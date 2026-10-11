@@ -33,16 +33,16 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       text.
 
 ## Build 96: settings and menus
-- [ ] Backing out of any submenu lands on the row that opened it, not the page's top.
-- [ ] Colors and More: a tooltip on every row, a **Theme** value on most rows, and the Grid backgrounds tinted
+- [x] Backing out of any submenu lands on the row that opened it, not the page's top.
+- [x] Colors and More: a tooltip on every row, a **Theme** value on most rows, and the Grid backgrounds tinted
       by the color theme.
-- [ ] Flow and Grid: **Flow Cover Count** and **Flow Cover Size** (the flow's own rows say so).
-- [ ] STATUS scrolls like the settings pages; the support line naming the user is removed.
-- [ ] Neutrino: a clear description of the automatic arguments.
-- [ ] Settings pages read in one plain face on every theme (Adapt's settings face), not each theme's styled
+- [x] Flow and Grid: **Flow Cover Count** and **Flow Cover Size** (the flow's own rows say so).
+- [x] STATUS scrolls like the settings pages; the support line naming the user is removed.
+- [x] Neutrino: a clear description of the automatic arguments.
+- [x] Settings pages read in one plain face on every theme (Adapt's settings face), not each theme's styled
       fonts.
-- [ ] Devices: auto start can be **Last Used**, the device and page you were on.
-- [ ] Page buttons: Theme, L1 / R1 or L2 / R2; theme key `page_buttons=l2r2`, which RIPgrid uses.
+- [x] Devices: auto start can be **Last Used**, the device and page you were on.
+- [x] Page buttons: Theme, L1 / R1 or L2 / R2; theme key `page_buttons=l2r2`, which RIPgrid uses.
 
 ## Build 97: Grid and Flow
 - [ ] RIPgrid: the name under the grid in RIPPS2 Sleek Bold; the grid centered on the content, ignoring the
@@ -91,3 +91,7 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       in the README with the exact formats, resolutions and bitrates.
 - [ ] A converter on the PC (RIPPS2 Audio Studio grows into a media studio): any video or music to what RIPPS2
       plays.
+
+## After build 99
+- Gather testing data from the build 99 release, then move from alpha to **beta** and prepare the beta launch on
+  psx-place.com.
