@@ -1,5 +1,22 @@
 # RIPPS2 changelog
 
+## Build 95 (testing), changes since build 94
+
+### Sound effects that never stack, stall or come back
+- **A held cursor no longer goes quiet in waves**, and old sounds no longer come back after. The console plays a sound only on a voice that has finished, and RIPPS2 used to set a voice's volume before asking: with the BIOS rips' long tails, a press often landed on a voice still ringing, lost its own sound and turned the old one back up. Now RIPPS2 knows when every voice ends, a sound takes only a finished one, and its volume is set once it is playing. In the lab, a held cursor went from six ticks and 0.8 s of silence, over and over, to every tick 60 ms apart.
+- **No sounds are built in any more.** RIPPS2's sounds come from your `AUDIO` folder: **Audio Settings > BIOS Sounds > Rip** makes them from your own console, and RIPPS2 Audio Studio on a PC makes any others. Without them RIPPS2 is silent, and **STATUS** has a new **SOUNDS** section that says how many are loaded and where from, with **RIP THIS CONSOLE'S SOUNDS** right there.
+- **The boot no longer reads the boot sound on its own.** Every sound file is read by the one worker that reads the drives. A ripped `boot.adp` (a few hundred KB) used to be read at boot while that worker was busy with the same memory card, which can hang a console. Each file is also checked first (a real `.adp`, at most 1 MB) and RIPPS2 makes sure the IOP has room for it before handing it over, so a bad or oversized file is skipped instead of stopping anything.
+- **Ripped sounds end at silence:** each one fades out over its last 30 ms instead of stopping in its hall's tail. Rip again to get the new endings.
+- **Memory Files plays `.adp` sounds:** Cross plays one (again), Back closes. Handy for checking a rip.
+
+### Fixed
+- **RIPFLOW is back**, and so is anything else that broke from build 93: libsmslite (the video player) carried its own copies of the C library's string functions, and they replaced the real ones for all of RIPPS2. RIPFLOW's theme stopped loading (a plain list over its background art), build 93 could hang at boot, and a count went wrong on the console. libsmslite keeps those to itself now, and the build fails if it ever does that again. MX4SIO, which FifthFox found missing everywhere, is identified by those same string functions: please check whether it is back.
+- **JPG pictures open whole.** RIPPS2 reads the file completely before decoding it: a short read from a drive used to end a JPG early, leaving the top part only.
+- **Game art can be JPG.** A cover (or any art) with no PNG is looked for as a JPG of the same name, so old OPL art packs show on every theme instead of the game's name.
+
+### In-Game Menu
+- Its tooltip now says it is experimental: some games skip their sound, or stop, if paused during a cutscene. With it **off (the default) the combo is OPL's trusted IGR**, and nothing of the pause menu or its achievement list is involved.
+
 ## Build 94 (testing), changes since build 93
 
 ### Spirit of RA: what is left to hunt

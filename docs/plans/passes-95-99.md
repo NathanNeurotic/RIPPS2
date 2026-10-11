@@ -7,28 +7,28 @@ then tick it here. ripto's RiptOPL reference (device handling, artwork keys, Gam
 build 99. FifthFox's build 94 report (SCPH-39001: APA SSD, MMCE, MX4SIO, iLink with a Seagate HDD, USB, HDMI
 converter) added the regressions now in build 95, the POPSTARTER and iLink items in build 99, and build 100.
 
-## Build 95: sound and stability (release, hardware session 1)
-- [ ] **Boot freeze with ripped sounds in AUDIO.** Reproduce in the lab (rip on PCSX2's BIOS, reboot), find
+## Build 95: sound and stability (released v0.0.95-alpha, hardware session 1)
+- [x] **Boot freeze with ripped sounds in AUDIO.** Reproduce in the lab (rip on PCSX2's BIOS, reboot), find
       why (suspects: the long boot/launch rips overflowing SPU2 RAM, the early boot sound, two loads at once),
       and make loading foolproof: a size and SPU2 budget check per sound, a bad or oversized file skipped and
       named, never a hang.
-- [ ] **No built-in sounds.** OPL's eight built-in `.adp` leave the ELF. Sounds come only from `AUDIO`
+- [x] **No built-in sounds.** OPL's eight built-in `.adp` leave the ELF. Sounds come only from `AUDIO`
       (BIOS Sounds > Rip, or RIPPS2 Audio Studio); without them RIPPS2 is silent, and STATUS says how to get
       them.
-- [ ] **Clean, snappy sound effects.** One voice per sound, a new press cuts the old one, a held cursor never
+- [x] **Clean, snappy sound effects.** One voice per sound, a new press cuts the old one, a held cursor never
       stacks, mutes in waves or lets stale sounds play later. Measured from lab captures (gaps and overlaps in
       the recorded audio), not by ear.
-- [ ] **Rip quality.** No beeps, pops or clicks: the rip's synthesis run on the PC against a BIOS dump and
+- [x] **Rip quality.** No beeps, pops or clicks: the rip's synthesis run on the PC against a BIOS dump and
       compared with the reference recordings (click detector, envelope ends, loop points, noise voices).
-- [ ] **`.adp` preview** in Memory Files: Cross plays it, Back stops it.
-- [ ] **The trusted IGR stays primary.** With In-Game Menu off (the default) the combo is exactly OPL's IGR and
+- [x] **`.adp` preview** in Memory Files: Cross plays it, Back stops it.
+- [x] **The trusted IGR stays primary.** With In-Game Menu off (the default) the combo is exactly OPL's IGR and
       nothing of the pause menu or the hunt list is involved. The menu's tooltip calls it experimental and
       warns about cutscene audio; look at the cutscene skip and crash reports for anything that can be made
       safer without hardware.
-- [ ] **RIPFLOW is a plain list** with only background art (the user's ELF and FifthFox on hardware): find what
+- [x] **RIPFLOW is a plain list** with only background art (the user's ELF and FifthFox on hardware): find what
       broke its built-in theme, and a test that parses every built-in theme cfg.
-- [ ] **MX4SIO shows up nowhere** (it does in RiptOPL and did in earlier builds): find the regression.
-- [ ] **JPG loads stop partway** (a quarter of the picture, not always the same file): read the whole file before
+- [x] **MX4SIO shows up nowhere** (it does in RiptOPL and did in earlier builds): find the regression.
+- [x] **JPG loads stop partway** (a quarter of the picture, not always the same file): read the whole file before
       decoding (a short device read ends libjpeg's input early). Same for RIPgrid, which shows JPG covers as
       text.
 
