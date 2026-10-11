@@ -146,10 +146,29 @@ index 6b6632a..8f3e33c 100644
  #ifdef __OPLDIAG
          // #545: which settings home this boot chose, and why, before the menu covers it. Untranslated
 diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
-index a527c48..ca814ed 100644
+index a527c48..69e0667 100644
 --- a/src/ripps2biossnd.c
 +++ b/src/ripps2biossnd.c
-@@ -917,8 +917,7 @@ void ripps2RipBiosSoundsDialog(void)
+@@ -379,6 +379,8 @@ static rbs_u8 *rbsEncode(const float *y, int n, unsigned int pitch, float gain,
+ {
+     int blocks = n / 28 + 1, b, i, s1 = 0, s2 = 0, head = 0, x[28];
+     rbs_u8 *out = malloc(16 + (blocks + 1) * 16), nibs[28], *p;
++    // build 95: the last 30 ms fade to silence, so a sound ends at zero instead of stopping in its hall's tail
++    int fadeN = (int)(pitch * 48000u / 4096u * 3u / 100u), fade0 = n - fadeN;
+ 
+     if (out == NULL)
+         return NULL;
+@@ -395,7 +397,8 @@ static rbs_u8 *rbsEncode(const float *y, int n, unsigned int pitch, float gain,
+     for (b = 0; b < blocks; b++, p += 16) {
+         for (i = 0; i < 28; i++) {
+             int k = b * 28 + i;
+-            x[i] = k < n ? rbsClamp16((int)lrintf(y[k] * gain * 32767.0f)) : 0;
++            float f = (fadeN > 0 && k >= fade0) ? 0.5f * (1.0f + cosf(3.14159265f * (float)(k - fade0) / (float)fadeN)) : 1.0f;
++            x[i] = k < n ? rbsClamp16((int)lrintf(y[k] * gain * f * 32767.0f)) : 0;
+         }
+         head = rbsEncodeBlock(x, &s1, &s2, nibs);
+         p[0] = head;
+@@ -917,8 +920,7 @@ void ripps2RipBiosSoundsDialog(void)
          guiMsgBox(msg, 0, NULL);
          return;
      }
