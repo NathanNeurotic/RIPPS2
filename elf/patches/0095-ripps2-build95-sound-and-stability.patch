@@ -21,6 +21,29 @@ index b451482..aadfe26 100644
  EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
  EE_DEPS = $($(filter %.o,$(EE_OBJS)):%.o=%.d)
  
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 42d3615..ee2082b 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -213,7 +213,7 @@ int ripps2VmcDeleteSave(const char *image, const char *save);
+ int ripps2PickList(const char *const *items, int count); // ripps2edit.c: a small glass list; -1 = none
+ void ripps2CardManager(int slot, const char *image); // ripps2card.c (build 86): memory card 1/2 (slot 0/1), or a card image (slot -1)
+ // ripps2media.c (build 93): Memory Files opens pictures (PNG, JPG) and video (AVI, with libsmslite)
+-enum { RIPPS2_MEDIA_NONE = 0, RIPPS2_MEDIA_PICTURE, RIPPS2_MEDIA_VIDEO };
++enum { RIPPS2_MEDIA_NONE = 0, RIPPS2_MEDIA_PICTURE, RIPPS2_MEDIA_VIDEO, RIPPS2_MEDIA_SOUND };
+ int ripps2MediaKind(const char *name);
+ void ripps2ViewPicture(const char *path);
+ void ripps2PlayVideo(const char *path);
+@@ -240,4 +240,9 @@ void ripps2LaunchDiscBegin(void);                                  // its clock
+ int ripps2DrawLaunchDisc(void);                                    // draws it; 0 when there is nothing to draw
+ void ripps2LaunchDiscEnd(void);                                    // the launch came back: drop it
+ 
++// RIPPS2 build 95 (ripps2media.c): a PNG or JPG in RAM decoded at most maxW x maxH, RGBA with the GS's alpha;
++// *rgba is memalign'd (the caller frees it). 1 on success; *why says why not when it can
++int ripps2DecodePicture(const unsigned char *buf, int len, int maxW, int maxH, unsigned char **rgba, int *w, int *h,
++                        int *ow, int *oh, const char **why);
++
+ #endif
 diff --git a/include/sound.h b/include/sound.h
 index a1a8dbf..61ac524 100644
 --- a/include/sound.h
@@ -47,6 +70,19 @@ index a1a8dbf..61ac524 100644
  void ripps2QuietBootMark(int bootSoundOn); // build 75: mc0:/RIPPS2/QUIETBOOT follows the boot sound setting
  int ripps2AudioBase(char *out, int size, int searchDrives); // build 74: the folder the AUDIO folder is in
  
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index dbd7cd4..129087f 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1408,7 +1408,7 @@ gui_strings:
+ - label: RIPPS2_IGR_MENU
+   string: In-Game Menu
+ - label: HINT_RIPPS2_IGR_MENU
+-  string: "L1+L2+R1+R2+SELECT+START in a game pauses it under Resume, Achievements and Exit Game. Off: the combo leaves the game at once."
++  string: "Experimental. On: L1+L2+R1+R2+SELECT+START pauses a game under Resume, Achievements and Exit Game; in some games the sound skips or the game stops if paused during a cutscene. Off (the default): the combo leaves the game at once, OPL's trusted IGR."
+ - label: RIPPS2_BOOT_LOADER
+   string: Boot Loader
+ - label: HINT_RIPPS2_BOOT_LOADER
 diff --git a/src/gui.c b/src/gui.c
 index 0dec3cd..76a22fb 100644
 --- a/src/gui.c
@@ -123,6 +159,432 @@ index a527c48..ca814ed 100644
      snprintf(msg, sizeof(msg), "%d sounds from this console's BIOS are in %s and playing now.", n, dir);
      guiMsgBox(msg, 0, NULL);
  }
+diff --git a/src/ripps2media.c b/src/ripps2media.c
+index 43a2498..2e43979 100644
+--- a/src/ripps2media.c
++++ b/src/ripps2media.c
+@@ -25,6 +25,8 @@
+ #include <delaythread.h>
+ #include <png.h>
+ #include <jpeglib.h>
++#include <fcntl.h>
++#include <unistd.h>
+ 
+ #include "include/opl.h"
+ #include "include/gui.h"
+@@ -42,6 +44,7 @@
+ 
+ #define VIEW_MAX_W 720
+ #define VIEW_MAX_H 512
++#define VIEW_MAX_FILE (12 * 1024 * 1024) // build 95: the file is read whole before it is decoded
+ 
+ int ripps2MediaKind(const char *name)
+ {
+@@ -54,6 +57,8 @@ int ripps2MediaKind(const char *name)
+     if (!strcasecmp(dot, ".avi"))
+         return RIPPS2_MEDIA_VIDEO;
+ #endif
++    if (!strcasecmp(dot, ".adp")) // build 95: a sound, as a rip or RIPPS2 Audio Studio made it
++        return RIPPS2_MEDIA_SOUND;
+     return RIPPS2_MEDIA_NONE;
+ }
+ 
+@@ -63,25 +68,29 @@ int ripps2MediaKind(const char *name)
+ typedef struct
+ {
+     int sw, sh, tw, th, cur;
+-    int ow, oh; // the picture's own size (a JPG is read at 1/2^n of it)
++    int ow, oh;     // the picture's own size (a JPG is read at 1/2^n of it)
++    int maxW, maxH; // build 95: the most it is kept at (0: VIEW_MAX_W x VIEW_MAX_H)
+     unsigned int *acc, *cnt;
+     unsigned char *out;
+ } view_shrink_t;
+ 
+ static int shrinkBegin(view_shrink_t *s, int sw, int sh)
+ {
++    int maxW = s->maxW > 0 ? s->maxW : VIEW_MAX_W, maxH = s->maxH > 0 ? s->maxH : VIEW_MAX_H;
+     memset(s, 0, sizeof(*s));
++    s->maxW = maxW;
++    s->maxH = maxH;
+     s->sw = sw;
+     s->sh = sh;
+     s->tw = sw;
+     s->th = sh;
+-    if (s->tw > VIEW_MAX_W) {
+-        s->th = (int)((long long)s->th * VIEW_MAX_W / s->tw);
+-        s->tw = VIEW_MAX_W;
++    if (s->tw > maxW) {
++        s->th = (int)((long long)s->th * maxW / s->tw);
++        s->tw = maxW;
+     }
+-    if (s->th > VIEW_MAX_H) {
+-        s->tw = (int)((long long)s->tw * VIEW_MAX_H / s->th);
+-        s->th = VIEW_MAX_H;
++    if (s->th > maxH) {
++        s->tw = (int)((long long)s->tw * maxH / s->th);
++        s->th = maxH;
+     }
+     if (s->tw < 1)
+         s->tw = 1;
+@@ -134,19 +143,38 @@ static void shrinkFree(view_shrink_t *s)
+     s->acc = s->cnt = NULL;
+ }
+ 
+-static jmp_buf viewJmp;
++// ---- decoding (build 95: from memory) ----
++// The whole file is read first, then decoded from RAM. Streaming through stdio let a short device read end
++// libjpeg's input early: a JPG came out as its top part only, and not always the same file (FifthFox, build 94).
++// No state is kept between calls: the art worker decodes JPG covers (textures.c) while the viewer may be open.
+ 
+-static int viewPng(FILE *f, view_shrink_t *s, const char **why)
++typedef struct
++{
++    const unsigned char *p;
++    size_t left;
++} view_mem_t;
++
++static void viewPngRead(png_structp png, png_bytep out, png_size_t n)
++{
++    view_mem_t *m = (view_mem_t *)png_get_io_ptr(png);
++    if (n > m->left)
++        png_error(png, "short");
++    memcpy(out, m->p, n);
++    m->p += n;
++    m->left -= n;
++}
++
++static int viewPng(const unsigned char *buf, int len, view_shrink_t *s, const char **why)
+ {
+-    static png_structp png;
+-    static png_infop info;
+-    static unsigned char *row;
++    png_structp png;
++    png_infop info;
++    unsigned char *volatile row = NULL;
++    view_mem_t mem = {buf, (size_t)len};
+     png_uint_32 w, h;
+     int depth, type, y;
+ 
+     png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+     info = png != NULL ? png_create_info_struct(png) : NULL;
+-    row = NULL;
+     if (info == NULL) {
+         png_destroy_read_struct(&png, NULL, NULL);
+         return 0;
+@@ -156,7 +184,7 @@ static int viewPng(FILE *f, view_shrink_t *s, const char **why)
+         free(row);
+         return 0;
+     }
+-    png_init_io(png, f);
++    png_set_read_fn(png, &mem, viewPngRead);
+     png_read_info(png, info);
+     png_get_IHDR(png, info, &w, &h, &depth, &type, NULL, NULL, NULL);
+     if (png_get_interlace_type(png, info) != PNG_INTERLACE_NONE) { // its rows come in passes: no row at a time
+@@ -191,44 +219,44 @@ static int viewPng(FILE *f, view_shrink_t *s, const char **why)
+ struct viewJpegErr
+ {
+     struct jpeg_error_mgr pub;
++    jmp_buf jmp;
+ };
+ 
+ static void viewJpegFail(j_common_ptr c)
+ {
+-    (void)c;
+-    longjmp(viewJmp, 1);
++    longjmp(((struct viewJpegErr *)c->err)->jmp, 1);
+ }
+ 
+-static int viewJpg(FILE *f, view_shrink_t *s, const char **why)
++static int viewJpg(const unsigned char *buf, int len, view_shrink_t *s, const char **why)
+ {
+-    static struct jpeg_decompress_struct d;
+-    static struct viewJpegErr je;
+-    static unsigned char *rgb, *row;
++    struct jpeg_decompress_struct d;
++    struct viewJpegErr je;
++    unsigned char *volatile rgb = NULL, *volatile row = NULL;
+     unsigned int x, fw, fh;
+ 
+-    rgb = row = NULL;
++    memset(&d, 0, sizeof(d));
+     d.err = jpeg_std_error(&je.pub);
+     je.pub.error_exit = viewJpegFail;
+-    if (setjmp(viewJmp)) {
++    if (setjmp(je.jmp)) {
+         jpeg_destroy_decompress(&d);
+         free(rgb);
+         free(row);
+         return 0;
+     }
+     jpeg_create_decompress(&d);
+-    jpeg_stdio_src(&d, f);
++    jpeg_mem_src(&d, (unsigned char *)buf, (unsigned long)len);
+     jpeg_read_header(&d, TRUE);
+     d.out_color_space = JCS_RGB;
+     // libjpeg's own 1/2, 1/4 or 1/8 first, as far as still covers the size the picture ends up at
+     fw = d.image_width;
+     fh = d.image_height;
+-    if (fw > VIEW_MAX_W) {
+-        fh = fh * VIEW_MAX_W / fw;
+-        fw = VIEW_MAX_W;
++    if (fw > (unsigned int)s->maxW) {
++        fh = fh * s->maxW / fw;
++        fw = s->maxW;
+     }
+-    if (fh > VIEW_MAX_H) {
+-        fw = fw * VIEW_MAX_H / fh;
+-        fh = VIEW_MAX_H;
++    if (fh > (unsigned int)s->maxH) {
++        fw = fw * s->maxH / fh;
++        fh = s->maxH;
+     }
+     d.scale_num = 1;
+     d.scale_denom = 1;
+@@ -238,14 +266,15 @@ static int viewJpg(FILE *f, view_shrink_t *s, const char **why)
+     if (d.output_components != 3 || !shrinkBegin(s, (int)d.output_width, (int)d.output_height) ||
+         (rgb = malloc(d.output_width * 3)) == NULL || (row = malloc(d.output_width * 4)) == NULL) {
+         *why = "Not enough memory to open this picture.";
+-        longjmp(viewJmp, 1);
++        longjmp(je.jmp, 1);
+     }
+     s->ow = (int)d.image_width;
+     s->oh = (int)d.image_height;
+     while (d.output_scanline < d.output_height) {
+         int y = (int)d.output_scanline;
+         JSAMPROW r = rgb;
+-        jpeg_read_scanlines(&d, &r, 1);
++        if (jpeg_read_scanlines(&d, &r, 1) != 1)
++            longjmp(je.jmp, 1);
+         for (x = 0; x < d.output_width; x++) {
+             row[x * 4] = rgb[x * 3];
+             row[x * 4 + 1] = rgb[x * 3 + 1];
+@@ -262,32 +291,85 @@ static int viewJpg(FILE *f, view_shrink_t *s, const char **why)
+     return 1;
+ }
+ 
+-// The picture as a texture, at most VIEW_MAX_W x VIEW_MAX_H; its own size in sw x sh. NULL on success, else why not.
+-static const char *viewLoad(const char *path, GSTEXTURE *t, int *sw, int *sh)
++// A whole file into RAM, read to its end (a read may come back short); its length in *len. NULL: no file, empty,
++// or bigger than max
++static unsigned char *viewReadAll(const char *path, int max, int *len)
++{
++    int fd = open(path, O_RDONLY), got = 0, r, size;
++    unsigned char *buf;
++
++    if (fd < 0)
++        return NULL;
++    size = lseek(fd, 0, SEEK_END);
++    lseek(fd, 0, SEEK_SET);
++    if (size <= 0 || size > max || (buf = malloc(size)) == NULL) {
++        close(fd);
++        return NULL;
++    }
++    while (got < size && (r = read(fd, buf + got, size - got)) > 0)
++        got += r;
++    close(fd);
++    if (got != size) {
++        free(buf);
++        return NULL;
++    }
++    *len = size;
++    return buf;
++}
++
++// Build 95: a picture decoded at most maxW x maxH, RGBA with the GS's alpha (0x80 opaque), into *rgba (memalign'd,
++// the caller frees it); its decoded size in *w x *h, its own in *ow x *oh. PNG or JPG, by its first bytes.
++int ripps2DecodePicture(const unsigned char *buf, int len, int maxW, int maxH, unsigned char **rgba, int *w, int *h,
++                        int *ow, int *oh, const char **why)
+ {
+     view_shrink_t s;
+-    const char *why = NULL, *dot = strrchr(path, '.');
+-    FILE *f = fopen(path, "rb");
++    const char *dummy = NULL;
+     int ok;
+ 
+     memset(&s, 0, sizeof(s));
+-    if (f == NULL)
+-        return "This picture could not be opened.";
+-    ok = (dot != NULL && !strcasecmp(dot, ".png")) ? viewPng(f, &s, &why) : viewJpg(f, &s, &why);
+-    fclose(f);
++    s.maxW = maxW;
++    s.maxH = maxH;
++    if (why == NULL)
++        why = &dummy;
++    if (len >= 8 && buf[0] == 0x89 && buf[1] == 'P' && buf[2] == 'N' && buf[3] == 'G')
++        ok = viewPng(buf, len, &s, why);
++    else if (len >= 3 && buf[0] == 0xFF && buf[1] == 0xD8)
++        ok = viewJpg(buf, len, &s, why);
++    else
++        ok = 0;
+     shrinkFree(&s);
+     if (!ok) {
+         free(s.out);
++        return 0;
++    }
++    *rgba = s.out;
++    *w = s.tw;
++    *h = s.th;
++    *ow = s.ow > 0 ? s.ow : s.sw;
++    *oh = s.oh > 0 ? s.oh : s.sh;
++    return 1;
++}
++
++// The picture as a texture, at most VIEW_MAX_W x VIEW_MAX_H; its own size in sw x sh. NULL on success, else why not.
++static const char *viewLoad(const char *path, GSTEXTURE *t, int *sw, int *sh)
++{
++    const char *why = NULL;
++    unsigned char *buf, *rgba;
++    int len = 0, w, h;
++
++    if ((buf = viewReadAll(path, VIEW_MAX_FILE, &len)) == NULL)
++        return "This picture could not be read whole (missing, empty, or larger than 12 MB).";
++    if (!ripps2DecodePicture(buf, len, VIEW_MAX_W, VIEW_MAX_H, &rgba, &w, &h, sw, sh, &why)) {
++        free(buf);
+         return why != NULL ? why : "This picture could not be read. RIPPS2 opens PNG and JPG pictures.";
+     }
++    free(buf);
+     memset(t, 0, sizeof(*t));
+-    t->Width = s.tw;
+-    t->Height = s.th;
++    t->Width = w;
++    t->Height = h;
+     t->PSM = GS_PSM_CT32;
+-    t->Mem = (u32 *)s.out;
++    t->Mem = (u32 *)rgba;
+     t->Filter = GS_FILTER_LINEAR;
+-    *sw = s.ow > 0 ? s.ow : s.sw;
+-    *sh = s.oh > 0 ? s.oh : s.sh;
+     return NULL;
+ }
+ 
+@@ -462,6 +544,56 @@ void ripps2PlayVideo(const char *path)
+ }
+ #endif
+ 
++// ---- sounds (build 95) ----
++// An .adp plays as RIPPS2 would play it: the confirm button plays it again, back closes. While it is open the
++// menu's own sounds are let go (audsrv cannot stop one sound alone) and they load again on the way out.
++static void ripps2PlaySound(const char *path)
++{
++    const char *name = strrchr(path, '/');
++    int ms = sfxPreviewStart(path), scrW, scrH, again = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS;
++    clock_t started = clock();
++    char line[200];
++
++    if (ms < 0) {
++        sfxPreviewStop();
++        guiMsgBox("This sound could not be played. RIPPS2 plays .adp sounds with their APCM header, up to 1 MB, as "
++                  "BIOS Sounds > Rip and RIPPS2 Audio Studio make them.",
++                  0, NULL);
++        return;
++    }
++    name = name != NULL ? name + 1 : path;
++    rmGetScreenExtents(&scrW, &scrH);
++    readPads();
++    for (;;) {
++        float t = (float)(clock() - started) / (float)CLOCKS_PER_SEC, len = ms / 1000.0f;
++        int done = t >= len, barW = (int)(400.0f * (done ? 1.0f : t / len));
++
++        guiStartFrame();
++        rmDrawRect(0, 0, scrW, scrH, GS_SETREG_RGBA(0x02, 0x03, 0x0A, 0x70));
++        fntRenderString(gTheme->fonts[0], 320, 190, ALIGN_CENTER, 0, 0, name, GS_SETREG_RGBA(0xE0, 0xE8, 0xFF, 0x80));
++        snprintf(line, sizeof(line), done ? "%.2f s" : "%.2f of %.2f s", done ? len : t, len);
++        fntRenderString(gTheme->fonts[0], 320, 222, ALIGN_CENTER, 0, 0, line, GS_SETREG_RGBA(0xA0, 0xB0, 0xE0, 0x80));
++        rmDrawRect(120, 246, 400, 4, GS_SETREG_RGBAQ(0x10, 0x16, 0x2C, 0x60, 0x00));
++        rmDrawRect(120, 246, barW, 4, GS_SETREG_RGBAQ(0x6A, 0x9A, 0xFF, 0x80, 0x00));
++        fntRenderString(gTheme->fonts[0], 320, 458, ALIGN_CENTER, 0, 0,
++                        gSelectButton == KEY_CIRCLE ? "Circle play again   Cross close" : "Cross play again   Circle close",
++                        GS_SETREG_RGBA(0xA0, 0xB0, 0xE0, 0x80));
++        guiEndFrame();
++
++        readPads();
++        if (getKeyOn(guiCancelKey()) || getKeyOn(KEY_START))
++            break;
++        if (getKeyOn(again)) {
++            ms = sfxPreviewStart(path);
++            started = clock();
++            if (ms < 0)
++                break;
++        }
++    }
++    sfxPreviewStop();
++    readPads();
++}
++
+ void ripps2OpenMedia(const char *path)
+ {
+     switch (ripps2MediaKind(path)) {
+@@ -471,6 +603,9 @@ void ripps2OpenMedia(const char *path)
+         case RIPPS2_MEDIA_VIDEO:
+             ripps2PlayVideo(path);
+             break;
++        case RIPPS2_MEDIA_SOUND:
++            ripps2PlaySound(path);
++            break;
+         default:
+             break;
+     }
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index d482595..7720d86 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -33,6 +33,7 @@
+ #include "include/sound.h"
+ #include "include/lang.h"
+ #include "include/ripps2.h"
++#include "include/ripps2biossnd.h" // build 95: SOUNDS > RIP THIS CONSOLE'S SOUNDS
+ #include <zlib.h>                 // build 85: crc32 for the launch report
+ #include "include/ripps2_build.h" // build 85: the launch report names its build
+ #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
+@@ -61,6 +62,7 @@ enum {
+     ACT_POPS_NET,
+     ACT_EMBER_INSTALL,
+     ACT_BIBLE_MANAGE,
++    ACT_SOUNDS_RIP, // build 95
+ };
+ 
+ typedef struct
+@@ -69,7 +71,7 @@ typedef struct
+     char text[112], aside[48];
+ } st_row_t;
+ 
+-#define ST_ROWS 24
++#define ST_ROWS 28
+ static st_row_t stRows[ST_ROWS];
+ static int stCount;
+ 
+@@ -183,6 +185,20 @@ static void stScan(void)
+         r->ok = locked;
+     }
+     stAdd(ROW_ACTION, ACT_BIBLE_MANAGE, "MANAGE", "boot loader, card by card");
++
++    // SOUNDS (build 95): none are built in any more, so say where they come from
++    stAdd(ROW_HEAD, ACT_NONE, "SOUNDS", "AUDIO folder");
++    {
++        char base[256];
++        int skipped = 0, loaded = sfxLoadedSounds(&skipped);
++        if (loaded > 0 && ripps2AudioBase(base, sizeof(base), 0))
++            snprintf(line, sizeof(line), "%d sounds from %sAUDIO%s", loaded, base, skipped ? ", some files could not be used" : "");
++        else
++            snprintf(line, sizeof(line), "None yet: RIPPS2 has no sounds of its own. Rip this console's, or make them in RIPPS2 Audio Studio.");
++        st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
++        r->ok = loaded > 0 && !skipped;
++    }
++    stAdd(ROW_ACTION, ACT_SOUNDS_RIP, "RIP THIS CONSOLE'S SOUNDS", "from its BIOS, into AUDIO");
+ }
+ 
+ static int stRowH(const st_row_t *r)
+@@ -397,6 +413,10 @@ void ripps2Status(void)
+                     ripps2BibleManage();
+                     rescan = 1;
+                     break;
++                case ACT_SOUNDS_RIP:
++                    ripps2RipBiosSoundsDialog();
++                    rescan = 1;
++                    break;
+             }
+             if (rescan)
+                 stScan();
 diff --git a/src/sound.c b/src/sound.c
 index 46067e8..aea69e4 100644
 --- a/src/sound.c
@@ -971,4 +1433,77 @@ index 46067e8..aea69e4 100644
 +            audsrv_adpcm_set_volume_and_pan(v, gSFXVolume, 0);
 +    audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
      audsrv_set_volume(gBGMVolume);
+ }
+diff --git a/src/textures.c b/src/textures.c
+index ae382e8..6427097 100644
+--- a/src/textures.c
++++ b/src/textures.c
+@@ -7,6 +7,7 @@
+ #include <errno.h>         // errno/ENOENT in the staging-arm open classifier (transitively via opl.h, but be explicit)
+ #include <kernel.h>
+ #include <png.h>
++#include "include/ripps2.h" // RIPPS2 build 95: ripps2DecodePicture, game art as JPG
+ 
+ extern void *load0_png;
+ extern void *load1_png;
+@@ -1103,6 +1104,43 @@ void texSetProbe(char *out, int size)
+     texProbeThread = out != NULL ? GetThreadId() : -1;
+ }
+ 
++// RIPPS2 build 95: game art as JPG. RiptOPL reads PNG only, and old OPL art packs are JPG, so every theme showed
++// those games as text (FifthFox on RIPgrid). Tried only when the PNG is not there; read whole, then decoded at
++// most 512 on a side (ripps2media.c).
++#define TEX_JPG_MAX_FILE (4 * 1024 * 1024)
++static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
++{
++    unsigned char *buf, *rgba;
++    int fd, size, got = 0, r, w, h, ow, oh;
++
++    if ((fd = open(filePath, O_RDONLY)) < 0)
++        return ERR_BAD_FILE;
++    size = lseek(fd, 0, SEEK_END);
++    lseek(fd, 0, SEEK_SET);
++    if (size <= 0 || size > TEX_JPG_MAX_FILE || (buf = malloc(size)) == NULL) {
++        close(fd);
++        return ERR_BAD_FILE;
++    }
++    while (got < size && (r = read(fd, buf + got, size - got)) > 0)
++        got += r;
++    close(fd);
++    if (got != size || !ripps2DecodePicture(buf, size, 512, 512, &rgba, &w, &h, &ow, &oh, NULL)) {
++        free(buf);
++        return ERR_BAD_FILE;
++    }
++    free(buf);
++    texPrepare(texture);
++    texture->Width = w;
++    texture->Height = h;
++    texture->PSM = GS_PSM_CT32;
++    texture->Mem = (u32 *)rgba;
++    if (texSizeValidate(w, h, GS_PSM_CT32) < 0) {
++        texFree(texture);
++        return ERR_BAD_FILE;
++    }
++    return 0;
++}
++
+ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
+ {
+     char filePath[256];
+@@ -1131,9 +1169,13 @@ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
+     // worst case is exactly the behaviour that was here before.
+     if (!artIndexMayExist(filePath)) {
+         LOG("texDiscoverLoad: '%s' absent per directory index (no device access)\n", filePath);
+-        return ERR_BAD_FILE;
++        result = ERR_BAD_FILE;
++    } else
++        result = texLoad(texture, filePath);
++    if (result < 0 && texId == -1 && !texLoadAbortRequested()) { // RIPPS2 build 95: the same name as a JPG
++        snprintf(filePath, sizeof(filePath), "%s.jpg", path);
++        if (artIndexMayExist(filePath) && texLoadJpg(texture, filePath) == 0)
++            return 0;
+     }
+-
+-    result = texLoad(texture, filePath);
+     return (result >= 0) ? 0 : result;
  }
