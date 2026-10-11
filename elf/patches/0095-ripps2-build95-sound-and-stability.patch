@@ -1,0 +1,974 @@
+diff --git a/Makefile b/Makefile
+index b451482..aadfe26 100644
+--- a/Makefile
++++ b/Makefile
+@@ -187,7 +187,8 @@ GFX_OBJS = $(PNG_ASSETS:%=%_png.o) poeveticanew.o
+ # theme's <OPL boot/CWD home>/bgm.ogg on non-APA boots and <gHDDPrefix>THM/bgm.ogg
+ # on APA boots (see sound.c bgmLoad), never embedded
+ # -- do not add bgm.o back here.
+-AUDIO_OBJS =	boot.o cancel.o confirm.o cursor.o message.o transition.o bd_connect.o bd_disconnect.o
++# RIPPS2 build 95: no sounds are built in (AUDIO folder, BIOS Sounds > Rip, RIPPS2 Audio Studio)
++AUDIO_OBJS =
+ 
+ # icon_sys.o + save_icn.o are the memory-card browser save icon for the settings folder.
+ # icon.sys names list.icn, copy.icn and del.icn; all three are the same artwork, so ONE blob is
+@@ -401,7 +402,7 @@ EE_CFLAGS += -fsingle-precision-constant -DOPL_VERSION=\"$(OPL_VERSION)\"
+ EE_CFLAGS += -Wno-format-truncation -Wno-stringop-truncation
+ # Generate .d files to track header file dependencies of each object file
+ EE_CFLAGS += -MMD -MP
+-EE_OBJS += $(FRONTEND_OBJS) $(GFX_OBJS) $(AUDIO_OBJS) $(MISC_OBJS) $(EECORE_OBJS) $(IOP_OBJS)
++EE_OBJS += $(FRONTEND_OBJS) $(GFX_OBJS) $(MISC_OBJS) $(EECORE_OBJS) $(IOP_OBJS)
+ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
+ EE_DEPS = $($(filter %.o,$(EE_OBJS)):%.o=%.d)
+ 
+diff --git a/include/sound.h b/include/sound.h
+index a1a8dbf..61ac524 100644
+--- a/include/sound.h
++++ b/include/sound.h
+@@ -44,8 +44,12 @@ void audioInit(void);
+ void audioEnd(void);
+ void audioSetVolume(void);
+ 
+-int sfxInit(int bootSnd);
++int sfxInit(int bootSnd); // the IO worker only; other threads call sfxReload
+ int sfxGetSoundDuration(int id);
++void sfxReload(int thenPlay);          // build 95: load the sounds again on the IO worker, then play thenPlay (-1: none)
++int sfxLoadedSounds(int *skipped);     // build 95: sounds loaded by the last load; *skipped: files that could not be used
++int sfxPreviewStart(const char *path); // build 95: Memory Files plays an .adp (its length in ms, < 0: not playable)
++void sfxPreviewStop(void);             // build 95: the preview stops and the sounds load again
+ void sfxPlay(int id);
+ // Per-press audsrv RPC wall time (last / max, ms) -- measured on the dispatch thread.
+ void sfxGetPlayDiag(unsigned int *lastMs, unsigned int *maxMs);
+@@ -78,7 +82,6 @@ void bgmUnMute(void);
+  * why the art worst-open latch samples it separately. */
+ extern volatile int gBgmInRead;
+ 
+-void sfxBootStartEarly(void);        // build 75: the built-in boot sound before an HDD launch reads its settings
+ void ripps2QuietBootMark(int bootSoundOn); // build 75: mc0:/RIPPS2/QUIETBOOT follows the boot sound setting
+ int ripps2AudioBase(char *out, int size, int searchDrives); // build 74: the folder the AUDIO folder is in
+ 
+diff --git a/src/gui.c b/src/gui.c
+index 0dec3cd..76a22fb 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -1232,7 +1232,7 @@ reshow_ui:
+         }
+         if (appsViewChanged)
+             guiRefreshAppsView();
+-        sfxInit(0);
++        sfxReload(-1); // RIPPS2 build 95: on the IO worker
+ 
+         if (gEnableBGM && !isBgmPlaying())
+             bgmStart();
+@@ -1265,7 +1265,7 @@ void guiCycleTheme(void)
+     if (isBgmPlaying())
+         bgmStop(); // a theme may bring its own music
+     applyConfig(next, -1, 1);
+-    sfxInit(0);
++    sfxReload(-1); // RIPPS2 build 95: on the IO worker
+     if (gEnableBGM && !isBgmPlaying())
+         bgmStart();
+     if (thmGetGuiValue() == next) {
+@@ -3289,7 +3289,7 @@ reshow_interface:
+         }
+         if (appsViewChanged)
+             guiRefreshAppsView();
+-        sfxInit(0);
++        sfxReload(-1); // RIPPS2 build 95: on the IO worker
+         if (gEnableBGM && !isBgmPlaying())
+             bgmStart();
+ 
+diff --git a/src/opl.c b/src/opl.c
+index 6b6632a..8f3e33c 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -4765,7 +4765,7 @@ static void unloadLwnbdSvr(void)
+     initAllSupport(1);
+ 
+     audioInit();
+-    sfxInit(0);
++    sfxReload(-1); // RIPPS2 build 95: on the IO worker, after the drives
+     if (gEnableBGM)
+         bgmStart();
+ }
+@@ -4831,7 +4831,7 @@ int ripps2RebootIopWith(const void *ioprp, int size)
+     ioBlockOps(0);
+     initAllSupport(1);
+     audioInit();
+-    sfxInit(0);
++    sfxReload(-1); // RIPPS2 build 95: on the IO worker, after the drives
+     if (gEnableBGM)
+         bgmStart();
+     return 1;
+@@ -5346,8 +5346,6 @@ static void init(void)
+         // before the intro splash) while the config loads.
+         guiSetBootStatus(_l(_STR_BOOT_LOADING_CONFIG));
+         guiRenderGreetingScreen();
+-        if (!strncmp(gBootDir, "hdd", 3) || !strncmp(gBootDir, "pfs", 3))
+-            sfxBootStartEarly(); // RIPPS2 build 75: sound before the HDD's driver stack comes up
+         _loadConfig(); // only try to restore config if emergency key is not being pressed
+ #ifdef __OPLDIAG
+         // #545: which settings home this boot chose, and why, before the menu covers it. Untranslated
+diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
+index a527c48..ca814ed 100644
+--- a/src/ripps2biossnd.c
++++ b/src/ripps2biossnd.c
+@@ -917,8 +917,7 @@ void ripps2RipBiosSoundsDialog(void)
+         guiMsgBox(msg, 0, NULL);
+         return;
+     }
+-    sfxInit(0); // the new sounds, now
+-    sfxPlay(SFX_CONFIRM);
++    sfxReload(SFX_CONFIRM); // the new sounds, loaded on the IO worker, and a confirm in them
+     snprintf(msg, sizeof(msg), "%d sounds from this console's BIOS are in %s and playing now.", n, dir);
+     guiMsgBox(msg, 0, NULL);
+ }
+diff --git a/src/sound.c b/src/sound.c
+index 46067e8..aea69e4 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -16,6 +16,8 @@
+ #include <fcntl.h>
+ #include <unistd.h>
+ #include <sys/stat.h>
++#include <string.h>
++#include <iopheap.h> // build 95: SifAllocIopHeap, the room check before audsrv takes a sound
+ 
+ #include "include/sound.h"
+ #include "include/opl.h"
+@@ -33,36 +35,20 @@ static ov_callbacks OV_CALLBACKS_STREAMONLY_NOCLOSE __attribute__((unused));
+ /*--    Theme Sound Effects    ----------------------------------------------------------------------------------------------
+ ---------------------------------------------------------------------------------------------------------------------------*/
+ 
+-extern unsigned char boot_adp[];
+-extern unsigned int size_boot_adp;
+-
+-extern unsigned char cancel_adp[];
+-extern unsigned int size_cancel_adp;
+-
+-extern unsigned char confirm_adp[];
+-extern unsigned int size_confirm_adp;
+-
+-extern unsigned char cursor_adp[];
+-extern unsigned int size_cursor_adp;
+-
+-extern unsigned char message_adp[];
+-extern unsigned int size_message_adp;
+-
+-extern unsigned char transition_adp[];
+-extern unsigned int size_transition_adp;
+-
+-extern unsigned char bd_connect_adp[];
+-extern unsigned int size_bd_connect_adp;
+-
+-extern unsigned char bd_disconnect_adp[];
+-extern unsigned int size_bd_disconnect_adp;
++/*
++  RIPPS2 build 95: no sounds are built in. Every sound comes from an AUDIO folder (BIOS Sounds > Rip, or
++  RIPPS2 Audio Studio), a disk theme's sound folder, or a pack baked into a private build; without one,
++  RIPPS2 is silent. Every sound file is read on the IO worker only: a memory card asked from two threads at
++  once can hang, and the boot used to read a ripped boot.adp (hundreds of KB) on the main thread while the
++  IO worker was busy with the same card.
++*/
+ 
+ struct sfxEffect
+ {
+     const char *name;
+     void *buffer;
+     int size;
+-    int builtin;
++    int baked; // the buffer is the baked pack's, never freed
+     int duration_ms;
+ };
+ 
+@@ -75,7 +61,7 @@ static struct sfxEffect sfx_files[SFX_COUNT] = {
+     {"transition.adp"},
+     {"bd_connect.adp"},
+     {"bd_disconnect.adp"},
+-    {"page_in.adp"}, // RIPPS2: the pack's own events (no built-in sound: see sfxFallback)
++    {"page_in.adp"}, // RIPPS2: the pack's own events (see sfxFallback)
+     {"page_out.adp"},
+     {"error.adp"},
+     {"save.adp"},
+@@ -84,9 +70,7 @@ static struct sfxEffect sfx_files[SFX_COUNT] = {
+     {"random.adp"},
+ };
+ 
+-#define SFX_BUILTIN_COUNT 8 // boot .. bd_disconnect are compiled in
+-
+-extern const unsigned char *const ripps2SfxPack[SFX_COUNT]; // RIPPS2: ripps2sfxpack.c
++extern const unsigned char *const ripps2SfxPack[SFX_COUNT]; // RIPPS2: ripps2sfxpack.c (empty unless a pack is baked in)
+ extern const int ripps2SfxPackSize[SFX_COUNT];
+ 
+ // RIPPS2: what an event plays when it has no sound of its own (-1: nothing)
+@@ -100,46 +84,118 @@ static const signed char sfxFallback[SFX_COUNT] = {
+     -1,             // disc
+     SFX_CURSOR,     // random: the cursor's tick, as the pick jumps
+ };
+-static unsigned char sfxReady[SFX_COUNT]; // loaded into audsrv
+-static int sfxBootEarly = 0;              // RIPPS2: the boot sound is loaded and may still be playing (sfxBootStart)
++static unsigned char sfxReady[SFX_COUNT];  // loaded into audsrv
++static unsigned char sfxSkipped[SFX_COUNT]; // build 95: a file was there but could not be used (STATUS)
++static int sfxLoadedCount = 0;              // build 95: what the last load found (STATUS)
++static volatile int sfxPreviewing = 0;      // build 95: Memory Files is playing an .adp, the set is unloaded
+ 
+ static struct audsrv_adpcm_t sfx[SFX_COUNT];
+ static int audio_initialized = 0;
+ 
+-#define CURSOR_SFX_CHANNEL_BASE  SFX_BUILTIN_COUNT // RIPPS2: pinned; SFX_COUNT grew past audsrv's 24 channels
+-#define CURSOR_SFX_CHANNEL_COUNT 6
++/*
++  RIPPS2 build 95: voices. audsrv plays a sound only on a voice that has finished: asked to play on one that
++  is still sounding it does nothing (and says so), and it has no way to stop a voice. Up to build 94, fixed
++  channels rotated and each one's volume was set before playing on it, so a press that landed on a voice whose
++  long tail (a BIOS rip's hall) was still going lost its own sound and unmuted the old tail instead: on a held
++  cursor the sound went quiet in waves, and old sounds came back after. Now each voice's end is known (the
++  file header's sample count at its pitch), a sound takes only a voice that has ended, its volume is set once
++  the play is accepted, and a sound that has to give way is muted: it runs out silently and frees its voice.
++  Voice 0 is the boot sound's; 1 to 23 are shared.
++*/
++#define SFX_VOICES        24
++#define SFX_BOOT_VOICE    0
++#define SFX_CURSOR_VOICES 3 // a held cursor rings at most this many ticks at once; the oldest is muted
++static clock_t voiceStart[SFX_VOICES];
++static unsigned int voiceLen[SFX_VOICES]; // its sound's length in clock ticks (0: free)
++static signed char voiceSound[SFX_VOICES];
++static unsigned char voiceMuted[SFX_VOICES];
+ 
+-static int cursorChannelIndex = 0;
++static int voiceBusy(int v)
++{
++    return voiceLen[v] != 0 && (unsigned int)(clock() - voiceStart[v]) < voiceLen[v];
++}
+ 
+-static int sfxGetCursorChannel(int slot)
++static void voicesReset(void) // audsrv_adpcm_init keyed every voice off
+ {
+-    return CURSOR_SFX_CHANNEL_BASE + slot;
++    int v;
++    for (v = 0; v < SFX_VOICES; v++) {
++        voiceLen[v] = 0;
++        voiceSound[v] = -1;
++        voiceMuted[v] = 0;
++    }
+ }
+ 
+-static void sfxSetCursorChannelsVolume(int volume)
++static void voiceMute(int v)
+ {
+-    for (int i = 0; i < CURSOR_SFX_CHANNEL_COUNT; i++)
+-        audsrv_adpcm_set_volume_and_pan(sfxGetCursorChannel(i), volume, 0);
++    if (!voiceMuted[v]) {
++        audsrv_adpcm_set_volume_and_pan(v, 0, 0);
++        voiceMuted[v] = 1;
++    }
+ }
+ 
+-// COALESCE the one-shot UI sounds instead of interrupting them.
+-//
+-// #575 is two of these raised on the SAME frame -- confirming a rename plays SFX_CONFIRM in
+-// diaShowKeyb and then SFX_TRANSITION from the guiSwitchScreen right after it -- which stacked into
+-// one distorted noise. Sharing a channel fixed that but broke worse: audsrv has no way to stop an
+-// adpcm voice, so replaying a BUSY channel left it wedged and the NEXT press went silent (#504, and
+-// #575's own follow-up).
+-//
+-// So never interrupt. Each sound keeps its own channel, and a one-shot arriving within a frame of
+-// the previous one is simply dropped -- that is the double-raise, and one sound is what was asked
+-// for either way. Deliberate presses are far more than a frame apart and all still play.
++// A sound on the voice that has been free the longest. The play is asked first and the volume set once it is
++// accepted, so a voice that turns out to be still sounding keeps its own (muted) volume. The voice, or -1
++static int sfxStart(int id, int volume)
++{
++    unsigned int len = (unsigned int)sfx_files[id].duration_ms * (CLOCKS_PER_SEC / 1000) + CLOCKS_PER_SEC / 25;
++    int tries, v, best;
++
++    for (tries = 0; tries < 3; tries++) {
++        clock_t now = clock();
++        best = -1;
++        for (v = 1; v < SFX_VOICES; v++)
++            if (!voiceBusy(v) && (best < 0 || (long)(voiceStart[v] - voiceStart[best]) < 0))
++                best = v;
++        if (best < 0)
++            return -1; // every voice still sounding: this one is dropped, nothing stale comes back
++        if (audsrv_ch_play_adpcm(best, &sfx[id]) < 0) { // still sounding after all: give it a little longer
++            voiceStart[best] = now;
++            voiceLen[best] = CLOCKS_PER_SEC / 10;
++            continue;
++        }
++        audsrv_adpcm_set_volume_and_pan(best, volume, 0);
++        voiceStart[best] = now;
++        voiceLen[best] = len;
++        voiceSound[best] = id;
++        voiceMuted[best] = 0;
++        return best;
++    }
++    return -1;
++}
++
++static void sfxMuteSound(int id) // the same sound again starts fresh: its earlier voices fall silent
++{
++    int v;
++    for (v = 1; v < SFX_VOICES; v++)
++        if (voiceSound[v] == id && voiceBusy(v))
++            voiceMute(v);
++}
++
++static void sfxCursorRoom(void) // at most SFX_CURSOR_VOICES ticks ring at once: the oldest gives way
++{
++    for (;;) {
++        int v, n = 0, oldest = -1;
++        for (v = 1; v < SFX_VOICES; v++)
++            if (voiceSound[v] == SFX_CURSOR && voiceBusy(v) && !voiceMuted[v]) {
++                n++;
++                if (oldest < 0 || (long)(voiceStart[v] - voiceStart[oldest]) < 0)
++                    oldest = v;
++            }
++        if (n < SFX_CURSOR_VOICES || oldest < 0)
++            return;
++        voiceMute(oldest);
++    }
++}
++
++// COALESCE the one-shot UI sounds: the same one raised twice within a frame (a confirm in diaShowKeyb and a
++// transition from the guiSwitchScreen right after it, #575) plays once. Deliberate presses are far more than a
++// frame apart and all still play.
+ #define SFX_ONESHOT_COALESCE_MS 50
+ 
+-// RIPPS2 build 71: one press, one sound. A press that opens or leaves a page raises its confirm or
+-// cancel AND the page's own sound within a few milliseconds; with an AUDIO folder those are different
+-// sounds, and two or three were heard. Within SFX_PRESS_MS the bigger one wins: a confirm, cancel or
+-// message after a page sound is dropped, and one before it is cut off as the page sound takes the
+-// next channel (the rotation mutes the one before).
++// RIPPS2 build 71: one press, one sound. A press that opens or leaves a page raises its confirm or cancel AND
++// the page's own sound within a few milliseconds; with an AUDIO folder those are different sounds. Within
++// SFX_PRESS_MS the bigger one wins: a confirm, cancel or message after a page sound is dropped, and one before
++// it is muted as the page sound starts.
+ #define SFX_PRESS_MS 150
+ 
+ static int sfxPressRank(int id)
+@@ -155,148 +211,116 @@ static int sfxIsUiOneShot(int id)
+            (id >= SFX_PAGE_IN && id < SFX_COUNT); // RIPPS2: the pack's events
+ }
+ 
+-// RIPPS2: every sound cuts the one before it off and starts fresh -- the same sound again too, so a
+-// category switch or an info page toggle always answers with a new transition, never a tail.
+-// audsrv cannot stop an adpcm voice, and replaying a voice that is still sounding does not restart
+-// it, so one-shots rotate through a pool of their own channels (like the cursor ticks do): each play
+-// takes the next channel and mutes the one before, and a channel gets its volume back right before
+-// it plays again. The coalescing above still drops a double-raise of the same sound in one frame.
+-#define ONESHOT_SFX_CHANNEL_BASE  (CURSOR_SFX_CHANNEL_BASE + CURSOR_SFX_CHANNEL_COUNT)
+-#define ONESHOT_SFX_CHANNEL_COUNT 8 // channels 14..21 of audsrv's 24
+-static int oneShotChannelIndex = 0;
+-static int sfxLastChannel = -1;
++/*
++  Reading a sound (the IO worker; Memory Files' preview on the main thread). A file is used only when it is an
++  .adp audsrv can play: the APCM header, a pitch, and no bigger than SFX_MAX_BYTES. Before audsrv takes it,
++  RIPPS2 checks that the IOP has the room with SFX_IOP_MARGIN to spare: audsrv holds the whole sound in IOP
++  memory on its way to SPU2, and a big rip must not leave the drivers short.
++*/
++#define SFX_MAX_BYTES  (1024 * 1024)
++#define SFX_IOP_MARGIN (96 * 1024)
++
++static unsigned int sfxLe32(const unsigned char *p)
++{
++    return p[0] | p[1] << 8 | p[2] << 16 | (unsigned int)p[3] << 24;
++}
+ 
+-static void sfxInterruptPrevious(int channel, int volume)
++// The header's sample count at its pitch, in ms; 0 when it is not an .adp audsrv can play
++static int sfxHeaderMs(const unsigned char *h, int size)
+ {
+-    if (sfxLastChannel >= 0 && sfxLastChannel != channel)
+-        audsrv_adpcm_set_volume_and_pan(sfxLastChannel, 0, 0);
+-    audsrv_adpcm_set_volume_and_pan(channel, volume, 0);
+-    sfxLastChannel = channel;
++    unsigned int pitch, samples;
++
++    if (size < 32 || memcmp(h, "APCM", 4) != 0)
++        return 0;
++    pitch = sfxLe32(h + 8);
++    samples = sfxLe32(h + 12);
++    if (pitch == 0 || pitch > 0x3FFF)
++        return 0;
++    if (samples == 0)
++        samples = (unsigned int)(size - 16) / 16 * 28; // an encoder that left it out: from the blocks
++    return (int)((unsigned long long)samples * 4096000ull / ((unsigned long long)pitch * 48000ull)) + 1;
+ }
+ 
+-// Returns 0 if the specified file was read. The sfxEffect structure will not be updated unless the file is successfully read.
++// Returns 0 if the file was read; sfx is not changed otherwise
+ static int sfxRead(const char *full_path, struct sfxEffect *sfx)
+ {
+-    int adpcm;
++    unsigned char head[16];
++    int adpcm, ret, size, ms;
+     void *buffer;
+-    int ret, size;
+-
+-    LOG("SFX: sfxRead('%s')\n", full_path);
+ 
+     adpcm = open(full_path, O_RDONLY);
+-    if (adpcm < 0) {
+-        LOG("SFX: %s: Failed to open adpcm file %s\n", __FUNCTION__, full_path);
++    if (adpcm < 0)
+         return -ENOENT;
+-    }
+-
+     size = lseek(adpcm, 0, SEEK_END);
+-    if (size <= 0) {
+-        LOG("SFX: lseek failed or empty file: %s\n", full_path);
++    lseek(adpcm, 0L, SEEK_SET);
++    if (size < 32 || size > SFX_MAX_BYTES || read(adpcm, head, 16) != 16 || (ms = sfxHeaderMs(head, size)) == 0) {
++        LOG("SFX: %s is not a playable .adp (%d bytes): skipped\n", full_path, size);
+         close(adpcm);
+-        return -EIO;
++        return -EINVAL;
+     }
+     lseek(adpcm, 0L, SEEK_SET);
+-
+-    buffer = memalign(64, size);
+-    if (buffer == NULL) {
+-        LOG("SFX: Failed to allocate memory for SFX\n");
++    if ((buffer = memalign(64, size)) == NULL) {
+         close(adpcm);
+         return -ENOMEM;
+     }
+-
+     ret = read(adpcm, buffer, size);
+     close(adpcm);
+-
+     if (ret != size) {
+-        LOG("SFX: Failed to read SFX: %d (expected %d)\n", ret, size);
++        LOG("SFX: %s: read %d of %d bytes\n", full_path, ret, size);
+         free(buffer);
+         return -EIO;
+     }
+-
+     sfx->buffer = buffer;
+     sfx->size = size;
+-    sfx->builtin = 0;
+-
++    sfx->baked = 0;
++    sfx->duration_ms = ms;
+     return 0;
+ }
+ 
+-static int sfxCalculateSoundDuration(int nSamples)
+-{
+-    float sampleRate = 44100; // 44.1kHz
+-
+-    // Return duration in milliseconds
+-    return (nSamples / sampleRate) * 1000;
+-}
+-
+ static void sfxInitDefaults(void)
+ {
+     int i;
+ 
+-    for (i = 0; i < SFX_COUNT; i++)
+-        sfx_files[i].builtin = 1;
+-    for (i = SFX_BUILTIN_COUNT; i < SFX_COUNT; i++) { // RIPPS2: the pack's events have no built-in
++    for (i = 0; i < SFX_COUNT; i++) {
+         sfx_files[i].buffer = NULL;
+         sfx_files[i].size = 0;
+         sfx_files[i].duration_ms = 0;
+-    }
+-    sfx_files[SFX_BOOT].buffer = boot_adp;
+-    sfx_files[SFX_BOOT].size = size_boot_adp;
+-    sfx_files[SFX_CANCEL].buffer = cancel_adp;
+-    sfx_files[SFX_CANCEL].size = size_cancel_adp;
+-    sfx_files[SFX_CONFIRM].buffer = confirm_adp;
+-    sfx_files[SFX_CONFIRM].size = size_confirm_adp;
+-    sfx_files[SFX_CURSOR].buffer = cursor_adp;
+-    sfx_files[SFX_CURSOR].size = size_cursor_adp;
+-    sfx_files[SFX_MESSAGE].buffer = message_adp;
+-    sfx_files[SFX_MESSAGE].size = size_message_adp;
+-    sfx_files[SFX_TRANSITION].buffer = transition_adp;
+-    sfx_files[SFX_TRANSITION].size = size_transition_adp;
+-    sfx_files[SFX_BD_CONNECT].buffer = bd_connect_adp;
+-    sfx_files[SFX_BD_CONNECT].size = size_bd_connect_adp;
+-    sfx_files[SFX_BD_DISCONNECT].buffer = bd_disconnect_adp;
+-    sfx_files[SFX_BD_DISCONNECT].size = size_bd_disconnect_adp;
+-
+-    // RIPPS2: a sound pack compiled in (ripps2sfxpack.c, empty in the public build) takes each event
+-    // it has, the built-in ones included, so it comes after them; a SOUND folder beside the ELF still
+-    // overrides it in sfxInit
+-    for (i = 0; i < SFX_COUNT; i++) {
+-        if (ripps2SfxPack[i] != NULL && ripps2SfxPackSize[i] > 16) {
++        sfx_files[i].baked = 0;
++        // a sound pack baked into a private build (ripps2sfxpack.c, empty in the public one); an AUDIO folder
++        // still overrides it in sfxInit
++        if (ripps2SfxPack[i] != NULL && ripps2SfxPackSize[i] > 32 && sfxHeaderMs(ripps2SfxPack[i], ripps2SfxPackSize[i])) {
+             sfx_files[i].buffer = (void *)ripps2SfxPack[i];
+             sfx_files[i].size = ripps2SfxPackSize[i];
++            sfx_files[i].baked = 1;
++            sfx_files[i].duration_ms = sfxHeaderMs(ripps2SfxPack[i], ripps2SfxPackSize[i]);
+         }
+     }
+ }
+ 
+-// Returns 0 (AUDSRV_ERR_NOERROR) if the sound was loaded successfully.
++// Returns 0 (AUDSRV_ERR_NOERROR) if the sound was loaded
+ static int sfxLoad(struct sfxEffect *sfxData, audsrv_adpcm_t *sfx)
+ {
++    void *probe = SifAllocIopHeap(sfxData->size + SFX_IOP_MARGIN);
+     int ret;
+ 
+-    // Calculate duration based on number of samples. The sample count lives at
+-    // u32 offset 3 (bytes 12-15); guard against a SFX file shorter than that
+-    // header so we don't read past the buffer.
+-    if (sfxData->size >= (int)(4 * sizeof(u32)))
+-        sfxData->duration_ms = sfxCalculateSoundDuration(((u32 *)sfxData->buffer)[3]);
+-    else
+-        sfxData->duration_ms = 0;
+-    // Estimate duration based on filesize, if the ADPCM header was 0
+-    if (sfxData->duration_ms == 0)
+-        sfxData->duration_ms = sfxData->size / 47;
+-
+-    ret = audsrv_load_adpcm(sfx, sfxData->buffer, sfxData->size);
+-    if (sfxData->builtin == 0) {
++    if (probe == NULL) {
++        LOG("SFX: %s: the IOP has no room for %d bytes: skipped\n", sfxData->name, sfxData->size);
++        ret = -AUDSRV_ERR_OUT_OF_MEMORY;
++    } else {
++        SifFreeIopHeap(probe);
++        ret = audsrv_load_adpcm(sfx, sfxData->buffer, sfxData->size);
++    }
++    if (!sfxData->baked) {
+         free(sfxData->buffer);
+-        sfxData->buffer = NULL; // Mark the buffer as freed.
++        sfxData->buffer = NULL;
+     }
+-
+     return ret;
+ }
+ 
+-// RIPPS2 build 74: where the AUDIO folder is. Beside RIPPS2 first: the quickest, and where the boot
+-// sound comes from before any drive is up. Then the memory cards and every drive that has started, at
+-// its top or in its APPS folder, and the HDD's data home (where its ART is): so RIPPS2 started from a
+-// memory card (BIBLE, quick) plays the AUDIO kept on the HDD or a USB drive. out gets the folder the
+-// AUDIO folder is in ("...APPS/"), as oplGetRipps2Dir gives RIPPS2's own. 1 when one was found.
++// RIPPS2 build 74: where the AUDIO folder is. Beside RIPPS2 first: the quickest. Then the memory cards and every
++// drive that has started, at its top or in its APPS folder, and the HDD's data home (where its ART is): so
++// RIPPS2 started from a memory card (BIBLE, quick) plays the AUDIO kept on the HDD or a USB drive. out gets the
++// folder the AUDIO folder is in ("...APPS/"), as oplGetRipps2Dir gives RIPPS2's own. 1 when one was found.
+ static int audioHas(const char *base)
+ {
+     char path[280];
+@@ -318,8 +342,8 @@ static int audioHas(const char *base)
+ static char audioBase[256];
+ static volatile int audioBaseFound = 0;
+ 
+-// searchDrives: only on the IO worker (the boot's sound load, ripps2AudioLateCheck): a memory card
+-// must never be asked from two threads at once. Every other caller takes what was found.
++// searchDrives: only on the IO worker (the boot's sound load, ripps2AudioLateCheck): a memory card must never
++// be asked from two threads at once. Every other caller takes what was found.
+ int ripps2AudioBase(char *out, int size, int searchDrives)
+ {
+     static const char *const roots[] = {"mc0:/", "mc1:/", "mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/",
+@@ -364,45 +388,50 @@ int ripps2AudioBase(char *out, int size, int searchDrives)
+     return oplGetRipps2Dir(out, size);
+ }
+ 
+-// Returns number of audio files successfully loaded, < 0 if an unrecoverable error occurred.
++// RIPPS2: the boot sound opens the show and the music follows it in. From build 95 it is the first sound the
++// IO worker loads (deferredAudioInit, sfxInit(1)) and it plays the moment it is in, on voice 0, which nothing
++// else uses; the rest load after it. Once they are in, the music starts from a thread of its own (never the
++// IO worker, which a settings save or a launch waits on) and fades in over two seconds under whatever is left
++// of the boot sound.
++static volatile int bootAudioReady = 0; // the sounds are loaded: the music may start
++static volatile int bgmFadeIn = 0;      // the boot music starts silent and rises
++static clock_t bgmFadeAt = 0;
++static clock_t bootSoundEnds = 0; // when the boot sound has played out
++#define BGM_FADE_S 2.0f
++
++// Returns the number of sounds loaded, < 0 if audio is not up. The IO worker only (sfxReload queues it)
+ int sfxInit(int bootSnd)
+ {
+     char sound_path[256];
+     char full_path[256];
+     int ret, loaded;
+     int thmSfxEnabled = 0;
+-    int i = 1;
++    int i;
+ 
+     if (!audio_initialized) {
+         LOG("SFX: %s: ERROR: not initialized!\n", __FUNCTION__);
+         return -1;
+     }
++    if (sfxPreviewing)
++        return 0; // Memory Files' preview has the voices; its close loads the set again
+ 
+-    if (sfxBootEarly) { // RIPPS2: the boot sound is loaded and may still be playing: leave audsrv's ADPCM be
+-        sfxBootEarly = 0;
+-        bootSnd = 0;
+-    } else
+-        audsrv_adpcm_init();
+-    cursorChannelIndex = 0;
++    audsrv_adpcm_init();
++    voicesReset();
+     sfxInitDefaults();
+     audioSetVolume();
+ 
+-    // Check default theme is not current theme
+     int themeID = thmGetGuiValue();
+     char *thmPath = thmGetFilePath(themeID);
+-    if (thmPath != NULL) { // NULL for <OPL> + the built-in <Coverflow> -> use default sfx
+-        // Get theme path for sfx
++    if (thmPath != NULL) { // a disk theme's own sound folder
+         snprintf(sound_path, sizeof(sound_path), "%ssound", thmPath);
+-
+-        // Check for custom sfx folder
+         DIR *dir = opendir(sound_path);
+         if (dir != NULL) {
+             thmSfxEnabled = 1;
+             closedir(dir);
+         }
+     } else if (ripps2AudioBase(sound_path, sizeof(sound_path) - 6, 0)) { // build 74: beside RIPPS2, or on a drive
+-        // RIPPS2: the AUDIO folder beside RIPPS2 (<event>.adp, RiptOPL's names and RIPPS2's) for the
+-        // built-in themes; a SOUND folder (builds 61 to 65) still counts
++        // RIPPS2: the AUDIO folder (<event>.adp, RiptOPL's names and RIPPS2's) for the built-in themes; a
++        // SOUND folder (builds 61 to 65) still counts
+         size_t base = strlen(sound_path);
+         strcat(sound_path, "AUDIO");
+         DIR *dir = opendir(sound_path);
+@@ -418,33 +447,108 @@ int sfxInit(int bootSnd)
+     }
+ 
+     loaded = 0;
+-    i = bootSnd ? 0 : 1;
+-    for (; i < SFX_COUNT; i++) {
++    memset(sfxReady, 0, sizeof(sfxReady));
++    memset(sfxSkipped, 0, sizeof(sfxSkipped));
++    for (i = bootSnd ? 0 : 1; i < SFX_COUNT; i++) {
+         if (thmSfxEnabled) {
+             snprintf(full_path, sizeof(full_path), "%s/%s", sound_path, sfx_files[i].name);
+             ret = sfxRead(full_path, &sfx_files[i]);
+-            if (ret != 0) {
+-                LOG("SFX: %s could not be loaded. Using default sound %d.\n", full_path, ret);
+-            }
++            if (ret != 0 && ret != -ENOENT)
++                sfxSkipped[i] = 1;
+         } else
+-            snprintf(full_path, sizeof(full_path), "builtin/%s", sfx_files[i].name);
++            snprintf(full_path, sizeof(full_path), "baked/%s", sfx_files[i].name);
+ 
+-        sfxReady[i] = 0;
+         if (sfx_files[i].buffer == NULL)
+-            continue; // RIPPS2: an event with no file of its own plays its fallback
++            continue; // an event with no file of its own plays its fallback, or nothing
+         ret = sfxLoad(&sfx_files[i], &sfx[i]);
+-        if (ret == 0) {
+-            LOG("SFX: Loaded %s, size=%d, duration=%dms\n", full_path, sfx_files[i].size, sfx_files[i].duration_ms);
+-            sfxReady[i] = 1;
+-            loaded++;
+-        } else {
++        if (ret != 0) {
+             LOG("SFX: failed to load %s, error %d\n", full_path, ret);
++            sfxSkipped[i] = 1;
++            continue;
++        }
++        LOG("SFX: Loaded %s, size=%d, duration=%dms\n", full_path, sfx_files[i].size, sfx_files[i].duration_ms);
++        sfxReady[i] = 1;
++        loaded++;
++        if (i == SFX_BOOT && gEnableSFX && gEnableBootSND) { // it plays now; the rest load under it
++            audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
++            if (audsrv_ch_play_adpcm(SFX_BOOT_VOICE, &sfx[SFX_BOOT]) >= 0) {
++                voiceStart[SFX_BOOT_VOICE] = clock();
++                voiceLen[SFX_BOOT_VOICE] = (unsigned int)sfx_files[SFX_BOOT].duration_ms * (CLOCKS_PER_SEC / 1000);
++                voiceSound[SFX_BOOT_VOICE] = SFX_BOOT;
++                bootSoundEnds = clock() + (clock_t)sfx_files[SFX_BOOT].duration_ms * (CLOCKS_PER_SEC / 1000);
++            }
+         }
+     }
+-
++    sfxLoadedCount = loaded;
+     return loaded;
+ }
+ 
++// Build 95: a fresh load of the sounds (a theme change, a rip, an IOP reboot) runs on the IO worker, never on
++// the caller's thread; thenPlay (or -1) sounds once they are in
++static volatile int sfxPlayAfterLoad = -1;
++
++static void sfxReloadWork(void)
++{
++    int id;
++    sfxInit(0);
++    if ((id = sfxPlayAfterLoad) >= 0) {
++        sfxPlayAfterLoad = -1;
++        sfxPlay(id);
++    }
++}
++
++void sfxReload(int thenPlay)
++{
++    sfxPlayAfterLoad = thenPlay;
++    if (ioPutRequest(IO_CUSTOM_SIMPLEACTION, &sfxReloadWork) != IO_OK)
++        sfxReloadWork();
++}
++
++int sfxLoadedSounds(int *skipped)
++{
++    int i, n = 0;
++    for (i = 0; i < SFX_COUNT; i++)
++        n += sfxSkipped[i];
++    if (skipped)
++        *skipped = n;
++    return sfxLoadedCount;
++}
++
++// Build 95: Memory Files plays an .adp. audsrv cannot stop one sound, only key every voice off and drop every
++// sound (audsrv_adpcm_init), so the set is let go while the preview plays and loaded again when it closes.
++// The sound's length in ms, or < 0 when it is not an .adp that plays
++int sfxPreviewStart(const char *path)
++{
++    static struct audsrv_adpcm_t preview;
++    struct sfxEffect e = {"preview", NULL, 0, 0, 0};
++    int vol = gSFXVolume > 0 ? gSFXVolume : 80;
++
++    if (!audio_initialized)
++        return -1;
++    sfxPreviewing = 1;
++    audsrv_adpcm_init(); // a preview playing stops here too
++    voicesReset();
++    memset(sfxReady, 0, sizeof(sfxReady));
++    if (sfxRead(path, &e) != 0)
++        return -2;
++    if (sfxLoad(&e, &preview) != 0)
++        return -3;
++    if (audsrv_ch_play_adpcm(1, &preview) < 0)
++        return -4;
++    audsrv_adpcm_set_volume_and_pan(1, vol, 0);
++    return e.duration_ms;
++}
++
++void sfxPreviewStop(void)
++{
++    if (!sfxPreviewing)
++        return;
++    audsrv_adpcm_init();
++    voicesReset();
++    sfxPreviewing = 0;
++    sfxReload(-1);
++}
++
+ int sfxGetSoundDuration(int id)
+ {
+     if (!audio_initialized) {
+@@ -561,127 +665,67 @@ static void sfxRumble(int id)
+ 
+ void sfxPlay(int id)
+ {
+-    int channel;
++    static u32 lastCursorTicks = 0, lastOneShotTicks = 0;
++    static int lastOneShotId = -1, lastOneShotVoice = -1;
++    int v;
+ 
+     sfxRumble(id);
+ 
+-    if (!audio_initialized) {
+-        LOG("SFX: %s: ERROR: not initialized!\n", __FUNCTION__);
++    if (!audio_initialized || sfxPreviewing)
+         return;
+-    }
+ 
+     // RIPPS2: an event without a sound of its own plays the one it falls back to, or nothing
+     while (id >= 0 && id < SFX_COUNT && !sfxReady[id])
+         id = sfxFallback[id];
+-    if (id < 0 || id >= SFX_COUNT)
++    if (id < 0 || id >= SFX_COUNT || id == SFX_BOOT || !gEnableSFX)
+         return;
+ 
+-    if (gEnableSFX) {
+-        u32 sfxStartTicks = cpu_ticks();
+-        if (id == SFX_CURSOR) {
+-            static u32 lastCursorTicks = 0;
+-            if (lastCursorTicks != 0) {
+-                u32 interval = (sfxStartTicks - lastCursorTicks) / SFX_CLOCKS_PER_MS;
+-                if (interval < 45)
+-                    return;
+-            }
+-            lastCursorTicks = sfxStartTicks;
+-
+-            int chosenSlot = cursorChannelIndex;
+-
+-            cursorChannelIndex = (cursorChannelIndex + 1) % CURSOR_SFX_CHANNEL_COUNT;
+-            channel = sfxGetCursorChannel(chosenSlot);
+-
+-            // Replaying a rotation channel replaces its old sample in one SIF RPC.
+-            sfxInterruptPrevious(channel, gSFXVolume);
+-            audsrv_ch_play_adpcm(channel, &sfx[id]);
+-        } else {
+-            if (sfxIsUiOneShot(id)) { // see SFX_ONESHOT_COALESCE_MS
+-                static u32 lastOneShotTicks = 0;
+-                static int lastOneShotId = -1;
+-                u32 sinceMs = lastOneShotTicks != 0 ? (sfxStartTicks - lastOneShotTicks) / SFX_CLOCKS_PER_MS : 0xFFFFFFFFu;
+-                // RIPPS2: only the same sound raised twice is dropped; a different one interrupts
+-                if (id == lastOneShotId && sinceMs < SFX_ONESHOT_COALESCE_MS)
+-                    return;
+-                if (sinceMs < SFX_PRESS_MS && sfxPressRank(id) < sfxPressRank(lastOneShotId))
++    u32 sfxStartTicks = cpu_ticks();
++    if (id == SFX_CURSOR) {
++        if (lastCursorTicks != 0 && (sfxStartTicks - lastCursorTicks) / SFX_CLOCKS_PER_MS < 45)
++            return;
++        lastCursorTicks = sfxStartTicks;
++        sfxCursorRoom();
++        sfxStart(id, gSFXVolume);
++    } else {
++        int oneShot = sfxIsUiOneShot(id);
++        if (oneShot) {
++            u32 sinceMs = lastOneShotTicks != 0 ? (sfxStartTicks - lastOneShotTicks) / SFX_CLOCKS_PER_MS : 0xFFFFFFFFu;
++            if (id == lastOneShotId && sinceMs < SFX_ONESHOT_COALESCE_MS)
++                return;
++            if (sinceMs < SFX_PRESS_MS) {
++                if (sfxPressRank(id) < sfxPressRank(lastOneShotId))
+                     return; // build 71: the page sound of this press already played
+-                lastOneShotTicks = sfxStartTicks;
+-                lastOneShotId = id;
++                if (lastOneShotVoice >= 0 && voiceSound[lastOneShotVoice] == lastOneShotId && voiceBusy(lastOneShotVoice))
++                    voiceMute(lastOneShotVoice); // the smaller sound of this press gives way
+             }
+-            channel = ONESHOT_SFX_CHANNEL_BASE + oneShotChannelIndex;
+-            oneShotChannelIndex = (oneShotChannelIndex + 1) % ONESHOT_SFX_CHANNEL_COUNT;
+-            sfxInterruptPrevious(channel, id == SFX_BOOT ? gBootSndVolume : gSFXVolume);
+-            audsrv_ch_play_adpcm(channel, &sfx[id]);
+         }
+-
+-        unsigned int costMs = (unsigned int)((cpu_ticks() - sfxStartTicks) / SFX_CLOCKS_PER_MS);
+-        sfxLastPlayMs = costMs;
+-        if (costMs > sfxMaxPlayMs)
+-            sfxMaxPlayMs = costMs;
++        sfxMuteSound(id);
++        v = sfxStart(id, gSFXVolume);
++        if (oneShot) {
++            lastOneShotTicks = sfxStartTicks;
++            lastOneShotId = id;
++            lastOneShotVoice = v;
++        }
+     }
+-}
+-
+-// RIPPS2: the boot sound opens the show and the music follows it in. sfxBootStart runs on the main
+-// thread at the end of the boot's config load, the moment the towers start to rise: audio comes up
+-// there (audsrv is loaded with the IOP modules long before), the boot sound alone is loaded (a sound
+-// pack's own beside RIPPS2, else the built-in one) and plays at once on channel 0, which nothing else
+-// uses, so no press can cut it off. The rest of the sounds load later on the IO worker, which then
+-// leaves audsrv's ADPCM as it is (starting it over would cut the boot sound off). Once they are in,
+-// the music starts from a thread of its own (never the IO worker, which a settings save or a launch
+-// waits on) and fades in over two seconds under whatever is left of the boot sound.
+-static volatile int bootAudioReady = 0;   // the sounds are loaded: the music may start
+-static volatile int bgmFadeIn = 0;        // the boot music starts silent and rises
+-static clock_t bgmFadeAt = 0;
+-static clock_t bootSoundEnds = 0;         // when the boot sound has played out
+-#define BGM_FADE_S 2.0f
+-
+-static int sfxRead(const char *full_path, struct sfxEffect *sfx);
+-static int sfxLoad(struct sfxEffect *sfxData, audsrv_adpcm_t *sfx);
+-static void sfxInitDefaults(void);
+ 
+-// RIPPS2 build 75: an HDD launch reads its settings from the HDD, so its whole driver stack comes up
+-// first and the boot sat silent and still for seconds. The built-in boot sound starts before that
+-// now, unless the memory card says the user turned it off (QUIETBOOT, kept by ripps2QuietBootMark).
+-static int sfxBootBuiltinOnly = 0;
+-#define QUIETBOOT_MC0 "mc0:/RIPPS2/QUIETBOOT"
+-#define QUIETBOOT_MC1 "mc1:/RIPPS2/QUIETBOOT"
+-
+-static int quietBootMarked(void)
+-{
+-    int fd = open(QUIETBOOT_MC0, O_RDONLY);
+-    if (fd < 0)
+-        fd = open(QUIETBOOT_MC1, O_RDONLY);
+-    if (fd >= 0)
+-        close(fd);
+-    return fd >= 0;
+-}
+-
+-void sfxBootStartEarly(void)
+-{
+-    if (quietBootMarked())
+-        return;
+-    sfxBootBuiltinOnly = 1;
+-    sfxBootStart();
+-    sfxBootBuiltinOnly = 0;
++    unsigned int costMs = (unsigned int)((cpu_ticks() - sfxStartTicks) / SFX_CLOCKS_PER_MS);
++    sfxLastPlayMs = costMs;
++    if (costMs > sfxMaxPlayMs)
++        sfxMaxPlayMs = costMs;
+ }
+ 
+-// On the IO worker, with each settings save: the marker follows the boot sound setting
++// Build 75 kept mc0:/RIPPS2/QUIETBOOT for a built-in boot sound that played before the settings were read.
++// With no built-in sounds (build 95) the boot sound waits for the settings, so the marker is not needed.
+ void ripps2QuietBootMark(int bootSoundOn)
+ {
+-    int marked = quietBootMarked(), fd;
+-    if (!bootSoundOn && !marked) {
+-        mkdir("mc0:/RIPPS2", 0777);
+-        if ((fd = open(QUIETBOOT_MC0, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0)
+-            close(fd);
+-    } else if (bootSoundOn && marked) {
+-        remove(QUIETBOOT_MC0);
+-        remove(QUIETBOOT_MC1);
+-    }
++    (void)bootSoundOn;
+ }
+ 
++// The main thread, as the towers rise: audio comes up. The boot sound itself is the IO worker's first load
++// (deferredAudioInit), so no sound file is read here (build 95)
+ void sfxBootStart(void)
+ {
+-    char path[256];
+     static int done = 0;
+ 
+     if (done)
+@@ -691,26 +735,8 @@ void sfxBootStart(void)
+     if (!audio_initialized)
+         return;
+     audsrv_adpcm_init();
+-    sfxInitDefaults();
++    voicesReset();
+     audioSetVolume();
+-    if (!sfxBootBuiltinOnly && thmGetFilePath(thmGetGuiValue()) == NULL && ripps2AudioBase(path, sizeof(path) - 16, 0)) { // beside RIPPS2 only: no drive is up yet
+-        size_t base = strlen(path);
+-        strcat(path, "AUDIO/boot.adp");
+-        if (sfxRead(path, &sfx_files[SFX_BOOT]) != 0) { // the built-in (or baked) one stays when there is none
+-            path[base] = '\0';
+-            strcat(path, "SOUND/boot.adp");
+-            sfxRead(path, &sfx_files[SFX_BOOT]);
+-        }
+-    }
+-    if (sfxLoad(&sfx_files[SFX_BOOT], &sfx[SFX_BOOT]) != 0)
+-        return;
+-    sfxReady[SFX_BOOT] = 1;
+-    sfxBootEarly = 1;
+-    if (gEnableSFX && gEnableBootSND) {
+-        audsrv_adpcm_set_volume_and_pan(0, gBootSndVolume, 0);
+-        audsrv_ch_play_adpcm(0, &sfx[SFX_BOOT]);
+-        bootSoundEnds = clock() + (clock_t)sfx_files[SFX_BOOT].duration_ms * (CLOCKS_PER_SEC / 1000);
+-    }
+ }
+ 
+ // Build 74: RIPPS2 started where it has no AUDIO folder (a memory card, through BIBLE) finds the one on
+@@ -1956,17 +1982,16 @@ void audioEnd(void)
+ 
+ void audioSetVolume(void)
+ {
+-    int i;
++    int v;
+ 
+     if (!audio_initialized) {
+         LOG("AUDIO: %s: ERROR: not initialized!\n", __FUNCTION__);
+         return;
+     }
+ 
+-    for (i = 1; i < CURSOR_SFX_CHANNEL_BASE; i++) // RIPPS2: the per-sound channels, not the pools after them
+-        audsrv_adpcm_set_volume(i, gSFXVolume);
+-
+-    sfxSetCursorChannelsVolume(gSFXVolume);
+-    audsrv_adpcm_set_volume(0, gBootSndVolume);
++    for (v = 1; v < SFX_VOICES; v++) // build 95: a muted voice stays muted until its sound has run out
++        if (!voiceMuted[v])
++            audsrv_adpcm_set_volume_and_pan(v, gSFXVolume, 0);
++    audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
+     audsrv_set_volume(gBGMVolume);
+ }
