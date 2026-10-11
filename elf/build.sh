@@ -94,8 +94,27 @@ cp -r "$HERE/libsmslite" "$SRC/thirdparty/libsmslite"
 # a DEBUG=1 build (RIPPS2_MAKE_FLAGS) gets the player's own log lines too
 case "${RIPPS2_MAKE_FLAGS:-}" in *DEBUG=1*) SMS_CF=-DSMSLITE_DEBUG ;; *) SMS_CF= ;; esac
 make -C "$SRC/thirdparty/libsmslite" all SMSLITE_CFLAGS="$SMS_CF"
-cp -f "$SRC/thirdparty/libsmslite/lib/libsmslite.a" "$SRC/lib/libsmslite.a"
-echo "libsmslite: $(du -k "$SRC/lib/libsmslite.a" | cut -f1) KB"
+case "${RIPPS2_MAKE_FLAGS:-}" in
+  *RIPPS2_NO_SMSLITE=1*) # build 95: a test build without the player, to tell its link apart from everything else
+    rm -f "$SRC/lib/libsmslite.a"
+    echo "libsmslite: left out (RIPPS2_NO_SMSLITE=1)" ;;
+  *)
+    cp -f "$SRC/thirdparty/libsmslite/lib/libsmslite.a" "$SRC/lib/libsmslite.a"
+    echo "libsmslite: $(du -k "$SRC/lib/libsmslite.a" | cut -f1) KB" ;;
+esac
+# build 95: symbols libsmslite defines that a library linked after it defines too. It comes first in EE_LIBS,
+# so RIPPS2's own calls would take its version of any of these: the list must stay empty.
+SMS_NM=$(command -v mips64r5900el-ps2-elf-nm || true)
+if [ -n "$SMS_NM" ]; then
+  "$SMS_NM" -g --defined-only "$SRC/thirdparty/libsmslite/lib/libsmslite.a" 2>/dev/null | awk 'NF==3 && $2 ~ /[TDBRW]/ {print $3}' | sort -u > "$SRC/sms_syms.txt"
+  : > "$SRC/other_syms.txt"
+  for L in "$PS2SDK"/ee/lib/*.a "$PS2SDK"/ports/lib/*.a "$GSKIT"/lib/*.a "$PS2DEV"/ee/mips64r5900el-ps2-elf/lib/libc.a "$PS2DEV"/ee/mips64r5900el-ps2-elf/lib/libm.a; do
+    [ -f "$L" ] && "$SMS_NM" -g --defined-only "$L" 2>/dev/null | awk 'NF==3 && $2 ~ /[TDBRW]/ {print $3}' >> "$SRC/other_syms.txt"
+  done
+  sort -u "$SRC/other_syms.txt" -o "$SRC/other_syms.txt"
+  echo "libsmslite symbols that shadow a later library: $(comm -12 "$SRC/sms_syms.txt" "$SRC/other_syms.txt" | wc -l)"
+  comm -12 "$SRC/sms_syms.txt" "$SRC/other_syms.txt" | head -60 | sed 's/^/  shadows: /'
+fi
 
 cd "$SRC"
 sh .github/scripts/install_coherent_mmce.sh
