@@ -114,6 +114,10 @@ if [ -n "$SMS_NM" ]; then
   sort -u "$SRC/other_syms.txt" -o "$SRC/other_syms.txt"
   echo "libsmslite symbols that shadow a later library: $(comm -12 "$SRC/sms_syms.txt" "$SRC/other_syms.txt" | wc -l)"
   comm -12 "$SRC/sms_syms.txt" "$SRC/other_syms.txt" | head -60 | sed 's/^/  shadows: /'
+  if [ -n "$(comm -12 "$SRC/sms_syms.txt" "$SRC/other_syms.txt")" ]; then
+    echo "::error::libsmslite defines symbols a later library defines (see above): RIPPS2 would call its versions"
+    exit 1
+  fi
 fi
 
 cd "$SRC"

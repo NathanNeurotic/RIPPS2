@@ -24,17 +24,10 @@
 .globl pcm_syn1
 .globl pcm_syn2
 .globl pcm_synN
-.globl strlen
-.globl strcat
-.globl strcpy
-.globl strncmp
-.globl strncpy
-.globl strchr
-.globl strcmp
-.globl strrchr
-.globl strstr
-.globl strpbrk
-.globl memmove
+/* RIPPS2 fork: the C library's string functions below (strlen, strcat, strcpy, strncmp, strncpy, strchr,
+   strcmp, strrchr, strstr, strpbrk, memmove) are no longer exported. libsmslite is linked ahead of libc in
+   RIPPS2, so exporting them replaced libc's for the whole ELF: RIPFLOW's theme stopped loading, a strchr
+   walk miscounted, build 93 hung at boot. Every caller now gets libc's; these stay local to this file. */
 
 .data
 .align 4

@@ -25,3 +25,7 @@ family (MPEG-1 layer II and III). The copy here is RIPPS2's fork of it.
   given back to the decoder the way IPU_Display gives a shown one back (m_FrameType = -1).
 - After the last frame the player waited for its audio threads by rotating their ready queue, from a
   thread one priority above them, so they never ran: after a stop it spun for ever. It sleeps now.
+- src/ps2/utils.S no longer exports its own strlen, strcat, strcpy, strncmp, strncpy, strchr, strcmp, strrchr,
+  strstr, strpbrk and memmove. Linked ahead of libc, they replaced the C library's for all of RIPPS2 (from build
+  93: RIPFLOW stopped loading, a strchr walk miscounted, a boot hung). RIPPS2's build.sh now fails if the
+  library defines any symbol a library linked after it defines too.
