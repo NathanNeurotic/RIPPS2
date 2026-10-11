@@ -58,8 +58,9 @@ if 'gRipps2PaletteShown == 0' not in tint or 'gRipps2Palette ' in tint.replace('
     fail.append('the tint must draw the palette in effect (gRipps2PaletteShown)')
 take = gui[gui.index('static void guiRipps2Take('):]
 take = take[:take.index('\n}\n')]
-if 'v != ripps2ColorsShown(bit)' not in take or 'gRipps2UserSet |= bit;' not in take:
-    fail.append('moving a row off what it showed must make it the user\'s')
+# build 96: picking a value makes the row the user's; picking Theme (0) gives it back to the theme
+if 'gRipps2UserSet |= bit;' not in take or 'gRipps2UserSet &= ~bit;' not in take:
+    fail.append('a picked value must make the row the user\'s, and Theme must give it back')
 if '"ripps2_userset"' not in opl or opl.count('ripps2_userset') < 2:
     fail.append('the changed rows must be saved and loaded (ripps2_userset)')
 # --- the view word keeps its 64 px face in a theme without a font14 of its own

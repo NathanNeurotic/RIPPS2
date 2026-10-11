@@ -1,0 +1,1109 @@
+diff --git a/include/dialogs.h b/include/dialogs.h
+index 9012d1f..c3d3686 100644
+--- a/include/dialogs.h
++++ b/include/dialogs.h
+@@ -342,6 +342,7 @@ enum UI_ITEMS {
+     RIPPS2_RIP_BIOS_BUTTON, // RIPPS2 build 88: Audio settings > BIOS Sounds > RIP
+     RIPPS2_HINTS_BUTTON,      // RIPPS2 build 90: Controller Settings > Hints and Glyphs
+     RIPPS2_HINT_ORDER_BUTTON, // and its Hint Order
++    CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
+     LAUNCH_GSM_DEFAULTS_BUTTON,
+ 
+ #ifdef PADEMU
+diff --git a/include/menusys.h b/include/menusys.h
+index 452e3d5..6d5d450 100644
+--- a/include/menusys.h
++++ b/include/menusys.h
+@@ -154,6 +154,7 @@ void menuHandleInputAppMenu();
+ 
+ // Sets the selected item if it is found in the menu list
+ void menuSetSelectedItem(menu_item_t *item);
++int menuCurrentMode(void); // RIPPS2 build 96: the IO mode of the page shown, -1 when none
+ 
+ /** Serialize menu_item_t::hints against the renderer.
+  *
+diff --git a/include/ripps2.h b/include/ripps2.h
+index ee2082b..65f5f85 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -58,6 +58,10 @@ extern int gRipps2Random;
+ // build 87: In-Game Menu (Settings > General): the IGR combo pauses a game under Resume / Achievements /
+ // Exit Game (ee_core igrmenu.c) instead of leaving it at once
+ extern int gRipps2IgrMenu;
++extern int gRipps2StartLast;   // build 96: Default Menu > Last Used
++extern int gRipps2PageButtons; // build 96: 0 Theme, 1 L1 / R1, 2 L2 / R2
++int ripps2PageButtons(void);   // what is in effect: 0 RIPPS2's own (L2 top, R2 end), 1 L1 / R1, 2 L2 / R2
++extern int gRipps2LastDevice;  // build 96: the page (an IO mode) the last session was on, -1: none
+ 
+ // RIPPSettings (Controller Settings > RIPPSettings, build 70): how RIPPS2's own pages look, saved in
+ // the settings
+diff --git a/include/themes.h b/include/themes.h
+index ab5af9f..a179630 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -236,6 +236,7 @@ typedef struct theme
+     int hintsColumnDef;                 // hints_layout: -1 not set, 0 row, 1 column
+     int hintsSpacing;                   // hints_spacing: a column's line pitch
+     int glyphSetDef;                    // glyph_set: RIPPS2_GLYPHSET_* (THEME: its own PNGs)
++    int pageButtonsDef;                 // build 96: page_buttons= l1r1 (1) | l2r2 (2); 0: RIPPS2's own (L2 top, R2 end)
+     int glyphSetLoaded;                 // the set its glyph textures hold now
+     char glyphPath[192];                // where its own glyph PNGs load from ("" for a built-in theme)
+     int launchDiscDef;                  // RIPPS2 build 91: launch_disc: 0 off, 1 pop, 2 spin
+@@ -259,6 +260,7 @@ typedef struct theme
+ 
+     GSTEXTURE textures[TEXTURES_COUNT];
+     int fonts[THM_MAX_FONTS]; //!< Storage of font handles for removal once not needed
++    int diaFont, diaTipFont;  // RIPPS2 build 96: the settings pages' faces, the same on every theme
+ } theme_t;
+ 
+ extern theme_t *gTheme;
+@@ -266,6 +268,9 @@ extern theme_t *gTheme;
+ // RIPPS2: menus, settings, dialogs and message boxes draw in the theme's font4 (RIPPS2 Sleek in the
+ // built-in theme; a theme without font4 falls back to its default font, as every font slot does)
+ #define RIPPS2_UI_FONT (gTheme->fonts[4])
++// RIPPS2 build 96: settings pages and message boxes, on every theme: Adapt's settings face (Roboto Bold Condensed),
++// plainer than a theme's styled menu fonts
++#define RIPPS2_DIA_FONT (gTheme->diaFont)
+ // RIPPS2: Sleek Bold with a true lowercase (builtin:ripps2sleekcase, theme font15), for typed text
+ #define RIPPS2_CASE_FONT (gTheme->fonts[15])
+ // RIPPS2 build 70: the same lowercase face, large (theme font9): a title in true case (RetroAchievements)
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index 129087f..ef8435e 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -746,13 +746,13 @@ gui_strings:
+ - label: CORE_LOADER
+   string: Loader Core
+ - label: COVERFLOW_ANIM
+-  string: Animation Speed
++  string: Flow Animation Speed
+ - label: COVERFLOW_COUNT
+-  string: Cover Count
++  string: Flow Cover Count
+ - label: COVERFLOW_DIM
+   string: Vignette Other Covers
+ - label: COVERFLOW_SCALE
+-  string: Center Scale
++  string: Flow Cover Size
+ - label: COVERFLOW_SETTINGS
+   string: Flow and Grid
+ - label: DEFAULT_CORE
+@@ -850,7 +850,7 @@ gui_strings:
+ - label: NARGS_ATA1
+   string: ATA1 Image (-ata1)
+ - label: NARGS_AUTO_NOTE
+-  string: 'Auto: game device and ISO, per-game compatibility and VMC, selected video mode'
++  string: 'RIPPS2 adds the drive, ISO, VMCs and video mode itself: see each row''s tooltip'
+ - label: NARGS_CFG
+   string: Config (-cfg)
+ - label: NARGS_CWD
+@@ -1405,6 +1405,50 @@ gui_strings:
+   string: Boot Lock
+ - label: HINT_RIPPS2_BOOT_LOCK
+   string: "Starts RIPPS2 at power on through PS2BBL. Off puts back what PS2BBL started before. No PS2BBL yet? Boot Loader installs BIBLE."
++- label: HINT_COLORS_TEXT
++  string: "The color of the game list's text. Themes set their own; this changes it for the built-in themes."
++- label: HINT_COLORS_SELECTED
++  string: "The color of the chosen game and the chosen row on settings pages."
++- label: HINT_COLORS_DIALOG
++  string: "The color of the settings pages and message boxes."
++- label: HINT_COLORS_TITLE
++  string: "The color of a game's name on its info page."
++- label: HINT_COLORS_BACKGROUND
++  string: "The color behind everything when no art or towers are drawn."
++- label: HINT_COLORS_PLASMA
++  string: "The color the old OPL plasma background blends toward (the <OPL> theme)."
++- label: HINT_COLORS_RESET
++  string: "Puts the six colors above back to the theme's own."
++- label: HINT_COVERFLOW_COUNT
++  string: "How many covers RIPFLOW shows on each side of the chosen one."
++- label: HINT_COVERFLOW_SCALE
++  string: "How big RIPFLOW draws the chosen cover against the others."
++- label: HINT_COVERFLOW_ANIM
++  string: "How fast the covers glide when you move along the flow."
++- label: HINT_NARGS_QB
++  string: "Quick Boot: skips Neutrino's own start-up screen. On here, it is sent for every game; off, RIPPS2 still sends it on its own for USB, iLink and network games, where it is needed."
++- label: HINT_NARGS_DBC
++  string: "Debug Colors: Neutrino fills the screen with a color at each loading step, so a photo shows where a game stops."
++- label: HINT_NARGS_LOGO
++  string: "Shows the PS2 logo before the game (a second IOP reboot, which some iLink drives need). Off here, RIPPS2 follows Game Launching > PS2 Logo, and never sends it for MMCE or network games."
++- label: HINT_NARGS_CWD
++  string: "The folder the game sees as its own. Empty: Neutrino's default."
++- label: HINT_NARGS_CFG
++  string: "A Neutrino config file of your own (-cfg). Empty: Neutrino's."
++- label: HINT_NARGS_ELF
++  string: "Starts this ELF instead of the boot file the disc names. Empty: the game's own."
++- label: HINT_NARGS_ATA0
++  string: "An HDD image Neutrino mounts as the console's internal HDD, for games that use the HDD (-ata0)."
++- label: HINT_NARGS_ATA0ID
++  string: "The ID file that goes with that HDD image (-ata0id)."
++- label: HINT_NARGS_ATA1
++  string: "A second HDD image (-ata1)."
++- label: RIPPS2_LAST_USED
++  string: Last Used
++- label: RIPPS2_PAGE_BUTTONS
++  string: Page Buttons
++- label: HINT_RIPPS2_PAGE_BUTTONS
++  string: "Which shoulder buttons turn the game list's pages. L2 / R2: they turn the pages and L1 / R1 switch categories. L1 / R1: they turn the pages and L2 / R2 switch categories. Theme: the theme decides; without one, L2 goes to the top and R2 to the end. L2 + R2 together always picks a random game."
+ - label: RIPPS2_IGR_MENU
+   string: In-Game Menu
+ - label: HINT_RIPPS2_IGR_MENU
+@@ -1432,19 +1476,19 @@ gui_strings:
+ - label: RIPPS2_GLYPHS
+   string: D-pad Glyphs
+ - label: HINT_RIPPS2_GLYPHS
+-  string: "D-pad glyphs beside drive and formation names. Fade In shows them when you switch; Fade Out shows them as a page opens."
++  string: "D-pad glyphs beside drive and formation names. Fade In shows them when you switch; Fade Out shows them as a page opens. Theme: the theme decides."
+ - label: RIPPS2_COLOR_THEME
+   string: Color Theme
+ - label: HINT_RIPPS2_COLOR_THEME
+-  string: "One color for the towers, orbs, glass, CD player and file browser, on all three tabs."
++  string: "One color for the towers, orbs, glass, CD player and file browser, on all three tabs. Theme: the theme decides (RIPPS2 blue where it does not)."
+ - label: RIPPS2_HINTS
+   string: Button Hints
+ - label: HINT_RIPPS2_HINTS
+-  string: "The button hints along the bottom. Fade When Idle hides them until you press a button."
++  string: "The button hints along the bottom. Fade When Idle hides them until you press a button. Theme: the theme decides."
+ - label: RIPPS2_CATEGORY_BAR
+   string: Category Bar
+ - label: HINT_RIPPS2_CATEGORY_BAR
+-  string: "LAUNCH DISC, STORAGE and MEMORY FILES along the top. Fade When Idle hides them until you press a button."
++  string: "LAUNCH DISC, STORAGE and MEMORY FILES along the top. Fade When Idle hides them until you press a button. Theme: the theme decides."
+ - label: RIPPS2_SOURCE_NAME
+   string: Source Name
+ - label: RIPPS2_STATUS
+@@ -1452,7 +1496,7 @@ gui_strings:
+ - label: RIPPS2_SOURCE
+   string: Source
+ - label: HINT_RIPPS2_SOURCE_NAME
+-  string: "The source's name over the games (ALL GAMES, HDD GAMES and so on). Fade When Idle fades it with the category bar; Pop In shows it big in the middle of the page instead, the way L3 names the list, on the first list after boot and whenever the source changes, then fades. Themes can make Pop In their Shown."
++  string: "The source's name over the games (ALL GAMES, HDD GAMES and so on). Fade When Idle fades it with the category bar; Pop In shows it big in the middle of the page instead, the way L3 names the list, on the first list after boot and whenever the source changes, then fades. Themes can make Pop In their Shown. Theme: the theme decides."
+ - label: RIPPS2_RECENTS
+   string: Show Recents
+ - label: HINT_RIPPS2_RECENTS
+@@ -1460,7 +1504,7 @@ gui_strings:
+ - label: RIPPS2_CATEGORY_ORDER
+   string: Category Order
+ - label: HINT_RIPPS2_CATEGORY_ORDER
+-  string: "Memory Files first and Launch Disc last. Made for RIPFLOW (Interface > Theme)."
++  string: "Memory Files first and Launch Disc last. Made for RIPFLOW (Interface > Theme). Theme: the theme decides."
+ - label: RIPPS2_MUSIC
+   string: Music
+ - label: HINT_RIPPS2_MUSIC
+@@ -1528,7 +1572,7 @@ gui_strings:
+ - label: NEUTRINO_ARGS_CONFIRM
+   string: "Neutrino will start with these arguments. Launch?"
+ - label: HINT_NARGS_EXTRA
+-  string: "Other Neutrino flags, separated by spaces. A flag with its own row above (such as -logo) moves into that row when saved, and is still sent."
++  string: "Other Neutrino flags, separated by spaces, sent after everything above. RIPPS2 always adds -bsd and -dvd for the game's drive and ISO, -mc0 and -mc1 for its VMCs, -gsm for its video mode, and a game's own compatibility modes. A flag with its own row above (such as -logo) moves into that row when saved, and is still sent."
+ - label: HINT_RIPPS2_THEME
+   string: "The look of every page. On the game list, hold SELECT for 4.2 seconds to switch to the next theme; a quick press of SELECT still refreshes the list."
+ - label: GAME_TYPE_LABELS
+diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
+index 8109223..720f286 100644
+--- a/misc/theme_ripgrid.cfg
++++ b/misc/theme_ripgrid.cfg
+@@ -2,6 +2,8 @@
+ # images in place of the folder's (the screenshots go without the pack's SCR43 frame). The launch disc
+ # pops in as a game starts; RIPFLOW's spins.
+ launch_disc=pop
++# RIPPS2 build 96: L2 / R2 turn the grid's pages (Controller Settings > Page Buttons can change it)
++page_buttons=l2r2
+ # Theme Name: RIPgrid
+ # Made by: akilluminati47 (Adapt RiptOPL, 8/27/2026), RIPPS2 edition (build 83)
+ # [case.png] [case_overlay.png] RiptOPL's built-in case (b2); [SCR43.png] Adapt's screenshot frame at 4:3
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index dd18a96..5114977 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -30,6 +30,7 @@
+ #include <fileXio_rpc.h> // fileXioIoctl, fileXioDevctl
+ #include <delaythread.h>
+ #include <sys/stat.h> // mkdir() -- create the config folder before a BDM save probe
++#include "include/ripps2.h" // RIPPS2 build 96: gRipps2StartLast, gRipps2LastDevice
+ 
+ static int iUSBModLoaded = 0;
+ static int iLinkModLoaded = 0;
+@@ -1373,6 +1374,9 @@ int bdmEffectiveStartMode(void)
+ {
+     if (gEnableUDPBD && gBDMStartMode != START_MODE_AUTO)
+         return START_MODE_AUTO;
++    // RIPPS2 build 96: Default Menu > Last Used, last on a drive page: the drives start with the boot
++    if (gRipps2StartLast && gBDMStartMode == START_MODE_MANUAL && gRipps2LastDevice >= BDM_MODE && gRipps2LastDevice < ETH_MODE)
++        return START_MODE_AUTO;
+     return gBDMStartMode;
+ }
+ 
+diff --git a/src/dia.c b/src/dia.c
+index e448484..7fae9fb 100644
+--- a/src/dia.c
++++ b/src/dia.c
+@@ -215,7 +215,7 @@ int diaShowKeyb(char *text, int maxLen, int hide_text, const char *title)
+ 
+         // Title
+         if (title != NULL) {
+-            fntRenderString(RIPPS2_UI_FONT, 25, 20, ALIGN_NONE, 0, 0, title, gTheme->textColor);
++            fntRenderString(RIPPS2_DIA_FONT, 25, 20, ALIGN_NONE, 0, 0, title, gTheme->textColor);
+             // separating line
+             rmDrawLine(25, 38, 615, 38, gColWhite);
+         }
+@@ -253,8 +253,8 @@ int diaShowKeyb(char *text, int maxLen, int hide_text, const char *title)
+         rmDrawLine(25, 138, 615, 138, gColWhite);
+ 
+         if (usbTyping) { // RIPPS2: typing on a USB keyboard: the on-screen keys step aside
+-            fntRenderString(RIPPS2_UI_FONT, 320, 200, ALIGN_CENTER, 0, 0, "USB KEYBOARD", gTheme->textColor);
+-            fntRenderString(RIPPS2_UI_FONT, 320, 228, ALIGN_CENTER, 0, 0, "ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.", gTheme->uiTextColor);
++            fntRenderString(RIPPS2_DIA_FONT, 320, 200, ALIGN_CENTER, 0, 0, "USB KEYBOARD", gTheme->textColor);
++            fntRenderString(RIPPS2_DIA_FONT, 320, 228, ALIGN_CENTER, 0, 0, "ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.", gTheme->uiTextColor);
+         } else {
+         for (j = 0; j < KEYB_HEIGHT; j++) {
+             for (i = 0; i < KEYB_WIDTH; i++) {
+@@ -276,7 +276,7 @@ int diaShowKeyb(char *text, int maxLen, int hide_text, const char *title)
+             }
+ 
+             x = 477;
+-            w = fntRenderString(RIPPS2_UI_FONT, x, 170 + 3 * UI_SPACING_H * i, ALIGN_NONE, 0, 0, commands[i], gTheme->uiTextColor) - x;
++            w = fntRenderString(RIPPS2_DIA_FONT, x, 170 + 3 * UI_SPACING_H * i, ALIGN_NONE, 0, 0, commands[i], gTheme->uiTextColor) - x;
+             if (i == selcommand)
+                 diaDrawBoundingBox(x, 170 + 3 * UI_SPACING_H * i, w, UI_SPACING_H, 0);
+         }
+@@ -300,7 +300,7 @@ int diaShowKeyb(char *text, int maxLen, int hide_text, const char *title)
+                 if (l1Tex && l1Tex->Mem)
+                     rmDrawPixmap(l1Tex, hintX, 417, ALIGN_NONE, l1W, 20, SCALING_RATIO, gDefaultCol, 0);
+                 hintX += rmWideScale(l1W) + 8;
+-                hintX = fntRenderString(RIPPS2_UI_FONT, hintX, 417, ALIGN_NONE, avail, 20,
++                hintX = fntRenderString(RIPPS2_DIA_FONT, hintX, 417, ALIGN_NONE, avail, 20,
+                                         _l(_STR_KEYB_MOVE_CURSOR), gTheme->textColor);
+                 hintX += 8;
+                 if (r1Tex && r1Tex->Mem && hintX + rmWideScale(r1W) <= KEYB_HINT_END)
+@@ -308,7 +308,7 @@ int diaShowKeyb(char *text, int maxLen, int hide_text, const char *title)
+             }
+         }
+ 
+-        guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_CANCEL, RIPPS2_UI_FONT, 500, 417, gTheme->textColor);
++        guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_CANCEL, RIPPS2_DIA_FONT, 500, 417, gTheme->textColor);
+ 
+         rmEndFrame();
+ 
+@@ -496,8 +496,8 @@ static int diaShowNumPad(char *text, int maxLen, int minv, int maxv)
+ 
+         // The entry so far, with the accepted range beside it. An octet and a port look identical
+         // on screen otherwise, and guessing which one you are in is how you end up with 255 ports.
+-        fntRenderString(RIPPS2_UI_FONT, 50, 120, ALIGN_NONE, 0, 0, text, gTheme->textColor);
+-        fntRenderString(RIPPS2_UI_FONT, 400, 120, ALIGN_NONE, 0, 0, range, gTheme->uiTextColor);
++        fntRenderString(RIPPS2_DIA_FONT, 50, 120, ALIGN_NONE, 0, 0, text, gTheme->textColor);
++        fntRenderString(RIPPS2_DIA_FONT, 400, 120, ALIGN_NONE, 0, 0, range, gTheme->uiTextColor);
+         rmDrawLine(25, 138, 615, 138, gColWhite);
+ 
+         for (j = 0; j < NUMPAD_HEIGHT; j++) {
+@@ -510,15 +510,15 @@ static int diaShowNumPad(char *text, int maxLen, int minv, int maxv)
+                     col = gTheme->textColor;
+ 
+                 x = 270 + i * 40;
+-                w = fntRenderString(RIPPS2_UI_FONT, x, 170 + 3 * UI_SPACING_H * j, ALIGN_NONE, 0, 0, c, col) - x;
++                w = fntRenderString(RIPPS2_DIA_FONT, x, 170 + 3 * UI_SPACING_H * j, ALIGN_NONE, 0, 0, c, col) - x;
+                 if (idx == sel)
+                     diaDrawBoundingBox(x, 170 + 3 * UI_SPACING_H * j, w, UI_SPACING_H, 0);
+             }
+         }
+ 
+-        guiDrawIconAndText(SQUARE_ICON, _STR_BACKSPACE, RIPPS2_UI_FONT, 50, 417, gTheme->textColor);
+-        guiDrawIconAndText(START_ICON, _STR_ENTER, RIPPS2_UI_FONT, 250, 417, gTheme->textColor);
+-        guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_CANCEL, RIPPS2_UI_FONT, 500, 417, gTheme->textColor);
++        guiDrawIconAndText(SQUARE_ICON, _STR_BACKSPACE, RIPPS2_DIA_FONT, 50, 417, gTheme->textColor);
++        guiDrawIconAndText(START_ICON, _STR_ENTER, RIPPS2_DIA_FONT, 250, 417, gTheme->textColor);
++        guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_CANCEL, RIPPS2_DIA_FONT, 500, 417, gTheme->textColor);
+ 
+         rmEndFrame();
+ 
+@@ -607,7 +607,7 @@ static int diaShowColSel(unsigned char *r, unsigned char *g, unsigned char *b)
+         rmDrawRect(0, 0, screenWidth, screenHeight, gColDarker);
+ 
+         // "Color selection"
+-        fntRenderString(RIPPS2_UI_FONT, 50, 50, ALIGN_NONE, 0, 0, _l(_STR_COLOR_SELECTION), GS_SETREG_RGBA(0x60, 0x60, 0x60, 0x80));
++        fntRenderString(RIPPS2_DIA_FONT, 50, 50, ALIGN_NONE, 0, 0, _l(_STR_COLOR_SELECTION), GS_SETREG_RGBA(0x60, 0x60, 0x60, 0x80));
+ 
+         // 3 bars representing the colors...
+         size_t co;
+@@ -639,8 +639,8 @@ static int diaShowColSel(unsigned char *r, unsigned char *g, unsigned char *b)
+         rmDrawRect(x, y, 70, 70, GS_SETREG_RGBA(0x60, 0x60, 0x60, 0x80));
+         rmDrawRect(x + 5, y + 5, 60, 60, dcol);
+ 
+-        guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, _STR_OK, RIPPS2_UI_FONT, 420, 417, gTheme->textColor);
+-        guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_CANCEL, RIPPS2_UI_FONT, 500, 417, gTheme->textColor);
++        guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, _STR_OK, RIPPS2_DIA_FONT, 420, 417, gTheme->textColor);
++        guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_CANCEL, RIPPS2_DIA_FONT, 500, 417, gTheme->textColor);
+ 
+         rmEndFrame();
+ 
+@@ -731,7 +731,7 @@ static int diaShouldBreakLineAfter(struct UIItem *ui)
+ #define DIA_TIP_IN_S   0.35f
+ #define DIA_TIP_HOLD_S 4.2f
+ #define DIA_TIP_OUT_S  0.35f
+-#define DIA_TIP_FONT   RIPPS2_CASE_FONT
++#define DIA_TIP_FONT   (gTheme->diaTipFont) // build 96: Roboto Condensed on every theme
+ 
+ static float diaTipEase(float x)
+ {
+@@ -857,7 +857,7 @@ static int diaItemHeight(struct UIItem *item, int spacingH)
+ // The fit itself (scroll the selected value, "..." for the rest) is fntRenderStringFit, shared with theme text.
+ static int diaRenderValue(int x, int y, const char *text, u64 color, int selected)
+ {
+-    return fntRenderStringFit(RIPPS2_UI_FONT, x, y, ALIGN_NONE, screenWidth - DIA_VALUE_MARGIN - x, text, color, selected);
++    return fntRenderStringFit(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, screenWidth - DIA_VALUE_MARGIN - x, text, color, selected);
+ }
+ 
+ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int haveFocus, int spacingH, int *w, int *h)
+@@ -889,9 +889,9 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+             // width is text length in pixels...
+             const char *txt = diaGetLocalisedText(item->label.text, item->label.stringId);
+             if (txt && strlen(txt))
+-                *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, txt, txtcol) - x;
++                *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, txt, txtcol) - x;
+             else
+-                *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, _l(_STR_NOT_SET), txtcol) - x;
++                *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, _l(_STR_NOT_SET), txtcol) - x;
+ 
+             break;
+         }
+@@ -927,7 +927,7 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+ 
+         case UI_OK: {
+             const char *txt = _l(_STR_OK);
+-            *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, txt, txtcol) - x;
++            *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, txt, txtcol) - x;
+             break;
+         }
+ 
+@@ -935,7 +935,7 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+             char tmp[10];
+ 
+             snprintf(tmp, sizeof(tmp), "%d", item->intvalue.current);
+-            *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, tmp, txtcol) - x;
++            *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, tmp, txtcol) - x;
+             break;
+         }
+ 
+@@ -945,9 +945,9 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+             else if (item->showDefaultWhenEmpty)
+                 // Field has a built-in fallback when blank -- show a dim "Default" so it reads as
+                 // intentional, not unset. The stored value stays empty, so the fallback still fires.
+-                *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, _l(_STR_DEFAULT), GS_SETREG_RGBA(0x60, 0x60, 0x60, 0x80)) - x;
++                *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, _l(_STR_DEFAULT), GS_SETREG_RGBA(0x60, 0x60, 0x60, 0x80)) - x;
+             else
+-                *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, _l(_STR_NOT_SET), txtcol) - x;
++                *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, _l(_STR_NOT_SET), txtcol) - x;
+             break;
+         }
+ 
+@@ -962,15 +962,15 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+                     stars[i] = '*';
+ 
+                 stars[i] = '\0';
+-                *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, stars, txtcol) - x;
++                *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, stars, txtcol) - x;
+             } else
+-                *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, _l(_STR_NOT_SET), txtcol) - x;
++                *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, _l(_STR_NOT_SET), txtcol) - x;
+             break;
+         }
+ 
+         case UI_BOOL: {
+             const char *txtval = _l((item->intvalue.current) ? _STR_ON : _STR_OFF);
+-            *w = fntRenderString(RIPPS2_UI_FONT, x, y, ALIGN_NONE, 0, 0, txtval, txtcol) - x;
++            *w = fntRenderString(RIPPS2_DIA_FONT, x, y, ALIGN_NONE, 0, 0, txtval, txtcol) - x;
+             break;
+         }
+ 
+@@ -1039,6 +1039,45 @@ static struct UIItem *diaGetFirstControl(struct UIItem *ui);
+ 
+ static int diaScrollOffset = 0;
+ 
++// RIPPS2 build 96: backing out of a submenu lands on the row that opened it. A page's button leaves the dialog,
++// its caller opens the submenu (a dialog of its own) and then shows the page again with no focus asked for:
++// the page remembers the button here, one entry per page, so the submenu in between does not wipe it.
++#define DIA_RETURN_SLOTS 8
++static struct UIItem *diaReturnUi[DIA_RETURN_SLOTS];
++static int diaReturnId[DIA_RETURN_SLOTS];
++
++static int diaReturnSlot(struct UIItem *ui)
++{
++    int i;
++    for (i = 0; i < DIA_RETURN_SLOTS; i++)
++        if (diaReturnUi[i] == ui)
++            return i;
++    return -1;
++}
++
++static void diaReturnForget(struct UIItem *ui)
++{
++    int i = diaReturnSlot(ui);
++    if (i >= 0)
++        diaReturnUi[i] = NULL;
++}
++
++static void diaReturnRemember(struct UIItem *ui, int id)
++{
++    int i = diaReturnSlot(ui);
++    if (i < 0) { // a free slot, else the oldest one goes
++        for (i = 0; i < DIA_RETURN_SLOTS && diaReturnUi[i] != NULL; i++)
++            ;
++        if (i == DIA_RETURN_SLOTS) {
++            memmove(&diaReturnUi[0], &diaReturnUi[1], sizeof(diaReturnUi[0]) * (DIA_RETURN_SLOTS - 1));
++            memmove(&diaReturnId[0], &diaReturnId[1], sizeof(diaReturnId[0]) * (DIA_RETURN_SLOTS - 1));
++            i = DIA_RETURN_SLOTS - 1;
++        }
++    }
++    diaReturnUi[i] = ui;
++    diaReturnId[i] = id;
++}
++
+ // RIPPS2 build 89: the right stick slides a long page on its own ("peek"), with no cursor sound, and leaves the
+ // cursor where it is; the D-pad (or the first confirm) brings the view back to the cursor. A scroll bar on the
+ // right shows how much page there is and where the view is.
+@@ -1298,7 +1337,7 @@ void diaRenderUI(struct UIItem *ui, short inMenu, struct UIItem *cur, int haveFo
+             if (l1Tex && l1Tex->Mem)
+                 rmDrawPixmap(l1Tex, pageX, uiY + 10, ALIGN_VCENTER, l1W, 20, SCALING_RATIO, gDefaultCol, 0);
+             pageX += rmWideScale(l1W) + 8;
+-            pageX = fntRenderString(RIPPS2_UI_FONT, pageX, uiY + 10, ALIGN_VCENTER, 0, 0, diaSettingsIndicator, gTheme->textColor);
++            pageX = fntRenderString(RIPPS2_DIA_FONT, pageX, uiY + 10, ALIGN_VCENTER, 0, 0, diaSettingsIndicator, gTheme->textColor);
+             pageX += 8;
+             if (r1Tex && r1Tex->Mem)
+                 rmDrawPixmap(r1Tex, pageX, uiY + 10, ALIGN_VCENTER, r1W, 20, SCALING_RATIO, gDefaultCol, 0);
+@@ -1631,6 +1670,12 @@ int diaExecuteDialog(struct UIItem *ui, int uiId, short inMenu, int (*updater)(i
+     rmGetScreenExtents(&screenWidth, &screenHeight);
+ 
+     struct UIItem *cur = NULL;
++    {
++        int slot = diaReturnSlot(ui); // build 96: back on the button that opened something
++        if (uiId == -1 && slot >= 0)
++            uiId = diaReturnId[slot];
++        diaReturnForget(ui);
++    }
+     if (uiId != -1)
+         cur = diaFindByID(ui, uiId);
+ 
+@@ -1772,6 +1817,7 @@ int diaExecuteDialog(struct UIItem *ui, int uiId, short inMenu, int (*updater)(i
+ 
+                 if (cur->type == UI_BUTTON) {
+                     diaRestoreScrollSpeed();
++                    diaReturnRemember(ui, cur->id); // build 96
+                     return cur->id;
+                 }
+ 
+diff --git a/src/dialogs.c b/src/dialogs.c
+index 69b0113..61e7273 100644
+--- a/src/dialogs.c
++++ b/src/dialogs.c
+@@ -912,35 +912,35 @@ struct UIItem diaColorsConfig[] = {
+ 
+     {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_TXTCOLOR}}},
+     {UI_SPACER},
+-    {UI_COLOUR, UICFG_TXTCOL, 1, 1, -1, -10, 17, {.colourvalue = {0, 0}}},
++    {UI_COLOUR, UICFG_TXTCOL, 1, 1, _STR_HINT_COLORS_TEXT, -10, 17, {.colourvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_SELCOLOR}}},
+     {UI_SPACER},
+-    {UI_COLOUR, UICFG_SELCOL, 1, 1, -1, -10, 17, {.colourvalue = {0, 0}}},
++    {UI_COLOUR, UICFG_SELCOL, 1, 1, _STR_HINT_COLORS_SELECTED, -10, 17, {.colourvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_UICOLOR}}},
+     {UI_SPACER},
+-    {UI_COLOUR, UICFG_UICOL, 1, 1, -1, -10, 17, {.colourvalue = {0, 0}}},
++    {UI_COLOUR, UICFG_UICOL, 1, 1, _STR_HINT_COLORS_DIALOG, -10, 17, {.colourvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_TITLECOLOR}}},
+     {UI_SPACER},
+-    {UI_COLOUR, UICFG_TITLECOL, 1, 1, -1, -10, 17, {.colourvalue = {0, 0}}},
++    {UI_COLOUR, UICFG_TITLECOL, 1, 1, _STR_HINT_COLORS_TITLE, -10, 17, {.colourvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_BGCOLOR}}},
+     {UI_SPACER},
+-    {UI_COLOUR, UICFG_BGCOL, 1, 1, -1, -10, 17, {.colourvalue = {0, 0}}},
++    {UI_COLOUR, UICFG_BGCOL, 1, 1, _STR_HINT_COLORS_BACKGROUND, -10, 17, {.colourvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_PLASCOLOR}}},
+     {UI_SPACER},
+-    {UI_COLOUR, UICFG_PLASCOL, 1, 1, -1, -10, 17, {.colourvalue = {0, 0}}},
++    {UI_COLOUR, UICFG_PLASCOL, 1, 1, _STR_HINT_COLORS_PLASMA, -10, 17, {.colourvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    {UI_BUTTON, UICFG_RESETCOL, 1, 1, -1, 0, 0, {.label = {NULL, _STR_RESETCOLOR}}},
++    {UI_BUTTON, UICFG_RESETCOL, 1, 1, _STR_HINT_COLORS_RESET, 0, 0, {.label = {NULL, _STR_RESETCOLOR}}},
+     {UI_BREAK},
+ 
+     // buttons
+@@ -1901,6 +1901,12 @@ struct UIItem diaControllerConfig[] = {
+     {UI_SPACER},
+     {UI_BOOL, CFG_RUMBLE, 1, 1, _STR_HINT_RUMBLE, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
++
++    // build 96: which shoulder buttons turn the game list's pages
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_PAGE_BUTTONS}}},
++    {UI_SPACER},
++    {UI_ENUM, CFG_RIPPS2_PAGE_BUTTONS, 1, 1, _STR_HINT_RIPPS2_PAGE_BUTTONS, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
+     {UI_BUTTON, RIPPS2_HINTS_BUTTON, 1, 1, _STR_HINT_RIPPS2_HINTS_GLYPHS, 0, 0, {.label = {NULL, _STR_RIPPS2_HINTS_GLYPHS}}}, // build 90
+     {UI_BREAK},
+ #ifdef PADEMU
+@@ -2004,17 +2010,17 @@ struct UIItem diaCoverflowConfig[] = {
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COVERFLOW_COUNT}}},
+     {UI_SPACER},
+-    {UI_ENUM, COVERFLOW_CFG_COUNT, 1, 1, -1, 0, 0, {.intvalue = {0, 0}}},
++    {UI_ENUM, COVERFLOW_CFG_COUNT, 1, 1, _STR_HINT_COVERFLOW_COUNT, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COVERFLOW_SCALE}}},
+     {UI_SPACER},
+-    {UI_ENUM, COVERFLOW_CFG_SCALE, 1, 1, -1, 0, 0, {.intvalue = {0, 0}}},
++    {UI_ENUM, COVERFLOW_CFG_SCALE, 1, 1, _STR_HINT_COVERFLOW_SCALE, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COVERFLOW_ANIM}}},
+     {UI_SPACER},
+-    {UI_ENUM, COVERFLOW_CFG_ANIM, 1, 1, -1, 0, 0, {.intvalue = {0, 0}}},
++    {UI_ENUM, COVERFLOW_CFG_ANIM, 1, 1, _STR_HINT_COVERFLOW_ANIM, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COVERFLOW_DIM}}},
+@@ -2045,47 +2051,47 @@ struct UIItem diaNeutrinoArgs[] = {
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_QB}}},
+     {UI_SPACER},
+-    {UI_BOOL, NARGS_QB, 1, 1, -1, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BOOL, NARGS_QB, 1, 1, _STR_HINT_NARGS_QB, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_DBC}}},
+     {UI_SPACER},
+-    {UI_BOOL, NARGS_DBC, 1, 1, -1, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BOOL, NARGS_DBC, 1, 1, _STR_HINT_NARGS_DBC, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_LOGO}}},
+     {UI_SPACER},
+-    {UI_BOOL, NARGS_LOGO, 1, 1, -1, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BOOL, NARGS_LOGO, 1, 1, _STR_HINT_NARGS_LOGO, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_CWD}}},
+     {UI_SPACER},
+-    {UI_STRING, NARGS_CWD, 1, 1, -1, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsCwdHandler}}},
++    {UI_STRING, NARGS_CWD, 1, 1, _STR_HINT_NARGS_CWD, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsCwdHandler}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_CFG}}},
+     {UI_SPACER},
+-    {UI_STRING, NARGS_CFG, 1, 1, -1, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsCfgHandler}}},
++    {UI_STRING, NARGS_CFG, 1, 1, _STR_HINT_NARGS_CFG, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsCfgHandler}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_ELF}}},
+     {UI_SPACER},
+-    {UI_STRING, NARGS_ELF, 1, 1, -1, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsElfHandler}}},
++    {UI_STRING, NARGS_ELF, 1, 1, _STR_HINT_NARGS_ELF, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsElfHandler}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_ATA0}}},
+     {UI_SPACER},
+-    {UI_STRING, NARGS_ATA0, 1, 1, -1, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsAta0Handler}}},
++    {UI_STRING, NARGS_ATA0, 1, 1, _STR_HINT_NARGS_ATA0, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsAta0Handler}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_ATA0ID}}},
+     {UI_SPACER},
+-    {UI_STRING, NARGS_ATA0ID, 1, 1, -1, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsAta0idHandler}}},
++    {UI_STRING, NARGS_ATA0ID, 1, 1, _STR_HINT_NARGS_ATA0ID, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsAta0idHandler}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_ATA1}}},
+     {UI_SPACER},
+-    {UI_STRING, NARGS_ATA1, 1, 1, -1, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsAta1Handler}}},
++    {UI_STRING, NARGS_ATA1, 1, 1, _STR_HINT_NARGS_ATA1, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsAta1Handler}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_EXTRA}}},
+diff --git a/src/gui.c b/src/gui.c
+index 76a22fb..7155f12 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -561,6 +561,8 @@ static int guiUpdater(int modified)
+     return 0;
+ }
+ 
++#define RIPPS2_DEFDEVICE_LAST 7 // build 96: Default Menu's Last Used (after Favourites)
++
+ int guiDeviceTypeToIoMode(int deviceType)
+ {
+     // Translates an index into deviceNames into an IO mode index used internally.
+@@ -881,7 +883,7 @@ static int guiDeviceConfigUpdater(int modified)
+ 
+ void guiShowDeviceConfig(void)
+ {
+-    const char *deviceNames[] = {_l(_STR_RIPPS2_ALL_GAMES), _l(_STR_BDM_GAMES), _l(_STR_MMCE), _l(_STR_HDD_GAMES), _l(_STR_NET_GAMES), _l(_STR_APPS), _l(_STR_FAV), NULL};
++    const char *deviceNames[] = {_l(_STR_RIPPS2_ALL_GAMES), _l(_STR_BDM_GAMES), _l(_STR_MMCE), _l(_STR_HDD_GAMES), _l(_STR_NET_GAMES), _l(_STR_APPS), _l(_STR_FAV), _l(_STR_RIPPS2_LAST_USED), NULL};
+     const char *deviceModes[] = {_l(_STR_OFF), _l(_STR_MANUAL), _l(_STR_AUTO), NULL};
+     static const char *hddOplHomes[] = {"__common/OPL/", "+OPL/", NULL};
+ 
+@@ -892,7 +894,7 @@ void guiShowDeviceConfig(void)
+     diaSetEnum(diaDeviceConfig, CFG_APPMODE, deviceModes);
+     diaSetEnum(diaDeviceConfig, CFG_FAVMODE, deviceModes);
+ 
+-    int deviceModeIndex = guiIoModeToDeviceType(gDefaultDevice);
++    int deviceModeIndex = gRipps2StartLast ? RIPPS2_DEFDEVICE_LAST : guiIoModeToDeviceType(gDefaultDevice); // build 96
+     diaSetInt(diaDeviceConfig, CFG_DEFDEVICE, deviceModeIndex);
+     diaSetInt(diaDeviceConfig, CFG_BDMMODE, gBDMStartMode);
+     diaSetInt(diaDeviceConfig, CFG_HDDMODE, gHDDStartMode);
+@@ -926,7 +928,9 @@ reshow_device:
+     }
+     if (ret) {
+         diaGetInt(diaDeviceConfig, CFG_DEFDEVICE, &deviceModeIndex);
+-        gDefaultDevice = guiDeviceTypeToIoMode(deviceModeIndex);
++        gRipps2StartLast = deviceModeIndex == RIPPS2_DEFDEVICE_LAST; // build 96: Last Used keeps the old Default Menu under it
++        if (!gRipps2StartLast)
++            gDefaultDevice = guiDeviceTypeToIoMode(deviceModeIndex);
+         diaGetInt(diaDeviceConfig, CFG_BDMMODE, &gBDMStartMode);
+         diaGetInt(diaDeviceConfig, CFG_HDDMODE, &gHDDStartMode);
+         diaGetInt(diaDeviceConfig, CFG_APPMODE, &gAPPStartMode);
+@@ -2382,31 +2386,44 @@ void guiShowArtworkConfig(void)
+ // RIPPS2 build 70: Interface > Colors and More opens with RIPPS2's own look (it was the RIPPSettings
+ // page under Controller Settings): the D-pad glyphs, the Color Theme, the hints, the category bar and
+ // its order. Each row shows live behind the page as it changes; Cancel puts back what was there.
+-static const char *guiRipps2GlyphNames[] = {"Hidden", "Shown", "Fade In", "Fade Out", NULL};
+-static const char *guiRipps2ShowNames[] = {"Shown", "Fade When Idle", "Hidden", NULL};
+-static const char *guiRipps2SrcNames[] = {"Shown", "Fade When Idle", "Hidden", "Pop In", NULL}; // build 80
+-static const char *guiRipps2OrderNames[] = {"Launch Disc First", "Memory Files First", NULL};
+-static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1];
++// build 96: every row starts with Theme, the theme's own choice (RIPPS2's default where it has none)
++static const char *guiRipps2GlyphNames[] = {"Theme", "Hidden", "Shown", "Fade In", "Fade Out", NULL};
++static const char *guiRipps2ShowNames[] = {"Theme", "Shown", "Fade When Idle", "Hidden", NULL};
++static const char *guiRipps2SrcNames[] = {"Theme", "Shown", "Fade When Idle", "Hidden", "Pop In", NULL}; // build 80
++static const char *guiRipps2OrderNames[] = {"Theme", "Launch Disc First", "Memory Files First", NULL};
++static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 2];
+ 
+-// build 81: a row the user moves off what it showed (a theme's default included) becomes theirs for good
+-static void guiRipps2Take(int id, int bit, int count, int *setting)
++// build 81: a row the user picks a value on becomes theirs; build 96: picking Theme (0) gives it back to the
++// theme, the setting back on its own default so the theme's value shows (ripps2ui.c themeDefault)
++static void guiRipps2Take(int id, int bit, int count, int *setting, int def)
+ {
+     int v;
+-    if (diaGetInt(diaColorsConfig, id, &v) && v >= 0 && v < count && v != ripps2ColorsShown(bit)) {
+-        *setting = v;
++    if (!diaGetInt(diaColorsConfig, id, &v) || v < 0 || v > count)
++        return;
++    if (v == 0) {
++        gRipps2UserSet &= ~bit;
++        *setting = def;
++    } else {
++        *setting = v - 1;
+         gRipps2UserSet |= bit;
+     }
+ }
+ 
++// what a row shows: Theme while the theme decides it, else the user's value (one past Theme)
++static int guiRipps2Shown(int bit, int setting, int def)
++{
++    return (gRipps2UserSet & bit) || setting != def ? setting + 1 : 0;
++}
++
+ static void guiRipps2SettingsRead(void)
+ {
+     int v;
+-    guiRipps2Take(UICFG_RIPPS2_GLYPHS, RIPPS2_SET_GLYPHS, RIPPS2_GLYPHS_COUNT, &gRipps2Glyphs);
+-    guiRipps2Take(UICFG_RIPPS2_PALETTE, RIPPS2_SET_PALETTE, RIPPS2_PALETTE_COUNT, &gRipps2Palette);
+-    guiRipps2Take(UICFG_RIPPS2_HINTS, RIPPS2_SET_HINTS, RIPPS2_SHOW_COUNT, &gRipps2Hints);
+-    guiRipps2Take(UICFG_RIPPS2_CATBAR, RIPPS2_SET_CATBAR, RIPPS2_SHOW_COUNT, &gRipps2CatBar);
+-    guiRipps2Take(UICFG_RIPPS2_CATSWAP, RIPPS2_SET_CATSWAP, 2, &gRipps2CatSwap);
+-    guiRipps2Take(UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName);
++    guiRipps2Take(UICFG_RIPPS2_GLYPHS, RIPPS2_SET_GLYPHS, RIPPS2_GLYPHS_COUNT, &gRipps2Glyphs, RIPPS2_GLYPHS_HIDDEN);
++    guiRipps2Take(UICFG_RIPPS2_PALETTE, RIPPS2_SET_PALETTE, RIPPS2_PALETTE_COUNT, &gRipps2Palette, 0);
++    guiRipps2Take(UICFG_RIPPS2_HINTS, RIPPS2_SET_HINTS, RIPPS2_SHOW_COUNT, &gRipps2Hints, RIPPS2_SHOW_ON);
++    guiRipps2Take(UICFG_RIPPS2_CATBAR, RIPPS2_SET_CATBAR, RIPPS2_SHOW_COUNT, &gRipps2CatBar, RIPPS2_SHOW_ON);
++    guiRipps2Take(UICFG_RIPPS2_CATSWAP, RIPPS2_SET_CATSWAP, 2, &gRipps2CatSwap, 0);
++    guiRipps2Take(UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
+     if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_RECENTS, &v) && v >= 0 && v <= 9)
+         gRipps2Recents = v;
+     if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_TRANSITION, &v) && v >= 0 && v <= 3)
+@@ -2424,22 +2441,23 @@ static int guiRipps2SettingsUpdater(int modified)
+ static void guiRipps2SettingsSet(void)
+ {
+     int i;
++    guiRipps2PaletteNames[0] = "Theme";
+     for (i = 0; i < RIPPS2_PALETTE_COUNT; i++)
+-        guiRipps2PaletteNames[i] = ripps2PaletteName(i);
+-    guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT] = NULL;
++        guiRipps2PaletteNames[i + 1] = ripps2PaletteName(i);
++    guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1] = NULL;
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_GLYPHS, guiRipps2GlyphNames);
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2PaletteNames);
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_HINTS, guiRipps2ShowNames);
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_CATBAR, guiRipps2ShowNames);
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_CATSWAP, guiRipps2OrderNames);
+     // build 81: each row shows what is in effect, a theme's default included
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_GLYPHS, ripps2ColorsShown(RIPPS2_SET_GLYPHS));
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_PALETTE, ripps2ColorsShown(RIPPS2_SET_PALETTE));
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_HINTS, ripps2ColorsShown(RIPPS2_SET_HINTS));
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_CATBAR, ripps2ColorsShown(RIPPS2_SET_CATBAR));
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_CATSWAP, ripps2ColorsShown(RIPPS2_SET_CATSWAP));
++    diaSetInt(diaColorsConfig, UICFG_RIPPS2_GLYPHS, guiRipps2Shown(RIPPS2_SET_GLYPHS, gRipps2Glyphs, RIPPS2_GLYPHS_HIDDEN));
++    diaSetInt(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2Shown(RIPPS2_SET_PALETTE, gRipps2Palette, 0));
++    diaSetInt(diaColorsConfig, UICFG_RIPPS2_HINTS, guiRipps2Shown(RIPPS2_SET_HINTS, gRipps2Hints, RIPPS2_SHOW_ON));
++    diaSetInt(diaColorsConfig, UICFG_RIPPS2_CATBAR, guiRipps2Shown(RIPPS2_SET_CATBAR, gRipps2CatBar, RIPPS2_SHOW_ON));
++    diaSetInt(diaColorsConfig, UICFG_RIPPS2_CATSWAP, guiRipps2Shown(RIPPS2_SET_CATSWAP, gRipps2CatSwap, 0));
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_SRCNAME, guiRipps2SrcNames);
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_SRCNAME, ripps2ColorsShown(RIPPS2_SET_SRCNAME));
++    diaSetInt(diaColorsConfig, UICFG_RIPPS2_SRCNAME, guiRipps2Shown(RIPPS2_SET_SRCNAME, gRipps2SrcName, RIPPS2_SHOW_ON));
+     diaSetInt(diaColorsConfig, UICFG_RIPPS2_RECENTS, gRipps2Recents);
+     static const char *transitions[] = {"Theme", "None", "Fade", "Flash", NULL}; // build 92
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_TRANSITION, transitions);
+@@ -2742,6 +2760,11 @@ int guiShowControllerConfig(void)
+     diaSetInt(diaControllerConfig, CFG_XSENSITIVITY, gXSensitivity);
+     diaSetInt(diaControllerConfig, CFG_YSENSITIVITY, gYSensitivity);
+     diaSetInt(diaControllerConfig, CFG_RUMBLE, gEnableRumble);
++    {
++        static const char *pageNames[] = {"Theme", "L1 / R1", "L2 / R2", NULL}; // build 96
++        diaSetEnum(diaControllerConfig, CFG_RIPPS2_PAGE_BUTTONS, pageNames);
++        diaSetInt(diaControllerConfig, CFG_RIPPS2_PAGE_BUTTONS, gRipps2PageButtons);
++    }
+ 
+     guiSettingsBeginDialog(diaControllerConfig);
+     int result;
+@@ -2752,6 +2775,7 @@ reshow_controller:
+         diaGetInt(diaControllerConfig, CFG_XSENSITIVITY, &gXSensitivity);
+         diaGetInt(diaControllerConfig, CFG_YSENSITIVITY, &gYSensitivity);
+         diaGetInt(diaControllerConfig, CFG_RUMBLE, &gEnableRumble);
++        diaGetInt(diaControllerConfig, CFG_RIPPS2_PAGE_BUTTONS, &gRipps2PageButtons); // build 96
+         if (!gEnableRumble)
+             padRumbleFlush(); // turned off mid-pulse -> do not leave a motor running
+ 
+@@ -3051,7 +3075,7 @@ static int guiSettingsSourcesUpdater(int modified)
+ static int guiSettingsShowSources(void)
+ {
+     const struct UIItem *parts[] = {diaDeviceConfig};
+-    const char *deviceNames[] = {_l(_STR_RIPPS2_ALL_GAMES), _l(_STR_BDM_GAMES), _l(_STR_MMCE), _l(_STR_HDD_GAMES), _l(_STR_NET_GAMES), _l(_STR_APPS), _l(_STR_FAV), NULL};
++    const char *deviceNames[] = {_l(_STR_RIPPS2_ALL_GAMES), _l(_STR_BDM_GAMES), _l(_STR_MMCE), _l(_STR_HDD_GAMES), _l(_STR_NET_GAMES), _l(_STR_APPS), _l(_STR_FAV), _l(_STR_RIPPS2_LAST_USED), NULL};
+     const char *deviceModes[] = {_l(_STR_OFF), _l(_STR_MANUAL), _l(_STR_AUTO), NULL};
+     static const char *hddOplHomes[] = {"__common/OPL/", "+OPL/", NULL};
+     struct UIItem *ui = guiSettingsCompose(parts, 1, NULL, 0, -1, 0);
+@@ -3066,7 +3090,7 @@ static int guiSettingsShowSources(void)
+     diaSetEnum(ui, CFG_HDDMODE, deviceModes);
+     diaSetEnum(ui, CFG_APPMODE, deviceModes);
+     diaSetEnum(ui, CFG_FAVMODE, deviceModes);
+-    deviceModeIndex = guiIoModeToDeviceType(gDefaultDevice);
++    deviceModeIndex = gRipps2StartLast ? RIPPS2_DEFDEVICE_LAST : guiIoModeToDeviceType(gDefaultDevice); // build 96
+     diaSetInt(ui, CFG_DEFDEVICE, deviceModeIndex);
+     diaSetInt(ui, CFG_BDMMODE, gBDMStartMode);
+     diaSetInt(ui, CFG_HDDMODE, gHDDStartMode);
+@@ -3101,7 +3125,9 @@ reshow_sources:
+ 
+     if (result != UIID_BTN_CANCEL && result != -1 && !guiSettingsLeftUntouched(ui, result, NULL, NULL)) {
+         diaGetInt(ui, CFG_DEFDEVICE, &deviceModeIndex);
+-        gDefaultDevice = guiDeviceTypeToIoMode(deviceModeIndex);
++        gRipps2StartLast = deviceModeIndex == RIPPS2_DEFDEVICE_LAST; // build 96
++        if (!gRipps2StartLast)
++            gDefaultDevice = guiDeviceTypeToIoMode(deviceModeIndex);
+         diaGetInt(ui, CFG_BDMMODE, &gBDMStartMode);
+         diaGetInt(ui, CFG_HDDMODE, &gHDDStartMode);
+         diaGetInt(ui, CFG_APPMODE, &gAPPStartMode);
+diff --git a/src/menusys.c b/src/menusys.c
+index c2c1538..fc99173 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -1464,6 +1464,13 @@ static void menuPrevPage()
+     }
+ }
+ 
++// RIPPS2 build 96: the IO mode of the page the menu is on (Default Menu > Last Used), -1 when it is not a game page
++int menuCurrentMode(void)
++{
++    item_list_t *support = (selected_item != NULL && selected_item->item != NULL) ? (item_list_t *)selected_item->item->userdata : NULL;
++    return support != NULL ? support->mode : -1;
++}
++
+ void menuSetSelectedItem(menu_item_t *item)
+ {
+     menu_list_t *itm = menu;
+@@ -1974,16 +1981,18 @@ static void menuNavigateDown()
+ static void menuShoulderKeys(int viewPending)
+ {
+     static int shoulderChord = 0; // this L2/R2 hold became a chord
+-    int l2 = getKeyPressed(KEY_L2), r2 = getKeyPressed(KEY_R2);
++    int l2 = getKeyPressed(KEY_L2), r2 = getKeyPressed(KEY_R2), pages = ripps2PageButtons();
+     if (l2 && r2) {
+         if (!shoulderChord && !viewPending && gRipps2Random != RIPPS2_RANDOM_OFF)
+             menuRandomItem(0);
+         shoulderChord = 1;
+     } else {
++        // build 96: Page Buttons. L2 / R2 turn the pages, or (with L1 / R1 on the pages) switch categories;
++        // else, as before, the top and the end of the list
+         if (getKeyOff(KEY_L2) && !shoulderChord)
+-            menuFirstPage();
++            pages == 2 ? menuPrevPage() : pages == 1 ? ripps2StepCategory(-1) : menuFirstPage();
+         if (getKeyOff(KEY_R2) && !shoulderChord)
+-            menuLastPage();
++            pages == 2 ? menuNextPage() : pages == 1 ? ripps2StepCategory(1) : menuLastPage();
+         if (!l2 && !r2)
+             shoulderChord = 0;
+     }
+@@ -2013,9 +2022,15 @@ void menuHandleInputMain()
+     int cf = gTheme->coverflow != NULL;
+     int grid = thmGridColumns() > 0; // build 78: every arrow moves through the grid, and repeats
+     if (getKeyOn(KEY_L1)) {
+-        ripps2StepCategory(-1); // RIPPS2 build 69: L1/R1 switch categories (Launch Disc / Memory Files)
++        if (ripps2PageButtons() == 1)
++            menuPrevPage(); // build 96: Page Buttons L1 / R1
++        else
++            ripps2StepCategory(-1); // RIPPS2 build 69: L1/R1 switch categories (Launch Disc / Memory Files)
+     } else if (getKeyOn(KEY_R1)) {
+-        ripps2StepCategory(1);
++        if (ripps2PageButtons() == 1)
++            menuNextPage();
++        else
++            ripps2StepCategory(1);
+     } else if ((cf || grid) ? getKey(KEY_LEFT) : getKeyOn(KEY_LEFT)) {
+         menuNavigateLeft(); // RIPPS2 build 69: Left/Right switch drives, like the orb formations (FifthFox)
+     } else if ((cf || grid) ? getKey(KEY_RIGHT) : getKeyOn(KEY_RIGHT)) {
+diff --git a/src/opl.c b/src/opl.c
+index 8f3e33c..812614b 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -936,6 +936,9 @@ static int modeStartMode(int mode)
+         startMode = gMMCEStartMode;
+     else if (mode == MIX_MODE)
+         startMode = mixStartMode();
++    // RIPPS2 build 96: Last Used starts the last page's device too, even when it waits for a press
++    if (gRipps2StartLast && startMode == START_MODE_MANUAL && mode == gRipps2LastDevice)
++        startMode = START_MODE_AUTO;
+     return startMode;
+ }
+ 
+@@ -3468,6 +3471,8 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
+             configGetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, &gAutoRefresh);
+             configGetInt(configOPL, CONFIG_OPL_DEFAULT_DEVICE, &gDefaultDevice);
++            configGetInt(configOPL, "ripps2_start_last", &gRipps2StartLast); // RIPPS2 build 96
++            configGetInt(configOPL, "ripps2_page_buttons", &gRipps2PageButtons);
+             if (!configGetInt(configOPL, "ripps2_all_games", &value))
+                 gDefaultDevice = MIX_MODE; // RIPPS2: All Games becomes the start page once, on its first boot
+             configGetInt(configOPL, CONFIG_OPL_ENABLE_WRITE, &gEnableWrite);
+@@ -3525,6 +3530,8 @@ static void _loadConfig()
+             // rather than clamped, so that page opens on its default instead of on a view with no
+             // rows. Reading it before those two would validate against stale settings.
+             libViewLoadFromConfig(configGetByType(CONFIG_LAST));
++            if (!configGetInt(configGetByType(CONFIG_LAST), "ripps2_last_device", &gRipps2LastDevice)) // RIPPS2 build 96
++                gRipps2LastDevice = -1;
+             emberLoadSettings(configOPL);
+             // A boot default-view locked to one type (VCD or ISO) must force the same one-shot
+             // rescan the settings dialog does on a view change (gui.c). Without it, libViewActive()
+@@ -4140,6 +4147,8 @@ static void _saveConfig()
+         configSetInt(configOPL, CONFIG_OPL_AUTO_SORT, gAutosort);
+         configSetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, gAutoRefresh);
+         configSetInt(configOPL, CONFIG_OPL_DEFAULT_DEVICE, gDefaultDevice);
++        configSetInt(configOPL, "ripps2_start_last", gRipps2StartLast); // RIPPS2 build 96
++        configSetInt(configOPL, "ripps2_page_buttons", gRipps2PageButtons);
+         configSetInt(configOPL, "ripps2_all_games", 1); // RIPPS2: the one-time All Games start page is done
+         configSetInt(configOPL, CONFIG_OPL_ENABLE_WRITE, gEnableWrite);
+         configSetInt(configOPL, CONFIG_OPL_HDD_SPINDOWN, gHDDSpindown);
+@@ -4226,8 +4235,15 @@ static void _saveConfig()
+     // already getting -- a game launch, or a settings save (which asks for CONFIG_LAST for exactly
+     // this reason). configSetStr marks the set modified only when the text really changed, so a
+     // session that never touched L3 still leaves the file alone.
+-    if (lscstatus & CONFIG_LAST)
++    if (lscstatus & CONFIG_LAST) {
+         libViewStoreToConfig(configGetByType(CONFIG_LAST));
++        // RIPPS2 build 96: the page shown rides along with the same write (a launch, a settings save)
++        int shownMode = menuCurrentMode();
++        if (shownMode >= 0 && shownMode < MODE_COUNT) {
++            gRipps2LastDevice = shownMode;
++            configSetInt(configGetByType(CONFIG_LAST), "ripps2_last_device", shownMode);
++        }
++    }
+ 
+     if (lscstatus & CONFIG_NETWORK) {
+         config_set_t *configNet = configGetByType(CONFIG_NETWORK);
+@@ -5391,6 +5407,8 @@ static void deferredInit(void)
+     // main screen worth selecting and the start menu stays -- previously ANY unregistered pick
+     // silently parked every boot on the start menu with no explanation.
+     int bootMode = gDefaultDevice;
++    if (gRipps2StartLast && gRipps2LastDevice >= 0 && gRipps2LastDevice < MODE_COUNT && list_support[gRipps2LastDevice].support != NULL)
++        bootMode = gRipps2LastDevice; // RIPPS2 build 96: Last Used
+     // "ETH Games" is the Default Menu entry for the network, whichever protocol the Network page picked.
+     // Only SMB registers ETH_MODE; the other protocols put their games on a different page, so an
+     // unresolved ETH_MODE had no support and every UDPFS/HTTP boot fell through to MMCE/Apps below.
+diff --git a/src/ripps2about.c b/src/ripps2about.c
+index 0884d55..242933b 100644
+--- a/src/ripps2about.c
++++ b/src/ripps2about.c
+@@ -167,9 +167,6 @@ static const ab_row_t abRows[] = {
+     {'H', "NETWORK UPDATE"},
+     {'T', "icyson55"},
+     {'G', NULL},
+-    {'H', "FINANCIAL SUPPORT"},
+-    {'T', "Akilluminati47"},
+-    {'G', NULL},
+     {'H', "BUILD DETAILS"},
+     {'T', abBuild},
+     {'G', NULL},
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index 7720d86..ec9cb0d 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -22,6 +22,7 @@
+ #include <unistd.h>
+ #include <dirent.h>
+ #include <sys/stat.h> // build 85: mkdir for the launch report
++#include <time.h>     // build 96: the scroll's pace
+ 
+ #include "include/opl.h"
+ #include "include/gui.h"
+@@ -296,7 +297,9 @@ static void stInstallEmber(void)
+ void ripps2Status(void)
+ {
+     int openKey = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
+-    int sel, scroll = 0, i, changed = 0;
++    int sel, scroll = 0, i, changed = 0, peek = 0, content = 0;
++    float peekPos = 0.0f;
++    clock_t lastFrame = clock();
+ 
+     stScan();
+     sel = stNextAction(-1, 1);
+@@ -310,9 +313,19 @@ void ripps2Status(void)
+         fntRenderString(RIPPS2_CASE_TITLE_FONT, ST_X, 66, ALIGN_VCENTER, 0, 0, "RIPPS2's homebrew", ST_LIT);
+         rmDrawLine(ST_X, 82, ST_X + ST_W, 82, ST_PRIM(0x4A, 0x72, 0xDC, 0x60));
+ 
+-        // keep the chosen row in the viewport, its section's name with it where it fits
++        // keep the chosen row in the viewport, its section's name with it where it fits; build 96: the right
++        // stick slides the page on its own (peek), and the D-pad brings it back to the chosen row
+         {
+-            int top = 0, y = 0, selTop = 0, selBot = 0, head = 0;
++            int top = 0, y = 0, selTop = 0, selBot = 0, head = 0, sx, sy;
++            float dt = (float)(clock() - lastFrame) / (float)CLOCKS_PER_SEC;
++            lastFrame = clock();
++            padGetRightStick(&sx, &sy);
++            if (sy > 24 || sy < -24) {
++                if (!peek)
++                    peekPos = (float)scroll;
++                peek = 1;
++                peekPos += (float)sy / 127.0f * 420.0f * (dt > 0.1f ? 0.1f : dt);
++            }
+             for (i = 0; i < stCount; i++) {
+                 if (stRows[i].kind == ROW_HEAD)
+                     head = y;
+@@ -322,16 +335,30 @@ void ripps2Status(void)
+                 }
+                 y += stRowH(&stRows[i]);
+             }
+-            if (selBot - scroll > ST_BOTTOM - ST_TOP)
+-                scroll = selBot - (ST_BOTTOM - ST_TOP);
+-            if (selTop < scroll)
+-                scroll = selTop;
++            content = y;
++            if (peek)
++                scroll = (int)peekPos;
++            else {
++                if (selBot - scroll > ST_BOTTOM - ST_TOP)
++                    scroll = selBot - (ST_BOTTOM - ST_TOP);
++                if (selTop < scroll)
++                    scroll = selTop;
++            }
+             if (scroll > y - (ST_BOTTOM - ST_TOP))
+                 scroll = y - (ST_BOTTOM - ST_TOP);
+             if (scroll < 0)
+                 scroll = 0;
++            peekPos = (float)scroll;
+             (void)top;
+         }
++        if (content > ST_BOTTOM - ST_TOP) { // build 96: a scroll bar when the page runs past the screen
++            int vh = ST_BOTTOM - ST_TOP, th = vh * vh / content, ty;
++            if (th < 24)
++                th = 24;
++            ty = ST_TOP + (vh - th) * scroll / (content - vh);
++            rmDrawRect(ST_X + ST_W + 14, ST_TOP, 3, vh, ST_PRIM(0x10, 0x16, 0x2C, 0x50));
++            rmDrawRect(ST_X + ST_W + 14, ty, 3, th, ST_PRIM(0x6A, 0x9A, 0xFF, 0x70));
++        }
+ 
+         int y = ST_TOP - scroll;
+         for (i = 0; i < stCount; i++) {
+@@ -365,6 +392,8 @@ void ripps2Status(void)
+         }
+         rmEndFrame();
+ 
++        if (getKey(KEY_UP) || getKey(KEY_DOWN) || getKey(KEY_LEFT) || getKey(KEY_RIGHT))
++            peek = 0; // build 96: the D-pad brings the view back to the chosen row
+         if (getKeyOn(backKey) || getKeyOn(KEY_TRIANGLE) || getKeyOn(KEY_START)) {
+             sfxPlay(SFX_CANCEL);
+             break;
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 39d330c..8e4127a 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -64,6 +64,16 @@ static const char *formationName[] = {
+ #define FORMATION_COUNT ((int)(sizeof(formationName) / sizeof(formationName[0])))
+ int gRipps2Formation = 0;
+ int gRipps2Random = RIPPS2_RANDOM_ON;
++int gRipps2StartLast = 0;   // build 96: Default Menu > Last Used
++int gRipps2PageButtons = 0; // build 96: Controller Settings > Page Buttons (0 Theme)
++
++int ripps2PageButtons(void)
++{
++    if (gRipps2PageButtons == 1 || gRipps2PageButtons == 2)
++        return gRipps2PageButtons;
++    return gTheme != NULL ? gTheme->pageButtonsDef : 0;
++}
++int gRipps2LastDevice = -1; // build 96: the page the last session was on (CONFIG_LAST ripps2_last_device)
+ int gRipps2IgrMenu = 0; // build 87: In-Game Menu (General); off until consoles have shown it safe (PCSX2 cannot run it)
+ int gRipps2OrbOff = 0, gRipps2OrbCycle = 0, gRipps2OrbSpeed = 1, gRipps2OrbPaths = 0, gRipps2OrbHeight = 0;
+ 
+@@ -1532,7 +1542,10 @@ void ripps2DrawFrost(GSTEXTURE *frost, int x, int y, int w, int h, int crop, int
+     float vs = crop ? 0.75f : 1.0f, vo = crop ? 0.125f * FROST_H : 0.0f;
+     float u0 = (float)x * FROST_W / 640.0f, v0 = vo + (float)y * FROST_H * vs / 480.0f;
+     float u1 = (float)(x + w) * FROST_W / 640.0f, v1 = vo + (float)(y + h) * FROST_H * vs / 480.0f;
+-    rmDrawPixmapPart(frost, x, y, ALIGN_NONE, w, h, SCALING_NONE, alpha >= 0x80 ? gDefaultCol : GS_SETREG_RGBA(0x80, 0x80, 0x80, alpha), u0, v0, u1, v1);
++    u64 mod = alpha >= 0x80 ? gDefaultCol : GS_SETREG_RGBA(0x80, 0x80, 0x80, alpha);
++    if (gRipps2PaletteShown != 0) // build 96: a Color Theme other than RIPPS2 blue shades the frost (RIPgrid's whole screen)
++        mod = GS_SETREG_RGBA(0x6C, 0x74, 0x8C, alpha > 0x80 ? 0x80 : alpha);
++    rmDrawPixmapPart(frost, x, y, ALIGN_NONE, w, h, SCALING_NONE, mod, u0, v0, u1, v1);
+ }
+ 
+ // build 79: a theme's clear glass -- one constant tint (a theme's tint=, tint_color=) over the frost,
+diff --git a/src/themes.c b/src/themes.c
+index 1a7380d..d46665d 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -4763,6 +4763,17 @@ static void thmLoadFonts(config_set_t *themeConfig, const char *themePath, theme
+         if (fntHandle != FNT_ERROR)
+             theme->fonts[14] = fntHandle;
+     }
++
++    // RIPPS2 build 96: the settings pages read in Adapt's plain faces on every theme, not each theme's styled
++    // menu fonts: Roboto Bold Condensed for the rows, Roboto Condensed for the tooltips (RIPFLOW's, built in).
++    // Loaded once for the whole run, never per theme: a theme switch holds two themes' fonts at once
++    static int diaFont = FNT_ERROR, diaTipFont = FNT_ERROR;
++    if (diaFont == FNT_ERROR)
++        diaFont = fntLoadFile("builtin:ripflowbold", 19);
++    if (diaTipFont == FNT_ERROR)
++        diaTipFont = fntLoadFile("builtin:ripflow", 16);
++    theme->diaFont = diaFont != FNT_ERROR ? diaFont : theme->fonts[4];
++    theme->diaTipFont = diaTipFont != FNT_ERROR ? diaTipFont : theme->fonts[15];
+ }
+ 
+ // Bound the MMCE-art drain before a theme swap. On timeout the current theme
+@@ -5185,6 +5196,11 @@ static int thmLoad(const char *themePath)
+         if (configGetInt(themeConfig, "hints_spacing", &intValue) && intValue >= 12 && intValue <= 96)
+             newT->hintsSpacing = intValue;
+         newT->glyphSetDef = configGetStr(themeConfig, "glyph_set", &v) ? ripps2GlyphSetParse(v) : RIPPS2_GLYPHSET_THEME;
++        // build 96: page_buttons=l2r2 turns the game list's pages on L2 / R2, l1r1 on L1 / R1 (Controller Settings >
++        // Page Buttons overrides it)
++        newT->pageButtonsDef = 0;
++        if (configGetStr(themeConfig, "page_buttons", &v) && v != NULL)
++            newT->pageButtonsDef = !strcasecmp(v, "l2r2") ? 2 : !strcasecmp(v, "l1r1") ? 1 : 0;
+         // build 91: launch_disc=pop|spin, the disc that comes in as a game launches (off unless a theme or
+         // Flow and Grid > Launch Disc asks for it)
+         if (configGetStr(themeConfig, "launch_disc", &v) && v != NULL)
