@@ -242,12 +242,12 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [x] PR #869 (PS1 disc IDs for VCD and Ember): port once it is merged and validated upstream.
       Merged upstream 10-08; ported (retrogem.c whole, three hunks by hand): POPSTARTER and Ember flash the
       disc's own GameID, and the menu no longer flashes a PS1 row's file or folder name as one.
-- [ ] Release, Test me post, and a Short (the build 94 Short is folded into this one).
+- [x] Release, Test me post, and a Short (the build 94 Short is folded into this one).
       Released 10-12: v0.0.99-alpha (pre-release, the ELF of 561ca2b, md5 95b7689b) and RIPPS2-themes v99 (latest:
       Adapt and Adapt Rx with the glossary). CHANGELOG has builds 96 to 99; tester notes in tools/discord/notes/
       build99.md, banner made. Short made (59.5 s on Slideshow: B:/.torrents/.montages/OpenMontage/projects/
-      ripps2-build99-short, renders/ripps2-b99-short.mp4 + YOUTUBE.md). Waiting: the Test me post (the webhook comes
-      from the user at run time) and the Short's YouTube link for the README.
+      ripps2-build99-short, renders/ripps2-b99-short.mp4 + YOUTUBE.md). Test me posted 10-12 (message
+      1559237125671751770, the ELF attached). Waiting: the Short's YouTube link for the README.
 
 ## Build 100: media
 - [ ] MP3 in Memory Files, and a Coverflow-style music player: albums from the tags, their cover art, play and
