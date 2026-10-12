@@ -1,0 +1,484 @@
+diff --git a/include/sound.h b/include/sound.h
+index 61ac524..1b27ec1 100644
+--- a/include/sound.h
++++ b/include/sound.h
+@@ -69,6 +69,7 @@ void bgmStop(void);
+ // exit path. See the comment on the definition -- this is rebuild-163's fix minus its freeze.
+ void bgmQuiesce(void);
+ int isBgmPlaying(void);
++int bgmHoldsPath(const char *path); // RIPPS2 build 98: the music streams from this file, or from inside this folder
+ // Discretionary storage users (art, cosmetic metadata) should not START a new read while the
+ // decoded BGM reserve is below its low-water mark. Always true when BGM is off/not yet primed.
+ int bgmDiscretionaryIoAllowed(void);
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index f4fad92..a1fbb6a 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -38,6 +38,7 @@
+ #include <delaythread.h>
+ #define NEWLIB_PORT_AWARE
+ #include <fileXio_rpc.h> // fileXioDevctl: the MMCE ping (START DRIVES)
++#include <libmc.h>      // build 98: mcGetInfo, a card slot's own answer
+ 
+ #include "include/opl.h"
+ #include "include/gui.h"
+@@ -123,17 +124,53 @@ static volatile int fbDoneItems = 0, fbTotalItems = 0, fbFailed = 0, fbSkipped =
+ static volatile int fbDoneFiles = 0, fbTotalFiles = 0, fbOkDirs = 0;
+ static int fbTreeFiles = 0; // counted by fbTreeSize as it walks
+ static const char *fbOpLabel = "";
+-static char fbFailWhat[40]; // the first thing that failed in this operation, e.g. "REMOVE icon.sys"
+-
++static char fbFailWhat[56]; // the first thing that failed in this operation, e.g. "IN USE: REMOVE FILE bgm_03.ogg"
++
++// build 98: why, in words, where the code says something a user can act on
++static const char *fbErrWord(int err)
++{
++    switch (err) {
++        case EBUSY:
++            return "IN USE";
++        case ENOSPC:
++            return "FULL";
++        case ENOTEMPTY:
++            return "NOT EMPTY";
++        case EACCES:
++        case EPERM:
++            return "PROTECTED";
++        case EROFS:
++            return "READ ONLY";
++        case ENOENT:
++            return "NOT FOUND";
++        case EEXIST:
++            return "ALREADY THERE";
++        case ENXIO:
++        case ENODEV:
++            return "NOT CONNECTED";
++        case EIO:
++            return "READ OR WRITE ERROR";
++        case ENAMETOOLONG:
++            return "NAME TOO LONG";
++    }
++    return NULL;
++}
++
++// The reason first (a long name is what gets cut), then what was being done to what: "IN USE: REMOVE FILE x".
++// A code with no word keeps its number, never E0: the callers put the call's own return in errno.
+ static void fbNoteFail(const char *verb, const char *path)
+ {
+     int err = errno;
++    char why[16];
++    const char *word = fbErrWord(err);
+     if (fbFailWhat[0])
+         return;
+     const char *name = strrchr(path, '/');
+     if (name == NULL)
+         name = strrchr(path, ':');
+-    snprintf(fbFailWhat, sizeof(fbFailWhat), "%s %s E%d", verb, name && name[1] ? name + 1 : path, err);
++    if (word == NULL)
++        snprintf(why, sizeof(why), "E%d", err);
++    snprintf(fbFailWhat, sizeof(fbFailWhat), "%s: %s %s", word != NULL ? word : why, verb, name && name[1] ? name + 1 : path);
+ }
+ static int fbOp = 0; // what the worker runs next
+ enum { FB_OP_SCAN = 0, FB_OP_PASTE, FB_OP_DELETE, FB_OP_UNPACK };
+@@ -150,7 +187,7 @@ static int fbMenuOpen = 0, fbMenuSel = 0, fbMenuItems[FB_ACT_COUNT], fbMenuCount
+ static const char *fbDevices[] = {"mc0:/", "mc1:/", "mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/",
+                                   "mass7:/", "mmce0:/", "mmce1:/", "pfs0:/", NULL};
+ 
+-static char fbToastDetail[40];
++static char fbToastDetail[56];
+ 
+ static void fbSetToast(const char *text)
+ {
+@@ -330,6 +367,50 @@ static int fbCompare(const void *a, const void *b)
+     return strcasecmp(x->name, y->name);
+ }
+ 
++// build 98: what is in a memory card slot: sceMcTypePS2, PS1 or PDA, or 0 for nothing, through mcman's own info
++// call. The first one after a card is detected answers "changed card" (-1, or -2 unformatted), and that call is
++// what clears the state: START DRIVES' MMCE ping left a card in it, its opendir() failed once, and the slot fell
++// off the list. Up to three asks. freeKb (may be NULL): its free space when it is a formatted PS2 card, else -1.
++static int fbCardType(int port, int *freeKb)
++{
++    int tries, type, freeC, format, res;
++
++    for (tries = 0; tries < 3; tries++) {
++        type = freeC = format = 0;
++        res = -10;
++        mcGetInfo(port, 0, &type, &freeC, &format);
++        mcSync(0, NULL, &res);
++        if (res >= -2) {
++            if (freeKb != NULL)
++                *freeKb = res >= -1 && type == sceMcTypePS2 && format == MC_FORMATTED ? freeC : -1;
++            return type;
++        }
++        DelayThread(50 * 1000);
++    }
++    if (freeKb != NULL)
++        *freeKb = -1;
++    return 0;
++}
++
++// A card slot belongs on the drive list while a card is in it. Its root is read a few times (a card can still
++// refuse the first read); a PS2 card stays listed even then, so the slot is never lost, and a PS1 card or a
++// PDA only when its root reads.
++static int fbCardListed(const char *dev)
++{
++    int type = fbCardType(dev[2] - '0', NULL), tries;
++    DIR *d = NULL;
++
++    if (type == 0)
++        return 0;
++    for (tries = 0; tries < 4 && (d = opendir(dev)) == NULL; tries++)
++        DelayThread(50 * 1000);
++    if (d != NULL) {
++        closedir(d);
++        return 1;
++    }
++    return type == sceMcTypePS2;
++}
++
+ // The drive list is kept between visits: probing cards and slots that are not there takes seconds, and
+ // coming back up to the list should be instant. It is probed again on entering the browser, after
+ // START DRIVES, and on Select.
+@@ -374,10 +455,15 @@ static void fbScanDevices(void)
+             continue;
+         if (!strncmp(dev, "pfs", 3) && hddGetObject(1) == NULL && !fbDrivesUp)
+             continue;
+-        DIR *d = opendir(dev);
+-        if (d == NULL)
+-            continue;
+-        closedir(d);
++        if (fbIsMc(dev)) { // build 98: a card slot asks mcman first, and is read more than once
++            if (!fbCardListed(dev))
++                continue;
++        } else {
++            DIR *d = opendir(dev);
++            if (d == NULL)
++                continue;
++            closedir(d);
++        }
+         fb_entry_t *e = &fbList[n++];
+         memset(e, 0, sizeof(*e));
+         snprintf(e->name, sizeof(e->name), "%s", fbDevices[i]);
+@@ -617,10 +703,19 @@ static int fbCopyFile(const char *src, const char *dst)
+         return 0;
+     }
+     while ((r = read(in, fbBuf, FB_BUF_SIZE)) > 0) {
+-        int w = write(out, fbBuf, r);
+-        if (w != r) {
++        // build 98: a write may take part of the block; the rest goes again. One that takes nothing means the
++        // drive is full (a memory card answers that way: it was E999).
++        int off = 0, w = 0;
++        while (off < r) {
++            errno = 0;
++            w = write(out, fbBuf + off, r - off);
++            if (w <= 0)
++                break;
++            off += w;
++        }
++        if (off < r) {
+             if (errno == 0)
+-                errno = w < 0 ? -w : 999;
++                errno = w < 0 ? -w : ENOSPC;
+             fbNoteFail("WRITE", dst);
+             ok = 0;
+             break;
+@@ -669,15 +764,23 @@ static int fbCopyTree(const char *src, const char *dst, int isDir, int depth)
+     return ok;
+ }
+ 
+-// A removal, retried briefly: a memory card can refuse one straight after the same files were read
++static int fbExists(const char *path);
++
++// A removal, retried briefly: a memory card can refuse one straight after the same files were read. Build 98:
++// done means gone (looked for again after the call says so), and a failure keeps the call's own code (a remove
++// that set no errno showed E0).
+ static int fbRemoveRetry(const char *path, int isDir)
+ {
+-    int tries;
++    int tries, r = 0, err = 0;
+     for (tries = 0; tries < 4; tries++) {
+-        if ((isDir ? rmdir(path) : remove(path)) == 0)
++        errno = 0;
++        r = isDir ? rmdir(path) : remove(path);
++        if (r == 0 && !fbExists(path))
+             return 1;
++        err = r == 0 ? EIO : errno != 0 ? errno : r < 0 ? -r : EIO;
+         DelayThread(100 * 1000);
+     }
++    errno = err;
+     fbNoteFail(isDir ? "REMOVE FOLDER" : "REMOVE FILE", path);
+     return 0;
+ }
+@@ -794,6 +897,22 @@ static void fbPasteWork(void)
+             fbTotalBytes += fbTreeSize(src, fbClipIsDir[i], 0);
+         }
+     fbTotalFiles = fbTreeFiles; // build 91: every file it will copy, the folders' included
++    // build 98: onto a memory card, the room first. Every file takes whole 1 KB clusters and a place in its folder,
++    // every folder two more; a paste that cannot fit says so now instead of failing partway (E999).
++    if (fbIsMc(fbPath) && !fromVmc && !toVmc && fbPasteMode == FB_PASTE_PLAIN) {
++        int freeKb = -1, dirs = 0;
++        for (i = 0; i < fbClipCount; i++)
++            dirs += fbClipIsDir[i] ? 1 : 0;
++        fbCardType(fbPath[2] - '0', &freeKb);
++        u32 needKb = fbTotalBytes / 1024 + fbTotalFiles + (fbTotalFiles + 1) / 2 + 2 * dirs + 1;
++        if (freeKb >= 0 && needKb > (u32)freeKb) {
++            snprintf(fbFailWhat, sizeof(fbFailWhat), "CARD FULL: NEEDS %u KB, %d KB FREE", (unsigned)needKb, freeKb);
++            fbFailed = fbDoneItems = fbClipCount;
++            free(fbBuf);
++            fbBuf = NULL;
++            return;
++        }
++    }
+     for (i = 0; i < fbClipCount; i++) {
+         snprintf(src, sizeof(src), "%s%s", fbClipDir, fbClip[i]);
+         r = fbSavePaste(i, src, fromVmc, srcSave, toVmc, toSave);
+@@ -946,6 +1065,26 @@ static void fbWorker(void)
+     fbBusy = 0;
+ }
+ 
++// build 98: the music streams from a file; a drive will not remove or rename it while it is open (E16). Before
++// an operation touches one, the music stops; it starts again when the operation is done.
++static int fbMusicPaused = 0;
++
++static void fbReleaseMusic(const char *dir, char (*names)[FB_NAME], int n)
++{
++    char path[320];
++    int i;
++    if (!isBgmPlaying())
++        return;
++    for (i = 0; i < n; i++) {
++        fbJoin(path, sizeof(path), dir, names[i]);
++        if (bgmHoldsPath(path)) {
++            bgmStop();
++            fbMusicPaused = 1;
++            return;
++        }
++    }
++}
++
+ static void fbRun(int op, const char *label)
+ {
+     if (fbBusy)
+@@ -1182,7 +1321,6 @@ static void fbEdit(const char *name)
+ //   shares slot 2 and the controllers' bus. MX4SIO also stays out while a memory card is in slot 2.
+ static void fbStartDrivesWork(void)
+ {
+-    DIR *d;
+     int r __attribute__((unused)); // build 76: read only by LOG, which a release build compiles out
+     // the BDM core with each transport (bdmEnsureTypedSource), as a typed custom path brings one up
+     r = bdmEnsureTypedSource(BDM_TYPE_USB, 2500);
+@@ -1193,8 +1331,7 @@ static void fbStartDrivesWork(void)
+     }
+     if (!gEnableMX4SIO)
+         ;
+-    else if ((d = opendir("mc1:/")) != NULL) {
+-        closedir(d);
++    else if (fbCardType(1, NULL) != 0) { // build 98: by mcman's answer, any card (its root may not read yet)
+         LOG("START DRIVES: a memory card is in slot 2, MX4SIO left out\n");
+     } else {
+         r = bdmEnsureTypedSource(BDM_TYPE_SDC, 2500);
+@@ -1216,6 +1353,10 @@ static void fbStartDrivesWork(void)
+     fbMmceSlot[0] = fileXioDevctl("mmce0:/", 0x1, NULL, 0, NULL, 0) != -1;
+     fbMmceSlot[1] = fileXioDevctl("mmce1:/", 0x1, NULL, 0, NULL, 0) != -1;
+     LOG("START DRIVES: MMCE slot 1 %d, slot 2 %d\n", fbMmceSlot[0], fbMmceSlot[1]);
++    // build 98: a plain card answers the ping by timing out, and its next access says "changed card": ask it now
++    // so the drive list finds both slots as they were
++    fbCardType(0, NULL);
++    fbCardType(1, NULL);
+     DelayThread(1000 * 1000); // a USB stick enumerates a moment after its driver: let it, before the list is read
+     fbDrivesUp = 1;
+     fbDrivesDone = 1;
+@@ -1384,6 +1525,8 @@ static void fbAction(int act)
+             sfxPlay(SFX_CONFIRM);
+             fbPasteMode = act == FB_ACT_PASTE_PSU ? FB_PASTE_PSU : act == FB_ACT_UNPACK ? FB_PASTE_UNPACK : FB_PASTE_PLAIN;
+             fbTotalItems = fbClipCount;
++            if (fbClipCut)
++                fbReleaseMusic(fbClipDir, fbClip, fbClipCount); // build 98: a move removes the original
+             fbRun(FB_OP_PASTE, fbPasteMode == FB_PASTE_PSU ? "EXPORTING" : fbPasteMode == FB_PASTE_UNPACK ? "UNPACKING" : fbClipCut ? "MOVING" : "PASTING");
+             break;
+         case FB_ACT_DELETE:
+@@ -1396,6 +1539,7 @@ static void fbAction(int act)
+                 fbDeleteCount = n;
+                 fbTotalItems = n;
+                 fbClearMarks();
++                fbReleaseMusic(fbPath, fbDeleteNames, n); // build 98
+                 fbRun(FB_OP_DELETE, "DELETING");
+             }
+             break;
+@@ -1404,6 +1548,10 @@ static void fbAction(int act)
+             if (guiShowKeyboard(name, sizeof(name)) && name[0] && strcmp(name, fbList[fbCursor].name) != 0) {
+                 fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
+                 fbJoin(to, sizeof(to), fbPath, name);
++                if (isBgmPlaying() && bgmHoldsPath(from)) { // build 98: an open file will not rename
++                    bgmStop();
++                    fbMusicPaused = 1;
++                }
+                 fbSetToast(rename(from, to) == 0 ? "RENAMED" : "RENAME FAILED");
+                 snprintf(fbKeepName, sizeof(fbKeepName), "%s", name);
+                 fbRun(FB_OP_SCAN, "READING");
+@@ -2045,6 +2193,11 @@ void ripps2RenderFiles(void)
+     }
+     if (!fbBusy)
+         fbRestoreCursor();
++    if (!fbBusy && fbMusicPaused) { // build 98: the operation that needed the music's file is done
++        fbMusicPaused = 0;
++        if (gEnableBGM && !isBgmPlaying())
++            bgmStart();
++    }
+ 
+     // the path, and the clipboard / what just happened
+     fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : "MEMORY FILES", FB_LIT);
+diff --git a/src/sound.c b/src/sound.c
+index aea69e4..cd417cb 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -17,6 +17,7 @@
+ #include <unistd.h>
+ #include <sys/stat.h>
+ #include <string.h>
++#include <ctype.h> // build 98: bgmHoldsPath
+ #include <iopheap.h> // build 95: SifAllocIopHeap, the room check before audsrv takes a sound
+ 
+ #include "include/sound.h"
+@@ -403,9 +404,10 @@ static clock_t bootSoundEnds = 0; // when the boot sound has played out
+ int sfxInit(int bootSnd)
+ {
+     char sound_path[256];
++    char audio_path[256];
+     char full_path[256];
+     int ret, loaded;
+-    int thmSfxEnabled = 0;
++    int themeSfx = 0, audioSfx = 0; // build 98: both are looked in, per event
+     int i;
+ 
+     if (!audio_initialized) {
+@@ -420,28 +422,32 @@ int sfxInit(int bootSnd)
+     sfxInitDefaults();
+     audioSetVolume();
+ 
++    // Build 98: per event, the disk theme's own sound first, then the AUDIO folder's (the user's rips). Up to
++    // build 97 a disk theme with a sound folder played only its own and one without played nothing: Adapt
++    // ships six of the fifteen, so a ripped launch, disc or save sound went silent on it.
+     int themeID = thmGetGuiValue();
+     char *thmPath = thmGetFilePath(themeID);
+     if (thmPath != NULL) { // a disk theme's own sound folder
+         snprintf(sound_path, sizeof(sound_path), "%ssound", thmPath);
+         DIR *dir = opendir(sound_path);
+         if (dir != NULL) {
+-            thmSfxEnabled = 1;
++            themeSfx = 1;
+             closedir(dir);
+         }
+-    } else if (ripps2AudioBase(sound_path, sizeof(sound_path) - 6, 0)) { // build 74: beside RIPPS2, or on a drive
+-        // RIPPS2: the AUDIO folder (<event>.adp, RiptOPL's names and RIPPS2's) for the built-in themes; a
+-        // SOUND folder (builds 61 to 65) still counts
+-        size_t base = strlen(sound_path);
+-        strcat(sound_path, "AUDIO");
+-        DIR *dir = opendir(sound_path);
++    }
++    if (ripps2AudioBase(audio_path, sizeof(audio_path) - 6, 0)) { // build 74: beside RIPPS2, or on a drive
++        // RIPPS2: the AUDIO folder (<event>.adp, RiptOPL's names and RIPPS2's); a SOUND folder (builds 61 to 65)
++        // still counts
++        size_t base = strlen(audio_path);
++        strcat(audio_path, "AUDIO");
++        DIR *dir = opendir(audio_path);
+         if (dir == NULL) {
+-            sound_path[base] = '\0';
+-            strcat(sound_path, "SOUND");
+-            dir = opendir(sound_path);
++            audio_path[base] = '\0';
++            strcat(audio_path, "SOUND");
++            dir = opendir(audio_path);
+         }
+         if (dir != NULL) {
+-            thmSfxEnabled = 1;
++            audioSfx = 1;
+             closedir(dir);
+         }
+     }
+@@ -450,13 +456,21 @@ int sfxInit(int bootSnd)
+     memset(sfxReady, 0, sizeof(sfxReady));
+     memset(sfxSkipped, 0, sizeof(sfxSkipped));
+     for (i = bootSnd ? 0 : 1; i < SFX_COUNT; i++) {
+-        if (thmSfxEnabled) {
++        full_path[0] = '\0';
++        if (themeSfx) {
+             snprintf(full_path, sizeof(full_path), "%s/%s", sound_path, sfx_files[i].name);
+             ret = sfxRead(full_path, &sfx_files[i]);
+             if (ret != 0 && ret != -ENOENT)
+                 sfxSkipped[i] = 1;
+-        } else
+-            snprintf(full_path, sizeof(full_path), "baked/%s", sfx_files[i].name);
++        }
++        if (sfx_files[i].buffer == NULL && audioSfx) { // build 98: the AUDIO folder's, when the theme has none
++            snprintf(full_path, sizeof(full_path), "%s/%s", audio_path, sfx_files[i].name);
++            ret = sfxRead(full_path, &sfx_files[i]);
++            if (ret == 0)
++                sfxSkipped[i] = 0;
++            else if (ret != -ENOENT)
++                sfxSkipped[i] = 1;
++        }
+ 
+         if (sfx_files[i].buffer == NULL)
+             continue; // an event with no file of its own plays its fallback, or nothing
+@@ -1469,6 +1483,36 @@ static ov_callbacks bgmSourceCallbacks = {
+     bgmSourceTell,
+ };
+ 
++// RIPPS2 build 98: the file the music streams from ("" when none). A drive refuses to remove an open file
++// (Memory Files showed E16 deleting a track in AUDIO), so the browser asks first and lets the music go.
++static char bgmOpenPath[256];
++
++// Is the music streaming from path, a file, or from inside it, a folder? "pfs0:AUDIO/x" and "pfs0:/AUDIO/x"
++// are the same place, and case is not looked at.
++int bgmHoldsPath(const char *path)
++{
++    const char *a = bgmOpenPath, *b = path;
++
++    if (!bgmOpenPath[0] || path == NULL || !path[0])
++        return 0;
++    while (*a && *a != ':' && *b && tolower((unsigned char)*a) == tolower((unsigned char)*b))
++        a++, b++;
++    if (*a != ':' || *b != ':')
++        return 0;
++    for (a++, b++; *a == '/'; a++)
++        ;
++    while (*b == '/')
++        b++;
++    size_t n = strlen(b);
++    while (n > 0 && b[n - 1] == '/')
++        n--; // a folder given with its slash
++    if (n == 0)
++        return 1; // the drive's root
++    if (strncasecmp(a, b, n) != 0)
++        return 0;
++    return a[n] == '\0' || a[n] == '/';
++}
++
+ static int bgmTryLoadPath(const char *bgmPath, const char *source)
+ {
+     bgm_source_t *src;
+@@ -1497,6 +1541,7 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
+ 
+     if (ov_open_callbacks(src, vorbisFile, NULL, 0, bgmSourceCallbacks) == 0) {
+         LOG("BGM: Loaded %s BGM %s (%ld bytes)\n", source, bgmPath, src->size);
++        snprintf(bgmOpenPath, sizeof(bgmOpenPath), "%s", bgmPath);
+         return 1;
+     }
+ 
+@@ -1644,6 +1689,7 @@ static int bgmLoad(void)
+             if (wavOpen(bgmPath)) { // the vorbis state is not needed for it
+                 free(vorbisFile);
+                 vorbisFile = NULL;
++                snprintf(bgmOpenPath, sizeof(bgmOpenPath), "%s", bgmPath);
+                 return 0;
+             }
+         } else if (bgmTryLoadPath(bgmPath, "RIPPS2 music"))
+@@ -1752,6 +1798,7 @@ static void bgmDeinit(void)
+         vorbisFile = NULL;
+     }
+     wavClose(); // RIPPS2
++    bgmOpenPath[0] = '\0'; // build 98: closed
+     bgmPcmRead = NULL;
+     bgmPcmEnded = 0;
+ }
