@@ -29,7 +29,8 @@ if sd.count('fbCardType(') < 3:
     fail.append('after the MMCE ping both slots must be asked again')
 
 # --- delete: the call's own code, gone checked, the music let go
-rr = fb[fb.index('static int fbRemoveRetry('):]
+rr = fb.replace('\r\n', '\n')
+rr = rr[rr.index('static int fbRemoveRetry(const char *path, int isDir)\n{'):]
 rr = rr[:rr.index('\n}\n')]
 if 'r == 0 && !fbExists(path)' not in rr or 'errno = err;' not in rr:
     fail.append('a removal must be checked gone and keep its own error code')
