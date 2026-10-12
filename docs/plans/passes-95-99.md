@@ -62,11 +62,23 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       showed a few games over empty rows (it looked as if games were missing). A list page is always full now.
 
 ## Build 98: Memory Files
-- [ ] **A memory card slot disappears after START DRIVES** in Memory Files: both cards must stay reachable.
-- [ ] **Deleting can fail and must never corrupt**: error 16 deleting `bgm_03` from the HDD's AUDIO folder, e0
+- [x] **A memory card slot disappears after START DRIVES** in Memory Files: both cards must stay reachable.
+      A slot is asked through mcGetInfo (it clears the "changed card" the MMCE ping leaves) and read more than
+      once; MX4SIO stays out while any card is in slot 2. (PCSX2 has no MMCE or MX4SIO: hardware confirms.)
+- [x] **Deleting can fail and must never corrupt**: error 16 deleting `bgm_03` from the HDD's AUDIO folder, e0
       deleting the file itself. Stop the music (or anything else) holding a file before it goes, retry, and
-      say plainly what could not be removed.
-- [ ] **Copying an ELF from USB to the memory card gave e999**: find what that code is and make the copy work.
+      say plainly what could not be removed. E16 was the music's open file; E0 a remove whose code never
+      reached errno. Now: the music lets go and comes back, a removal is checked gone, reasons in words.
+- [x] **Copying an ELF from USB to the memory card gave e999**: find what that code is and make the copy work.
+      999 was RIPPS2's own stand-in for a short write: the card was full. Short writes finish, and a paste
+      that cannot fit says CARD FULL with the KB it needs before it writes anything.
+- [x] Sounds per event: a disk theme's own first, then the AUDIO folder's (Adapt ships 6 of 15, so ripped
+      launch, disc and save sounds were silent on it).
+- [ ] **Stability while art loads** (user, 10-11): pressing anything while the list and the info page are still
+      loading art must never crash (the HDD list on the RIPPS2 theme, into the info page, navigating while its
+      images come in). Reproduce in the lab with a button storm, catch any freeze or crash in a save state.
+- [ ] **The game's background art fades in as soon as it is decoded** on the main view: nothing ahead of it
+      delays the fade. (Build 99 may take this further with RiptOPL's art loading round-up.)
 - [ ] Devices show as `mc0:/` and `mc1:/`.
 - [ ] Hold to scroll: after 0.42 s the cursor repeats at the Storage list's scroll speed.
 - [ ] Card manager: hints with glyphs on its Actions modal.
