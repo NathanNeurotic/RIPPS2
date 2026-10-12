@@ -80,7 +80,7 @@ H, R0 = 3.05, 1.0
 BEND_T, BEND_ANG = 0.42, 1.45
 BEND_Y = BEND_T * H
 BEND_R = (H - BEND_Y) / BEND_ANG
-SWING = 0.5  # radians the curl swings at full weight
+SWING = 0.75  # radians the curl swings at full weight (a ring you can see from any side)
 
 
 def bend(x, y, z):
@@ -169,7 +169,7 @@ for i in range(BLAT + 1):
              bc[2] + BR * math.sin(phi) * math.sin(2 * math.pi * j / BLON)) for j in range(BLON)]
     pts.append(ring + [ring[0]])
     uvs.append([texel(j / BLON, i / BLAT, BELL) for j in range(BLON + 1)])
-    sw.append([1.15] * (BLON + 1))  # it swings a little past the felt holding it: it rings
+    sw.append([1.3] * (BLON + 1))  # it swings a little past the felt holding it: it rings
 add_grid(pts, uvs, sw)
 
 # the blood pool: an irregular disc under it
