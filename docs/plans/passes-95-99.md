@@ -245,7 +245,9 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] Release, Test me post, and a Short (the build 94 Short is folded into this one).
       Released 10-12: v0.0.99-alpha (pre-release, the ELF of 561ca2b, md5 95b7689b) and RIPPS2-themes v99 (latest:
       Adapt and Adapt Rx with the glossary). CHANGELOG has builds 96 to 99; tester notes in tools/discord/notes/
-      build99.md, banner made. Waiting: the Test me post (the webhook comes from the user at run time), the Short.
+      build99.md, banner made. Short made (59.5 s on Slideshow: B:/.torrents/.montages/OpenMontage/projects/
+      ripps2-build99-short, renders/ripps2-b99-short.mp4 + YOUTUBE.md). Waiting: the Test me post (the webhook comes
+      from the user at run time) and the Short's YouTube link for the README.
 
 ## Build 100: media
 - [ ] MP3 in Memory Files, and a Coverflow-style music player: albums from the tags, their cover art, play and
