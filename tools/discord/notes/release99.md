@@ -4,6 +4,8 @@
 
 **[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/download/v0.0.99-alpha/RIPPS2.elf)**, and the **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** if you like (Adapt and Adapt Rx, each with its full key glossary; RIPGRID and RIPFLOW are built in).
 
+**[Watch the 60-second Short](https://www.youtube.com/shorts/Ov5iA-tMcI8)**: build 99 in under a minute.
+
 ### Music
 - **Half of all music never played.** The PS2's Vorbis library refuses an Ogg stream whose serial number has its top bit set, and encoders pick that number at random. RIPPS2 fixes it as it reads, and RIPPS2 Audio Studio no longer writes such files.
 - **The music no longer waits in line for the drive:** it is read into memory in big pieces (about 16 seconds of music per request instead of a request every few hundred milliseconds), so loading covers cannot starve it. In the lab a pilot tone ran 90 seconds through a button storm without a dropout.
