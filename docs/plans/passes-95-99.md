@@ -174,8 +174,15 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       z toward the viewer, normals, UVs, vertex colours), an MTL and the texture as PNG. Host test checks the OBJ
       against RiptOPL's shipped icons; lab: POPStarter's list.icn ripped from a card, its PNG opens in the
       picture viewer and its MTL in the text editor.
-- [ ] RIPPS2's own save icon: the bloody elf hat ringing its bell, animated, in the PS2 icon format (under the
+- [x] RIPPS2's own save icon: the bloody elf hat ringing its bell, animated, in the PS2 icon format (under the
       icon vertex limit, one texture), on RIPPS2's memory card folder.
+      misc/ripps2.icn from elf/theme/tools/make_hat_icon.py: the logo's blue hat curling to its gold bell,
+      fur brim, blood pool; 514 triangles, three morph shapes ringing the bell four times then resting (1.5 s),
+      one packed texture. ripps2CardFolderIcon writes it with an icon.sys titled RIPPS2 (night-to-blood
+      background) wherever RIPPS2 makes its card folder: the launch report's mc0:/RIPPS2 (it had no icon.sys,
+      so the browser called it corrupted) and the BIBLE copy (was OPL's icon). Host test runs the writer; lab:
+      the writer's own files on a card ring in the 3D viewer. Hardware: look at mc0:/RIPPS2 in the PS2 browser
+      after a launch on 98.
 - [ ] Launch from Memory Files: `.iso` / `.zso` with RIPPS2's loader or Neutrino, `.cue` / `.bin` in an
       `EMBER/games/<folder>` with Ember (`.vcd` with POPSTARTER already works). CHD: neither core reads it.
 
