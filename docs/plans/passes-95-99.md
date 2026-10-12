@@ -207,8 +207,11 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [x] **Grid in widescreen** (FifthFox, 95): moved to build 98 (the Widescreen Grid layout rows).
 - Noted, no change: RIPFLOW puts MEMORY FILES left and LAUNCH DISC right on purpose (category_order, a user
   setting). POPSTARTER from iLink crashes on 95 while Ember works (FifthFox): the POPS item below.
-- [ ] Device names by driver, not slot: `mass0:` on the internal exFAT HDD says HDD, not USB (YOUR ACCOUNT
+- [x] Device names by driver, not slot: `mass0:` on the internal exFAT HDD says HDD, not USB (YOUR ACCOUNT
       said "on USB" in the lab). Same in Memory Files, STATUS, toasts and the launch report.
+      bdmSlotDriveName (USB, HDD, iLINK, MX4SIO, UDPBD by the driver): YOUR ACCOUNT's "on", STATUS's install
+      rows and Neutrino picker, the launch report's drive line; MMCE reads 0 / 1. Memory Files and STATUS DRIVES
+      already went by the driver. Lab: STATUS says HDD POPS / EMBER folder on the reel's exFAT HDD.
 - [ ] Artwork and config keys exactly as RiptOPL: VCD basename, Ember folder name, ELF basename with `.ELF`;
       a PS1 GameID never replaces them. Check RIPPS2's own paths: Grid back covers, All Games, Starred,
       metadata, art fetch, recents.
