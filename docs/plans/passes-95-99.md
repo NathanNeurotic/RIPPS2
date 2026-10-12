@@ -55,6 +55,11 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] Older OPL themes: load a set of classic themes in the lab and fix what draws wrong next to RiptOPL.
 
 ## Build 98: Memory Files
+- [ ] **A memory card slot disappears after START DRIVES** in Memory Files: both cards must stay reachable.
+- [ ] **Deleting can fail and must never corrupt**: error 16 deleting `bgm_03` from the HDD's AUDIO folder, e0
+      deleting the file itself. Stop the music (or anything else) holding a file before it goes, retry, and
+      say plainly what could not be removed.
+- [ ] **Copying an ELF from USB to the memory card gave e999**: find what that code is and make the copy work.
 - [ ] Devices show as `mc0:/` and `mc1:/`.
 - [ ] Hold to scroll: after 0.42 s the cursor repeats at the Storage list's scroll speed.
 - [ ] Card manager: hints with glyphs on its Actions modal.
