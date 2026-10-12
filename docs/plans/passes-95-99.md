@@ -229,10 +229,19 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       in Memory Files' ISO launch only ever holds a PS2 ID. bdmGetGameStartup returns a PS1 row's full name.
 - [ ] POPSTARTER from the APA HDD (logo, then nothing) and from iLink (crashes once the BDM files are there): the
       BDMA driver must follow the transport, not the `massN:` slot.
+      The BDM launcher already equips the BDMA pair by transport (bdmDeviceType: USB asks, MX4SIO, iLink,
+      ATA by type). RiptOPL d8b5016 ported: a slow-spinning iLink drive is polled 3 s after its driver loads.
+      The APA launcher is upstream's but for RIPPS2's bundled-POPSTARTER fallback. Both need the console run
+      on the 99 release (FifthFox's iLink and APA SSD).
 - [ ] iLink PS2 games: Neutrino fails where the OPL core with the right modes and the PS2 logo works.
 - [ ] Handoffs: Ember keeps the mounted device state (Memory Files launches too), Neutrino across devices,
       the MMCE GameID switch.
-- [ ] PR #869 (PS1 disc IDs for VCD and Ember): port once it is merged and validated upstream.
+      Memory Files' Ember launches (ember.elf, or a game folder's CUE/BIN) go the Storage way: sysLaunchEmber
+      keeps the IOP and its drives, itemLaunchCue is the row's own launcher. Neutrino across devices and the
+      MMCE GameID switch: the console run.
+- [x] PR #869 (PS1 disc IDs for VCD and Ember): port once it is merged and validated upstream.
+      Merged upstream 10-08; ported (retrogem.c whole, three hunks by hand): POPSTARTER and Ember flash the
+      disc's own GameID, and the menu no longer flashes a PS1 row's file or folder name as one.
 - [ ] Release, Test me post, and a Short (the build 94 Short is folded into this one).
 
 ## Build 100: media
