@@ -162,7 +162,13 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       slot 2: RiptOPL's and POPStarter's own icons): textured, lit by icon.sys over its background gradient,
       spinning; D-pad or right stick turns, L2 / R2 zoom, Square stops the spin, Triangle resets. The shipped
       icons are one shape each, so the morph path is covered by the host test only.
-- [ ] Text editor input bugs: reproduce first.
+- [x] Text editor input bugs: reproduce first.
+      Not reproduced in the lab on 98: moving, holding, typing, Space / Backspace, Enter, Actions and the close
+      prompt all answer once each. The likeliest cause on hardware was build 97's pad fix (readPads could block
+      in the actuator RPC and drop or delay presses); ask the user to try 98. Fixed on the way, all data losses:
+      lines over 255 characters were cut on load, past 1000 lines the rest was dropped on save, trailing blank
+      lines and a missing last break did not round-trip, a NUL byte cut the file. Host test round-trips each;
+      lab: an edit and its undo left LAUNCH.TXT byte-identical. The tooltip now refreshes after a save.
 - [ ] Rip a save's 3D icon to the PC: the model as OBJ with its texture as PNG, one OBJ per animation shape.
 - [ ] RIPPS2's own save icon: the bloody elf hat ringing its bell, animated, in the PS2 icon format (under the
       icon vertex limit, one texture), on RIPPS2's memory card folder.
