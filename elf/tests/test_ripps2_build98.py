@@ -206,7 +206,7 @@ if 'int wide = rmWideScale(4) == 3;' not in th:
 gc = th.replace('\r\n', '\n')
 gc = gc[gc.index('static void drawGridCover('):]
 gc = gc[:gc.index('\n}\n')]
-if '!gridSerial(src->itemGetStartup(src, it->item.id), serial, sizeof(serial))))\n                return;' not in gc:
+if '!gridRowSerial(src, it->item.id, serial, sizeof(serial)))\n                return;' not in gc:  # build 99: gridRowSerial
     fail.append('with coverless=serial a tile is the game ID or nothing, never its name')
 tc = rd('src/texcache.c')
 if 'static void artPlaceSecond(load_image_request_t *req, int queued)' not in tc or tc.count('isPriority == 2 && !(req->sio2 && gArtNavActive)') != 3 or \
