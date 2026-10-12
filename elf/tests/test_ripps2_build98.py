@@ -98,7 +98,7 @@ int main(void)
 if 'src->fixSerial = 1;' not in snd or 'return bgmFixedRead(src, (unsigned char *)ptr, size * nmemb) / size;' not in snd:
     fail.append('a top-bit serial must be spotted at the open and fixed as it is read')
 if re.search(r'^[^#\n]*bgmOpenTrace', snd[snd.index('static size_t bgmSourceRead('):snd.index('static ov_callbacks bgmSourceCallbacks')], re.M) and \
-        '#ifdef __DEBUG\n        if (bgmOpenTrace)' not in snd.replace('\r\n', '\n'):
+        not re.search(r'#ifdef __DEBUG\n +if \(bgmOpenTrace\)', snd.replace('\r\n', '\n')):  # build 99: one level in
     fail.append('the open trace must stay behind __DEBUG (a host test compiles the reader)')
 
 
@@ -139,7 +139,8 @@ if cc:
 #include <string.h>
 #include <stdlib.h>
 #define BGM_REOPEN_TRIES 4
-typedef struct { FILE *f; long pos; long size; char path[256]; int fixSerial; unsigned char serial[4]; } bgm_source_t;
+typedef struct { FILE *f; long pos; long size; char path[256]; int fixSerial; unsigned char serial[4];
+                 unsigned char *cache; long cacheBase, cacheLen, cacheCap, cacheNext; int noCache; } bgm_source_t; /* build 99: the RAM pieces */
 static int bgmSourceReopen(bgm_source_t *src) { (void)src; return 0; }
 ''' + src + r'''
 int main(int argc, char **argv)

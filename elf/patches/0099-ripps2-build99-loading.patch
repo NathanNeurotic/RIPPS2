@@ -1,0 +1,372 @@
+diff --git a/.github/scripts/test_bgm_source.py b/.github/scripts/test_bgm_source.py
+index 0e532e2..a0524f6 100644
+--- a/.github/scripts/test_bgm_source.py
++++ b/.github/scripts/test_bgm_source.py
+@@ -10,7 +10,9 @@ the empty read for the end of the stream, the rewind failed the same way, and th
+ for good a few seconds into the menu.
+ 
+ src/sound.c feeds vorbisfile through bgmSource* callbacks that keep their own position and reopen
+-the file when a read comes back empty before the end, or a seek fails.
++the file when a read comes back empty before the end. RIPPS2 build 99 reads the file into RAM in big
++pieces (bgmCacheRead: 64 KB growing to 256 KB, a track up to 512 KB whole), so the harness runs twice:
++a 300 KB track held whole and a 1.1 MB one streamed piece by piece.
+ 
+ Part 1 pins the load path to those callbacks. Part 2 compiles bgmSourceReopen, bgmSourceRead,
+ bgmSourceSeek, bgmSourceTell and bgmSourceClose on the host against a model of that firmware and
+@@ -83,7 +85,9 @@ typedef long long ogg_int64_t;
+ 
+ /* ---- sd2psxtd MMCE file service (src/ps2/mmceman/, firmware 1.4.0), reduced to the descriptor ---- */
+ #define CARD_FILES 16
++#ifndef MUSIC_SIZE
+ #define MUSIC_SIZE (300 * 1024 + 123)
++#endif
+ static unsigned char music[MUSIC_SIZE];
+ static int cardOpen[CARD_FILES];
+ static long cardPos[CARD_FILES];
+@@ -217,6 +221,7 @@ static bgm_source_t *openMusic(void)
+ {
+     bgm_source_t *src = malloc(sizeof(*src));
+ 
++    memset(src, 0, sizeof(*src)); /* RIPPS2 build 99: as bgmTryLoadPath leaves it: no piece in RAM yet */
+     memset(cardOpen, 0, sizeof(cardOpen));
+     musicExists = 1;
+     opens = 0;
+@@ -303,6 +308,8 @@ static void seeks(void)
+     printf("%-34s OK\n", "seeks");
+ }
+ 
++/* The card pulled or the file deleted mid-play. What is already in RAM still plays (a track held whole plays on
++   for good); a piece that is not gives up in bounded time and leaves the position where it was. */
+ static void gone(void)
+ {
+     bgm_source_t *src = openMusic();
+@@ -310,16 +317,52 @@ static void gone(void)
+     long before;
+ 
+     r = bgmSourceRead(got, 1, 2048, src);
+-    before = bgmSourceTell(src);
+-    musicExists = 0; /* card pulled, file deleted */
++    musicExists = 0;
+     failedLookup();
+     r = bgmSourceRead(got, 1, 2048, src);
+-    expectThat(r == 0, "gone", "a read of a file that is gone", (long long)r);
++    expectThat(r == 2048 && memcmp(got, music + 2048, 2048) == 0, "gone", "what was in RAM did not play on", (long long)r);
++    expectThat(bgmSourceSeek(src, MUSIC_SIZE - 100, SEEK_SET) == 0, "gone", "a seek within the file", -1);
++    before = bgmSourceTell(src);
++    r = bgmSourceRead(got, 1, 2048, src);
++#if MUSIC_SIZE <= BGM_CACHE_WHOLE
++    (void)before;
++    expectThat(r == 100 && memcmp(got, music + MUSIC_SIZE - 100, 100) == 0, "gone", "a track held whole plays to its end", (long long)r);
++#else
++    expectThat(r == 0, "gone", "a read of a piece that is gone", (long long)r);
+     expectThat(bgmSourceTell(src) == before, "gone", "position after giving up", bgmSourceTell(src));
++#endif
+     expectThat(delayedUs <= 2000000, "gone", "microseconds spent before giving up", delayedUs);
+-    expectThat(bgmSourceSeek(src, 0, SEEK_SET) != 0 && bgmSourceTell(src) == before, "gone", "a failed seek moved the position",
+-               bgmSourceTell(src));
+-    printf("%-34s gave up after %d opens and %lld us: OK\n", "gone", opens, delayedUs);
++    printf("%-34s %d opens, %lld us: OK\n", "gone", opens, delayedUs);
++    bgmSourceClose(src);
++}
++
++/* RIPPS2 build 99: playing straight through, the drive is asked for big pieces, not 2 KB at a time -- through the
++   top-bit-serial reader too (fixed = 1), whose look back over a page header must not shrink the pieces again */
++static void pieces(int fixed)
++{
++    bgm_source_t *src = openMusic();
++    long total = 0;
++    int devReads = 0;
++    size_t r;
++    long lastBase = -1;
++
++    src->fixSerial = fixed; /* the made-up music has no "OggS" page: the reader hands it on unchanged */
++    while ((r = bgmSourceRead(got + total, 1, 2048, src)) > 0) {
++        total += (long)r;
++        if (src->cacheBase != lastBase) {
++            devReads++;
++            lastBase = src->cacheBase;
++        }
++    }
++    expectThat(total == MUSIC_SIZE, "pieces", "bytes delivered", total);
++    expectThat(memcmp(got, music, MUSIC_SIZE) == 0, "pieces", "the music reached the decoder changed or out of order", fixed);
++#if MUSIC_SIZE <= BGM_CACHE_WHOLE
++    expectThat(devReads == 1, "pieces", "a short track is read once, whole", devReads);
++#else
++    expectThat(devReads <= 2 + MUSIC_SIZE / BGM_CACHE_BLOCK, "pieces", "pieces read for a long track", devReads);
++    expectThat(src->cacheNext == BGM_CACHE_BLOCK, "pieces", "the pieces grew to their full size", src->cacheNext);
++#endif
++    printf("%-34s %d pieces for %ld bytes: OK\n", fixed ? "pieces (top-bit serial reader)" : "pieces", devReads, total);
+     bgmSourceClose(src);
+ }
+ 
+@@ -339,6 +382,8 @@ int main(void)
+     wholeFile("lost before every read", 1, 0);
+     seeks();
+     gone();
++    pieces(0);
++    pieces(1);
+     return fails != 0;
+ }
+ '''
+@@ -353,23 +398,26 @@ def run_source_harness():
+         fix = sound[sound.index('#define OGG_HDR_MAX'):sound.index('static size_t bgmSourceRead(')]
+     program = (HARNESS.replace('@DEFINES@', defines).replace('@TYPE@', source_type.group(0))
+                .replace('@FUNCTIONS@', '\n'.join([fix] + functions)))
+-    with tempfile.TemporaryDirectory() as tmp:
+-        src = Path(tmp) / 'bgm_source.c'
+-        exe = Path(tmp) / 'bgm_source'
+-        src.write_text(program)
+-        result = subprocess.run(['cc', '-std=c99', '-Wall', '-Wextra', '-Werror', '-o', str(exe), str(src)],
+-                                capture_output=True, text=True)
+-        if result.returncode != 0:
+-            failures.append('bgm source harness did not compile:\n%s' % result.stderr)
+-            return
+-        try:
+-            result = subprocess.run([str(exe)], capture_output=True, text=True, timeout=60)
+-        except subprocess.TimeoutExpired:
+-            failures.append('bgm source harness did not finish in 60 s')
+-            return
+-        sys.stdout.write(result.stdout)
+-        if result.returncode != 0:
+-            failures.append('bgm source harness failed:\n%s%s' % (result.stdout, result.stderr))
++    # RIPPS2 build 99: a track held whole in RAM, then one streamed through it piece by piece
++    for size in ('(300 * 1024 + 123)', '(1100 * 1024 + 123)'):
++        with tempfile.TemporaryDirectory() as tmp:
++            src = Path(tmp) / 'bgm_source.c'
++            exe = Path(tmp) / 'bgm_source'
++            src.write_text(program)
++            result = subprocess.run(['cc', '-std=c99', '-Wall', '-Wextra', '-Werror', '-DMUSIC_SIZE=' + size, '-o', str(exe), str(src)],
++                                    capture_output=True, text=True)
++            if result.returncode != 0:
++                failures.append('bgm source harness did not compile:\n%s' % result.stderr)
++                return
++            try:
++                result = subprocess.run([str(exe)], capture_output=True, text=True, timeout=60)
++            except subprocess.TimeoutExpired:
++                failures.append('bgm source harness did not finish in 60 s')
++                return
++            print('music of %s bytes:' % size)
++            sys.stdout.write(result.stdout)
++            if result.returncode != 0:
++                failures.append('bgm source harness failed:\n%s%s' % (result.stdout, result.stderr))
+ 
+ 
+ run_source_harness()
+diff --git a/src/sound.c b/src/sound.c
+index c4eb76e..024f50f 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -1457,6 +1457,9 @@ typedef struct
+     char path[256];
+     int fixSerial;           // build 98: the stream's serial has its top bit set (see bgmFixPages)
+     unsigned char serial[4]; // ...and this is it, as the file has it
++    unsigned char *cache;    // build 99: the file's bytes [cacheBase, cacheBase + cacheLen) in RAM (bgmCacheRead)
++    long cacheBase, cacheLen, cacheCap, cacheNext;
++    int noCache; // no memory for it: the drive is read directly, as before
+ } bgm_source_t;
+ 
+ static int bgmSourceReopen(bgm_source_t *src)
+@@ -1541,27 +1544,115 @@ static void bgmFixPages(unsigned char *buf, size_t len, const unsigned char *ser
+ 
+ static int bgmSourceReopen(bgm_source_t *src);
+ 
++// RIPPS2 build 99: the music's own read path. vorbisfile asks for 2 KB at a time; straight from the drive that was a
++// device request every few hundred milliseconds of music, each one queued behind whatever art or list read held the
++// drive, and under a storm of those the decoder fell behind (the stutter on hardware). The file is now read into RAM
++// in big pieces -- 64 KB, growing to 256 KB while the music plays straight on (about 16 s of a 128 kbit/s track in
++// one request) -- and a track up to 512 KB is held whole, so its loop never touches the drive again. A seek starts
++// small again. Without the memory for it, reads go to the drive as they used to.
++#define BGM_CACHE_FIRST (64 * 1024)
++#define BGM_CACHE_BLOCK (256 * 1024)
++#define BGM_CACHE_WHOLE (512 * 1024)
++#define BGM_CACHE_KEEP  4096 // a piece read straight on starts this much before the last one ended (bgmFixedRead looks back)
++
++// 1 = the piece holding `at` is in RAM, 0 = the end of the file or a drive that will not answer, -1 = no memory
++static int bgmCacheFill(bgm_source_t *src, long at)
++{
++    long start = at, want, cap;
++    int tries = 0;
++
++    if (src->size >= 0 && src->size <= BGM_CACHE_WHOLE) {
++        start = 0;
++        want = cap = src->size;
++    } else {
++        // reading on from the end of the last piece: a bigger piece, starting a little before that end so a read that
++        // looks back over a page header still finds it in RAM; anywhere else (a seek): a small one
++        int straight = src->cacheLen > 0 && at == src->cacheBase + src->cacheLen;
++        long next = straight ? src->cacheNext * 2 : BGM_CACHE_FIRST;
++        src->cacheNext = next < BGM_CACHE_FIRST ? BGM_CACHE_FIRST : next > BGM_CACHE_BLOCK ? BGM_CACHE_BLOCK : next;
++        if (straight)
++            start = at > BGM_CACHE_KEEP ? at - BGM_CACHE_KEEP : 0;
++        want = src->cacheNext;
++        cap = BGM_CACHE_BLOCK;
++        if (src->size >= 0 && start + want > src->size)
++            want = src->size - start;
++    }
++    if (want <= 0)
++        return 0;
++    if (src->cache == NULL || src->cacheCap < cap) {
++        free(src->cache);
++        src->cacheLen = src->cacheCap = 0;
++        if ((src->cache = malloc((size_t)cap)) == NULL)
++            return -1;
++        src->cacheCap = cap;
++    }
++    for (;;) {
++        size_t got = 0;
++        if (fseek(src->f, start, SEEK_SET) == 0)
++            got = fread(src->cache, 1, (size_t)want, src->f);
++        if (got > 0) {
++            src->cacheBase = start;
++            src->cacheLen = (long)got;
++            return 1;
++        }
++        src->cacheLen = 0;
++        // nothing read before the end: the descriptor is gone -- reopen and read again
++        if (tries++ >= BGM_REOPEN_TRIES || !bgmSourceReopen(src))
++            return 0;
++    }
++}
++
++// n bytes of the file from off into buf, from RAM; a piece not there is read in first. The bytes it could give.
++static size_t bgmCacheRead(bgm_source_t *src, long off, unsigned char *buf, size_t n)
++{
++    size_t done = 0;
++    int tries = 0;
++
++    while (done < n) {
++        long at = off + (long)done;
++        if (src->cacheLen > 0 && at >= src->cacheBase && at < src->cacheBase + src->cacheLen) {
++            size_t k = (size_t)(src->cacheBase + src->cacheLen - at);
++            if (k > n - done)
++                k = n - done;
++            memcpy(buf + done, src->cache + (at - src->cacheBase), k);
++            done += k;
++            continue;
++        }
++        if (src->size >= 0 && at >= src->size)
++            break; // the end of the file
++        int r = src->noCache ? -1 : bgmCacheFill(src, at);
++        if (r > 0)
++            continue;
++        if (r == 0)
++            break;
++        src->noCache = 1; // no memory for it: straight from the drive, as before
++        size_t got = 0;
++        if (fseek(src->f, at, SEEK_SET) == 0)
++            got = fread(buf + done, 1, n - done, src->f);
++        if (got > 0) {
++            done += got;
++            continue;
++        }
++        if (tries++ >= BGM_REOPEN_TRIES || !bgmSourceReopen(src))
++            break;
++    }
++    return done;
++}
++
+ // A read through the fix: each piece is read with a page header's worth before and after it, so a header that
+ // straddles the piece is whole when it is fixed, and only the piece asked for is handed on
+ static size_t bgmFixedRead(bgm_source_t *src, unsigned char *out, size_t want)
+ {
+     size_t done = 0;
+-    int tries = 0;
+ 
+     while (done < want) {
+         size_t n = want - done > BGM_FIX_CHUNK ? BGM_FIX_CHUNK : want - done;
+         long p = src->pos, b = p > OGG_HDR_MAX ? p - OGG_HDR_MAX : 0;
+-        size_t lead = (size_t)(p - b), got = 0;
+-
+-        if (fseek(src->f, b, SEEK_SET) == 0)
+-            got = fread(bgmFixBuf, 1, lead + n + OGG_HDR_MAX, src->f);
+-        if (got <= lead) {
+-            if (src->size >= 0 && p >= src->size)
+-                break; // the end of the file
+-            if (tries++ >= BGM_REOPEN_TRIES || !bgmSourceReopen(src))
+-                break; // the descriptor is gone and will not come back
+-            continue;
+-        }
++        size_t lead = (size_t)(p - b), got;
++
++        got = bgmCacheRead(src, b, bgmFixBuf, lead + n + OGG_HDR_MAX); // build 99: through the music's own path
++        if (got <= lead)
++            break; // the end of the file, or a drive that will not answer (the cache has tried it again)
+         size_t avail = got - lead > n ? n : got - lead;
+         bgmFixPages(bgmFixBuf, got, src->serial);
+         memcpy(out + done, bgmFixBuf + lead, avail);
+@@ -1576,35 +1667,26 @@ static size_t bgmFixedRead(bgm_source_t *src, unsigned char *out, size_t want)
+ static size_t bgmSourceRead(void *ptr, size_t size, size_t nmemb, void *datasource)
+ {
+     bgm_source_t *src = (bgm_source_t *)datasource;
+-    int tries = 0;
+ 
+     if (size == 0 || nmemb == 0)
+         return 0;
+     if (src->fixSerial) // build 98: a top-bit serial, cleared as it is read
+         return bgmFixedRead(src, (unsigned char *)ptr, size * nmemb) / size;
+-    while (1) {
+-        size_t r = fread(ptr, size, nmemb, src->f);
++    // build 99: from RAM, the drive read in big pieces (bgmCacheRead); a lost descriptor is reopened there, and
++    // nothing back before the end is a drive that will not answer
++    size_t r = bgmCacheRead(src, src->pos, (unsigned char *)ptr, size * nmemb) / size;
+ #ifdef __DEBUG
+-        if (bgmOpenTrace)
+-            LOG("BGM open: read %u x %u at %ld -> %u\n", (unsigned)size, (unsigned)nmemb, src->pos, (unsigned)r);
++    if (bgmOpenTrace)
++        LOG("BGM open: read %u x %u at %ld -> %u\n", (unsigned)size, (unsigned)nmemb, src->pos, (unsigned)r);
+ #endif
+-        if (r > 0) {
+-            src->pos += (long)(r * size);
+-            return r;
+-        }
+-        // Nothing read. At the real end of the file that is the end of the stream; before it, the
+-        // descriptor is gone -- reopen and read again.
+-        if (src->size >= 0 && src->pos >= src->size)
+-            return 0;
+-        if (tries++ >= BGM_REOPEN_TRIES || !bgmSourceReopen(src))
+-            return 0;
+-    }
++    src->pos += (long)(r * size);
++    return r;
+ }
+ 
+ static int bgmSourceSeek(void *datasource, ogg_int64_t offset, int whence)
+ {
+     bgm_source_t *src = (bgm_source_t *)datasource;
+-    long target, keep;
++    long target;
+ 
+     if (whence == SEEK_SET)
+         target = (long)offset;
+@@ -1621,14 +1703,7 @@ static int bgmSourceSeek(void *datasource, ogg_int64_t offset, int whence)
+         LOG("BGM open: seek %d %ld -> %ld (size %ld)\n", whence, (long)offset, target, src->size);
+ #endif
+ 
+-    if (fseek(src->f, target, SEEK_SET) != 0) {
+-        keep = src->pos;
+-        src->pos = target;
+-        if (!bgmSourceReopen(src)) {
+-            src->pos = keep;
+-            return -1;
+-        }
+-    }
++    // build 99: a seek only moves the position; the next read brings that piece in (and reopens a lost descriptor)
+     src->pos = target;
+     return 0;
+ }
+@@ -1643,6 +1718,7 @@ static int bgmSourceClose(void *datasource)
+     bgm_source_t *src = (bgm_source_t *)datasource;
+     int ret = fclose(src->f);
+ 
++    free(src->cache); // build 99
+     free(src);
+     return ret;
+ }
+@@ -1699,6 +1775,7 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
+         fclose(bgmFile);
+         return 0;
+     }
++    memset(src, 0, sizeof(*src)); // build 99: no piece in RAM yet
+     src->f = bgmFile;
+     src->pos = 0;
+     snprintf(src->path, sizeof(src->path), "%s", bgmPath);

@@ -1,0 +1,34 @@
+"""Build 99: loading and cancel round-up, RiptOPL's identity contract, release.
+
+Static checks on the patched tree (the music path's behaviour is run by RiptOPL's test_bgm_source.py, which compiles
+it against a card that loses descriptors)."""
+import os
+import sys
+from pathlib import Path
+
+root = Path(os.environ.get('RIPTOPL_DIR', '.'))
+rd = lambda p: (root / p).read_text(encoding='utf-8').replace('\r\n', '\n')
+fail = []
+
+# the music's own read path: big pieces into RAM, a short track whole, the old direct reads without the memory
+snd = rd('src/sound.c')
+for needle, why in (('#define BGM_CACHE_FIRST (64 * 1024)', 'pieces start at 64 KB'),
+                    ('#define BGM_CACHE_BLOCK (256 * 1024)', 'and grow to 256 KB'),
+                    ('#define BGM_CACHE_WHOLE (512 * 1024)', 'a track up to 512 KB is held whole'),
+                    ('static size_t bgmCacheRead(bgm_source_t *src, long off, unsigned char *buf, size_t n)', 'the cache reader'),
+                    ('size_t r = bgmCacheRead(src, src->pos, (unsigned char *)ptr, size * nmemb) / size;', 'vorbisfile reads through it'),
+                    ('got = bgmCacheRead(src, b, bgmFixBuf, lead + n + OGG_HDR_MAX);', 'the top-bit serial reader too'),
+                    ('src->noCache = 1; // no memory for it: straight from the drive, as before', 'without memory the old path'),
+                    ('free(src->cache); // build 99', 'the cache goes with the source'),
+                    ('memset(src, 0, sizeof(*src)); // build 99', 'a new source starts with no piece in RAM')):
+    if needle not in snd:
+        fail.append('music read path: %s (%s missing)' % (why, needle))
+seek = snd[snd.index('static int bgmSourceSeek('):]
+seek = seek[:seek.index('\n}\n')]
+if 'fseek(' in seek:
+    fail.append('a music seek must only move the position (the next read brings the piece in)')
+
+if fail:
+    print('\n'.join(fail))
+    sys.exit(1)
+print('build99: the music reads the drive in big pieces from RAM OK')
