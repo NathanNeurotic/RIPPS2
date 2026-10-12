@@ -28,6 +28,7 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [x] **RIPFLOW is a plain list** with only background art (the user's ELF and FifthFox on hardware): find what
       broke its built-in theme, and a test that parses every built-in theme cfg.
 - [x] **MX4SIO shows up nowhere** (it does in RiptOPL and did in earlier builds): find the regression.
+      REOPENED in build 98: FifthFox on build 95 still has no MX4SIO (patch 0095 changed nothing there).
 - [x] **JPG loads stop partway** (a quarter of the picture, not always the same file): read the whole file before
       decoding (a short device read ends libjpeg's input early). Same for RIPgrid, which shows JPG covers as
       text.
@@ -87,6 +88,16 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       Hardware stutter is device contention: pass 99.
 - [ ] **`.adp` preview cancel is robust**: a frantic press of play / stop / move never loops a load or leaves a
       voice playing.
+- [ ] **MX4SIO missing** (FifthFox, build 95: SCPH-39001 with APA SSD, MMCE, MX4SIO, iLink HDD, USB; works on
+      RiptOPL). Walk every MX4SIO path against RiptOPL 65d4b89 and its later fixes (load gates, the second
+      probe, Game Sources, page visibility, MMCE sharing SIO2, slot 2 card access). PCSX2 has no MX4SIO:
+      FifthFox confirms on hardware.
+- [ ] **Grid tiles without a cover** (FifthFox, 95): the ISO's file name in very large text, sometimes past the
+      tile, while game IDs are much smaller. A tile shows only the game ID (the name is under the grid), one
+      size on every tile, always inside it; a game with no ID shows a clear tile.
+- [ ] **A video that loads forever** (FifthFox, 95: an AVI "from web"): asked whether it was on a local or a
+      network device. Reproduce, and make the player give up with a message instead of hanging.
+- [ ] Flow and Grid settings text too large and cramped (FifthFox, 95): check it on the build 96 settings face.
 - [ ] **File tooltip**: resting on a file for 0.42 s shows its date, size and the other details wLE shows.
 - [ ] **Paste overwrites when asked**: a name already there asks Yes / No / Yes to All (the choice highlighted
       in the modal), and an overwrite succeeds (it is skipped today).
@@ -106,6 +117,10 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] **Loading and cancel round-up** (user, 10-11): every device's load speed tuned; the music on a path of its own
       so it never competes with art and lists (from RAM, or its own IOP stream), measured on hardware; RiptOPL's
       art loading performance; every cancel (art, previews, scans) robust to frantic input.
+- [ ] **Grid in widescreen** (FifthFox, 95: large empty sides in 16:9): a flag for more covers per row on wide and HD
+      pictures (a theme key and a Flow and Grid row).
+- Noted, no change: RIPFLOW puts MEMORY FILES left and LAUNCH DISC right on purpose (category_order, a user
+  setting). POPSTARTER from iLink crashes on 95 while Ember works (FifthFox): the POPS item below.
 - [ ] Device names by driver, not slot: `mass0:` on the internal exFAT HDD says HDD, not USB (YOUR ACCOUNT
       said "on USB" in the lab). Same in Memory Files, STATUS, toasts and the launch report.
 - [ ] Artwork and config keys exactly as RiptOPL: VCD basename, Ember folder name, ELF basename with `.ELF`;
