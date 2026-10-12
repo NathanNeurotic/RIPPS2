@@ -28,7 +28,20 @@ seek = seek[:seek.index('\n}\n')]
 if 'fseek(' in seek:
     fail.append('a music seek must only move the position (the next read brings the piece in)')
 
+# drives named by their driver, not their slot: mass0: on the internal exFAT HDD is no USB
+bdm, st, ra = rd('src/bdmsupport.c'), rd('src/ripps2status.c'), rd('src/ripps2ra.c')
+if 'const char *bdmSlotDriveName(int slot)' not in bdm or 'case BDM_TYPE_ATA:\n            return "HDD";' not in bdm:
+    fail.append('bdmSlotDriveName must name a drive by its driver (an exFAT HDD is HDD)')
+if 'if ((drive = bdmSlotDriveName(d)) != NULL)' not in ra or '"MMCE 0", "MMCE 1"' not in ra:
+    fail.append('YOUR ACCOUNT must say where a game is by the drive\'s driver, and MMCE 0 / 1')
+for needle in ('"%s POPS folder", mass0Name', '"%s EMBER folder", mass0Name', '"%s  (mass0:/neutrino)"', 'LR_ADD("drive      mass%c: is %s\\r\\n"'):
+    if needle not in st:
+        fail.append('STATUS / the launch report must name mass0: by its driver (%s missing)' % needle)
+for gone in ('"USB POPS folder"', '"USB EMBER folder"', '"USB  (mass0:/neutrino)"', 'Not found on USB.'):
+    if gone in st:
+        fail.append('STATUS still calls mass0: USB whatever it is: %s' % gone)
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build99: the music reads the drive in big pieces from RAM OK')
+print('build99: the music reads the drive in big pieces from RAM, drives named by their driver OK')

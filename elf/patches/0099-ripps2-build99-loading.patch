@@ -152,6 +152,179 @@ index 0e532e2..a0524f6 100644
  
  
  run_source_harness()
+diff --git a/include/bdmsupport.h b/include/bdmsupport.h
+index 4512d54..5b701a5 100644
+--- a/include/bdmsupport.h
++++ b/include/bdmsupport.h
+@@ -84,6 +84,7 @@ int bdmHDDIsPresent(u32 timeoutMs);
+ // resolver, the Neutrino pickers) must stay on massN:.
+ int bdmGetDeviceRootByType(int bdmType, char *root, int rootLen);
+ int bdmSlotDeviceType(int slot); // RIPPS2: BDM_TYPE_* of what is mounted at mass<slot>:, -2 when nothing is
++const char *bdmSlotDriveName(int slot); // RIPPS2 build 99: USB, HDD, iLINK, MX4SIO, UDPBD or DRIVE by its driver; NULL: none
+ int bdmMx4sioReport(int *err, char *root, int rootLen); // RIPPS2 build 98: STATUS > DRIVES' MX4SIO line
+ // Fill `slots` with the massN: slot index of EVERY mounted device whose driver matches bdmType (root =
+ // "mass<i>:/"), up to maxSlots; returns the count. The BDMA equip searches all same-type slots so a
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index 4b7264f..8282fe5 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -986,6 +986,29 @@ void bdmLogConfigWriteResult(const bdm_config_diag_snapshot_t *snap, int result)
+ #endif
+ }
+ 
++// RIPPS2 build 99: a drive's name by its driver, for what RIPPS2 says about it (YOUR ACCOUNT said "on USB" of the
++// internal exFAT HDD at mass0:): USB, HDD, iLINK, MX4SIO, UDPBD, DRIVE for one of unknown kind; NULL when nothing is
++// mounted at mass<slot>:. It asks the drive, so callers ask once, not every frame.
++const char *bdmSlotDriveName(int slot)
++{
++    switch (bdmSlotDeviceType(slot)) {
++        case -2:
++            return NULL;
++        case BDM_TYPE_USB:
++            return "USB";
++        case BDM_TYPE_ATA:
++            return "HDD";
++        case BDM_TYPE_ILINK:
++            return "iLINK";
++        case BDM_TYPE_SDC:
++            return "MX4SIO";
++        case BDM_TYPE_UDPBD:
++            return "UDPBD";
++        default:
++            return "DRIVE";
++    }
++}
++
+ // RIPPS2 build 69: what is mounted at mass<slot>: (BDM_TYPE_*), or -2 when nothing is. The file
+ // browser names drives by it (USB, MX4SIO, iLink, exFAT HDD) instead of calling every one "mass".
+ int bdmSlotDeviceType(int slot)
+diff --git a/src/ripps2ra.c b/src/ripps2ra.c
+index cb2c82c..06817d4 100644
+--- a/src/ripps2ra.c
++++ b/src/ripps2ra.c
+@@ -32,6 +32,7 @@
+ #include "include/sound.h"
+ #include "include/lang.h"
+ #include "include/ripps2.h"
++#include "include/bdmsupport.h" // build 99: bdmSlotDriveName
+ #ifdef RETROACHIEVEMENTS
+ #include "include/discsupport.h"
+ #include "include/supportbase.h"
+@@ -167,9 +168,14 @@ static int raHuntLeft(const ra_game_t *g, ra_hunt_t *list)
+ 
+ static int raAcctLoad(ra_game_t *games)
+ {
+-    static const char *const names[] = {"USB", "USB 2", "MMCE 1", "MMCE 2", "HDD", "SMB"};
++    // build 99: mass0: and mass1: by their driver (the internal exFAT HDD is no USB); cards 0 and 1 as everywhere
++    const char *names[] = {"USB", "USB 2", "MMCE 0", "MMCE 1", "HDD", "SMB"}, *drive;
+     int d, n = 0, i;
+ 
++    for (d = 0; d < 2; d++)
++        if ((drive = bdmSlotDriveName(d)) != NULL)
++            names[d] = drive;
++
+     for (d = 0; d < (int)(sizeof(dirs) / sizeof(dirs[0])); d++) {
+         DIR *dir = opendir(dirs[d]);
+         struct dirent *de;
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index ae52e12..75b818a 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -131,6 +131,9 @@ static void stScan(void)
+     int n;
+ 
+     guiRenderTextScreen("STATUS: looking for RIPPS2's homebrew");
++    const char *mass0Name = bdmSlotDriveName(0); // build 99: mass0: by its driver (the internal exFAT HDD is no USB)
++    if (mass0Name == NULL)
++        mass0Name = "USB";
+     stCount = 0;
+ 
+     // NEUTRINO: the path in Settings, then the places a launch looks (the game's drive, the cards);
+@@ -153,7 +156,7 @@ static void stScan(void)
+         st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : "Not installed. A game that needs it offers RIPPS2's copy, or install it here.", NULL);
+         r->ok = n > 0;
+     }
+-    stAdd(ROW_ACTION, ACT_NT_INSTALL, "INSTALL RIPPS2'S COPY", "USB or a memory card");
++    stAdd(ROW_ACTION, ACT_NT_INSTALL, "INSTALL RIPPS2'S COPY", "a drive or a memory card");
+     stAdd(ROW_ACTION, ACT_NT_SETTINGS, "NEUTRINO SETTINGS", "path, video, arguments");
+ 
+     // POPSTARTER: the path in Settings, the USB drive's POPS folder, the cards
+@@ -164,7 +167,8 @@ static void stScan(void)
+         st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : "Not found yet. The first PS1 game started writes RIPPS2's copy to its drive's POPS folder.", NULL);
+         r->ok = n > 0;
+     }
+-    stAdd(ROW_ACTION, ACT_POPS_INSTALL, "INSTALL RIPPS2'S COPY", "USB POPS folder");
++    snprintf(line, sizeof(line), "%s POPS folder", mass0Name); // build 99: the drive by its driver
++    stAdd(ROW_ACTION, ACT_POPS_INSTALL, "INSTALL RIPPS2'S COPY", line);
+     stAdd(ROW_ACTION, ACT_POPS_SETTINGS, "PS1 SETTINGS", "POPSTARTER and Ember");
+     stAdd(ROW_ACTION, ACT_POPS_NET, "POPSTARTER NETWORK", "its own IP and SMB files");
+ 
+@@ -173,10 +177,13 @@ static void stScan(void)
+     {
+         const char *p[1] = {"mass0:/EMBER/ember.elf"};
+         n = stFound(line, sizeof(line), p, 1, 1);
+-        st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : "Not found on USB. Starting an Ember game writes it beside the games.", NULL);
++        char none[96];
++        snprintf(none, sizeof(none), "Not found on mass0: (%s). Starting an Ember game writes it beside the games.", mass0Name);
++        st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : none, NULL);
+         r->ok = n > 0;
+     }
+-    stAdd(ROW_ACTION, ACT_EMBER_INSTALL, "INSTALL RIPPS2'S COPY", "USB EMBER folder");
++    snprintf(line, sizeof(line), "%s EMBER folder", mass0Name);
++    stAdd(ROW_ACTION, ACT_EMBER_INSTALL, "INSTALL RIPPS2'S COPY", line);
+ 
+     // BIBLE: what starts at power on is MANAGE's to show, card by card
+     stAdd(ROW_HEAD, ACT_NONE, "BIBLE", "PS2BBL 1.2.0 for RIPPS2");
+@@ -272,7 +279,10 @@ static void stInstallNeutrino(void)
+     const char *labels[3], *dirs[3];
+     int n = 0, pick;
+     if (stDriveThere("mass0:/")) {
+-        labels[n] = "USB  (mass0:/neutrino)";
++        static char massLabel[48]; // build 99: the drive by its driver, not "USB" whatever it is
++        const char *name = bdmSlotDriveName(0);
++        snprintf(massLabel, sizeof(massLabel), "%s  (mass0:/neutrino)", name != NULL ? name : "DRIVE");
++        labels[n] = massLabel;
+         dirs[n++] = "mass0:/neutrino";
+     }
+     if (stDriveThere("mc0:/")) {
+@@ -285,7 +295,7 @@ static void stInstallNeutrino(void)
+     }
+     if (n == 0) {
+         guiMsgBoxSound(SFX_ERROR);
+-        guiMsgBox("There is no USB drive or memory card to install Neutrino on.", 0, NULL);
++        guiMsgBox("There is no drive (mass0:) or memory card to install Neutrino on.", 0, NULL);
+         return;
+     }
+     if ((pick = ripps2PickList(labels, n)) < 0)
+@@ -298,7 +308,7 @@ static void stInstallPopstarter(void)
+     const char *path = "mass0:/POPS/POPSTARTER.ELF";
+     if (!stDriveThere("mass0:/")) {
+         guiMsgBoxSound(SFX_ERROR);
+-        guiMsgBox("Connect the USB drive your PS1 games are on, then try again.", 0, NULL);
++        guiMsgBox("Connect the drive your PS1 games are on (a USB drive, or the internal exFAT HDD), then try again.", 0, NULL);
+         return;
+     }
+     if (stExists(path)) {
+@@ -315,7 +325,7 @@ static void stInstallEmber(void)
+     const char *path = "mass0:/EMBER/ember.elf";
+     if (!stDriveThere("mass0:/")) {
+         guiMsgBoxSound(SFX_ERROR);
+-        guiMsgBox("Connect the USB drive your Ember games are on, then try again.", 0, NULL);
++        guiMsgBox("Connect the drive your Ember games are on (a USB drive, or the internal exFAT HDD), then try again.", 0, NULL);
+         return;
+     }
+     if (stExists(path) && guiMsgBox("There is an ember.elf in mass0:/EMBER already. Replace it with RIPPS2's Beta-2?", 1, NULL) != 1)
+@@ -544,6 +554,10 @@ void ripps2LaunchReport(const char *what, const char *elf, int argc, char **argv
+                (size == 167700 && crc == 0x59ebabb9u) ? " (the POPSTARTER RIPPS2 carries)" : (size == 1611956 ? " (the size of the Ember RIPPS2 carries)" : ""));
+     for (i = 0; argv != NULL && i < argc; i++)
+         LR_ADD("argv[%d]    %s\r\n", i, argv[i] != NULL ? argv[i] : "(null)");
++    if (!strncmp(elf, "mass", 4) && elf[4] >= '0' && elf[4] <= '7') { // build 99: which drive mass<n>: is, by its driver
++        const char *drive = bdmSlotDriveName(elf[4] - '0');
++        LR_ADD("drive      mass%c: is %s\r\n", elf[4], drive != NULL ? drive : "not mounted");
++    }
+ 
+     // the folder the ELF sits in, with its separator
+     slash = strrchr(elf, '/');
 diff --git a/src/sound.c b/src/sound.c
 index c4eb76e..024f50f 100644
 --- a/src/sound.c
