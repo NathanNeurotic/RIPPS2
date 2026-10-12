@@ -27,6 +27,60 @@ if 'initGridBack(' not in init or 'elem->endElem = &endGrid;' not in init:
 if 'static int menuGridEdge(int dir)' not in menu or 'if (!menuGridEdge(1))' not in menu or 'if (!menuGridEdge(-1))' not in menu:
     fail.append("the Grid must turn its page at a row's edge")
 
+dl = thm[thm.index('static void drawItemsList('):]
+dl = dl[:dl.index('\n}\n')]
+if 'while (rows < itemsList->displayedItems && ps->prev != NULL)' not in dl or 'menu->item->pagestart = ps;' not in dl:
+    fail.append('a list page must be full: rows come down from above when the end of the list is short')
+
+# fntFitString on the host: it never reads or writes past the string's terminator
+import shutil, subprocess, tempfile
+fnt = rd('src/fntsys.c')
+fit = fnt[fnt.index('void fntFitString(int id, char *string, size_t width)'):]
+fit = fit[:fit.index('\n}\n') + 3]
+cc = shutil.which('gcc') or shutil.which('cc')
+if 'if (osp == \'\\0\')\n            break;' not in fit.replace('\r\n', '\n'):
+    fail.append('fntFitString must stop at the end of the string')
+elif cc:
+    prog = r"""
+#include <stdio.h>
+#include <string.h>
+#define rmScaleX(x) (x)
+static size_t fntCalcDimensions(int id, const char *s) { (void)id; return strlen(s) * 10; }
+""" + fit + r"""
+static int check(const char *text, size_t width, const char *want)
+{
+    char buf[64];
+    memset(buf, 'X', sizeof(buf));
+    buf[sizeof(buf) - 1] = '\0';
+    memcpy(buf, text, strlen(text) + 1);
+    fntFitString(0, buf, width);
+    if (strcmp(buf, want) != 0) { printf("'%s' at %u: got '%s', want '%s'\n", text, (unsigned)width, buf, want); return 1; }
+    for (size_t i = strlen(text) + 1; i < sizeof(buf) - 1; i++)
+        if (buf[i] != 'X') { printf("'%s' at %u: wrote past the end at %u\n", text, (unsigned)width, (unsigned)i); return 1; }
+    return 0;
+}
+int main(void)
+{
+    int bad = 0;
+    bad |= check("TEST GAME", 200, "TEST GAME");
+    bad |= check("TEST GAME", 60, "TEST\nGAME");
+    bad |= check("TEST GAME", 30, "TEST\nGAME");
+    bad |= check("SUPERCALIFRAGILISTIC", 50, "SUPERCALIFRAGILISTIC");
+    bad |= check("A VERYLONGWORD B", 40, "A\nVERYLONGWORD\nB");
+    bad |= check("ONE TWO THREE", 75, "ONE TWO\nTHREE");
+    return bad;
+}
+"""
+    with tempfile.TemporaryDirectory() as td:
+        open(td + '/f.c', 'w').write(prog)
+        r = subprocess.run([cc, td + '/f.c', '-o', td + '/f.exe'], capture_output=True, text=True)
+        if r.returncode:
+            fail.append('fntFitString host build: ' + r.stderr[-300:])
+        else:
+            r = subprocess.run([td + '/f.exe'], capture_output=True, text=True)
+            if r.returncode:
+                fail.append('fntFitString: ' + r.stdout.strip())
+
 # the built-in themes: each cfg parses, and its main page has what it needs
 def elems(cfg):
     out, cur = {}, None
@@ -54,5 +108,5 @@ shots = [v for k, v in elems(rd('misc/theme_coverflow.cfg')).items() if k.starts
 if len(shots) != 2 or any(v.get('tilt') != '1' for v in shots):
     fail.append("RIPFLOW's info page screenshots must tilt")
 
-print('\n'.join(fail) or 'build97: 0.42 s flip on the Grid and RIPFLOW, page edges, RIPgrid centred with a Sleek Bold title, RIPFLOW tilt OK')
+print('\n'.join(fail) or 'build97: 0.42 s flip on the Grid and RIPFLOW, page edges, RIPgrid centred with a Sleek Bold title, RIPFLOW tilt, full list pages, fntFitString stops at the end of its string OK')
 sys.exit(1 if fail else 0)

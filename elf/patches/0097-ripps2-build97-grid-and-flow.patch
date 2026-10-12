@@ -68,6 +68,61 @@ index 720f286..f042b0e 100644
  main5:
  	type=ItemsList
  	x=POS_MID
+diff --git a/src/fntsys.c b/src/fntsys.c
+index a759a49..dad9e95 100644
+--- a/src/fntsys.c
++++ b/src/fntsys.c
+@@ -991,28 +991,31 @@ void fntFitString(int id, char *string, size_t width)
+         // NOTE: The word was terminated, so we're seeing a single word
+         // on that position
+         size_t ww = fntCalcDimensions(id, str);
+-
+-        if (cw + ww > width) {
+-            if (psp) {
+-                // we have a prev space to utilise (wrap on it)
+-                *psp = '\n';
+-                *sp = osp;
+-                cw = ww;
+-                psp = sp;
+-            } else {
+-                // no prev. space to hijack, must break after the word
+-                // this will mean overflowed text...
+-                *sp = '\n';
+-                cw = 0;
+-            }
+-        } else {
++        *sp = osp;
++
++        if (cw + ww > width && psp != NULL) {
++            // we have a prev space to utilise (wrap on it)
++            *psp = '\n';
++            cw = ww;
++        } else if (cw + ww > width && osp != '\0') {
++            // no prev. space to hijack, must break after the word
++            // this will mean overflowed text...
++            *sp = '\n';
++            cw = 0;
++            psp = NULL;
++            str = sp + 1;
++            continue;
++        } else
+             cw += ww;
+-            *sp = osp;
+-            psp = sp;
+-        }
+ 
++        // RIPPS2 build 97: the string's end ends the walk. It used to step over the terminator and go on through
++        // whatever the buffer held after it, turning a space or the old terminator there into a line break: a
++        // stray letter under a coverless grid tile's name in 720p, and in a release build a freeze.
++        if (osp == '\0')
++            break;
++        psp = sp;
+         cw += spacewidth;
+-        str = ++sp;
++        str = sp + 1;
+     }
+ }
+ 
 diff --git a/src/menusys.c b/src/menusys.c
 index fc99173..a36fc4c 100644
 --- a/src/menusys.c
@@ -186,7 +241,7 @@ index 3330dc0..821b1c6 100644
          updateISOGameList(path, &cache, *glist, count);
          freeISOGameListCache(&cache);
 diff --git a/src/themes.c b/src/themes.c
-index d46665d..5ad072a 100644
+index d46665d..19d513c 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -2034,6 +2034,12 @@ int thmCoverflowIsAnimating(void)
@@ -349,3 +404,26 @@ index d46665d..5ad072a 100644
      } else
          LOG("THEMES Coverflow %s: NO cache, elem disabled !!\n", name);
  }
+@@ -3389,6 +3440,22 @@ static void drawItemsList(struct menu_list *menu, struct submenu_list *item, con
+         int others = 0;
+         u64 color;
+         int textEndX = 0;
++        // RIPPS2 build 97: a full page. The list opens on the remembered game as its top row; near the end of the
++        // list that left empty rows under it while the games above were out of sight, as if they were missing.
++        // Rows come down from above until the page is full (the chosen one stays on it: only the end is short).
++        if (ps != NULL && !itemsList->hidden) {
++            submenu_list_t *end = ps;
++            int rows = 1;
++            while (end->next != NULL && rows < itemsList->displayedItems) {
++                end = end->next;
++                rows++;
++            }
++            while (rows < itemsList->displayedItems && ps->prev != NULL) {
++                ps = ps->prev;
++                rows++;
++            }
++            menu->item->pagestart = ps;
++        }
+         // RIPPS2: rows on the theme's pitch (item_height), each title centred in its row
+         int rowStep = elem->itemHeight > 0 ? elem->itemHeight : MENU_ITEM_HEIGHT;
+         int rowTop = posY;
