@@ -1,3 +1,29 @@
+diff --git a/.github/scripts/test_bgm_source.py b/.github/scripts/test_bgm_source.py
+index f5b03d3..0e532e2 100644
+--- a/.github/scripts/test_bgm_source.py
++++ b/.github/scripts/test_bgm_source.py
+@@ -224,6 +224,7 @@ static bgm_source_t *openMusic(void)
+     src->f = fopen("mmce0:/THM/theme/sound/bgm.ogg", "rb");
+     src->pos = 0;
+     src->size = MUSIC_SIZE;
++    src->fixSerial = 0; /* RIPPS2 build 98: a stream with a top-bit serial reads through bgmFixedRead */
+     snprintf(src->path, sizeof(src->path), "%s", "mmce0:/THM/theme/sound/bgm.ogg");
+     return src;
+ }
+@@ -346,8 +347,12 @@ int main(void)
+ def run_source_harness():
+     if source_type is None or None in functions:
+         return
++    # RIPPS2 build 98: the reader's top-bit serial fix (bgmFixedRead and its helpers) sits right before it
++    fix = ''
++    if '#define OGG_HDR_MAX' in sound:
++        fix = sound[sound.index('#define OGG_HDR_MAX'):sound.index('static size_t bgmSourceRead(')]
+     program = (HARNESS.replace('@DEFINES@', defines).replace('@TYPE@', source_type.group(0))
+-               .replace('@FUNCTIONS@', '\n'.join(functions)))
++               .replace('@FUNCTIONS@', '\n'.join([fix] + functions)))
+     with tempfile.TemporaryDirectory() as tmp:
+         src = Path(tmp) / 'bgm_source.c'
+         exe = Path(tmp) / 'bgm_source'
 diff --git a/include/sound.h b/include/sound.h
 index 61ac524..1b27ec1 100644
 --- a/include/sound.h
