@@ -217,6 +217,10 @@ if 'prevFile.baked = 1;' not in pv or 'for (v = 1; v <= SFX_PREVIEW_VOICES && vo
     fail.append('the .adp preview: play again from the SPU2, the file read once, no reload per close, never beside a reload')
 if 'if (sfxReloadQueued)\n        return;' not in snd.replace('\r\n', '\n') or 'sfxReloadTick(); // build 98' not in snd:
     fail.append('sound reloads must not queue twice, and a preview close reloads once things are calm')
+st = rd('src/ripps2status.c')
+if 'stAdd(ROW_HEAD, ACT_NONE, "DRIVES", "what RIPPS2 sees");' not in st or 'bdmMx4sioReport(&err, root, sizeof(root))' not in st or \
+        'mx4sioLoadRet = bdmDiagLoadOptionalModule("MX4SIO"' not in rd('src/bdmsupport.c'):
+    fail.append('STATUS must list the drives RIPPS2 sees and what became of MX4SIO')
 if 'RIPgrid' in th or '"<RIPGRID>"' not in th:
     fail.append('RIPGRID is written in capitals')
 

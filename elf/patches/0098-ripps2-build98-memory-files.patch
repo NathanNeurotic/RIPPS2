@@ -24,6 +24,18 @@ index f5b03d3..0e532e2 100644
      with tempfile.TemporaryDirectory() as tmp:
          src = Path(tmp) / 'bgm_source.c'
          exe = Path(tmp) / 'bgm_source'
+diff --git a/include/bdmsupport.h b/include/bdmsupport.h
+index 5bb6fd0..4512d54 100644
+--- a/include/bdmsupport.h
++++ b/include/bdmsupport.h
+@@ -84,6 +84,7 @@ int bdmHDDIsPresent(u32 timeoutMs);
+ // resolver, the Neutrino pickers) must stay on massN:.
+ int bdmGetDeviceRootByType(int bdmType, char *root, int rootLen);
+ int bdmSlotDeviceType(int slot); // RIPPS2: BDM_TYPE_* of what is mounted at mass<slot>:, -2 when nothing is
++int bdmMx4sioReport(int *err, char *root, int rootLen); // RIPPS2 build 98: STATUS > DRIVES' MX4SIO line
+ // Fill `slots` with the massN: slot index of EVERY mounted device whose driver matches bdmType (root =
+ // "mass<i>:/"), up to maxSlots; returns the count. The BDMA equip searches all same-type slots so a
+ // source family with two same-type devices is covered when the files sit on the second.
 diff --git a/include/dialogs.h b/include/dialogs.h
 index c3d3686..6a53d06 100644
 --- a/include/dialogs.h
@@ -224,6 +236,51 @@ index f042b0e..a7952f2 100644
  main5:
  	type=ItemsList
  	x=POS_MID
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index 5114977..4b7264f 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -37,6 +37,7 @@ static int iLinkModLoaded = 0;
+ static int iLinkManModLoaded = 0;
+ static int ieee1394ModLoaded = 0;
+ static int mx4sioModLoaded = 0;
++static int mx4sioLoadRet = 1; // RIPPS2 build 98: the driver load's own answer (1: not asked yet), for STATUS
+ static int hddModLoaded = 0;
+ static int udpbdModLoaded = 0;
+ /*
+@@ -1118,7 +1119,8 @@ static void bdmLoadBlockDeviceModules(void)
+ 
+     if (gEnableMX4SIO && !mx4sioModLoaded) {
+         // Load MX4SIO Block Device drivers
+-        if (bdmDiagLoadOptionalModule("MX4SIO", "MX4SIO_BD", &mx4sio_bd_irx, size_mx4sio_bd_irx) >= 0)
++        mx4sioLoadRet = bdmDiagLoadOptionalModule("MX4SIO", "MX4SIO_BD", &mx4sio_bd_irx, size_mx4sio_bd_irx);
++        if (mx4sioLoadRet >= 0)
+             mx4sioModLoaded = 1;
+     }
+ 
+@@ -2647,6 +2649,22 @@ static item_list_t bdmGameList = {
+     &bdmLaunchGame, &bdmGetConfig, &bdmGetImage, &bdmCleanUp, &bdmShutdown, &bdmCheckVMC, &bdmGetIconId, &bdmLaunchVcd,
+     /* viewOverride */ 0, /* itemGetArtArchivePath */ NULL, &bdmLaunchCue, &bdmGetItemView, &bdmGetSourceId, &bdmSaveCueSettings};
+ 
++// RIPPS2 build 98: what became of MX4SIO, for STATUS: -3 off in Game Sources, -2 its driver not asked for yet, -1 the
++// driver would not load (*err: its code), 0 loaded with no SD card answering, 1 mounted (root: where)
++int bdmMx4sioReport(int *err, char *root, int rootLen)
++{
++    if (!gEnableMX4SIO)
++        return -3;
++    if (!mx4sioModLoaded) {
++        if (mx4sioLoadRet == 1)
++            return -2;
++        if (err != NULL)
++            *err = mx4sioLoadRet;
++        return -1;
++    }
++    return bdmGetDeviceRootByType(BDM_TYPE_SDC, root, rootLen) ? 1 : 0;
++}
++
+ void bdmInitSemaphore()
+ {
+     // Create a semaphore so only one thread can load IOP modules at a time.
 diff --git a/src/dialogs.c b/src/dialogs.c
 index 61e7273..f40af3f 100644
 --- a/src/dialogs.c
@@ -925,10 +982,54 @@ index f4fad92..2485c5e 100644
      // the path, and the clipboard / what just happened
      fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : "MEMORY FILES", FB_LIT);
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index ec9cb0d..567ea63 100644
+index ec9cb0d..84b46a6 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
-@@ -246,11 +246,11 @@ static void stInstallNeutrino(void)
+@@ -35,6 +35,7 @@
+ #include "include/lang.h"
+ #include "include/ripps2.h"
+ #include "include/ripps2biossnd.h" // build 95: SOUNDS > RIP THIS CONSOLE'S SOUNDS
++#include "include/bdmsupport.h"    // build 98: DRIVES
+ #include <zlib.h>                 // build 85: crc32 for the launch report
+ #include "include/ripps2_build.h" // build 85: the launch report names its build
+ #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
+@@ -187,6 +188,35 @@ static void stScan(void)
+     }
+     stAdd(ROW_ACTION, ACT_BIBLE_MANAGE, "MANAGE", "boot loader, card by card");
+ 
++    // DRIVES (build 98): every block device RIPPS2 sees, by its driver, and what became of MX4SIO, so a tester can read
++    // out what a console found (MX4SIO went missing on hardware, and PCSX2 has none)
++    stAdd(ROW_HEAD, ACT_NONE, "DRIVES", "what RIPPS2 sees");
++    {
++        int i, err = 0, m;
++        char root[32] = "";
++        for (i = 0; i < 8; i++) {
++            int t = bdmSlotDeviceType(i);
++            if (t < -1)
++                continue;
++            snprintf(line, sizeof(line), "mass%d:/  %s", i, t == BDM_TYPE_USB ? "USB" : t == BDM_TYPE_ILINK ? "iLink" : t == BDM_TYPE_SDC ? "MX4SIO" : t == BDM_TYPE_ATA ? "internal HDD (exFAT)" : t == BDM_TYPE_UDPBD ? "UDPBD" : "a drive of unknown kind");
++            st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
++            r->ok = 1;
++        }
++        m = bdmMx4sioReport(&err, root, sizeof(root));
++        if (m == 1)
++            snprintf(line, sizeof(line), "MX4SIO: the SD card is %s", root);
++        else if (m == 0)
++            snprintf(line, sizeof(line), "MX4SIO: the driver is in, but no SD card answered (the mc1 slot).");
++        else if (m == -1)
++            snprintf(line, sizeof(line), "MX4SIO: its driver would not load (code %d).", err);
++        else if (m == -2)
++            snprintf(line, sizeof(line), "MX4SIO: on in Game Sources; its driver has not been started yet.");
++        else
++            snprintf(line, sizeof(line), "MX4SIO: off in Game Sources.");
++        st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
++        r->ok = m == 1;
++    }
++
+     // SOUNDS (build 95): none are built in any more, so say where they come from
+     stAdd(ROW_HEAD, ACT_NONE, "SOUNDS", "AUDIO folder");
+     {
+@@ -246,11 +276,11 @@ static void stInstallNeutrino(void)
          dirs[n++] = "mass0:/neutrino";
      }
      if (stDriveThere("mc0:/")) {
