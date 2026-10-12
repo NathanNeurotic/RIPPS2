@@ -623,6 +623,33 @@ index 72e26c1..676dde9 100644
                      if (guiMsgBox(ask, 1, NULL) == 1)
                          cmWrite(to, toast, sizeof(toast));
                      break;
+diff --git a/src/ripps2edit.c b/src/ripps2edit.c
+index e83696e..adc23cd 100644
+--- a/src/ripps2edit.c
++++ b/src/ripps2edit.c
+@@ -93,7 +93,8 @@ static int edMenu(const char *const *items, int count)
+             guiDrawBGPlasma();
+         // as wide as its longest item (build 69: BIBLE's card list ran off the box), centred once it
+         // outgrows the small box at the right
+-        int w = 220, h = count * 24 + 20, x = 400, y = 120;
++        // build 98: a strip of button hints at its foot (CHOOSE, BACK), like the pages it opens over
++        int w = 220, h = count * 24 + 20 + 28, x = 400, y = 120;
+         for (i = 0; i < count; i++) {
+             int iw = fntCalcDimensions(gTheme->fonts[4], items[i]) + 32;
+             if (iw > w)
+@@ -112,6 +113,12 @@ static int edMenu(const char *const *items, int count)
+                 rmDrawRect(x + 4, ry, w - 8, 22, ED_PRIM(0x1E, 0x3C, 0x96, 0x60));
+             fntRenderString(gTheme->fonts[4], x + 16, ry + 11, ALIGN_VCENTER, 0, 0, items[i], i == sel ? ED_LIT : ED_SOFT);
+         }
++        int okIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
++        int hy = y + h - 14, hw = 24 + ripps2HintWidth("CHOOSE") + 18 + 24 + ripps2HintWidth("BACK");
++        int hx = x + (w - hw) / 2;
++        rmDrawLine(x + 8, y + h - 28, x + w - 8, y + h - 28, ED_PRIM(0x4A, 0x72, 0xDC, 0x40));
++        edHint(okIcon, "CHOOSE", &hx, hy);
++        edHint(backIcon, "BACK", &hx, hy);
+         rmEndFrame();
+         if (getKey(KEY_UP) && sel > 0) {
+             sel--;
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
 index ca8e866..1bf483c 100644
 --- a/src/ripps2ember.c
@@ -637,7 +664,7 @@ index ca8e866..1bf483c 100644
      }
      if (n == 0)
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index f4fad92..99ad41d 100644
+index f4fad92..fde4eb5 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -38,6 +38,8 @@
@@ -1129,7 +1156,60 @@ index f4fad92..99ad41d 100644
                  fbSetToast(rename(from, to) == 0 ? "RENAMED" : "RENAME FAILED");
                  snprintf(fbKeepName, sizeof(fbKeepName), "%s", name);
                  fbRun(FB_OP_SCAN, "READING");
-@@ -2025,6 +2300,106 @@ int ripps2FilesBusy(void)
+@@ -1834,6 +2109,37 @@ static int fbDrawGrid(void)
+     return 1;
+ }
+ 
++// build 98: a held Up or Down steps once, and after resting FB_HOLD_S repeats at the Storage list's speed (the
++// SCROLL SPEED setting: 500, 300 or 100 ms a step), timed here so a dialog's own repeat delays never carry over.
++#define FB_HOLD_S 0.42f
++static int fbHeldStep(int key)
++{
++    static int heldKey = 0;
++    static clock_t since = 0, last = 0;
++    clock_t now = clock();
++
++    if (getKeyOn(key)) {
++        heldKey = key;
++        since = last = now;
++        return 1;
++    }
++    if (heldKey != key || !getKeyPressed(key)) {
++        if (heldKey == key)
++            heldKey = 0;
++        return 0;
++    }
++    if ((float)(now - since) / (float)CLOCKS_PER_SEC < FB_HOLD_S)
++        return 0;
++    int ms = 500 - gScrollSpeed * 200;
++    if (ms < 60)
++        ms = 60;
++    if ((u32)(now - last) * 1000u / CLOCKS_PER_SEC >= (u32)ms) {
++        last = now;
++        return 1;
++    }
++    return 0;
++}
++
+ void ripps2HandleInputFiles(void)
+ {
+     int openKey = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS;
+@@ -1868,12 +2174,12 @@ void ripps2HandleInputFiles(void)
+         return;
+     }
+ 
+-    if (getKeyOn(KEY_UP)) {
++    if (fbHeldStep(KEY_UP)) { // build 98: held, it scrolls
+         if (fbCursor > 0) {
+             fbCursor--;
+             sfxPlay(SFX_CURSOR);
+         }
+-    } else if (getKeyOn(KEY_DOWN)) {
++    } else if (fbHeldStep(KEY_DOWN)) {
+         if (fbCursor < fbCount - 1) {
+             fbCursor++;
+             sfxPlay(SFX_CURSOR);
+@@ -2025,6 +2331,106 @@ int ripps2FilesBusy(void)
      return fbBusy || fbPath[0] != '\0';
  }
  
@@ -1236,7 +1316,7 @@ index f4fad92..99ad41d 100644
  void ripps2RenderFiles(void)
  {
      int i, rowFont = gTheme->fonts[8], smallFont = gTheme->fonts[5], uiFont = gTheme->fonts[4];
-@@ -2045,6 +2420,11 @@ void ripps2RenderFiles(void)
+@@ -2045,6 +2451,11 @@ void ripps2RenderFiles(void)
      }
      if (!fbBusy)
          fbRestoreCursor();
@@ -1248,7 +1328,7 @@ index f4fad92..99ad41d 100644
  
      // the path, and the clipboard / what just happened
      fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : "MEMORY FILES", FB_LIT);
-@@ -2132,6 +2512,8 @@ void ripps2RenderFiles(void)
+@@ -2132,6 +2543,8 @@ void ripps2RenderFiles(void)
          }
      }
  
@@ -1257,6 +1337,86 @@ index f4fad92..99ad41d 100644
      if (fbGridOpen && fbDrawGrid())
          return; // the grid draws its own hints
      // the hints
+diff --git a/src/ripps2media.c b/src/ripps2media.c
+index 2e43979..741e0e1 100644
+--- a/src/ripps2media.c
++++ b/src/ripps2media.c
+@@ -21,6 +21,7 @@
+ #include <malloc.h>
+ #include <setjmp.h>
+ #include <time.h>
++#include <math.h>
+ #include <kernel.h>
+ #include <delaythread.h>
+ #include <png.h>
+@@ -373,6 +374,32 @@ static const char *viewLoad(const char *path, GSTEXTURE *t, int *sw, int *sh)
+     return NULL;
+ }
+ 
++// build 98: a button glyph at its own shape, 20 px tall, then its word; returns the x after it
++static int viewHint(int icon, const char *text, int x, int y, int alpha, int draw)
++{
++    GSTEXTURE *t = thmGetTexture(icon);
++    if (t != NULL && t->Height > 0) {
++        int gw = 20 * t->Width / t->Height;
++        if (draw)
++            rmDrawPixmap(t, x, y - 10, ALIGN_NONE, gw, 20, SCALING_RATIO, GS_SETREG_RGBA(0x80, 0x80, 0x80, alpha), 0);
++        x += rmWideScale(gw) + 4;
++    }
++    if (draw)
++        x = ripps2HintText(x, y, text, GS_SETREG_RGBA(0x90, 0x98, 0xB0, alpha));
++    else
++        x += ripps2HintWidth(text);
++    return x + 16;
++}
++
++static int viewHints(int x, int y, int alpha, int draw)
++{
++    x = viewHint(R2_ICON, "ZOOM", x, y, alpha, draw);
++    x = viewHint(RIPPS2_DPAD_UP, "MOVE", x, y, alpha, draw);
++    x = viewHint(R3_ICON, "TILT", x, y, alpha, draw);
++    x = viewHint(TRIANGLE_ICON, "FIT", x, y, alpha, draw);
++    return viewHint(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, "BACK", x, y, alpha, draw);
++}
++
+ void ripps2ViewPicture(const char *path)
+ {
+     GSTEXTURE tex;
+@@ -409,17 +436,26 @@ void ripps2ViewPicture(const char *path)
+         rmDrawRect(0, 0, scrW, scrH, GS_SETREG_RGBA(0x02, 0x03, 0x0A, 0x80));
+         padGetRightStick(&rx, &ry);
+         int tilt = rx > 24 || rx < -24 || ry > 24 || ry < -24;
+-        if (tilt) // RIPPS2's tilt, about the picture's centre
+-            rmSetTilt(1, (int)(320 + px), (int)(240 + py), rx / 127.0f * 0.35f, -ry / 127.0f * 0.30f);
+-        rmDrawPixmap(&tex, (int)(320 + px), (int)(240 + py), ALIGN_CENTER, (int)w, (int)h, SCALING_RATIO,
+-                     GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
++        if (tilt) // RIPPS2's tilt, about the middle of the screen (the picture's centre until it outgrows the page)
++            rmSetTilt(1, 320, 240, rx / 127.0f * 0.35f, -ry / 127.0f * 0.30f);
++        // build 98: only the part on the screen is drawn, with a margin the tilt never brings into view. Zoomed
++        // in, the whole picture's quad ran thousands of pixels past the page, further than the GS can place a
++        // corner, and the picture came out sheared.
++        float hw = w * squeeze / 2.0f, hh = h / 2.0f, x0 = 320.0f + px - hw, y0 = 240.0f + py - hh;
++        float cx0 = floorf(x0 < -160.0f ? -160.0f : x0), cx1 = ceilf(x0 + 2 * hw > 800.0f ? 800.0f : x0 + 2 * hw);
++        float cy0 = floorf(y0 < -120.0f ? -120.0f : y0), cy1 = ceilf(y0 + 2 * hh > 600.0f ? 600.0f : y0 + 2 * hh);
++        if (cx1 > cx0 && cy1 > cy0)
++            rmDrawPixmapPart(&tex, (int)cx0, (int)cy0, ALIGN_NONE, (int)(cx1 - cx0), (int)(cy1 - cy0), SCALING_NONE,
++                             GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), (cx0 - x0) / (2 * hw) * tex.Width, (cy0 - y0) / (2 * hh) * tex.Height,
++                             (cx1 - x0) / (2 * hw) * tex.Width, (cy1 - y0) / (2 * hh) * tex.Height);
+         if (tilt)
+             rmSetTilt(0, 0, 0, 0.0f, 0.0f);
+-        if (infoA > 0) {
++        if (infoA > 0) { // build 98: Adapt's face, and the buttons as glyphs on a band that keeps them readable
+             snprintf(info, sizeof(info), "%s   %d x %d   %d%%", name, sw, sh, (int)(zoom * 100.0f * fitH / (float)sh + 0.5f));
+-            fntRenderString(gTheme->fonts[0], 320, 22, ALIGN_CENTER, 0, 0, info, GS_SETREG_RGBA(0xE0, 0xE8, 0xFF, infoA));
+-            fntRenderString(gTheme->fonts[0], 320, 458, ALIGN_CENTER, 0, 0, "R2 zoom in   L2 zoom out   D-pad move   right stick tilt   Triangle fit",
+-                            GS_SETREG_RGBA(0xA0, 0xB0, 0xE0, infoA));
++            rmDrawRect(0, 6, 640, 32, GS_SETREG_RGBAQ(0x02, 0x03, 0x0A, infoA * 3 / 4, 0x00));
++            fntRenderString(RIPPS2_DIA_FONT, 320, 22, ALIGN_CENTER, 600, 0, info, GS_SETREG_RGBA(0xE0, 0xE8, 0xFF, infoA));
++            rmDrawRect(0, 442, 640, 32, GS_SETREG_RGBAQ(0x02, 0x03, 0x0A, infoA * 3 / 4, 0x00));
++            viewHints(320 - (viewHints(0, 458, infoA, 0) - 16) / 2, 458, infoA, 1);
+         }
+         guiEndFrame();
+ 
 diff --git a/src/ripps2status.c b/src/ripps2status.c
 index ec9cb0d..84b46a6 100644
 --- a/src/ripps2status.c

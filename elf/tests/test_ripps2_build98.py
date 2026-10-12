@@ -228,6 +228,17 @@ if '{"YES, REPLACE IT", "NO, KEEP IT", "YES TO ALL"}' not in fb2 or 'fbPasteAskR
     fail.append('a paste onto a name already there must ask Yes / No / Yes to All and replace when told')
 if '#define FB_TIP_REST_S 0.42f' not in fb2 or 'fileXioGetStat(path, &st)' not in fb2 or 'fbDrawTip(); // build 98' not in fb2:
     fail.append('resting 0.42 s on an entry must show its size and times, read on the IO worker')
+fb3 = rd('src/ripps2files.c')
+if '#define FB_HOLD_S 0.42f' not in fb3 or 'int ms = 500 - gScrollSpeed * 200;' not in fb3 or \
+        'if (fbHeldStep(KEY_UP)) { // build 98: held, it scrolls' not in fb3 or '} else if (fbHeldStep(KEY_DOWN)) {' not in fb3:
+    fail.append('a held Up or Down must scroll the file list after 0.42 s at the Storage list speed')
+ed = rd('src/ripps2edit.c')
+if 'edHint(okIcon, "CHOOSE", &hx, hy);' not in ed or 'edHint(backIcon, "BACK", &hx, hy);' not in ed:
+    fail.append('the Actions list must show its buttons as glyph hints')
+md = rd('src/ripps2media.c')
+if 'rmDrawPixmapPart(&tex, (int)cx0, (int)cy0, ALIGN_NONE' not in md or 'fntRenderString(RIPPS2_DIA_FONT, 320, 22' not in md or \
+        'x = viewHint(R2_ICON, "ZOOM", x, y, alpha, draw);' not in md or 'R2 zoom in   L2 zoom out' in md:
+    fail.append('the picture viewer must draw only what is on screen, in Adapt face, with glyph hints')
 if 'RIPgrid' in th or '"<RIPGRID>"' not in th:
     fail.append('RIPGRID is written in capitals')
 
