@@ -1,0 +1,515 @@
+diff --git a/include/bdmsupport.h b/include/bdmsupport.h
+index 5b701a5..64fae57 100644
+--- a/include/bdmsupport.h
++++ b/include/bdmsupport.h
+@@ -84,7 +84,10 @@ int bdmHDDIsPresent(u32 timeoutMs);
+ // resolver, the Neutrino pickers) must stay on massN:.
+ int bdmGetDeviceRootByType(int bdmType, char *root, int rootLen);
+ int bdmSlotDeviceType(int slot); // RIPPS2: BDM_TYPE_* of what is mounted at mass<slot>:, -2 when nothing is
+-const char *bdmSlotDriveName(int slot); // RIPPS2 build 99: USB, HDD, iLINK, MX4SIO, UDPBD or DRIVE by its driver; NULL: none
++const char *bdmSlotDriveName(int slot);
++// RIPPS2 build 100: start the ISO/ZSO at path (on this BDM drive) where it sits, as Storage starts a game; returns only if
++// the launch did not happen
++void bdmLaunchIsoAt(item_list_t *itemList, const char *path, const char *startup, int dvd, config_set_t *configSet); // RIPPS2 build 99: USB, HDD, iLINK, MX4SIO, UDPBD or DRIVE by its driver; NULL: none
+ int bdmMx4sioReport(int *err, char *root, int rootLen); // RIPPS2 build 98: STATUS > DRIVES' MX4SIO line
+ // Fill `slots` with the massN: slot index of EVERY mounted device whose driver matches bdmType (root =
+ // "mass<i>:/"), up to maxSlots; returns the count. The BDMA equip searches all same-type slots so a
+diff --git a/include/supportbase.h b/include/supportbase.h
+index eb98975..5a6d355 100644
+--- a/include/supportbase.h
++++ b/include/supportbase.h
+@@ -80,6 +80,8 @@ void sbCreatePath(const base_game_info_t *game, char *path, const char *prefix,
+ void sbDelete(base_game_info_t **list, const char *prefix, const char *sep, int gamecount, int id);
+ void sbRename(base_game_info_t **list, const char *prefix, const char *sep, int gamecount, int id, char *newname);
+ config_set_t *sbPopulateConfig(base_game_info_t *game, const char *prefix, const char *sep);
++void sbSetPathOverride(const char *path);                       // RIPPS2 build 100: an ISO/ZSO launched where it sits
++int sbIsoStartup(const char *path, char *startup, int size);    // RIPPS2 build 100: its boot file from SYSTEM.CNF
+ // Gate for sbPopulateConfig's per-game size stat. OFF while scrolling the game list -- over SMB a
+ // fresh stat() of an ISO can cost seconds, and the main page only needs the metadata-derived badges
+ // (#DiscType/#Media/#Format), never #Size. The info screen flips it on via menuRequestInfoSize() so
+diff --git a/include/themes.h b/include/themes.h
+index 71ae268..044bb09 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -280,6 +280,9 @@ extern theme_t *gTheme;
+ // RIPPS2 build 96: settings pages and message boxes, on every theme: Adapt's settings face (Roboto Bold Condensed),
+ // plainer than a theme's styled menu fonts
+ #define RIPPS2_DIA_FONT (gTheme->diaFont)
++// RIPPS2 build 100: the START menu, the Settings hub and its save prompt, the game and app menus: Adapt's face too, so
++// the way into Settings reads the same on every theme as the pages it leads to (user, 10-12)
++#define RIPPS2_MENU_FONT RIPPS2_DIA_FONT
+ // RIPPS2: Sleek Bold with a true lowercase (builtin:ripps2sleekcase, theme font15), for typed text
+ #define RIPPS2_CASE_FONT (gTheme->fonts[15])
+ // RIPPS2 build 70: the same lowercase face, large (theme font9): a title in true case (RetroAchievements)
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index 003303e..06e73f6 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -1909,13 +1909,27 @@ static void bdmLaunchVcd(item_list_t *itemList, const char *vcdName, config_set_
+         } else if (gVcdUsbBdmaMode == VCD_USB_BDMA_FAT32) {
+             usbBdmaVariant = VCD_BDMA_FAT32;
+         } else {
+-            int usbMode = guiShowVcdUsbMode();
+-            if (usbMode == VCDUSB_BTN_FAT32)
++            // RIPPS2 build 100 (user: it insisted on setting POPSTARTER up again for every game): the last answer is
++            // remembered, and while the card is still set up for it (the exFAT pair equipped, or no pair: fat32) it is
++            // the answer, with no question. A card that changed asks again.
++            config_set_t *configOPL = configGetByType(CONFIG_OPL);
++            int last = 0;
++            configGetInt(configOPL, "ripps2_vcd_usb", &last);
++            if (last == 1 && vcdBdmaEnvironmentValid(VCD_BDMA_FAT32))
+                 usbBdmaVariant = VCD_BDMA_FAT32;
+-            else if (usbMode == VCDUSB_BTN_EXFAT)
++            else if (last == 2 && vcdBdmaEnvironmentValid(VCD_BDMA_USBEXFAT))
+                 usbBdmaVariant = VCD_BDMA_USBEXFAT;
+-            else
+-                return; // dialog cancelled -- nothing written, nothing prepared, nothing displayed
++            else {
++                int usbMode = guiShowVcdUsbMode();
++                if (usbMode == VCDUSB_BTN_FAT32)
++                    usbBdmaVariant = VCD_BDMA_FAT32;
++                else if (usbMode == VCDUSB_BTN_EXFAT)
++                    usbBdmaVariant = VCD_BDMA_USBEXFAT;
++                else
++                    return; // dialog cancelled -- nothing written, nothing prepared, nothing displayed
++                configSetInt(configOPL, "ripps2_vcd_usb", usbBdmaVariant == VCD_BDMA_FAT32 ? 1 : 2);
++                saveConfig(CONFIG_OPL, 0);
++            }
+         }
+     }
+ 
+@@ -2163,6 +2177,33 @@ fail:
+ // Where this image's two VMC slots live (sbMcemuSlotWord): searched on the first launch only.
+ static int bdmMcemuSlots[2] = {-2, -2};
+ 
++// RIPPS2 build 100: Memory Files starts an ISO or ZSO where it sits, not only in the drive's CD or DVD folder: a game of
++// its own for this one launch, every path of it the file (sbSetPathOverride), the normal teardown after
++static base_game_info_t bdmPathGame;
++static int bdmPathLaunch = 0;
++
++void bdmLaunchIsoAt(item_list_t *itemList, const char *path, const char *startup, int dvd, config_set_t *configSet)
++{
++    const char *name = strrchr(path, '/'), *dot;
++
++    if (itemList == NULL || itemList->priv == NULL || path == NULL || startup == NULL)
++        return;
++    name = name != NULL ? name + 1 : path;
++    dot = strrchr(name, '.');
++    memset(&bdmPathGame, 0, sizeof(bdmPathGame));
++    snprintf(bdmPathGame.name, sizeof(bdmPathGame.name), "%.*s", dot != NULL ? (int)(dot - name) : (int)strlen(name), name);
++    snprintf(bdmPathGame.extension, sizeof(bdmPathGame.extension), "%s", dot != NULL ? dot : ".iso");
++    snprintf(bdmPathGame.startup, sizeof(bdmPathGame.startup), "%s", startup);
++    bdmPathGame.parts = 1;
++    bdmPathGame.media = dvd ? SCECdPS2DVD : SCECdPS2CD;
++    bdmPathGame.format = GAME_FORMAT_ISO;
++    bdmPathLaunch = 1;
++    sbSetPathOverride(path);
++    bdmLaunchGame(itemList, 0, configSet);
++    bdmPathLaunch = 0; // back here: the launch did not happen
++    sbSetPathOverride(NULL);
++}
++
+ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+ {
+     int i, fd, iop_fd, index, compatmask = 0;
+@@ -2178,7 +2219,10 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+ 
+     bdm_device_data_t *pDeviceData = NULL;
+ 
+-    if (gAutoLaunchBDMGame == NULL) {
++    if (bdmPathLaunch) { // RIPPS2 build 100: the file where it sits (bdmLaunchIsoAt)
++        pDeviceData = (bdm_device_data_t *)itemList->priv;
++        game = &bdmPathGame;
++    } else if (gAutoLaunchBDMGame == NULL) {
+         pDeviceData = (bdm_device_data_t *)itemList->priv;
+         // Resolve through the ACTIVE view's array (#120 split): in the VCD view this yields the VCD
+         // entry whose name the POPSTARTER handoff below uses, and any stale/invalid id yields the
+@@ -2206,7 +2250,7 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+     // disc / Neutrino path below (which is entirely disc-specific). The BDM_TYPE_ATA internal exFAT HDD
+     // still launches off the live massN: prefix, NOT ata0:/ (OPL never mounts an ata0: filesystem -- a
+     // re-point there made LoadELFFromFile fail into an already-deinit'd OPL = black-screen freeze).
+-    if (gAutoLaunchBDMGame == NULL && game != NULL && (bdmGetItemView(itemList, id) == LIB_VIEW_PS1)) {
++    if (gAutoLaunchBDMGame == NULL && !bdmPathLaunch && game != NULL && (bdmGetItemView(itemList, id) == LIB_VIEW_PS1)) {
+         // ONE PS1 list, TWO cores. Which one runs this title is a property of the ROW -- a .VCD row
+         // goes to POPSTARTER, an Ember game folder to ember.elf -- and NEVER of the page, because
+         // both kinds sit side by side in the same list. Asking the view here instead of the row is
+diff --git a/src/gui.c b/src/gui.c
+index 69daded..a6d5bb4 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -3663,11 +3663,11 @@ static int guiSettingsPromptSave(void)
+             guiDrawBGPlasma();
+ 
+         guiDrawStatusBackdrop(); // RIPPS2: the pillars behind the glass page panel (was a dark wash and two rules)
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, 150, ALIGN_CENTER, 0, 0,
++        fntRenderString(RIPPS2_MENU_FONT, screenWidth >> 1, 150, ALIGN_CENTER, 0, 0,
+                         _l(_STR_SETTINGS_SAVE_PROMPT), gTheme->selTextColor);
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, 205, ALIGN_CENTER, 0, 0,
++        fntRenderString(RIPPS2_MENU_FONT, screenWidth >> 1, 205, ALIGN_CENTER, 0, 0,
+                         _l(_STR_SETTINGS_SAVE_PROMPT_LINE1), gTheme->textColor);
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, 230, ALIGN_CENTER, 0, 0,
++        fntRenderString(RIPPS2_MENU_FONT, screenWidth >> 1, 230, ALIGN_CENTER, 0, 0,
+                         _l(_STR_SETTINGS_SAVE_PROMPT_LINE2), gTheme->textColor);
+ 
+         x = guiAlignSubMenuHints(3, promptHints, promptIcons, RIPPS2_UI_FONT, 12, 1);
+@@ -3743,18 +3743,18 @@ static int guiSettingsShowIndex(int *page)
+         if (guiDrawBGSettings() == 0)
+             guiDrawBGPlasma();
+ 
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, 50, ALIGN_CENTER, 0, 0, _l(_STR_SETTINGS), gTheme->textColor);
++        fntRenderString(RIPPS2_MENU_FONT, screenWidth >> 1, 50, ALIGN_CENTER, 0, 0, _l(_STR_SETTINGS), gTheme->textColor);
+ 
+         // Keep the exact running build visible on the Settings hub so bug reports do not require
+         // opening About/Credits just to discover the version. OPL_VERSION already includes the
+         // release/revision/hash/toolchain suffix used everywhere else in the build.
+         char versionLine[80];
+         snprintf(versionLine, sizeof(versionLine), "RiptOPL %s", OPL_VERSION);
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, 72, ALIGN_CENTER, 0, 0, versionLine, gTheme->textColor);
++        fntRenderString(RIPPS2_MENU_FONT, screenWidth >> 1, 72, ALIGN_CENTER, 0, 0, versionLine, gTheme->textColor);
+ 
+         y = (gTheme->usedHeight >> 1) - (spacing * (itemCount >> 1));
+         for (int i = 0; i < itemCount; i++) {
+-            fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, y, ALIGN_CENTER, 0, 0, labels[i], (i == selected) ? gTheme->selTextColor : gTheme->textColor);
++            fntRenderString(RIPPS2_MENU_FONT, screenWidth >> 1, y, ALIGN_CENTER, 0, 0, labels[i], (i == selected) ? gTheme->selTextColor : gTheme->textColor);
+             y += spacing;
+             if (i == saveRow - 1)
+                 y += spacing / 2;
+diff --git a/src/menusys.c b/src/menusys.c
+index f1b217f..5a0deff 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -1550,7 +1550,7 @@ void menuRenderMenu()
+     int cp = 0; // current position
+     for (it = mainMenu; it; it = it->next, cp++) {
+         // render, advance
+-        fntRenderString(RIPPS2_UI_FONT, 320, y, ALIGN_CENTER, 0, 0, submenuItemGetText(&it->item), (cp == sitem) ? gTheme->selTextColor : gTheme->textColor);
++        fntRenderString(RIPPS2_MENU_FONT, 320, y, ALIGN_CENTER, 0, 0, submenuItemGetText(&it->item), (cp == sitem) ? gTheme->selTextColor : gTheme->textColor);
+         y += spacing;
+         // Group the live service/settings actions above the informational/exit actions.
+         // Key this to the actual row ID, not enum arithmetic, so retired/reserved IDs cannot move the gap.
+@@ -2278,16 +2278,16 @@ void menuRenderGameMenu()
+     int cp = 0; // current position
+ 
+     // game title
+-    fntRenderString(RIPPS2_UI_FONT, 320, 20, ALIGN_CENTER, 0, 0, selected_item->item->current->item.text, gTheme->selTextColor);
++    fntRenderString(RIPPS2_MENU_FONT, 320, 20, ALIGN_CENTER, 0, 0, selected_item->item->current->item.text, gTheme->selTextColor);
+ 
+     // config source
+     char *cfgSource = gameConfigSource();
+-    fntRenderString(RIPPS2_UI_FONT, 320, 40, ALIGN_CENTER, 0, 0, cfgSource, gTheme->textColor);
++    fntRenderString(RIPPS2_MENU_FONT, 320, 40, ALIGN_CENTER, 0, 0, cfgSource, gTheme->textColor);
+ 
+     // settings list
+     for (it = gameMenu; it; it = it->next, cp++) {
+         // render, advance
+-        fntRenderString(RIPPS2_UI_FONT, 320, y, ALIGN_CENTER, 0, 0, submenuItemGetText(&it->item), (cp == sitem) ? gTheme->selTextColor : gTheme->textColor);
++        fntRenderString(RIPPS2_MENU_FONT, 320, y, ALIGN_CENTER, 0, 0, submenuItemGetText(&it->item), (cp == sitem) ? gTheme->selTextColor : gTheme->textColor);
+         y += spacing;
+         if (cp == (GAME_SAVE_CHANGES - 1) || cp == (GAME_REMOVE_CHANGES - 1))
+             y += spacing / 2;
+@@ -2492,7 +2492,7 @@ void menuRenderAppMenu()
+     int cp = 0; // current position
+ 
+     // app title
+-    fntRenderString(RIPPS2_UI_FONT, 320, 20, ALIGN_CENTER, 0, 0, selected_item->item->current->item.text, gTheme->selTextColor);
++    fntRenderString(RIPPS2_MENU_FONT, 320, 20, ALIGN_CENTER, 0, 0, selected_item->item->current->item.text, gTheme->selTextColor);
+ 
+     // A PS1 row opens this smaller menu, not the PS2 VMC editor. Say why the missing PS2 control
+     // is intentional without claiming that Ember and POPSTARTER store their cards identically.
+@@ -2502,7 +2502,7 @@ void menuRenderAppMenu()
+ 
+     for (it = appMenu; it; it = it->next, cp++) {
+         // render, advance
+-        fntRenderString(RIPPS2_UI_FONT, 320, y, ALIGN_CENTER, 0, 0, submenuItemGetText(&it->item), (cp == sitem) ? gTheme->selTextColor : gTheme->textColor);
++        fntRenderString(RIPPS2_MENU_FONT, 320, y, ALIGN_CENTER, 0, 0, submenuItemGetText(&it->item), (cp == sitem) ? gTheme->selTextColor : gTheme->textColor);
+         y += spacing;
+     }
+ 
+diff --git a/src/ripps2edit.c b/src/ripps2edit.c
+index 951ca63..6480771 100644
+--- a/src/ripps2edit.c
++++ b/src/ripps2edit.c
+@@ -44,6 +44,8 @@
+ #define ED_X         30
+ #define ED_RIGHT     610
+ 
++// build 100: the title, the line numbers, menus and labels too, not the theme's fonts 4 and 5 (Planet N on RIPPS2)
++#define ED_FONT RIPPS2_CASE_FONT
+ #define ED_LIT  GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80)
+ #define ED_DIM  GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80)
+ #define ED_SOFT GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)
+@@ -70,9 +72,9 @@ static void edHighlight(int y)
+ static void edFrameStart(const char *title, const char *right)
+ {
+     guiDrawBGPlasma(); // the moving background and the glass page panel
+-    fntRenderString(gTheme->fonts[4], ED_X, 30, ALIGN_VCENTER, 0, 0, title, ED_LIT);
++    fntRenderString(ED_FONT, ED_X, 30, ALIGN_VCENTER, 0, 0, title, ED_LIT);
+     if (right != NULL && right[0])
+-        fntRenderString(gTheme->fonts[4], ED_RIGHT - fntCalcDimensions(gTheme->fonts[4], right), 30, ALIGN_VCENTER, 0, 0, right, ED_SOFT);
++        fntRenderString(ED_FONT, ED_RIGHT - fntCalcDimensions(ED_FONT, right), 30, ALIGN_VCENTER, 0, 0, right, ED_SOFT);
+     rmDrawLine(ED_X, 46, ED_RIGHT, 46, ED_PRIM(0x4A, 0x72, 0xDC, 0x60));
+ }
+ 
+@@ -96,7 +98,7 @@ static int edMenu(const char *const *items, int count)
+         // build 98: a strip of button hints at its foot (CHOOSE, BACK), like the pages it opens over
+         int w = 220, h = count * 24 + 20 + 28, x = 400, y = 120;
+         for (i = 0; i < count; i++) {
+-            int iw = fntCalcDimensions(gTheme->fonts[4], items[i]) + 32;
++            int iw = fntCalcDimensions(ED_FONT, items[i]) + 32;
+             if (iw > w)
+                 w = iw > 600 ? 600 : iw;
+         }
+@@ -111,7 +113,7 @@ static int edMenu(const char *const *items, int count)
+             int ry = y + 10 + i * 24;
+             if (i == sel)
+                 rmDrawRect(x + 4, ry, w - 8, 22, ED_PRIM(0x1E, 0x3C, 0x96, 0x60));
+-            fntRenderString(gTheme->fonts[4], x + 16, ry + 11, ALIGN_VCENTER, 0, 0, items[i], i == sel ? ED_LIT : ED_SOFT);
++            fntRenderString(ED_FONT, x + 16, ry + 11, ALIGN_VCENTER, 0, 0, items[i], i == sel ? ED_LIT : ED_SOFT);
+         }
+         int okIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
+         int hy = y + h - 14, hw = 24 + ripps2HintWidth("CHOOSE") + 18 + 24 + ripps2HintWidth("BACK");
+@@ -285,7 +287,7 @@ static void edDrawFile(void)
+         if (cur)
+             edHighlight(y);
+         snprintf(num, sizeof(num), "%d", edView.top + i + 1);
+-        fntRenderString(gTheme->fonts[5], ED_X + 30 - fntCalcDimensions(gTheme->fonts[5], num), y + 9, ALIGN_VCENTER, 0, 0, num, ED_DIM);
++        fntRenderString(ED_FONT, ED_X + 30 - fntCalcDimensions(ED_FONT, num), y + 9, ALIGN_VCENTER, 0, 0, num, ED_DIM);
+         fntRenderString(RIPPS2_CASE_FONT, ED_X + 42, y + 9, ALIGN_VCENTER, ED_RIGHT - ED_X - 46, 0, edLines[edView.top + i], cur ? ED_LIT : ED_SOFT);
+     }
+     int hx = 44;
+@@ -457,7 +459,7 @@ static void mdDraw(void)
+             rmDrawRect(ED_X - 6, y - 1, ED_RIGHT - ED_X + 12, 32, ED_PRIM(0x1E, 0x3C, 0x96, 0x58));
+             rmDrawRect(ED_X - 6, y - 1, 3, 32, ED_PRIM(0x6A, 0x9A, 0xFF, 0x80));
+         }
+-        fntRenderString(gTheme->fonts[4], ED_X + 4, y + 8, ALIGN_VCENTER, 0, 0, mdFields[f].label, cur ? ED_LIT : ED_SOFT);
++        fntRenderString(ED_FONT, ED_X + 4, y + 8, ALIGN_VCENTER, 0, 0, mdFields[f].label, cur ? ED_LIT : ED_SOFT);
+         if (mdFields[f].choices && v[0])
+             mdPretty(v, shown, sizeof(shown));
+         else
+@@ -465,9 +467,9 @@ static void mdDraw(void)
+         // bright: the user's own value; dim: what the metadata database says
+         fntRenderString(RIPPS2_CASE_FONT, ED_X + 4, y + 22, ALIGN_VCENTER, ED_RIGHT - ED_X - 120, 0, shown, mdView.user[f][0] ? ED_LIT : ED_DIM);
+         if (!mdView.user[f][0] && mdView.db[f][0])
+-            fntRenderString(gTheme->fonts[5], ED_RIGHT - fntCalcDimensions(gTheme->fonts[5], "DATABASE"), y + 8, ALIGN_VCENTER, 0, 0, "DATABASE", ED_DIM);
++            fntRenderString(ED_FONT, ED_RIGHT - fntCalcDimensions(ED_FONT, "DATABASE"), y + 8, ALIGN_VCENTER, 0, 0, "DATABASE", ED_DIM);
+         else if (mdView.user[f][0])
+-            fntRenderString(gTheme->fonts[5], ED_RIGHT - fntCalcDimensions(gTheme->fonts[5], "YOURS"), y + 8, ALIGN_VCENTER, 0, 0, "YOURS", ED_SOFT);
++            fntRenderString(ED_FONT, ED_RIGHT - fntCalcDimensions(ED_FONT, "YOURS"), y + 8, ALIGN_VCENTER, 0, 0, "YOURS", ED_SOFT);
+     }
+     int hx = 44;
+     edHint(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, mdFields[mdView.cursor].choices ? "NEXT VALUE" : "EDIT", &hx, 448);
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index 2f15aec..9b7c0c6 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -682,6 +682,7 @@ static int fbRemoveRetry(const char *path, int isDir);
+ static int fbCopyFile(const char *src, const char *dst)
+ {
+     int in = open(src, O_RDONLY), out, r, ok = 1;
++    u32 copied = 0;
+     if (in < 0) {
+         fbNoteFail("READ", src);
+         return 0;
+@@ -705,7 +706,8 @@ static int fbCopyFile(const char *src, const char *dst)
+     int tries = 0;
+     do {
+         errno = 0;
+-        out = open(target, O_WRONLY | O_CREAT, 0666);
++        // build 100: a replace also truncates, in case a drive kept the old file through its removal
++        out = open(target, O_WRONLY | O_CREAT | (fbReplacing ? O_TRUNC : 0), 0666);
+         if (out >= 0 || !fbIsMc(dst))
+             break;
+         DelayThread(50 * 1000);
+@@ -735,6 +737,7 @@ static int fbCopyFile(const char *src, const char *dst)
+             break;
+         }
+         fbDoneBytes += r;
++        copied += (u32)r;
+     }
+     if (r < 0) {
+         fbNoteFail("READ", src);
+@@ -742,6 +745,17 @@ static int fbCopyFile(const char *src, const char *dst)
+     }
+     close(out);
+     close(in);
++    // build 100: the copy is read back for its size before it counts (a replace "succeeded" with the old file left)
++    if (ok) {
++        int chk = open(target, O_RDONLY), size = chk >= 0 ? lseek(chk, 0, SEEK_END) : -1;
++        if (chk >= 0)
++            close(chk);
++        if (size < 0 || (u32)size != copied) {
++            errno = EIO;
++            fbNoteFail("CHECK", dst);
++            ok = 0;
++        }
++    }
+     if (!ok)
+         remove(dst);
+     else
+@@ -1446,6 +1460,58 @@ static int fbGameKind(const char *name)
+ // PS2 view), launched with its own settings, so RIPPS2's loader or Neutrino runs it as its Loader Core says,
+ // with its VMCs, cheats and the rest. (Storage's VMC-on-first-launch is left out here: it saves through the
+ // menu's current row, which is not this game.)
++// build 100: is there a folder of this name in the path ("mass0:/PS2/CD/sub/" has CD)?
++static int fbPathHasFolder(const char *path, const char *folder)
++{
++    int n = strlen(folder);
++    const char *p;
++    for (p = path; (p = strchr(p, '/')) != NULL; p++)
++        if (!strncasecmp(p + 1, folder, n) && p[1 + n] == '/')
++            return 1;
++    return 0;
++}
++
++// build 100: an ISO or ZSO started where it sits (user: "launch where they are, no move them error"): its boot file read
++// from the image, its CFG settings, the launch as Storage's, on the BDM drive it is on. A CD folder anywhere in its path
++// makes it a CD; anything else is a DVD, as most PS2 games are.
++static void fbRunIsoAt(item_list_t *src, const fb_entry_t *e)
++{
++    char ask[200], full[320], startup[GAME_STARTUP_MAX + 1];
++    const char *dot = strrchr(e->name, '.');
++    base_game_info_t g;
++    int dvd = !fbPathHasFolder(fbPath, "CD");
++
++    if (src->mode < BDM_MODE || src->mode > BDM_MODE_LAST) {
++        guiMsgBox("On an MMCE card a game starts from the card's CD or DVD folder.", 0, NULL);
++        return;
++    }
++    fbJoin(full, sizeof(full), fbPath, e->name);
++    guiRenderTextScreen("Reading the disc image");
++    if (!sbIsoStartup(full, startup, sizeof(startup))) {
++        guiMsgBox("This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.", 0, NULL);
++        return;
++    }
++    snprintf(ask, sizeof(ask), "Play %.*s?", dot != NULL ? (int)(dot - e->name) : (int)strlen(e->name), e->name);
++    if (!guiMsgBox(ask, 1, NULL))
++        return;
++    memset(&g, 0, sizeof(g));
++    snprintf(g.name, sizeof(g.name), "%.*s", dot != NULL ? (int)(dot - e->name) : (int)strlen(e->name), e->name);
++    snprintf(g.startup, sizeof(g.startup), "%s", startup);
++    snprintf(g.extension, sizeof(g.extension), "%s", dot != NULL ? dot : ".iso");
++    g.parts = 1;
++    g.media = dvd ? SCECdPS2DVD : SCECdPS2CD;
++    g.format = GAME_FORMAT_ISO;
++    (void)cacheCancelPendingImageLoadsTimed(0); // the launch owns the drive now
++    config_set_t *cfg = sbPopulateConfig(&g, src->itemGetPrefix(src), "/");
++    ripps2LaunchDiscArm(src, startup);
++    ripps2PlayLaunchSequence();
++    guiShowGameID(startup);
++    bdmLaunchIsoAt(src, full, startup, dvd, cfg); // returns only when the launch failed
++    ripps2LaunchAborted();
++    if (cfg != NULL)
++        configFree(cfg);
++}
++
+ static void fbRunIso(const fb_entry_t *e)
+ {
+     char ask[200], want[160], full[ISO_GAME_NAME_MAX + GAME_STARTUP_MAX + 8], startup[GAME_STARTUP_MAX + 1];
+@@ -1461,8 +1527,7 @@ static void fbRunIso(const fb_entry_t *e)
+     snprintf(want, sizeof(want), "%s%s", prefix != NULL ? prefix : "", prefix != NULL && prefix[0] && prefix[strlen(prefix) - 1] != '/' ? "/" : "");
+     cd = strlen(fbPath) > strlen(want) && !strncasecmp(fbPath, want, strlen(want)) && !strcasecmp(fbPath + strlen(want), "CD/");
+     if (!cd && !(strlen(fbPath) > strlen(want) && !strncasecmp(fbPath, want, strlen(want)) && !strcasecmp(fbPath + strlen(want), "DVD/"))) {
+-        snprintf(ask, sizeof(ask), "PS2 games start from the CD or DVD folder in %s. Move this image there and try again.", want);
+-        guiMsgBox(ask, 0, NULL);
++        fbRunIsoAt(src, e); // build 100: anywhere else, it starts where it sits
+         return;
+     }
+     view = *src;
+@@ -1479,10 +1544,8 @@ static void fbRunIso(const fb_entry_t *e)
+         if (found < 0 && g->format == GAME_FORMAT_OLD_ISO && !strcasecmp(full, e->name))
+             found = i;
+     }
+-    if (found < 0) {
+-        guiMsgBox("This game is not in the drive's game list yet (Storage lists it after a refresh, or shows a subfolder now). "
+-                  "Refresh the drive in Storage, then start it here or there.",
+-                  0, NULL);
++    if (found < 0) { // build 100: not in the list (yet): it starts where it sits all the same
++        fbRunIsoAt(src, e);
+         return;
+     }
+     snprintf(ask, sizeof(ask), "Play %s?", view.itemGetName(&view, found));
+@@ -1797,6 +1860,11 @@ static void fbAction(int act)
+             fbPasteAskReplace(); // build 98: names already there: replace them?
+             if (fbClipCut)
+                 fbReleaseMusic(fbClipDir, fbClip, fbClipCount); // build 98: a move removes the original
++            for (n = 0; n < fbClipCount; n++)
++                if (fbClipReplace[n]) { // build 100: a replace erases the file there first: the music lets it go too
++                    fbReleaseMusic(fbPath, fbClip, fbClipCount);
++                    break;
++                }
+             fbRun(FB_OP_PASTE, fbPasteMode == FB_PASTE_PSU ? "EXPORTING" : fbPasteMode == FB_PASTE_UNPACK ? "UNPACKING" : fbClipCut ? "MOVING" : "PASTING");
+             break;
+         case FB_ACT_DELETE:
+diff --git a/src/ripps2media.c b/src/ripps2media.c
+index c46c24c..f5511c5 100644
+--- a/src/ripps2media.c
++++ b/src/ripps2media.c
+@@ -761,10 +761,11 @@ void ripps2ViewSaveIcon(const char *path)
+             break;
+         int rx, ry;
+         padGetRightStick(&rx, &ry);
++        // build 100: the front turns the way pressed (a front point's x is -sin(yaw): more yaw moves it left)
+         if (getKeyPressed(KEY_LEFT) || rx < -24)
+-            yaw -= dt * (rx < -24 ? -rx / 127.0f : 1.0f) * 2.5f;
++            yaw += dt * (rx < -24 ? -rx / 127.0f : 1.0f) * 2.5f;
+         if (getKeyPressed(KEY_RIGHT) || rx > 24)
+-            yaw += dt * (rx > 24 ? rx / 127.0f : 1.0f) * 2.5f;
++            yaw -= dt * (rx > 24 ? rx / 127.0f : 1.0f) * 2.5f;
+         if (getKeyPressed(KEY_UP) || ry < -24)
+             pitch -= dt * (ry < -24 ? -ry / 127.0f : 1.0f) * 2.0f;
+         if (getKeyPressed(KEY_DOWN) || ry > 24)
+diff --git a/src/supportbase.c b/src/supportbase.c
+index 821b1c6..dc36512 100644
+--- a/src/supportbase.c
++++ b/src/supportbase.c
+@@ -1063,8 +1063,34 @@ void sbRebuildULCfg(base_game_info_t **list, const char *prefix, int gamecount,
+     }
+ }
+ 
++// RIPPS2 build 100: a game started from Memory Files where it sits (not in CD or DVD). While set, every path of an ISO or
++// ZSO game is this file, so the launch, its layer probe and its fragment list all read it. Set only around that launch.
++static char sbPathOverride[256] = "";
++
++void sbSetPathOverride(const char *path)
++{
++    snprintf(sbPathOverride, sizeof(sbPathOverride), "%s", path != NULL ? path : "");
++}
++
++// RIPPS2 build 100: an image's boot file ("SLUS_200.62") from its SYSTEM.CNF, as the scan reads it; 1 = found
++int sbIsoStartup(const char *path, char *startup, int size)
++{
++    char st[GAME_STARTUP_MAX];
++    int ok, fd = fileXioMount("iso:", path, FIO_MT_RDONLY);
++
++    ok = fd >= 0 && GetStartupExecName("iso:/SYSTEM.CNF;1", st, GAME_STARTUP_MAX - 1) == 0;
++    fileXioUmount("iso:");
++    if (ok)
++        snprintf(startup, size, "%s", st);
++    return ok;
++}
++
+ static void sbCreatePath_name(const base_game_info_t *game, char *path, const char *prefix, const char *sep, int part, const char *game_name)
+ {
++    if (sbPathOverride[0] != '\0' && (game->format == GAME_FORMAT_ISO || game->format == GAME_FORMAT_OLD_ISO)) {
++        snprintf(path, 256, "%s", sbPathOverride); // build 100: the file where it sits
++        return;
++    }
+     // Folder browsing: a game inside a subfolder sits at <prefix>CD|DVD/<sub>/<name>. sbBrowseSub is
+     // "" for the normal device-root case, so subseg collapses to nothing and the path is unchanged.
+     // WITHOUT this, every consumer of sbCreatePath composed a DEVICE-ROOT path for a game the user
+diff --git a/src/themes.c b/src/themes.c
+index 8101eb7..0b40e03 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -2524,7 +2524,10 @@ static void gridFlipUpdate(const void *selected, int backReady)
+     if (!flipHoldDone && (float)(now - flipHoldSince) / (float)CLOCKS_PER_SEC >= FLIP_HOLD_S) {
+         int k = gridFlipFind(selected, 1);
+         gridFlips[k].target = !gridFlips[k].target;
+-        gridFlips[k].side = -side; // the leaning side goes away first, as the tilt sends it
++        // build 100: both turns go the way the stick pushes. The drawn turn is side * pi * eased(pos); going home pos
++        // runs back to 0, so the home turn needs the opposite sign for the same push. Both used -side, so the turn to
++        // the back spun against the push while the turn home looked right (user, 10-12).
++        gridFlips[k].side = gridFlips[k].target ? side : -side;
+         flipHoldDone = 1;          // let go and hold again to turn it back
+         sfxPlay(SFX_PAGE_IN);
+     }
