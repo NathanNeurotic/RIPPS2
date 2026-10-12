@@ -458,6 +458,102 @@ index c46c24c..f5511c5 100644
          if (getKeyPressed(KEY_UP) || ry < -24)
              pitch -= dt * (ry < -24 ? -ry / 127.0f : 1.0f) * 2.0f;
          if (getKeyPressed(KEY_DOWN) || ry > 24)
+diff --git a/src/sound.c b/src/sound.c
+index 024f50f..da2fac4 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -134,6 +134,18 @@ static void voiceMute(int v)
+     }
+ }
+ 
++// RIPPS2 build 100: the beep. audsrv_adpcm_init keys every voice off and frees the sounds' SPU memory, and the next
++// load writes new sounds over it. A key-off is not silence: a voice still in its release (a BIOS rip's long hall)
++// goes on reading that memory as it is rewritten, and plays it as a tone (heard after the save message, whose own
++// sound was still ringing when the settings' reload began). Every voice is turned to nothing first.
++static void voicesSilence(void)
++{
++    int v;
++    for (v = 0; v < SFX_VOICES; v++)
++        audsrv_adpcm_set_volume_and_pan(v, 0, 0);
++    DelayThread(2 * 1000); // the volumes reach the SPU before the memory changes
++}
++
+ // A sound on the voice that has been free the longest. The play is asked first and the volume set once it is
+ // accepted, so a voice that turns out to be still sounding keeps its own (muted) volume. The voice, or -1
+ static int sfxStart(int id, int volume)
+@@ -417,6 +429,7 @@ int sfxInit(int bootSnd)
+     if (sfxPreviewing)
+         return 0; // Memory Files' preview has the voices; its close loads the set again
+ 
++    voicesSilence(); // build 100
+     audsrv_adpcm_init();
+     voicesReset();
+     sfxInitDefaults();
+@@ -455,6 +468,8 @@ int sfxInit(int bootSnd)
+     loaded = 0;
+     memset(sfxReady, 0, sizeof(sfxReady));
+     memset(sfxSkipped, 0, sizeof(sfxSkipped));
++    unsigned char fromTheme[SFX_COUNT];
++    memset(fromTheme, 0, sizeof(fromTheme));
+     for (i = bootSnd ? 0 : 1; i < SFX_COUNT; i++) {
+         full_path[0] = '\0';
+         if (themeSfx) {
+@@ -462,8 +477,15 @@ int sfxInit(int bootSnd)
+             ret = sfxRead(full_path, &sfx_files[i]);
+             if (ret != 0 && ret != -ENOENT)
+                 sfxSkipped[i] = 1;
++            fromTheme[i] = sfx_files[i].buffer != NULL;
+         }
+-        if (sfx_files[i].buffer == NULL && audioSfx) { // build 98: the AUDIO folder's, when the theme has none
++        // build 100: no theme sound and a rip side by side. An event the theme's set already covers (its transition
++        // plays for page in and out, its message for error and save, its cursor for random) keeps the theme's; the
++        // AUDIO folder fills only what the theme leaves silent (user: no double sound effects).
++        int covered = 0, f;
++        for (f = sfxFallback[i]; f >= 0 && f < SFX_COUNT && !covered; f = sfxFallback[f])
++            covered = fromTheme[f];
++        if (sfx_files[i].buffer == NULL && audioSfx && !covered) { // build 98: the AUDIO folder's, when the theme has none
+             snprintf(full_path, sizeof(full_path), "%s/%s", audio_path, sfx_files[i].name);
+             ret = sfxRead(full_path, &sfx_files[i]);
+             if (ret == 0)
+@@ -589,6 +611,7 @@ int sfxPreviewStart(const char *path)
+             }
+         }
+     }
++    voicesSilence();     // build 100: nothing still ringing reads the memory about to change
+     audsrv_adpcm_init(); // every voice off and every sound dropped: the menu's set, and an earlier preview
+     voicesReset();
+     memset(sfxReady, 0, sizeof(sfxReady));
+@@ -615,6 +638,7 @@ void sfxPreviewStop(void)
+ {
+     if (!sfxPreviewing)
+         return;
++    voicesSilence(); // build 100
+     audsrv_adpcm_init();
+     voicesReset();
+     if (prevFile.buffer != NULL) {
+@@ -755,8 +779,14 @@ void sfxPlay(int id)
+         return;
+ 
+     // RIPPS2: an event without a sound of its own plays the one it falls back to, or nothing
++#ifdef __DEBUG
++    int asked = id; // build 100: every sound asked for, logged below, to find a sound nobody pressed for
++#endif
+     while (id >= 0 && id < SFX_COUNT && !sfxReady[id])
+         id = sfxFallback[id];
++#ifdef __DEBUG
++    LOG("SFX %d -> %d at %u ms\n", asked, id, (unsigned)(cpu_ticks() / SFX_CLOCKS_PER_MS));
++#endif
+     if (id < 0 || id >= SFX_COUNT || id == SFX_BOOT || !gEnableSFX)
+         return;
+ 
+@@ -814,6 +844,7 @@ void sfxBootStart(void)
+     audioInit();
+     if (!audio_initialized)
+         return;
++    voicesSilence(); // build 100
+     audsrv_adpcm_init();
+     voicesReset();
+     audioSetVolume();
 diff --git a/src/supportbase.c b/src/supportbase.c
 index 821b1c6..dc36512 100644
 --- a/src/supportbase.c
