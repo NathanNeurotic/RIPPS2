@@ -2,13 +2,13 @@
 
 # RIPPS2
 
-> ### Kill it: RIPPS2 build 99 (alpha)
+> ### Kill it: RIPPS2 build 100, the first beta
 > **RIP PS2, the ELF killer.** ELF-sufficient, never ELF-destructive: your other ELFs stay safe on the [shelf](https://akilluminati47.github.io/RIPPS2/) (nothing is deleted unless you ask), they just get a well-earned rest.
-> 1. **[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/download/v0.0.99-alpha/RIPPS2.elf)** (one file, about 3 MB), and the **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** if you like (Adapt, Adapt Rx; RIPGRID and RIPFLOW are built in).
+> 1. **[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/download/v0.1.0-beta/RIPPS2.elf)** (one file, about 3 MB), and the **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** if you like (Adapt, Adapt Rx; RIPGRID and RIPFLOW are built in).
 > 2. Copy it to a USB stick or memory card, and launch it from FreeMcBoot, PS2BBL, wLaunchELF or whatever you already use to start homebrew. In PCSX2: **System > Start File** and pick `RIPPS2.elf`.
 > 3. Tell us how it went: [open an issue](https://github.com/akilluminati47/RIPPS2/issues) or find **#RIPPS2** on the developers' Discord, [discord.gg/ggkCDWqhE](https://discord.gg/ggkCDWqhE) (invite good for October 2026).
 >
-> [What's new in build 99](https://github.com/akilluminati47/RIPPS2/releases/tag/v0.0.99-alpha) | [Changelog](CHANGELOG.md) | [Watch the build 99 Short](https://www.youtube.com/shorts/Ov5iA-tMcI8) (and [build 88's](https://www.youtube.com/shorts/Sqprz22tdtg), [the build 83 reel](https://youtu.be/A27N9s6tumk) and [its Short](https://youtube.com/shorts/4QBe5UO2KxM)) | [Every release](https://github.com/akilluminati47/RIPPS2/releases)<br>
+> [What's new in build 100](https://github.com/akilluminati47/RIPPS2/releases/tag/v0.1.0-beta) | [Changelog](CHANGELOG.md) | [Watch the build 99 Short](https://www.youtube.com/shorts/Ov5iA-tMcI8) (and [build 88's](https://www.youtube.com/shorts/Sqprz22tdtg), [the build 83 reel](https://youtu.be/A27N9s6tumk) and [its Short](https://youtube.com/shorts/4QBe5UO2KxM)) | [Every release](https://github.com/akilluminati47/RIPPS2/releases)<br>
 > [Theme RIPPS2](https://github.com/akilluminati47/RIPPS2-themes) (no rebuild, agent friendly) | [Fill your AUDIO folder](#the-sound-ripps2-was-made-with) with RIPPS2 Audio Studio
 
 RIPPS2 is a PS2 front end in a single `.elf`: a teardown and rebuild of [RiptOPL](https://github.com/NathanNeurotic/Open-PS2-Loader) (the Open PS2 Loader fork) with its own look, launchers, file browser and save tools. Glass towers stand behind your games and orbit formations behind your files, all drawn live by the PS2.
@@ -17,7 +17,7 @@ RIPPS2 is a PS2 front end in a single `.elf`: a teardown and rebuild of [RiptOPL
 - **STORAGE** is your game library: every drive in one list, with art, an info page whose art crossfades with the screenshots, per-game settings, and R3 to star a game into Starred Games.
 - **MEMORY FILES** is a built-in file browser: copy, move and delete across memory cards, USB and HDD; open OPL's VMC card images like folders; export and import PSU saves; edit text files; open pictures and play AVI video full screen; Start opens its settings. Square on a memory card opens the **CARD MANAGER**: back a card up to a VMC, write a VMC's saves back, erase the game saves, format.
 
-It is **alpha**. It runs in PCSX2, and it is being tested now by ripto, nuno6573, zackcage6, eliminator1403, FifthFox and Mr.sus.60. Keep your usual loader close by, and tell us what breaks: feedback is what makes RIPPS2.
+It is **beta** from build 100: a hundred builds of alpha, tested on consoles and in PCSX2 by ripto, nuno6573, zackcage6, eliminator1403, FifthFox and Mr.sus.60. Keep your usual loader close by, and tell us what breaks: feedback is what makes RIPPS2.
 
 ## Highlights
 

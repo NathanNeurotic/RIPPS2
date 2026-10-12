@@ -1,5 +1,34 @@
 # RIPPS2 changelog
 
+## Build 100 (beta, v0.1.0-beta), changes since build 99
+
+RIPPS2 leaves alpha: build 100 is the first beta, released as **v0.1.0-beta** (About reads BUILD 100 (BETA)).
+
+### Sound, cleaned up
+- **The ripped boot and launch music no longer pop.** Three of the boot bank's instruments (the PS2 logo, the boot's low swells) were read as the SPU2's noise generator and played as a random level held for a tenth of a second: a pop at every step. They are a real recording at the start of the bank. Checked on the PC against a real console's recordings: boot went from 274 click points to 2, launch from 50 to 0. RIPPS2 Audio Studio's renderer is fixed the same way.
+- **The beep after saving settings is gone.** Reloading the sounds (leaving Interface did it every time) let audsrv turn a still ringing voice back up to full while new sounds were written under it. Every voice now goes silent the moment a reload starts, only a voice with a sound playing is turned up, and only a new theme reloads the sounds at all.
+- **One press, one sound.** A press that opens something (a message, the save prompt, a page) used to play its confirm and, a few milliseconds later, the sound of what it opened, cutting the first one off: a tick, then the second sound. Now the press waits for the end of its frame and what it opened sounds instead. Saving sounds once, with its own box. Circle on a setting sounds as a cancel, not a confirm.
+- **Nothing sounds without a press.** The notices a drive scan raises (settings, themes or languages found) are silent, a drive that comes up because you pressed Start Device adds no connect sound, and turning a case over with the right stick is silent like its tilt.
+- **No double sounds:** your AUDIO folder fills only what the theme's sounds leave silent. Adapt and Adapt Rx now ship no sounds of their own, so your rips play as they are.
+
+### The menu music, ripped on its own
+- **Audio settings > BIOS Music > RIP** writes your console's menu music, the browser's ambient piece (5:31), as `bgm_00 Menu.wav`, made from the BIOS's own notes. Its size (15.1 MB) is shown first and you pick where it goes: beside RIPPS2, or OPL's AUDIO folder on a started drive. A memory card is never offered (none has room). **BIOS Sounds > RIP** now makes only the sounds, under 1 MB.
+- **The music plays from OPL's AUDIO folder too:** every started drive's OPL folder (USB, HDD, MMCE) adds its `bgm` tracks to the Music list beside RIPPS2's own, in file name order, and a drive that brings music starts it when nothing is playing.
+
+### RIPPS2's own save
+- **RIPPS2 keeps its settings in its own memory card save, `mc0:/RIPPS2`** (or the card you boot from): the dead elf's hat ringing its bell, the settings files and nothing else, about 55 KB. No more sharing settings files with another OPL beside the ELF. Your current settings are read once from where they were and saved there from then on; a Custom Settings Path still wins, and without a card nothing changes.
+- **The hat icon is lighter:** 51 KB instead of 90 KB, and a card holding the old one gets the new one.
+
+### Memory Files
+- **Replacing a file is a clean erase, then the copy, then a check** that the new file is whole; the music lets go of a file being replaced, and a failure says so.
+- **An ISO or ZSO starts where it is.** Outside the CD and DVD folders, or not yet in the drive's list, it starts all the same, with no "move it" message.
+- **The text editor** draws every line in RIPPS2 Sleek's true case (Planet N's capitals were hard to tell apart). **The 3D icon viewer** turns the way you press.
+
+### Storage and menus
+- **POPSTARTER from USB remembers** whether your drive is FAT32 or exFAT and stops asking (and stops sounding as if it had never been set up) while the drive still matches.
+- **A case turns over from the side you push**, to its back and home again.
+- **The START menu, the game and app menus and the Settings hub** use Adapt's clear face on every theme.
+
 ## Build 99 (testing), changes since build 98
 
 ### The music has a road of its own

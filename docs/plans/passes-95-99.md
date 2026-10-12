@@ -249,39 +249,44 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       ripps2-build99-short, renders/ripps2-b99-short.mp4 + YOUTUBE.md). Test me posted 10-12 (message
       1559237125671751770, the ELF attached). Waiting: the Short's YouTube link for the README.
 
-## Build 100: the build 99 notes (user, 10-12)
+## Build 100: the build 99 notes (user, 10-12; released as v0.1.0-beta, the first beta)
 ### Quick fixes
-- [ ] 3D icon viewer: left and right on the D-pad / right stick turn the icon the wrong way.
-- [ ] Text editor on the RIPPS2 theme: RIPPS2 Sleek's true case (RIPPS2_CASE_FONT) for every line, the title and the
+- [x] 3D icon viewer: left and right on the D-pad / right stick turn the icon the wrong way.
+- [x] Text editor on the RIPPS2 theme: RIPPS2 Sleek's true case (RIPPS2_CASE_FONT) for every line, the title and the
       numbers; Planet N's letters are hard to tell apart.
-- [ ] Case flip: the back cover turns over from the side the stick pushes (left turns it over on the left), as the
+- [x] Case flip: the back cover turns over from the side the stick pushes (left turns it over on the left), as the
       front does today; the back's flip is the wrong way round.
-- [ ] Start menu and every submenu on the way into Settings in Adapt's face (RIPPS2_DIA_FONT), readable on every
+- [x] Start menu and every submenu on the way into Settings in Adapt's face (RIPPS2_DIA_FONT), readable on every
       theme, as the settings pages are since build 96.
 ### Memory Files
-- [ ] Overwrite is not robust and fails silently: a replace is a clean erase, then the copy, then a check that the
+- [x] Overwrite is not robust and fails silently: a replace is a clean erase, then the copy, then a check that the
       new file is whole; a failure says so.
-- [ ] ISO and ZSO start where they are: no "move it to CD or DVD" message. A game outside the drive's own CD / DVD
+- [x] ISO and ZSO start where they are: no "move it to CD or DVD" message. A game outside the drive's own CD / DVD
       folders still starts (Neutrino takes a path; the OPL core needs its CD/DVD list).
-- [ ] POPSTARTER from USB: it re-places POPSTARTER and its files on every launch, and its message says it is setting
+- [x] POPSTARTER from USB: it re-places POPSTARTER and its files on every launch, and its message says it is setting
       up as if it never had. Detect what is already there (same files, same sizes) and say nothing, or say it is
       ready.
 ### Sound
-- [ ] The beep: a startling tone after a modal (saving settings) with ripped sounds loaded; the rips have no such
+- [x] The beep: a startling tone after a modal (saving settings) with ripped sounds loaded; the rips have no such
       tone. Find the voice / SPU memory that plays it and stop it.
-- [ ] No double sounds: an AUDIO file never plays when the theme has its own sound for that event; nothing plays
+- [x] No double sounds: an AUDIO file never plays when the theme has its own sound for that event; nothing plays
       when art appears in the game list (a confirm-like sound today); one action, one sound (some menus play the
       cursor and the confirm together).
-- [ ] Adapt and Adapt Rx: purge their bundled sounds from the pack, so the user's rips play.
-- [ ] Ripped boot and launch .adp play choppy, the launch one with spitty pops, in Memory Files too: make the rips
+- [x] Adapt and Adapt Rx: purge their bundled sounds from the pack, so the user's rips play.
+- [x] Ripped boot and launch .adp play choppy, the launch one with spitty pops, in Memory Files too: make the rips
       as clean as they can be (check the encoder, loop flags, sample rate, the tail).
-- [ ] Rip the menu music on its own: SOUNDS and MUSIC are two rips; the music is big, so say its size first and
+- [x] Rip the menu music on its own: SOUNDS and MUSIC are two rips; the music is big, so say its size first and
       let the user pick where it goes (beside RIPPS2, or OPL's resources AUDIO folder when there is one).
-- [ ] The music plays from OPL's resources AUDIO folder too (where the music list reads), as well as AUDIO beside
+- [x] The music plays from OPL's resources AUDIO folder too (where the music list reads), as well as AUDIO beside
       RIPPS2, whichever starts.
 ### Save
-- [ ] RIPPS2's own save folder on the memory card: its icon, and its settings apart from OPL's (no shared
+- [x] RIPPS2's own save folder on the memory card: its icon, and its settings apart from OPL's (no shared
       conf_opl.cfg), small and clean.
+      Lab: a save wrote mc0:/RIPPS2 (hat 51 KB, icon.sys, four settings files) and nothing beside the ELF; a
+      reboot read Remember Last Played back from it. The music rip ran in the lab (15.1 MB, both folders offered;
+      0.9996 correlation with the PC render), the editor draws in Sleek, Save sounds once with no confirm blip,
+      the hub's back press only the prompt's sound. PCSX2 never reproduced the beep (its SPU2 does not replay a
+      releasing voice over rewritten memory); the fix follows audsrv's own code.
 
 ## Build 101: media
 - [ ] MP3 in Memory Files, and a Coverflow-style music player: albums from the tags, their cover art, play and

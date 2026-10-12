@@ -61,10 +61,10 @@ cp -f "$HERE/popstarter/POPSTARTER.ELF" "$SRC/misc/popstarter_elf.bin"
 # Neutrino 1.8.0 (build 77): rickgaiser's release folder as a gzip'd tar, AFL-3.0 (elf/neutrino/README.md);
 # RIPPS2 installs it where the user picks when a Neutrino launch finds none
 cp -f "$HERE/neutrino/neutrino-1.8.0.tar.gz" "$SRC/misc/neutrino.tar.gz"
-# The build number shown in About: the number of the last patch (build N is patch N)
+# The build number shown in About: the number of the last patch (build N is patch N); beta from build 100
 LAST="$(ls "$HERE"/patches/0*.patch | tail -n1)"
 NUM="$(basename "$LAST" | cut -c1-4 | sed 's/^0*//')"
-printf '#define RIPPS2_BUILD %s\n#define RIPPS2_STAGE "%s"\n' "$NUM" "${RIPPS2_STAGE:-ALPHA}" > "$SRC/include/ripps2_build.h"
+printf '#define RIPPS2_BUILD %s\n#define RIPPS2_STAGE "%s"\n' "$NUM" "${RIPPS2_STAGE:-BETA}" > "$SRC/include/ripps2_build.h"
 # A private sound pack baked into this build only (never set by the public workflow: RIPPS2 carries
 # no one else's sounds). A folder of <event>.adp files, from elf/theme/tools/make_sound_pack.py.
 if [ -n "${RIPPS2_SOUND_PACK:-}" ]; then
