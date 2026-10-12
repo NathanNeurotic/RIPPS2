@@ -1352,9 +1352,20 @@ index 72e26c1..676dde9 100644
                          cmWrite(to, toast, sizeof(toast));
                      break;
 diff --git a/src/ripps2edit.c b/src/ripps2edit.c
-index e83696e..adc23cd 100644
+index e83696e..951ca63 100644
 --- a/src/ripps2edit.c
 +++ b/src/ripps2edit.c
+@@ -35,8 +35,8 @@
+ #include "include/ripps2.h"
+ #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
+ 
+-#define ED_MAX_LINES 1000
+-#define ED_LINE      256
++#define ED_MAX_LINES 4096 // build 98: a file with more is refused, never cut short on save (was 1000, silently)
++#define ED_LINE      1024 // build 98: the longest line the keyboard edits; longer ones load and save whole (was 256, cut)
+ #define ED_FILE_MAX  (64 * 1024)
+ #define ED_ROWS      16
+ #define ED_ROW_H     22
 @@ -93,7 +93,8 @@ static int edMenu(const char *const *items, int count)
              guiDrawBGPlasma();
          // as wide as its longest item (build 69: BIBLE's card list ran off the box), centred once it
@@ -1378,6 +1389,150 @@ index e83696e..adc23cd 100644
          rmEndFrame();
          if (getKey(KEY_UP) && sel > 0) {
              sel--;
+@@ -148,14 +155,23 @@ static void edFree(void)
+     edCount = 0;
+ }
+ 
++// build 98: each line exactly its own length (a long one is kept whole); an edit swaps in a new one
++static char *edAlloc(const char *text)
++{
++    int len = strlen(text);
++    char *line = malloc(len + 1);
++    if (line != NULL)
++        memcpy(line, text, len + 1);
++    return line;
++}
++
+ static int edInsert(int at, const char *text)
+ {
+     if (edCount >= ED_MAX_LINES)
+         return 0;
+-    char *line = malloc(ED_LINE);
++    char *line = edAlloc(text);
+     if (line == NULL)
+         return 0;
+-    snprintf(line, ED_LINE, "%s", text);
+     memmove(&edLines[at + 1], &edLines[at], (edCount - at) * sizeof(char *));
+     edLines[at] = line;
+     edCount++;
+@@ -171,14 +187,16 @@ static void edDelete(int at)
+     edCount--;
+ }
+ 
+-// 1 = loaded (a missing file is an empty one), 0 = too big or unreadable
+-static int edLoad(const char *path, int *crlf)
++// 1 = loaded (a missing file is an empty one), 0 = too big or unreadable, -1 = more lines than the editor holds,
++// -2 = not plain text (a NUL byte: a save would cut the file there). *endNl: the file ends with a line break.
++static int edLoad(const char *path, int *crlf, int *endNl)
+ {
+     int fd = open(path, O_RDONLY), n;
+     char *buf, *p, *e;
+ 
+     edFree();
+     *crlf = 0;
++    *endNl = 0;
+     if (fd < 0)
+         return edInsert(0, "");
+     n = lseek(fd, 0, SEEK_END);
+@@ -199,7 +217,13 @@ static int edLoad(const char *path, int *crlf)
+         return 0;
+     }
+     buf[n] = '\0';
+-    for (p = buf; *p && edCount < ED_MAX_LINES; p = e) {
++    if ((int)strlen(buf) != n) {
++        free(buf);
++        return -2;
++    }
++    // build 98: every line kept, a blank last line too: "a\n\n" is two lines and saves back as itself
++    *endNl = n > 0 && buf[n - 1] == '\n';
++    for (p = buf; *p; p = e) {
+         e = strchr(p, '\n');
+         if (e != NULL)
+             *e++ = '\0';
+@@ -210,7 +234,12 @@ static int edLoad(const char *path, int *crlf)
+             p[l - 1] = '\0';
+             *crlf = 1;
+         }
+-        edInsert(edCount, p);
++        if (!edInsert(edCount, p)) {
++            int full = edCount >= ED_MAX_LINES;
++            free(buf);
++            edFree();
++            return full ? -1 : 0;
++        }
+     }
+     free(buf);
+     if (edCount == 0)
+@@ -218,7 +247,7 @@ static int edLoad(const char *path, int *crlf)
+     return 1;
+ }
+ 
+-static int edSave(const char *path, int crlf)
++static int edSave(const char *path, int crlf, int endNl)
+ {
+     int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666), i, ok = 1;
+     if (fd < 0)
+@@ -227,7 +256,7 @@ static int edSave(const char *path, int crlf)
+         int l = strlen(edLines[i]);
+         if (write(fd, edLines[i], l) != l)
+             ok = 0;
+-        else if (i < edCount - 1 || l > 0) {
++        else if (i < edCount - 1 || endNl) { // build 98: lines joined by their break, and the last one as it came
+             if (write(fd, crlf ? "\r\n" : "\n", crlf ? 2 : 1) != (crlf ? 2 : 1))
+                 ok = 0;
+         }
+@@ -268,13 +297,16 @@ static void edDrawFile(void)
+ int ripps2EditFile(const char *path)
+ {
+     static const char *const actions[] = {"INSERT LINE", "DELETE LINE", "SAVE", "SAVE AND CLOSE", "CLOSE"};
+-    int cursor = 0, top = 0, modified = 0, crlf = 0, saved = 0;
++    int cursor = 0, top = 0, modified = 0, crlf = 0, endNl = 1, saved = 0, r;
+     char line[ED_LINE], status[48] = "";
+     const char *name = strrchr(path, '/');
+     name = name ? name + 1 : path;
+ 
+-    if (!edLoad(path, &crlf)) {
+-        guiMsgBox("This file is too big to edit here (64 KB at most).", 0, NULL);
++    if ((r = edLoad(path, &crlf, &endNl)) != 1) {
++        guiMsgBox(r == -1   ? "This file has too many lines to edit here (4096 at most)."
++                  : r == -2 ? "This file is not plain text, so it is not opened in the editor."
++                            : "This file is too big to edit here (64 KB at most).",
++                  0, NULL);
+         return 0;
+     }
+     while (1) {
+@@ -310,11 +342,20 @@ int ripps2EditFile(const char *path)
+             cursor += ED_ROWS;
+             sfxPlay(SFX_CURSOR);
+         } else if (getKeyOn(gSelectButton)) {
++            if ((int)strlen(edLines[cursor]) >= ED_LINE) { // build 98: kept whole, but too long for the keyboard
++                sfxPlay(SFX_CANCEL);
++                snprintf(status, sizeof(status), "LINE TOO LONG TO EDIT");
++                continue;
++            }
+             sfxPlay(SFX_CONFIRM);
+             snprintf(line, sizeof(line), "%s", edLines[cursor]);
+             if (diaShowKeyb(line, sizeof(line), 0, name) && strcmp(line, edLines[cursor]) != 0) {
+-                snprintf(edLines[cursor], ED_LINE, "%s", line);
+-                modified = 1;
++                char *was = edLines[cursor], *now = edAlloc(line);
++                if (now != NULL) {
++                    edLines[cursor] = now;
++                    free(was);
++                    modified = 1;
++                }
+             }
+         } else if (getKeyOn(KEY_TRIANGLE)) {
+             sfxPlay(SFX_CONFIRM);
+@@ -332,7 +373,7 @@ int ripps2EditFile(const char *path)
+                     edInsert(0, "");
+                 modified = 1;
+             } else if (a == 2 || a == 3) {
+-                if (edSave(path, crlf)) {
++                if (edSave(path, crlf, endNl)) {
+                     modified = 0;
+                     saved = 1;
+                     snprintf(status, sizeof(status), "SAVED");
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
 index ca8e866..1bf483c 100644
 --- a/src/ripps2ember.c
