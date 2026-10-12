@@ -198,6 +198,12 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] **Loading and cancel round-up** (user, 10-11): every device's load speed tuned; the music on a path of its own
       so it never competes with art and lists (from RAM, or its own IOP stream), measured on hardware; RiptOPL's
       art loading performance; every cancel (art, previews, scans) robust to frantic input.
+      Music path done: the file is read into RAM in pieces of 64 KB growing to 256 KB (about 16 s of music a
+      request; a 1.1 MB track takes 6 requests, was 552), a track up to 512 KB whole; RiptOPL's descriptor-loss
+      harness runs both. Lab: 90 s of pilot tone through a storm, tab switches and the loop, no dropout; a
+      heavier storm (refresh spam, L3 views, info page in and out, tabs, fast scrolling) left the UI answering
+      and the music whole. Upstream has no art-speed work to take (#910/#912 are allocation guards). Open for
+      the hardware session: the stutter measured on a console, device load speeds.
 - [x] **Grid in widescreen** (FifthFox, 95): moved to build 98 (the Widescreen Grid layout rows).
 - Noted, no change: RIPFLOW puts MEMORY FILES left and LAUNCH DISC right on purpose (category_order, a user
   setting). POPSTARTER from iLink crashes on 95 while Ember works (FifthFox): the POPS item below.
