@@ -78,16 +78,22 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] **Stability while art loads** (user, 10-11): pressing anything while the list and the info page are still
       loading art must never crash (the HDD list on the RIPPS2 theme, into the info page, navigating while its
       images come in). Reproduce in the lab with a button storm, catch any freeze or crash in a save state.
-- [ ] **The game's background art fades in as soon as it is decoded** on the main view: nothing ahead of it
+- [x] **The game's background art fades in as soon as it is decoded** on the main view: nothing ahead of it
       delays the fade. (Build 99 may take this further with RiptOPL's art loading round-up.)
+      It queued at the art queue's tail, behind prefetches and a fast scroll's leftover reads; it is now asked for
+      second, right behind its cover. Lab: in 0.3-0.5 s after the last press (the lab's disk never backs the
+      queue up; the gain is on slow real drives).
 - [x] **The music under load** (user: the BGM stutters and freezes too). Found in the lab: the PS2's Vorbis
       library refuses any stream whose Ogg serial has its top bit set (ov_open -132); ffmpeg picks serials at
       random, so about half of all music never played, Audio Studio's included. The reader now clears the bit
       and corrects each page's CRC; Audio Studio writes serials under 2^31 (its exe needs a rebuild). With a
       pilot-tone track (made by Audio Studio) the lab's music held through a button storm: no dropout, no stop.
       Hardware stutter is device contention: pass 99.
-- [ ] **`.adp` preview cancel is robust**: a frantic press of play / stop / move never loops a load or leaves a
+- [x] **`.adp` preview cancel is robust**: a frantic press of play / stop / move never loops a load or leaves a
       voice playing.
+      Play again replays from the SPU2 on a free voice; the file is read once; the menu's sounds reload once,
+      1 s after the last close, never per close; a preview waits for a reload already using audsrv. Lab: a
+      frantic play / close / move run left the browser responsive (its capture did not finalize: no sound check).
 - [ ] **MX4SIO missing** (FifthFox, build 95: SCPH-39001 with APA SSD, MMCE, MX4SIO, iLink HDD, USB; works on
       RiptOPL). Walk every MX4SIO path against RiptOPL 65d4b89 and its later fixes (load gates, the second
       probe, Game Sources, page visibility, MMCE sharing SIO2, slot 2 card access). PCSX2 has no MX4SIO:
