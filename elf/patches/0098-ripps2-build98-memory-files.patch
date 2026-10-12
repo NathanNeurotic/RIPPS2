@@ -965,7 +965,7 @@ index 8e4127a..498e0b6 100644
  {
      rmSetTilt(1, cx, cy, tiltYaw * scalePct / 100.0f + turn, tiltPitch * scalePct / 100.0f);
 diff --git a/src/sound.c b/src/sound.c
-index aea69e4..98a04ef 100644
+index aea69e4..c4eb76e 100644
 --- a/src/sound.c
 +++ b/src/sound.c
 @@ -17,6 +17,7 @@
@@ -1057,7 +1057,153 @@ index aea69e4..98a04ef 100644
  
          if (sfx_files[i].buffer == NULL)
              continue; // an event with no file of its own plays its fallback, or nothing
-@@ -1373,6 +1387,8 @@ typedef struct
+@@ -486,11 +500,18 @@ int sfxInit(int bootSnd)
+ // Build 95: a fresh load of the sounds (a theme change, a rip, an IOP reboot) runs on the IO worker, never on
+ // the caller's thread; thenPlay (or -1) sounds once they are in
+ static volatile int sfxPlayAfterLoad = -1;
++static volatile int sfxReloadQueued = 0; // build 98: one reload waits at a time; another ask joins it
++static volatile int sfxReloadBusy = 0;   // build 98: a reload is talking to audsrv on the IO worker now
++static clock_t sfxReloadAt = 0;          // build 98: a reload wanted once things are calm (after a preview)
+ 
+ static void sfxReloadWork(void)
+ {
+     int id;
+-    sfxInit(0);
++    sfxReloadQueued = 0;
++    sfxReloadBusy = 1;
++    if (!sfxPreviewing) // a preview opened meanwhile: it has the voices, and its close reloads
++        sfxInit(0);
++    sfxReloadBusy = 0;
+     if ((id = sfxPlayAfterLoad) >= 0) {
+         sfxPlayAfterLoad = -1;
+         sfxPlay(id);
+@@ -500,10 +521,22 @@ static void sfxReloadWork(void)
+ void sfxReload(int thenPlay)
+ {
+     sfxPlayAfterLoad = thenPlay;
++    if (sfxReloadQueued)
++        return; // build 98: the one waiting does it
++    sfxReloadQueued = 1;
+     if (ioPutRequest(IO_CUSTOM_SIMPLEACTION, &sfxReloadWork) != IO_OK)
+         sfxReloadWork();
+ }
+ 
++// build 98: the GUI's frame tick: the reload a preview's close asked for, once no preview has opened for 1 s
++static void sfxReloadTick(void)
++{
++    if (sfxReloadAt != 0 && !sfxPreviewing && (long)(clock() - sfxReloadAt) >= 0) {
++        sfxReloadAt = 0;
++        sfxReload(-1);
++    }
++}
++
+ int sfxLoadedSounds(int *skipped)
+ {
+     int i, n = 0;
+@@ -517,26 +550,65 @@ int sfxLoadedSounds(int *skipped)
+ // Build 95: Memory Files plays an .adp. audsrv cannot stop one sound, only key every voice off and drop every
+ // sound (audsrv_adpcm_init), so the set is let go while the preview plays and loaded again when it closes.
+ // The sound's length in ms, or < 0 when it is not an .adp that plays
++// Build 98: frantic use. The file is read once per preview and kept (prevFile); play again replays what is already in
++// the SPU2 on one of voices 1-4 that has ended, the last one muted, and loads it again from memory only when all four
++// still sound. A reload running on the IO worker finishes before the preview touches audsrv (two threads at once).
++#define SFX_PREVIEW_VOICES 4
++static struct sfxEffect prevFile = {"preview", NULL, 0, 0, 0};
++static char prevPath[256];
++static struct audsrv_adpcm_t prevSample;
++static int prevInSpu = 0, prevVoice = 0;
++
+ int sfxPreviewStart(const char *path)
+ {
+-    static struct audsrv_adpcm_t preview;
+-    struct sfxEffect e = {"preview", NULL, 0, 0, 0};
+-    int vol = gSFXVolume > 0 ? gSFXVolume : 80;
++    int vol = gSFXVolume > 0 ? gSFXVolume : 80, i, v;
+ 
+     if (!audio_initialized)
+         return -1;
+-    sfxPreviewing = 1;
+-    audsrv_adpcm_init(); // a preview playing stops here too
++    sfxPreviewing = 1; // first: a reload not yet begun now leaves the voices alone
++    sfxReloadAt = 0;
++    for (i = 0; sfxReloadBusy && i < 400; i++)
++        DelayThread(10 * 1000); // one already talking to audsrv finishes first
++    if (prevFile.buffer != NULL && strcmp(prevPath, path) != 0) { // another sound: let the last one's file go
++        free(prevFile.buffer);
++        prevFile.buffer = NULL;
++        prevInSpu = 0;
++    }
++    if (prevInSpu) { // the same sound again: on a voice that has ended, the one before muted
++        for (v = 1; v <= SFX_PREVIEW_VOICES && voiceBusy(v); v++)
++            ;
++        if (v <= SFX_PREVIEW_VOICES) {
++            if (prevVoice > 0)
++                audsrv_adpcm_set_volume_and_pan(prevVoice, 0, 0);
++            if (audsrv_ch_play_adpcm(v, &prevSample) >= 0) {
++                audsrv_adpcm_set_volume_and_pan(v, vol, 0);
++                voiceStart[v] = clock();
++                voiceLen[v] = (unsigned int)prevFile.duration_ms * (CLOCKS_PER_SEC / 1000);
++                prevVoice = v;
++                return prevFile.duration_ms;
++            }
++        }
++    }
++    audsrv_adpcm_init(); // every voice off and every sound dropped: the menu's set, and an earlier preview
+     voicesReset();
+     memset(sfxReady, 0, sizeof(sfxReady));
+-    if (sfxRead(path, &e) != 0)
+-        return -2;
+-    if (sfxLoad(&e, &preview) != 0)
++    prevInSpu = 0;
++    if (prevFile.buffer == NULL) { // read once per preview
++        snprintf(prevPath, sizeof(prevPath), "%s", path);
++        if (sfxRead(path, &prevFile) != 0)
++            return -2;
++    }
++    prevFile.baked = 1; // sfxLoad keeps the buffer: play again needs no device
++    if (sfxLoad(&prevFile, &prevSample) != 0)
+         return -3;
+-    if (audsrv_ch_play_adpcm(1, &preview) < 0)
++    prevInSpu = 1;
++    if (audsrv_ch_play_adpcm(1, &prevSample) < 0)
+         return -4;
+     audsrv_adpcm_set_volume_and_pan(1, vol, 0);
+-    return e.duration_ms;
++    voiceStart[1] = clock();
++    voiceLen[1] = (unsigned int)prevFile.duration_ms * (CLOCKS_PER_SEC / 1000);
++    prevVoice = 1;
++    return prevFile.duration_ms;
+ }
+ 
+ void sfxPreviewStop(void)
+@@ -545,8 +617,16 @@ void sfxPreviewStop(void)
+         return;
+     audsrv_adpcm_init();
+     voicesReset();
++    if (prevFile.buffer != NULL) {
++        free(prevFile.buffer);
++        prevFile.buffer = NULL;
++    }
++    prevInSpu = 0;
++    prevVoice = 0;
+     sfxPreviewing = 0;
+-    sfxReload(-1);
++    // build 98: the menu's sounds come back once things are calm (sfxReloadTick), not at every close: a frantic
++    // open / close stacked a full reload of them per close
++    sfxReloadAt = clock() + CLOCKS_PER_SEC;
+ }
+ 
+ int sfxGetSoundDuration(int id)
+@@ -803,6 +883,8 @@ void bgmBootTick(void)
+     static int started = 0;
+     static clock_t lastStep = 0;
+ 
++    sfxReloadTick(); // build 98: the reload a preview's close asked for
++
+     if (started)
+         audioLateTick(); // build 74: an AUDIO folder on a drive that started after the boot
+     if (!started) {
+@@ -1373,6 +1455,8 @@ typedef struct
      long pos;  // where the decoder believes it is
      long size; // -1 when the size could not be read
      char path[256];
@@ -1066,7 +1212,7 @@ index aea69e4..98a04ef 100644
  } bgm_source_t;
  
  static int bgmSourceReopen(bgm_source_t *src)
-@@ -1398,6 +1414,97 @@ static int bgmSourceReopen(bgm_source_t *src)
+@@ -1398,6 +1482,97 @@ static int bgmSourceReopen(bgm_source_t *src)
      return 0;
  }
  
@@ -1164,7 +1310,7 @@ index aea69e4..98a04ef 100644
  static size_t bgmSourceRead(void *ptr, size_t size, size_t nmemb, void *datasource)
  {
      bgm_source_t *src = (bgm_source_t *)datasource;
-@@ -1405,8 +1512,14 @@ static size_t bgmSourceRead(void *ptr, size_t size, size_t nmemb, void *datasour
+@@ -1405,8 +1580,14 @@ static size_t bgmSourceRead(void *ptr, size_t size, size_t nmemb, void *datasour
  
      if (size == 0 || nmemb == 0)
          return 0;
@@ -1179,7 +1325,7 @@ index aea69e4..98a04ef 100644
          if (r > 0) {
              src->pos += (long)(r * size);
              return r;
-@@ -1435,6 +1548,10 @@ static int bgmSourceSeek(void *datasource, ogg_int64_t offset, int whence)
+@@ -1435,6 +1616,10 @@ static int bgmSourceSeek(void *datasource, ogg_int64_t offset, int whence)
          return -1;
      if (target < 0)
          return -1;
@@ -1190,7 +1336,7 @@ index aea69e4..98a04ef 100644
  
      if (fseek(src->f, target, SEEK_SET) != 0) {
          keep = src->pos;
-@@ -1469,6 +1586,36 @@ static ov_callbacks bgmSourceCallbacks = {
+@@ -1469,6 +1654,36 @@ static ov_callbacks bgmSourceCallbacks = {
      bgmSourceTell,
  };
  
@@ -1227,7 +1373,7 @@ index aea69e4..98a04ef 100644
  static int bgmTryLoadPath(const char *bgmPath, const char *source)
  {
      bgm_source_t *src;
-@@ -1495,8 +1642,31 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
+@@ -1495,8 +1710,31 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
          return 0;
      }
  
@@ -1260,7 +1406,7 @@ index aea69e4..98a04ef 100644
          return 1;
      }
  
-@@ -1644,6 +1814,7 @@ static int bgmLoad(void)
+@@ -1644,6 +1882,7 @@ static int bgmLoad(void)
              if (wavOpen(bgmPath)) { // the vorbis state is not needed for it
                  free(vorbisFile);
                  vorbisFile = NULL;
@@ -1268,7 +1414,7 @@ index aea69e4..98a04ef 100644
                  return 0;
              }
          } else if (bgmTryLoadPath(bgmPath, "RIPPS2 music"))
-@@ -1752,6 +1923,7 @@ static void bgmDeinit(void)
+@@ -1752,6 +1991,7 @@ static void bgmDeinit(void)
          vorbisFile = NULL;
      }
      wavClose(); // RIPPS2
