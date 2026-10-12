@@ -212,12 +212,21 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       bdmSlotDriveName (USB, HDD, iLINK, MX4SIO, UDPBD by the driver): YOUR ACCOUNT's "on", STATUS's install
       rows and Neutrino picker, the launch report's drive line; MMCE reads 0 / 1. Memory Files and STATUS DRIVES
       already went by the driver. Lab: STATUS says HDD POPS / EMBER folder on the reel's exFAT HDD.
-- [ ] Artwork and config keys exactly as RiptOPL: VCD basename, Ember folder name, ELF basename with `.ELF`;
+- [x] Artwork and config keys exactly as RiptOPL: VCD basename, Ember folder name, ELF basename with `.ELF`;
       a PS1 GameID never replaces them. Check RIPPS2's own paths: Grid back covers, All Games, Starred,
       metadata, art fetch, recents.
-- [ ] Grid's coverless serial: the PS2 startup ID or a verified PS1 disc ID only; a VCD or Ember name is never
+      Audited RIPPS2's own paths against the reference: Grid back covers and the launch disc take the row's
+      itemGetStartup (a PS1 row answers with its VCD or Ember name); All Games and Starred / Recents key on
+      the favourites record (mode, id, name, row kind), All Games' PS1 art match being upstream's strict
+      leading-serial fallback; metadata (cfg.tar) only looks up disc-ID-shaped keys; art fetch only PS2
+      startup IDs. Nothing replaced a PS1 key with a GameID.
+- [x] Grid's coverless serial: the PS2 startup ID or a verified PS1 disc ID only; a VCD or Ember name is never
       shown as a serial.
-- [ ] PS1 identities never truncated to the PS2 startup field in RIPPS2's own buffers.
+      gridSerial now takes exactly the 11-character PS2 startup form (a VCD named SCUS_949.00.Crash... showed
+      its name), and gridRowSerial never asks a PS1 row; compiled on the PC against the names that slipped.
+- [x] PS1 identities never truncated to the PS2 startup field in RIPPS2's own buffers.
+      Audited: RIPPS2's buffers that hold a row identity are 128+ bytes or dynamic; the 12-byte startup buffer
+      in Memory Files' ISO launch only ever holds a PS2 ID. bdmGetGameStartup returns a PS1 row's full name.
 - [ ] POPSTARTER from the APA HDD (logo, then nothing) and from iLink (crashes once the BDM files are there): the
       BDMA driver must follow the transport, not the `massN:` slot.
 - [ ] iLink PS2 games: Neutrino fails where the OPL core with the right modes and the PS2 logo works.
