@@ -1,6 +1,11 @@
 """Build 100: the build 99 notes (user, 10-12). Static checks on the patched tree."""
+import math
 import os
+import shutil
+import struct
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
@@ -67,7 +72,125 @@ dia = rd('src/dia.c')
 if 'diaResetValue(item);\n        sfxPlay(SFX_CANCEL);' not in dia:
     fail.append('Circle on a focused value must sound as a cancel')
 
+# Sound: the menu music, a rip of its own (its size said first, beside RIPPS2 or OPL's resources AUDIO), and the music
+# list reading OPL's resources AUDIO on each started drive
+for name in ('ripps2BiosMusicFromImage', 'ripps2BiosMusicSamples', 'ripps2RipBiosMusicDialog', 'RBS_MUSIC_SEQ     "SNDWARNS"'):
+    if name not in rip:
+        fail.append('the menu music rip needs %s' % name)
+if 'RIPPS2_RIP_MUSIC_BUTTON' not in rd('src/dialogs.c') or 'ripps2RipBiosMusicDialog();' not in gui or \
+        'label: RIPPS2_BIOS_MUSIC' not in rd('lng_tmpl/_base.yml'):
+    fail.append('Audio settings must offer BIOS Music > RIP')
+for f in ('src/bdmsupport.c', 'src/hddsupport.c', 'src/mmcesupport.c'):
+    if 'bgmAddMusicHome(' not in rd(f):
+        fail.append('%s must register its OPL root for the music list' % f)
+if 'void bgmAddMusicHome(const char *prefix)' not in snd or 'snprintf(sub, sizeof(sub), "%sAUDIO", bgmHomes[i]);' not in snd:
+    fail.append('the music list must read OPL\'s resources AUDIO too')
+
+# Save: RIPPS2's own save on the memory card, the hat lighter
+opl = rd('src/opl.c')
+if opl.count('ripps2CardSettingsHome(cardHome, sizeof(cardHome)') != 2 or 'configSetMove(prevHome);' not in opl:
+    fail.append('the settings must load from and save to RIPPS2\'s own save on a memory card')
+icn = (root / 'misc/ripps2.icn').stat().st_size
+if icn > 60000:
+    fail.append('the hat icon must stay small (%d bytes)' % icn)
+
+
+def lz_literals(data):
+    out = bytearray(struct.pack('<I', len(data)))
+    for i in range(0, len(data), 30):
+        out += b'\0\0\0\0' + data[i:i + 30]
+    return bytes(out)
+
+
+def adpcm_tone(loop=False):
+    out = bytearray()
+    for b in range(40):
+        nibs = [int(round(7 * math.sin(2 * math.pi * (b * 28 + i) / 14))) & 0xF for i in range(28)]
+        flags = (4 if loop and b == 0 else 0) | ((3 if loop else 1) if b == 39 else 0)
+        out += bytes([0x08, flags]) + bytes(nibs[i] | nibs[i + 1] << 4 for i in range(0, 28, 2))
+    return bytes(out)
+
+
+def romdir(files):
+    files = [('RESET', b'\0' * 16), ('ROMDIR', b'')] + files
+    for _ in range(2):
+        entries = b''.join(struct.pack('<10sHI', n.encode(), 0, len(d)) for n, d in files) + b'\0' * 16
+        files[1] = ('ROMDIR', entries)
+    img = bytearray()
+    for _, d in files:
+        img += d + b'\0' * (-len(d) % 16)
+    return bytes(img)
+
+
+def music_image():
+    """A one-instrument bank and a 'menu piece' of 40 notes, 1.5 s apart (60 s), each held a second."""
+    bank = bytearray(0x20 + 4 + 8 + 16)
+    struct.pack_into('<I', bank, 0x10, 0x20)
+    struct.pack_into('<HH', bank, 0x20, 0, 4)
+    p = 0x24
+    bank[p:p + 3] = bytes([0, 127, 64])
+    t = p + 8
+    bank[t + 1], bank[t + 2], bank[t + 3] = 127, 60, 0
+    struct.pack_into('<HHH', bank, t + 4, 0, 0x000F, 0x0000)
+    bank[t + 10], bank[t + 11], bank[t + 12], bank[t + 15] = 0, 127, 64, 1
+    seq = bytearray(0x110)
+    struct.pack_into('<HHH', seq, 0, 127, 480, 120)  # 120 quarter notes a minute: a quarter is 0.5 s
+    for c in range(16):
+        seq[0x10 + c * 16 + 1:0x10 + c * 16 + 5] = bytes([c, 0, 100, 64])
+    ev = bytearray([0x90, 60, 100])
+    for k in range(40):
+        ev += bytes([0x87, 0x40, 0x80, 60, 0])         # a second (960 ticks), then off
+        ev += bytes([0x83, 0x60, 0x90, 60 + k % 5, 100])  # half a second, then the next on
+    ev += bytes([0x87, 0x40, 0x80, 60, 0, 0x00, 0xFF, 0x2F, 0x00])
+    seq += ev
+    return romdir([('SNDBOOTH', lz_literals(bytes(bank))), ('SNDBOOTB', lz_literals(adpcm_tone(loop=True))),
+                   ('SNDWARNS', lz_literals(bytes(seq)))])
+
+
+cc = shutil.which('gcc') or shutil.which('cc')
+if cc and not fail:
+    with tempfile.TemporaryDirectory() as td:
+        td = Path(td)
+        (td / 'img.bin').write_bytes(music_image())
+        (td / 'm.c').write_text(r"""
+#include <stdio.h>
+#include <stdlib.h>
+#include "include/ripps2biossnd.h"
+static long got, peakAt;
+static int peak;
+static int put(const short *pcm, int n, int done, int total, void *ctx)
+{
+    int k;
+    (void)ctx;
+    if (n <= 0 || done > total) return -1;
+    for (k = 0; k < n; k++)
+        if (abs(pcm[k]) > peak) { peak = abs(pcm[k]); peakAt = got + k; }
+    got += n;
+    return 0;
+}
+int main(int argc, char **argv)
+{
+    static unsigned char d[1 << 20];
+    FILE *f = fopen(argv[1], "rb");
+    int n = (int)fread(d, 1, sizeof(d), f), want, made;
+    fclose(f);
+    want = ripps2BiosMusicSamples(d, n);
+    made = ripps2BiosMusicFromImage(d, n, put, NULL);
+    printf("%d %d %ld %d\n", want, made, got, peak);
+    return want > 24000 * 60 && made == want && got == want && peak > 100 ? 0 : 2; // the gain is the real piece's: a made-up one is quieter
+}
+""")
+        exe = td / 'm.exe'
+        r = subprocess.run([cc, '-DRIPPS2_BIOSSND_HOST_TEST', '-I', str(root), str(td / 'm.c'), str(root / 'src/ripps2biossnd.c'),
+                            '-o', str(exe), '-lm'], capture_output=True, text=True)
+        if r.returncode:
+            fail.append('the music ripper must build on the PC: ' + r.stderr[-400:])
+        else:
+            r = subprocess.run([str(exe), str(td / 'img.bin')], capture_output=True, text=True)
+            if r.returncode:
+                fail.append('the music ripper must stream a made-up piece whole (%d): %s' % (r.returncode, r.stdout.strip()))
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build100: viewer turn, editor face, flip direction, menu face, clean replace, ISO where it sits, POPSTARTER answer, rips without noise pops, no beep, one press one sound OK')
+print('build100: viewer turn, editor face, flip direction, menu face, clean replace, ISO where it sits, POPSTARTER answer, rips without noise pops, no beep, one press one sound, the menu music rip, OPL AUDIO folders, the card save OK')

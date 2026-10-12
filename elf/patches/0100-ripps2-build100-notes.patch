@@ -1,3 +1,15 @@
+diff --git a/.github/scripts/test_bdm_scan_retry.py b/.github/scripts/test_bdm_scan_retry.py
+index 1dd0281..1e6abd1 100644
+--- a/.github/scripts/test_bdm_scan_retry.py
++++ b/.github/scripts/test_bdm_scan_retry.py
+@@ -136,6 +136,7 @@ static int bdmUpdateDeviceData(item_list_t *itemList)
+     return r;
+ }
+ static void sfxPlay(int id) { (void)id; }
++static void bgmAddMusicHome(const char *prefix) { (void)prefix; } // RIPPS2 build 100
+ static void sbCreateFolders(const char *path, int disc) { (void)path; (void)disc; }
+ static int libListViewActive(item_list_t *itemList) { (void)itemList; return view; }
+ static int stub_stat(const char *path, struct stat *st) { (void)path; memset(st, 0, sizeof(*st)); return -1; }
 diff --git a/include/bdmsupport.h b/include/bdmsupport.h
 index 5b701a5..64fae57 100644
 --- a/include/bdmsupport.h
@@ -14,11 +26,51 @@ index 5b701a5..64fae57 100644
  int bdmMx4sioReport(int *err, char *root, int rootLen); // RIPPS2 build 98: STATUS > DRIVES' MX4SIO line
  // Fill `slots` with the massN: slot index of EVERY mounted device whose driver matches bdmType (root =
  // "mass<i>:/"), up to maxSlots; returns the count. The BDMA equip searches all same-type slots so a
+diff --git a/include/dialogs.h b/include/dialogs.h
+index 6a53d06..98d51d1 100644
+--- a/include/dialogs.h
++++ b/include/dialogs.h
+@@ -342,6 +342,7 @@ enum UI_ITEMS {
+     GENERAL_GSM_DEFAULTS_BUTTON,
+     RIPPS2_BIBLE_BUTTON, // RIPPS2: BOOT LOADER > MANAGE (BIBLE)
+     RIPPS2_RIP_BIOS_BUTTON, // RIPPS2 build 88: Audio settings > BIOS Sounds > RIP
++    RIPPS2_RIP_MUSIC_BUTTON, // RIPPS2 build 100: Audio settings > BIOS Music > RIP
+     RIPPS2_HINTS_BUTTON,      // RIPPS2 build 90: Controller Settings > Hints and Glyphs
+     RIPPS2_HINT_ORDER_BUTTON, // and its Hint Order
+     CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
+diff --git a/include/ripps2biossnd.h b/include/ripps2biossnd.h
+index 4a2d05e..55e738d 100644
+--- a/include/ripps2biossnd.h
++++ b/include/ripps2biossnd.h
+@@ -16,4 +16,12 @@ int ripps2BiosSoundsFromImage(const unsigned char *img, int size, ripps2_biossnd
+ // Audio settings > BIOS Sounds > RIP
+ void ripps2RipBiosSoundsDialog(void);
+ 
++// build 100: the menu music, the BIOS's ambient piece, as 24 kHz mono 16-bit PCM handed over a slice at a time
++// (done and total in samples); put returns 0 to go on
++typedef int (*ripps2_biosmusic_put_t)(const short *pcm, int n, int done, int total, void *ctx);
++int ripps2BiosMusicSamples(const unsigned char *img, int size); // its length in samples, < 0: not in this image
++int ripps2BiosMusicFromImage(const unsigned char *img, int size, ripps2_biosmusic_put_t put, void *ctx); // samples made, < 0
++// Audio settings > BIOS Music > RIP
++void ripps2RipBiosMusicDialog(void);
++
+ #endif
 diff --git a/include/sound.h b/include/sound.h
-index 1b27ec1..c8cd2c0 100644
+index 1b27ec1..a491fa8 100644
 --- a/include/sound.h
 +++ b/include/sound.h
-@@ -51,6 +51,7 @@ int sfxLoadedSounds(int *skipped);     // build 95: sounds loaded by the last lo
+@@ -28,7 +28,9 @@ enum SFX {
+ 
+ #define RIPPS2_MUSIC_NAME 64 // a MUSIC track's file name
+ #define RIPPS2_MUSIC_MAX  32 // tracks listed
+-int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max); // MUSIC/*.ogg beside RIPPS2, in name order
++int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max); // AUDIO bgm*.ogg / .wav beside RIPPS2 and in OPL's resources
++void bgmAddMusicHome(const char *prefix);                    // build 100: a started drive's OPL root ("mass0:/"), from its update
++int bgmMusicHome(int i, char *out, int size);                // build 100: the i-th such root apart from RIPPS2's own
+ void bgmMusicTitle(const char *file, char *out, int size);
+ int bgmMusicDefault(char (*names)[RIPPS2_MUSIC_NAME], int n); // build 88: the track called Menu, else the first   // "01 Slideshow.ogg" -> "Slideshow"
+ 
+@@ -51,6 +53,7 @@ int sfxLoadedSounds(int *skipped);     // build 95: sounds loaded by the last lo
  int sfxPreviewStart(const char *path); // build 95: Memory Files plays an .adp (its length in ms, < 0: not playable)
  void sfxPreviewStop(void);             // build 95: the preview stops and the sounds load again
  void sfxPlay(int id);
@@ -53,11 +105,760 @@ index 71ae268..044bb09 100644
  // RIPPS2: Sleek Bold with a true lowercase (builtin:ripps2sleekcase, theme font15), for typed text
  #define RIPPS2_CASE_FONT (gTheme->fonts[15])
  // RIPPS2 build 70: the same lowercase face, large (theme font9): a title in true case (RetroAchievements)
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index 2d73850..75b77a1 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1508,11 +1508,11 @@ gui_strings:
+ - label: RIPPS2_MUSIC
+   string: Music
+ - label: HINT_RIPPS2_MUSIC
+-  string: "Plays the bgm files in the AUDIO folder beside RIPPS2 (Ogg without tags, or 16-bit WAV); one called Menu plays first. A theme's own music plays instead."
++  string: "Plays the bgm files in the AUDIO folder beside RIPPS2 and in OPL's AUDIO folder on each started drive (Ogg without tags, or 16-bit WAV); one called Menu plays first. A theme's own music plays instead."
+ - label: RIPPS2_BIOS_SOUNDS
+   string: BIOS Sounds
+ - label: HINT_RIPPS2_BIOS_SOUNDS
+-  string: "Writes this console's own menu sounds from its BIOS into the AUDIO folder as RIPPS2's sounds."
++  string: "Writes this console's own menu sounds from its BIOS into the AUDIO folder as RIPPS2's sounds (under 1 MB). The menu music is a rip of its own: BIOS Music."
+ - label: RIPPS2_RIP
+   string: Rip
+ - label: RIPPS2_HINTS_GLYPHS
+@@ -1595,3 +1595,7 @@ gui_strings:
+   string: "Creating this game's VMC..."
+ - label: AUTO_VMC_FAILED
+   string: "Could not create this game's VMC. The game starts without one."
++- label: RIPPS2_BIOS_MUSIC
++  string: BIOS Music
++- label: HINT_RIPPS2_BIOS_MUSIC
++  string: "Writes this console's menu music (its browser's ambient piece, about 15 MB as a WAV) to an AUDIO folder you pick: beside RIPPS2, or OPL's on a started drive. Too big for a memory card. Its size is shown first."
+diff --git a/misc/ripps2.icn b/misc/ripps2.icn
+index 620934a0fc60a4200bcb39965f7e15aecec3dff4..f30b141cc317e7c0391fc95b1a813aa8d2a8aa44 100644
+GIT binary patch
+literal 50598
+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
+L?(vhFRQ&$~kl|c7
+
+literal 90372
+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
+
 diff --git a/src/bdmsupport.c b/src/bdmsupport.c
-index 003303e..06e73f6 100644
+index 003303e..f29cb83 100644
 --- a/src/bdmsupport.c
 +++ b/src/bdmsupport.c
-@@ -1909,13 +1909,27 @@ static void bdmLaunchVcd(item_list_t *itemList, const char *vcdName, config_set_
+@@ -1607,6 +1607,8 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+     if (!sbIsSameSize(pDeviceData->bdmPrefix, pDeviceData->bdmULSizePrev))
+         result = 1;
+ 
++    bgmAddMusicHome(pDeviceData->bdmPrefix); // RIPPS2 build 100: OPL's resources AUDIO, for the music list
++
+     // update Themes
+     if (!pDeviceData->ThemesLoaded) {
+         snprintf(path, sizeof(path), "%sTHM", pDeviceData->bdmPrefix);
+@@ -1909,13 +1911,27 @@ static void bdmLaunchVcd(item_list_t *itemList, const char *vcdName, config_set_
          } else if (gVcdUsbBdmaMode == VCD_USB_BDMA_FAT32) {
              usbBdmaVariant = VCD_BDMA_FAT32;
          } else {
@@ -90,7 +891,7 @@ index 003303e..06e73f6 100644
          }
      }
  
-@@ -2163,6 +2177,33 @@ fail:
+@@ -2163,6 +2179,33 @@ fail:
  // Where this image's two VMC slots live (sbMcemuSlotWord): searched on the first launch only.
  static int bdmMcemuSlots[2] = {-2, -2};
  
@@ -124,7 +925,7 @@ index 003303e..06e73f6 100644
  void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
  {
      int i, fd, iop_fd, index, compatmask = 0;
-@@ -2178,7 +2219,10 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2178,7 +2221,10 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
  
      bdm_device_data_t *pDeviceData = NULL;
  
@@ -136,7 +937,7 @@ index 003303e..06e73f6 100644
          pDeviceData = (bdm_device_data_t *)itemList->priv;
          // Resolve through the ACTIVE view's array (#120 split): in the VCD view this yields the VCD
          // entry whose name the POPSTARTER handoff below uses, and any stale/invalid id yields the
-@@ -2206,7 +2250,7 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2206,7 +2252,7 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
      // disc / Neutrino path below (which is entirely disc-specific). The BDM_TYPE_ATA internal exFAT HDD
      // still launches off the live massN: prefix, NOT ata0:/ (OPL never mounts an ata0: filesystem -- a
      // re-point there made LoadELFFromFile fail into an already-deinit'd OPL = black-screen freeze).
@@ -158,8 +959,24 @@ index 7fae9fb..c543a2f 100644
          return 0;
      }
  
+diff --git a/src/dialogs.c b/src/dialogs.c
+index f40af3f..6e350e4 100644
+--- a/src/dialogs.c
++++ b/src/dialogs.c
+@@ -1858,6 +1858,11 @@ struct UIItem diaAudioConfig[] = {
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_BIOS_SOUNDS}}},
+     {UI_SPACER},
+     {UI_BUTTON, RIPPS2_RIP_BIOS_BUTTON, 1, 1, _STR_HINT_RIPPS2_BIOS_SOUNDS, 0, 0, {.label = {NULL, _STR_RIPPS2_RIP}}},
++    {UI_BREAK},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_BIOS_MUSIC}}},
++    {UI_SPACER},
++    {UI_BUTTON, RIPPS2_RIP_MUSIC_BUTTON, 1, 1, _STR_HINT_RIPPS2_BIOS_MUSIC, 0, 0, {.label = {NULL, _STR_RIPPS2_RIP}}},
+     {UI_SPLITTER},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_DEF_BGM_PATH}}},
 diff --git a/src/gui.c b/src/gui.c
-index 69daded..0b513e0 100644
+index 69daded..47fb377 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -324,6 +324,7 @@ u32 guiGetFrameWatchdog(u32 *worstUs, u32 *overruns)
@@ -181,7 +998,24 @@ index 69daded..0b513e0 100644
          }
  
          if (showPartPopup) {
-@@ -3663,11 +3666,11 @@ static int guiSettingsPromptSave(void)
+@@ -2749,9 +2752,13 @@ int guiShowAudioConfig(void)
+ 
+     guiSettingsBeginDialog(diaAudioConfig);
+     int result;
+-    while ((result = diaExecuteDialog(diaAudioConfig, -1, 1, guiAudioUpdater)) == RIPPS2_RIP_BIOS_BUTTON) {
+-        ripps2RipBiosSoundsDialog(); // RIPPS2 build 88: the console's own menu sounds into AUDIO
+-        guiMusicBegin();             // a new AUDIO folder can bring the music list with it
++    while ((result = diaExecuteDialog(diaAudioConfig, -1, 1, guiAudioUpdater)) == RIPPS2_RIP_BIOS_BUTTON ||
++           result == RIPPS2_RIP_MUSIC_BUTTON) {
++        if (result == RIPPS2_RIP_BIOS_BUTTON)
++            ripps2RipBiosSoundsDialog(); // RIPPS2 build 88: the console's own menu sounds into AUDIO
++        else
++            ripps2RipBiosMusicDialog(); // RIPPS2 build 100: its menu music, on its own
++        guiMusicBegin();                // a new AUDIO folder can bring the music list with it
+     }
+     guiSettingsEndDialog();
+     return guiSettingsPageResult(result);
+@@ -3663,11 +3670,11 @@ static int guiSettingsPromptSave(void)
              guiDrawBGPlasma();
  
          guiDrawStatusBackdrop(); // RIPPS2: the pillars behind the glass page panel (was a dark wash and two rules)
@@ -196,7 +1030,7 @@ index 69daded..0b513e0 100644
                          _l(_STR_SETTINGS_SAVE_PROMPT_LINE2), gTheme->textColor);
  
          x = guiAlignSubMenuHints(3, promptHints, promptIcons, RIPPS2_UI_FONT, 12, 1);
-@@ -3680,8 +3683,7 @@ static int guiSettingsPromptSave(void)
+@@ -3680,8 +3687,7 @@ static int guiSettingsPromptSave(void)
          guiEndFrame();
  
          readPads();
@@ -206,7 +1040,7 @@ index 69daded..0b513e0 100644
              return SETTINGS_PROMPT_SAVE;
          }
          if (getKeyOn(guiCancelKey())) {
-@@ -3743,18 +3745,18 @@ static int guiSettingsShowIndex(int *page)
+@@ -3743,18 +3749,18 @@ static int guiSettingsShowIndex(int *page)
          if (guiDrawBGSettings() == 0)
              guiDrawBGPlasma();
  
@@ -228,7 +1062,7 @@ index 69daded..0b513e0 100644
              y += spacing;
              if (i == saveRow - 1)
                  y += spacing / 2;
-@@ -3771,7 +3773,8 @@ static int guiSettingsShowIndex(int *page)
+@@ -3771,7 +3777,8 @@ static int guiSettingsShowIndex(int *page)
              sfxPlay(SFX_CURSOR);
              selected = (selected + 1) % itemCount;
          } else if (getKeyOn(guiConfirmKey())) {
@@ -238,6 +1072,26 @@ index 69daded..0b513e0 100644
              if (selected == achRow) {
                  ripps2Achievements(); // its own page; back here when it closes
                  readPads();
+diff --git a/src/hddsupport.c b/src/hddsupport.c
+index b1821db..1ff3600 100644
+--- a/src/hddsupport.c
++++ b/src/hddsupport.c
+@@ -18,6 +18,7 @@
+ #include "include/cheatman.h"
+ #include "include/mmcesupport.h" // mmceSendGameID() cross-device game-id (#261)
+ #include "include/metadb.h" // RIPPS2: the metadata database
++#include "include/sound.h" // RIPPS2 build 100: bgmAddMusicHome
+ #include "modules/iopcore/common/cdvd_config.h"
+ 
+ #define NEWLIB_PORT_AWARE
+@@ -224,6 +225,7 @@ static void hddInitModules(void)
+     char path[256];
+     snprintf(path, sizeof(path), "%sTHM", gHDDPrefix);
+     thmAddElements(path, "/", 1);
++    bgmAddMusicHome(gHDDPrefix); // RIPPS2 build 100: OPL's resources AUDIO, for the music list
+ 
+     snprintf(path, sizeof(path), "%sLNG", gHDDPrefix);
+     lngAddLanguages(path, "/", hddGameList.mode);
 diff --git a/src/menusys.c b/src/menusys.c
 index f1b217f..7b06cf3 100644
 --- a/src/menusys.c
@@ -299,8 +1153,28 @@ index f1b217f..7b06cf3 100644
          y += spacing;
      }
  
+diff --git a/src/mmcesupport.c b/src/mmcesupport.c
+index 0374a09..18f6871 100644
+--- a/src/mmcesupport.c
++++ b/src/mmcesupport.c
+@@ -15,6 +15,7 @@
+ #include "include/system.h"
+ #include "include/extern_irx.h"
+ #include "include/cheatman.h"
++#include "include/sound.h" // RIPPS2 build 100: bgmAddMusicHome
+ #include "modules/iopcore/common/cdvd_config.h"
+ #include "../ee_core/include/coreconfig.h"
+ #include <usbhdfsd-common.h>
+@@ -561,6 +562,7 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+     // MMCE SIO2 bus (config + list + art traffic), themes on the card stayed invisible for the whole
+     // session while USB's fast first try succeeded. Here every pass retries until each succeeds; the
+     // cost is one dir-open per pass until then (identical to the old ISO-view retry behavior).
++    bgmAddMusicHome(mmcePrefix); // RIPPS2 build 100: OPL's resources AUDIO, for the music list
+     if (!ThemesLoaded) {
+         snprintf(path, sizeof(path), "%sTHM", mmcePrefix);
+         if (thmAddElements(path, "/", 1) > 0)
 diff --git a/src/opl.c b/src/opl.c
-index 130dfd0..46d7c2b 100644
+index 130dfd0..82efcbf 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -425,6 +425,7 @@ static void itemExecSelect(struct menu_item *curMenu)
@@ -311,6 +1185,92 @@ index 130dfd0..46d7c2b 100644
      // That confirm just armed a rumble pulse, and everything below blocks the GUI thread without
      // polling readPads() -- config load, GameID hold, the whole itemLaunch chain. The IOP LATCHES
      // the actuator, so without this the motor buzzes through the entire loading screen. GUI-thread
+@@ -3352,12 +3353,60 @@ static void emberSaveSettings(config_set_t *configOPL)
+     configRemoveKey(configOPL, CONFIG_OPL_EMBER_DISPLAY); // migrated on load; never written again
+ }
+ 
++/*
++  RIPPS2 build 100 (user: "make it so we aren't sharing settings with other opl elf and ours is separate clean and
++  structured without any bloat so the save will be small neat and display the icn"): with a memory card in, RIPPS2's
++  settings are a save of their own, mcN:/RIPPS2: the hat (icon.sys, ripps2.icn) and the settings files, nothing else.
++  Not beside the ELF, where another OPL's conf files sit, nor in OPL's mc?:OPL. The boot card first, then the other.
++  haveSettings: only a card whose RIPPS2 folder holds RIPPS2's settings already (the load); otherwise the first card
++  in, its folder made with its hat (the save). A Custom Settings Path (config.path) wins over both; without a card
++  nothing changes.
++*/
++static int ripps2CardSettingsHome(char *out, int size, int haveSettings)
++{
++    int k, boot = !strncmp(gBootDir, "mc1:", 4) ? 1 : 0;
++    char path[64];
++
++    for (k = 0; k < 2; k++) {
++        int slot = k ? 1 - boot : boot, fd;
++        DIR *d;
++        snprintf(path, sizeof(path), "mc%d:/", slot);
++        if ((d = opendir(path)) == NULL)
++            continue;
++        closedir(d);
++        snprintf(out, size, "mc%d:/RIPPS2", slot);
++        if (haveSettings) {
++            snprintf(path, sizeof(path), "%s/%s", out, CONFIG_OPL_FILENAME);
++            if ((fd = open(path, O_RDONLY)) < 0)
++                continue;
++            close(fd);
++            return 1;
++        }
++        mkdir(out, 0777);
++        return ripps2CardFolderIcon(out); // the folder is there with its hat: the settings may go in
++    }
++    return 0;
++}
++
+ static void _loadConfig()
+ {
+     int value, themeID = -1, langID = -1;
+     const char *temp;
++    char cardHome[16], prevHome[256], redirect[256];
++    int fromCard = 0;
+     resolveBootDirToMass(); // usb0:/ata0:/mx4sio0:/APPS -> mass0:/APPS (boot-device massN:) before the first read
++    // RIPPS2 build 100: RIPPS2's own save on a memory card first, unless a Custom Settings Path points elsewhere
++    if ((lscstatus & CONFIG_OPL) && !readConfigPathRedirect(redirect, sizeof(redirect)) &&
++        ripps2CardSettingsHome(cardHome, sizeof(cardHome), 1)) {
++        snprintf(prevHome, sizeof(prevHome), "%s", configGetHomePath());
++        configSetMove(cardHome);
++        fromCard = 1;
++    }
+     int result = configReadMulti(lscstatus);
++    if (fromCard && !(result & CONFIG_OPL)) { // unreadable there: the way it always was
++        configSetMove(prevHome);
++        result = configReadMulti(lscstatus);
++    }
+ 
+     if (lscstatus & CONFIG_OPL) {
+         if (!(result & CONFIG_OPL)) {
+@@ -4383,7 +4432,24 @@ static void _saveConfig()
+         }
+     }
+ 
++    // RIPPS2 build 100: with a memory card in, the settings go to RIPPS2's own save there (ripps2CardSettingsHome); a
++    // card that will not take them (full, gone) leaves them where they were
++    char cardHome[16], prevHome[256];
++    int toCard = 0;
++    if (!customSettingsExplicit && ripps2CardSettingsHome(cardHome, sizeof(cardHome), 0)) {
++        snprintf(prevHome, sizeof(prevHome), "%s", configGetHomePath());
++        if (strcmp(prevHome, cardHome)) {
++            configSetMove(cardHome);
++            toCard = 1;
++        }
++    }
++
+     lscret = configWriteChecked(lscstatus);
++    if (toCard && lscret <= 0) {
++        LOG("CONFIG %s would not take the settings; they stay in %s\n", cardHome, prevHome);
++        configSetMove(prevHome);
++        lscret = configWriteChecked(lscstatus);
++    }
+ 
+     // Save icons for EVERY memory-card save home, not just the legacy mc?:OPL/ one. The block above
+     // only stamps icons when there is no boot identity, so an appdir-on-MC boot (settings beside the
 diff --git a/src/pad.c b/src/pad.c
 index 176ca0c..c488407 100644
 --- a/src/pad.c
@@ -333,7 +1293,7 @@ index 176ca0c..c488407 100644
          oldpaddata = paddata;
      paddata = 0;
 diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
-index 69e0667..ddd8089 100644
+index 69e0667..be73213 100644
 --- a/src/ripps2biossnd.c
 +++ b/src/ripps2biossnd.c
 @@ -18,8 +18,15 @@
@@ -354,7 +1314,134 @@ index 69e0667..ddd8089 100644
    An older BIOS (1.00, SCPH-10000) keeps its sounds elsewhere and is refused.
  
    RIPPS2_BIOSSND_HOST_TEST builds only the ripper, for elf/tests and checks against Audio Studio.
-@@ -466,7 +473,6 @@ static rbs_u8 *rbsRender(const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLe
+@@ -262,53 +269,98 @@ static void rbsEnvelope(unsigned int a1, unsigned int a2, float *out, int n)
+ 
+ // A little of the hall the console runs under its menus (Schroeder: four damped combs, two all-passes,
+ // after an 18 ms gap), scaled to wet times the dry peak. y holds n dry samples and room for the tail.
+-static int rbsHall(float *y, int n, int cap, int rate, float wet, float tail)
++// The hall as a running state (build 100: the menu music runs it a slice at a time): four combs, highs fading
++// first, then two all-passes, after an 18 ms pre-delay
++typedef struct
++{
++    float *line[6], filt[4], g[4], *pre;
++    int len[6], pos[6], preLen, prePos;
++} rbs_hall_t;
++
++static void rbsHallFree(rbs_hall_t *h)
++{
++    int c;
++    for (c = 0; c < 6; c++)
++        free(h->line[c]);
++    free(h->pre);
++    memset(h, 0, sizeof(*h));
++}
++
++static int rbsHallInit(rbs_hall_t *h, int rate, float tail)
+ {
+     static const float combMs[4] = {29.7f, 37.1f, 41.1f, 43.7f}, apMs[2] = {5.0f, 1.7f};
+-    float *w, *line[6], filt[4] = {0, 0, 0, 0}, peak = 0, wpeak = 0, g[4];
+-    int len[6], pos[6] = {0, 0, 0, 0, 0, 0}, pre = rate * 18 / 1000, i, c, total = cap;
++    int c;
+ 
+-    if ((w = calloc(total, sizeof(float))) == NULL)
+-        return n;
++    memset(h, 0, sizeof(*h));
++    h->preLen = rate * 18 / 1000;
++    if ((h->pre = calloc(h->preLen > 0 ? h->preLen : 1, sizeof(float))) == NULL)
++        return -1;
+     for (c = 0; c < 6; c++) {
+-        len[c] = (int)((c < 4 ? combMs[c] : apMs[c - 4]) * rate / 1000) + 1;
+-        if ((line[c] = calloc(len[c], sizeof(float))) == NULL) {
+-            while (c--)
+-                free(line[c]);
+-            free(w);
+-            return n;
++        h->len[c] = (int)((c < 4 ? combMs[c] : apMs[c - 4]) * rate / 1000) + 1;
++        if ((h->line[c] = calloc(h->len[c], sizeof(float))) == NULL) {
++            rbsHallFree(h);
++            return -1;
+         }
+     }
+     for (c = 0; c < 4; c++)
+-        g[c] = powf(10.0f, -3.0f * combMs[c] / 1000.0f / tail); // tail: seconds to fall 60 dB
++        h->g[c] = powf(10.0f, -3.0f * combMs[c] / 1000.0f / tail); // tail: seconds to fall 60 dB
++    return 0;
++}
++
++// one dry sample in, the hall's sample out (the dry one from 18 ms before, through the combs and all-passes)
++static float rbsHallStep(rbs_hall_t *h, float in)
++{
++    float x, s = 0;
++    int c;
++
++    if (h->preLen > 0) {
++        x = h->pre[h->prePos];
++        h->pre[h->prePos] = in;
++        h->prePos = (h->prePos + 1) % h->preLen;
++    } else
++        x = in;
++    for (c = 0; c < 4; c++) {
++        float out = h->line[c][h->pos[c]];
++        h->filt[c] = out * 0.65f + h->filt[c] * 0.35f; // highs fade first
++        h->line[c][h->pos[c]] = x + h->filt[c] * h->g[c];
++        h->pos[c] = (h->pos[c] + 1) % h->len[c];
++        s += out;
++    }
++    for (c = 4; c < 6; c++) {
++        float d = h->line[c][h->pos[c]], v = s + d * 0.7f;
++        h->line[c][h->pos[c]] = v;
++        h->pos[c] = (h->pos[c] + 1) % h->len[c];
++        s = d - v * 0.7f;
++    }
++    return s;
++}
++
++static int rbsHall(float *y, int n, int cap, int rate, float wet, float tail)
++{
++    rbs_hall_t h;
++    float *w, peak = 0, wpeak = 0;
++    int i, total = cap;
++
++    if ((w = calloc(total, sizeof(float))) == NULL)
++        return n;
++    if (rbsHallInit(&h, rate, tail)) {
++        free(w);
++        return n;
++    }
+     for (i = 0; i < total; i++) {
+-        float x = (i - pre >= 0 && i - pre < n) ? y[i - pre] : 0, s = 0;
+-        for (c = 0; c < 4; c++) {
+-            float out = line[c][pos[c]];
+-            filt[c] = out * 0.65f + filt[c] * 0.35f; // highs fade first
+-            line[c][pos[c]] = x + filt[c] * g[c];
+-            pos[c] = (pos[c] + 1) % len[c];
+-            s += out;
+-        }
+-        for (c = 4; c < 6; c++) {
+-            float d = line[c][pos[c]], v = s + d * 0.7f;
+-            line[c][pos[c]] = v;
+-            pos[c] = (pos[c] + 1) % len[c];
+-            s = d - v * 0.7f;
+-        }
++        float s = rbsHallStep(&h, i < n ? y[i] : 0);
+         w[i] = s;
+         if (fabsf(s) > wpeak)
+             wpeak = fabsf(s);
+         if (i < n && fabsf(y[i]) > peak)
+             peak = fabsf(y[i]);
+     }
++    rbsHallFree(&h);
+     if (total > n)
+         memset(y + n, 0, sizeof(float) * (size_t)(total - n));
+     if (wpeak > 0)
+         for (i = 0; i < total; i++)
+             y[i] += w[i] * (wet * peak / wpeak);
+-    for (c = 0; c < 6; c++)
+-        free(line[c]);
+     free(w);
+     // the tail ends where it falls 50 dB under the peak
+     peak = 0;
+@@ -466,7 +518,6 @@ static rbs_u8 *rbsRender(const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLe
  
  // ---- the system music (build 89): a sequence played on the SNDBOOT bank, mono at 48 kHz
  #define RBS_RATE       48000
@@ -362,7 +1449,7 @@ index 69e0667..ddd8089 100644
  #define RBS_PROGS      128
  #define RBS_NOTES      256
  #define RBS_POINTS     64
-@@ -475,7 +481,7 @@ static rbs_u8 *rbsRender(const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLe
+@@ -475,7 +526,7 @@ static rbs_u8 *rbsRender(const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLe
  
  typedef struct
  {
@@ -371,8 +1458,22 @@ index 69e0667..ddd8089 100644
      unsigned int addr, a1, a2;
  } rbs_tone_t;
  typedef struct
-@@ -501,8 +507,7 @@ typedef struct
+@@ -499,10 +550,21 @@ typedef struct
+     float *s;
+     int n, loop;
  } rbs_smp_t;
++// build 100: one tone of one note, from its key on to its envelope's end, run a piece at a time (the menu music is
++// rendered a slice at a time: five minutes whole would not fit in the PS2's memory)
++typedef struct
++{
++    const rbs_smp_t *sp;
++    const rbs_chan_t *ch;
++    rbs_env_t env;
++    unsigned long long pos, step; // where the sample is read, 32.32 fixed point: no drift in pitch
++    int i0, koff, done;
++    float g, gl, gr, cg, cl, cr;
++} rbs_voice_t;
++#define RBS_VOICES (RBS_NOTES * 8)
  
  // An instrument bank (SShd): its programs, each a few tones (layers) with their key range, root note and
 -// fine tune, sample address (8-byte units; a tone without the sample flag is the SPU2 noise), envelope,
@@ -381,7 +1482,7 @@ index 69e0667..ddd8089 100644
  static int rbsBankPrograms(const rbs_u8 *hd, int len, rbs_prog_t *progs)
  {
      unsigned int base, last, p, k;
-@@ -529,8 +534,7 @@ static int rbsBankPrograms(const rbs_u8 *hd, int len, rbs_prog_t *progs)
+@@ -529,8 +591,7 @@ static int rbsBankPrograms(const rbs_u8 *hd, int len, rbs_prog_t *progs)
              tn->a2 = rbsLe16(t + 8);
              tn->keyLo = t[10];
              tn->vol = t[11];
@@ -391,29 +1492,64 @@ index 69e0667..ddd8089 100644
          }
      }
      return 0;
-@@ -668,7 +672,6 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
-     rbs_smp_t cache[RBS_SAMPLES];
-     float endSec = 0, *mix = NULL, peak = 0;
-     int headVol = 0, nn = 0, total, cap, k, len, ncache = 0;
--    unsigned int seed = 0x2545F491u;
-     rbs_u8 *adp = NULL;
+@@ -659,114 +720,161 @@ static float rbsCurve(const rbs_chan_t *c, int k, float t) // a channel curve's
+     return v;
+ }
  
-     if (progs == NULL || notes == NULL || ch == NULL || rbsBankPrograms(hd, hdLen, progs) ||
-@@ -687,34 +690,23 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
-         for (t = 0; t < pg->ntones; t++) {
+-// One sequence as an event's .adp. NULL when it is not there
+-static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLen, int *outLen)
++// Every tone of every note as a voice, in note order (so by start), their samples decoded once into cache
++static int rbsVoices(const rbs_note_t *notes, int nn, const rbs_prog_t *progs, const rbs_chan_t *ch, const rbs_u8 *bd, int bdLen,
++                     rbs_smp_t *cache, int *ncache, int total, rbs_voice_t *v, int max)
+ {
+-    rbs_prog_t *progs = calloc(RBS_PROGS, sizeof(rbs_prog_t));
+-    rbs_note_t *notes = malloc(sizeof(rbs_note_t) * RBS_NOTES);
+-    rbs_chan_t *ch = malloc(sizeof(rbs_chan_t) * 16);
+-    rbs_smp_t cache[RBS_SAMPLES];
+-    float endSec = 0, *mix = NULL, peak = 0;
+-    int headVol = 0, nn = 0, total, cap, k, len, ncache = 0;
+-    unsigned int seed = 0x2545F491u;
+-    rbs_u8 *adp = NULL;
++    int k, t, c, n = 0;
+ 
+-    if (progs == NULL || notes == NULL || ch == NULL || rbsBankPrograms(hd, hdLen, progs) ||
+-        (nn = rbsSequence(sq, sqLen, notes, ch, &headVol, &endSec)) <= 0)
+-        goto done;
+-    total = (int)((endSec + 4.0f) * RBS_RATE) + 1; // the last event and 4 s for the releases, as Audio Studio
+-    cap = total + RBS_RATE * 7 / 2;                 // and room for the hall
+-    if (endSec > 40 || (mix = calloc(cap, sizeof(float))) == NULL)
+-        goto done;
+     for (k = 0; k < nn; k++) {
+         const rbs_note_t *nt = &notes[k];
+         const rbs_prog_t *pg = &progs[nt->prog & (RBS_PROGS - 1)];
+-        int i0 = (int)(nt->on * RBS_RATE), koff = nt->off >= 0 ? (int)((nt->off - nt->on) * RBS_RATE) : -1, t;
++        int i0 = (int)(nt->on * RBS_RATE);
+         if (!pg->used || i0 >= total)
+             continue;
+-        for (t = 0; t < pg->ntones; t++) {
++        for (t = 0; t < pg->ntones && n < max; t++) {
              const rbs_tone_t *tn = &pg->tone[t];
              const rbs_smp_t *sp = NULL;
 -            float ratio, g, pn, gl, gr, cg = 0, cl = 0, cr = 0, level = 0, hold = 1;
-+            float ratio, g, pn, gl, gr, cg = 0, cl = 0, cr = 0;
-             unsigned long long pos = 0, step; // where the sample is read, 32.32 fixed point: no drift in pitch
+-            unsigned long long pos = 0, step; // where the sample is read, 32.32 fixed point: no drift in pitch
 -            int i, c, hi = tn->keyHi > tn->keyLo ? tn->keyHi : tn->keyLo, lastIdx = -1;
-+            int i, c, hi = tn->keyHi > tn->keyLo ? tn->keyHi : tn->keyLo;
-             rbs_env_t env;
+-            rbs_env_t env;
++            int hi = tn->keyHi > tn->keyLo ? tn->keyHi : tn->keyLo;
++            float ratio, pn;
              if (nt->note < tn->keyLo || nt->note > hi)
                  continue;
 -#ifdef RBS_TEST_NONOISE // host checks against Audio Studio: no noise voices (random on both sides), no hall
 -            if (tn->noise)
--                continue;
++            for (c = 0; c < *ncache; c++)
++                if (cache[c].addr == tn->addr)
++                    sp = &cache[c];
++            if (sp == NULL && *ncache < RBS_SAMPLES) {
++                cache[*ncache].addr = tn->addr;
++                if ((cache[*ncache].s = rbsAdpcm(bd, bdLen, tn->addr, &cache[*ncache].n, &cache[*ncache].loop)) != NULL)
++                    sp = &cache[(*ncache)++];
++            }
++            if (sp == NULL || sp->n < 2)
+                 continue;
 -#endif
              ratio = powf(2.0f, (nt->note - tn->root + tn->fine / 128.0f) / 12.0f);
 -            if (tn->noise) { // the SPU2 noise: a random level held for 48000 / rate samples at a time
@@ -432,28 +1568,26 @@ index 69e0667..ddd8089 100644
 -                }
 -                if (sp == NULL || sp->n < 2)
 -                    continue;
-+            for (c = 0; c < ncache; c++)
-+                if (cache[c].addr == tn->addr)
-+                    sp = &cache[c];
-+            if (sp == NULL && ncache < RBS_SAMPLES) {
-+                cache[ncache].addr = tn->addr;
-+                if ((cache[ncache].s = rbsAdpcm(bd, bdLen, tn->addr, &cache[ncache].n, &cache[ncache].loop)) != NULL)
-+                    sp = &cache[ncache++];
-             }
-+            if (sp == NULL || sp->n < 2)
-+                continue;
-             step = (unsigned long long)(ratio * 4294967296.0f);
-             rbsEnvInit(&env, tn->a1, tn->a2);
-             g = nt->vel / 127.0f * tn->vol / 127.0f * pg->vol / 127.0f;
-@@ -723,32 +715,21 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
-             gl = cosf((pn + 1) * RBS_PI4);
-             gr = sinf((pn + 1) * RBS_PI4);
-             for (i = 0; i0 + i < total; i++) {
+-            }
+-            step = (unsigned long long)(ratio * 4294967296.0f);
+-            rbsEnvInit(&env, tn->a1, tn->a2);
+-            g = nt->vel / 127.0f * tn->vol / 127.0f * pg->vol / 127.0f;
++            memset(&v[n], 0, sizeof(v[n]));
++            v[n].sp = sp;
++            v[n].ch = &ch[nt->ch];
++            v[n].i0 = i0;
++            v[n].koff = nt->off >= 0 ? (int)((nt->off - nt->on) * RBS_RATE) : -1;
++            v[n].step = (unsigned long long)(ratio * 4294967296.0f);
++            rbsEnvInit(&v[n].env, tn->a1, tn->a2);
++            v[n].g = nt->vel / 127.0f * tn->vol / 127.0f * pg->vol / 127.0f;
+             pn = ((tn->pan - 64) + (pg->pan - 64)) / 64.0f;
+             pn = pn < -1 ? -1 : pn > 1 ? 1 : pn;
+-            gl = cosf((pn + 1) * RBS_PI4);
+-            gr = sinf((pn + 1) * RBS_PI4);
+-            for (i = 0; i0 + i < total; i++) {
 -                float e = rbsEnvNext(&env, i == koff), y;
-+                float e = rbsEnvNext(&env, i == koff), y, f;
-+                int a, b;
-                 if (env.done)
-                     break; // the voice ends when its envelope does
+-                if (env.done)
+-                    break; // the voice ends when its envelope does
 -                if (tn->noise) {
 -                    int idx = (int)(i / hold);
 -                    if (idx != lastIdx) {
@@ -476,29 +1610,467 @@ index 69e0667..ddd8089 100644
 -                    b = a + 1 < sp->n ? a + 1 : sp->n - 1;
 -                    y = sp->s[a] * (1 - f) + sp->s[b] * f;
 -                    pos += step;
-+                if ((pos >> 32) >= (unsigned long long)sp->n) {
-+                    if (sp->loop < 0 || sp->loop >= sp->n - 1)
-+                        break;
-+                    while ((pos >> 32) >= (unsigned long long)sp->n)
-+                        pos -= (unsigned long long)(sp->n - sp->loop) << 32;
-                 }
-+                a = (int)(pos >> 32);
-+                f = (unsigned int)pos * (1.0f / 4294967296.0f);
-+                b = a + 1 < sp->n ? a + 1 : sp->n - 1;
-+                y = sp->s[a] * (1 - f) + sp->s[b] * f;
-+                pos += step;
-                 if ((i & 63) == 0) { // the channel's volume, expression and pan where the note is
-                     float tt = (float)(i0 + i) / RBS_RATE, pc;
-                     cg = rbsCurve(&ch[nt->ch], 0, tt) * rbsCurve(&ch[nt->ch], 1, tt);
-@@ -763,7 +744,7 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
+-                }
+-                if ((i & 63) == 0) { // the channel's volume, expression and pan where the note is
+-                    float tt = (float)(i0 + i) / RBS_RATE, pc;
+-                    cg = rbsCurve(&ch[nt->ch], 0, tt) * rbsCurve(&ch[nt->ch], 1, tt);
+-                    pc = (rbsCurve(&ch[nt->ch], 2, tt) - 64) / 64.0f;
+-                    pc = pc < -1 ? -1 : pc > 1 ? 1 : pc;
+-                    cl = cosf((pc + 1) * RBS_PI4) * 1.41421356f;
+-                    cr = sinf((pc + 1) * RBS_PI4) * 1.41421356f;
+-                }
+-                mix[i0 + i] += y * e * g * cg * (gl * cl + gr * cr) * 0.5f; // left and right, summed to mono
++            v[n].gl = cosf((pn + 1) * RBS_PI4);
++            v[n].gr = sinf((pn + 1) * RBS_PI4);
++            n++;
++        }
++    }
++    return n;
++}
++
++// A voice's samples from the song's 48 kHz sample at on, one in every stride (1: every one; the menu music takes 2,
++// for 24 kHz at half the work), added into mix[0 .. n - 1]
++static void rbsVoiceRun(rbs_voice_t *v, float *mix, int at, int n, int stride)
++{
++    int k = v->i0 > at ? (v->i0 - at + stride - 1) / stride : 0, t;
++
++    if (v->done)
++        return;
++    for (; k < n; k++) {
++        int i = at + k * stride - v->i0, a, b; // the voice's own sample count
++        float e = rbsEnvNext(&v->env, i == v->koff), y, f;
++        for (t = 1; t < stride; t++) // the envelope ticks at 48 kHz whatever the output's rate
++            rbsEnvNext(&v->env, i + t == v->koff);
++        if (v->env.done) {
++            v->done = 1; // the voice ends when its envelope does
++            return;
++        }
++        if ((v->pos >> 32) >= (unsigned long long)v->sp->n) {
++            if (v->sp->loop < 0 || v->sp->loop >= v->sp->n - 1) {
++                v->done = 1;
++                return;
+             }
++            while ((v->pos >> 32) >= (unsigned long long)v->sp->n)
++                v->pos -= (unsigned long long)(v->sp->n - v->sp->loop) << 32;
++        }
++        a = (int)(v->pos >> 32);
++        f = (unsigned int)v->pos * (1.0f / 4294967296.0f);
++        b = a + 1 < v->sp->n ? a + 1 : v->sp->n - 1;
++        y = v->sp->s[a] * (1 - f) + v->sp->s[b] * f;
++        v->pos += v->step * stride;
++        if ((i & 63) < stride) { // the channel's volume, expression and pan where the note is
++            float tt = (float)(v->i0 + i) / RBS_RATE, pc;
++            v->cg = rbsCurve(v->ch, 0, tt) * rbsCurve(v->ch, 1, tt);
++            pc = (rbsCurve(v->ch, 2, tt) - 64) / 64.0f;
++            pc = pc < -1 ? -1 : pc > 1 ? 1 : pc;
++            v->cl = cosf((pc + 1) * RBS_PI4) * 1.41421356f;
++            v->cr = sinf((pc + 1) * RBS_PI4) * 1.41421356f;
+         }
++        mix[k] += y * e * v->g * v->cg * (v->gl * v->cl + v->gr * v->cr) * 0.5f; // left and right, summed to mono
      }
-     for (k = 0; k < total; k++)
-         mix[k] *= headVol / 127.0f;
+-    for (k = 0; k < total; k++)
+-        mix[k] *= headVol / 127.0f;
 -#if defined(RBS_TEST_NONOISE) || defined(RBS_TEST_DRY)
+-    len = total;
++}
++
++// A sequence and its bank, parsed: programs, notes, channels, the voices and their samples
++typedef struct
++{
++    rbs_prog_t *progs;
++    rbs_note_t *notes;
++    rbs_chan_t *ch;
++    rbs_voice_t *voices;
++    rbs_smp_t cache[RBS_SAMPLES];
++    float endSec;
++    int headVol, nn, nv, ncache, total;
++} rbs_seq_t;
++
++static void rbsSeqFree(rbs_seq_t *q)
++{
++    int k;
++    for (k = 0; k < q->ncache; k++)
++        free(q->cache[k].s);
++    free(q->voices);
++    free(q->progs);
++    free(q->notes);
++    free(q->ch);
++    memset(q, 0, sizeof(*q));
++}
++
++// total: the song's length in 48 kHz samples (its last event and 4 s for the releases, as Audio Studio)
++static int rbsSeqOpen(rbs_seq_t *q, const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLen, float maxSec)
++{
++    memset(q, 0, sizeof(*q));
++    q->progs = calloc(RBS_PROGS, sizeof(rbs_prog_t));
++    q->notes = malloc(sizeof(rbs_note_t) * RBS_NOTES);
++    q->ch = malloc(sizeof(rbs_chan_t) * 16);
++    if (q->progs == NULL || q->notes == NULL || q->ch == NULL || rbsBankPrograms(hd, hdLen, q->progs) ||
++        (q->nn = rbsSequence(sq, sqLen, q->notes, q->ch, &q->headVol, &q->endSec)) <= 0 || q->endSec > maxSec)
++        goto bad;
++    q->total = (int)((q->endSec + 4.0f) * RBS_RATE) + 1;
++    if ((q->voices = malloc(sizeof(rbs_voice_t) * RBS_VOICES)) == NULL)
++        goto bad;
++    q->nv = rbsVoices(q->notes, q->nn, q->progs, q->ch, bd, bdLen, q->cache, &q->ncache, q->total, q->voices, RBS_VOICES);
++    return 0;
++bad:
++    rbsSeqFree(q);
++    return -1;
++}
++
++// One sequence as an event's .adp. NULL when it is not there
++static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLen, int *outLen)
++{
++    rbs_seq_t q;
++    float *mix = NULL, peak = 0;
++    int k, len, cap;
++    rbs_u8 *adp = NULL;
++
++    if (rbsSeqOpen(&q, sq, sqLen, hd, hdLen, bd, bdLen, 40))
++        return NULL;
++    cap = q.total + RBS_RATE * 7 / 2; // and room for the hall
++    if ((mix = calloc(cap, sizeof(float))) == NULL)
++        goto done;
++    for (k = 0; k < q.nv; k++)
++        rbsVoiceRun(&q.voices[k], mix, 0, q.total, 1);
++    for (k = 0; k < q.total; k++)
++        mix[k] *= q.headVol / 127.0f;
 +#ifdef RBS_TEST_DRY
-     len = total;
++    len = q.total;
  #else
-     len = rbsHall(mix, total, cap, RBS_RATE, 0.4f, 3.0f);
+-    len = rbsHall(mix, total, cap, RBS_RATE, 0.4f, 3.0f);
++    len = rbsHall(mix, q.total, cap, RBS_RATE, 0.4f, 3.0f);
+ #endif
+     for (k = 0; k < len; k++)
+         if (fabsf(mix[k]) > peak)
+@@ -774,15 +882,163 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
+     if (peak > 0)
+         adp = rbsEncode(mix, len, 4096, 0.8f / peak, outLen);
+ done:
+-    for (k = 0; k < ncache; k++)
+-        free(cache[k].s);
+     free(mix);
+-    free(progs);
+-    free(notes);
+-    free(ch);
++    rbsSeqFree(&q);
+     return adp;
+ }
+ 
++/*
++  Build 100: the menu music (user: the BGM rip apart from the sounds, its size said first, and the user picks where
++  it goes). The browser's ambient piece, SNDWARNS (5 min 27 s on the SNDBOOT bank: its spectrum is the PS2's "Menu"
++  recording's), rendered a 0.2 s slice at a time straight at 24 kHz mono 16-bit (each voice read at every other
++  48 kHz step: the piece has next to nothing over 8 kHz) and through the same hall as the sounds, into a WAV the
++  music player loops.
++
++  The hall's level and the final gain need the whole piece's peaks, which a slice at a time cannot know in advance
++  without rendering it twice; SNDIMAGE is the same on every BIOS from 1.60 (checked on the PC from SCPH-30004 to
++  SCPH-77001), so they were measured once on the PC (ripps2BiosMusicMeasure) and are fixed here, with a soft limit
++  as a safety on a BIOS that would differ.
++*/
++#define RBS_MUSIC_SEQ     "SNDWARNS"
++#define RBS_MUSIC_RATE    24000
++#define RBS_MUSIC_SLICE   4800 // 24 kHz samples rendered at a time
++#define RBS_MUSIC_FADE    1.0f // seconds faded out at the end, so the loop starts again from silence
++#define RBS_MUSIC_WET     0.0807f // the hall at 0.4 of the dry piece's peak (dry 0.5335, raw hall 2.6455)
++#define RBS_MUSIC_GAIN    1.3875f // the result's peak (0.5766) to 0.8, as the sounds
++
++typedef struct
++{
++    rbs_seq_t q;
++    rbs_hall_t hall;
++    int at, out, outTotal; // at: the song's 48 kHz sample; out: 24 kHz samples made
++} rbs_music_t;
++
++static void rbsMusicClose(rbs_music_t *m)
++{
++    rbsHallFree(&m->hall);
++    rbsSeqFree(&m->q);
++    free(m);
++}
++
++static rbs_music_t *rbsMusicOpen(const unsigned char *img, int size)
++{
++    rbs_music_t *m = calloc(1, sizeof(rbs_music_t));
++    rbs_u8 *hd = NULL, *bd = NULL, *sq = NULL;
++    int ho, hl, bo, bl, so, sl, hdLen, bdLen, sqLen, ok = 0;
++
++    if (m == NULL)
++        return NULL;
++    if (!ripps2RomdirFind(img, size, "SNDBOOTH", &ho, &hl) && !ripps2RomdirFind(img, size, "SNDBOOTB", &bo, &bl) &&
++        !ripps2RomdirFind(img, size, RBS_MUSIC_SEQ, &so, &sl) && (hd = rbsUnlz(img + ho, hl, &hdLen)) != NULL &&
++        (bd = rbsUnlz(img + bo, bl, &bdLen)) != NULL && (sq = rbsUnlz(img + so, sl, &sqLen)) != NULL &&
++        !rbsSeqOpen(&m->q, sq, sqLen, hd, hdLen, bd, bdLen, 600) && !rbsHallInit(&m->hall, RBS_MUSIC_RATE, 3.0f))
++        ok = 1;
++    free(hd);
++    free(bd);
++    free(sq);
++    if (!ok) {
++        rbsMusicClose(m);
++        return NULL;
++    }
++    m->outTotal = m->q.total / 2;
++    return m;
++}
++
++// The next slice as 24 kHz mono samples (-1..1) in out (RBS_MUSIC_SLICE at most): how many, 0 at the end.
++// wetScale: the hall's level against the dry piece's; the samples are not yet gained
++static int rbsMusicNext(rbs_music_t *m, float *out, float wetScale)
++{
++    int n = m->outTotal - m->out, k;
++
++    if (n <= 0)
++        return 0;
++    if (n > RBS_MUSIC_SLICE)
++        n = RBS_MUSIC_SLICE;
++    memset(out, 0, sizeof(float) * n);
++    for (k = 0; k < m->q.nv && m->q.voices[k].i0 < m->at + 2 * n; k++) // the voices are in start order
++        rbsVoiceRun(&m->q.voices[k], out, m->at, n, 2);
++    for (k = 0; k < n; k++) {
++        float d = out[k] * (m->q.headVol / 127.0f);
++        out[k] = d + rbsHallStep(&m->hall, d) * wetScale;
++    }
++    m->at += 2 * n;
++    m->out += n;
++    return n;
++}
++
++int ripps2BiosMusicSamples(const unsigned char *img, int size)
++{
++    rbs_music_t *m = rbsMusicOpen(img, size);
++    int n;
++
++    if (m == NULL)
++        return -1;
++    n = m->outTotal;
++    rbsMusicClose(m);
++    return n;
++}
++
++int ripps2BiosMusicFromImage(const unsigned char *img, int size, ripps2_biosmusic_put_t put, void *ctx)
++{
++    rbs_music_t *m = rbsMusicOpen(img, size);
++    static short pcm[RBS_MUSIC_SLICE];
++    static float out[RBS_MUSIC_SLICE]; // static: 19 KB is too much for the GUI thread's stack
++    int n, k, fade0, r = 0;
++
++    if (m == NULL)
++        return -1;
++    fade0 = m->outTotal - (int)(RBS_MUSIC_FADE * RBS_MUSIC_RATE);
++    while ((n = rbsMusicNext(m, out, RBS_MUSIC_WET)) > 0) {
++        for (k = 0; k < n; k++) {
++            int at = m->out - n + k;
++            float v = out[k] * RBS_MUSIC_GAIN;
++            if (at >= fade0)
++                v *= 0.5f * (1.0f + cosf(3.14159265f * (float)(at - fade0) / (RBS_MUSIC_FADE * RBS_MUSIC_RATE)));
++            if (v > 0.9f || v < -0.9f) // a soft limit, only on a BIOS whose piece is louder than the one measured
++                v = (v > 0 ? 1.0f : -1.0f) * (0.9f + 0.1f * tanhf((fabsf(v) - 0.9f) * 10.0f));
++            pcm[k] = (short)lrintf(v * 32767.0f);
++        }
++        if ((r = put(pcm, n, m->out, m->outTotal, ctx)) != 0)
++            break;
++    }
++    n = m->out;
++    rbsMusicClose(m);
++    return r != 0 ? -2 : n;
++}
++
++#ifdef RIPPS2_BIOSSND_HOST_TEST
++// The PC's measure of the two fixed levels: the dry piece's peak, the raw hall's, and the result's at those levels
++int ripps2BiosMusicMeasure(const unsigned char *img, int size, float *dryPeak, float *wetPeak, float *outPeak, float wetScale)
++{
++    rbs_music_t *m = rbsMusicOpen(img, size), *w;
++    static float out[RBS_MUSIC_SLICE], dry[RBS_MUSIC_SLICE];
++    int n, k;
++
++    if (m == NULL)
++        return -1;
++    *dryPeak = *wetPeak = *outPeak = 0;
++    while ((n = rbsMusicNext(m, out, 0)) > 0)
++        for (k = 0; k < n; k++)
++            if (fabsf(out[k]) > *dryPeak)
++                *dryPeak = fabsf(out[k]);
++    rbsMusicClose(m);
++    if ((m = rbsMusicOpen(img, size)) == NULL || (w = rbsMusicOpen(img, size)) == NULL)
++        return -1;
++    while ((n = rbsMusicNext(m, out, wetScale)) > 0) {
++        rbsMusicNext(w, dry, 0);
++        for (k = 0; k < n; k++) {
++            if (fabsf(out[k]) > *outPeak)
++                *outPeak = fabsf(out[k]);
++            if (wetScale > 0 && fabsf((out[k] - dry[k]) / wetScale) > *wetPeak)
++                *wetPeak = fabsf((out[k] - dry[k]) / wetScale);
++        }
++    }
++    rbsMusicClose(m);
++    rbsMusicClose(w);
++    return 0;
++}
++#endif
++
+ // the two sequences RIPPS2 takes, on the SNDBOOT bank
+ static const struct
+ {
+@@ -924,4 +1180,137 @@ void ripps2RipBiosSoundsDialog(void)
+     snprintf(msg, sizeof(msg), "%d sounds from this console's BIOS are in %s and playing now.", n, dir);
+     guiMsgBox(msg, 0, NULL);
+ }
++
++// build 100: the menu music's WAV, written a slice at a time with its progress on screen
++typedef struct
++{
++    FILE *f;
++    int pct;
++} rbs_wav_t;
++
++static void rbsPut32(unsigned char *p, unsigned int v)
++{
++    p[0] = v;
++    p[1] = v >> 8;
++    p[2] = v >> 16;
++    p[3] = v >> 24;
++}
++
++static int rbsWavPut(const short *pcm, int n, int done, int total, void *ctx)
++{
++    rbs_wav_t *w = (rbs_wav_t *)ctx;
++    int pct = total > 0 ? (int)((long long)done * 100 / total) : 0;
++    char msg[80];
++
++    if ((int)fwrite(pcm, 2, n, w->f) != n) // the EE is little-endian, as a WAV is
++        return -1;
++    if (pct != w->pct) {
++        w->pct = pct;
++        snprintf(msg, sizeof(msg), "Ripping this console's menu music: %d%%", pct);
++        guiRenderTextScreen(msg);
++    }
++    return 0;
++}
++
++#define RBS_MUSIC_FILE "bgm_00 Menu.wav" // "Menu": the track the music list plays when none is picked
++
++// Audio settings > BIOS Music > RIP (build 100; user: the music apart from the sounds, its size said before it is
++// ripped, and the user picks where it goes: beside RIPPS2, or OPL's resources AUDIO on a drive). No memory card
++// has room for it, so a memory card is never offered.
++void ripps2RipBiosMusicDialog(void)
++{
++    char own[256], home[64], dirs[2][288], path[320], msg[768], mb[16];
++    unsigned char *img, h[44] = {'R', 'I', 'F', 'F', 0, 0, 0, 0, 'W', 'A', 'V', 'E', 'f', 'm', 't', ' ', 16, 0, 0, 0, 1, 0, 1, 0};
++    int imgSize = 0, samples, nd = 0, pick, r, ok, wasPlaying;
++    unsigned int bytes;
++    rbs_wav_t w;
++
++    if ((img = rbsReadSndImage(&imgSize)) == NULL) {
++        guiMsgBox("This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their "
++                  "sounds another way, which RIPPS2 does not read yet.",
++                  0, NULL);
++        return;
++    }
++    guiRenderTextScreen("Reading this console's menu music");
++    if ((samples = ripps2BiosMusicSamples(img, imgSize)) <= 0) {
++        free(img);
++        guiMsgBox("This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.", 0, NULL);
++        return;
++    }
++    bytes = 44 + (unsigned int)samples * 2;
++    snprintf(mb, sizeof(mb), "%u.%u MB", bytes / 1048576, bytes % 1048576 * 10 / 1048576);
++    if (ripps2AudioBase(own, sizeof(own) - 8, 0) && strncmp(own, "mc", 2))
++        snprintf(dirs[nd++], sizeof(dirs[0]), "%sAUDIO/", own);
++    if (bgmMusicHome(0, home, sizeof(home)) && strncmp(home, "mc", 2))
++        snprintf(dirs[nd++], sizeof(dirs[0]), "%sAUDIO/", home);
++    if (nd == 0) {
++        free(img);
++        snprintf(msg, sizeof(msg),
++                 "The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no "
++                 "drive with an OPL folder is started: start one in Storage, then rip the music to it.",
++                 mb);
++        guiMsgBox(msg, 0, NULL);
++        return;
++    }
++    if (nd == 2) {
++        snprintf(msg, sizeof(msg),
++                 "RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and "
++                 "writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes "
++                 "it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.",
++                 samples / RBS_MUSIC_RATE / 60, samples / RBS_MUSIC_RATE % 60, mb, dirs[0], dirs[1], RBS_MUSIC_FILE);
++        guiMsgBoxStartOption("RIP TO OPL'S AUDIO");
++        pick = guiMsgBox(msg, 1, NULL); // 1: beside RIPPS2, 2: OPL's resources
++    } else {
++        snprintf(msg, sizeof(msg),
++                 "RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and "
++                 "writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a "
++                 "minute or two.",
++                 samples / RBS_MUSIC_RATE / 60, samples / RBS_MUSIC_RATE % 60, mb, dirs[0], RBS_MUSIC_FILE);
++        guiMsgBoxStartOption("RIP");
++        pick = guiMsgBox(msg, 0, NULL) == 2 ? 1 : 0;
++    }
++    if (pick < 1 || pick > nd) {
++        free(img);
++        return;
++    }
++    snprintf(path, sizeof(path), "%s", dirs[pick - 1]);
++    path[strlen(path) - 1] = '\0';
++    mkdir(path, 0777);
++    snprintf(path, sizeof(path), "%s%s", dirs[pick - 1], RBS_MUSIC_FILE);
++    wasPlaying = isBgmPlaying();
++    if (wasPlaying)
++        bgmStop(); // the music may be playing this very file: it lets go while it is rewritten
++    if ((w.f = fopen(path, "wb")) == NULL) {
++        free(img);
++        snprintf(msg, sizeof(msg), "%s could not be made. Is the drive write-protected?", path);
++        guiMsgBox(msg, 0, NULL);
++        if (wasPlaying)
++            bgmStart();
++        return;
++    }
++    rbsPut32(h + 4, bytes - 8);
++    rbsPut32(h + 24, RBS_MUSIC_RATE);
++    rbsPut32(h + 28, RBS_MUSIC_RATE * 2);
++    h[32] = 2;
++    h[34] = 16;
++    memcpy(h + 36, "data", 4);
++    rbsPut32(h + 40, (unsigned int)samples * 2);
++    w.pct = -1;
++    guiRenderTextScreen("Ripping this console's menu music: 0%");
++    ok = fwrite(h, 1, sizeof(h), w.f) == sizeof(h);
++    r = ok ? ripps2BiosMusicFromImage(img, imgSize, rbsWavPut, &w) : -2;
++    free(img);
++    ok = fclose(w.f) == 0 && r == samples;
++    if (!ok) {
++        remove(path); // never a short WAV left behind
++        snprintf(msg, sizeof(msg), "The menu music could not be written to %s (%s). Is the drive full?", dirs[pick - 1], mb);
++    } else
++        snprintf(msg, sizeof(msg),
++                 "The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is "
++                 "picked.",
++                 mb, dirs[pick - 1], RBS_MUSIC_FILE);
++    if (gEnableBGM && !isBgmPlaying())
++        bgmStart();
++    guiMsgBox(msg, 0, NULL);
++}
+ #endif
+diff --git a/src/ripps2boot.c b/src/ripps2boot.c
+index 0b76f5d..8afc5d0 100644
+--- a/src/ripps2boot.c
++++ b/src/ripps2boot.c
+@@ -737,6 +737,16 @@ int ripps2CardFolderIcon(const char *dir)
+     if ((fd = open(path, O_RDONLY)) >= 0) {
+         keep = read(fd, old, sizeof(old)) == (int)sizeof(old) && strncmp((char *)old + 0x104, "bible.icn", 10) != 0;
+         close(fd);
++        if (keep && !strncmp((char *)old + 0x104, "ripps2.icn", 11)) {
++            // build 100: the hat got lighter (90 KB to 50 KB, the save small): an older ripps2.icn is replaced
++            snprintf(path, sizeof(path), "%s/ripps2.icn", dir);
++            if ((fd = open(path, O_RDONLY)) >= 0) {
++                int size = (int)lseek(fd, 0, SEEK_END);
++                close(fd);
++                if (size != (int)size_ripps2_icn)
++                    blWrite(path, (const char *)ripps2_icn, size_ripps2_icn);
++            }
++        }
+         if (keep)
+             return 1;
+     }
 diff --git a/src/ripps2edit.c b/src/ripps2edit.c
 index 951ca63..6480771 100644
 --- a/src/ripps2edit.c
@@ -733,7 +2305,7 @@ index c46c24c..f5511c5 100644
              pitch -= dt * (ry < -24 ? -ry / 127.0f : 1.0f) * 2.0f;
          if (getKeyPressed(KEY_DOWN) || ry > 24)
 diff --git a/src/sound.c b/src/sound.c
-index 024f50f..1f31c38 100644
+index 024f50f..cbd4f36 100644
 --- a/src/sound.c
 +++ b/src/sound.c
 @@ -134,6 +134,20 @@ static void voiceMute(int v)
@@ -908,7 +2480,137 @@ index 024f50f..1f31c38 100644
      audioSetVolume();
  }
  
-@@ -2306,9 +2382,13 @@ void audioSetVolume(void)
+@@ -1825,9 +1901,74 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
+ // RIPPS2: the MUSIC folder beside RIPPS2. Its Ogg Vorbis tracks in file name order (a number in front
+ // sets the order); Audio settings > Music picks one, the first by default. A disk theme's own music
+ // and a typed Default Theme Music path still come first.
++// build 100: by file name, wherever the track sits, so bgm_01 and bgm_02 keep their order across folders
++static const char *bgmMusicFile(const char *name)
++{
++    const char *s = strrchr(name, '/');
++    return s != NULL ? s + 1 : name;
++}
++
+ static int bgmMusicCmp(const void *a, const void *b)
+ {
+-    return strcasecmp((const char *)a, (const char *)b);
++    int r = strcasecmp(bgmMusicFile((const char *)a), bgmMusicFile((const char *)b));
++    return r != 0 ? r : strcasecmp((const char *)a, (const char *)b);
++}
++
++/*
++  Build 100 (user: "the background music should be able to play from the opl resources /audio too ... as well as
++  the /audio folder next to the .elf"): OPL's resources on each started drive (its OPL root, where THM and ART are:
++  the BDM prefix, the HDD's home, the MMCE card's) may hold an AUDIO folder too. Each drive's update registers its
++  root here, as it registers its themes; the music list reads every one beside RIPPS2's own AUDIO. A track there
++  is listed by its full path; one of the same name beside RIPPS2 wins.
++*/
++static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*names)[RIPPS2_MUSIC_NAME], int n, int max);
++
++#define BGM_HOMES 8
++static char bgmHomes[BGM_HOMES][48];
++static volatile int bgmHomeCount = 0;
++
++static int bgmHomeHasMusic(const char *prefix)
++{
++    static char names[RIPPS2_MUSIC_MAX][RIPPS2_MUSIC_NAME];
++    char sub[64];
++    snprintf(sub, sizeof(sub), "%sAUDIO", prefix);
++    return bgmMusicScan("", sub, 1, names, 0, RIPPS2_MUSIC_MAX) > 0;
++}
++
++// a drive's OPL root ("mass0:/", "pfs0:/"), from its update (the IO worker)
++void bgmAddMusicHome(const char *prefix)
++{
++    int i, n = bgmHomeCount;
++
++    if (prefix == NULL || prefix[0] == '\0' || strlen(prefix) >= sizeof(bgmHomes[0]))
++        return;
++    for (i = 0; i < n; i++)
++        if (!strcmp(bgmHomes[i], prefix))
++            return;
++    if (n >= BGM_HOMES)
++        return;
++    snprintf(bgmHomes[n], sizeof(bgmHomes[n]), "%s", prefix);
++    bgmHomeCount = n + 1;
++    // nothing playing yet (no music beside RIPPS2, or the drive came up late): this drive's music starts
++    if (audio_initialized && gEnableBGM && !isBgmPlaying() && bgmHomeHasMusic(prefix)) {
++        bgmFadeIn = 1;
++        bgmFadeAt = clock();
++        bgmStart();
++    }
++}
++
++// the i-th OPL resources root with no AUDIO of RIPPS2's own in it (Audio settings > BIOS Music offers it)
++int bgmMusicHome(int i, char *out, int size)
++{
++    char dir[256];
++    int k, n = bgmHomeCount;
++
++    if (!ripps2AudioBase(dir, sizeof(dir), 0))
++        dir[0] = '\0';
++    for (k = 0; k < n; k++)
++        if (strcmp(bgmHomes[k], dir) && i-- == 0)
++            return snprintf(out, size, "%s", bgmHomes[k]) < size;
++    return 0;
+ }
+ 
+ // One AUDIO folder beside RIPPS2 holds the sound pack and the music, named as RiptOPL names them:
+@@ -1859,13 +2000,27 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
+ 
+ int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
+ {
+-    char dir[256];
+-    int n;
++    char dir[256], sub[64];
++    int n = 0, i, k, j;
+ 
+-    if (!ripps2AudioBase(dir, sizeof(dir) - 8, 0))
+-        return 0;
+-    n = bgmMusicScan(dir, "AUDIO", 1, names, 0, max);
+-    n = bgmMusicScan(dir, "MUSIC", 0, names, n, max);
++    if (ripps2AudioBase(dir, sizeof(dir) - 8, 0)) {
++        n = bgmMusicScan(dir, "AUDIO", 1, names, 0, max);
++        n = bgmMusicScan(dir, "MUSIC", 0, names, n, max);
++    } else
++        dir[0] = '\0';
++    for (i = 0; i < bgmHomeCount && n < max; i++) { // build 100: OPL's resources AUDIO on each started drive
++        if (!strcmp(bgmHomes[i], dir))
++            continue; // RIPPS2's own folder, read above
++        snprintf(sub, sizeof(sub), "%sAUDIO", bgmHomes[i]);
++        k = bgmMusicScan("", sub, 1, names, n, max);
++        for (j = n; j < k; j++) { // one of the same name already listed (beside RIPPS2 first) wins
++            int d, dup = 0;
++            for (d = 0; d < n && !dup; d++)
++                dup = !strcasecmp(bgmMusicFile(names[d]), bgmMusicFile(names[j]));
++            if (!dup)
++                memmove(names[n++], names[j], RIPPS2_MUSIC_NAME);
++        }
++    }
+     qsort(names, n, RIPPS2_MUSIC_NAME, bgmMusicCmp);
+     return n;
+ }
+@@ -1912,7 +2067,7 @@ static int bgmMusicPath(char *out, int size)
+     char dir[256];
+     int n = bgmMusicList(names, RIPPS2_MUSIC_MAX), i, pick;
+ 
+-    if (n == 0 || !ripps2AudioBase(dir, sizeof(dir), 0))
++    if (n == 0)
+         return 0;
+     pick = bgmMusicDefault(names, n);
+     for (i = 0; i < n; i++)
+@@ -1920,6 +2075,10 @@ static int bgmMusicPath(char *out, int size)
+             pick = i;
+             break;
+         }
++    if (strchr(names[pick], ':') != NULL) // build 100: a track in OPL's resources, by its full path
++        return snprintf(out, size, "%s", names[pick]) < size;
++    if (!ripps2AudioBase(dir, sizeof(dir), 0))
++        return 0;
+     return snprintf(out, size, "%s%s", dir, names[pick]) < size;
+ }
+ 
+@@ -2306,9 +2465,13 @@ void audioSetVolume(void)
          return;
      }
  

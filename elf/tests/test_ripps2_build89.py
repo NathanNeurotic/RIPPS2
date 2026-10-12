@@ -21,7 +21,7 @@ fail = []
 # the system music
 if '{"SNDBOOTS", "boot.adp"}' not in rip or '{"SNDLOGOS", "launch.adp"}' not in rip:
     fail.append('the boot and the PS2 logo must be ripped into boot.adp and launch.adp')
-if 'unsigned long long pos = 0, step' not in rip:
+if 'unsigned long long pos, step; // where the sample is read, 32.32 fixed point' not in rip: # build 100: in the voice
     fail.append('the sequence voices must read their samples in fixed point (float drift detunes them)')
 
 # Ember's bios.bin is never made from the PS2's ROM. Tested in PCSX2 with Digimon World: a PS1 console's BIOS

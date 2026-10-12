@@ -5,6 +5,9 @@ blood pool. Three morph shapes (at rest, the curl swung one way, the other way) 
 times, dying away, then rest: a 1.5 s loop. One 128 x 128 texture (felt, fur, bell and blood side by side),
 RLE-packed as the icons RiptOPL ships are (texture type 0x0E, alpha bit clear).
 
+Build 100 (user: RIPPS2's save small and neat): a lighter mesh (one icon in the browser is a few centimetres
+high) and grain that runs along the rows, so the RLE packs it: about half the size of build 98's 90 KB.
+
     python make_hat_icon.py OUT.icn [--png preview.png]
 
 The format (as saveicon.c reads it): a 20-byte header (0x00010000, shapes, texture type, 1.0, vertices), per
@@ -37,7 +40,7 @@ def make_texture():
     base = np.array([58, 92, 176], np.float32)
     yy, xx = np.mgrid[0:h, 0:w]
     shade = 0.82 + 0.18 * (yy / h)  # a touch darker toward the tip
-    fib = RNG.normal(0, 9, (h, w))
+    fib = np.repeat(RNG.normal(0, 9, (h, 1)), w, axis=1)  # build 100: grain along the rows, so the RLE packs it
     felt = base[None, None, :] * shade[..., None] + fib[..., None]
     reach = h * (0.30 + 0.12 * np.sin(xx[0] * 0.21 + 1.7) * np.sin(xx[0] * 0.5) + 0.05 * RNG.random(w))
     up = (h - 1 - yy)  # distance up from the brim row
@@ -48,7 +51,7 @@ def make_texture():
     # fur: cream, noisy; its lower side (larger v) soaked
     x0, y0, w, h = FUR
     yy, xx = np.mgrid[0:h, 0:w]
-    fur = np.array([232, 220, 196], np.float32)[None, None, :] + RNG.normal(0, 16, (h, w))[..., None]
+    fur = np.array([232, 220, 196], np.float32)[None, None, :] + np.repeat(RNG.normal(0, 16, (h, 1)), w, axis=1)[..., None]
     soak = np.clip((yy / h - 0.55) / 0.35, 0, 1)
     fur = fur * (1 - soak[..., None]) + np.array([96, 6, 12], np.float32) * soak[..., None]
     img[y0:y0 + h, x0:x0 + w] = fur
@@ -132,7 +135,7 @@ def add_grid(points, uvs, swings):
 
 
 # hat cone: 12 around, 11 rings up the profile
-AROUND, RINGS = 12, 11
+AROUND, RINGS = 10, 8
 pts, uvs, sw = [], [], []
 for i in range(RINGS + 1):
     t = i / RINGS
@@ -144,7 +147,7 @@ for i in range(RINGS + 1):
 add_grid(pts, uvs, sw)
 
 # fur brim: a fat torus round the cone's foot, 12 around, 6 round the tube (rows = around, columns = the tube)
-TUBE, TR = 6, 0.2
+TUBE, TR = 5, 0.2
 pts, uvs, sw = [], [], []
 for i in range(AROUND + 1):
     a = 2 * math.pi * (i % AROUND) / AROUND
@@ -161,7 +164,7 @@ add_grid(pts, uvs, sw)
 # the bell at the end of the curl, a little below it
 tip = bend(0.03, H + 0.18, 0.0)
 bc = (tip[0] + 0.06, tip[1] - 0.16, tip[2])
-BR, BLAT, BLON = 0.22, 5, 8
+BR, BLAT, BLON = 0.22, 4, 6
 pts, uvs, sw = [], [], []
 for i in range(BLAT + 1):
     phi = math.pi * i / BLAT
@@ -173,7 +176,7 @@ for i in range(BLAT + 1):
 add_grid(pts, uvs, sw)
 
 # the blood pool: an irregular disc under it
-POOLN = 14
+POOLN = 12
 rest_c = (0.0, 0.02, 0.0)
 edge = []
 for j in range(POOLN):
