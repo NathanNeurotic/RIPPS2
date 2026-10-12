@@ -637,18 +637,28 @@ index ca8e866..1bf483c 100644
      }
      if (n == 0)
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index f4fad92..2485c5e 100644
+index f4fad92..99ad41d 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
-@@ -38,6 +38,7 @@
+@@ -38,6 +38,8 @@
  #include <delaythread.h>
  #define NEWLIB_PORT_AWARE
  #include <fileXio_rpc.h> // fileXioDevctl: the MMCE ping (START DRIVES)
++#include <iox_stat.h>    // build 98: fileXioGetStat for an entry's details
 +#include <libmc.h>      // build 98: mcGetInfo, a card slot's own answer
  
  #include "include/opl.h"
  #include "include/gui.h"
-@@ -123,17 +124,53 @@ static volatile int fbDoneItems = 0, fbTotalItems = 0, fbFailed = 0, fbSkipped =
+@@ -104,6 +106,8 @@ static char fbClipDir[256];
+ static char fbClip[FB_CLIP_MAX][FB_NAME];
+ static unsigned char fbClipIsDir[FB_CLIP_MAX];
+ static int fbClipCount = 0, fbClipCut = 0;
++static unsigned char fbClipReplace[FB_CLIP_MAX]; // build 98: a name already there, replaced by this paste (asked first)
++static volatile int fbReplacing = 0;             // build 98: the copy running now replaces what it finds
+ static char fbClipVmc[256]; // the card image the clipboard was filled in ("" = none)
+ 
+ // inside a PS2 card image: its path ("" = not in one), whether it is read only, its free space
+@@ -123,17 +127,53 @@ static volatile int fbDoneItems = 0, fbTotalItems = 0, fbFailed = 0, fbSkipped =
  static volatile int fbDoneFiles = 0, fbTotalFiles = 0, fbOkDirs = 0;
  static int fbTreeFiles = 0; // counted by fbTreeSize as it walks
  static const char *fbOpLabel = "";
@@ -705,7 +715,7 @@ index f4fad92..2485c5e 100644
  }
  static int fbOp = 0; // what the worker runs next
  enum { FB_OP_SCAN = 0, FB_OP_PASTE, FB_OP_DELETE, FB_OP_UNPACK };
-@@ -150,7 +187,7 @@ static int fbMenuOpen = 0, fbMenuSel = 0, fbMenuItems[FB_ACT_COUNT], fbMenuCount
+@@ -150,7 +190,7 @@ static int fbMenuOpen = 0, fbMenuSel = 0, fbMenuItems[FB_ACT_COUNT], fbMenuCount
  static const char *fbDevices[] = {"mc0:/", "mc1:/", "mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/",
                                    "mass7:/", "mmce0:/", "mmce1:/", "pfs0:/", NULL};
  
@@ -714,7 +724,7 @@ index f4fad92..2485c5e 100644
  
  static void fbSetToast(const char *text)
  {
-@@ -187,7 +224,7 @@ static int fbVmcPath(const char *image, const char *path, char *save, int size)
+@@ -187,7 +227,7 @@ static int fbVmcPath(const char *image, const char *path, char *save, int size)
  static const char *fbDeviceLabel(const char *dev, char *buf, int size, int bdmType, int nth, int count)
  {
      if (!strncmp(dev, "mc", 2))
@@ -723,7 +733,7 @@ index f4fad92..2485c5e 100644
      else if (!strncmp(dev, "mass", 4)) {
          const char *kind = bdmType == BDM_TYPE_USB ? "USB DRIVE" : bdmType == BDM_TYPE_SDC ? "MX4SIO" : bdmType == BDM_TYPE_ILINK ? "iLINK DRIVE" :
                             bdmType == BDM_TYPE_ATA ? "HDD (exFAT)" : bdmType == BDM_TYPE_UDPBD ? "UDPBD (NETWORK)" : "DRIVE";
-@@ -330,6 +367,50 @@ static int fbCompare(const void *a, const void *b)
+@@ -330,6 +370,50 @@ static int fbCompare(const void *a, const void *b)
      return strcasecmp(x->name, y->name);
  }
  
@@ -774,7 +784,7 @@ index f4fad92..2485c5e 100644
  // The drive list is kept between visits: probing cards and slots that are not there takes seconds, and
  // coming back up to the list should be instant. It is probed again on entering the browser, after
  // START DRIVES, and on Select.
-@@ -374,10 +455,15 @@ static void fbScanDevices(void)
+@@ -374,10 +458,15 @@ static void fbScanDevices(void)
              continue;
          if (!strncmp(dev, "pfs", 3) && hddGetObject(1) == NULL && !fbDrivesUp)
              continue;
@@ -794,7 +804,30 @@ index f4fad92..2485c5e 100644
          fb_entry_t *e = &fbList[n++];
          memset(e, 0, sizeof(*e));
          snprintf(e->name, sizeof(e->name), "%s", fbDevices[i]);
-@@ -617,10 +703,19 @@ static int fbCopyFile(const char *src, const char *dst)
+@@ -585,6 +674,9 @@ static u32 fbTreeSize(const char *path, int isDir, int depth)
+     return total;
+ }
+ 
++static int fbExists(const char *path);
++static int fbRemoveRetry(const char *path, int isDir);
++
+ static int fbCopyFile(const char *src, const char *dst)
+ {
+     int in = open(src, O_RDONLY), out, r, ok = 1;
+@@ -600,6 +692,12 @@ static int fbCopyFile(const char *src, const char *dst)
+         snprintf(cardPath, sizeof(cardPath), "%.4s%s", dst, dst + 5);
+         target = cardPath;
+     }
++    // build 98: replacing, the file there goes first (the copy opens without truncating, so a shorter new file
++    // would keep the old one's tail)
++    if (fbReplacing && fbExists(dst) && !fbRemoveRetry(dst, 0)) {
++        close(in);
++        return 0;
++    }
+     // a memory card answers "changed card" (ENXIO, mcman's sceMcResChangedCard) to the first access
+     // after it is detected; asking again is how every PS2 program deals with it
+     int tries = 0;
+@@ -617,10 +715,19 @@ static int fbCopyFile(const char *src, const char *dst)
          return 0;
      }
      while ((r = read(in, fbBuf, FB_BUF_SIZE)) > 0) {
@@ -817,13 +850,11 @@ index f4fad92..2485c5e 100644
              fbNoteFail("WRITE", dst);
              ok = 0;
              break;
-@@ -669,15 +764,23 @@ static int fbCopyTree(const char *src, const char *dst, int isDir, int depth)
+@@ -669,15 +776,21 @@ static int fbCopyTree(const char *src, const char *dst, int isDir, int depth)
      return ok;
  }
  
 -// A removal, retried briefly: a memory card can refuse one straight after the same files were read
-+static int fbExists(const char *path);
-+
 +// A removal, retried briefly: a memory card can refuse one straight after the same files were read. Build 98:
 +// done means gone (looked for again after the call says so), and a failure keeps the call's own code (a remove
 +// that set no errno showed E0).
@@ -844,7 +875,7 @@ index f4fad92..2485c5e 100644
      fbNoteFail(isDir ? "REMOVE FOLDER" : "REMOVE FILE", path);
      return 0;
  }
-@@ -794,6 +897,22 @@ static void fbPasteWork(void)
+@@ -794,6 +907,22 @@ static void fbPasteWork(void)
              fbTotalBytes += fbTreeSize(src, fbClipIsDir[i], 0);
          }
      fbTotalFiles = fbTreeFiles; // build 91: every file it will copy, the folders' included
@@ -867,10 +898,138 @@ index f4fad92..2485c5e 100644
      for (i = 0; i < fbClipCount; i++) {
          snprintf(src, sizeof(src), "%s%s", fbClipDir, fbClip[i]);
          r = fbSavePaste(i, src, fromVmc, srcSave, toVmc, toSave);
-@@ -946,6 +1065,26 @@ static void fbWorker(void)
+@@ -822,15 +951,29 @@ static void fbPasteWork(void)
+         if (fbIsMc(fbPath) && fbClipIsDir[i] && fbFolderHasIconSys(src))
+             fbMcRoot(fbPath, destDir, sizeof(destDir));
+         snprintf(dst, sizeof(dst), "%s%s", destDir, fbClip[i]);
+-        if (!strcmp(src, dst) || fbExists(dst)) {
+-            fbSkipped++; // never over the top of something
+-        } else if (fbCopyTree(src, dst, fbClipIsDir[i], 0)) {
++        int there = strcmp(src, dst) != 0 && fbExists(dst), ok = 1;
++        if (!strcmp(src, dst) || (there && !fbClipReplace[i])) {
++            fbSkipped++; // never over the top of something, unless the user said replace it
++            fbDoneItems++;
++            continue;
++        }
++        if (there) { // build 98: replace. A folder merges (each file in it replaced); anything else goes first
++            DIR *dd = opendir(dst);
++            int dstIsDir = dd != NULL;
++            if (dd != NULL)
++                closedir(dd);
++            if (!(fbClipIsDir[i] && dstIsDir))
++                ok = fbDeleteTree(dst, dstIsDir, 0);
++        }
++        fbReplacing = there;
++        if (ok && fbCopyTree(src, dst, fbClipIsDir[i], 0)) {
+             if (fbClipIsDir[i])
+                 fbOkDirs++;
+             if (fbClipCut && !fbDeleteTree(src, fbClipIsDir[i], 0))
+                 fbKept++; // copied; the original is still there
+         } else
+             fbFailed++;
++        fbReplacing = 0;
+         fbDoneItems++;
+     }
+     free(fbBuf);
+@@ -946,6 +1089,121 @@ static void fbWorker(void)
      fbBusy = 0;
  }
  
++static void fbHint(int icon, const char *text, int *x, int y); // drawn with the tree's hints below
++
++// RIPPS2 build 98: a name already there. YES, REPLACE IT / NO, KEEP IT / YES TO ALL, the choice highlighted; back keeps
++// it. 0 keep, 1 replace, 2 replace this one and every other
++static int fbAskReplace(const char *name, int left)
++{
++    static const char *const opts[3] = {"YES, REPLACE IT", "NO, KEEP IT", "YES TO ALL"};
++    int sel = 0, i, n = left > 1 ? 3 : 2, smallFont = gTheme->fonts[5], uiFont = gTheme->fonts[4];
++    char line[160];
++    int selIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
++
++    sfxPlay(SFX_MESSAGE);
++    while (1) {
++        readPads();
++        rmStartFrame();
++        ripps2DrawBackground();
++        ripps2DrawPagePanel();
++        int w = 440, h = 92 + n * 26, x = (640 - w) / 2, y = 150;
++        rmDrawRect(x, y, w, h, FB_PRIM(0x03, 0x08, 0x22, 0x78));
++        rmDrawLine(x, y, x + w, y, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        rmDrawLine(x, y + h, x + w, y + h, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        rmDrawLine(x, y, x, y + h, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        rmDrawLine(x + w, y, x + w, y + h, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        fntRenderStringFit(uiFont, x + 16, y + 20, ALIGN_VCENTER, w - 32, name, FB_LIT, 1);
++        if (left > 1)
++            snprintf(line, sizeof(line), "IS ALREADY HERE (%d MORE TO GO). REPLACE IT?", left - 1);
++        else
++            snprintf(line, sizeof(line), "IS ALREADY HERE. REPLACE IT?");
++        fntRenderString(smallFont, x + 16, y + 44, ALIGN_VCENTER, 0, 0, line, FB_SOFT);
++        for (i = 0; i < n; i++) {
++            int ry = y + 62 + i * 26;
++            if (i == sel) {
++                rmDrawRect(x + 8, ry, w - 16, 24, FB_PRIM(0x1E, 0x3C, 0x96, 0x60));
++                rmDrawRect(x + 8, ry, 3, 24, FB_PRIM(0x6A, 0x9A, 0xFF, 0x80));
++            }
++            fntRenderString(uiFont, x + 22, ry + 12, ALIGN_VCENTER, 0, 0, opts[i], i == sel ? FB_LIT : FB_SOFT);
++        }
++        int hx = x + 16;
++        fbHint(selIcon, "CHOOSE", &hx, y + h + 22);
++        fbHint(backIcon, "KEEP IT", &hx, y + h + 22);
++        rmEndFrame();
++        if (getKey(KEY_UP) && sel > 0) {
++            sel--;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKey(KEY_DOWN) && sel < n - 1) {
++            sel++;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKeyOn(gSelectButton)) {
++            sfxPlay(SFX_CONFIRM);
++            return sel == 0 ? 1 : sel == 1 ? 0 : 2;
++        } else if (getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
++            sfxPlay(SFX_CANCEL);
++            return 0;
++        }
++    }
++}
++
++// Before a plain paste runs: every clipboard item whose name is already where it goes is asked about (once YES TO ALL,
++// the rest are replaced without asking). Saves, card images and .psu unpacks keep their own rules.
++static void fbPasteAskReplace(void)
++{
++    char src[320], dst[320], destDir[256];
++    int i, all = 0, left = 0;
++    int fromVmc = fbVmcPath(fbClipVmc, fbClipDir, NULL, 0), toVmc = fbVmcPath(fbVmc, fbPath, NULL, 0);
++
++    memset(fbClipReplace, 0, sizeof(fbClipReplace));
++    if (fbPasteMode != FB_PASTE_PLAIN || fromVmc || toVmc)
++        return;
++    int there[FB_CLIP_MAX];
++    for (i = 0; i < fbClipCount; i++) {
++        there[i] = 0;
++        if (!fbClipIsDir[i] && fbHasSuffix(fbClip[i], ".psu") && fbIsMc(fbPath))
++            continue; // unpacked as a save
++        snprintf(src, sizeof(src), "%s%s", fbClipDir, fbClip[i]);
++        snprintf(destDir, sizeof(destDir), "%s", fbPath);
++        if (fbIsMc(fbPath) && fbClipIsDir[i] && fbFolderHasIconSys(src))
++            fbMcRoot(fbPath, destDir, sizeof(destDir));
++        snprintf(dst, sizeof(dst), "%s%s", destDir, fbClip[i]);
++        there[i] = strcmp(src, dst) != 0 && fbExists(dst);
++        left += there[i];
++    }
++    for (i = 0; i < fbClipCount; i++) {
++        if (!there[i])
++            continue;
++        if (!all) {
++            int a = fbAskReplace(fbClip[i], left);
++            if (a == 2)
++                all = 1;
++            fbClipReplace[i] = a != 0;
++        } else
++            fbClipReplace[i] = 1;
++        left--;
++    }
++}
++
 +// build 98: the music streams from a file; a drive will not remove or rename it while it is open (E16). Before
 +// an operation touches one, the music stops; it starts again when the operation is done.
 +static int fbMusicPaused = 0;
@@ -894,7 +1053,7 @@ index f4fad92..2485c5e 100644
  static void fbRun(int op, const char *label)
  {
      if (fbBusy)
-@@ -1182,7 +1321,6 @@ static void fbEdit(const char *name)
+@@ -1182,7 +1440,6 @@ static void fbEdit(const char *name)
  //   shares slot 2 and the controllers' bus. MX4SIO also stays out while a memory card is in slot 2.
  static void fbStartDrivesWork(void)
  {
@@ -902,7 +1061,7 @@ index f4fad92..2485c5e 100644
      int r __attribute__((unused)); // build 76: read only by LOG, which a release build compiles out
      // the BDM core with each transport (bdmEnsureTypedSource), as a typed custom path brings one up
      r = bdmEnsureTypedSource(BDM_TYPE_USB, 2500);
-@@ -1193,8 +1331,7 @@ static void fbStartDrivesWork(void)
+@@ -1193,8 +1450,7 @@ static void fbStartDrivesWork(void)
      }
      if (!gEnableMX4SIO)
          ;
@@ -912,7 +1071,7 @@ index f4fad92..2485c5e 100644
          LOG("START DRIVES: a memory card is in slot 2, MX4SIO left out\n");
      } else {
          r = bdmEnsureTypedSource(BDM_TYPE_SDC, 2500);
-@@ -1210,12 +1347,23 @@ static void fbStartDrivesWork(void)
+@@ -1210,12 +1466,23 @@ static void fbStartDrivesWork(void)
          clearErrorMessageIf(_STR_HDD_NOT_CONNECTED_ERROR);
          LOG("START DRIVES: no internal hard drive\n");
      }
@@ -941,16 +1100,17 @@ index f4fad92..2485c5e 100644
      DelayThread(1000 * 1000); // a USB stick enumerates a moment after its driver: let it, before the list is read
      fbDrivesUp = 1;
      fbDrivesDone = 1;
-@@ -1384,6 +1532,8 @@ static void fbAction(int act)
+@@ -1384,6 +1651,9 @@ static void fbAction(int act)
              sfxPlay(SFX_CONFIRM);
              fbPasteMode = act == FB_ACT_PASTE_PSU ? FB_PASTE_PSU : act == FB_ACT_UNPACK ? FB_PASTE_UNPACK : FB_PASTE_PLAIN;
              fbTotalItems = fbClipCount;
++            fbPasteAskReplace(); // build 98: names already there: replace them?
 +            if (fbClipCut)
 +                fbReleaseMusic(fbClipDir, fbClip, fbClipCount); // build 98: a move removes the original
              fbRun(FB_OP_PASTE, fbPasteMode == FB_PASTE_PSU ? "EXPORTING" : fbPasteMode == FB_PASTE_UNPACK ? "UNPACKING" : fbClipCut ? "MOVING" : "PASTING");
              break;
          case FB_ACT_DELETE:
-@@ -1396,6 +1546,7 @@ static void fbAction(int act)
+@@ -1396,6 +1666,7 @@ static void fbAction(int act)
                  fbDeleteCount = n;
                  fbTotalItems = n;
                  fbClearMarks();
@@ -958,7 +1118,7 @@ index f4fad92..2485c5e 100644
                  fbRun(FB_OP_DELETE, "DELETING");
              }
              break;
-@@ -1404,6 +1555,10 @@ static void fbAction(int act)
+@@ -1404,6 +1675,10 @@ static void fbAction(int act)
              if (guiShowKeyboard(name, sizeof(name)) && name[0] && strcmp(name, fbList[fbCursor].name) != 0) {
                  fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
                  fbJoin(to, sizeof(to), fbPath, name);
@@ -969,7 +1129,114 @@ index f4fad92..2485c5e 100644
                  fbSetToast(rename(from, to) == 0 ? "RENAMED" : "RENAME FAILED");
                  snprintf(fbKeepName, sizeof(fbKeepName), "%s", name);
                  fbRun(FB_OP_SCAN, "READING");
-@@ -2045,6 +2200,11 @@ void ripps2RenderFiles(void)
+@@ -2025,6 +2300,106 @@ int ripps2FilesBusy(void)
+     return fbBusy || fbPath[0] != '\0';
+ }
+ 
++// RIPPS2 build 98: an entry's details, shown once the cursor has rested on it for 0.42 s: the full name, the exact size,
++// when it was modified and created. The IO worker reads them (fileXioGetStat); the list never waits on the drive.
++#define FB_TIP_REST_S 0.42f
++static int fbTipCursor = -1;
++static clock_t fbTipSince = 0;
++static volatile int fbTipState = 0; // 0 nothing asked, 1 asked, 2 ready
++static char fbTipPath[384], fbTipKey[384];
++static char fbTipLine[3][72];
++
++static void fbTipTime(const unsigned char *t, char *out, int size)
++{
++    int year = t[6] | (t[7] << 8);
++    if (year < 1980 || year > 2100 || t[5] < 1 || t[5] > 12 || t[4] < 1 || t[4] > 31)
++        snprintf(out, size, "UNKNOWN");
++    else
++        snprintf(out, size, "%04d-%02d-%02d  %02d:%02d", year, t[5], t[4], t[3], t[2]);
++}
++
++static void fbTipWork(void)
++{
++    iox_stat_t st;
++    char path[384], when[32];
++    snprintf(path, sizeof(path), "%s", fbTipPath);
++    // a memory card in RiptOPL's own form, "mc0:SAVE/FILE"
++    if (fbIsMc(path) && path[4] == '/')
++        memmove(path + 4, path + 5, strlen(path + 5) + 1);
++    memset(&st, 0, sizeof(st));
++    if (fileXioGetStat(path, &st) < 0) {
++        snprintf(fbTipLine[0], sizeof(fbTipLine[0]), "NO DETAILS: THE DRIVE DID NOT SAY");
++        fbTipLine[1][0] = fbTipLine[2][0] = '\0';
++    } else {
++        unsigned long long size = ((unsigned long long)st.hisize << 32) | st.size;
++        if (FIO_S_ISDIR(st.mode))
++            snprintf(fbTipLine[0], sizeof(fbTipLine[0]), "FOLDER");
++        else {
++            char num[32], grp[40];
++            int n, o = 0, k;
++            snprintf(num, sizeof(num), "%llu", size);
++            n = strlen(num);
++            for (k = 0; k < n; k++) { // 1,528,102,912
++                grp[o++] = num[k];
++                if ((n - k - 1) % 3 == 0 && k < n - 1)
++                    grp[o++] = ',';
++            }
++            grp[o] = '\0';
++            snprintf(fbTipLine[0], sizeof(fbTipLine[0]), "%s BYTES", grp);
++        }
++        fbTipTime(st.mtime, when, sizeof(when));
++        snprintf(fbTipLine[1], sizeof(fbTipLine[1]), "MODIFIED  %s", when);
++        fbTipTime(st.ctime, when, sizeof(when));
++        snprintf(fbTipLine[2], sizeof(fbTipLine[2]), "CREATED   %s", when);
++    }
++    snprintf(fbTipKey, sizeof(fbTipKey), "%s", fbTipPath);
++    fbTipState = 2;
++}
++
++static void fbDrawTip(void)
++{
++    fb_entry_t *e;
++    char path[384];
++    int smallFont = gTheme->fonts[5], i;
++
++    if (fbBusy || fbMenuOpen || fbGridOpen || !fbPath[0] || fbCount == 0 || fbCursor >= fbCount) {
++        fbTipCursor = -1;
++        return;
++    }
++    e = &fbList[fbCursor];
++    if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START)
++        return;
++    snprintf(path, sizeof(path), "%s%s", fbPath, e->name);
++    if (fbCursor != fbTipCursor || strcmp(path, fbTipPath) != 0) { // moved: the rest starts again
++        fbTipCursor = fbCursor;
++        fbTipSince = clock();
++        if (fbTipState != 1) // one already asked finishes first (it writes fbTipPath's answer)
++            fbTipState = 0;
++        snprintf(fbTipPath, sizeof(fbTipPath), "%s", path);
++        return;
++    }
++    if (fbTipState == 0 && (float)(clock() - fbTipSince) / CLOCKS_PER_SEC >= FB_TIP_REST_S) {
++        fbTipState = 1;
++        if (ioPutRequest(IO_CUSTOM_SIMPLEACTION, &fbTipWork) != IO_OK)
++            fbTipState = 0;
++        return;
++    }
++    if (fbTipState != 2 || strcmp(fbTipKey, path) != 0)
++        return;
++    int row = fbCursor - fbTop, y = FB_LIST_Y + (row + 1) * FB_ROW_H + 2, w = 330, h = 4 * 17 + 10, x = FB_RIGHT - w;
++    if (y + h > FB_LIST_Y + FB_ROWS * FB_ROW_H)
++        y = FB_LIST_Y + row * FB_ROW_H - h - 4; // above the row near the bottom
++    rmDrawRect(x, y, w, h, FB_PRIM(0x03, 0x08, 0x22, 0x7A));
++    rmDrawLine(x, y, x + w, y, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++    rmDrawLine(x, y + h, x + w, y + h, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++    rmDrawLine(x, y, x, y + h, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++    rmDrawLine(x + w, y, x + w, y + h, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++    fntRenderStringFit(smallFont, x + 10, y + 13, ALIGN_VCENTER, w - 20, e->name, FB_LIT, 1);
++    for (i = 0; i < 3; i++)
++        if (fbTipLine[i][0])
++            fntRenderString(smallFont, x + 10, y + 13 + (i + 1) * 17, ALIGN_VCENTER, 0, 0, fbTipLine[i], FB_SOFT);
++}
++
+ void ripps2RenderFiles(void)
+ {
+     int i, rowFont = gTheme->fonts[8], smallFont = gTheme->fonts[5], uiFont = gTheme->fonts[4];
+@@ -2045,6 +2420,11 @@ void ripps2RenderFiles(void)
      }
      if (!fbBusy)
          fbRestoreCursor();
@@ -981,6 +1248,15 @@ index f4fad92..2485c5e 100644
  
      // the path, and the clipboard / what just happened
      fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : "MEMORY FILES", FB_LIT);
+@@ -2132,6 +2512,8 @@ void ripps2RenderFiles(void)
+         }
+     }
+ 
++    fbDrawTip(); // build 98: the details of the entry the cursor rests on
++
+     if (fbGridOpen && fbDrawGrid())
+         return; // the grid draws its own hints
+     // the hints
 diff --git a/src/ripps2status.c b/src/ripps2status.c
 index ec9cb0d..84b46a6 100644
 --- a/src/ripps2status.c

@@ -221,6 +221,12 @@ st = rd('src/ripps2status.c')
 if 'stAdd(ROW_HEAD, ACT_NONE, "DRIVES", "what RIPPS2 sees");' not in st or 'bdmMx4sioReport(&err, root, sizeof(root))' not in st or \
         'mx4sioLoadRet = bdmDiagLoadOptionalModule("MX4SIO"' not in rd('src/bdmsupport.c'):
     fail.append('STATUS must list the drives RIPPS2 sees and what became of MX4SIO')
+fb2 = rd('src/ripps2files.c')
+if '{"YES, REPLACE IT", "NO, KEEP IT", "YES TO ALL"}' not in fb2 or 'fbPasteAskReplace(); // build 98' not in fb2 or \
+        'if (fbReplacing && fbExists(dst) && !fbRemoveRetry(dst, 0))' not in fb2 or '(there && !fbClipReplace[i])' not in fb2:
+    fail.append('a paste onto a name already there must ask Yes / No / Yes to All and replace when told')
+if '#define FB_TIP_REST_S 0.42f' not in fb2 or 'fileXioGetStat(path, &st)' not in fb2 or 'fbDrawTip(); // build 98' not in fb2:
+    fail.append('resting 0.42 s on an entry must show its size and times, read on the IO worker')
 if 'RIPgrid' in th or '"<RIPGRID>"' not in th:
     fail.append('RIPGRID is written in capitals')
 
