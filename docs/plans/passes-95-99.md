@@ -98,7 +98,8 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       Lab: GTA's tile reads SLES 51061; the PS1 test titles (no ID) are clear tiles.
 - [ ] **A video that loads forever** (FifthFox, 95: an AVI "from web"): asked whether it was on a local or a
       network device. Reproduce, and make the player give up with a message instead of hanging.
-- [ ] Flow and Grid settings text too large and cramped (FifthFox, 95): check it on the build 96 settings face.
+- [x] Flow and Grid settings text too large and cramped (FifthFox, 95): check it on the build 96 settings face.
+      Lab, build 98: the page reads in the plain face with room to spare (fixed by build 96).
 - [x] **mc1:/ must never vanish after START DRIVES** (user, 10-12, again: copying from USB or HDD to that slot is
       impossible; the only way round is starting the drives on Storage first). And the cards are MEMORY CARD 0 and
       MEMORY CARD 1 (mc0:/, mc1:/), never 1 and 2.
