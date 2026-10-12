@@ -1,4 +1,4 @@
-"""List a PS2 memory card image's folders and files (read-only). Usage: mcls.py card.ps2"""
+"""List a PS2 memory card image's folders and files (read-only): mcls.py card.ps2 [FOLDER/FILE to print it]"""
 import struct
 import sys
 
@@ -51,6 +51,15 @@ def entries(first, count):
 
 rootdot = chain(root, 512)
 count = struct.unpack_from('<I', rootdot, 4)[0]
+if len(sys.argv) > 2:  # mcls.py card.ps2 FOLDER/FILE: the file's bytes to stdout
+    want = sys.argv[2].split('/')
+    for mode, length, cl, name in entries(root, count):
+        if name == want[0] and mode & 0x20:
+            for m2, l2, c2, n2 in entries(cl, length):
+                if n2 == want[1] and m2 & 0x10:
+                    sys.stdout.buffer.write(chain(c2, l2))
+                    sys.exit(0)
+    sys.exit('not found')
 for mode, length, cl, name in entries(root, count):
     if name in ('.', '..') or not (mode & 0x8000):
         continue

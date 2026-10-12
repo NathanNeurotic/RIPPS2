@@ -239,6 +239,8 @@ md = rd('src/ripps2media.c')
 if 'rmDrawPixmapPart(&tex, (int)cx0, (int)cy0, ALIGN_NONE' not in md or 'fntRenderString(RIPPS2_DIA_FONT, 320, 22' not in md or \
         'x = viewHint(R2_ICON, "ZOOM", x, y, alpha, draw);' not in md or 'R2 zoom in   L2 zoom out' in md:
     fail.append('the picture viewer must draw only what is on screen, in Adapt face, with glyph hints')
+if 'fbTipCursor = -1; // build 98: the work may change what the tooltip said' not in rd('src/ripps2files.c'):
+    fail.append('a scan or a copy must make the tooltip read the entry again (a saved file showed its old times)')
 if 'RIPgrid' in th or '"<RIPGRID>"' not in th:
     fail.append('RIPGRID is written in capitals')
 

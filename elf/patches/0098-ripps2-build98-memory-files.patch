@@ -1547,7 +1547,7 @@ index ca8e866..1bf483c 100644
      }
      if (n == 0)
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index f4fad92..fde4eb5 100644
+index f4fad92..1768df3 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -38,6 +38,8 @@
@@ -1841,7 +1841,7 @@ index f4fad92..fde4eb5 100644
          fbDoneItems++;
      }
      free(fbBuf);
-@@ -946,6 +1089,121 @@ static void fbWorker(void)
+@@ -946,10 +1089,128 @@ static void fbWorker(void)
      fbBusy = 0;
  }
  
@@ -1960,10 +1960,17 @@ index f4fad92..fde4eb5 100644
 +    }
 +}
 +
++static int fbTipCursor; // the tooltip's (below)
++
  static void fbRun(int op, const char *label)
  {
      if (fbBusy)
-@@ -1182,7 +1440,6 @@ static void fbEdit(const char *name)
+         return;
++    fbTipCursor = -1; // build 98: the work may change what the tooltip said (a saved file's times), so it asks again
+     fbOp = op;
+     fbOpLabel = label;
+     fbDoneItems = fbFailed = fbSkipped = fbKept = 0;
+@@ -1182,7 +1443,6 @@ static void fbEdit(const char *name)
  //   shares slot 2 and the controllers' bus. MX4SIO also stays out while a memory card is in slot 2.
  static void fbStartDrivesWork(void)
  {
@@ -1971,7 +1978,7 @@ index f4fad92..fde4eb5 100644
      int r __attribute__((unused)); // build 76: read only by LOG, which a release build compiles out
      // the BDM core with each transport (bdmEnsureTypedSource), as a typed custom path brings one up
      r = bdmEnsureTypedSource(BDM_TYPE_USB, 2500);
-@@ -1193,8 +1450,7 @@ static void fbStartDrivesWork(void)
+@@ -1193,8 +1453,7 @@ static void fbStartDrivesWork(void)
      }
      if (!gEnableMX4SIO)
          ;
@@ -1981,7 +1988,7 @@ index f4fad92..fde4eb5 100644
          LOG("START DRIVES: a memory card is in slot 2, MX4SIO left out\n");
      } else {
          r = bdmEnsureTypedSource(BDM_TYPE_SDC, 2500);
-@@ -1210,12 +1466,23 @@ static void fbStartDrivesWork(void)
+@@ -1210,12 +1469,23 @@ static void fbStartDrivesWork(void)
          clearErrorMessageIf(_STR_HDD_NOT_CONNECTED_ERROR);
          LOG("START DRIVES: no internal hard drive\n");
      }
@@ -2010,7 +2017,7 @@ index f4fad92..fde4eb5 100644
      DelayThread(1000 * 1000); // a USB stick enumerates a moment after its driver: let it, before the list is read
      fbDrivesUp = 1;
      fbDrivesDone = 1;
-@@ -1384,6 +1651,9 @@ static void fbAction(int act)
+@@ -1384,6 +1654,9 @@ static void fbAction(int act)
              sfxPlay(SFX_CONFIRM);
              fbPasteMode = act == FB_ACT_PASTE_PSU ? FB_PASTE_PSU : act == FB_ACT_UNPACK ? FB_PASTE_UNPACK : FB_PASTE_PLAIN;
              fbTotalItems = fbClipCount;
@@ -2020,7 +2027,7 @@ index f4fad92..fde4eb5 100644
              fbRun(FB_OP_PASTE, fbPasteMode == FB_PASTE_PSU ? "EXPORTING" : fbPasteMode == FB_PASTE_UNPACK ? "UNPACKING" : fbClipCut ? "MOVING" : "PASTING");
              break;
          case FB_ACT_DELETE:
-@@ -1396,6 +1666,7 @@ static void fbAction(int act)
+@@ -1396,6 +1669,7 @@ static void fbAction(int act)
                  fbDeleteCount = n;
                  fbTotalItems = n;
                  fbClearMarks();
@@ -2028,7 +2035,7 @@ index f4fad92..fde4eb5 100644
                  fbRun(FB_OP_DELETE, "DELETING");
              }
              break;
-@@ -1404,6 +1675,10 @@ static void fbAction(int act)
+@@ -1404,6 +1678,10 @@ static void fbAction(int act)
              if (guiShowKeyboard(name, sizeof(name)) && name[0] && strcmp(name, fbList[fbCursor].name) != 0) {
                  fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
                  fbJoin(to, sizeof(to), fbPath, name);
@@ -2039,7 +2046,7 @@ index f4fad92..fde4eb5 100644
                  fbSetToast(rename(from, to) == 0 ? "RENAMED" : "RENAME FAILED");
                  snprintf(fbKeepName, sizeof(fbKeepName), "%s", name);
                  fbRun(FB_OP_SCAN, "READING");
-@@ -1834,6 +2109,37 @@ static int fbDrawGrid(void)
+@@ -1834,6 +2112,37 @@ static int fbDrawGrid(void)
      return 1;
  }
  
@@ -2077,7 +2084,7 @@ index f4fad92..fde4eb5 100644
  void ripps2HandleInputFiles(void)
  {
      int openKey = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS;
-@@ -1868,12 +2174,12 @@ void ripps2HandleInputFiles(void)
+@@ -1868,12 +2177,12 @@ void ripps2HandleInputFiles(void)
          return;
      }
  
@@ -2092,7 +2099,7 @@ index f4fad92..fde4eb5 100644
          if (fbCursor < fbCount - 1) {
              fbCursor++;
              sfxPlay(SFX_CURSOR);
-@@ -2025,6 +2331,106 @@ int ripps2FilesBusy(void)
+@@ -2025,6 +2334,106 @@ int ripps2FilesBusy(void)
      return fbBusy || fbPath[0] != '\0';
  }
  
@@ -2199,7 +2206,7 @@ index f4fad92..fde4eb5 100644
  void ripps2RenderFiles(void)
  {
      int i, rowFont = gTheme->fonts[8], smallFont = gTheme->fonts[5], uiFont = gTheme->fonts[4];
-@@ -2045,6 +2451,11 @@ void ripps2RenderFiles(void)
+@@ -2045,6 +2454,11 @@ void ripps2RenderFiles(void)
      }
      if (!fbBusy)
          fbRestoreCursor();
@@ -2211,7 +2218,7 @@ index f4fad92..fde4eb5 100644
  
      // the path, and the clipboard / what just happened
      fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : "MEMORY FILES", FB_LIT);
-@@ -2132,6 +2543,8 @@ void ripps2RenderFiles(void)
+@@ -2132,6 +2546,8 @@ void ripps2RenderFiles(void)
          }
      }
  
