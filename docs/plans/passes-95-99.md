@@ -156,7 +156,12 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       The shearing was the zoomed quad running past the GS's coordinate range: only the part on screen is
       drawn now, with its own texture coordinates, and the tilt turns about the screen's middle. Lab: a
       640 x 480 PNG clean at 422% and at the 800% cap panned to its edge; info in Adapt's face, glyph hints.
-- [ ] PS2 3D save icons (`.ico` / `.icn`) open in a viewer: the model, its texture and its animation.
+- [x] PS2 3D save icons (`.ico` / `.icn`) open in a viewer: the model, its texture and its animation.
+      The icon, icon.sys and card-image readers are RiptOPL c60cf80's, taken as they are with its host test
+      (rewired for the viewer) and its triangle batch (with RIPPS2's queue guard). Lab (card RIPPS2-ICONS in
+      slot 2: RiptOPL's and POPStarter's own icons): textured, lit by icon.sys over its background gradient,
+      spinning; D-pad or right stick turns, L2 / R2 zoom, Square stops the spin, Triangle resets. The shipped
+      icons are one shape each, so the morph path is covered by the host test only.
 - [ ] Text editor input bugs: reproduce first.
 - [ ] Rip a save's 3D icon to the PC: the model as OBJ with its texture as PNG, one OBJ per animation shape.
 - [ ] RIPPS2's own save icon: the bloody elf hat ringing its bell, animated, in the PS2 icon format (under the
