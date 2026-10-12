@@ -1,3 +1,21 @@
+diff --git a/Makefile b/Makefile
+index aadfe26..d1c2cdd 100644
+--- a/Makefile
++++ b/Makefile
+@@ -597,9 +597,12 @@ $(EE_VPKD).ZIP: $(EE_VPKD).ELF DETAILED_CHANGELOG CREDITS LICENSE README.md
+ 	zip -r $@ $^
+ 	echo "Package Complete: $@"
+ 
++# RIPPS2: a debug build's EE SIO output is the menu's; ee_core with it no longer leaves room for its stack
++# (its link refuses), so it joins only when asked: EECORE_EESIO_DEBUG=1
++EECORE_EESIO_DEBUG ?= 0
+ ee_core/ee_core.elf: ee_core
+ 	echo "-EE core"
+-	$(MAKE) $(IGS_FLAGS) $(PADEMU_FLAGS) $(EECORE_EXTRA_FLAGS) -C $<
++	$(MAKE) $(IGS_FLAGS) $(PADEMU_FLAGS) $(EECORE_EXTRA_FLAGS) EESIO_DEBUG=$(EECORE_EESIO_DEBUG) -C $<
+ 
+ $(EE_ASM_DIR)ee_core.c: ee_core/ee_core.elf | $(EE_ASM_DIR)
+ 	$(BIN2C) $< $@ eecore_elf
 diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
 index 3a91e5c..858565c 100644
 --- a/misc/theme_coverflow.cfg
@@ -50,19 +68,6 @@ index 720f286..f042b0e 100644
  main5:
  	type=ItemsList
  	x=POS_MID
-diff --git a/src/bdmsupport.c b/src/bdmsupport.c
-index 5114977..91457bf 100644
---- a/src/bdmsupport.c
-+++ b/src/bdmsupport.c
-@@ -1608,6 +1608,8 @@ static int bdmUpdateGameList(item_list_t *itemList)
-             setErrorMessagePathCode(_STR_BDM_PS2_FOLDERS_UNREADABLE, pDeviceData->bdmPrefix, sbGetReadListError());
-         result += pDeviceData->bdmGameCount;
-     }
-+    LOG("bdmUpdateGameList: mode %d view %d: %d PS2, %d PS1, %d rows\n", itemList->mode, view, pDeviceData->bdmGameCount,
-+        pDeviceData->bdmPs1GameCount, result);
-     return result;
- }
- 
 diff --git a/src/menusys.c b/src/menusys.c
 index fc99173..a36fc4c 100644
 --- a/src/menusys.c
