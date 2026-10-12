@@ -45,14 +45,21 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [x] Page buttons: Theme, L1 / R1 or L2 / R2; theme key `page_buttons=l2r2`, which RIPgrid uses.
 
 ## Build 97: Grid and Flow
-- [ ] RIPgrid: the name under the grid in RIPPS2 Sleek Bold; the grid centered on the content, ignoring the
+- [x] RIPgrid: the name under the grid in RIPPS2 Sleek Bold; the grid centered on the content, ignoring the
       sidebar; Right at the right edge goes to the next page and Left at the left edge to the previous one
       (no wrapping).
-- [ ] Case flip on a 0.42 s right-stick hold (was 2 s), on RIPFLOW too, where it replaces the automatic front
+- [x] Case flip on a 0.42 s right-stick hold (was 2 s), on RIPFLOW too, where it replaces the automatic front
       and back crossfade.
-- [ ] RIPFLOW info page: right-stick tilt on the screenshots.
-- [ ] RIPgrid on HDMI and HD modes (FifthFox: "optimized for a CRT"): check every video mode and fix its layout.
-- [ ] Older OPL themes: load a set of classic themes in the lab and fix what draws wrong next to RiptOPL.
+- [x] RIPFLOW info page: right-stick tilt on the screenshots.
+- [x] RIPgrid on HDMI and HD modes (FifthFox: "optimized for a CRT"): check every video mode and fix its layout.
+      480p, 720p and 1080i lay out centred. 720p FROZE the release build: a lab save state read against the
+      build's symbols showed the GUI thread blocked in a pad actuator-align RPC the IOP never answered (the pad
+      still busy with its init), holding the GUI lock. The align now waits for an idle pad. Also fixed on the
+      way: fntFitString walked past the end of its string (a stray letter under a coverless tile).
+- [x] Older OPL themes: load a set of classic themes in the lab and fix what draws wrong next to RiptOPL.
+      Grunge and Adapt RiptOPL draw their lists, menus and settings as RiptOPL does on build 97.
+- [x] Found in the lab: a list opened on the remembered game as its top row, so near the end of a list it
+      showed a few games over empty rows (it looked as if games were missing). A list page is always full now.
 
 ## Build 98: Memory Files
 - [ ] **A memory card slot disappears after START DRIVES** in Memory Files: both cards must stay reachable.
