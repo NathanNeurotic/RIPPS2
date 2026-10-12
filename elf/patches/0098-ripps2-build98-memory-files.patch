@@ -24,6 +24,569 @@ index f5b03d3..0e532e2 100644
      with tempfile.TemporaryDirectory() as tmp:
          src = Path(tmp) / 'bgm_source.c'
          exe = Path(tmp) / 'bgm_source'
+diff --git a/.github/scripts/test_save_icons.py b/.github/scripts/test_save_icons.py
+new file mode 100644
+index 0000000..42b72ba
+--- /dev/null
++++ b/.github/scripts/test_save_icons.py
+@@ -0,0 +1,544 @@
++"""3D Save Icons: the icon, icon.sys and memory-card-image readers (RiptOPL c60cf80), and RIPPS2's viewer.
++
++Compiles the real src/saveicon.c (its pure half, -DSAVEICON_HOST_TEST) and checks it against an
++independent Python reading of the icons this repository ships, against card images built here -- bare
++and with the ECC spare, a fragmented icon chain, two saves of one game (the newer must win), damage
++that must be refused rather than followed -- and against truncated and corrupted icons. Then checks
++that Memory Files opens an .ico / .icn in RIPPS2's 3D viewer (build 98).
++"""
++from pathlib import Path
++import re
++import struct
++import subprocess
++import sys
++import tempfile
++
++root = Path(__file__).resolve().parents[2]
++failures = []
++
++
++def text(rel):
++    return (root / rel).read_text(encoding='utf-8').replace('\r\n', '\n')
++
++
++# ---- an independent reading of the icon format ------------------------------------------------
++
++def parse_icon(data):
++    magic, shapes, textype, _, verts = struct.unpack_from('<IIIfI', data, 0)
++    off, pos_sum, uv_sum, rgba_sum = 20, 0, 0, 0
++    for _ in range(verts):
++        for s in range(shapes):
++            pos_sum += sum(struct.unpack_from('<hhh', data, off + 8 * s))
++        off += 8 * shapes + 8
++        uv_sum += sum(struct.unpack_from('<hh', data, off))
++        off += 4
++        rgba_sum += sum(data[off:off + 4])
++        off += 4
++    tag, frame_len, speed, _, frames = struct.unpack_from('<IIfII', data, off)
++    off += 20
++    for _ in range(frames):
++        _, keys = struct.unpack_from('<II', data, off)
++        off += 8 + 8 * keys
++    tex_sum, end = None, off
++    if textype & 4:
++        pixels = []
++        if textype & 8:
++            packed, = struct.unpack_from('<I', data, off)
++            end = off + 4 + packed
++            src, i = data[off + 4:off + 4 + packed], 0
++            while i + 2 <= len(src) and len(pixels) < 16384:
++                code, = struct.unpack_from('<H', src, i)
++                i += 2
++                if code & 0x8000:
++                    n = 0x10000 - code
++                    pixels.extend(struct.unpack_from('<%dH' % n, src, i))
++                    i += 2 * n
++                else:
++                    pixels.extend([struct.unpack_from('<H', src, i)[0]] * code)
++                    i += 2
++        else:
++            pixels = list(struct.unpack_from('<16384H', data, off))
++            end = off + 32768
++        tex_sum = sum((pixels + [0] * 16384)[:16384])
++    return {'shapes': shapes, 'verts': verts, 'pos': pos_sum, 'uv': uv_sum, 'rgba': rgba_sum,
++            'tex': tex_sum, 'frame_len': frame_len, 'end': end}
++
++
++def make_icon(shapes, verts, keys, textured=True):
++    """A small synthetic icon: `verts` vertices, shape s offset by 100*s, per-shape key lists."""
++    out = bytearray(struct.pack('<IIIfI', 0x00010000, shapes, 0x07 if textured else 0x03, 1.0, verts))
++    for v in range(verts):
++        for s in range(shapes):
++            out += struct.pack('<hhhh', v * 10 + 100 * s, -v * 5, v, 0)
++        out += struct.pack('<hhhh', 0, 0, -4096, 0)
++        out += struct.pack('<hh', v * 64, v * 32)
++        out += bytes([0x80, 0x40, 0x20, 0x80])
++    out += struct.pack('<IIfII', 1, 60, 1.0, 0, len(keys))
++    for shape, kl in keys:
++        out += struct.pack('<II', shape, len(kl))
++        for t, value in kl:
++            out += struct.pack('<ff', t, value)
++    if textured:
++        out += struct.pack('<16384H', *[(i * 7) & 0xFFFF for i in range(16384)])
++    return bytes(out)
++
++
++# ---- memory-card images -------------------------------------------------------------------------
++
++PAGE, PPC = 512, 2
++CS = PAGE * PPC
++CLUSTERS, ALLOC, IFC = 1024, 41, 8
++FATS = [9, 10, 11, 12]  # 256 entries each: enough for the 983 allocatable clusters
++DIR_MODE, FILE_MODE = 0x8027, 0x8017
++
++
++class Card:
++    def __init__(self):
++        self.img = bytearray(b'\xFF' * (CLUSTERS * CS))
++        self.fat = [0x7FFFFFFF] * (CLUSTERS - ALLOC)  # free
++        self.used = set()
++        sb = bytearray(0x154)
++        sb[0:40] = b'Sony PS2 Memory Card Format 1.2.0.0\0\0\0\0\0'
++        struct.pack_into('<HHHH', sb, 0x28, PAGE, PPC, 16, 0xFF00)
++        struct.pack_into('<IIII', sb, 0x30, CLUSTERS, ALLOC, CLUSTERS - 1, 0)
++        struct.pack_into('<I', sb, 0x50, IFC)
++        self.img[0:len(sb)] = sb
++
++    def alloc(self, count, pattern='contiguous'):
++        free = [c for c in range(CLUSTERS - ALLOC) if c not in self.used]
++        if pattern == 'fragmented':  # runs of two with gaps: exercises both coalescing and chain jumps
++            picked = []
++            for c in free:
++                if len(picked) == count:
++                    break
++                if c % 4 in (1, 2):
++                    picked.append(c)
++        else:
++            picked = free[:count]
++        assert len(picked) == count
++        self.used.update(picked)
++        for a, b in zip(picked, picked[1:]):
++            self.fat[a] = 0x80000000 | b
++        self.fat[picked[-1]] = 0xFFFFFFFF
++        return picked
++
++    def write(self, data, pattern='contiguous'):
++        clusters = self.alloc(max(1, (len(data) + CS - 1) // CS), pattern)
++        for i, c in enumerate(clusters):
++            chunk = data[i * CS:(i + 1) * CS]
++            at = (ALLOC + c) * CS
++            self.img[at:at + len(chunk)] = chunk
++        return clusters[0]
++
++    def finish(self):
++        ifc = bytearray(CS)
++        for i, f in enumerate(FATS):
++            struct.pack_into('<I', ifc, 4 * i, f)
++        self.img[IFC * CS:(IFC + 1) * CS] = ifc
++        for i, f in enumerate(FATS):
++            block = bytearray(CS)
++            for k in range(256):
++                n = i * 256 + k
++                struct.pack_into('<I', block, 4 * k, self.fat[n] if n < len(self.fat) else 0x7FFFFFFF)
++            self.img[f * CS:(f + 1) * CS] = block
++        return bytes(self.img)
++
++
++def entry(mode, length, cluster, name, stamp):
++    sec, minute, hour, day, month, year = stamp
++    e = bytearray(512)
++    struct.pack_into('<HHI', e, 0, mode, 0, length)
++    t = struct.pack('<BBBBBBH', 0, sec, minute, hour, day, month, year)
++    e[0x08:0x10] = t
++    struct.pack_into('<II', e, 0x10, cluster, 0)
++    e[0x18:0x20] = t
++    e[0x40:0x40 + len(name)] = name
++    return bytes(e)
++
++
++OLD, NEW = (1, 2, 3, 4, 5, 2019), (1, 2, 3, 4, 5, 2024)
++
++
++def save_folder(card, name, sys_bytes, icon_bytes, stamp, icon_pattern='contiguous', extra=()):
++    sys_cluster = card.write(sys_bytes)
++    icon_cluster = card.write(icon_bytes, icon_pattern)
++    files = [entry(FILE_MODE, len(sys_bytes), sys_cluster, b'icon.sys', stamp),
++             entry(FILE_MODE, len(icon_bytes), icon_cluster, b'list.icn', stamp)] + list(extra)
++    count = 2 + len(files)
++    # A folder's "." entry needs its own cluster number, so lay out the entries after allocation.
++    clusters = card.alloc((count * 512 + CS - 1) // CS)
++    body = b''.join([entry(DIR_MODE, count, clusters[0], b'.', stamp),
++                     entry(DIR_MODE, 0, 0, b'..', stamp)] + files)
++    for i, c in enumerate(clusters):
++        chunk = body[i * CS:(i + 1) * CS]
++        at = (ALLOC + c) * CS
++        card.img[at:at + len(chunk)] = chunk
++    return entry(DIR_MODE, count, clusters[0], name, stamp)
++
++
++def build_card(folders):
++    """folders: entries for the root, made by save_folder. The root takes relative cluster 0."""
++    card = Card()
++    root_count = 2 + len(folders)
++    root_clusters = card.alloc((root_count * 512 + CS - 1) // CS)
++    assert root_clusters[0] == 0
++    return card, root_clusters, root_count
++
++
++def finish_root(card, root_clusters, root_count, folder_entries):
++    body = b''.join([entry(DIR_MODE, root_count, 0, b'.', NEW), entry(DIR_MODE, 0, 0, b'..', NEW)] + folder_entries)
++    for i, c in enumerate(root_clusters):
++        chunk = body[i * CS:(i + 1) * CS]
++        at = (ALLOC + c) * CS
++        card.img[at:at + len(chunk)] = chunk
++    return card.finish()
++
++
++def with_ecc(bare):
++    pages = len(bare) // PAGE
++    out = bytearray()
++    for p in range(pages):
++        out += bare[p * PAGE:(p + 1) * PAGE] + bytes([p & 0xFF]) * 16
++    return bytes(out)
++
++
++HARNESS = r'''
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include "include/saveicon.h"
++
++static int reads;
++
++static unsigned char *slurp(const char *path, int *size)
++{
++    FILE *f = fopen(path, "rb");
++    unsigned char *d;
++    long n;
++    if (f == NULL)
++        return NULL;
++    fseek(f, 0, SEEK_END);
++    n = ftell(f);
++    fseek(f, 0, SEEK_SET);
++    d = malloc(n > 0 ? n : 1);
++    *size = (int)fread(d, 1, n, f);
++    fclose(f);
++    return d;
++}
++
++static int fileRead(void *ctx, unsigned int offset, void *buf, int size)
++{
++    reads++;
++    if (fseek((FILE *)ctx, (long)offset, SEEK_SET) != 0)
++        return -1;
++    return (int)fread(buf, 1, size, (FILE *)ctx);
++}
++
++static void model(const char *path, int cut)
++{
++    int size, r, i;
++    long long pos = 0, uv = 0, rgba = 0, tex = 0;
++    unsigned char *d = slurp(path, &size);
++    saveicon_model_t m;
++    if (cut >= 0 && cut < size)
++        size = cut;
++    r = saveIconParseModel(d, size, &m);
++    if (r != 0) {
++        printf("ERR %d\n", r);
++        free(d);
++        return;
++    }
++    for (i = 0; i < m.shapes * m.verts * 3; i++)
++        pos += m.pos[i];
++    for (i = 0; i < m.verts * 2; i++)
++        uv += m.uv[i];
++    for (i = 0; i < m.verts * 4; i++)
++        rgba += m.rgba[i];
++    if (m.texels != NULL)
++        for (i = 0; i < 128 * 128; i++)
++            tex += m.texels[i];
++    printf("OK shapes=%d verts=%d pos=%lld uv=%lld rgba=%lld tex=%lld frame_len=%d speed=%g\n", m.shapes, m.verts,
++           pos, uv, rgba, m.texels != NULL ? tex : -1, m.frameLength, m.speed);
++    saveIconFreeModel(&m);
++    free(d);
++}
++
++static void sys(const char *path)
++{
++    int size;
++    unsigned char *d = slurp(path, &size);
++    char name[64];
++    saveicon_light_t l;
++    memset(&l, 0, sizeof(l));
++    if (saveIconParseSys(d, size, name, sizeof(name), &l))
++        printf("OK %s ambient=%.3f dir0=%.3f,%.3f,%.3f valid=%d\n", name, l.ambient[0], l.dir[0][0], l.dir[0][1], l.dir[0][2], l.valid);
++    else
++        printf("ERR\n");
++    free(d);
++}
++
++static void card(const char *path, const char *serial)
++{
++    FILE *f = fopen(path, "rb");
++    saveicon_model_t m;
++    saveicon_light_t l;
++    long size;
++    int ok;
++    fseek(f, 0, SEEK_END);
++    size = ftell(f);
++    reads = 0;
++    memset(&l, 0, sizeof(l));
++    ok = saveIconFromCardImage(fileRead, f, (unsigned int)size, serial, &m, &l);
++    if (ok)
++        printf("FOUND verts=%d shapes=%d ambient=%.3f reads=%d\n", m.verts, m.shapes, l.ambient[0], reads);
++    else
++        printf("NONE reads=%d\n", reads);
++    saveIconFreeModel(&m);
++    fclose(f);
++}
++
++static void weights(void)
++{
++    saveicon_model_t m;
++    saveicon_key_t k0[2] = {{0.0f, 1.0f}, {10.0f, 0.0f}}, k1[2] = {{0.0f, 0.0f}, {10.0f, 1.0f}};
++    float w[4], t, sum;
++    memset(&m, 0, sizeof(m));
++    m.shapes = 2;
++    m.keys[0] = k0;
++    m.keys[1] = k1;
++    m.keyCount[0] = m.keyCount[1] = 2;
++    for (t = -1.0f; t <= 11.0f; t += 3.0f) {
++        sum = saveIconShapeWeights(&m, t, w);
++        printf("t=%.0f w0=%.2f w1=%.2f sum=%.2f\n", t, w[0], w[1], sum);
++    }
++    m.keyCount[0] = m.keyCount[1] = 0; // no keys at all: the first shape, never a collapsed model
++    sum = saveIconShapeWeights(&m, 5.0f, w);
++    printf("nokeys w0=%.2f w1=%.2f sum=%.2f\n", w[0], w[1], sum);
++    m.shapes = 1; // one shape always has the full weight
++    sum = saveIconShapeWeights(&m, 5.0f, w);
++    printf("single w0=%.2f sum=%.2f\n", w[0], sum);
++}
++
++int main(int argc, char **argv)
++{
++    char serial[16];
++    if (!strcmp(argv[1], "model"))
++        model(argv[2], argc > 3 ? atoi(argv[3]) : -1);
++    else if (!strcmp(argv[1], "sys"))
++        sys(argv[2]);
++    else if (!strcmp(argv[1], "card"))
++        card(argv[2], argv[3]);
++    else if (!strcmp(argv[1], "weights"))
++        weights();
++    else if (!strcmp(argv[1], "serial")) {
++        int i;
++        for (i = 2; i < argc; i++) {
++            if (saveIconSerialForStartup(argv[i], serial, sizeof(serial)))
++                printf("%s=%s\n", argv[i], serial);
++            else
++                printf("%s=-\n", argv[i]);
++        }
++    } else if (!strcmp(argv[1], "folder"))
++        printf("%d\n", saveIconFolderMatches(argv[2], argv[3]));
++    return 0;
++}
++'''
++
++with tempfile.TemporaryDirectory() as tmp:
++    tmp = Path(tmp)
++    (tmp / 'harness.c').write_text(HARNESS, encoding='utf-8')
++    exe = tmp / 'harness'
++    build = subprocess.run(['gcc', '-std=gnu99', '-Wall', '-Werror', '-DSAVEICON_HOST_TEST', '-I', str(root),
++                            '-o', str(exe), str(tmp / 'harness.c'), str(root / 'src/saveicon.c')],
++                           capture_output=True, text=True, check=False)
++    if build.returncode != 0:
++        sys.exit('saveicon.c did not compile for the host test:\n' + build.stderr)
++
++    def run(*args):
++        return subprocess.run([str(exe)] + [str(a) for a in args], capture_output=True, text=True,
++                              check=False, timeout=60).stdout.strip()
++
++    # 1. The shipped icons parse exactly as the independent reading says.
++    for rel in ('misc/list.icn', 'POPS/list.icn', 'POPS/del.icn'):
++        data = (root / rel).read_bytes()
++        ref = parse_icon(data)
++        got = run('model', root / rel)
++        want = 'OK shapes=%d verts=%d pos=%d uv=%d rgba=%d tex=%d frame_len=%d speed=1' % (
++            ref['shapes'], ref['verts'], ref['pos'], ref['uv'], ref['rgba'], ref['tex'], ref['frame_len'])
++        if got != want:
++            failures.append('%s: parsed as %r, expected %r' % (rel, got, want))
++        # Cut anywhere before the texture's last byte, an icon is refused; from there on it parses.
++        cuts = set(range(0, 400, 7)) | set(range(400, len(data) + 1, max(1, len(data) // 47)))
++        for cut in sorted(cuts | {ref['end'] - 1, ref['end']}):
++            got = run('model', root / rel, cut)
++            if not (got.startswith('ERR') or got.startswith('OK')):
++                failures.append('%s cut at %d: crashed or printed %r' % (rel, cut, got))
++            elif got.startswith('OK') != (cut >= ref['end']):
++                failures.append('%s cut at %d (texture ends at %d): %r' % (rel, cut, ref['end'], got))
++
++    # 2. Corrupted headers are refused before anything is allocated from them.
++    base = bytearray((root / 'misc/list.icn').read_bytes())
++    for label, offset, value in (('shapes 0', 4, 0), ('shapes 33', 4, 33), ('verts 0', 16, 0),
++                                 ('verts not a triangle list', 16, 301), ('verts huge', 16, 0x7FFFFFF0),
++                                 ('magic', 0, 0x00020000)):
++        bad = bytearray(base)
++        struct.pack_into('<I', bad, offset, value)
++        (tmp / 'bad.icn').write_bytes(bad)
++        if not run('model', tmp / 'bad.icn').startswith('ERR'):
++            failures.append('a corrupted icon (%s) was accepted' % label)
++    bad = bytearray(base)
++    off = 20 + 300 * 24
++    struct.pack_into('<I', bad, off + 16, 1)        # one frame...
++    bad[off + 20:off + 28] = struct.pack('<II', 0, 0x7FFFFFFF)  # ...claiming 2^31 keys
++    (tmp / 'bad.icn').write_bytes(bad[:off + 28])
++    if not run('model', tmp / 'bad.icn').startswith('ERR'):
++        failures.append('an icon claiming 2^31 animation keys was accepted')
++
++    # 3. A morphing icon: two shapes, both keyed; untextured; speed honoured.
++    (tmp / 'morph.icn').write_bytes(make_icon(2, 6, [(0, [(0.0, 1.0), (60.0, 0.0)]), (1, [(0.0, 0.0), (60.0, 1.0)]), (7, [(0.0, 1.0)])], textured=False))
++    got = run('model', tmp / 'morph.icn')
++    if not got.startswith('OK shapes=2 verts=6') or 'tex=-1' not in got:
++        failures.append('two-shape untextured icon: %r' % got)
++    got = run('weights').splitlines()
++    want = ['t=-1 w0=1.00 w1=0.00 sum=1.00', 't=2 w0=0.80 w1=0.20 sum=1.00', 't=5 w0=0.50 w1=0.50 sum=1.00',
++            't=8 w0=0.20 w1=0.80 sum=1.00', 't=11 w0=0.00 w1=1.00 sum=1.00', 'nokeys w0=1.00 w1=0.00 sum=1.00',
++            'single w0=1.00 sum=1.00']
++    if got != want:
++        failures.append('shape weights: %r, expected %r' % (got, want))
++
++    # 4. icon.sys: the list icon's name and the lights; unsafe names refused.
++    got = run('sys', root / 'POPS/icon.sys')
++    if not got.startswith('OK list.icn ambient=') or 'dir0=0.500,0.500,0.500 valid=1' not in got:
++        failures.append('POPS/icon.sys: %r' % got)
++    sysdata = bytearray((root / 'misc/icon.sys').read_bytes())
++    for label, name in (('a path', b'../list.icn'), ('a separator', b'a/b.icn'), ('a device', b'mc0:x'),
++                        ('nothing', b''), ('dot-dot', b'..'), ('no terminator', b'x' * 64)):
++        bad = bytearray(sysdata)
++        bad[0x104:0x144] = (name + b'\0' * 64)[:64]
++        (tmp / 'bad.sys').write_bytes(bad)
++        if run('sys', tmp / 'bad.sys') != 'ERR':
++            failures.append('icon.sys naming %s as its list icon was accepted' % label)
++    (tmp / 'short.sys').write_bytes(sysdata[:900])
++    if run('sys', tmp / 'short.sys') != 'ERR':
++        failures.append('a truncated icon.sys was accepted')
++
++    # 5. Product codes and save folders.
++    got = run('serial', 'SLUS_200.62', 'SCES_503.61', 'SLPM_123.45.Game.iso', 'SLUS-200.62', 'slus_200.62', 'SLUS_20A.62', 'SLUS_200.6')
++    want = 'SLUS_200.62=SLUS-20062\nSCES_503.61=SCES-50361\nSLPM_123.45.Game.iso=SLPM-12345\nSLUS-200.62=-\nslus_200.62=-\nSLUS_20A.62=-\nSLUS_200.6=-'
++    if got != want:
++        failures.append('product codes: %r' % got)
++    for folder, serial, want in (('BASLUS-20062GAME', 'SLUS-20062', '1'), ('BESLUS-20062', 'SLUS-20062', '1'),
++                                 ('BASLUS-2006', 'SLUS-20062', '0'), ('XASLUS-20062', 'SLUS-20062', '0'),
++                                 ('BASLUS-20063', 'SLUS-20062', '0')):
++        if run('folder', folder, serial) != want:
++            failures.append('folder %s for %s should be %s' % (folder, serial, want))
++
++    # 6. Card images: the newer of two saves wins, through a fragmented chain, bare and with ECC.
++    sys_bytes = (root / 'POPS/icon.sys').read_bytes()
++    new_icon = (root / 'misc/list.icn').read_bytes()    # 300 vertices
++    old_icon = (root / 'POPS/list.icn').read_bytes()    # 1044 vertices
++    other = make_icon(1, 3, [])
++
++    def standard_card(new_pattern='fragmented'):
++        card, rc, count = build_card([None] * 4)
++        folders = [save_folder(card, b'BASLUS-20062OLDSAVE', sys_bytes, old_icon, OLD),
++                   save_folder(card, b'BESLES-99999OTHER', sys_bytes, other, NEW),
++                   save_folder(card, b'BASLUS-20062NEWSAVE', sys_bytes, new_icon, NEW, new_pattern),
++                   entry(FILE_MODE, 5, card.write(b'hello'), b'BASLUS-20062FILE', NEW)]  # a file, not a save
++        return card, rc, count, folders
++
++    card, rc, count, folders = standard_card()
++    image = finish_root(card, rc, count, folders)
++    (tmp / 'card.bin').write_bytes(image)
++    got = run('card', tmp / 'card.bin', 'SLUS-20062')
++    ambient = '%.3f' % struct.unpack_from('<f', sys_bytes, 0xB0)[0]
++    if not got.startswith('FOUND verts=300 shapes=1 ambient=%s' % ambient):
++        failures.append('bare card image: %r (the newer save, 300 vertices and its lights, should win)' % got)
++    (tmp / 'ecc.bin').write_bytes(with_ecc(image))
++    got = run('card', tmp / 'ecc.bin', 'SLUS-20062')
++    if not got.startswith('FOUND verts=300 shapes=1'):
++        failures.append('card image with the ECC spare: %r' % got)
++    got = run('card', tmp / 'card.bin', 'SLES-99999')
++    if not got.startswith('FOUND verts=3'):
++        failures.append('second game on the same card: %r' % got)
++    for serial in ('SLUS-20063', 'SCUS-97328'):
++        if not run('card', tmp / 'card.bin', serial).startswith('NONE'):
++            failures.append('a game with no save on the card found one (%s)' % serial)
++
++    # A contiguous icon is read in one run, not cluster by cluster.
++    card, rc, count, folders = standard_card('contiguous')
++    (tmp / 'contig.bin').write_bytes(finish_root(card, rc, count, folders))
++    got = run('card', tmp / 'contig.bin', 'SLUS-20062')
++    contiguous = re.search(r'reads=(\d+)', got)
++    fragmented = re.search(r'reads=(\d+)', run('card', tmp / 'card.bin', 'SLUS-20062'))
++    if (not got.startswith('FOUND verts=300') or contiguous is None or fragmented is None or
++            int(contiguous.group(1)) > 20 or int(contiguous.group(1)) + 4 > int(fragmented.group(1))):
++        failures.append('contiguous icon on a bare image: %r (expected one run, fewer reads than the fragmented card)' % got)
++
++    # 7. Damage is refused, never followed.
++    def damaged(mutate):
++        card, rc, count, folders = standard_card()
++        mutate(card)
++        return finish_root(card, rc, count, folders)
++
++    cases = {
++        'wrong magic': lambda img: b'Not a card' + img[10:],
++        'too small for its clusters': lambda img: img[:len(img) // 2],
++    }
++    for label, mutate in cases.items():
++        (tmp / 'bad.bin').write_bytes(mutate(image))
++        if not run('card', tmp / 'bad.bin', 'SLUS-20062').startswith('NONE'):
++            failures.append('a damaged card image (%s) was read' % label)
++
++    def free_mid_chain(card):
++        # The first link that jumps (the fragmented icon's): the cluster it jumps to becomes free.
++        jump = next(c for c in sorted(card.used) if card.fat[c] != 0xFFFFFFFF and (card.fat[c] & 0x7FFFFFFF) != c + 1)
++        card.fat[card.fat[jump] & 0x7FFFFFFF] = 0x7FFFFFFF
++    (tmp / 'bad.bin').write_bytes(damaged(free_mid_chain))
++    got = run('card', tmp / 'bad.bin', 'SLUS-20062')
++    if not (got.startswith('NONE') or got.startswith('FOUND verts=1044')):
++        failures.append('a chain running into a free cluster: %r' % got)
++
++    big = bytearray(image)
++    struct.pack_into('<I', big, ALLOC * CS + 4, 0x7FFFFFFF)  # root "." claims 2^31 entries
++    (tmp / 'bad.bin').write_bytes(big)
++    if not run('card', tmp / 'bad.bin', 'SLUS-20062').startswith('NONE'):
++        failures.append('a root claiming 2^31 entries was walked')
++
++    loop = bytearray(image)
++    for i in range(256):  # every FAT link points back at itself: walks must end, not spin
++        struct.pack_into('<I', loop, FATS[0] * CS + 4 * i, 0x80000000 | i)
++    (tmp / 'loop.bin').write_bytes(loop)
++    try:
++        run('card', tmp / 'loop.bin', 'SLUS-20062')
++    except subprocess.TimeoutExpired:
++        failures.append('a looping FAT chain hung the reader')
++
++# ---- the wiring (RIPPS2 build 98: the reader backs Memory Files' 3D icon viewer) ----------------
++
++if 'saveicon.o' not in text('Makefile'):
++    failures.append('Makefile: saveicon.o is not built')
++if 'void rmDrawTriangles(GSTEXTURE *txt, int count, const float *xy, const float *uv, const u64 *colors)' not in text('src/renderman.c'):
++    failures.append('renderman.c: rmDrawTriangles is missing')
++media = text('src/ripps2media.c')
++kind = media[media.index('int ripps2MediaKind('):]
++kind = kind[:kind.index('\n}\n')]
++if '".ico"' not in kind or '".icn"' not in kind or 'RIPPS2_MEDIA_ICON' not in kind:
++    failures.append('ripps2media.c: .ico and .icn must be a RIPPS2_MEDIA_ICON')
++if 'case RIPPS2_MEDIA_ICON:\n            ripps2ViewSaveIcon(path);' not in media:
++    failures.append('ripps2media.c: ripps2OpenMedia must open an icon in ripps2ViewSaveIcon')
++view = media[media.index('void ripps2ViewSaveIcon('):]
++view = view[:view.index('\n}\n')]
++for needle, why in (('saveIconParseModel(data, len, &m) != 0', 'a file that is not an icon must be refused'),
++                    ('saveIconParseSys(sys, sysLen', "the save's icon.sys lights it"),
++                    ('saveIconShapeWeights(&m, t, weights)', 'the animation must play'),
++                    ('rmDrawTriangles(m.texels != NULL ? &tex : NULL', 'the model must be drawn'),
++                    ('rmUnloadTexture(&tex)', 'its texture must leave VRAM'),
++                    ('saveIconFreeModel(&m);', 'the model must be freed')):
++    if needle not in view:
++        failures.append('ripps2ViewSaveIcon: %s (%s missing)' % (why, needle))
++
++if failures:
++    print('\n'.join(failures))
++    sys.exit(1)
++print('save icons: OK')
+diff --git a/Makefile b/Makefile
+index d1c2cdd..8866dee 100644
+--- a/Makefile
++++ b/Makefile
+@@ -135,7 +135,7 @@ endif
+ 
+ FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
+ 		dia.o ioman.o texcache.o themes.o supportbase.o bdmsupport.o netsupport.o ethsupport.o httpcatalog.o httpsupport.o udpfssupport.o hddsupport.o zso.o lz4.o launchdiag.o \
+-		appsupport.o mmcesupport.o artindex.o vcdsupport.o cuesupport.o libview.o retrogem.o folderbrowse.o gui.o guigame.o vmc_groups.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o cheatconfig.o sound.o ps2cnf.o tar.o
++		appsupport.o mmcesupport.o artindex.o vcdsupport.o cuesupport.o libview.o retrogem.o folderbrowse.o gui.o guigame.o vmc_groups.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o cheatconfig.o sound.o ps2cnf.o tar.o saveicon.o
+ 
+ IOP_OBJS =	iomanx.o filexio.o ps2fs.o usbd.o usbhdfsd.o bdmevent.o \
+ 		bdm.o bdmfs_fatfs.o usbmass_bd.o iLinkman.o IEEE1394_bd.o mx4sio_bd.o \
 diff --git a/include/bdmsupport.h b/include/bdmsupport.h
 index 5bb6fd0..4512d54 100644
 --- a/include/bdmsupport.h
@@ -56,6 +619,133 @@ index c3d3686..6a53d06 100644
  
      NARGS_QB,
      NARGS_CWD,
+diff --git a/include/renderman.h b/include/renderman.h
+index efbd4bf..ccda44b 100644
+--- a/include/renderman.h
++++ b/include/renderman.h
+@@ -129,6 +129,11 @@ void rmDrawFramedRect(int x, int y, int w, int h, int border, u64 frameColor, u6
+ /** Queues a single color line to be rendered */
+ void rmDrawLine(int x1, int y1, int x2, int y2, u64 color);
+ 
++/** Queues count opaque Gouraud-shaded triangles in the order given, in virtual 640x480 coordinates:
++ * xy and uv hold two floats per vertex, colors one RGBAQ per vertex, three vertices per triangle.
++ * Textured from txt (uv in texels) when it is not NULL, otherwise the vertex colours alone. */
++void rmDrawTriangles(GSTEXTURE *txt, int count, const float *xy, const float *uv, const u64 *colors);
++
+ // RIPPS2: gradient-shaded triangle / quad (corners TL, TR, BL, BR) and additive blending
+ void rmDrawTriGouraud(float x1, float y1, u64 c1, float x2, float y2, u64 c2, float x3, float y3, u64 c3);
+ void rmDrawQuadGouraud(float x1, float y1, u64 c1, float x2, float y2, u64 c2,
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 65f5f85..cad689e 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -217,9 +217,10 @@ int ripps2VmcDeleteSave(const char *image, const char *save);
+ int ripps2PickList(const char *const *items, int count); // ripps2edit.c: a small glass list; -1 = none
+ void ripps2CardManager(int slot, const char *image); // ripps2card.c (build 86): memory card 1/2 (slot 0/1), or a card image (slot -1)
+ // ripps2media.c (build 93): Memory Files opens pictures (PNG, JPG) and video (AVI, with libsmslite)
+-enum { RIPPS2_MEDIA_NONE = 0, RIPPS2_MEDIA_PICTURE, RIPPS2_MEDIA_VIDEO, RIPPS2_MEDIA_SOUND };
++enum { RIPPS2_MEDIA_NONE = 0, RIPPS2_MEDIA_PICTURE, RIPPS2_MEDIA_VIDEO, RIPPS2_MEDIA_SOUND, RIPPS2_MEDIA_ICON };
+ int ripps2MediaKind(const char *name);
+ void ripps2ViewPicture(const char *path);
++void ripps2ViewSaveIcon(const char *path); // build 98: a PS2 save icon (.ico / .icn) in 3D
+ void ripps2PlayVideo(const char *path);
+ void ripps2OpenMedia(const char *path);
+ void ripps2SetOrbInput(int showPaths, int boost); // Memory Files: L2 shows the paths, R2 builds the orbs to 2x
+diff --git a/include/saveicon.h b/include/saveicon.h
+new file mode 100644
+index 0000000..c645f65
+--- /dev/null
++++ b/include/saveicon.h
+@@ -0,0 +1,89 @@
++#ifndef __SAVEICON_H
++#define __SAVEICON_H
++
++/*
++  3D save icons (fork-gaps OR1, ORBIT parity): the selected PS2 game's newest save -- in the game's own
++  per-game VMC first, then on a physical memory card -- with its list icon spun, animated and lit
++  inside a theme's SaveIcon element.
++
++  Written from the published PS2 save formats (the icon.sys layout matches ps2sdk's mcIcon, the card
++  filesystem matches OPL's own vmc_superblock_t); no code from other launchers. Threading: the IO
++  worker finds and parses; the GUI thread alone owns the model on screen and its texture, adopting a
++  finished load at draw time, so gsKit's texture manager is only ever touched by the thread that draws.
++*/
++
++#define SAVEICON_TEX_SIZE   128          // icon textures are 128x128, 16-bit A1B5G5R5
++#define SAVEICON_MAX_SHAPES 32           // animation shapes (morph targets) per icon
++#define SAVEICON_MAX_VERTS  6000         // ~2000 triangles: well inside one frame's gsKit queue
++#define SAVEICON_MAX_POS    48000        // shapes x vertices: the morph-target storage bound
++#define SAVEICON_MAX_KEYS   1024         // keys per shape
++#define SAVEICON_MAX_FILE   (512 * 1024) // largest icon file read
++#define SAVEICON_SYS_SIZE   964          // icon.sys
++#define SAVEICON_SYS_LIST   0x104        // icon.sys: list-icon file name (64 bytes)
++#define SAVEICON_PATH_SIZE  192          // a per-game VMC path: device prefix + "VMC/" + name + ".bin"
++
++typedef struct
++{
++    float time;
++    float value;
++} saveicon_key_t;
++
++typedef struct
++{
++    int shapes;
++    int verts;           // a multiple of 3: a plain triangle list
++    short *pos;          // [shape][vert][3] in 4.12 fixed point; +x right, +y DOWN, +z into the screen
++    short *normal;       // [vert][3] in 4.12 fixed point
++    short *uv;           // [vert][2] in 4.12 fixed point of the texture (4096 = full width)
++    unsigned char *rgba; // [vert][4] already in the GS colour scale (0x80 = 1.0)
++    int frameLength;     // animation length in frames (60 per second)
++    float speed;         // animation speed factor; 0 means 1
++    int keyCount[SAVEICON_MAX_SHAPES];
++    saveicon_key_t *keys[SAVEICON_MAX_SHAPES];
++    unsigned short *texels; // SAVEICON_TEX_SIZE^2 A1B5G5R5, or NULL for an untextured icon
++} saveicon_model_t;
++
++typedef struct
++{
++    float dir[3][3];   // three directional lights (icon.sys)
++    float color[3][3]; // their colours, 1.0 = full
++    float ambient[3];
++    int valid;
++} saveicon_light_t;
++
++// Pure, bounds-checked parse of a PS2 icon file (.icn/.ico). 0 = *model filled (free with
++// saveIconFreeModel); negative = a file that cannot be trusted, and *model is left empty.
++int saveIconParseModel(const unsigned char *data, int size, saveicon_model_t *model);
++void saveIconFreeModel(saveicon_model_t *model);
++
++// icon.sys: copies the list-icon file name into listName (refused when it is not a plain file name)
++// and the save's lights into *light. 1 = usable, 0 = not an icon.sys.
++int saveIconParseSys(const unsigned char *data, int size, char *listName, int listSize, saveicon_light_t *light);
++
++// "SLUS_200.62" -> "SLUS-20062", the product code inside a save folder name (BASLUS-20062...).
++// 1 = done; 0 = not a retail boot-file name.
++int saveIconSerialForStartup(const char *startup, char *serial, int serialSize);
++// Does this memory-card folder name belong to that product code? (B + region + serial + anything)
++int saveIconFolderMatches(const char *folder, const char *serial);
++
++// Animation: each shape's weight at time t (frames), written to weights[shapes]; returns their sum.
++float saveIconShapeWeights(const saveicon_model_t *model, float t, float *weights);
++
++// A memory-card image -- a VMC .bin, with or without the per-page ECC spare -- read through readFn
++// (bytes read, or < 0): the newest save folder of that product code in its root, its icon.sys lights
++// and its list icon. 1 = *model filled; 0 = no such save, not a card image, or a damaged one.
++typedef int (*saveicon_read_t)(void *ctx, unsigned int offset, void *buf, int size);
++int saveIconFromCardImage(saveicon_read_t readFn, void *ctx, unsigned int imageSize, const char *serial,
++                          saveicon_model_t *model, saveicon_light_t *light);
++
++// GUI thread, every frame the element draws. startup = the selected PS2 game's boot file (NULL or ""
++// for none); vmc0/vmc1 = full paths of its per-game VMCs ("" for a slot without one), meaningful only
++// when vmcKnown (its per-game config has loaded). Cheap; the cards are read once the row settles.
++void saveIconSelect(const char *startup, const char *vmc0, const char *vmc1, int vmcKnown);
++// GUI thread. Draws the selected game's icon, once loaded, centred on (cx, cy) and fitted to a w x h
++// box, all in virtual 640x480 units; xScale narrows x for a 16:9 display (1.0 at 4:3).
++void saveIconDraw(int cx, int cy, int w, int h, float xScale);
++// Forget everything: the setting turned off, or shutdown. GUI thread.
++void saveIconReset(void);
++
++#endif
 diff --git a/include/sound.h b/include/sound.h
 index 61ac524..1b27ec1 100644
 --- a/include/sound.h
@@ -475,6 +1165,44 @@ index 7145a62..176ca0c 100644
  // -> padActSet -> padSetActAlign -> sceSifCallRpc, the IOP idle, the GUI lock held, and the IO worker waiting
  // on it in thmAddElements. The pad's init had timed out in EXECCMD (PCSX2's after Enter Press Mode). Asked
  // fresh, never from the cached state (which only follows Stable, FindCTP1 and Disconnected).
+diff --git a/src/renderman.c b/src/renderman.c
+index 4975be3..9c1cd2f 100644
+--- a/src/renderman.c
++++ b/src/renderman.c
+@@ -854,6 +854,33 @@ void rmDrawLine(int x1, int y1, int x2, int y2, u64 color)
+ 
+ // RIPPS2: gradient-shaded primitives in theme space (640x480, like every rm* call) for the
+ // native pillars and orbs. Vertex colours are interpolated by the GS, alpha included.
++// RiptOPL c60cf80 (3D save icons): a painter's-sorted batch, one texture bind
++void rmDrawTriangles(GSTEXTURE *txt, int count, const float *xy, const float *uv, const u64 *colors)
++{
++    float sx = iDisplayWidth / 640.0f, sy = iDisplayHeight / 480.0f;
++    int i;
++
++    if (count <= 0 || rmQueueFull()) // RIPPS2: every primitive waits for room in the queue
++        return;
++    gsGlobal->PrimAlphaEnable = GS_SETTING_OFF;
++    gsKit_set_test(gsGlobal, GS_ATEST_OFF);
++    // One bind for the batch: nothing else binds between these triangles, so it stays resident.
++    if (txt != NULL)
++        gsKit_TexManager_bind(gsGlobal, txt);
++    for (i = 0; i < count; i++, xy += 6, uv += 6, colors += 3) {
++        float x0 = xy[0] * sx + fRenderXOff, y0 = xy[1] * sy + fRenderYOff;
++        float x1 = xy[2] * sx + fRenderXOff, y1 = xy[3] * sy + fRenderYOff;
++        float x2 = xy[4] * sx + fRenderXOff, y2 = xy[5] * sy + fRenderYOff;
++
++        if (txt != NULL)
++            gsKit_prim_triangle_goraud_texture_3d(gsGlobal, txt, x0, y0, order, uv[0], uv[1], x1, y1, order, uv[2], uv[3],
++                                                  x2, y2, order, uv[4], uv[5], colors[0], colors[1], colors[2]);
++        else
++            gsKit_prim_triangle_gouraud_3d(gsGlobal, x0, y0, order, x1, y1, order, x2, y2, order, colors[0], colors[1], colors[2]);
++    }
++    order++;
++}
++
+ void rmDrawTriGouraud(float x1, float y1, u64 c1, float x2, float y2, u64 c2, float x3, float y3, u64 c3)
+ {
+     if (rmQueueFull())
 diff --git a/src/ripps2boot.c b/src/ripps2boot.c
 index e7be100..4305d61 100644
 --- a/src/ripps2boot.c
@@ -1338,7 +2066,7 @@ index f4fad92..fde4eb5 100644
          return; // the grid draws its own hints
      // the hints
 diff --git a/src/ripps2media.c b/src/ripps2media.c
-index 2e43979..741e0e1 100644
+index 2e43979..c46c24c 100644
 --- a/src/ripps2media.c
 +++ b/src/ripps2media.c
 @@ -21,6 +21,7 @@
@@ -1349,7 +2077,24 @@ index 2e43979..741e0e1 100644
  #include <kernel.h>
  #include <delaythread.h>
  #include <png.h>
-@@ -373,6 +374,32 @@ static const char *viewLoad(const char *path, GSTEXTURE *t, int *sw, int *sh)
+@@ -38,6 +39,7 @@
+ #include "include/sound.h"
+ #include "include/ioman.h" // LOG
+ #include "include/ripps2.h"
++#include "include/saveicon.h" // build 98: the 3D save icon viewer
+ #ifdef RIPPS2_SMSLITE
+ #include <smslite.h>
+ #endif
+@@ -59,6 +61,8 @@ int ripps2MediaKind(const char *name)
+ #endif
+     if (!strcasecmp(dot, ".adp")) // build 95: a sound, as a rip or RIPPS2 Audio Studio made it
+         return RIPPS2_MEDIA_SOUND;
++    if (!strcasecmp(dot, ".ico") || !strcasecmp(dot, ".icn")) // build 98: a PS2 save icon, in 3D
++        return RIPPS2_MEDIA_ICON;
+     return RIPPS2_MEDIA_NONE;
+ }
+ 
+@@ -373,6 +377,32 @@ static const char *viewLoad(const char *path, GSTEXTURE *t, int *sw, int *sh)
      return NULL;
  }
  
@@ -1382,7 +2127,7 @@ index 2e43979..741e0e1 100644
  void ripps2ViewPicture(const char *path)
  {
      GSTEXTURE tex;
-@@ -409,17 +436,26 @@ void ripps2ViewPicture(const char *path)
+@@ -409,17 +439,26 @@ void ripps2ViewPicture(const char *path)
          rmDrawRect(0, 0, scrW, scrH, GS_SETREG_RGBA(0x02, 0x03, 0x0A, 0x80));
          padGetRightStick(&rx, &ry);
          int tilt = rx > 24 || rx < -24 || ry > 24 || ry < -24;
@@ -1417,6 +2162,315 @@ index 2e43979..741e0e1 100644
          }
          guiEndFrame();
  
+@@ -460,6 +499,298 @@ void ripps2ViewPicture(const char *path)
+     texFree(&tex);
+ }
+ 
++// ---- build 98: a PS2 save icon (.ico / .icn), in 3D ----
++// The model, its texture and its animation, read by the save-icon reader (saveicon.c) and drawn the way the PS2's
++// browser shows it: lit from the save's icon.sys, over its background, turning. The D-pad (or the right stick)
++// turns it, L2 / R2 zoom, Square stops or starts the spin, Triangle puts it back.
++#define ICON_SPIN_S 6.0f // one turn, as the browser's
++
++typedef struct
++{
++    float *x, *y, *z, *depth, *drawXY, *drawUV;
++    u64 *col, *drawCol;
++    int *order;
++} icon_bufs_t;
++
++static void iconFreeBufs(icon_bufs_t *b)
++{
++    free(b->x);
++    free(b->y);
++    free(b->z);
++    free(b->depth);
++    free(b->drawXY);
++    free(b->drawUV);
++    free(b->col);
++    free(b->drawCol);
++    free(b->order);
++    memset(b, 0, sizeof(*b));
++}
++
++static int iconAllocBufs(icon_bufs_t *b, int verts)
++{
++    memset(b, 0, sizeof(*b));
++    b->x = malloc(sizeof(float) * verts);
++    b->y = malloc(sizeof(float) * verts);
++    b->z = malloc(sizeof(float) * verts);
++    b->depth = malloc(sizeof(float) * (verts / 3));
++    b->drawXY = malloc(sizeof(float) * 2 * verts);
++    b->drawUV = malloc(sizeof(float) * 2 * verts);
++    b->col = malloc(sizeof(u64) * verts);
++    b->drawCol = malloc(sizeof(u64) * verts);
++    b->order = malloc(sizeof(int) * (verts / 3));
++    if (b->x == NULL || b->y == NULL || b->z == NULL || b->depth == NULL || b->drawXY == NULL || b->drawUV == NULL ||
++        b->col == NULL || b->drawCol == NULL || b->order == NULL) {
++        iconFreeBufs(b);
++        return 0;
++    }
++    return 1;
++}
++
++// icon.sys's lights, used only when they hold something (an all-zero or absurd set leaves the vertex colours as
++// they are rather than drawing the icon black); the directions come back normalised
++static int iconLightUsable(saveicon_light_t *l)
++{
++    float total = 0.0f;
++    int i, k;
++
++    if (!l->valid)
++        return 0;
++    for (i = 0; i < 3; i++) {
++        float *d = l->dir[i], len = sqrtf(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
++        if (!(len < 1e6f))
++            return 0;
++        if (len > 0.0f)
++            for (k = 0; k < 3; k++)
++                d[k] /= len;
++        for (k = 0; k < 3; k++) {
++            if (!(l->color[i][k] >= 0.0f && l->color[i][k] <= 4.0f))
++                return 0;
++            total += l->color[i][k];
++        }
++    }
++    for (k = 0; k < 3; k++) {
++        if (!(l->ambient[k] >= 0.0f && l->ambient[k] <= 4.0f))
++            return 0;
++        total += l->ambient[k];
++    }
++    return total > 0.05f;
++}
++
++static u64 iconShade(const unsigned char *rgba, const saveicon_light_t *l, int lit, float nx, float ny, float nz)
++{
++    float f[3] = {1.0f, 1.0f, 1.0f};
++    int i, k, c[3];
++
++    if (lit) {
++        for (k = 0; k < 3; k++)
++            f[k] = l->ambient[k];
++        for (i = 0; i < 3; i++) {
++            float d = nx * l->dir[i][0] + ny * l->dir[i][1] + nz * l->dir[i][2];
++            if (d < 0.0f) // two-sided, as the save-icon element: the format's light sign is not a guess worth losing the front to
++                d = -d;
++            for (k = 0; k < 3; k++)
++                f[k] += l->color[i][k] * d;
++        }
++    }
++    for (k = 0; k < 3; k++) {
++        c[k] = (int)(rgba[k] * (f[k] < 1.0f ? f[k] : 1.0f));
++        if (c[k] > 0xFF)
++            c[k] = 0xFF;
++    }
++    return GS_SETREG_RGBAQ(c[0], c[1], c[2], 0x80, 0x00);
++}
++
++void ripps2ViewSaveIcon(const char *path)
++{
++    saveicon_model_t m;
++    saveicon_light_t light;
++    icon_bufs_t b;
++    GSTEXTURE tex;
++    unsigned char *data, *sys = NULL;
++    int len = 0, sysLen = 0, lit = 0, haveBg = 0, v, s, i, k, tris, scrW, scrH;
++    u64 bg[4] = {0, 0, 0, 0};
++    char info[160], dir[256], listName[64];
++    const char *name = strrchr(path, '/');
++
++    guiRenderTextScreen("Opening the icon");
++    data = viewReadAll(path, SAVEICON_MAX_FILE, &len);
++    if (data == NULL || saveIconParseModel(data, len, &m) != 0) {
++        free(data);
++        guiMsgBox("This is not a PS2 save icon, or it is damaged.", 0, NULL);
++        return;
++    }
++    free(data);
++    if (!iconAllocBufs(&b, m.verts)) {
++        saveIconFreeModel(&m);
++        guiMsgBox("Not enough memory to show this icon.", 0, NULL);
++        return;
++    }
++    name = name != NULL ? name + 1 : path;
++
++    // the save's own icon.sys, beside it: its lights and the four corners of its background
++    memset(&light, 0, sizeof(light));
++    snprintf(dir, sizeof(dir), "%.*sicon.sys", (int)(name - path), path);
++    if ((sys = viewReadAll(dir, 2 * SAVEICON_SYS_SIZE, &sysLen)) != NULL) {
++        if (saveIconParseSys(sys, sysLen, listName, sizeof(listName), &light)) {
++            lit = iconLightUsable(&light);
++            for (i = 0; i < 4; i++) { // 0..255 per channel; the GS's full is 0x80
++                const unsigned char *c = sys + 0x10 + 16 * i;
++                bg[i] = GS_SETREG_RGBAQ(c[0] >> 1, c[4] >> 1, c[8] >> 1, 0x80, 0x00);
++            }
++            haveBg = 1;
++        }
++        free(sys);
++    }
++
++    memset(&tex, 0, sizeof(tex));
++    if (m.texels != NULL) {
++        tex.Width = SAVEICON_TEX_SIZE;
++        tex.Height = SAVEICON_TEX_SIZE;
++        tex.PSM = GS_PSM_CT16;
++        tex.Mem = (u32 *)m.texels;
++        tex.Filter = GS_FILTER_LINEAR;
++        tex.ClutStorageMode = GS_CLUT_STORAGE_CSM1;
++        tex.Delayed = 1;
++    }
++
++    // the pivot and the radius over every shape, so no frame of the animation leaves the box at any angle
++    float lo[3] = {1e9f, 1e9f, 1e9f}, hi[3] = {-1e9f, -1e9f, -1e9f}, pivot[3], radius = 1.0f;
++    for (i = 0; i < m.shapes * m.verts; i++)
++        for (k = 0; k < 3; k++) {
++            float c = m.pos[i * 3 + k];
++            lo[k] = c < lo[k] ? c : lo[k];
++            hi[k] = c > hi[k] ? c : hi[k];
++        }
++    for (k = 0; k < 3; k++)
++        pivot[k] = (lo[k] + hi[k]) * 0.5f;
++    for (i = 0; i < m.shapes * m.verts; i++) {
++        float dx = m.pos[i * 3] - pivot[0], dy = m.pos[i * 3 + 1] - pivot[1], dz = m.pos[i * 3 + 2] - pivot[2];
++        float r = sqrtf(dx * dx + dy * dy + dz * dz);
++        radius = r > radius ? r : radius;
++    }
++
++    tris = m.verts / 3;
++    for (i = 0; i < tris; i++)
++        b.order[i] = i;
++    rmGetScreenExtents(&scrW, &scrH);
++    float squeeze = rmWideScale(1000) / 1000.0f, zoom = 1.0f, yaw = 0.0f, pitch = 0.0f, weights[SAVEICON_MAX_SHAPES];
++    int spin = 1;
++    clock_t last = clock(), began = last;
++    snprintf(info, sizeof(info), "%s   %d TRIANGLES   %d %s%s", name, tris, m.shapes, m.shapes == 1 ? "SHAPE" : "SHAPES",
++             m.texels != NULL ? "" : "   NO TEXTURE");
++
++    for (;;) {
++        clock_t now = clock();
++        float dt = (float)(now - last) / (float)CLOCKS_PER_SEC, t = 0.0f;
++        last = now;
++        if (dt > 0.1f)
++            dt = 0.1f;
++        if (spin)
++            yaw += dt * (2.0f * 3.14159265f / ICON_SPIN_S);
++        if (m.frameLength > 1) // 60 frames a second, at the icon's own speed
++            t = fmodf((float)(now - began) / (float)CLOCKS_PER_SEC * 60.0f * m.speed, (float)m.frameLength);
++        float sum = saveIconShapeWeights(&m, t, weights), cy = cosf(yaw), sy = sinf(yaw), cp = cosf(pitch), sp = sinf(pitch);
++        float scale = 170.0f / radius * zoom;
++
++        for (v = 0; v < m.verts; v++) {
++            const short *n = &m.normal[v * 3];
++            float p[3] = {0.0f, 0.0f, 0.0f};
++            for (s = 0; s < m.shapes; s++) {
++                const short *q = &m.pos[(s * m.verts + v) * 3];
++                if (weights[s] <= 0.0f)
++                    continue;
++                for (k = 0; k < 3; k++)
++                    p[k] += weights[s] * q[k];
++            }
++            for (k = 0; k < 3; k++)
++                p[k] = p[k] / sum - pivot[k];
++            // a turn about the vertical axis, then a tip about the horizontal one; icon space has +y down the screen
++            float x1 = p[0] * cy + p[2] * sy, z1 = p[2] * cy - p[0] * sy;
++            float nx1 = (n[0] * cy + n[2] * sy) / 4096.0f, nz1 = (n[2] * cy - n[0] * sy) / 4096.0f, ny = n[1] / 4096.0f;
++            b.x[v] = 320.0f + x1 * scale * squeeze;
++            b.y[v] = 232.0f + (p[1] * cp - z1 * sp) * scale;
++            b.z[v] = p[1] * sp + z1 * cp;
++            b.col[v] = iconShade(&m.rgba[v * 4], &light, lit, nx1, ny * cp - nz1 * sp, ny * sp + nz1 * cp);
++        }
++        // painter's order, far first (+z into the screen); last frame's order is nearly right, so insertion sort
++        for (i = 0; i < tris; i++)
++            b.depth[i] = b.z[i * 3] + b.z[i * 3 + 1] + b.z[i * 3 + 2];
++        for (i = 1; i < tris; i++) {
++            int cur = b.order[i], j = i - 1;
++            float d = b.depth[cur];
++            while (j >= 0 && b.depth[b.order[j]] < d) {
++                b.order[j + 1] = b.order[j];
++                j--;
++            }
++            b.order[j + 1] = cur;
++        }
++        for (i = 0; i < tris; i++) {
++            int a = b.order[i] * 3;
++            for (k = 0; k < 3; k++) {
++                int dst = i * 3 + k, src = a + k;
++                b.drawXY[dst * 2] = b.x[src];
++                b.drawXY[dst * 2 + 1] = b.y[src];
++                b.drawUV[dst * 2] = m.uv[src * 2] / 32.0f; // 4.12 UVs of a 128-texel texture
++                b.drawUV[dst * 2 + 1] = m.uv[src * 2 + 1] / 32.0f;
++                b.drawCol[dst] = b.col[src];
++            }
++        }
++
++        guiStartFrame();
++        if (haveBg)
++            rmDrawQuadGouraud(0, 0, bg[0], scrW, 0, bg[1], 0, scrH, bg[2], scrW, scrH, bg[3]);
++        else
++            rmDrawRect(0, 0, scrW, scrH, GS_SETREG_RGBA(0x02, 0x03, 0x0A, 0x80));
++        rmDrawTriangles(m.texels != NULL ? &tex : NULL, tris, b.drawXY, b.drawUV, b.drawCol);
++        rmDrawRect(0, 6, 640, 32, GS_SETREG_RGBAQ(0x02, 0x03, 0x0A, 0x60, 0x00));
++        fntRenderString(RIPPS2_DIA_FONT, 320, 22, ALIGN_CENTER, 600, 0, info, GS_SETREG_RGBA(0xE0, 0xE8, 0xFF, 0x80));
++        rmDrawRect(0, 442, 640, 32, GS_SETREG_RGBAQ(0x02, 0x03, 0x0A, 0x60, 0x00));
++        int hx = 0;
++        for (i = 0; i < 2; i++) { // measured, then drawn centred
++            int x = i ? 320 - (hx - 16) / 2 : 0;
++            x = viewHint(R2_ICON, "ZOOM", x, 458, 0x80, i);
++            x = viewHint(RIPPS2_DPAD_UP, "TURN", x, 458, 0x80, i);
++            x = viewHint(SQUARE_ICON, spin ? "STOP SPIN" : "SPIN", x, 458, 0x80, i);
++            x = viewHint(TRIANGLE_ICON, "RESET", x, 458, 0x80, i);
++            hx = viewHint(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, "BACK", x, 458, 0x80, i);
++        }
++        guiEndFrame();
++
++        readPads();
++        if (getKeyOn(guiCancelKey()))
++            break;
++        int rx, ry;
++        padGetRightStick(&rx, &ry);
++        if (getKeyPressed(KEY_LEFT) || rx < -24)
++            yaw -= dt * (rx < -24 ? -rx / 127.0f : 1.0f) * 2.5f;
++        if (getKeyPressed(KEY_RIGHT) || rx > 24)
++            yaw += dt * (rx > 24 ? rx / 127.0f : 1.0f) * 2.5f;
++        if (getKeyPressed(KEY_UP) || ry < -24)
++            pitch -= dt * (ry < -24 ? -ry / 127.0f : 1.0f) * 2.0f;
++        if (getKeyPressed(KEY_DOWN) || ry > 24)
++            pitch += dt * (ry > 24 ? ry / 127.0f : 1.0f) * 2.0f;
++        pitch = pitch > 1.4f ? 1.4f : pitch < -1.4f ? -1.4f : pitch;
++        if (getKeyPressed(KEY_R2))
++            zoom *= 1.0f + dt * 1.2f;
++        if (getKeyPressed(KEY_L2))
++            zoom /= 1.0f + dt * 1.2f;
++        zoom = zoom > 2.4f ? 2.4f : zoom < 0.4f ? 0.4f : zoom;
++        if (getKeyOn(KEY_SQUARE)) {
++            spin = !spin;
++            sfxPlay(SFX_CURSOR);
++        }
++        if (getKeyOn(KEY_TRIANGLE)) {
++            yaw = pitch = 0.0f;
++            zoom = 1.0f;
++            sfxPlay(SFX_CURSOR);
++        }
++    }
++    if (m.texels != NULL)
++        rmUnloadTexture(&tex);
++    iconFreeBufs(&b);
++    saveIconFreeModel(&m);
++}
++
+ #ifdef RIPPS2_SMSLITE
+ // ---- video ----
+ static volatile int videoPadRun = 0, videoPadDone = 0;
+@@ -606,6 +937,9 @@ void ripps2OpenMedia(const char *path)
+         case RIPPS2_MEDIA_SOUND:
+             ripps2PlaySound(path);
+             break;
++        case RIPPS2_MEDIA_ICON:
++            ripps2ViewSaveIcon(path);
++            break;
+         default:
+             break;
+     }
 diff --git a/src/ripps2status.c b/src/ripps2status.c
 index ec9cb0d..84b46a6 100644
 --- a/src/ripps2status.c
@@ -1501,6 +2555,1122 @@ index 8e4127a..498e0b6 100644
  void ripps2TiltBeginTurn(int cx, int cy, int scalePct, float turn)
  {
      rmSetTilt(1, cx, cy, tiltYaw * scalePct / 100.0f + turn, tiltPitch * scalePct / 100.0f);
+diff --git a/src/saveicon.c b/src/saveicon.c
+new file mode 100644
+index 0000000..713e84a
+--- /dev/null
++++ b/src/saveicon.c
+@@ -0,0 +1,1110 @@
++/*
++  Copyright 2026, Open-PS2-Loader contributors
++  Licenced under Academic Free License version 3.0
++  Review OpenUsbLd README & LICENSE files for further details.
++
++  3D save icons for the selected game (fork-gaps OR1). See include/saveicon.h for the contract.
++
++  The formats, as checked against the icons this repository ships (misc/, POPS/) and OPL's own VMCs:
++  - icon.sys (964 bytes): "PS2D", the background, then three lights at 0x50 (directions), 0x80
++    (colours) and 0xB0 (ambient) as float x,y,z,w, the Shift-JIS title at 0xC0 and the list-icon
++    file name at 0x104 -- ps2sdk's mcIcon layout.
++  - the icon: a 20-byte header (0x00010000, shape count, texture type, a float, vertex count), then
++    per vertex one 8-byte position per shape, an 8-byte normal, a 4-byte UV and a 4-byte RGBA, the
++    positions, normals and UVs in 4.12 fixed point; then an animation header (tag 1, frame length,
++    speed, play offset, frame count) and per frame a shape id, a key count and that many (time,
++    value) float keys; then the 128x128 A1B5G5R5 texture when type bit 2 is set -- raw, or with bit 3
++    RLE-compressed: a byte count, then 16-bit codes, bit 15 set copying (0x10000 - code) pixels and
++    anything else repeating the next pixel code times.
++  - a card image: include/mcemu.h's superblock at page 0; a two-level FAT (the indirect clusters the
++    superblock lists name the FAT clusters, whose 32-bit entries chain the allocatable clusters: bit
++    31 = in use, 0x7FFFFFFF = the end); 512-byte directory entries (mode, length, first cluster, the
++    modification time at 0x18, the name at 0x40), the "." entry of a directory counting its entries.
++    An image holds either bare pages or pages followed by their 1/32-size ECC spare.
++*/
++
++#ifdef SAVEICON_HOST_TEST
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#define siAllocTexels(bytes) malloc(bytes)
++#else
++#include "include/opl.h"
++#include "include/ioman.h"
++#include "include/renderman.h"
++#include <dirent.h>
++#include <fcntl.h>
++#include <malloc.h>
++#include <math.h>
++#include <time.h>
++#include <unistd.h>
++#include <sys/stat.h>
++#define siAllocTexels(bytes) memalign(128, bytes) // DMA'd to the GS like every other texture
++#endif
++#include "include/saveicon.h"
++
++// ---- format (pure, host-tested) -------------------------------------------------------------
++
++static unsigned int siRd32(const unsigned char *p)
++{
++    return (unsigned int)p[0] | ((unsigned int)p[1] << 8) | ((unsigned int)p[2] << 16) | ((unsigned int)p[3] << 24);
++}
++
++static unsigned int siRd16u(const unsigned char *p)
++{
++    return (unsigned int)p[0] | ((unsigned int)p[1] << 8);
++}
++
++static short siRd16(const unsigned char *p)
++{
++    return (short)siRd16u(p);
++}
++
++static float siRdFloat(const unsigned char *p)
++{
++    union
++    {
++        unsigned int u;
++        float f;
++    } v;
++    v.u = siRd32(p);
++    return v.f;
++}
++
++void saveIconFreeModel(saveicon_model_t *model)
++{
++    int s;
++
++    if (model == NULL)
++        return;
++    free(model->pos);
++    free(model->normal);
++    free(model->uv);
++    free(model->rgba);
++    free(model->texels);
++    for (s = 0; s < SAVEICON_MAX_SHAPES; s++)
++        free(model->keys[s]);
++    memset(model, 0, sizeof(*model));
++}
++
++// Expands the RLE texture into dst (count pixels). A stream cut short leaves the rest black rather
++// than failing a picture that is merely truncated at the end.
++static void siDecodeRle(const unsigned char *src, int len, unsigned short *dst, int count)
++{
++    int i = 0, n = 0;
++
++    while (i + 2 <= len && n < count) {
++        unsigned int code = siRd16u(src + i);
++        i += 2;
++        if (code & 0x8000) {
++            int run = 0x10000 - (int)code;
++            while (run-- > 0 && i + 2 <= len && n < count) {
++                dst[n++] = (unsigned short)siRd16u(src + i);
++                i += 2;
++            }
++        } else {
++            unsigned short value;
++            if (i + 2 > len)
++                break;
++            value = (unsigned short)siRd16u(src + i);
++            i += 2;
++            while (code-- > 0 && n < count)
++                dst[n++] = value;
++        }
++    }
++}
++
++int saveIconParseModel(const unsigned char *data, int size, saveicon_model_t *model)
++{
++    int off, v, s, k, vsize, textype, frames, f;
++    const int pixels = SAVEICON_TEX_SIZE * SAVEICON_TEX_SIZE;
++
++    if (model == NULL)
++        return -1;
++    memset(model, 0, sizeof(*model));
++    if (data == NULL || size < 20 || size > SAVEICON_MAX_FILE || siRd32(data) != 0x00010000)
++        return -1;
++
++    model->shapes = (int)siRd32(data + 4);
++    textype = (int)siRd32(data + 8);
++    model->verts = (int)siRd32(data + 16);
++    if (model->shapes < 1 || model->shapes > SAVEICON_MAX_SHAPES || model->verts < 3 ||
++        model->verts > SAVEICON_MAX_VERTS || model->verts % 3 != 0 || model->shapes * model->verts > SAVEICON_MAX_POS) {
++        memset(model, 0, sizeof(*model));
++        return -1;
++    }
++
++    vsize = model->shapes * 8 + 8 + 4 + 4;
++    off = 20;
++    if ((size - off) / vsize < model->verts)
++        goto bad;
++
++    model->pos = malloc(sizeof(short) * 3 * model->shapes * model->verts);
++    model->normal = malloc(sizeof(short) * 3 * model->verts);
++    model->uv = malloc(sizeof(short) * 2 * model->verts);
++    model->rgba = malloc(4 * model->verts);
++    if (model->pos == NULL || model->normal == NULL || model->uv == NULL || model->rgba == NULL)
++        goto bad;
++
++    for (v = 0; v < model->verts; v++) {
++        for (s = 0; s < model->shapes; s++) {
++            for (k = 0; k < 3; k++)
++                model->pos[(s * model->verts + v) * 3 + k] = siRd16(data + off + 8 * s + 2 * k);
++        }
++        off += 8 * model->shapes;
++        for (k = 0; k < 3; k++)
++            model->normal[v * 3 + k] = siRd16(data + off + 2 * k);
++        off += 8;
++        model->uv[v * 2] = siRd16(data + off);
++        model->uv[v * 2 + 1] = siRd16(data + off + 2);
++        off += 4;
++        memcpy(&model->rgba[v * 4], data + off, 4);
++        off += 4;
++    }
++
++    // Animation. A key list for a shape the model does not have is skipped, never trusted.
++    if (size - off < 20 || siRd32(data + off) != 1)
++        goto bad;
++    model->frameLength = (int)siRd32(data + off + 4);
++    model->speed = siRdFloat(data + off + 8);
++    if (!(model->speed > 0.0f && model->speed < 100.0f)) // also refuses a NaN
++        model->speed = 1.0f;
++    frames = (int)siRd32(data + off + 16);
++    off += 20;
++    if (frames < 0 || frames > SAVEICON_MAX_SHAPES * 4)
++        goto bad;
++    for (f = 0; f < frames; f++) {
++        int shape, count;
++        if (size - off < 8)
++            goto bad;
++        shape = (int)siRd32(data + off);
++        count = (int)siRd32(data + off + 4);
++        off += 8;
++        if (count < 0 || count > SAVEICON_MAX_KEYS || (size - off) / 8 < count)
++            goto bad;
++        if (shape >= 0 && shape < model->shapes && model->keys[shape] == NULL && count > 0) {
++            model->keys[shape] = malloc(sizeof(saveicon_key_t) * count);
++            if (model->keys[shape] == NULL)
++                goto bad;
++            for (k = 0; k < count; k++) {
++                model->keys[shape][k].time = siRdFloat(data + off + 8 * k);
++                model->keys[shape][k].value = siRdFloat(data + off + 8 * k + 4);
++            }
++            model->keyCount[shape] = count;
++        }
++        off += 8 * count;
++    }
++
++    if (textype & 4) {
++        model->texels = siAllocTexels(sizeof(unsigned short) * pixels);
++        if (model->texels == NULL)
++            goto bad;
++        memset(model->texels, 0, sizeof(unsigned short) * pixels);
++        if (textype & 8) {
++            int packed;
++            if (size - off < 4)
++                goto bad;
++            packed = (int)siRd32(data + off);
++            off += 4;
++            if (packed < 0 || packed > size - off)
++                goto bad;
++            siDecodeRle(data + off, packed, model->texels, pixels);
++        } else {
++            if (size - off < (int)sizeof(unsigned short) * pixels)
++                goto bad;
++            for (k = 0; k < pixels; k++)
++                model->texels[k] = (unsigned short)siRd16u(data + off + 2 * k);
++        }
++    }
++    return 0;
++
++bad:
++    saveIconFreeModel(model);
++    return -2;
++}
++
++int saveIconParseSys(const unsigned char *data, int size, char *listName, int listSize, saveicon_light_t *light)
++{
++    int i, k, len;
++
++    if (data == NULL || size < SAVEICON_SYS_SIZE || listName == NULL || listSize <= 0 || memcmp(data, "PS2D", 4) != 0)
++        return 0;
++
++    // The name must be a plain file inside the save folder: no separator, no device, not empty.
++    for (len = 0; len < 64 && data[SAVEICON_SYS_LIST + len] != '\0'; len++) {
++        unsigned char c = data[SAVEICON_SYS_LIST + len];
++        if (c == '/' || c == '\\' || c == ':' || c < 0x20)
++            return 0;
++    }
++    if (len == 0 || len == 64 || len >= listSize || (len <= 2 && data[SAVEICON_SYS_LIST] == '.'))
++        return 0;
++    memcpy(listName, data + SAVEICON_SYS_LIST, len);
++    listName[len] = '\0';
++
++    if (light != NULL) {
++        for (i = 0; i < 3; i++) {
++            for (k = 0; k < 3; k++) {
++                light->dir[i][k] = siRdFloat(data + 0x50 + 16 * i + 4 * k);
++                light->color[i][k] = siRdFloat(data + 0x80 + 16 * i + 4 * k);
++            }
++        }
++        for (k = 0; k < 3; k++)
++            light->ambient[k] = siRdFloat(data + 0xB0 + 4 * k);
++        light->valid = 1;
++    }
++    return 1;
++}
++
++int saveIconSerialForStartup(const char *startup, char *serial, int serialSize)
++{
++    int i;
++
++    if (startup == NULL || serial == NULL || serialSize < 11 || strlen(startup) < 11 || startup[4] != '_' || startup[8] != '.')
++        return 0;
++    for (i = 0; i < 4; i++) {
++        if (!((startup[i] >= 'A' && startup[i] <= 'Z') || (startup[i] >= '0' && startup[i] <= '9')))
++            return 0;
++    }
++    for (i = 5; i <= 10; i++) {
++        if (i != 8 && (startup[i] < '0' || startup[i] > '9'))
++            return 0;
++    }
++    // SLUS_200.62 -> SLUS-20062
++    snprintf(serial, serialSize, "%.4s-%.3s%.2s", startup, startup + 5, startup + 9);
++    return 1;
++}
++
++int saveIconFolderMatches(const char *folder, const char *serial)
++{
++    if (folder == NULL || serial == NULL || folder[0] != 'B' || strlen(folder) < 12 || strlen(serial) != 10)
++        return 0;
++    return strncmp(folder + 2, serial, 10) == 0;
++}
++
++float saveIconShapeWeights(const saveicon_model_t *model, float t, float *weights)
++{
++    int s, k;
++    float sum = 0.0f;
++
++    for (s = 0; s < model->shapes; s++) {
++        const saveicon_key_t *keys = model->keys[s];
++        int n = model->keyCount[s];
++        float w = 0.0f;
++
++        if (model->shapes == 1)
++            w = 1.0f;
++        else if (n == 1)
++            w = keys[0].value;
++        else if (n > 1) {
++            if (t <= keys[0].time)
++                w = keys[0].value;
++            else if (t >= keys[n - 1].time)
++                w = keys[n - 1].value;
++            else {
++                for (k = 1; k < n; k++) {
++                    if (t <= keys[k].time) {
++                        float span = keys[k].time - keys[k - 1].time;
++                        float a = span > 0.0f ? (t - keys[k - 1].time) / span : 1.0f;
++                        w = keys[k - 1].value + (keys[k].value - keys[k - 1].value) * a;
++                        break;
++                    }
++                }
++            }
++        }
++        if (!(w > 0.0f)) // negative, or a NaN key
++            w = 0.0f;
++        weights[s] = w;
++        sum += w;
++    }
++    if (!(sum > 0.0f)) {
++        // No usable keys: show the first shape still, never an empty (collapsed) model.
++        for (s = 0; s < model->shapes; s++)
++            weights[s] = s == 0 ? 1.0f : 0.0f;
++        sum = 1.0f;
++    }
++    return sum;
++}
++
++// ---- the card filesystem inside a VMC image (pure, host-tested) ------------------------------
++
++#define SI_MC_ENTRY        512 // one directory entry
++#define SI_MC_EXISTS       0x8000
++#define SI_MC_IS_DIR       0x0020
++#define SI_MC_IS_FILE      0x0010
++#define SI_MC_CLUSTER_MAX  4096 // bytes; every real card uses 1024
++#define SI_MC_CLUSTERS_MAX 262144
++#define SI_MC_ENTRIES_MAX  4096 // a directory larger than this is damage, not saves
++
++typedef struct
++{
++    saveicon_read_t read;
++    void *ctx;
++    unsigned int pageSize, pageRaw, pagesPerCluster, clusterSize, clusters, allocOffset;
++    unsigned int ifc[32];
++    unsigned int ifcCached, fatCached; // the absolute cluster each buffer holds, or ~0
++    unsigned char ifcBuf[SI_MC_CLUSTER_MAX], fatBuf[SI_MC_CLUSTER_MAX], dirBuf[SI_MC_CLUSTER_MAX];
++} si_card_t;
++
++typedef struct
++{
++    const char *name;   // a file, matched exactly
++    const char *serial; // or a save folder of this product code
++    unsigned int cluster, length;
++    unsigned long long stamp;
++    int found;
++} si_find_t;
++
++// count clusters from absolute cluster first, the first `bytes` of them, into out.
++static int siCardRead(si_card_t *card, unsigned int first, unsigned int count, unsigned char *out, unsigned int bytes)
++{
++    unsigned int page, done;
++
++    if (first >= card->clusters || count > card->clusters - first || bytes > count * card->clusterSize)
++        return 0;
++    if (card->pageRaw == card->pageSize)
++        return card->read(card->ctx, first * card->clusterSize, out, (int)bytes) == (int)bytes;
++    // An ECC spare follows every page: one read per page.
++    for (page = first * card->pagesPerCluster, done = 0; done < bytes; page++) {
++        unsigned int n = bytes - done < card->pageSize ? bytes - done : card->pageSize;
++        if (card->read(card->ctx, page * card->pageRaw, out + done, (int)n) != (int)n)
++            return 0;
++        done += n;
++    }
++    return 1;
++}
++
++static int siCardU32(si_card_t *card, unsigned int cluster, unsigned int index, unsigned char *buf, unsigned int *cached, unsigned int *out)
++{
++    if (*cached != cluster) {
++        if (!siCardRead(card, cluster, 1, buf, card->clusterSize))
++            return 0;
++        *cached = cluster;
++    }
++    *out = siRd32(buf + 4 * index);
++    return 1;
++}
++
++// The cluster after relative cluster n in its chain: 1 = *next set, 0 = the end of the chain or damage.
++static int siCardNext(si_card_t *card, unsigned int n, unsigned int *next)
++{
++    unsigned int per = card->clusterSize / 4, fatIndex = n / per, ifcIndex = fatIndex / per, fatCluster, entry;
++
++    if (ifcIndex >= 32 ||
++        !siCardU32(card, card->ifc[ifcIndex], fatIndex % per, card->ifcBuf, &card->ifcCached, &fatCluster) ||
++        !siCardU32(card, fatCluster, n % per, card->fatBuf, &card->fatCached, &entry))
++        return 0;
++    if (!(entry & 0x80000000u) || (entry & 0x7FFFFFFFu) == 0x7FFFFFFFu)
++        return 0;
++    *next = entry & 0x7FFFFFFFu;
++    return 1;
++}
++
++// The first `size` bytes of the chain starting at relative cluster first.
++static int siCardReadChain(si_card_t *card, unsigned int first, unsigned char *out, unsigned int size)
++{
++    unsigned int cs = card->clusterSize, done = 0, cluster = first, steps = 0;
++
++    while (done < size) {
++        unsigned int start = cluster, count = 1, bytes;
++
++        // Consecutive clusters are one read on an image of bare pages.
++        while (done + count * cs < size) {
++            unsigned int next;
++            if (!siCardNext(card, cluster, &next) || ++steps > card->clusters)
++                return 0; // the chain ends before the file does, or loops
++            cluster = next;
++            if (next != start + count || card->pageRaw != card->pageSize)
++                break;
++            count++;
++        }
++        bytes = size - done < count * cs ? size - done : count * cs;
++        if (!siCardRead(card, card->allocOffset + start, count, out + done, bytes))
++            return 0;
++        done += bytes;
++    }
++    return 1;
++}
++
++// Calls visit on each live entry of the directory at relative cluster first (count entries) until it
++// returns nonzero. 1 = walked (or stopped by visit), 0 = damage.
++static int siCardWalk(si_card_t *card, unsigned int first, unsigned int count, int (*visit)(const unsigned char *entry, si_find_t *find), si_find_t *find)
++{
++    unsigned int per = card->clusterSize / SI_MC_ENTRY, i = 0, cluster = first, steps = 0, k;
++
++    while (i < count) {
++        if (!siCardRead(card, card->allocOffset + cluster, 1, card->dirBuf, card->clusterSize))
++            return 0;
++        for (k = 0; k < per && i < count; k++, i++) {
++            const unsigned char *entry = card->dirBuf + k * SI_MC_ENTRY;
++            if ((siRd16u(entry) & SI_MC_EXISTS) && visit(entry, find))
++                return 1;
++        }
++        if (i < count && (!siCardNext(card, cluster, &cluster) || ++steps > card->clusters))
++            return 0;
++    }
++    return 1;
++}
++
++// The card's 8-byte time (unused, second, minute, hour, day, month, 16-bit year) as one ordered number.
++static unsigned long long siCardStamp(const unsigned char *t)
++{
++    return (((((unsigned long long)siRd16u(t + 6) * 13 + t[5]) * 32 + t[4]) * 24 + t[3]) * 60 + t[2]) * 60 + t[1];
++}
++
++static int siVisitSave(const unsigned char *entry, si_find_t *find)
++{
++    char name[33];
++    unsigned long long stamp;
++
++    if (!(siRd16u(entry) & SI_MC_IS_DIR))
++        return 0;
++    memcpy(name, entry + 0x40, 32);
++    name[32] = '\0';
++    if (!saveIconFolderMatches(name, find->serial))
++        return 0;
++    stamp = siCardStamp(entry + 0x18);
++    if (!find->found || stamp > find->stamp) {
++        find->found = 1;
++        find->stamp = stamp;
++        find->cluster = siRd32(entry + 0x10);
++        find->length = siRd32(entry + 0x04);
++    }
++    return 0; // keep walking: the newest save wins
++}
++
++static int siVisitFile(const unsigned char *entry, si_find_t *find)
++{
++    if (!(siRd16u(entry) & SI_MC_IS_FILE) || strncmp((const char *)entry + 0x40, find->name, 32) != 0)
++        return 0;
++    find->found = 1;
++    find->cluster = siRd32(entry + 0x10);
++    find->length = siRd32(entry + 0x04);
++    return 1;
++}
++
++int saveIconFromCardImage(saveicon_read_t readFn, void *ctx, unsigned int imageSize, const char *serial,
++                          saveicon_model_t *model, saveicon_light_t *light)
++{
++    unsigned char sb[0x150], *data = NULL;
++    si_card_t *card;
++    si_find_t save, file;
++    char listName[64];
++    unsigned int spare, root, rootCount, i;
++    int ok = 0;
++
++    if (model == NULL)
++        return 0;
++    memset(model, 0, sizeof(*model));
++    if (readFn == NULL || serial == NULL || readFn(ctx, 0, sb, sizeof(sb)) != (int)sizeof(sb) ||
++        memcmp(sb, "Sony PS2 Memory Card Format ", 28) != 0)
++        return 0;
++    card = malloc(sizeof(*card));
++    if (card == NULL)
++        return 0;
++    memset(card, 0, sizeof(*card));
++    card->read = readFn;
++    card->ctx = ctx;
++    card->pageSize = siRd16u(sb + 0x28);
++    card->pagesPerCluster = siRd16u(sb + 0x2A);
++    card->clusterSize = card->pageSize * card->pagesPerCluster;
++    card->clusters = siRd32(sb + 0x30);
++    card->allocOffset = siRd32(sb + 0x34);
++    root = siRd32(sb + 0x3C);
++    for (i = 0; i < 32; i++)
++        card->ifc[i] = siRd32(sb + 0x50 + 4 * i);
++    card->ifcCached = card->fatCached = 0xFFFFFFFFu;
++    spare = card->pageSize / 32;
++    if ((card->pageSize != 512 && card->pageSize != 1024) || card->pagesPerCluster < 1 ||
++        card->clusterSize > SI_MC_CLUSTER_MAX || card->clusters < 16 || card->clusters > SI_MC_CLUSTERS_MAX ||
++        card->allocOffset >= card->clusters)
++        goto done;
++    // The ECC-spare layout only when the size says exactly that; anything at least the bare size is bare pages.
++    if (imageSize == card->clusters * card->pagesPerCluster * (card->pageSize + spare))
++        card->pageRaw = card->pageSize + spare;
++    else if (imageSize >= card->clusters * card->clusterSize)
++        card->pageRaw = card->pageSize;
++    else
++        goto done;
++
++    // The root's own "." entry counts the root.
++    if (!siCardRead(card, card->allocOffset + root, 1, card->dirBuf, card->clusterSize))
++        goto done;
++    rootCount = siRd32(card->dirBuf + 0x04);
++    if (rootCount < 2 || rootCount > SI_MC_ENTRIES_MAX)
++        goto done;
++
++    memset(&save, 0, sizeof(save));
++    save.serial = serial;
++    if (!siCardWalk(card, root, rootCount, &siVisitSave, &save) || !save.found || save.length < 2 || save.length > SI_MC_ENTRIES_MAX)
++        goto done;
++
++    memset(&file, 0, sizeof(file));
++    file.name = "icon.sys";
++    if (!siCardWalk(card, save.cluster, save.length, &siVisitFile, &file) || !file.found ||
++        file.length < SAVEICON_SYS_SIZE || file.length > 2 * SAVEICON_SYS_SIZE)
++        goto done;
++    data = malloc(file.length);
++    if (data == NULL || !siCardReadChain(card, file.cluster, data, file.length) ||
++        !saveIconParseSys(data, (int)file.length, listName, sizeof(listName), light))
++        goto done;
++    free(data);
++    data = NULL;
++
++    memset(&file, 0, sizeof(file));
++    file.name = listName;
++    if (!siCardWalk(card, save.cluster, save.length, &siVisitFile, &file) || !file.found || file.length < 20 ||
++        file.length > SAVEICON_MAX_FILE)
++        goto done;
++    data = malloc(file.length);
++    if (data != NULL && siCardReadChain(card, file.cluster, data, file.length))
++        ok = saveIconParseModel(data, (int)file.length, model) == 0;
++
++done:
++    free(data);
++    free(card);
++    return ok;
++}
++
++#ifndef SAVEICON_HOST_TEST
++
++// ---- loading (IO worker) --------------------------------------------------------------------
++
++#define SI_SETTLE_US      250000  // a row is read once the cursor has rested on it this long
++#define SI_CONFIG_WAIT_US 2000000 // how long a row waits for its per-game config before reading the cards alone
++#define SI_SPIN_SECONDS   6.0f    // one turn
++
++// A whole small file, malloc'd; NULL when missing, empty or larger than maxSize.
++static unsigned char *siReadFile(const char *path, int maxSize, int *outSize)
++{
++    unsigned char *buf;
++    int fd, size;
++
++    fd = open(path, O_RDONLY);
++    if (fd < 0)
++        return NULL;
++    size = lseek(fd, 0, SEEK_END);
++    if (size <= 0 || size > maxSize || lseek(fd, 0, SEEK_SET) != 0) {
++        close(fd);
++        return NULL;
++    }
++    buf = malloc(size);
++    if (buf != NULL && read(fd, buf, size) != size) {
++        free(buf);
++        buf = NULL;
++    }
++    close(fd);
++    if (buf != NULL)
++        *outSize = size;
++    return buf;
++}
++
++static int siFdRead(void *ctx, unsigned int offset, void *buf, int size)
++{
++    int fd = *(int *)ctx;
++
++    if (lseek(fd, (int)offset, SEEK_SET) != (int)offset)
++        return -1;
++    return read(fd, buf, size);
++}
++
++// The game's own per-game VMC.
++static int siLoadFromVmc(const char *path, const char *serial, saveicon_model_t *model, saveicon_light_t *light)
++{
++    int fd, size, ok;
++
++    fd = open(path, O_RDONLY);
++    if (fd < 0)
++        return 0;
++    size = lseek(fd, 0, SEEK_END);
++    ok = size > 0 && saveIconFromCardImage(&siFdRead, &fd, (unsigned int)size, serial, model, light);
++    close(fd);
++    LOG("SAVEICON %s in %s: %s\n", serial, path, ok ? "loaded" : "none");
++    return ok;
++}
++
++// The memory cards: the newest save folder of that product code on either, by modification time.
++static int siLoadFromCards(const char *serial, saveicon_model_t *model, saveicon_light_t *light)
++{
++    char best[96], path[96], listName[64];
++    saveicon_light_t candidate;
++    time_t bestTime = 0;
++    unsigned char *data;
++    int port, size = 0, ok, found = 0;
++
++    for (port = 0; port < 2; port++) {
++        char root[8];
++        DIR *dir;
++        struct dirent *de;
++
++        // Slot 2 is where an MX4SIO sits: never put card traffic on the bus it is serving games from.
++        if (port == 1 && gEnableMX4SIO)
++            continue;
++        snprintf(root, sizeof(root), "mc%d:/", port);
++        dir = opendir(root);
++        if (dir == NULL)
++            continue;
++        while ((de = readdir(dir)) != NULL) {
++            struct stat st;
++            time_t mtime;
++
++            if (!saveIconFolderMatches(de->d_name, serial))
++                continue;
++            snprintf(path, sizeof(path), "mc%d:/%s", port, de->d_name);
++            mtime = stat(path, &st) == 0 ? st.st_mtime : 0;
++            if (found && mtime <= bestTime)
++                continue; // an equally new or newer save already won
++            snprintf(path, sizeof(path), "mc%d:/%s/icon.sys", port, de->d_name);
++            data = siReadFile(path, 2 * SAVEICON_SYS_SIZE, &size);
++            if (data == NULL)
++                continue;
++            ok = saveIconParseSys(data, size, listName, sizeof(listName), &candidate);
++            free(data);
++            if (!ok)
++                continue;
++            snprintf(best, sizeof(best), "mc%d:/%s/%s", port, de->d_name, listName);
++            bestTime = mtime;
++            *light = candidate;
++            found = 1;
++        }
++        closedir(dir);
++    }
++    if (!found)
++        return 0;
++    data = siReadFile(best, SAVEICON_MAX_FILE, &size);
++    if (data == NULL)
++        return 0;
++    ok = saveIconParseModel(data, size, model) == 0;
++    free(data);
++    LOG("SAVEICON %s: %s %s\n", serial, best, ok ? "loaded" : "unreadable");
++    return ok;
++}
++
++// ---- hand-off between the two threads ---------------------------------------------------------
++
++#define SI_NONE    0
++#define SI_MODEL   1 // a model for that key
++#define SI_MISSING 2 // looked, and that game has no readable save icon
++
++#define SI_KEY_SIZE (16 + 2 * SAVEICON_PATH_SIZE + 4)
++
++static int siSema = -1;
++
++// Under siSema. Written by the GUI thread, read by the IO worker: what to load. The key is
++// startup|vmc0|vmc1, "" for nothing.
++static char siWantKey[SI_KEY_SIZE];
++static char siWantStartup[16];
++static char siWantVmc[2][SAVEICON_PATH_SIZE];
++// Under siSema. A finished load, published by the IO worker and adopted by the GUI thread.
++static char siPendingKey[SI_KEY_SIZE];
++static int siPendingState;
++static saveicon_model_t siPending;
++static saveicon_light_t siPendingLight;
++
++// GUI thread only.
++static char siSelStartup[16]; // the row the element last asked about
++static clock_t siSelSince;
++static char siQueuedKey[SI_KEY_SIZE];
++static char siShownKey[SI_KEY_SIZE];
++static int siShownState;
++static saveicon_model_t siShown;
++static saveicon_light_t siShownLight;
++static int siShownLit;
++static GSTEXTURE siTex;
++static clock_t siShownSince;
++static float siPivot[3], siRadius, siHalfHeight;
++// The model last replaced, kept two more frames: a hires frame can still be drawing from it.
++static saveicon_model_t siRetired;
++static int siRetiredFrames;
++// Per-vertex work buffers, and the painter's order kept from frame to frame.
++static float *siX, *siY, *siZ, *siDepth, *siDrawXY, *siDrawUV;
++static u64 *siCol, *siDrawCol;
++static int *siOrder, siBufVerts, siOrderValid;
++
++static void siLock(void)
++{
++    if (siSema < 0) {
++        ee_sema_t sema;
++        sema.init_count = 1;
++        sema.max_count = 1;
++        sema.option = 0;
++        siSema = CreateSema(&sema);
++    }
++    WaitSema(siSema);
++}
++
++static void siUnlock(void)
++{
++    SignalSema(siSema);
++}
++
++static void siLoadAction(void)
++{
++    char key[SI_KEY_SIZE], startup[16], vmc[2][SAVEICON_PATH_SIZE], serial[16];
++    saveicon_model_t model;
++    saveicon_light_t light;
++    int found = 0, slot;
++
++    siLock();
++    memcpy(key, siWantKey, sizeof(key));
++    memcpy(startup, siWantStartup, sizeof(startup));
++    memcpy(vmc, siWantVmc, sizeof(vmc));
++    siUnlock();
++    if (key[0] == '\0')
++        return;
++
++    memset(&model, 0, sizeof(model));
++    memset(&light, 0, sizeof(light));
++    if (saveIconSerialForStartup(startup, serial, sizeof(serial))) {
++        // The game's own VMC first: when it has one, that is where its saves are.
++        for (slot = 0; slot < 2 && !found; slot++) {
++            if (vmc[slot][0] != '\0')
++                found = siLoadFromVmc(vmc[slot], serial, &model, &light);
++        }
++        if (!found)
++            found = siLoadFromCards(serial, &model, &light);
++    }
++
++    siLock();
++    if (strcmp(siWantKey, key) == 0) {
++        if (siPendingState == SI_MODEL)
++            saveIconFreeModel(&siPending);
++        siPendingState = found ? SI_MODEL : SI_MISSING;
++        if (found) {
++            siPending = model;
++            siPendingLight = light;
++            found = 0; // handed over
++        }
++        memcpy(siPendingKey, key, sizeof(siPendingKey));
++    }
++    siUnlock();
++    if (found)
++        saveIconFreeModel(&model); // the selection moved on while the cards were read
++}
++
++static void siFreeRetired(void)
++{
++    saveIconFreeModel(&siRetired);
++    siRetiredFrames = 0;
++}
++
++static void siRetireShown(void)
++{
++    if (siShownState == SI_MODEL) {
++        if (siShown.texels != NULL)
++            rmUnloadTexture(&siTex);
++        siFreeRetired();
++        siRetired = siShown;
++        memset(&siShown, 0, sizeof(siShown));
++    }
++    memset(&siTex, 0, sizeof(siTex));
++    siShownState = SI_NONE;
++    siShownKey[0] = '\0';
++}
++
++// The pivot and the extent over every shape, so no frame of the animation leaves the box.
++static void siMeasure(void)
++{
++    int i, k, n = siShown.shapes * siShown.verts;
++    float lo[3] = {1e9f, 1e9f, 1e9f}, hi[3] = {-1e9f, -1e9f, -1e9f};
++
++    for (i = 0; i < n; i++) {
++        for (k = 0; k < 3; k++) {
++            float c = siShown.pos[i * 3 + k];
++            if (c < lo[k])
++                lo[k] = c;
++            if (c > hi[k])
++                hi[k] = c;
++        }
++    }
++    for (k = 0; k < 3; k++)
++        siPivot[k] = (lo[k] + hi[k]) * 0.5f;
++    siRadius = 1.0f;
++    for (i = 0; i < n; i++) {
++        float dx = siShown.pos[i * 3] - siPivot[0], dz = siShown.pos[i * 3 + 2] - siPivot[2];
++        float r = sqrtf(dx * dx + dz * dz);
++        if (r > siRadius)
++            siRadius = r;
++    }
++    siHalfHeight = (hi[1] - lo[1]) * 0.5f;
++    if (siHalfHeight < 1.0f)
++        siHalfHeight = 1.0f;
++}
++
++// icon.sys lights, used only when they hold something: an all-zero (or unreadable) set leaves the
++// vertex colours as they are rather than drawing the icon black.
++static void siPrepareLight(void)
++{
++    float total = 0.0f;
++    int i, k;
++
++    siShownLit = 0;
++    if (!siShownLight.valid)
++        return;
++    for (i = 0; i < 3; i++) {
++        float *d = siShownLight.dir[i], len = sqrtf(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
++        if (!(len < 1e6f))
++            return; // NaN or absurd
++        if (len > 0.0f) {
++            for (k = 0; k < 3; k++)
++                d[k] /= len;
++        }
++        for (k = 0; k < 3; k++) {
++            if (!(siShownLight.color[i][k] >= 0.0f && siShownLight.color[i][k] <= 4.0f))
++                return;
++            total += siShownLight.color[i][k];
++        }
++    }
++    for (k = 0; k < 3; k++) {
++        if (!(siShownLight.ambient[k] >= 0.0f && siShownLight.ambient[k] <= 4.0f))
++            return;
++        total += siShownLight.ambient[k];
++    }
++    siShownLit = total > 0.05f;
++}
++
++static void siAdoptPending(void)
++{
++    siLock();
++    if (siPendingState != SI_NONE) {
++        if (strcmp(siPendingKey, siWantKey) == 0) {
++            siRetireShown();
++            siShownState = siPendingState;
++            memcpy(siShownKey, siPendingKey, sizeof(siShownKey));
++            if (siPendingState == SI_MODEL) {
++                siShown = siPending;
++                siShownLight = siPendingLight;
++                if (siShown.texels != NULL) {
++                    siTex.Width = SAVEICON_TEX_SIZE;
++                    siTex.Height = SAVEICON_TEX_SIZE;
++                    siTex.PSM = GS_PSM_CT16;
++                    siTex.Mem = (u32 *)siShown.texels;
++                    siTex.Filter = GS_FILTER_LINEAR;
++                    siTex.ClutStorageMode = GS_CLUT_STORAGE_CSM1;
++                    siTex.Delayed = 1;
++                }
++                siMeasure();
++                siPrepareLight();
++                siShownSince = clock();
++                siOrderValid = 0;
++            }
++        } else if (siPendingState == SI_MODEL) {
++            saveIconFreeModel(&siPending);
++        }
++        memset(&siPending, 0, sizeof(siPending));
++        siPendingState = SI_NONE;
++    }
++    siUnlock();
++}
++
++static void siSetWant(const char *key, const char *startup, const char *vmc0, const char *vmc1)
++{
++    siLock();
++    snprintf(siWantKey, sizeof(siWantKey), "%s", key);
++    snprintf(siWantStartup, sizeof(siWantStartup), "%s", startup);
++    snprintf(siWantVmc[0], sizeof(siWantVmc[0]), "%s", vmc0);
++    snprintf(siWantVmc[1], sizeof(siWantVmc[1]), "%s", vmc1);
++    siUnlock();
++}
++
++void saveIconSelect(const char *startup, const char *vmc0, const char *vmc1, int vmcKnown)
++{
++    char key[SI_KEY_SIZE];
++
++    if (startup == NULL)
++        startup = "";
++    if (strcmp(startup, siSelStartup) != 0) {
++        snprintf(siSelStartup, sizeof(siSelStartup), "%s", startup);
++        siSelSince = clock();
++        siQueuedKey[0] = '\0';
++        siSetWant("", "", "", ""); // nothing on screen until this row's own icon is known
++    }
++    if (startup[0] == '\0')
++        return;
++    // Its per-game config names its VMCs. Wait for it, but not forever: a config that never arrives
++    // must not cost the memory cards.
++    if (!vmcKnown || vmc0 == NULL || vmc1 == NULL) {
++        if ((clock() - siSelSince) < (clock_t)SI_CONFIG_WAIT_US)
++            return;
++        vmc0 = vmc1 = "";
++    }
++    snprintf(key, sizeof(key), "%s|%s|%s", startup, vmc0, vmc1);
++    if (strcmp(key, siWantKey) != 0)
++        siSetWant(key, startup, vmc0, vmc1);
++    // Read once the cursor has settled, so scrolling past games never touches the cards.
++    if ((clock() - siSelSince) >= (clock_t)SI_SETTLE_US && strcmp(siWantKey, siShownKey) != 0 &&
++        strcmp(siWantKey, siQueuedKey) != 0) {
++        memcpy(siQueuedKey, siWantKey, sizeof(siQueuedKey));
++        if (ioPutRequestUnlessWaiting(IO_CUSTOM_SIMPLEACTION, (void *)&siLoadAction) != IO_OK)
++            siQueuedKey[0] = '\0'; // try again next frame
++    }
++}
++
++static void siFreeBuffers(void)
++{
++    free(siX);
++    free(siY);
++    free(siZ);
++    free(siDepth);
++    free(siDrawXY);
++    free(siDrawUV);
++    free(siCol);
++    free(siDrawCol);
++    free(siOrder);
++    siX = siY = siZ = siDepth = siDrawXY = siDrawUV = NULL;
++    siCol = siDrawCol = NULL;
++    siOrder = NULL;
++    siBufVerts = 0;
++    siOrderValid = 0;
++}
++
++static int siEnsureBuffers(int verts)
++{
++    if (verts <= siBufVerts)
++        return 1;
++    siFreeBuffers();
++    siX = malloc(sizeof(float) * verts);
++    siY = malloc(sizeof(float) * verts);
++    siZ = malloc(sizeof(float) * verts);
++    siDepth = malloc(sizeof(float) * (verts / 3));
++    siDrawXY = malloc(sizeof(float) * 2 * verts);
++    siDrawUV = malloc(sizeof(float) * 2 * verts);
++    siCol = malloc(sizeof(u64) * verts);
++    siDrawCol = malloc(sizeof(u64) * verts);
++    siOrder = malloc(sizeof(int) * (verts / 3));
++    if (siX == NULL || siY == NULL || siZ == NULL || siDepth == NULL || siDrawXY == NULL || siDrawUV == NULL ||
++        siCol == NULL || siDrawCol == NULL || siOrder == NULL) {
++        siFreeBuffers();
++        return 0;
++    }
++    siBufVerts = verts;
++    return 1;
++}
++
++void saveIconReset(void)
++{
++    siLock();
++    if (siPendingState == SI_MODEL)
++        saveIconFreeModel(&siPending);
++    memset(&siPending, 0, sizeof(siPending));
++    siPendingState = SI_NONE;
++    siWantKey[0] = '\0';
++    siUnlock();
++    siRetireShown();
++    siFreeRetired();
++    siFreeBuffers();
++    siSelStartup[0] = '\0';
++    siQueuedKey[0] = '\0';
++}
++
++// ---- drawing (GUI thread) ---------------------------------------------------------------------
++
++static u64 siShade(const unsigned char *rgba, float nx, float ny, float nz)
++{
++    float f[3] = {1.0f, 1.0f, 1.0f};
++    int i, k, c[3];
++
++    if (siShownLit) {
++        for (k = 0; k < 3; k++)
++            f[k] = siShownLight.ambient[k];
++        for (i = 0; i < 3; i++) {
++            float d = nx * siShownLight.dir[i][0] + ny * siShownLight.dir[i][1] + nz * siShownLight.dir[i][2];
++            // Two-sided: which way the format's light vectors point must not be decided by a guess,
++            // since the wrong sign would leave the front of every icon unlit.
++            if (d < 0.0f)
++                d = -d;
++            for (k = 0; k < 3; k++)
++                f[k] += siShownLight.color[i][k] * d;
++        }
++    }
++    for (k = 0; k < 3; k++) {
++        c[k] = (int)(rgba[k] * (f[k] < 1.0f ? f[k] : 1.0f));
++        if (c[k] > 0xFF)
++            c[k] = 0xFF;
++    }
++    return GS_SETREG_RGBAQ(c[0], c[1], c[2], 0x80, 0x00);
++}
++
++void saveIconDraw(int cx, int cy, int w, int h, float xScale)
++{
++    float weights[SAVEICON_MAX_SHAPES], sum, seconds, angle, cosA, sinA, scale, t;
++    int v, s, i, k, tris;
++
++    siAdoptPending();
++    if (siRetired.verts != 0 && ++siRetiredFrames > 2)
++        siFreeRetired();
++    if (siShownState != SI_MODEL || siWantKey[0] == '\0' || strcmp(siShownKey, siWantKey) != 0 || w <= 0 || h <= 0)
++        return;
++    if (!siEnsureBuffers(siShown.verts))
++        return;
++    tris = siShown.verts / 3;
++    if (!siOrderValid) {
++        for (i = 0; i < tris; i++)
++            siOrder[i] = i;
++        siOrderValid = 1;
++    }
++
++    seconds = (float)(clock() - siShownSince) / (float)CLOCKS_PER_SEC;
++    angle = fmodf(seconds, SI_SPIN_SECONDS) * (2.0f * 3.14159265f / SI_SPIN_SECONDS);
++    cosA = cosf(angle);
++    sinA = sinf(angle);
++    t = 0.0f;
++    if (siShown.frameLength > 1)
++        t = fmodf(seconds * 60.0f * siShown.speed, (float)siShown.frameLength);
++    sum = saveIconShapeWeights(&siShown, t, weights);
++
++    // The whole animation's extent around the spin axis fits the box at every angle.
++    scale = (w * 0.5f) / siRadius;
++    if ((h * 0.5f) / siHalfHeight < scale)
++        scale = (h * 0.5f) / siHalfHeight;
++
++    for (v = 0; v < siShown.verts; v++) {
++        const short *n = &siShown.normal[v * 3];
++        float p[3] = {0.0f, 0.0f, 0.0f};
++
++        for (s = 0; s < siShown.shapes; s++) {
++            const short *q = &siShown.pos[(s * siShown.verts + v) * 3];
++            if (weights[s] <= 0.0f)
++                continue;
++            for (k = 0; k < 3; k++)
++                p[k] += weights[s] * q[k];
++        }
++        for (k = 0; k < 3; k++)
++            p[k] = p[k] / sum - siPivot[k];
++        // A turn about the vertical axis; icon space already has +y down the screen.
++        siX[v] = cx + (p[0] * cosA + p[2] * sinA) * scale * xScale;
++        siY[v] = cy + p[1] * scale;
++        siZ[v] = p[2] * cosA - p[0] * sinA;
++        siCol[v] = siShade(&siShown.rgba[v * 4], (n[0] * cosA + n[2] * sinA) / 4096.0f, n[1] / 4096.0f,
++                           (n[2] * cosA - n[0] * sinA) / 4096.0f);
++    }
++
++    // Painter's order, far first: +z points into the screen. Insertion sort, because last frame's
++    // order is nearly right after a small turn, which makes this close to one pass.
++    for (i = 0; i < tris; i++)
++        siDepth[i] = siZ[i * 3] + siZ[i * 3 + 1] + siZ[i * 3 + 2];
++    for (i = 1; i < tris; i++) {
++        int cur = siOrder[i], j = i - 1;
++        float d = siDepth[cur];
++        while (j >= 0 && siDepth[siOrder[j]] < d) {
++            siOrder[j + 1] = siOrder[j];
++            j--;
++        }
++        siOrder[j + 1] = cur;
++    }
++
++    for (i = 0; i < tris; i++) {
++        int a = siOrder[i] * 3;
++        for (k = 0; k < 3; k++) {
++            int dst = i * 3 + k, src = a + k;
++            siDrawXY[dst * 2] = siX[src];
++            siDrawXY[dst * 2 + 1] = siY[src];
++            // 4.12 UVs of a 128-texel texture: 4096 is the full width, so texels = uv / 32.
++            siDrawUV[dst * 2] = siShown.uv[src * 2] / 32.0f;
++            siDrawUV[dst * 2 + 1] = siShown.uv[src * 2 + 1] / 32.0f;
++            siDrawCol[dst] = siCol[src];
++        }
++    }
++    rmDrawTriangles(siShown.texels != NULL ? &siTex : NULL, tris, siDrawXY, siDrawUV, siDrawCol);
++}
++
++#endif // SAVEICON_HOST_TEST
 diff --git a/src/sound.c b/src/sound.c
 index aea69e4..c4eb76e 100644
 --- a/src/sound.c
