@@ -79,6 +79,15 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       images come in). Reproduce in the lab with a button storm, catch any freeze or crash in a save state.
 - [ ] **The game's background art fades in as soon as it is decoded** on the main view: nothing ahead of it
       delays the fade. (Build 99 may take this further with RiptOPL's art loading round-up.)
+- [ ] **The music under load** (user: the BGM stutters and freezes too). Found in the lab: some music files are
+      refused every time ("not a valid Ogg bitstream"), Audio Studio's own output among them (a 52 s and a
+      180 s track open, 120 s, 240 s and the Ambient rip do not). Find the cause, make every Audio Studio
+      track open, then measure stutter under a button storm with a pilot-tone track (scratchpad pilot.py).
+- [ ] **`.adp` preview cancel is robust**: a frantic press of play / stop / move never loops a load or leaves a
+      voice playing.
+- [ ] **File tooltip**: resting on a file for 0.42 s shows its date, size and the other details wLE shows.
+- [ ] **Paste overwrites when asked**: a name already there asks Yes / No / Yes to All (the choice highlighted
+      in the modal), and an overwrite succeeds (it is skipped today).
 - [ ] Devices show as `mc0:/` and `mc1:/`.
 - [ ] Hold to scroll: after 0.42 s the cursor repeats at the Storage list's scroll speed.
 - [ ] Card manager: hints with glyphs on its Actions modal.
