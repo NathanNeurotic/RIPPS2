@@ -241,6 +241,20 @@ if 'rmDrawPixmapPart(&tex, (int)cx0, (int)cy0, ALIGN_NONE' not in md or 'fntRend
     fail.append('the picture viewer must draw only what is on screen, in Adapt face, with glyph hints')
 if 'fbTipCursor = -1; // build 98: the work may change what the tooltip said' not in rd('src/ripps2files.c'):
     fail.append('a scan or a copy must make the tooltip read the entry again (a saved file showed its old times)')
+fb4 = rd('src/ripps2files.c')
+iso = fb4[fb4.index('static void fbRunIso('):]
+iso = iso[:iso.index('\n}\n')]
+for needle, why in (('view.viewOverride = ITEM_VIEW_FORCE_ISO;', "the drive's PS2 list whatever its page shows"),
+                    ('!strcasecmp(fbPath + strlen(want), "CD/")', "only the drive's own CD and DVD folders"),
+                    ('g->format == GAME_FORMAT_OLD_ISO', 'old SLUS_000.00.NAME.iso names match too'),
+                    ('view.itemGetConfig(&view, found)', "the game's own settings (its Loader Core: RIPPS2's loader or Neutrino)"),
+                    ('view.itemLaunch(&view, found, cfg);', 'launched as Storage launches it'),
+                    ('configFree(cfg);', 'a failed launch frees its config')):
+    if needle not in iso:
+        fail.append('Memory Files ISO launch: %s (%s missing)' % (why, needle))
+if 'src->itemLaunchCue(src, folder, NULL);' not in fb4 or 'A CHD does not start on a PS2' not in fb4 or \
+        'if (fbGameKind(e->name) != 0 && !fbVmcPath(fbVmc, fbPath, NULL, 0))' not in fb4:
+    fail.append('Memory Files must start a CUE/BIN game folder with Ember and explain a CHD')
 if 'RIPgrid' in th or '"<RIPGRID>"' not in th:
     fail.append('RIPGRID is written in capitals')
 

@@ -2155,7 +2155,7 @@ index ca8e866..1bf483c 100644
      }
      if (n == 0)
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index f4fad92..fcfad70 100644
+index f4fad92..c9ac3cd 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -38,6 +38,8 @@
@@ -2167,7 +2167,15 @@ index f4fad92..fcfad70 100644
  
  #include "include/opl.h"
  #include "include/gui.h"
-@@ -104,6 +106,8 @@ static char fbClipDir[256];
+@@ -53,6 +55,7 @@
+ #include "include/ripps2.h"
+ #include "include/bdmsupport.h"  // bdmSlotEverConnected: only probe slots that have held a drive
+ #include "include/mmcesupport.h"
++#include "include/supportbase.h" // build 98: a game row (base_game_info_t), for games started here
+ #include "include/hddsupport.h"
+ #include "include/lang.h" // _STR_HDD_NOT_CONNECTED_ERROR
+ #include "include/cuesupport.h" // EMBER_ELF_NAME
+@@ -104,6 +107,8 @@ static char fbClipDir[256];
  static char fbClip[FB_CLIP_MAX][FB_NAME];
  static unsigned char fbClipIsDir[FB_CLIP_MAX];
  static int fbClipCount = 0, fbClipCut = 0;
@@ -2176,7 +2184,7 @@ index f4fad92..fcfad70 100644
  static char fbClipVmc[256]; // the card image the clipboard was filled in ("" = none)
  
  // inside a PS2 card image: its path ("" = not in one), whether it is read only, its free space
-@@ -123,17 +127,53 @@ static volatile int fbDoneItems = 0, fbTotalItems = 0, fbFailed = 0, fbSkipped =
+@@ -123,17 +128,53 @@ static volatile int fbDoneItems = 0, fbTotalItems = 0, fbFailed = 0, fbSkipped =
  static volatile int fbDoneFiles = 0, fbTotalFiles = 0, fbOkDirs = 0;
  static int fbTreeFiles = 0; // counted by fbTreeSize as it walks
  static const char *fbOpLabel = "";
@@ -2233,7 +2241,7 @@ index f4fad92..fcfad70 100644
  }
  static int fbOp = 0; // what the worker runs next
  enum { FB_OP_SCAN = 0, FB_OP_PASTE, FB_OP_DELETE, FB_OP_UNPACK };
-@@ -143,14 +183,14 @@ static unsigned char fbDeleteIsDir[FB_CLIP_MAX];
+@@ -143,14 +184,14 @@ static unsigned char fbDeleteIsDir[FB_CLIP_MAX];
  static int fbDeleteCount = 0;
  
  // the actions menu (Triangle)
@@ -2251,7 +2259,7 @@ index f4fad92..fcfad70 100644
  
  static void fbSetToast(const char *text)
  {
-@@ -187,7 +227,7 @@ static int fbVmcPath(const char *image, const char *path, char *save, int size)
+@@ -187,7 +228,7 @@ static int fbVmcPath(const char *image, const char *path, char *save, int size)
  static const char *fbDeviceLabel(const char *dev, char *buf, int size, int bdmType, int nth, int count)
  {
      if (!strncmp(dev, "mc", 2))
@@ -2260,7 +2268,7 @@ index f4fad92..fcfad70 100644
      else if (!strncmp(dev, "mass", 4)) {
          const char *kind = bdmType == BDM_TYPE_USB ? "USB DRIVE" : bdmType == BDM_TYPE_SDC ? "MX4SIO" : bdmType == BDM_TYPE_ILINK ? "iLINK DRIVE" :
                             bdmType == BDM_TYPE_ATA ? "HDD (exFAT)" : bdmType == BDM_TYPE_UDPBD ? "UDPBD (NETWORK)" : "DRIVE";
-@@ -330,6 +370,50 @@ static int fbCompare(const void *a, const void *b)
+@@ -330,6 +371,50 @@ static int fbCompare(const void *a, const void *b)
      return strcasecmp(x->name, y->name);
  }
  
@@ -2311,7 +2319,7 @@ index f4fad92..fcfad70 100644
  // The drive list is kept between visits: probing cards and slots that are not there takes seconds, and
  // coming back up to the list should be instant. It is probed again on entering the browser, after
  // START DRIVES, and on Select.
-@@ -374,10 +458,15 @@ static void fbScanDevices(void)
+@@ -374,10 +459,15 @@ static void fbScanDevices(void)
              continue;
          if (!strncmp(dev, "pfs", 3) && hddGetObject(1) == NULL && !fbDrivesUp)
              continue;
@@ -2331,7 +2339,7 @@ index f4fad92..fcfad70 100644
          fb_entry_t *e = &fbList[n++];
          memset(e, 0, sizeof(*e));
          snprintf(e->name, sizeof(e->name), "%s", fbDevices[i]);
-@@ -585,6 +674,9 @@ static u32 fbTreeSize(const char *path, int isDir, int depth)
+@@ -585,6 +675,9 @@ static u32 fbTreeSize(const char *path, int isDir, int depth)
      return total;
  }
  
@@ -2341,7 +2349,7 @@ index f4fad92..fcfad70 100644
  static int fbCopyFile(const char *src, const char *dst)
  {
      int in = open(src, O_RDONLY), out, r, ok = 1;
-@@ -600,6 +692,12 @@ static int fbCopyFile(const char *src, const char *dst)
+@@ -600,6 +693,12 @@ static int fbCopyFile(const char *src, const char *dst)
          snprintf(cardPath, sizeof(cardPath), "%.4s%s", dst, dst + 5);
          target = cardPath;
      }
@@ -2354,7 +2362,7 @@ index f4fad92..fcfad70 100644
      // a memory card answers "changed card" (ENXIO, mcman's sceMcResChangedCard) to the first access
      // after it is detected; asking again is how every PS2 program deals with it
      int tries = 0;
-@@ -617,10 +715,19 @@ static int fbCopyFile(const char *src, const char *dst)
+@@ -617,10 +716,19 @@ static int fbCopyFile(const char *src, const char *dst)
          return 0;
      }
      while ((r = read(in, fbBuf, FB_BUF_SIZE)) > 0) {
@@ -2377,7 +2385,7 @@ index f4fad92..fcfad70 100644
              fbNoteFail("WRITE", dst);
              ok = 0;
              break;
-@@ -669,15 +776,21 @@ static int fbCopyTree(const char *src, const char *dst, int isDir, int depth)
+@@ -669,15 +777,21 @@ static int fbCopyTree(const char *src, const char *dst, int isDir, int depth)
      return ok;
  }
  
@@ -2402,7 +2410,7 @@ index f4fad92..fcfad70 100644
      fbNoteFail(isDir ? "REMOVE FOLDER" : "REMOVE FILE", path);
      return 0;
  }
-@@ -794,6 +907,22 @@ static void fbPasteWork(void)
+@@ -794,6 +908,22 @@ static void fbPasteWork(void)
              fbTotalBytes += fbTreeSize(src, fbClipIsDir[i], 0);
          }
      fbTotalFiles = fbTreeFiles; // build 91: every file it will copy, the folders' included
@@ -2425,7 +2433,7 @@ index f4fad92..fcfad70 100644
      for (i = 0; i < fbClipCount; i++) {
          snprintf(src, sizeof(src), "%s%s", fbClipDir, fbClip[i]);
          r = fbSavePaste(i, src, fromVmc, srcSave, toVmc, toSave);
-@@ -822,15 +951,29 @@ static void fbPasteWork(void)
+@@ -822,15 +952,29 @@ static void fbPasteWork(void)
          if (fbIsMc(fbPath) && fbClipIsDir[i] && fbFolderHasIconSys(src))
              fbMcRoot(fbPath, destDir, sizeof(destDir));
          snprintf(dst, sizeof(dst), "%s%s", destDir, fbClip[i]);
@@ -2458,7 +2466,7 @@ index f4fad92..fcfad70 100644
          fbDoneItems++;
      }
      free(fbBuf);
-@@ -946,10 +1089,128 @@ static void fbWorker(void)
+@@ -946,10 +1090,128 @@ static void fbWorker(void)
      fbBusy = 0;
  }
  
@@ -2587,7 +2595,130 @@ index f4fad92..fcfad70 100644
      fbOp = op;
      fbOpLabel = label;
      fbDoneItems = fbFailed = fbSkipped = fbKept = 0;
-@@ -1153,7 +1414,7 @@ static void fbRunVcd(const fb_entry_t *e)
+@@ -1150,10 +1412,130 @@ static void fbRunVcd(const fb_entry_t *e)
+     ripps2LaunchAborted();
+ }
+ 
++// ---- build 98: games started from Memory Files, as Storage starts them ----
++
++// The game source a browser path is on: a USB / exFAT HDD / MX4SIO / iLink drive (mass0..7:) or MMCE; NULL for
++// anything else, or one whose driver has no drive up yet
++static item_list_t *fbGameSource(void)
++{
++    opl_io_module_t *mod = NULL;
++    if (!strncmp(fbPath, "mass", 4) && fbPath[4] >= '0' && fbPath[4] <= '7')
++        mod = oplGetModule(BDM_MODE + (fbPath[4] - '0'));
++    else if (!strncmp(fbPath, "mmce", 4))
++        mod = oplGetModule(MMCE_MODE);
++    if (mod == NULL || mod->support == NULL)
++        return NULL;
++    if (mod->support->mode >= BDM_MODE && mod->support->mode <= BDM_MODE_LAST && mod->support->priv == NULL)
++        return NULL;
++    return mod->support;
++}
++
++// 1 a PS2 disc image, 2 a PS1 one for Ember, 3 a CHD (which neither core reads), 0 none of these
++static int fbGameKind(const char *name)
++{
++    if (fbHasSuffix(name, ".iso") || fbHasSuffix(name, ".zso"))
++        return 1;
++    if (fbHasSuffix(name, ".cue") || fbHasSuffix(name, ".bin"))
++        return 2;
++    return fbHasSuffix(name, ".chd") ? 3 : 0;
++}
++
++// A PS2 game (.ISO / .ZSO) in the drive's own CD or DVD folder starts as its row in Storage does: found in the
++// drive's PS2 list by its file name, whatever that page shows (Favourites' way: a copy of the list held on the
++// PS2 view), launched with its own settings, so RIPPS2's loader or Neutrino runs it as its Loader Core says,
++// with its VMCs, cheats and the rest. (Storage's VMC-on-first-launch is left out here: it saves through the
++// menu's current row, which is not this game.)
++static void fbRunIso(const fb_entry_t *e)
++{
++    char ask[200], want[160], full[ISO_GAME_NAME_MAX + GAME_STARTUP_MAX + 8], startup[GAME_STARTUP_MAX + 1];
++    item_list_t *src = fbGameSource(), view;
++    const char *prefix;
++    int i, count, found = -1, cd;
++
++    if (src == NULL || src->itemGetPrefix == NULL || src->itemGet == NULL || src->itemLaunch == NULL || src->itemGetConfig == NULL) {
++        guiMsgBox("This drive's games are not started yet. Open it once in Storage, then start the game here or there.", 0, NULL);
++        return;
++    }
++    prefix = src->itemGetPrefix(src);
++    snprintf(want, sizeof(want), "%s%s", prefix != NULL ? prefix : "", prefix != NULL && prefix[0] && prefix[strlen(prefix) - 1] != '/' ? "/" : "");
++    cd = strlen(fbPath) > strlen(want) && !strncasecmp(fbPath, want, strlen(want)) && !strcasecmp(fbPath + strlen(want), "CD/");
++    if (!cd && !(strlen(fbPath) > strlen(want) && !strncasecmp(fbPath, want, strlen(want)) && !strcasecmp(fbPath + strlen(want), "DVD/"))) {
++        snprintf(ask, sizeof(ask), "PS2 games start from the CD or DVD folder in %s. Move this image there and try again.", want);
++        guiMsgBox(ask, 0, NULL);
++        return;
++    }
++    view = *src;
++    view.viewOverride = ITEM_VIEW_FORCE_ISO;
++    count = view.itemGetCount(&view);
++    for (i = 0; i < count && found < 0; i++) {
++        base_game_info_t *g = (base_game_info_t *)view.itemGet(&view, i);
++        if (g == NULL || g->format == GAME_FORMAT_FOLDER || g->format == GAME_FORMAT_USBLD || (g->media == SCECdPS2CD) != cd)
++            continue;
++        snprintf(full, sizeof(full), "%s%s", g->name, g->extension); // NAME.iso, or the old SLUS_000.00.NAME.iso
++        if (!strcasecmp(full, e->name))
++            found = i;
++        snprintf(full, sizeof(full), "%s.%s%s", g->startup, g->name, g->extension);
++        if (found < 0 && g->format == GAME_FORMAT_OLD_ISO && !strcasecmp(full, e->name))
++            found = i;
++    }
++    if (found < 0) {
++        guiMsgBox("This game is not in the drive's game list yet (Storage lists it after a refresh, or shows a subfolder now). "
++                  "Refresh the drive in Storage, then start it here or there.",
++                  0, NULL);
++        return;
++    }
++    snprintf(ask, sizeof(ask), "Play %s?", view.itemGetName(&view, found));
++    if (!guiMsgBox(ask, 1, NULL))
++        return;
++    char *st = view.itemGetStartup(&view, found);
++    snprintf(startup, sizeof(startup), "%s", st != NULL ? st : "");
++    config_set_t *cfg = view.itemGetConfig(&view, found);
++    ripps2LaunchDiscArm(&view, startup);
++    ripps2PlayLaunchSequence();
++    guiShowGameID(startup);
++    view.itemLaunch(&view, found, cfg); // returns only when the launch failed
++    ripps2LaunchAborted();
++    if (cfg != NULL)
++        configFree(cfg);
++}
++
++// A PS1 game for Ember: its .CUE or .BIN inside <drive>/EMBER/games/<game folder>/ starts that folder's game, as
++// its row in Storage does
++static void fbRunCue(const fb_entry_t *e)
++{
++    char want[48], folder[CUE_NAME_MAX], ask[200];
++    const char *colon = strchr(fbPath, ':'), *rest;
++    item_list_t *src = fbGameSource();
++    int n;
++
++    (void)e;
++    snprintf(want, sizeof(want), "/%s/%s/", cueEmberFolder(), EMBER_GAMES_FOLDER);
++    rest = colon != NULL ? colon + 1 : "";
++    n = strlen(rest) - strlen(want) - 1; // the game folder's name, without its slash
++    if (strncasecmp(rest, want, strlen(want)) != 0 || n <= 0 || n >= (int)sizeof(folder) || strchr(rest + strlen(want), '/') != rest + strlen(rest) - 1) {
++        snprintf(ask, sizeof(ask), "PS1 games for Ember start from their own folder in %s%s on a drive. Put this game's folder there and try again.",
++                 cueEmberFolder(), want + strlen(cueEmberFolder()) + 1);
++        guiMsgBox(ask, 0, NULL);
++        return;
++    }
++    if (src == NULL || src->itemLaunchCue == NULL) {
++        guiMsgBox("This drive's games are not started yet. Open it once in Storage, then start the game here or there.", 0, NULL);
++        return;
++    }
++    snprintf(folder, sizeof(folder), "%.*s", n, rest + strlen(want));
++    snprintf(ask, sizeof(ask), "Play %s with Ember?", folder);
++    if (!guiMsgBox(ask, 1, NULL))
++        return;
++    ripps2LaunchDiscArmGeneric(); // a PS1 disc
++    ripps2PlayLaunchSequence();
++    src->itemLaunchCue(src, folder, NULL);
++    ripps2LaunchAborted();
++}
++
  // Files the text editor opens from the browser
  static int fbIsText(const char *name)
  {
@@ -2596,7 +2727,7 @@ index f4fad92..fcfad70 100644
      int i;
      for (i = 0; ext[i] != NULL; i++)
          if (fbHasSuffix(name, ext[i]))
-@@ -1182,7 +1443,6 @@ static void fbEdit(const char *name)
+@@ -1182,7 +1564,6 @@ static void fbEdit(const char *name)
  //   shares slot 2 and the controllers' bus. MX4SIO also stays out while a memory card is in slot 2.
  static void fbStartDrivesWork(void)
  {
@@ -2604,7 +2735,7 @@ index f4fad92..fcfad70 100644
      int r __attribute__((unused)); // build 76: read only by LOG, which a release build compiles out
      // the BDM core with each transport (bdmEnsureTypedSource), as a typed custom path brings one up
      r = bdmEnsureTypedSource(BDM_TYPE_USB, 2500);
-@@ -1193,8 +1453,7 @@ static void fbStartDrivesWork(void)
+@@ -1193,8 +1574,7 @@ static void fbStartDrivesWork(void)
      }
      if (!gEnableMX4SIO)
          ;
@@ -2614,7 +2745,7 @@ index f4fad92..fcfad70 100644
          LOG("START DRIVES: a memory card is in slot 2, MX4SIO left out\n");
      } else {
          r = bdmEnsureTypedSource(BDM_TYPE_SDC, 2500);
-@@ -1210,12 +1469,23 @@ static void fbStartDrivesWork(void)
+@@ -1210,12 +1590,23 @@ static void fbStartDrivesWork(void)
          clearErrorMessageIf(_STR_HDD_NOT_CONNECTED_ERROR);
          LOG("START DRIVES: no internal hard drive\n");
      }
@@ -2643,7 +2774,27 @@ index f4fad92..fcfad70 100644
      DelayThread(1000 * 1000); // a USB stick enumerates a moment after its driver: let it, before the list is read
      fbDrivesUp = 1;
      fbDrivesDone = 1;
-@@ -1349,6 +1619,8 @@ static void fbMenuBuild(void)
+@@ -1297,7 +1688,18 @@ static void fbOpen(void)
+             break;
+         }
+         default:
+-            if (fbIsText(e->name)) {
++            if (fbGameKind(e->name) != 0 && !fbVmcPath(fbVmc, fbPath, NULL, 0)) { // build 98: games start here too
++                int kind = fbGameKind(e->name);
++                sfxPlay(kind == 3 ? SFX_CANCEL : SFX_CONFIRM);
++                if (kind == 1)
++                    fbRunIso(e);
++                else if (kind == 2)
++                    fbRunCue(e);
++                else
++                    guiMsgBox("A CHD does not start on a PS2: neither RIPPS2's loader nor Ember reads it. Make PS2 games ISO or ZSO, "
++                              "and PS1 games CUE and BIN (or a VCD for POPSTARTER).",
++                              0, NULL);
++            } else if (fbIsText(e->name)) {
+                 sfxPlay(SFX_CONFIRM);
+                 fbEdit(e->name);
+             } else if (ripps2MediaKind(e->name) != RIPPS2_MEDIA_NONE && !fbVmcPath(fbVmc, fbPath, NULL, 0)) {
+@@ -1349,6 +1751,8 @@ static void fbMenuBuild(void)
          fbMenuItems[fbMenuCount++] = FB_ACT_MARKALL;
      if (haveItem && !inVmc && fbList[fbCursor].kind == FB_KIND_VMC)
          fbMenuItems[fbMenuCount++] = FB_ACT_CARDS; // build 86: the card image under the cursor
@@ -2652,7 +2803,7 @@ index f4fad92..fcfad70 100644
      fbMenuSel = 0;
  }
  
-@@ -1384,6 +1656,9 @@ static void fbAction(int act)
+@@ -1384,6 +1788,9 @@ static void fbAction(int act)
              sfxPlay(SFX_CONFIRM);
              fbPasteMode = act == FB_ACT_PASTE_PSU ? FB_PASTE_PSU : act == FB_ACT_UNPACK ? FB_PASTE_UNPACK : FB_PASTE_PLAIN;
              fbTotalItems = fbClipCount;
@@ -2662,7 +2813,7 @@ index f4fad92..fcfad70 100644
              fbRun(FB_OP_PASTE, fbPasteMode == FB_PASTE_PSU ? "EXPORTING" : fbPasteMode == FB_PASTE_UNPACK ? "UNPACKING" : fbClipCut ? "MOVING" : "PASTING");
              break;
          case FB_ACT_DELETE:
-@@ -1396,6 +1671,7 @@ static void fbAction(int act)
+@@ -1396,6 +1803,7 @@ static void fbAction(int act)
                  fbDeleteCount = n;
                  fbTotalItems = n;
                  fbClearMarks();
@@ -2670,7 +2821,7 @@ index f4fad92..fcfad70 100644
                  fbRun(FB_OP_DELETE, "DELETING");
              }
              break;
-@@ -1404,6 +1680,10 @@ static void fbAction(int act)
+@@ -1404,6 +1812,10 @@ static void fbAction(int act)
              if (guiShowKeyboard(name, sizeof(name)) && name[0] && strcmp(name, fbList[fbCursor].name) != 0) {
                  fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
                  fbJoin(to, sizeof(to), fbPath, name);
@@ -2681,7 +2832,7 @@ index f4fad92..fcfad70 100644
                  fbSetToast(rename(from, to) == 0 ? "RENAMED" : "RENAME FAILED");
                  snprintf(fbKeepName, sizeof(fbKeepName), "%s", name);
                  fbRun(FB_OP_SCAN, "READING");
-@@ -1433,6 +1713,20 @@ static void fbAction(int act)
+@@ -1433,6 +1845,20 @@ static void fbAction(int act)
              ripps2CardManager(-1, from);
              fbRun(FB_OP_SCAN, "READING");
              break;
@@ -2702,7 +2853,7 @@ index f4fad92..fcfad70 100644
      }
  }
  
-@@ -1834,6 +2128,37 @@ static int fbDrawGrid(void)
+@@ -1834,6 +2260,37 @@ static int fbDrawGrid(void)
      return 1;
  }
  
@@ -2740,7 +2891,7 @@ index f4fad92..fcfad70 100644
  void ripps2HandleInputFiles(void)
  {
      int openKey = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS;
-@@ -1868,12 +2193,12 @@ void ripps2HandleInputFiles(void)
+@@ -1868,12 +2325,12 @@ void ripps2HandleInputFiles(void)
          return;
      }
  
@@ -2755,7 +2906,7 @@ index f4fad92..fcfad70 100644
          if (fbCursor < fbCount - 1) {
              fbCursor++;
              sfxPlay(SFX_CURSOR);
-@@ -2025,6 +2350,106 @@ int ripps2FilesBusy(void)
+@@ -2025,6 +2482,106 @@ int ripps2FilesBusy(void)
      return fbBusy || fbPath[0] != '\0';
  }
  
@@ -2862,7 +3013,7 @@ index f4fad92..fcfad70 100644
  void ripps2RenderFiles(void)
  {
      int i, rowFont = gTheme->fonts[8], smallFont = gTheme->fonts[5], uiFont = gTheme->fonts[4];
-@@ -2045,6 +2470,11 @@ void ripps2RenderFiles(void)
+@@ -2045,6 +2602,11 @@ void ripps2RenderFiles(void)
      }
      if (!fbBusy)
          fbRestoreCursor();
@@ -2874,7 +3025,7 @@ index f4fad92..fcfad70 100644
  
      // the path, and the clipboard / what just happened
      fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : "MEMORY FILES", FB_LIT);
-@@ -2132,6 +2562,8 @@ void ripps2RenderFiles(void)
+@@ -2132,6 +2694,8 @@ void ripps2RenderFiles(void)
          }
      }
  
