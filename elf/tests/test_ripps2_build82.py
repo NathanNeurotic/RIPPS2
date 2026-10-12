@@ -36,8 +36,8 @@ if '"COV2"' not in th or 'gridBackFor(elem)' not in th:
 if 'initGridBack(themeConfig, theme, name,' not in th or '_back_pattern' not in th or \
         re.search(r'initMutableImage\([^;]*"COV2"', th):
     fail.append('the back covers need a cache of their own: through initMutableImage the Grid (a GAME_IMAGE) reads its pattern=COV over COV2')
-if 'FLIP_HOLD_S 2.0f' not in th or 'ripps2StickSide()' not in th or 'gridFlips[k].target = !gridFlips[k].target;' not in th:
-    fail.append('a 2 s hold of the right stick must turn the chosen case over, and again turn it back')
+if 'FLIP_HOLD_S' not in th or 'ripps2StickSide()' not in th or 'gridFlips[k].target = !gridFlips[k].target;' not in th:
+    fail.append('a hold of the right stick must turn the chosen case over, and again turn it back (build 97: 0.42 s)')
 if 'ripps2TiltBeginTurn(' not in th or 'int ripps2StickSide(void)' not in ui:
     fail.append('the flip must draw through the tilt with a turn of its own')
 dg = th[th.index('static void drawGrid(struct menu_list'):]

@@ -1,0 +1,281 @@
+diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
+index 3a91e5c..858565c 100644
+--- a/misc/theme_coverflow.cfg
++++ b/misc/theme_coverflow.cfg
+@@ -519,6 +519,7 @@ info26:
+ 	type=GameImage
+ 	pattern=SCR
+ 	default=screen
++	tilt=1
+ 	x=189
+ 	y=-150
+ 	scaled=2
+@@ -537,6 +538,7 @@ info27:
+ 	type=GameImage
+ 	pattern=SCR2
+ 	default=screen
++	tilt=1
+ 	x=-191
+ 	y=-150
+ 	width=200
+diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
+index 720f286..f042b0e 100644
+--- a/misc/theme_ripgrid.cfg
++++ b/misc/theme_ripgrid.cfg
+@@ -35,6 +35,9 @@ font5=builtin:ripps2sleek
+ font5_size=20
+ font6=builtin:ripps2sleekbold
+ font6_size=17
++# build 97: the chosen game's name under the grid, in RIPPS2 Sleek Bold
++font7=builtin:ripps2sleekbold
++font7_size=22
+ # RIPgrid's type: RIPPS2 Sleek (Regular, Bold, Bold Case), built into RIPPS2 (builtin: fonts)
+ # [circle.png] [cross.png] [square.png] [triangle.png] [select.png] [start.png] from the Grunge theme
+ 
+@@ -77,7 +80,7 @@ main3:
+ main4:
+ 	type=Grid
+ 	pattern=COV
+-	x=340
++	x=320
+ 	y=84
+ 	width=107
+ 	height=150
+@@ -90,7 +93,7 @@ main4:
+ 	coverless=serial
+ 	title=1
+ 	title_y=416
+-	title_font=5
++	title_font=7
+ main5:
+ 	type=ItemsList
+ 	x=POS_MID
+diff --git a/src/menusys.c b/src/menusys.c
+index fc99173..a36fc4c 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -1927,10 +1927,49 @@ static void menuGridStep(int dir)
+ // Coverflow rotates the nav axis on the MAIN screen only: Left/Right step through the
+ // carousel (a vertical list move) while Up/Down switch device menus. Non-coverflow themes
+ // behave exactly as before. The info screen is intentionally NOT rotated (menuHandleInputInfo).
++// RIPPS2 build 97: Right on a row's last cover turns to the next page (the same row, its first cover), Left on a
++// row's first cover back to the previous page (the same row, its last cover). At the first or the last page the
++// cursor stays: the grid no longer wraps on to the next row. 1 when the step was the grid's to make.
++static int menuGridEdge(int dir)
++{
++    int cols = thmGridColumns(), rows = gTheme->gridRows > 0 ? gTheme->gridRows : 1, page, cur = 0, count = 0, col, row, pageStart, target, i;
++    submenu_list_t *p;
++
++    if (cols <= 0 || selected_item == NULL || selected_item->item == NULL)
++        return 0;
++    for (p = selected_item->item->submenu; p != NULL; p = p->next, count++)
++        if (p == selected_item->item->current)
++            cur = count;
++    if (count == 0)
++        return 0;
++    page = cols * rows;
++    col = cur % cols;
++    row = (cur % page) / cols;
++    pageStart = cur - cur % page;
++    if (dir > 0 && (col == cols - 1 || cur == count - 1)) {
++        if (pageStart + page >= count)
++            return 1; // the last page: stay
++        target = pageStart + page + row * cols;
++        if (target > count - 1)
++            target = count - 1;
++    } else if (dir < 0 && col == 0) {
++        if (pageStart == 0)
++            return 1; // the first page: stay
++        target = pageStart - page + row * cols + cols - 1;
++    } else
++        return 0;
++    for (i = cur; i < target; i++)
++        menuNextV();
++    for (i = cur; i > target; i--)
++        menuPrevV();
++    return 1;
++}
++
+ static void menuNavigateLeft()
+ {
+     if (thmGridColumns() > 0) {
+-        menuPrevV();
++        if (!menuGridEdge(-1))
++            menuPrevV();
+         return;
+     }
+     if (gTheme->coverflow)
+@@ -1942,7 +1981,8 @@ static void menuNavigateLeft()
+ static void menuNavigateRight()
+ {
+     if (thmGridColumns() > 0) {
+-        menuNextV();
++        if (!menuGridEdge(1))
++            menuNextV();
+         return;
+     }
+     if (gTheme->coverflow)
+diff --git a/src/themes.c b/src/themes.c
+index d46665d..5ad072a 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -2034,6 +2034,12 @@ int thmCoverflowIsAnimating(void)
+     return cfIsAnimating;
+ }
+ 
++// build 97: the case flip, shared with the Grid (below)
++static mutable_image_t *gridBackFor(const void *elem);
++static GSTEXTURE *gridBackTexture(const void *elem, item_list_t *src, struct submenu_list *it, int priority);
++static float gridFlipTurn(const void *item);
++static void gridFlipUpdate(const void *selected, int backReady);
++
+ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
+ {
+     if (!item)
+@@ -2233,6 +2239,18 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+       center cover last) so that inner/center covers cleanly overlap outer ones on BOTH
+       left and right sides without geometry clipping.
+     */
++    // build 97: the centre cover turns over to its back cover on a 0.42 s hold of the right stick, as on the
++    // Grid; only at rest, and only once its front and its back are both in memory
++    GSTEXTURE *cfBack = NULL;
++    if (gridBackFor(elem) != NULL && !item->item.isFolder && !cfIsAnimating) {
++        theme_element_t *fe = thmGetElemForItem(menu, item, elem);
++        mutable_image_t *front = fe != NULL ? (mutable_image_t *)fe->extended : NULL;
++        GSTEXTURE *ft = front != NULL ? getGameImageTextureEx(front->cache, sourceList, &item->item, 1) : NULL;
++        if (ft != NULL && ft->Mem != NULL)
++            cfBack = gridBackTexture(elem, sourceList, item, 1);
++    }
++    gridFlipUpdate(item->item.isFolder || cfIsAnimating ? NULL : item, cfBack != NULL);
++
+     int drawOrder[COVERFLOW_MAX];
+     int drawCount = 0;
+     int maxDist = centerIdx - drawFirst;
+@@ -2314,6 +2332,17 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+         // RIPPS2 build 91: the side covers take the vignette (Vignette Other Covers) in place of the old dim
+         u64 coverColor = gDefaultCol;
+ 
++        // build 97: the centre cover, turned or turning (its back once past the half turn)
++        float cfTurn = (i == centerIdx && covers[i] == item) ? gridFlipTurn(item) : 0.0f;
++        if (cfBack == NULL && fabsf(cfTurn) > 1.5708f)
++            cfTurn = 0.0f; // turned, but its back is not in memory yet: front-on until it is
++        if (cfTurn != 0.0f) {
++            int seeBack = fabsf(cfTurn) > 1.5708f;
++            ripps2TiltBeginTurn(posX, posY, 0, seeBack ? cfTurn - (cfTurn > 0 ? 3.14159265f : -3.14159265f) : cfTurn);
++            if (seeBack)
++                texture = cfBack;
++        }
++
+         if (cimg->overlayTexture) {
+             // Scale the inlay (cover) corner offsets to the drawn overlay size so the case
+             // window tracks the cover at every scale. HW-verify alignment with real case art.
+@@ -2326,6 +2355,8 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+         } else {
+             rmDrawPixmap(texture, posX, posY, ALIGN_CENTER, drawW, drawH, SCALING_RATIO, coverColor, elem->reflection);
+         }
++        if (cfTurn != 0.0f)
++            ripps2TiltEnd();
+         if (gRipps2Vignette && i != centerIdx)
+             drawCoverVignette(posX, posY, rmWideScale(drawW), drawH, 1.0f);
+     }
+@@ -2349,28 +2380,31 @@ static int gridSlideFrom = -1;   // build 82: the page sliding away (its first r
+ static int gridSlideDir, gridSlideFrames;
+ static clock_t gridSlideStart;
+ #define GRID_SLIDE_MS 320
+-// build 82: the back covers (COV2), a cache of their own for each Grid element. Two places: a theme
+-// switch builds the new theme before it frees the old, so both grids live for a moment.
++// build 82: the back covers (COV2), a cache of their own for each Grid element. A theme switch builds the
++// new theme before it frees the old, so two themes' elements live for a moment; build 97 adds RIPFLOW's
++// coverflow, so there are four places.
++#define GRID_BACK_SLOTS 4
+ static struct
+ {
+     const void *elem;
+     mutable_image_t *img;
+-} gridBacks[2];
++} gridBacks[GRID_BACK_SLOTS];
+ 
+ static mutable_image_t *gridBackFor(const void *elem)
+ {
+     int i;
+-    for (i = 0; i < 2; i++)
++    for (i = 0; i < GRID_BACK_SLOTS; i++)
+         if (gridBacks[i].elem == elem)
+             return gridBacks[i].img;
+     return NULL;
+ }
+ 
+-// build 82: the back of the case. Hold the right stick to one side for 2 s and the chosen case turns
+-// over to its back cover, the way the stick leans; it stays turned on the grid when the selection moves
+-// on and when it comes back, until the stick turns it home. Only once its back cover has loaded.
++// build 82: the back of the case. Hold the right stick to one side and the chosen case turns over to its
++// back cover, the way the stick leans; it stays turned on the grid when the selection moves on and when
++// it comes back, until the stick turns it home. Only once its back cover has loaded. Build 97: a 0.42 s
++// hold (it was 2 s), and RIPFLOW's centre cover turns the same way.
+ #define GRID_FLIPS  64
+-#define FLIP_HOLD_S 2.0f
++#define FLIP_HOLD_S 0.42f
+ #define FLIP_TURN_S 0.55f
+ static struct
+ {
+@@ -2706,7 +2740,7 @@ static void drawGrid(struct menu_list *menu, struct submenu_list *item, config_s
+     int selX = -1, selY = 0;
+ 
+     // build 82: the back covers. The chosen game's is asked for as soon as its front is there; a turned
+-    // case's stays wanted while it shows. The chosen case turns over on a 2 s hold of the stick.
++    // case's stays wanted while it shows. The chosen case turns over on a 0.42 s hold of the stick (build 97).
+     GSTEXTURE *selBack = NULL;
+     if (gridBackFor(elem) != NULL && !item->item.isFolder) {
+         theme_element_t *ce = thmGetElemForItem(menu, item, elem);
+@@ -2777,7 +2811,7 @@ static void drawGrid(struct menu_list *menu, struct submenu_list *item, config_s
+ static void endGrid(struct theme_element *elem)
+ {
+     int i;
+-    for (i = 0; i < 2; i++)
++    for (i = 0; i < GRID_BACK_SLOTS; i++)
+         if (gridBacks[i].elem == elem) {
+             if (gridBacks[i].img != NULL) {
+                 if (gridBacks[i].img->cache && !gridBacks[i].img->cacheLinked)
+@@ -2818,6 +2852,15 @@ static mutable_image_t *initGridBack(config_set_t *themeConfig, theme_t *theme,
+     return img;
+ }
+ 
++static int gridBackFreeSlot(void)
++{
++    int i;
++    for (i = 0; i < GRID_BACK_SLOTS; i++)
++        if (gridBacks[i].elem == NULL)
++            return i;
++    return -1;
++}
++
+ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *theme, theme_element_t *elem, const char *name)
+ {
+     char key[64];
+@@ -2866,7 +2909,7 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+     if (mutableImage && mutableImage->cache) {
+         elem->drawElem = &drawGrid;
+         elem->endElem = &endGrid;
+-        int slot = gridBacks[0].elem == NULL ? 0 : gridBacks[1].elem == NULL ? 1 : -1;
++        int slot = gridBackFreeSlot();
+         if (slot >= 0) { // build 82: the back covers, for the flip
+             gridBacks[slot].img = initGridBack(themeConfig, theme, name, cols * rows + 2);
+             gridBacks[slot].elem = gridBacks[slot].img != NULL ? elem : NULL;
+@@ -2906,8 +2949,16 @@ static void initCoverflow(const char *themePath, config_set_t *themeConfig, them
+ 
+     if (mutableImage && mutableImage->cache) {
+         elem->drawElem = &drawCoverFlow;
+-        if (!theme->coverflow)
++        if (!theme->coverflow) {
+             theme->coverflow = elem; // first coverflow element = the "coverflow active" flag
++            int slot = gridBackFreeSlot(); // build 97: its centre cover turns over to the back, as the Grid's do
++            if (slot >= 0) {
++                gridBacks[slot].img = initGridBack(themeConfig, theme, name, 4);
++                gridBacks[slot].elem = gridBacks[slot].img != NULL ? elem : NULL;
++                if (gridBacks[slot].elem != NULL)
++                    elem->endElem = &endGrid;
++            }
++        }
+     } else
+         LOG("THEMES Coverflow %s: NO cache, elem disabled !!\n", name);
+ }
