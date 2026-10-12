@@ -147,9 +147,15 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       Lab: the second paste of cursor.adp onto mc0 asked REPLACE IT? (YES TO ALL shows when more than one
       name is there); YES replaced it. A folder merges, each file in it replaced.
 - [x] Devices show as `mc0:/` and `mc1:/`: MEMORY CARD 0 and MEMORY CARD 1, their paths beside them.
-- [ ] Hold to scroll: after 0.42 s the cursor repeats at the Storage list's scroll speed.
-- [ ] Card manager: hints with glyphs on its Actions modal.
-- [ ] Picture viewer: Adapt's face, glyph hints that fit, no distortion zoomed in close.
+- [x] Hold to scroll: after 0.42 s the cursor repeats at the Storage list's scroll speed.
+      Lab: Down held 1.5 s from the top of mass0:/AUDIO/ landed on row 11 (one step, then 100 ms steps at
+      Fast after 0.42 s). Timed in the browser, so a dialog's own repeat delays never carry over.
+- [x] Card manager: hints with glyphs on its Actions modal.
+      Lab: the Actions list (and every pick list sharing it) has a Choose / Back strip at its foot.
+- [x] Picture viewer: Adapt's face, glyph hints that fit, no distortion zoomed in close.
+      The shearing was the zoomed quad running past the GS's coordinate range: only the part on screen is
+      drawn now, with its own texture coordinates, and the tilt turns about the screen's middle. Lab: a
+      640 x 480 PNG clean at 422% and at the 800% cap panned to its edge; info in Adapt's face, glyph hints.
 - [ ] PS2 3D save icons (`.ico` / `.icn`) open in a viewer: the model, its texture and its animation.
 - [ ] Text editor input bugs: reproduce first.
 - [ ] Rip a save's 3D icon to the PC: the model as OBJ with its texture as PNG, one OBJ per animation shape.
