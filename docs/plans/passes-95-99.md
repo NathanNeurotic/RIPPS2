@@ -169,7 +169,11 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       lines over 255 characters were cut on load, past 1000 lines the rest was dropped on save, trailing blank
       lines and a missing last break did not round-trip, a NUL byte cut the file. Host test round-trips each;
       lab: an edit and its undo left LAUNCH.TXT byte-identical. The tooltip now refreshes after a save.
-- [ ] Rip a save's 3D icon to the PC: the model as OBJ with its texture as PNG, one OBJ per animation shape.
+- [x] Rip a save's 3D icon to the PC: the model as OBJ with its texture as PNG, one OBJ per animation shape.
+      Actions > RIP 3D ICON on an .ico / .icn writes mass0:/RIPPS2/ICONS/<save folder>/: an OBJ per shape (y up,
+      z toward the viewer, normals, UVs, vertex colours), an MTL and the texture as PNG. Host test checks the OBJ
+      against RiptOPL's shipped icons; lab: POPStarter's list.icn ripped from a card, its PNG opens in the
+      picture viewer and its MTL in the text editor.
 - [ ] RIPPS2's own save icon: the bloody elf hat ringing its bell, animated, in the PS2 icon format (under the
       icon vertex limit, one texture), on RIPPS2's memory card folder.
 - [ ] Launch from Memory Files: `.iso` / `.zso` with RIPPS2's loader or Neutrino, `.cue` / `.bin` in an
