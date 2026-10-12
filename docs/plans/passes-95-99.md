@@ -92,34 +92,44 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       RiptOPL). Walk every MX4SIO path against RiptOPL 65d4b89 and its later fixes (load gates, the second
       probe, Game Sources, page visibility, MMCE sharing SIO2, slot 2 card access). PCSX2 has no MX4SIO:
       FifthFox confirms on hardware.
-- [ ] **Grid tiles without a cover** (FifthFox, 95): the ISO's file name in very large text, sometimes past the
+- [x] **Grid tiles without a cover** (FifthFox, 95): the ISO's file name in very large text, sometimes past the
       tile, while game IDs are much smaller. A tile shows only the game ID (the name is under the grid), one
       size on every tile, always inside it; a game with no ID shows a clear tile.
+      Lab: GTA's tile reads SLES 51061; the PS1 test titles (no ID) are clear tiles.
 - [ ] **A video that loads forever** (FifthFox, 95: an AVI "from web"): asked whether it was on a local or a
       network device. Reproduce, and make the player give up with a message instead of hanging.
 - [ ] Flow and Grid settings text too large and cramped (FifthFox, 95): check it on the build 96 settings face.
-- [ ] **mc1:/ must never vanish after START DRIVES** (user, 10-12, again: copying from USB or HDD to that slot is
+- [x] **mc1:/ must never vanish after START DRIVES** (user, 10-12, again: copying from USB or HDD to that slot is
       impossible; the only way round is starting the drives on Storage first). And the cards are MEMORY CARD 0 and
       MEMORY CARD 1 (mc0:/, mc1:/), never 1 and 2.
-- [ ] **REGRESSION: the info page's background no longer fades in with the disc and the cover**, and its
+      START DRIVES pinged both slots with MMCE commands whatever Game Sources said; Storage never does. It now
+      asks exactly as Storage: nothing with MMCE off, the set slot only, Auto's slot 1 only when slot 0 has no
+      MMCE. Lab: MEMORY CARD 0 and 1 listed. Hardware (an MMCE beside a plain card) confirms.
+- [x] **REGRESSION: the info page's background no longer fades in with the disc and the cover**, and its
       slideshow does not fade properly (user, on the RIPPS2 theme). Find what changed and restore it.
-- [ ] **L2 / R2 on the Grid turn a whole page** (the set of covers on screen slides over, as at a row's edge);
+      On a real drive the background lands after the group's 0.8 s: the show began on a screenshot and late art
+      popped. The group waits 1.6 s, the show opens on its background (2 s), late art fades on its own.
+- [x] **L2 / R2 on the Grid turn a whole page** (the set of covers on screen slides over, as at a row's edge);
       today they move one cover.
-- [ ] **RIPFLOW tilts and flips like RIPGRID**: the centre cover on the main page tips with the right stick and
+      Lab: L2 from page 2 lands on page 1 at the same place; R2 on the last page goes to its last cover.
+- [x] **RIPFLOW tilts and flips like RIPGRID**: the centre cover on the main page tips with the right stick and
       turns over on a 0.42 s hold; on the info page the two screenshots tip as ONE sheet (today askew, each on
       its own pivot); the main page has no tilt at all.
-- [ ] **Vignette Other Covers: Off, Weak, Full.** Weak is the default at half of today's strength (Full); no bright
+      Lab: the centre cover leans with the stick (up, down, sideways); the info screenshots tip as one sheet.
+- [x] **Vignette Other Covers: Off, Weak, Full.** Weak is the default at half of today's strength (Full); no bright
       1 px line down a vignetted cover's side.
-- [ ] **Background art blur** (Artwork settings): Theme, Off, Weak (33 %), Normal (66 %), Strong (100 %, today's
+- [x] **Background art blur** (Artwork settings): Theme, Off, Weak (33 %), Normal (66 %), Strong (100 %, today's
       RIPGRID frost). A theme key; Adapt and RIPGRID default to Weak.
-- [ ] **Widescreen Grid layout**: its own rows under the Grid's in Flow and Grid (columns, rows, cover size)
+      Lab: RIPGRID's art reads through its frost at Weak.
+- [x] **Widescreen Grid layout**: its own rows under the Grid's in Flow and Grid (columns, rows, cover size)
       that apply only to the 16:9 HD modes (720p, 1080i) and widescreen, independent of the standard ones.
-- [ ] **RIPGRID in capitals everywhere** (the theme's name on screen, in docs and in the themes repo), like
+      Follows the picture as drawn. Lab, 720p: RIPGRID 6 x 2 (wide_columns=6), the sides filled.
+- [x] **RIPGRID in capitals everywhere** (the theme's name on screen, in docs and in the themes repo), like
       RIPPS2 and RIPFLOW; a saved `<RIPGRID>` still finds it.
 - [ ] **File tooltip**: resting on a file for 0.42 s shows its date, size and the other details wLE shows.
 - [ ] **Paste overwrites when asked**: a name already there asks Yes / No / Yes to All (the choice highlighted
       in the modal), and an overwrite succeeds (it is skipped today).
-- [ ] Devices show as `mc0:/` and `mc1:/`.
+- [x] Devices show as `mc0:/` and `mc1:/`: MEMORY CARD 0 and MEMORY CARD 1, their paths beside them.
 - [ ] Hold to scroll: after 0.42 s the cursor repeats at the Storage list's scroll speed.
 - [ ] Card manager: hints with glyphs on its Actions modal.
 - [ ] Picture viewer: Adapt's face, glyph hints that fit, no distortion zoomed in close.
