@@ -59,6 +59,17 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # the link map and the unstripped ELF of exactly this build: a lab save state's PC and stack read against them
+      - name: Upload symbols
+        uses: actions/upload-artifact@v6
+        with:
+          name: RIPPS2-symbols${{ inputs.debug && '-debug' || '' }}${{ inputs.flags && '-test' || '' }}
+          path: |
+            riptopl/opl.map
+            riptopl/opl.elf
+          if-no-files-found: warn
+          retention-days: 30
+
   # build 76: RiptOPL's host checks on the patched tree, plus RIPPS2's own (elf/tests). A plain Ubuntu
   # runner: the checks compile real loader code with the host gcc.
   host-tests:
