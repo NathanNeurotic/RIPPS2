@@ -78,6 +78,9 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] **Stability while art loads** (user, 10-11): pressing anything while the list and the info page are still
       loading art must never crash (the HDD list on the RIPPS2 theme, into the info page, navigating while its
       images come in). Reproduce in the lab with a button storm, catch any freeze or crash in a save state.
+      Lab: button storms on the HDD list and info page (with music) neither crashed nor stuck. Fixed on the
+      way: half of all music never played (top-bit Ogg serials), the background queued behind stale reads,
+      the preview's reload storm. Open until the hardware report.
 - [x] **The game's background art fades in as soon as it is decoded** on the main view: nothing ahead of it
       delays the fade. (Build 99 may take this further with RiptOPL's art loading round-up.)
       It queued at the art queue's tail, behind prefetches and a fast scroll's leftover reads; it is now asked for
@@ -98,6 +101,9 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       RiptOPL). Walk every MX4SIO path against RiptOPL 65d4b89 and its later fixes (load gates, the second
       probe, Game Sources, page visibility, MMCE sharing SIO2, slot 2 card access). PCSX2 has no MX4SIO:
       FifthFox confirms on hardware.
+      Nothing in RIPPS2's patches changes how the driver loads (walked against upstream, which has no newer
+      MX4SIO fix). STATUS > DRIVES now names every drive and what became of MX4SIO (off, not started,
+      refused with its code, no SD card, or mounted): ask FifthFox to read it out on build 98.
 - [x] **Grid tiles without a cover** (FifthFox, 95): the ISO's file name in very large text, sometimes past the
       tile, while game IDs are much smaller. A tile shows only the game ID (the name is under the grid), one
       size on every tile, always inside it; a game with no ID shows a clear tile.
@@ -133,9 +139,13 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       Follows the picture as drawn. Lab, 720p: RIPGRID 6 x 2 (wide_columns=6), the sides filled.
 - [x] **RIPGRID in capitals everywhere** (the theme's name on screen, in docs and in the themes repo), like
       RIPPS2 and RIPFLOW; a saved `<RIPGRID>` still finds it.
-- [ ] **File tooltip**: resting on a file for 0.42 s shows its date, size and the other details wLE shows.
-- [ ] **Paste overwrites when asked**: a name already there asks Yes / No / Yes to All (the choice highlighted
+- [x] **File tooltip**: resting on a file for 0.42 s shows its date, size and the other details wLE shows.
+      Lab: resting on cursor.adp shows 2,048 BYTES and its modified and created times; a save folder on mc0 its
+      times. Read on the IO worker (fileXioGetStat).
+- [x] **Paste overwrites when asked**: a name already there asks Yes / No / Yes to All (the choice highlighted
       in the modal), and an overwrite succeeds (it is skipped today).
+      Lab: the second paste of cursor.adp onto mc0 asked REPLACE IT? (YES TO ALL shows when more than one
+      name is there); YES replaced it. A folder merges, each file in it replaced.
 - [x] Devices show as `mc0:/` and `mc1:/`: MEMORY CARD 0 and MEMORY CARD 1, their paths beside them.
 - [ ] Hold to scroll: after 0.42 s the cursor repeats at the Storage list's scroll speed.
 - [ ] Card manager: hints with glyphs on its Actions modal.
