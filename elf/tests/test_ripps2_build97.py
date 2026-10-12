@@ -1,5 +1,5 @@
 """Build 97: Grid and Flow. The case flip on a 0.42 s hold of the right stick, on RIPFLOW's centre cover too; the
-Grid turns its page at a row's edge instead of wrapping; RIPgrid centred on the screen with its name in RIPPS2 Sleek
+Grid turns its page at a row's edge instead of wrapping; RIPGRID centred on the screen with its name in RIPPS2 Sleek
 Bold; RIPFLOW's info page screenshots tilt; every built-in theme cfg parses into the elements its page needs.
 
 Static checks on the patched tree."""
@@ -18,7 +18,7 @@ if '#define FLIP_HOLD_S 0.42f' not in thm:
 if 'gridBacks[GRID_BACK_SLOTS]' not in thm or 'for (i = 0; i < 2; i++)\n        if (gridBacks' in thm:
     fail.append('the back covers need a place for every flipping element (GRID_BACK_SLOTS)')
 cf = thm[thm.index('static void drawCoverFlow('):thm.index('// Grid (RIPPS2 build 78)')]
-if 'gridFlipUpdate(' not in cf or 'ripps2TiltBeginTurn(posX, posY, 0,' not in cf or 'texture = cfBack;' not in cf:
+if 'gridFlipUpdate(' not in cf or ('ripps2TiltBeginTurn(posX, posY, 0,' not in cf and 'ripps2TiltBeginTurn(posX, posY, cfTilt ? elem->tiltScale : 0,' not in cf) or 'texture = cfBack;' not in cf:
     fail.append("RIPFLOW's centre cover must turn over to its back cover")
 init = thm[thm.index('static void initCoverflow('):]
 init = init[:init.index('\n}\n')]
@@ -110,12 +110,12 @@ for name, need in (('misc/theme_coverflow.cfg', 'Coverflow'), ('misc/theme_ripgr
         fail.append('%s must keep a main %s element' % (name, need))
 grid = [v for k, v in elems(rd('misc/theme_ripgrid.cfg')).items() if v.get('type') == 'Grid']
 if not grid or grid[0].get('x') != '320' or grid[0].get('title_font') != '7':
-    fail.append('RIPgrid: centred (x=320), its name in font7')
+    fail.append('RIPGRID: centred (x=320), its name in font7')
 if 'font7=builtin:ripps2sleekbold' not in rd('misc/theme_ripgrid.cfg'):
-    fail.append("RIPgrid's font7 must be RIPPS2 Sleek Bold")
+    fail.append("RIPGRID's font7 must be RIPPS2 Sleek Bold")
 shots = [v for k, v in elems(rd('misc/theme_coverflow.cfg')).items() if k.startswith('info') and v.get('pattern') in ('SCR', 'SCR2')]
 if len(shots) != 2 or any(v.get('tilt') != '1' for v in shots):
     fail.append("RIPFLOW's info page screenshots must tilt")
 
-print('\n'.join(fail) or 'build97: 0.42 s flip on the Grid and RIPFLOW, page edges, RIPgrid centred with a Sleek Bold title, RIPFLOW tilt, full list pages, fntFitString stops at the end of its string, the pad align waits for an idle pad OK')
+print('\n'.join(fail) or 'build97: 0.42 s flip on the Grid and RIPFLOW, page edges, RIPGRID centred with a Sleek Bold title, RIPFLOW tilt, full list pages, fntFitString stops at the end of its string, the pad align waits for an idle pad OK')
 sys.exit(1 if fail else 0)

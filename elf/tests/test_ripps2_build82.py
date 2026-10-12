@@ -1,4 +1,4 @@
-"""Build 82: HD text at its true width, US spellings on screen, and RIPgrid's back covers, flip and page slide.
+"""Build 82: HD text at its true width, US spellings on screen, and RIPGRID's back covers, flip and page slide.
 
 Static checks on the patched tree. The HD check works the font scale out of the mode table the way
 fntsys.c does (height scale x PAR) and asks for the 16:9 width every picture in RIPPS2 uses: three
@@ -30,7 +30,7 @@ for text, where in (('Update cancelled.', lng), ('colour depth', lng), ('MIT lic
     if text in where:
         fail.append('UK spelling on screen: %s' % text)
 
-# --- RIPgrid: back covers, the 2 s flip that stays, a page slide
+# --- RIPGRID: back covers, the 2 s flip that stays, a page slide
 if '"COV2"' not in th or 'gridBackFor(elem)' not in th:
     fail.append('the grid must keep its own back cover (COV2) cache')
 if 'initGridBack(themeConfig, theme, name,' not in th or '_back_pattern' not in th or \
@@ -48,8 +48,8 @@ if 'selBack = gridBackTexture(elem, src, item, 1);' not in dg:
     fail.append('the chosen game\'s back cover must be asked for as soon as its front is in')
 ig = th[th.index('static void initGrid('):]
 ig = ig[:ig.index('\n}\n')]
-if 'int slots = 2 * cols * rows;' not in ig or 'elem->endElem = &endGrid;' not in ig:
+if ('int slots = 2 * cols * rows;' not in ig and 'int slots = 2 * most;' not in ig) or 'elem->endElem = &endGrid;' not in ig:  # build 98: of the larger layout
     fail.append('the grid needs two pages of cover slots and its own end')
 
-print('\n'.join(fail) or 'build82: HD text width, US spellings, RIPgrid back covers, flip and slide OK')
+print('\n'.join(fail) or 'build82: HD text width, US spellings, RIPGRID back covers, flip and slide OK')
 sys.exit(1 if fail else 0)

@@ -30,7 +30,7 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [x] **MX4SIO shows up nowhere** (it does in RiptOPL and did in earlier builds): find the regression.
       REOPENED in build 98: FifthFox on build 95 still has no MX4SIO (patch 0095 changed nothing there).
 - [x] **JPG loads stop partway** (a quarter of the picture, not always the same file): read the whole file before
-      decoding (a short device read ends libjpeg's input early). Same for RIPgrid, which shows JPG covers as
+      decoding (a short device read ends libjpeg's input early). Same for RIPGRID, which shows JPG covers as
       text.
 
 ## Build 96: settings and menus
@@ -43,16 +43,16 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [x] Settings pages read in one plain face on every theme (Adapt's settings face), not each theme's styled
       fonts.
 - [x] Devices: auto start can be **Last Used**, the device and page you were on.
-- [x] Page buttons: Theme, L1 / R1 or L2 / R2; theme key `page_buttons=l2r2`, which RIPgrid uses.
+- [x] Page buttons: Theme, L1 / R1 or L2 / R2; theme key `page_buttons=l2r2`, which RIPGRID uses.
 
 ## Build 97: Grid and Flow
-- [x] RIPgrid: the name under the grid in RIPPS2 Sleek Bold; the grid centered on the content, ignoring the
+- [x] RIPGRID: the name under the grid in RIPPS2 Sleek Bold; the grid centered on the content, ignoring the
       sidebar; Right at the right edge goes to the next page and Left at the left edge to the previous one
       (no wrapping).
 - [x] Case flip on a 0.42 s right-stick hold (was 2 s), on RIPFLOW too, where it replaces the automatic front
       and back crossfade.
 - [x] RIPFLOW info page: right-stick tilt on the screenshots.
-- [x] RIPgrid on HDMI and HD modes (FifthFox: "optimized for a CRT"): check every video mode and fix its layout.
+- [x] RIPGRID on HDMI and HD modes (FifthFox: "optimized for a CRT"): check every video mode and fix its layout.
       480p, 720p and 1080i lay out centred. 720p FROZE the release build: a lab save state read against the
       build's symbols showed the GUI thread blocked in a pad actuator-align RPC the IOP never answered (the pad
       still busy with its init), holding the GUI lock. The align now waits for an idle pad. Also fixed on the
@@ -115,7 +115,7 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] **Widescreen Grid layout**: its own rows under the Grid's in Flow and Grid (columns, rows, cover size)
       that apply only to the 16:9 HD modes (720p, 1080i) and widescreen, independent of the standard ones.
 - [ ] **RIPGRID in capitals everywhere** (the theme's name on screen, in docs and in the themes repo), like
-      RIPPS2 and RIPFLOW; a saved `<RIPgrid>` still finds it.
+      RIPPS2 and RIPFLOW; a saved `<RIPGRID>` still finds it.
 - [ ] **File tooltip**: resting on a file for 0.42 s shows its date, size and the other details wLE shows.
 - [ ] **Paste overwrites when asked**: a name already there asks Yes / No / Yes to All (the choice highlighted
       in the modal), and an overwrite succeeds (it is skipped today).

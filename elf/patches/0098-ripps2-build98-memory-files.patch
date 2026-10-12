@@ -24,6 +24,26 @@ index f5b03d3..0e532e2 100644
      with tempfile.TemporaryDirectory() as tmp:
          src = Path(tmp) / 'bgm_source.c'
          exe = Path(tmp) / 'bgm_source'
+diff --git a/include/dialogs.h b/include/dialogs.h
+index c3d3686..6a53d06 100644
+--- a/include/dialogs.h
++++ b/include/dialogs.h
+@@ -24,6 +24,7 @@ enum UI_ITEMS {
+     UICFG_ENABLE_ART_TAR,
+     UICFG_ENABLE_ANALOG_NAV,
+     UICFG_ART_DELAY,
++    UICFG_RIPPS2_BGBLUR, // RIPPS2 build 98: Background Blur
+     UICFG_WIDESCREEN,
+     UICFG_AUTOREFRESH,
+     UICFG_VMODE,
+@@ -264,6 +265,7 @@ enum UI_ITEMS {
+     COVERFLOW_CFG_DIM,        // build 91: Vignette Other Covers (was Dim Side Covers)
+     COVERFLOW_CFG_LAYOUT,     // build 91: Grid Layout
+     COVERFLOW_CFG_LAUNCHDISC, // build 91: Launch Disc
++    COVERFLOW_CFG_LAYOUT_WIDE, // build 98: Widescreen Grid Layout
+ 
+     NARGS_QB,
+     NARGS_CWD,
 diff --git a/include/sound.h b/include/sound.h
 index 61ac524..1b27ec1 100644
 --- a/include/sound.h
@@ -36,8 +56,531 @@ index 61ac524..1b27ec1 100644
  // Discretionary storage users (art, cosmetic metadata) should not START a new read while the
  // decoded BGM reserve is below its low-water mark. Always true when BGM is off/not yet primed.
  int bgmDiscretionaryIoAllowed(void);
+diff --git a/include/themes.h b/include/themes.h
+index a179630..71ae268 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -170,6 +170,12 @@ typedef struct
+     char *name;
+ } theme_file_t;
+ 
++// RIPPS2 build 98: a layout of the Grid: columns, rows, one cover, the gap, the top
++typedef struct
++{
++    int cols, rows, w, h, gap, y;
++} grid_layout_t;
++
+ typedef struct theme
+ {
+     int useDefault;
+@@ -250,6 +256,9 @@ typedef struct theme
+     int gridTitle, gridTitleY, gridTitleFont; // the chosen game's name under the grid, its line and its face
+     theme_element_t *grid; // RIPPS2 build 78: the first Grid element (a page of covers in rows), NULL if none
+     int gridColumns, gridRows, gridSpacing;
++    grid_layout_t gridStd, gridWide; // RIPPS2 build 98: the grid on a 4:3 picture, and on a 16:9 one
++    int gridActive;                  // which of the two the grid has now (-1: neither yet)
++    int bgBlurDef;                   // RIPPS2 build 98: bg_blur, the frost's strength in percent (100: full)
+ 
+     int gameCacheCount;
+ 
+@@ -277,8 +286,11 @@ extern theme_t *gTheme;
+ #define RIPPS2_CASE_TITLE_FONT (gTheme->fonts[9])
+ 
+ extern int gCoverflowCount, gCoverflowCenterScale, gCoverflowAnimSpeed, gCoverflowDimCovers;
+-extern int gRipps2Vignette, gRipps2GridLayout; // RIPPS2 build 91: Flow and Grid
++extern int gRipps2Vignette, gRipps2GridLayout; // RIPPS2 build 91: Flow and Grid (build 98: vignette 0 off, 1 weak, 2 full)
+ #define RIPPS2_GRID_LAYOUTS 4                  // presets after Theme
++extern int gRipps2GridWide;                    // RIPPS2 build 98: Widescreen Grid Layout, 0 Theme, 1 Same, 2.. presets
++#define RIPPS2_GRID_WIDE_PRESETS 4
++extern int gRipps2BgBlur;                      // RIPPS2 build 98: Background Blur, 0 Theme, 1 Off, 2 Weak, 3 Normal, 4 Strong
+ void thmTriggerCoverflowAnim(int dir);
+ int thmCoverflowIsAnimating(void);
+ 
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index ef8435e..eefb816 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1560,7 +1560,15 @@ gui_strings:
+ - label: HINT_RIPPS2_TRANSITION
+   string: "How a new page comes in as you go to another category: from the theme's background colour, or out of a flash. Theme keeps the theme's choice."
+ - label: HINT_RIPPS2_VIGNETTE
+-  string: "Darkens the edges of every cover but the chosen one, so the chosen one stands out."
++  string: "Darkens the edges of every cover but the chosen one, so the chosen one stands out. Weak is half of Full."
++- label: RIPPS2_GRID_WIDE
++  string: Widescreen Grid Layout
++- label: HINT_RIPPS2_GRID_WIDE
++  string: "The Grid's page on a 16:9 picture (Widescreen, 720p, 1080i) only, where covers draw narrower and more fit across. Theme uses the theme's own; Same follows Grid Layout."
++- label: RIPPS2_BGBLUR
++  string: Background Blur
++- label: HINT_RIPPS2_BGBLUR
++  string: "How strongly frosted glass blurs the game's background art. Theme uses the theme's own (Weak on RIPGRID and Adapt)."
+ - label: HINT_RIPPS2_HINT_SLOT
+   string: "The hint in this place. The hint that was here moves to the picked hint's old place."
+ - label: PS1_SAVE_GUIDANCE
+diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
+index 858565c..a94c7bf 100644
+--- a/misc/theme_coverflow.cfg
++++ b/misc/theme_coverflow.cfg
+@@ -65,6 +65,8 @@ main1:
+ #	height=16
+ main2:
+ 	type=Coverflow
++	tilt=1
++	tilt_scale=160
+ 	default=cover
+ 	reflection=1
+ 	reflection_offset=0
+@@ -83,6 +85,8 @@ main2:
+ 	overlay_lry=256
+ appsMain2:
+ 	type=Coverflow
++	tilt=1
++	tilt_scale=160
+ 	default=coverapp
+ 	reflection=1
+ 	reflection_offset=0
+@@ -101,6 +105,8 @@ appsMain2:
+ 	overlay_lry=256
+ vcdMain2:
+ 	type=Coverflow
++	tilt=1
++	tilt_scale=160
+ 	default=cover
+ 	reflection=1
+ 	reflection_offset=0
+@@ -520,9 +526,11 @@ info26:
+ 	pattern=SCR
+ 	default=screen
+ 	tilt=1
++	tilt_x=320
++	tilt_y=330
+ 	x=189
+ 	y=-150
+-	scaled=2
++	scaled=1
+ 	width=200
+ 	height=150
+ 	overlay=screens
+@@ -539,8 +547,11 @@ info27:
+ 	pattern=SCR2
+ 	default=screen
+ 	tilt=1
++	tilt_x=320
++	tilt_y=330
+ 	x=-191
+ 	y=-150
++	scaled=1
+ 	width=200
+ 	height=150
+ 	overlay=screens
+diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
+index f042b0e..a7952f2 100644
+--- a/misc/theme_ripgrid.cfg
++++ b/misc/theme_ripgrid.cfg
+@@ -1,10 +1,10 @@
+-# RIPPS2 build 91: <RIPgrid>, built in. The theme pack's thm_RIPgrid (RIPPS2-themes) with RIPPS2's own
++# RIPPS2 build 91: <RIPGRID>, built in. The theme pack's thm_RIPGRID (RIPPS2-themes) with RIPPS2's own
+ # images in place of the folder's (the screenshots go without the pack's SCR43 frame). The launch disc
+ # pops in as a game starts; RIPFLOW's spins.
+ launch_disc=pop
+ # RIPPS2 build 96: L2 / R2 turn the grid's pages (Controller Settings > Page Buttons can change it)
+ page_buttons=l2r2
+-# Theme Name: RIPgrid
++# Theme Name: RIPGRID
+ # Made by: akilluminati47 (Adapt RiptOPL, 8/27/2026), RIPPS2 edition (build 83)
+ # [case.png] [case_overlay.png] RiptOPL's built-in case (b2); [SCR43.png] Adapt's screenshot frame at 4:3
+ # RIPPS2: each game's art under frosted glass (a full-screen Ripps2PanelGlass, blur=1), a frosted side
+@@ -16,6 +16,7 @@ sel_text_color=#0064FF
+ text_color=#FFFFFF
+ ui_text_color=#C4DAFF
+ towers=0
++bg_blur=weak
+ source_name=pop
+ default_font=builtin:ripps2sleek
+ default_font_size=17
+@@ -29,7 +30,7 @@ font4=builtin:ripps2sleekbold
+ font4_size=20
+ font15=builtin:ripps2sleekcase
+ font15_size=15
+-# build 92: font5 is RIPPS2 Sleek here (the pack's RIPgrid uses Planet N, which is not RIPPS2's to build in);
++# build 92: font5 is RIPPS2 Sleek here (the pack's RIPGRID uses Planet N, which is not RIPPS2's to build in);
+ # font6 is RIPPS2 Sleek Bold, all capitals, for the developer and the genre
+ font5=builtin:ripps2sleek
+ font5_size=20
+@@ -38,7 +39,7 @@ font6_size=17
+ # build 97: the chosen game's name under the grid, in RIPPS2 Sleek Bold
+ font7=builtin:ripps2sleekbold
+ font7_size=22
+-# RIPgrid's type: RIPPS2 Sleek (Regular, Bold, Bold Case), built into RIPPS2 (builtin: fonts)
++# RIPGRID's type: RIPPS2 Sleek (Regular, Bold, Bold Case), built into RIPPS2 (builtin: fonts)
+ # [circle.png] [cross.png] [square.png] [triangle.png] [select.png] [start.png] from the Grunge theme
+ 
+ main0:
+@@ -94,6 +95,7 @@ main4:
+ 	title=1
+ 	title_y=416
+ 	title_font=7
++	wide_columns=6
+ main5:
+ 	type=ItemsList
+ 	x=POS_MID
+diff --git a/src/dialogs.c b/src/dialogs.c
+index 61e7273..f40af3f 100644
+--- a/src/dialogs.c
++++ b/src/dialogs.c
+@@ -853,6 +853,12 @@ struct UIItem diaArtworkConfig[] = {
+     {UI_ENUM, UICFG_ART_DELAY, 1, 1, -1, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
++    // RIPPS2 build 98: how strongly frosted glass blurs the game's background art
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_BGBLUR}}},
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_BGBLUR, 1, 1, _STR_HINT_RIPPS2_BGBLUR, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+     {UI_BREAK},
+@@ -2025,7 +2031,7 @@ struct UIItem diaCoverflowConfig[] = {
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COVERFLOW_DIM}}},
+     {UI_SPACER},
+-    {UI_BOOL, COVERFLOW_CFG_DIM, 1, 1, _STR_HINT_RIPPS2_VIGNETTE, 0, 0, {.intvalue = {0, 0}}},
++    {UI_ENUM, COVERFLOW_CFG_DIM, 1, 1, _STR_HINT_RIPPS2_VIGNETTE, 0, 0, {.intvalue = {0, 0}}}, // build 98: Off / Weak / Full
+     {UI_BREAK},
+ 
+     // RIPPS2 build 91: Grid's pages, and the disc a launch brings in
+@@ -2034,6 +2040,12 @@ struct UIItem diaCoverflowConfig[] = {
+     {UI_ENUM, COVERFLOW_CFG_LAYOUT, 1, 1, _STR_HINT_RIPPS2_GRID_LAYOUT, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
++    // build 98: the Grid's own layout for a 16:9 picture
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_GRID_WIDE}}},
++    {UI_SPACER},
++    {UI_ENUM, COVERFLOW_CFG_LAYOUT_WIDE, 1, 1, _STR_HINT_RIPPS2_GRID_WIDE, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_LAUNCH_DISC}}},
+     {UI_SPACER},
+     {UI_ENUM, COVERFLOW_CFG_LAUNCHDISC, 1, 1, _STR_HINT_RIPPS2_LAUNCH_DISC, 0, 0, {.intvalue = {0, 0}}},
+diff --git a/src/gui.c b/src/gui.c
+index 7155f12..69daded 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -2352,12 +2352,20 @@ void guiShowArtworkConfig(void)
+     diaSetInt(diaArtworkConfig, UICFG_ENABLE_ART_TAR, gEnableArtTar);
+     diaSetEnum(diaArtworkConfig, UICFG_ART_DELAY, artDelayNames);
+     diaSetInt(diaArtworkConfig, UICFG_ART_DELAY, artDelayToEnum(gArtDelay));
++    static const char *bgBlurNames[] = {"Theme", "Off", "Weak", "Normal", "Strong", NULL}; // build 98
++    diaSetEnum(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, bgBlurNames);
++    diaSetInt(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, gRipps2BgBlur);
+ 
+     int ret = diaExecuteDialog(diaArtworkConfig, -1, 1, NULL);
+     if (ret) {
+         diaGetInt(diaArtworkConfig, UICFG_COVERART, &gEnableArt);
+         diaGetInt(diaArtworkConfig, UICFG_ENABLE_DISCART, &gEnableDiscArt);
+         diaGetInt(diaArtworkConfig, UICFG_ENABLE_BGART, &gEnableBGArt);
++        {
++            int blur = 0; // build 98: Background Blur
++            if (diaGetInt(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, &blur) && blur >= 0 && blur <= 4)
++                gRipps2BgBlur = blur;
++        }
+         {
+             // Re-arm the .tar probe when the toggle actually flips. tarFind's "no archive anywhere"
+             // latch is write-once and process-wide, so a user who turns the loader on after boot would
+@@ -2621,7 +2629,13 @@ void guiShowCoverflowConfig(void)
+             animIdx = i;
+     diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_ANIM, animIdx);
+ 
+-    diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_DIM, gRipps2Vignette ? 1 : 0); // build 91: the vignette
++    static const char *vignetteNames[] = {"Off", "Weak", "Full", NULL}; // build 98
++    static const char *gridWideNames[] = {"Theme", "Same as Grid Layout", "6 x 2", "7 x 2", "5 x 2 Large", "8 x 3 Compact", NULL};
++    int keepWide = gRipps2GridWide;
++    diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_DIM, vignetteNames);
++    diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_DIM, gRipps2Vignette >= 0 && gRipps2Vignette <= 2 ? gRipps2Vignette : 1); // build 91: the vignette
++    diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gridWideNames);
++    diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gRipps2GridWide);
+ 
+     int result = diaExecuteDialog(diaCoverflowConfig, -1, 1, NULL);
+     if (result) {
+@@ -2631,14 +2645,16 @@ void guiShowCoverflowConfig(void)
+             gCoverflowCenterScale = ((value >= 0 && value <= 3) ? value : 0) * 15;
+         if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_ANIM, &value))
+             gCoverflowAnimSpeed = animValues[(value >= 0 && value <= 3) ? value : 2];
+-        if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_DIM, &value))
+-            gRipps2Vignette = value ? 1 : 0;
++        if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_DIM, &value) && value >= 0 && value <= 2)
++            gRipps2Vignette = value; // build 98: 0 Off, 1 Weak, 2 Full
++        if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, &value) && value >= 0 && value < 2 + RIPPS2_GRID_WIDE_PRESETS)
++            gRipps2GridWide = value;
+         if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_LAUNCHDISC, &value) && value >= 0 && value <= 3)
+             gRipps2LaunchDisc = value;
+         if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, &value) && value >= 0 && value <= RIPPS2_GRID_LAYOUTS)
+             gRipps2GridLayout = value;
+         // a new Grid Layout changes how many covers a page holds (and its cache): the theme loads again with it
+-        if (gRipps2GridLayout != keepLayout && gTheme != NULL && gTheme->grid != NULL && thmSetGuiValue(thmGetGuiValue(), 1)) {
++        if ((gRipps2GridLayout != keepLayout || gRipps2GridWide != keepWide) && gTheme != NULL && gTheme->grid != NULL && thmSetGuiValue(thmGetGuiValue(), 1)) {
+             int m;
+             for (m = 0; m < MODE_COUNT; m++)
+                 moduleUpdateMenu(m, 1, 0);
+diff --git a/src/menusys.c b/src/menusys.c
+index a36fc4c..f1b217f 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -1415,8 +1415,40 @@ static void menuPrevV()
+     }
+ }
+ 
++// RIPPS2 build 98: the page buttons on the Grid turn a whole page of covers (columns x rows), the cursor keeping its
++// place on the page; at the last page it moves to the last cover, at the first page it stays. They moved one cover:
++// the Grid's hidden list is one row high, so a list page there was a single item. 1 when it was the Grid's to do.
++static int menuGridPage(int dir)
++{
++    int cols = thmGridColumns(), rows = gTheme->gridRows > 0 ? gTheme->gridRows : 1, page, cur = 0, count = 0, target, i;
++    submenu_list_t *p;
++
++    if (cols <= 0 || selected_item == NULL || selected_item->item == NULL)
++        return 0;
++    for (p = selected_item->item->submenu; p != NULL; p = p->next, count++)
++        if (p == selected_item->item->current)
++            cur = count;
++    if (count == 0)
++        return 1;
++    page = cols * rows;
++    if (dir > 0) {
++        if (cur - cur % page + page >= count)
++            target = count - 1; // the last page: its last cover
++        else
++            target = cur + page < count ? cur + page : count - 1;
++    } else
++        target = cur >= page ? cur - page : cur; // the first page: stay
++    for (i = cur; i < target; i++)
++        menuNextV();
++    for (i = cur; i > target; i--)
++        menuPrevV();
++    return 1;
++}
++
+ static void menuNextPage()
+ {
++    if (menuGridPage(1))
++        return;
+     submenu_list_t *cur = selected_item->item->pagestart;
+     int displayed = ((items_list_t *)gTheme->itemsList->extended)->displayedItems;
+ 
+@@ -1448,6 +1480,8 @@ static void menuNextPage()
+ 
+ static void menuPrevPage()
+ {
++    if (menuGridPage(-1))
++        return;
+     submenu_list_t *cur = selected_item->item->pagestart;
+ 
+     if (cur && cur->prev) {
+diff --git a/src/opl.c b/src/opl.c
+index 812614b..5001a47 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -3404,8 +3404,12 @@ static void _loadConfig()
+             ripps2HintsLoadConfig(configOPL); // build 90: Hints and Glyphs
+             if (configGetInt(configOPL, "ripps2_launch_disc", &value) && value >= 0 && value <= 3)
+                 gRipps2LaunchDisc = value; // build 91: Flow and Grid > Launch Disc
+-            if (configGetInt(configOPL, "ripps2_vignette", &value))
+-                gRipps2Vignette = value ? 1 : 0;
++            if (configGetInt(configOPL, "ripps2_vignette", &value) && value >= 0 && value <= 2)
++                gRipps2Vignette = value; // build 98: 0 Off, 1 Weak (the old On reads as Weak), 2 Full
++            if (configGetInt(configOPL, "ripps2_grid_wide", &value) && value >= 0 && value < 2 + RIPPS2_GRID_WIDE_PRESETS)
++                gRipps2GridWide = value; // build 98
++            if (configGetInt(configOPL, "ripps2_bg_blur", &value) && value >= 0 && value <= 4)
++                gRipps2BgBlur = value; // build 98
+             if (configGetInt(configOPL, "ripps2_grid_layout", &value) && value >= 0 && value <= RIPPS2_GRID_LAYOUTS)
+                 gRipps2GridLayout = value;
+             if (configGetInt(configOPL, "ripps2_transition", &value) && value >= 0 && value <= 3)
+@@ -4117,6 +4121,8 @@ static void _saveConfig()
+         configSetInt(configOPL, "ripps2_launch_disc", gRipps2LaunchDisc); // build 91
+         configSetInt(configOPL, "ripps2_vignette", gRipps2Vignette);
+         configSetInt(configOPL, "ripps2_grid_layout", gRipps2GridLayout);
++        configSetInt(configOPL, "ripps2_grid_wide", gRipps2GridWide); // build 98
++        configSetInt(configOPL, "ripps2_bg_blur", gRipps2BgBlur);     // build 98
+         configSetInt(configOPL, "ripps2_transition", gRipps2Transition); // build 92
+         ripps2QuietBootMark(gEnableSFX && gEnableBootSND); // build 75: what an HDD launch knows before its settings
+         configSetStr(configOPL, CONFIG_OPL_THEME, thmGetValue());
+diff --git a/src/pad.c b/src/pad.c
+index 7145a62..176ca0c 100644
+--- a/src/pad.c
++++ b/src/pad.c
+@@ -127,7 +127,7 @@ static int isPadReadyState(int state)
+ 
+ // RIPPS2 build 97: may a BLOCKING pad command go out now? padSetActAlign is an RPC whose IOP side waits for
+ // the pad's current command to finish, and a pad still busy with one never answers: the caller waits for
+-// ever. That was the RIPgrid 720p freeze, found in a save state of the frozen lab: the GUI thread in readPads
++// ever. That was the RIPGRID 720p freeze, found in a save state of the frozen lab: the GUI thread in readPads
+ // -> padActSet -> padSetActAlign -> sceSifCallRpc, the IOP idle, the GUI lock held, and the IO worker waiting
+ // on it in thmAddElements. The pad's init had timed out in EXECCMD (PCSX2's after Enter Press Mode). Asked
+ // fresh, never from the cached state (which only follows Stable, FindCTP1 and Disconnected).
+diff --git a/src/ripps2boot.c b/src/ripps2boot.c
+index e7be100..4305d61 100644
+--- a/src/ripps2boot.c
++++ b/src/ripps2boot.c
+@@ -632,7 +632,7 @@ void ripps2BootLockApply(int on)
+         // What starts at power on is not PS2BBL, or there is no PS2BBL at all: a config cannot do it
+         int n;
+         if (boot >= 0) {
+-            n = snprintf(msg, sizeof(msg), "Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.", boot + 1, blKindName[blCards[boot].kind]);
++            n = snprintf(msg, sizeof(msg), "Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.", boot, blKindName[blCards[boot].kind]);
+         } else
+             n = snprintf(msg, sizeof(msg), "BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.");
+         if (changed && n < (int)sizeof(msg))
+@@ -896,7 +896,7 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+     if (SecrDownloadFile(2 + port, 0, buf) == NULL) {
+         free(buf);
+         guiMsgBoxSound(SFX_ERROR);
+-        snprintf(msg, sizeof(msg), "The console would not bind BIBLE to memory card %d (its MagicGate step failed). Nothing on the card was changed. A card that is not a genuine or MagicGate-compatible one cannot hold a system update.", port + 1);
++        snprintf(msg, sizeof(msg), "The console would not bind BIBLE to memory card %d (its MagicGate step failed). Nothing on the card was changed. A card that is not a genuine or MagicGate-compatible one cannot hold a system update.", port);
+         guiMsgBox(msg, 0, NULL);
+         return;
+     }
+@@ -941,7 +941,7 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+             blMcRename(port, backup, blSysFolder);
+         }
+         guiMsgBoxSound(SFX_ERROR);
+-        snprintf(msg, sizeof(msg), "BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.", port + 1);
++        snprintf(msg, sizeof(msg), "BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.", port);
+         guiMsgBox(msg, 0, NULL);
+         return;
+     }
+@@ -964,7 +964,7 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+             blWriteIcons(dir, "BIBLE ", "config");
+         if ((len = blBibleConfig(alt, backupKelf)) < 0 || blWrite(conf, blText, len) != 0) {
+             guiMsgBoxSound(SFX_ERROR);
+-            snprintf(msg, sizeof(msg), "BIBLE is on memory card %d, but its config (%s) could not be written, so it starts the browser. Free some space and run MANAGE again to finish.", port + 1, conf);
++            snprintf(msg, sizeof(msg), "BIBLE is on memory card %d, but its config (%s) could not be written, so it starts the browser. Free some space and run MANAGE again to finish.", port, conf);
+             guiMsgBox(msg, 0, NULL);
+             return;
+         }
+@@ -983,7 +983,7 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+     guiMsgBoxSound(SFX_SAVE);
+     {
+         int n = snprintf(msg, sizeof(msg), "BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.",
+-                         port + 1, port, blSysFolder, blSysFile, w->path);
++                         port, port, blSysFolder, blSysFile, w->path);
+         if (n < (int)sizeof(msg) && backup[0])
+             n += snprintf(msg + n, sizeof(msg) - n, " What was there before is kept in mc%d:/%s%s.", port, backup, backupKelf[0] ? " (hold CIRCLE at power on to start it)" : "");
+         if (n < (int)sizeof(msg) && keptConfig)
+@@ -1386,7 +1386,7 @@ static void blInstall(void)
+     for (port = 0; port < 2; port++)
+         if (blCards[port].present) {
+             blCardWhat(port, bootPort, what, sizeof(what));
+-            snprintf(items[n], sizeof(items[n]), "MEMORY CARD %d  (%s)", port + 1, what);
++            snprintf(items[n], sizeof(items[n]), "MEMORY CARD %d  (%s)", port, what);
+             list[n] = items[n];
+             ports[n++] = port;
+         }
+@@ -1435,10 +1435,10 @@ static void blInstall(void)
+         for (i = 0; i < 2; i++) {
+             if (!blCards[i].present || !strncmp(boot, i ? "mc1:" : "mc0:", 4))
+                 continue;
+-            snprintf(where[count].label, sizeof(where[count].label), "A COPY ON MEMORY CARD %d", i + 1);
++            snprintf(where[count].label, sizeof(where[count].label), "A COPY ON MEMORY CARD %d", i);
+             snprintf(where[count].path, sizeof(where[count].path), "mc?:/RIPPS2/%s", name);
+             snprintf(where[count].copyTo, sizeof(where[count].copyTo), "mc%d:/RIPPS2/%s", i, name);
+-            snprintf(where[count].copyWhat, sizeof(where[count].copyWhat), "memory card %d", i + 1);
++            snprintf(where[count].copyWhat, sizeof(where[count].copyWhat), "memory card %d", i);
+             where[count].cardKb = elfKb + 16;
+             where[count].cardPort = i;
+             count++;
+@@ -1480,13 +1480,13 @@ static void blInstall(void)
+         int need = kelfKb + 2 * ((size_save_icn + 1023) / 1024 + 2) + 4 + (where[pick].cardKb && where[pick].cardPort == port ? where[pick].cardKb : 0);
+         if (blCards[port].freeKb < need) {
+             guiMsgBoxSound(SFX_ERROR);
+-            snprintf(msg, sizeof(msg), "Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.", port + 1, blCards[port].freeKb, need);
++            snprintf(msg, sizeof(msg), "Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.", port, blCards[port].freeKb, need);
+             guiMsgBox(msg, 0, NULL);
+             return;
+         }
+         if (where[pick].cardKb && where[pick].cardPort != port && blCards[where[pick].cardPort].freeKb < where[pick].cardKb) {
+             guiMsgBoxSound(SFX_ERROR);
+-            snprintf(msg, sizeof(msg), "Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.", where[pick].cardPort + 1, blCards[where[pick].cardPort].freeKb, where[pick].cardKb);
++            snprintf(msg, sizeof(msg), "Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.", where[pick].cardPort, blCards[where[pick].cardPort].freeKb, where[pick].cardKb);
+             guiMsgBox(msg, 0, NULL);
+             return;
+         }
+@@ -1495,7 +1495,7 @@ static void blInstall(void)
+     // everything, said once, and only START goes ahead
+     {
+         const blCard_t *c = &blCards[port];
+-        int o = snprintf(msg, sizeof(msg), "INSTALL BIBLE ON MEMORY CARD %d\n", port + 1);
++        int o = snprintf(msg, sizeof(msg), "INSTALL BIBLE ON MEMORY CARD %d\n", port);
+         char sysDir[48];
+         snprintf(sysDir, sizeof(sysDir), "mc%d:/%s", port, blSysFolder);
+         if (blDirExists(sysDir) && !(c->bible && !strcmp(c->folder, blSysFolder)))
+@@ -1526,7 +1526,7 @@ void ripps2BibleManage(void)
+     for (port = 0; port < 2; port++)
+         blCardWhat(port, boot, what[port], sizeof(what[port]));
+     snprintf(msg, sizeof(msg),
+-             "MEMORY CARD 1: %s\nMEMORY CARD 2: %s\n%s\n"
++             "MEMORY CARD 0: %s\nMEMORY CARD 1: %s\n%s\n"
+              "BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?",
+              what[0], what[1],
+              removed ? "(Removed a SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it.)\n" : "");
+diff --git a/src/ripps2card.c b/src/ripps2card.c
+index 72e26c1..676dde9 100644
+--- a/src/ripps2card.c
++++ b/src/ripps2card.c
+@@ -10,7 +10,7 @@
+ 
+     DELETE        one save, two screens (the second only START gets past)
+     BACK UP       the whole card to a VMC on a drive: a blank image by genvmc, every folder copied in
+-    WRITE         every save in a card image onto memory card 1 or 2 (one already there is left alone)
++    WRITE         every save in a card image onto memory card 0 or 1 (one already there is left alone)
+     ERASE         every game save, keeping the folders that are not saves (boot loaders, RIPPS2, APPS...)
+     FORMAT        the card, blank (never the card RIPPS2 was started from)
+ */
+@@ -405,7 +405,7 @@ void ripps2CardManager(int slot, const char *image)
+     if (image != NULL)
+         snprintf(cmImage, sizeof(cmImage), "%s", image);
+     if (slot >= 0)
+-        snprintf(cmTitle, sizeof(cmTitle), "MEMORY CARD %d", slot + 1);
++        snprintf(cmTitle, sizeof(cmTitle), "MEMORY CARD %d", slot);
+     else {
+         slash = strrchr(cmImage, '/');
+         snprintf(cmTitle, sizeof(cmTitle), "%.60s", slash != NULL ? slash + 1 : cmImage);
+@@ -511,9 +511,9 @@ void ripps2CardManager(int slot, const char *image)
+             }
+             if (cmSlot < 0 && cmReady && cmCount > 0) {
+                 acts[n] = A_WRITE1;
+-                items[n++] = "WRITE THE SAVES TO MEMORY CARD 1";
++                items[n++] = "WRITE THE SAVES TO MEMORY CARD 0";
+                 acts[n] = A_WRITE2;
+-                items[n++] = "WRITE THE SAVES TO MEMORY CARD 2";
++                items[n++] = "WRITE THE SAVES TO MEMORY CARD 1";
+             }
+             if (cmReady && cmCount > 0) {
+                 acts[n] = A_ERASE;
+@@ -554,7 +554,7 @@ void ripps2CardManager(int slot, const char *image)
+                 case A_WRITE2: {
+                     char ask[200];
+                     int to = acts[pick] == A_WRITE1 ? 0 : 1;
+-                    snprintf(ask, sizeof(ask), "Write the %d saves in %s to memory card %d? A save already on the card is left as it is.", cmCount, cmTitle, to + 1);
++                    snprintf(ask, sizeof(ask), "Write the %d saves in %s to memory card %d? A save already on the card is left as it is.", cmCount, cmTitle, to);
+                     if (guiMsgBox(ask, 1, NULL) == 1)
+                         cmWrite(to, toast, sizeof(toast));
+                     break;
+diff --git a/src/ripps2ember.c b/src/ripps2ember.c
+index ca8e866..1bf483c 100644
+--- a/src/ripps2ember.c
++++ b/src/ripps2ember.c
+@@ -303,7 +303,7 @@ int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize)
+         if ((d = opendir(i ? "mc1:/" : "mc0:/")) == NULL)
+             continue;
+         closedir(d);
+-        snprintf(labels[n], sizeof(labels[n]), "MEMORY CARD %d  (about 600 KB)", i + 1);
++        snprintf(labels[n], sizeof(labels[n]), "MEMORY CARD %d  (about 600 KB)", i);
+         n++;
+     }
+     if (n == 0)
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index f4fad92..a1fbb6a 100644
+index f4fad92..2485c5e 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -38,6 +38,7 @@
@@ -114,6 +657,15 @@ index f4fad92..a1fbb6a 100644
  
  static void fbSetToast(const char *text)
  {
+@@ -187,7 +224,7 @@ static int fbVmcPath(const char *image, const char *path, char *save, int size)
+ static const char *fbDeviceLabel(const char *dev, char *buf, int size, int bdmType, int nth, int count)
+ {
+     if (!strncmp(dev, "mc", 2))
+-        snprintf(buf, size, "MEMORY CARD %c", dev[2] == '0' ? '1' : '2');
++        snprintf(buf, size, "MEMORY CARD %c", dev[2]); // build 98: mc0:/ is MEMORY CARD 0, mc1:/ MEMORY CARD 1
+     else if (!strncmp(dev, "mass", 4)) {
+         const char *kind = bdmType == BDM_TYPE_USB ? "USB DRIVE" : bdmType == BDM_TYPE_SDC ? "MX4SIO" : bdmType == BDM_TYPE_ILINK ? "iLINK DRIVE" :
+                            bdmType == BDM_TYPE_ATA ? "HDD (exFAT)" : bdmType == BDM_TYPE_UDPBD ? "UDPBD (NETWORK)" : "DRIVE";
 @@ -330,6 +367,50 @@ static int fbCompare(const void *a, const void *b)
      return strcasecmp(x->name, y->name);
  }
@@ -303,9 +855,27 @@ index f4fad92..a1fbb6a 100644
          LOG("START DRIVES: a memory card is in slot 2, MX4SIO left out\n");
      } else {
          r = bdmEnsureTypedSource(BDM_TYPE_SDC, 2500);
-@@ -1216,6 +1353,10 @@ static void fbStartDrivesWork(void)
-     fbMmceSlot[0] = fileXioDevctl("mmce0:/", 0x1, NULL, 0, NULL, 0) != -1;
-     fbMmceSlot[1] = fileXioDevctl("mmce1:/", 0x1, NULL, 0, NULL, 0) != -1;
+@@ -1210,12 +1347,23 @@ static void fbStartDrivesWork(void)
+         clearErrorMessageIf(_STR_HDD_NOT_CONNECTED_ERROR);
+         LOG("START DRIVES: no internal hard drive\n");
+     }
+-    // MMCE: the driver, then a ping per slot. A plain memory card does not answer it, and the list
+-    // never opens mmceN:/ on a slot that did not (MMCE commands to a plain card only time out)
+-    mmceLoadModules();
+-    fbMmceSlot[0] = fileXioDevctl("mmce0:/", 0x1, NULL, 0, NULL, 0) != -1;
+-    fbMmceSlot[1] = fileXioDevctl("mmce1:/", 0x1, NULL, 0, NULL, 0) != -1;
++    // MMCE: exactly as Storage asks (build 98). With MMCE off in Game Sources nothing is sent to either slot; a
++    // set slot is the only one pinged; Auto pings slot 0 and slot 1 only when slot 0 has no MMCE. START DRIVES
++    // used to load the driver and ping BOTH slots whatever the setting said, and MMCE commands sent to a plain
++    // card in slot 1 took mc1:/ off the list for the session (starting the drives on Storage never did).
++    fbMmceSlot[0] = fbMmceSlot[1] = 0;
++    if (gMMCEStartMode != START_MODE_DISABLED) {
++        mmceLoadModules();
++        if (gMMCESlot == 0 || gMMCESlot == 2)
++            fbMmceSlot[0] = fileXioDevctl("mmce0:/", 0x1, NULL, 0, NULL, 0) != -1;
++        if (gMMCESlot == 1 || (gMMCESlot == 2 && !fbMmceSlot[0]))
++            fbMmceSlot[1] = fileXioDevctl("mmce1:/", 0x1, NULL, 0, NULL, 0) != -1;
++    }
      LOG("START DRIVES: MMCE slot 1 %d, slot 2 %d\n", fbMmceSlot[0], fbMmceSlot[1]);
 +    // build 98: a plain card answers the ping by timing out, and its next access says "changed card": ask it now
 +    // so the drive list finds both slots as they were
@@ -314,7 +884,7 @@ index f4fad92..a1fbb6a 100644
      DelayThread(1000 * 1000); // a USB stick enumerates a moment after its driver: let it, before the list is read
      fbDrivesUp = 1;
      fbDrivesDone = 1;
-@@ -1384,6 +1525,8 @@ static void fbAction(int act)
+@@ -1384,6 +1532,8 @@ static void fbAction(int act)
              sfxPlay(SFX_CONFIRM);
              fbPasteMode = act == FB_ACT_PASTE_PSU ? FB_PASTE_PSU : act == FB_ACT_UNPACK ? FB_PASTE_UNPACK : FB_PASTE_PLAIN;
              fbTotalItems = fbClipCount;
@@ -323,7 +893,7 @@ index f4fad92..a1fbb6a 100644
              fbRun(FB_OP_PASTE, fbPasteMode == FB_PASTE_PSU ? "EXPORTING" : fbPasteMode == FB_PASTE_UNPACK ? "UNPACKING" : fbClipCut ? "MOVING" : "PASTING");
              break;
          case FB_ACT_DELETE:
-@@ -1396,6 +1539,7 @@ static void fbAction(int act)
+@@ -1396,6 +1546,7 @@ static void fbAction(int act)
                  fbDeleteCount = n;
                  fbTotalItems = n;
                  fbClearMarks();
@@ -331,7 +901,7 @@ index f4fad92..a1fbb6a 100644
                  fbRun(FB_OP_DELETE, "DELETING");
              }
              break;
-@@ -1404,6 +1548,10 @@ static void fbAction(int act)
+@@ -1404,6 +1555,10 @@ static void fbAction(int act)
              if (guiShowKeyboard(name, sizeof(name)) && name[0] && strcmp(name, fbList[fbCursor].name) != 0) {
                  fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
                  fbJoin(to, sizeof(to), fbPath, name);
@@ -342,7 +912,7 @@ index f4fad92..a1fbb6a 100644
                  fbSetToast(rename(from, to) == 0 ? "RENAMED" : "RENAME FAILED");
                  snprintf(fbKeepName, sizeof(fbKeepName), "%s", name);
                  fbRun(FB_OP_SCAN, "READING");
-@@ -2045,6 +2193,11 @@ void ripps2RenderFiles(void)
+@@ -2045,6 +2200,11 @@ void ripps2RenderFiles(void)
      }
      if (!fbBusy)
          fbRestoreCursor();
@@ -354,6 +924,46 @@ index f4fad92..a1fbb6a 100644
  
      // the path, and the clipboard / what just happened
      fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : "MEMORY FILES", FB_LIT);
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index ec9cb0d..567ea63 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -246,11 +246,11 @@ static void stInstallNeutrino(void)
+         dirs[n++] = "mass0:/neutrino";
+     }
+     if (stDriveThere("mc0:/")) {
+-        labels[n] = "MEMORY CARD 1  (about 600 KB)";
++        labels[n] = "MEMORY CARD 0  (about 600 KB)";
+         dirs[n++] = "mc0:/neutrino";
+     }
+     if (stDriveThere("mc1:/")) {
+-        labels[n] = "MEMORY CARD 2  (about 600 KB)";
++        labels[n] = "MEMORY CARD 1  (about 600 KB)";
+         dirs[n++] = "mc1:/neutrino";
+     }
+     if (n == 0) {
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 8e4127a..498e0b6 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -1543,7 +1543,7 @@ void ripps2DrawFrost(GSTEXTURE *frost, int x, int y, int w, int h, int crop, int
+     float u0 = (float)x * FROST_W / 640.0f, v0 = vo + (float)y * FROST_H * vs / 480.0f;
+     float u1 = (float)(x + w) * FROST_W / 640.0f, v1 = vo + (float)(y + h) * FROST_H * vs / 480.0f;
+     u64 mod = alpha >= 0x80 ? gDefaultCol : GS_SETREG_RGBA(0x80, 0x80, 0x80, alpha);
+-    if (gRipps2PaletteShown != 0) // build 96: a Color Theme other than RIPPS2 blue shades the frost (RIPgrid's whole screen)
++    if (gRipps2PaletteShown != 0) // build 96: a Color Theme other than RIPPS2 blue shades the frost (RIPGRID's whole screen)
+         mod = GS_SETREG_RGBA(0x6C, 0x74, 0x8C, alpha > 0x80 ? 0x80 : alpha);
+     rmDrawPixmapPart(frost, x, y, ALIGN_NONE, w, h, SCALING_NONE, mod, u0, v0, u1, v1);
+ }
+@@ -1617,7 +1617,7 @@ void ripps2TiltEnd(void)
+     rmSetTilt(0, 0, 0, 0.0f, 0.0f);
+ }
+ 
+-// build 82: the stick's tilt plus a turn of its own about the vertical axis (RIPgrid's case flip)
++// build 82: the stick's tilt plus a turn of its own about the vertical axis (RIPGRID's case flip)
+ void ripps2TiltBeginTurn(int cx, int cy, int scalePct, float turn)
+ {
+     rmSetTilt(1, cx, cy, tiltYaw * scalePct / 100.0f + turn, tiltPitch * scalePct / 100.0f);
 diff --git a/src/sound.c b/src/sound.c
 index aea69e4..98a04ef 100644
 --- a/src/sound.c
@@ -666,3 +1276,401 @@ index aea69e4..98a04ef 100644
      bgmPcmRead = NULL;
      bgmPcmEnded = 0;
  }
+diff --git a/src/textures.c b/src/textures.c
+index 6427097..685fdbb 100644
+--- a/src/textures.c
++++ b/src/textures.c
+@@ -1105,7 +1105,7 @@ void texSetProbe(char *out, int size)
+ }
+ 
+ // RIPPS2 build 95: game art as JPG. RiptOPL reads PNG only, and old OPL art packs are JPG, so every theme showed
+-// those games as text (FifthFox on RIPgrid). Tried only when the PNG is not there; read whole, then decoded at
++// those games as text (FifthFox on RIPGRID). Tried only when the PNG is not there; read whole, then decoded at
+ // most 512 on a side (ripps2media.c).
+ #define TEX_JPG_MAX_FILE (4 * 1024 * 1024)
+ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
+diff --git a/src/themes.c b/src/themes.c
+index 19d513c..e13c651 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -58,7 +58,7 @@ extern const char conf_theme_OPL_cfg;
+ extern u16 size_conf_theme_OPL_cfg;
+ extern const char theme_coverflow_cfg;
+ extern u16 size_theme_coverflow_cfg;
+-extern const char theme_ripgrid_cfg; // RIPPS2 build 91: <RIPgrid>, built in (misc/theme_ripgrid.cfg)
++extern const char theme_ripgrid_cfg; // RIPPS2 build 91: <RIPGRID>, built in (misc/theme_ripgrid.cfg)
+ extern u16 size_theme_ripgrid_cfg;
+ 
+ theme_t *gTheme;
+@@ -66,7 +66,7 @@ theme_t *gTheme;
+ // Set transiently around thmLoad(NULL) to load the embedded coverflow theme instead of
+ // the default OPL theme (the built-in "<Coverflow>" entry in the theme list).
+ static int gLoadCoverflowBuiltin = 0;
+-static int gLoadGridBuiltin = 0; // RIPPS2 build 91: the same for <RIPgrid> (id nThemes + 2)
++static int gLoadGridBuiltin = 0; // RIPPS2 build 91: the same for <RIPGRID> (id nThemes + 2)
+ 
+ static int screenWidth;
+ static int screenHeight;
+@@ -83,7 +83,9 @@ int gCoverflowCount = 3;        // 3 or 5 only (clamped on load AND at draw)
+ int gCoverflowCenterScale = 30; // px added to the center cover (UI 0/15/30/45)
+ int gCoverflowAnimSpeed = 200;  // ms (UI 0/100/200/400; 0 = instant, no anim)
+ int gCoverflowDimCovers = 0;    // bool (RIPPS2 build 91: kept in the settings, drawn as the vignette below)
+-int gRipps2Vignette = 1;        // RIPPS2 build 91: Flow and Grid > Vignette Other Covers
++int gRipps2Vignette = 1;        // RIPPS2 build 91: Flow and Grid > Vignette Other Covers (build 98: 1 Weak, the default; 2 Full)
++int gRipps2GridWide = 0;        // RIPPS2 build 98: Flow and Grid > Widescreen Grid Layout
++int gRipps2BgBlur = 0;          // RIPPS2 build 98: Artwork settings > Background Blur
+ int gRipps2GridLayout = 0;      // RIPPS2 build 91: Flow and Grid > Grid Layout, 0 = the theme's
+ static void drawCoverVignette(int cx, int cy, int w, int h, float fade); // build 91: Flow and Grid both draw it
+ 
+@@ -1141,14 +1143,27 @@ static GSTEXTURE *thmFrostFor(struct submenu_list *item, struct theme_element *g
+     return gTheme->frost[slot].Mem != NULL ? &gTheme->frost[slot] : NULL;
+ }
+ 
++// RIPPS2 build 98: Background Blur, the frost's strength in percent: the user's (Off 0, Weak 33, Normal 66, Strong 100), else
++// the theme's bg_blur (100 when it has none). The frosted copy is laid over the sharp art at that strength.
++static int thmBlurPercent(void)
++{
++    static const int pct[] = {-1, 0, 33, 66, 100};
++    if (gRipps2BgBlur >= 1 && gRipps2BgBlur <= 4)
++        return pct[gRipps2BgBlur];
++    return gTheme != NULL ? gTheme->bgBlurDef : 100;
++}
++
+ static void drawRipps2PanelGlass(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
+ {
+     int x, y;
+     ripps2PanelRect(elem, &x, &y);
+     if (elem->blur) { // build 78: frosted glass, the page's backdrop softened under the tint
+         float fade;
+-        GSTEXTURE *frost = thmFrostFor(item, elem, &fade);
+-        ripps2DrawFrost(frost, x, y, elem->width, elem->height, gWideScreen && gTheme->frostCrop[elem->family == &gTheme->mainElems ? 0 : 1], (int)(0x80 * fade));
++        int pct = thmBlurPercent();
++        GSTEXTURE *frost = pct > 0 ? thmFrostFor(item, elem, &fade) : NULL;
++        if (frost != NULL)
++            ripps2DrawFrost(frost, x, y, elem->width, elem->height, gWideScreen && gTheme->frostCrop[elem->family == &gTheme->mainElems ? 0 : 1],
++                            (int)(0x80 * fade) * pct / 100);
+     }
+     if (elem->glassTint >= 0) { // build 79: a theme's clear glass, one constant tint
+         ripps2DrawPanelFlat(x, y, elem->width, elem->height, elem->glassColor, elem->glassTint, elem->glassFrame);
+@@ -1459,6 +1474,10 @@ static void drawRAMark(struct submenu_list *item, struct theme_element *elem,
+ // crossfade the earlier one is painted opaque and the later one fades in over it (or out of it).
+ #define SLIDE_HOLD_S 5.0f
+ #define SLIDE_FADE_S 1.0f
++// RIPPS2 build 98: the show opens on its first slide (the info page's background, Adapt's front cover). While that is
++// still loading the show waits this long before it begins on another slide: it used to begin on the first one ready,
++// a screenshot, and the background joined the show later instead of coming in with the disc and the cover.
++#define SLIDE_FIRST_WAIT_S 2.0f
+ #define SLIDE_MAX    4
+ 
+ static struct
+@@ -1479,7 +1498,7 @@ static struct
+ // never leaves the page bare), and then all of it, placeholders included, fades in from that same
+ // moment. The report is read one frame late: the elements draw in painter's order, so the first ones
+ // cannot know about the last.
+-#define INFO_GROUP_WAIT_S 0.8f
++#define INFO_GROUP_WAIT_S 1.6f // build 98: was 0.8 s, under what a real drive takes for a background
+ static struct
+ {
+     void *item;
+@@ -1507,6 +1526,9 @@ static void infoGroupFrame(void *item)
+                                 (float)(clock() - infoGroup.start) / (float)CLOCKS_PER_SEC >= INFO_GROUP_WAIT_S)) {
+         infoGroup.released = 1;
+         infoGroup.release = clock();
++        // build 98: the first slide's hold starts when it is seen, not while the page waited for the rest
++        if (slideShow.item == item && slideShow.cur != 0 && slideShow.first)
++            slideShow.start = infoGroup.release;
+     }
+ }
+ 
+@@ -1538,7 +1560,7 @@ static int infoArtPending(image_cache_t *cache, struct submenu_item *item)
+ // eases up from nothing over ART_FADE_S. The slideshow's first slide fades in the same way; after
+ // that the slides crossfade on their own.
+ #define ART_FADE_S 0.35f
+-#define ART_FADES  8
++#define ART_FADES  16 // build 98: the info page's pieces fade on their own too (8 could evict one mid-fade)
+ 
+ static struct
+ {
+@@ -1635,6 +1657,9 @@ static void slideUpdate(struct menu_list *menu, struct submenu_list *item, struc
+         return;
+     }
+     if (slideShow.cur == 0 || slideShow.tex[slideShow.cur] == NULL) {
++        // build 98: the show opens on slide 1; while it is still loading, wait for it (SLIDE_FIRST_WAIT_S)
++        if (slideShow.cur == 0 && slideShow.tex[1] == NULL && slideShow.bgPending && slideElapsed() < SLIDE_FIRST_WAIT_S)
++            return;
+         for (s = 1; s <= SLIDE_MAX && slideShow.tex[s] == NULL; s++)
+             ;
+         slideShow.first = slideShow.cur == 0; // the show's first art: fade it in
+@@ -1705,7 +1730,8 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+             slideW = slideWeight(drawElem->slide);
+             if (onInfo) {
+                 float g = infoGroupAlpha();
+-                slideW = (slideShow.first && drawElem->slide == slideShow.cur) ? g : slideW * g;
++                // the first slide comes in with the group, or (build 98) fades in on its own when it lands later
++                slideW = (slideShow.first && drawElem->slide == slideShow.cur) ? (g < slideW ? g : slideW) : slideW * g;
+             }
+             if (slideW <= 0.0f)
+                 return;
+@@ -1797,9 +1823,13 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+             }
+         }
+ 
+-        // RIPPS2: on the info page every piece, placeholder or art, comes in with the group
++        // RIPPS2: on the info page every piece, placeholder or art, comes in with the group. Build 98: art that lands
++        // after the group came in fades in on its own (it popped in); art that was there fades with the group.
+         if (onInfo && !isSlide) {
++            float in = (gameImage->defaultTexture == NULL || texture != &gameImage->defaultTexture->source) ? artFadeIn(drawElem, item, texture) : 1.0f;
+             slideW = infoGroupAlpha();
++            if (in < slideW)
++                slideW = in;
+             if (slideW <= 0.0f)
+                 return;
+         }
+@@ -2250,6 +2280,9 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+             cfBack = gridBackTexture(elem, sourceList, item, 1);
+     }
+     gridFlipUpdate(item->item.isFolder || cfIsAnimating ? NULL : item, cfBack != NULL);
++    // build 98: with tilt=1 only the centre cover tips (below); the carousel holds still, as the Grid's page does
++    if (elem->tilt)
++        ripps2TiltEnd();
+ 
+     int drawOrder[COVERFLOW_MAX];
+     int drawCount = 0;
+@@ -2332,13 +2365,15 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+         // RIPPS2 build 91: the side covers take the vignette (Vignette Other Covers) in place of the old dim
+         u64 coverColor = gDefaultCol;
+ 
+-        // build 97: the centre cover, turned or turning (its back once past the half turn)
++        // build 97: the centre cover, turned or turning (its back once past the half turn). Build 98: with tilt=1 it
++        // also tips with the right stick about its own centre, as the Grid's chosen cover does
+         float cfTurn = (i == centerIdx && covers[i] == item) ? gridFlipTurn(item) : 0.0f;
++        int cfTilt = elem->tilt && i == centerIdx && covers[i] == item && !cfIsAnimating;
+         if (cfBack == NULL && fabsf(cfTurn) > 1.5708f)
+             cfTurn = 0.0f; // turned, but its back is not in memory yet: front-on until it is
+-        if (cfTurn != 0.0f) {
++        if (cfTurn != 0.0f || cfTilt) {
+             int seeBack = fabsf(cfTurn) > 1.5708f;
+-            ripps2TiltBeginTurn(posX, posY, 0, seeBack ? cfTurn - (cfTurn > 0 ? 3.14159265f : -3.14159265f) : cfTurn);
++            ripps2TiltBeginTurn(posX, posY, cfTilt ? elem->tiltScale : 0, seeBack ? cfTurn - (cfTurn > 0 ? 3.14159265f : -3.14159265f) : cfTurn);
+             if (seeBack)
+                 texture = cfBack;
+         }
+@@ -2355,7 +2390,7 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+         } else {
+             rmDrawPixmap(texture, posX, posY, ALIGN_CENTER, drawW, drawH, SCALING_RATIO, coverColor, elem->reflection);
+         }
+-        if (cfTurn != 0.0f)
++        if (cfTurn != 0.0f || cfTilt)
+             ripps2TiltEnd();
+         if (gRipps2Vignette && i != centerIdx)
+             drawCoverVignette(posX, posY, rmWideScale(drawW), drawH, 1.0f);
+@@ -2492,8 +2527,28 @@ static void gridFlipUpdate(const void *selected, int backReady)
+     }
+ }
+ 
++// RIPPS2 build 98: the Grid's layout for the picture now on screen (a 16:9 one takes the wide layout); every reader of
++// the grid's shape (its draw, the navigation) asks here first, so a widescreen switch takes effect at once
++static void gridUseLayout(void)
++{
++    int wide = gWideScreen ? 1 : 0;
++    const grid_layout_t *l;
++
++    if (gTheme == NULL || gTheme->grid == NULL || gTheme->gridActive == wide)
++        return;
++    l = wide ? &gTheme->gridWide : &gTheme->gridStd;
++    gTheme->gridColumns = l->cols;
++    gTheme->gridRows = l->rows;
++    gTheme->gridSpacing = l->gap;
++    gTheme->grid->width = l->w;
++    gTheme->grid->height = l->h;
++    gTheme->grid->posY = l->y;
++    gTheme->gridActive = wide;
++}
++
+ int thmGridColumns(void)
+ {
++    gridUseLayout();
+     return (gTheme != NULL && gTheme->grid != NULL) ? gTheme->gridColumns : 0;
+ }
+ 
+@@ -2573,12 +2628,15 @@ static int gridSerial(const char *startup, char *out, int size)
+ // width as drawn (through rmWideScale); fade the cover's own ease-in, 0..1.
+ static void drawCoverVignette(int cx, int cy, int w, int h, float fade)
+ {
+-    float x0 = cx - w / 2.0f, y0 = cy - h / 2.0f, x1 = x0 + w, y1 = y0 + h, fx = w * 0.34f, fy = h * 0.30f;
++    // build 98: Weak (the default) is half of Full; and the rim reaches a pixel past the cover on every side, where
++    // the cover's own last column showed through as a bright line
++    fade *= gRipps2Vignette >= 2 ? 1.0f : gRipps2Vignette == 1 ? 0.5f : 0.0f;
++    float x0 = cx - w / 2.0f - 1.0f, y0 = cy - h / 2.0f - 1.0f, x1 = x0 + w + 2.0f, y1 = y0 + h + 2.0f, fx = w * 0.34f, fy = h * 0.30f;
+     u64 dark = GS_SETREG_RGBA(0x00, 0x00, 0x00, (int)(0x58 * fade)), clear = GS_SETREG_RGBA(0x00, 0x00, 0x00, 0x00);
+ 
+     if (fade <= 0.0f)
+         return;
+-    rmDrawRect((int)x0, (int)y0, w, h, GS_SETREG_RGBA(0x00, 0x00, 0x00, (int)(0x14 * fade)));
++    rmDrawRect((int)x0, (int)y0, w + 2, h + 2, GS_SETREG_RGBA(0x00, 0x00, 0x00, (int)(0x14 * fade)));
+     rmDrawQuadGouraud(x0, y0, dark, x1, y0, dark, x0, y0 + fy, clear, x1, y0 + fy, clear);
+     rmDrawQuadGouraud(x0, y1 - fy, clear, x1, y1 - fy, clear, x0, y1, dark, x1, y1, dark);
+     rmDrawQuadGouraud(x0, y0, dark, x0 + fx, y0, clear, x0, y1, dark, x0 + fx, y1, clear);
+@@ -2690,6 +2748,7 @@ static void drawGridGlow(int cx, int cy, int w, int h)
+ static void drawGrid(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
+ {
+     struct submenu_list *p, *first;
++    gridUseLayout(); // build 98: the picture's layout (16:9 has its own)
+     int cols = gTheme->gridColumns, rows = gTheme->gridRows, gap = gTheme->gridSpacing;
+     int cur = 0, i, k, w = elem->width, h = elem->height;
+ 
+@@ -2852,6 +2911,16 @@ static mutable_image_t *initGridBack(config_set_t *themeConfig, theme_t *theme,
+     return img;
+ }
+ 
++// RIPPS2 build 98: a preset laid where the theme's grid is: its centre, and a page shorter than the theme's in the
++// middle of the theme's height
++static void gridFit(const grid_layout_t *theme, const grid_layout_t *preset, grid_layout_t *out)
++{
++    int themeH = theme->rows * theme->h + (theme->rows - 1) * theme->gap;
++    int pageH = preset->rows * preset->h + (preset->rows - 1) * preset->gap;
++    *out = *preset;
++    out->y = theme->y + (pageH < themeH ? (themeH - pageH) / 2 : 0);
++}
++
+ static int gridBackFreeSlot(void)
+ {
+     int i;
+@@ -2881,25 +2950,44 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+     // RIPPS2 build 91: Flow and Grid > Grid Layout, RIPPS2's own pages of covers in place of the theme's: 4 x 2,
+     // 5 x 2, 3 x 2 Large and 6 x 3 Compact, with RIPPS2's spacing. The grid keeps the theme's centre, and a
+     // page shorter than the theme's sits in the middle of the theme's height.
+-    static const struct
+-    {
+-        int cols, rows, w, h, gap;
+-    } layouts[RIPPS2_GRID_LAYOUTS] = {{4, 2, 107, 150, 12}, {5, 2, 86, 120, 10}, {3, 2, 112, 157, 16}, {6, 3, 66, 92, 8}};
+-    if (gRipps2GridLayout >= 1 && gRipps2GridLayout <= RIPPS2_GRID_LAYOUTS && elem->width > 0 && elem->height > 0) {
+-        int k = gRipps2GridLayout - 1;
+-        int themeH = rows * elem->height + (rows - 1) * gap;
+-        int pageH = layouts[k].rows * layouts[k].h + (layouts[k].rows - 1) * layouts[k].gap;
+-        if (pageH < themeH)
+-            elem->posY += (themeH - pageH) / 2;
+-        cols = layouts[k].cols;
+-        rows = layouts[k].rows;
+-        gap = layouts[k].gap;
+-        elem->width = layouts[k].w;
+-        elem->height = layouts[k].h;
+-    }
+-
+-    // build 82: enough cache slots for two pages (one slides out as the next slides in)
+-    int slots = 2 * cols * rows;
++    // Build 98: and a second layout for a 16:9 picture (Widescreen Grid Layout): the theme's wide_columns, wide_rows,
++    // wide_width, wide_height and wide_spacing, the standard layout, or 6 x 2, 7 x 2, 5 x 2 Large and 8 x 3 Compact
++    // (on 16:9 a cover draws at three quarters of its width, so more fit across). Both are kept; the one in use
++    // follows the picture (gridUseLayout).
++    static const grid_layout_t layouts[RIPPS2_GRID_LAYOUTS] = {{4, 2, 107, 150, 12, 0}, {5, 2, 86, 120, 10, 0}, {3, 2, 112, 157, 16, 0}, {6, 3, 66, 92, 8, 0}};
++    static const grid_layout_t wides[RIPPS2_GRID_WIDE_PRESETS] = {{6, 2, 107, 150, 12, 0}, {7, 2, 96, 135, 10, 0}, {5, 2, 112, 157, 16, 0}, {8, 3, 66, 92, 8, 0}};
++    grid_layout_t base = {cols, rows, elem->width, elem->height, gap, elem->posY}, std = base, wide;
++    if (gRipps2GridLayout >= 1 && gRipps2GridLayout <= RIPPS2_GRID_LAYOUTS && elem->width > 0 && elem->height > 0)
++        gridFit(&base, &layouts[gRipps2GridLayout - 1], &std);
++    wide = std;
++    if (gRipps2GridWide >= 2 && gRipps2GridWide < 2 + RIPPS2_GRID_WIDE_PRESETS && elem->width > 0 && elem->height > 0)
++        gridFit(&base, &wides[gRipps2GridWide - 2], &wide);
++    else if (gRipps2GridWide == 0) { // the theme's own wide layout, if it has one
++        grid_layout_t t = base;
++        int any = 0;
++        snprintf(key, sizeof(key), "%s_wide_columns", name);
++        any |= configGetInt(themeConfig, key, &t.cols);
++        snprintf(key, sizeof(key), "%s_wide_rows", name);
++        any |= configGetInt(themeConfig, key, &t.rows);
++        snprintf(key, sizeof(key), "%s_wide_width", name);
++        any |= configGetInt(themeConfig, key, &t.w);
++        snprintf(key, sizeof(key), "%s_wide_height", name);
++        any |= configGetInt(themeConfig, key, &t.h);
++        snprintf(key, sizeof(key), "%s_wide_spacing", name);
++        any |= configGetInt(themeConfig, key, &t.gap);
++        if (any && t.cols >= 1 && t.cols <= 8 && t.rows >= 1 && t.rows <= 4 && t.w > 0 && t.h > 0 && t.gap >= 0 && t.gap <= 64)
++            gridFit(&base, &t, &wide);
++    }
++    cols = std.cols;
++    rows = std.rows;
++    gap = std.gap;
++    elem->width = std.w;
++    elem->height = std.h;
++    elem->posY = std.y;
++    int most = std.cols * std.rows > wide.cols * wide.rows ? std.cols * std.rows : wide.cols * wide.rows;
++
++    // build 82: enough cache slots for two pages (one slides out as the next slides in); build 98: of the larger layout
++    int slots = 2 * most;
+     if (slots < COVER_CACHE_SLOTS)
+         slots = COVER_CACHE_SLOTS;
+     mutable_image_t *mutableImage = initMutableImage(themePath, themeConfig, theme, name, elem->type, "COV", slots, NULL, NULL);
+@@ -2911,7 +2999,7 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+         elem->endElem = &endGrid;
+         int slot = gridBackFreeSlot();
+         if (slot >= 0) { // build 82: the back covers, for the flip
+-            gridBacks[slot].img = initGridBack(themeConfig, theme, name, cols * rows + 2);
++            gridBacks[slot].img = initGridBack(themeConfig, theme, name, most + 2);
+             gridBacks[slot].elem = gridBacks[slot].img != NULL ? elem : NULL;
+         }
+         if (!theme->grid) {
+@@ -2919,6 +3007,9 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+             theme->gridColumns = cols;
+             theme->gridRows = rows;
+             theme->gridSpacing = gap;
++            theme->gridStd = std; // build 98: both layouts; gridUseLayout puts in the one the picture wants
++            theme->gridWide = wide;
++            theme->gridActive = 0;
+             // build 92: <name>_coverless=serial, a case with no art shows the game's serial in the in-game
+             // menu's pixel font (title, the default: its name on a glass tile); <name>_title=1, the chosen
+             // game's name under the grid at <name>_title_y (418) in font slot <name>_title_font (0)
+@@ -5265,6 +5356,9 @@ static int thmLoad(const char *themePath)
+         newT->glyphSetDef = configGetStr(themeConfig, "glyph_set", &v) ? ripps2GlyphSetParse(v) : RIPPS2_GLYPHSET_THEME;
+         // build 96: page_buttons=l2r2 turns the game list's pages on L2 / R2, l1r1 on L1 / R1 (Controller Settings >
+         // Page Buttons overrides it)
++        newT->bgBlurDef = 100; // build 98: bg_blur=off|weak|normal|strong, the frost's strength
++        if (configGetStr(themeConfig, "bg_blur", &v) && v != NULL)
++            newT->bgBlurDef = !strcasecmp(v, "off") ? 0 : !strcasecmp(v, "weak") ? 33 : !strcasecmp(v, "normal") ? 66 : 100;
+         newT->pageButtonsDef = 0;
+         if (configGetStr(themeConfig, "page_buttons", &v) && v != NULL)
+             newT->pageButtonsDef = !strcasecmp(v, "l2r2") ? 2 : !strcasecmp(v, "l1r1") ? 1 : 0;
+@@ -5339,7 +5433,7 @@ static void thmRebuildGuiNames(void)
+ 
+     // built-in coverflow theme occupies the slot right after the disk themes
+     guiThemesNames[nThemes + 1] = "<RIPFLOW>"; // RIPPS2 build 70: the built-in coverflow theme is RIPFLOW
+-    guiThemesNames[nThemes + 2] = "<RIPgrid>"; // RIPPS2 build 91: and the theme pack's grid, built in
++    guiThemesNames[nThemes + 2] = "<RIPGRID>"; // RIPPS2 build 91: and the theme pack's grid, built in
+     guiThemesNames[nThemes + 3] = NULL;
+ }
+ 
+@@ -5358,7 +5452,7 @@ int thmAddElements(char *path, const char *separator, int forceRefresh)
+     else if (guiThemeID == nThemes + 1)
+         snprintf(activeName, sizeof(activeName), "<RIPFLOW>");
+     else if (guiThemeID == nThemes + 2)
+-        snprintf(activeName, sizeof(activeName), "<RIPgrid>"); // build 91
++        snprintf(activeName, sizeof(activeName), "<RIPGRID>"); // build 91
+     const char *temp = NULL;
+     int savedMissing = configGetStr(configGetByType(CONFIG_OPL), "theme", &temp) && thmFindGuiID(temp) == 0;
+ 
+@@ -5413,7 +5507,7 @@ void thmReinit(const char *path)
+     } else if (guiThemeID == nThemes + 1) {
+         snprintf(activeName, sizeof(activeName), "<RIPFLOW>"); // built-in; its id (nThemes+1) shifts as themes are removed
+     } else if (guiThemeID == nThemes + 2) {
+-        snprintf(activeName, sizeof(activeName), "<RIPgrid>"); // build 91: likewise (nThemes+2)
++        snprintf(activeName, sizeof(activeName), "<RIPGRID>"); // build 91: likewise (nThemes+2)
+     }
+ 
+     // One guiLock section across the removal loop AND the rebuild: the frees below invalidate
+@@ -5472,7 +5566,7 @@ int thmSetGuiValue(int themeID, int reload)
+                 gLoadCoverflowBuiltin = 1;
+                 loadResult = thmLoad(NULL);
+                 gLoadCoverflowBuiltin = 0;
+-            } else if (themeID == nThemes + 2) { // RIPPS2 build 91: built-in <RIPgrid>, the same way
++            } else if (themeID == nThemes + 2) { // RIPPS2 build 91: built-in <RIPGRID>, the same way
+                 gLoadGridBuiltin = 1;
+                 loadResult = thmLoad(NULL);
+                 gLoadGridBuiltin = 0;
+@@ -5515,7 +5609,7 @@ int thmFindGuiID(const char *theme)
+     if (theme) {
+         if (strcasecmp(theme, "<RIPFLOW>") == 0 || strcasecmp(theme, "<Coverflow>") == 0)
+             return nThemes + 1; // built-in coverflow theme (RIPPS2 build 70: RIPFLOW; <Coverflow> in older settings)
+-        if (strcasecmp(theme, "<RIPgrid>") == 0)
++        if (strcasecmp(theme, "<RIPGRID>") == 0)
+             return nThemes + 2; // RIPPS2 build 91: the built-in grid
+         int i = 0;
+         for (; i < nThemes; i++) {

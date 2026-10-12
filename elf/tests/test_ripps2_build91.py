@@ -1,5 +1,5 @@
 """Build 91: the launch disc (launch_disc=pop|spin, Flow and Grid > Launch Disc), Interface > Flow and Grid (the
-vignette in place of the dim, Grid Layout), <RIPgrid> built in, no two dialog ids alike, a row of hidden controls
+vignette in place of the dim, Grid Layout), <RIPGRID> built in, no two dialog ids alike, a row of hidden controls
 taking no line, the Network page's order, and Memory Files calling a folder a folder.
 
 Static checks on the patched tree; then, with a C compiler, every dialog id compiled and checked unique (with
@@ -36,11 +36,11 @@ if 'ripps2DrawLaunchDisc();' not in bg or 'if (!ripps2DrawLaunchDisc())' not in 
 if '"ICO"' not in ui or 'DISC_REVMAX' not in ui:
     fail.append("the disc is the game's ICO art, and the spin ramps to a cap")
 if 'launch_disc=spin' not in rd('misc/theme_coverflow.cfg') or 'launch_disc=pop' not in rd('misc/theme_ripgrid.cfg'):
-    fail.append('RIPFLOW spins its disc and RIPgrid pops its in')
+    fail.append('RIPFLOW spins its disc and RIPGRID pops its in')
 if 'ripps2_launch_disc' not in opl:
     fail.append('Launch Disc must be saved')
 
-# Flow and Grid; <RIPgrid> built in
+# Flow and Grid; <RIPGRID> built in
 if 'string: Flow and Grid' not in yml or 'string: Vignette Other Covers' not in yml:
     fail.append('Interface must call the page Flow and Grid, its old dim Vignette Other Covers')
 if 'COVERFLOW_CFG_LAYOUT' not in dlg or 'COVERFLOW_CFG_LAUNCHDISC' not in dlg:
@@ -49,8 +49,8 @@ if 'drawCoverVignette(' not in thm or 'gCoverflowDimCovers && i != centerIdx' in
     fail.append('the covers not chosen must take the vignette in place of the dim')
 if 'gRipps2GridLayout >= 1' not in thm or 'thmSetGuiValue(thmGetGuiValue(), 1)' not in gui:
     fail.append('a Grid Layout must apply (the theme loads again with it)')
-if '"<RIPgrid>"' not in thm or 'theme_ripgrid.o' not in mk or 'gLoadGridBuiltin' not in thm:
-    fail.append('<RIPgrid> must be built in')
+if '"<RIPGRID>"' not in thm or 'theme_ripgrid.o' not in mk or 'gLoadGridBuiltin' not in thm:
+    fail.append('<RIPGRID> must be built in')
 
 # hidden rows, Network, the BDMA row
 if dia.count('diaRowCollapses(') < 3:
@@ -124,5 +124,5 @@ int main(void)
             if r.returncode or subprocess.run([str(td / 'w.exe')]).returncode:
                 fail.append('Memory Files must say FOLDER AND CONTENTS for folders and count files as files')
 
-print('\n'.join(fail) or 'build91: launch disc, Flow and Grid, <RIPgrid>, unique dialog ids, hidden rows, Network, folder wording OK')
+print('\n'.join(fail) or 'build91: launch disc, Flow and Grid, <RIPGRID>, unique dialog ids, hidden rows, Network, folder wording OK')
 sys.exit(1 if fail else 0)

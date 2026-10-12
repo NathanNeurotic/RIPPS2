@@ -175,5 +175,32 @@ int main(int argc, char **argv)
             if r.returncode:
                 fail.append('the serial fix: ' + r.stdout.strip())
 
-print('\n'.join(fail) or 'build98: card slots kept, thorough delete, CARD FULL up front, sounds theme then AUDIO, top-bit Ogg serials play OK')
+# --- START DRIVES asks MMCE as Storage does (an MMCE ping on a plain card in slot 1 took mc1:/ away)
+if 'if (gMMCEStartMode != START_MODE_DISABLED) {' not in sd or 'gMMCESlot == 2 && !fbMmceSlot[0]' not in sd:
+    fail.append('START DRIVES must leave MMCE alone when it is off, and ping slot 1 only as Storage\'s Auto does')
+if '"MEMORY CARD %c", dev[2]' not in fb or '"MEMORY CARD 2' in rd('src/ripps2status.c') or '"WRITE THE SAVES TO MEMORY CARD 2"' in rd('src/ripps2card.c'):
+    fail.append('the cards are MEMORY CARD 0 and MEMORY CARD 1 (mc0:/, mc1:/)')
+
+th, menu = rd('src/themes.c'), rd('src/menusys.c')
+# --- the info page: the group waits for its background, late art fades, the show opens on slide 1
+if '#define INFO_GROUP_WAIT_S 1.6f' not in th or 'SLIDE_FIRST_WAIT_S' not in th or 'artFadeIn(drawElem, item, texture) : 1.0f;' not in th:
+    fail.append('the info page\'s background must come in with its disc and cover, late art fading on its own')
+# --- the Grid's page buttons turn a page
+if 'static int menuGridPage(int dir)' not in menu or 'if (menuGridPage(1))' not in menu or 'if (menuGridPage(-1))' not in menu:
+    fail.append('L2 / R2 on the Grid must turn a whole page of covers')
+# --- RIPFLOW tilts its centre cover; its info screenshots tip as one sheet
+cf = rd('misc/theme_coverflow.cfg').replace('\r\n', '\n')
+if 'int cfTilt = elem->tilt' not in th or cf.count('\ttype=Coverflow\n\ttilt=1\n') < 1 or cf.count('\ttilt_x=320\n\ttilt_y=330\n') != 2:
+    fail.append('RIPFLOW: the centre cover tips with the stick, the two screenshots on one pivot')
+# --- vignette levels, background blur, the widescreen grid
+if 'fade *= gRipps2Vignette >= 2 ? 1.0f : gRipps2Vignette == 1 ? 0.5f : 0.0f;' not in th or 'w + 2, h + 2' not in th:
+    fail.append('Vignette Other Covers: Off, Weak (half) and Full, a pixel past the cover')
+if 'static int thmBlurPercent(void)' not in th or '"bg_blur"' not in th or 'bg_blur=weak' not in rd('misc/theme_ripgrid.cfg'):
+    fail.append('Background Blur: Theme, Off, Weak, Normal, Strong, and bg_blur=weak on RIPGRID')
+if 'static void gridUseLayout(void)' not in th or 'theme->gridWide = wide;' not in th or 'wide_columns=6' not in rd('misc/theme_ripgrid.cfg'):
+    fail.append('the Grid keeps a 16:9 layout of its own (RIPGRID: 6 across)')
+if 'RIPgrid' in th or '"<RIPGRID>"' not in th:
+    fail.append('RIPGRID is written in capitals')
+
+print('\n'.join(fail) or 'build98: card slots kept, thorough delete, CARD FULL up front, sounds theme then AUDIO, top-bit Ogg serials play, START DRIVES asks MMCE as Storage does, cards 0 and 1, info page fades as one, Grid pages, RIPFLOW tilt, vignette levels, background blur, widescreen grid, RIPGRID OK')
 sys.exit(1 if fail else 0)

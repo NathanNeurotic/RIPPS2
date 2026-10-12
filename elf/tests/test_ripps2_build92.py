@@ -1,7 +1,7 @@
 """Build 92: the category bar in RIPPS2's own face on every theme, as a sidebar or anywhere a theme puts it in
 its own words (category_font, category_layout, category_x/_y/_spacing, category_label_*), the page transition
 (category_transition, Colors and More > Page Transition), and the Grid look (<grid>_coverless=serial in the
-in-game menu's pixel font, <grid>_title under the grid) with RIPgrid using them.
+in-game menu's pixel font, <grid>_title under the grid) with RIPGRID using them.
 
 Static checks on the patched tree; then, with a C compiler, the serial formatter (gridSerial) run on the PC."""
 import os

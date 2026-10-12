@@ -55,7 +55,7 @@ if 'ripps2_last_device' not in rd('src/opl.c') or 'gRipps2StartLast && gBDMStart
 if 'CFG_RIPPS2_PAGE_BUTTONS' not in dlg or 'page_buttons' not in rd('src/themes.c') or 'ripps2PageButtons()' not in rd('src/menusys.c'):
     fail.append('Page Buttons must exist as a setting, a theme key, and on the game list')
 if 'page_buttons=l2r2' not in rd('misc/theme_ripgrid.cfg'):
-    fail.append('the built-in RIPgrid must turn its pages on L2 / R2')
+    fail.append('the built-in RIPGRID must turn its pages on L2 / R2')
 
 print('\n'.join(fail) or 'build96: focus memory, Colors and More Theme + tooltips, Flow labels, STATUS scroll, Neutrino help, plain settings faces, Last Used, Page Buttons OK')
 sys.exit(1 if fail else 0)
