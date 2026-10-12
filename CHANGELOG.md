@@ -1,5 +1,67 @@
 # RIPPS2 changelog
 
+## Build 99 (testing), changes since build 98
+
+### The music has a road of its own
+- **The music no longer waits in line for the drive.** It used to ask the drive for 2 KB at a time, every few hundred milliseconds, each request queued behind whatever cover or list was loading, and under a burst of those it fell behind (the stutter and freezes on real consoles). Now the music file is read into memory in big pieces, 64 KB growing to 256 KB (about 16 seconds of a typical track per request), and a track up to 512 KB is held whole, so its loop never touches the drive again. A 1.1 MB track now takes 6 requests instead of 552. In the lab a pilot tone played 90 seconds through a button storm, tab switches and the track's loop without a single dropout.
+
+### Names that mean what they say
+- **Drives are named by what they are, not by their slot.** `mass0:` can be a USB stick, the internal exFAT hard drive, iLink or MX4SIO. YOUR ACCOUNT said a game was "on USB" when it was on the HDD, and STATUS offered the "USB" POPS and EMBER folders and a "USB" Neutrino whatever the drive was. They now say USB, HDD, iLINK, MX4SIO or UDPBD, MMCE reads 0 and 1 like the cards, and the PS1 launch report says which drive `mass0:` was.
+- **A Grid tile without a cover shows a PS2 game ID or nothing.** A PS1 game named like a serial (`SCUS_949.00.Crash...`) showed its whole file name as one.
+- **Checked against RiptOPL's rules** for art and settings names: a PS2 game by its ID, a VCD by its file name, an Ember game by its folder name, an app by its ELF name, and a PS1 disc ID never in their place. RIPPS2's own pages (Grid back covers, All Games, Starred, Recents, metadata, art fetch) follow them.
+
+### From RiptOPL
+- **PS1 games flash their real disc ID** for Pixel FX / RetroGEM / PS2Digital (RiptOPL #869), for POPSTARTER and Ember alike, read from the disc itself. The menu no longer flashes a PS1 game's file name as its ID.
+- **A slow iLink drive is waited for** at start (RiptOPL d8b5016): a drive still spinning up is looked for again for 3 seconds instead of being missed.
+
+## Build 98 (testing), changes since build 97
+
+### Memory Files
+- **Both memory cards stay after START DRIVES.** It pinged both card slots with MMCE commands whatever Game Sources said, and a plain card in slot 1 then dropped out for the session. It now asks exactly as Storage does. Cards read **MEMORY CARD 0** and **MEMORY CARD 1** everywhere, beside `mc0:/` and `mc1:/`.
+- **Deleting is thorough and honest.** The music now lets go of a file you delete (error 16 was its open file) and comes back after; every removal is checked gone, and a failure says why in words, never a bare code.
+- **Copying to a full card says so first:** CARD FULL with the KB it needs, before anything is written (error 999 was a full card), and a slow write is finished instead of stopping short.
+- **Paste asks before it replaces:** YES, REPLACE IT / NO, KEEP IT / YES TO ALL. A folder merges, file by file.
+- **Rest on a file for 0.42 s** to see its size and its created and modified times. Hold Up or Down and the list scrolls at your Storage scroll speed.
+- **Games start right from Memory Files:** an ISO or ZSO in a drive's CD or DVD folder starts as it does from Storage (your Loader Core, VMCs and cheats), and a CUE or BIN in `EMBER/games/<game>/` starts with Ember. A CHD explains what to make instead.
+- **3D save icons:** an `.ico` or `.icn` opens in 3D, textured, lit and animated over its own background. Turn it with the D-pad or right stick, L2/R2 zoom, Square stops the spin. **Actions > RIP 3D ICON** writes it out for a PC: an OBJ for each animation shape, the material and the texture as PNG, in `mass0:/RIPPS2/ICONS/`.
+- **RIPPS2's own memory card folder has an icon:** the dead elf's hat ringing its bell. It used to show as corrupted data in the PS2 browser.
+- **The text editor keeps your file as it was:** long lines, long files, blank lines at the end and missing final line breaks all come back exactly; a file it cannot hold is refused instead of cut.
+- **The picture viewer** stays sharp zoomed right in (it used to shear), and both viewers show their buttons as glyphs.
+
+### Sound and music
+- **Half of all music never played, and now it does.** The PS2's Vorbis library refuses any Ogg stream whose serial number has its top bit set, and encoders pick that number at random. RIPPS2 now fixes it as it reads, and RIPPS2 Audio Studio no longer writes such files.
+- Each sound comes from your theme first, then from your AUDIO folder (a theme with only a few sounds used to leave the rest silent).
+- Previewing `.adp` sounds stands up to frantic play, stop and move.
+
+### Grid, Flow and art
+- **The game's background fades in as soon as it is decoded**, asked for right behind its cover instead of after everything else. The info page's background, disc and cover fade in together again, and its slideshow opens on the background.
+- **L2 / R2 on the Grid turn a whole page.** **Widescreen Grid layout:** its own columns, rows and cover size for 720p, 1080i and widescreen.
+- **Vignette Other Covers:** Off, Weak (new default, half as strong) or Full, without the bright line down a cover's side. **Background art blur:** Theme, Off, Weak, Normal or Strong.
+- **RIPFLOW tilts and flips like RIPGRID:** the centre cover leans with the right stick and turns over on a hold; the info page's screenshots tip as one sheet.
+- **Covers missing on a Grid** show the game's ID in one size, inside the tile, or a clear tile. RIPGRID is in capitals everywhere.
+- **STATUS > DRIVES** names every drive RIPPS2 sees and what became of MX4SIO (off, not started, refused with its code, no card, or mounted).
+- The theme pack is Adapt and Adapt Rx, each with a full key glossary at the top (RIPGRID is built in).
+
+## Build 97 (testing), changes since build 96
+
+### Grid and Flow
+- **RIPGRID froze at 720p and is fixed.** A save state read against the build's symbols showed the menu waiting on a pad command the controller never answered while it was still starting up. Pad commands now wait for an idle pad. 480p, 720p and 1080i all lay out centred.
+- **RIPGRID:** the name under the grid in RIPPS2 Sleek Bold, the grid centred on the content, and Right at the last column turns to the next page (Left to the previous) without wrapping.
+- **Case flip on a 0.42 s right-stick hold** (was 2 s), RIPFLOW too, where it replaces the automatic crossfade. RIPFLOW's info page tilts its screenshots with the right stick.
+- **A list page is always full.** It opened on your remembered game as its top row, so near the end of a list it showed a few games over empty rows, as if games were missing.
+- Older OPL themes (Grunge, Adapt RiptOPL) draw their lists, menus and settings as RiptOPL does.
+
+## Build 96 (testing), changes since build 95
+
+### Settings and menus
+- **Backing out of a submenu lands on the row that opened it**, not at the top of the page.
+- **Settings read in one plain face on every theme** (Adapt's settings face), not each theme's styled fonts.
+- **Colors and More:** a tooltip on every row, a **Theme** value on most rows, and the Grid backgrounds take the color theme.
+- **Flow Cover Count** and **Flow Cover Size** for RIPFLOW. STATUS scrolls like the settings pages.
+- **Devices:** auto start can be **Last Used**, the device and page you were on.
+- **Page buttons:** Theme, L1 / R1 or L2 / R2 (theme key `page_buttons=l2r2`, which RIPGRID uses).
+- Neutrino's automatic arguments are described plainly.
+
 ## Build 95 (testing), changes since build 94
 
 ### Sound effects that never stack, stall or come back
