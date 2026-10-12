@@ -220,6 +220,51 @@ index 16b3b31..116a919 100644
      mixLock();
      mixArray = b.arr; // published whole, after it is complete
      mixCount = kept;
+diff --git a/src/pad.c b/src/pad.c
+index 1a077a3..7145a62 100644
+--- a/src/pad.c
++++ b/src/pad.c
+@@ -125,6 +125,17 @@ static int isPadReadyState(int state)
+     return (state == PAD_STATE_STABLE) || (state == PAD_STATE_FINDCTP1);
+ }
+ 
++// RIPPS2 build 97: may a BLOCKING pad command go out now? padSetActAlign is an RPC whose IOP side waits for
++// the pad's current command to finish, and a pad still busy with one never answers: the caller waits for
++// ever. That was the RIPgrid 720p freeze, found in a save state of the frozen lab: the GUI thread in readPads
++// -> padActSet -> padSetActAlign -> sceSifCallRpc, the IOP idle, the GUI lock held, and the IO worker waiting
++// on it in thmAddElements. The pad's init had timed out in EXECCMD (PCSX2's after Enter Press Mode). Asked
++// fresh, never from the cached state (which only follows Stable, FindCTP1 and Disconnected).
++static int padIdleForCommand(struct pad_data_t *pad)
++{
++    return padGetState(pad->port, pad->slot) == PAD_STATE_STABLE && padGetReqState(pad->port, pad->slot) != PAD_RSTAT_BUSY;
++}
++
+ // Pad commands are asynchronous. Keep every wait BOUNDED so a transient SIO2/pad error cannot hang
+ // the GUI thread (fork #271/#272 hardening). The upstream form spun forever with no exit for
+ // PAD_STATE_ERROR and no yield -- padGetState is an EE-local read of the DMA'd buffer, so the loop
+@@ -266,7 +277,9 @@ static int initializePad(struct pad_data_t *pad)
+         pad->actAlign[5] = 0xff;
+ 
+         waitPadReady(pad);
+-        tmp = padSetActAlign(pad->port, pad->slot, pad->actAlign);
++        // build 97: only to a pad with nothing in flight (the wait above is bounded and can give up);
++        // otherwise padRumbleRealign() aligns it at the first pulse, under the same rule
++        tmp = padIdleForCommand(pad) ? padSetActAlign(pad->port, pad->slot, pad->actAlign) : 0;
+         pad->actAligned = (tmp != 0);
+         LOG("PAD padSetActAlign: %d\n", tmp);
+     } else {
+@@ -563,8 +576,9 @@ static void padRumbleRealign(struct pad_data_t *pad)
+ 
+     // No waitPadRequestComplete(): that blocks the GUI thread for up to ~150 ms, and this sits on
+     // the path readPads() drives. A refused request just retries on the next pulse -- pulses are
+-    // user-driven and seconds apart, so an unbounded lazy retry costs nothing.
+-    if (padSetActAlign(pad->port, pad->slot, pad->actAlign))
++    // user-driven and seconds apart, so an unbounded lazy retry costs nothing. Build 97: and a pad
++    // with a command still in flight is not asked at all (padIdleForCommand: it would never answer).
++    if (padIdleForCommand(pad) && padSetActAlign(pad->port, pad->slot, pad->actAlign))
+         pad->actAligned = 1;
+ }
+ 
 diff --git a/src/supportbase.c b/src/supportbase.c
 index 3330dc0..821b1c6 100644
 --- a/src/supportbase.c

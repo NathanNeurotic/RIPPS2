@@ -81,6 +81,15 @@ int main(void)
             if r.returncode:
                 fail.append('fntFitString: ' + r.stdout.strip())
 
+# padSetActAlign is a blocking RPC: only to a pad that is stable with nothing in flight (the 720p freeze)
+pad = rd('src/pad.c')
+calls = pad.count('padSetActAlign(pad->port, pad->slot, pad->actAlign)')
+guarded = pad.count('padIdleForCommand(pad) ? padSetActAlign(') + pad.count('padIdleForCommand(pad) && padSetActAlign(')
+if 'static int padIdleForCommand(struct pad_data_t *pad)' not in pad or 'padGetReqState(pad->port, pad->slot) != PAD_RSTAT_BUSY' not in pad:
+    fail.append('padIdleForCommand must read the pad state and its request state fresh')
+elif calls == 0 or guarded != calls:
+    fail.append('every padSetActAlign must wait for an idle pad (%d of %d guarded)' % (guarded, calls))
+
 # the built-in themes: each cfg parses, and its main page has what it needs
 def elems(cfg):
     out, cur = {}, None
@@ -108,5 +117,5 @@ shots = [v for k, v in elems(rd('misc/theme_coverflow.cfg')).items() if k.starts
 if len(shots) != 2 or any(v.get('tilt') != '1' for v in shots):
     fail.append("RIPFLOW's info page screenshots must tilt")
 
-print('\n'.join(fail) or 'build97: 0.42 s flip on the Grid and RIPFLOW, page edges, RIPgrid centred with a Sleek Bold title, RIPFLOW tilt, full list pages, fntFitString stops at the end of its string OK')
+print('\n'.join(fail) or 'build97: 0.42 s flip on the Grid and RIPFLOW, page edges, RIPgrid centred with a Sleek Bold title, RIPFLOW tilt, full list pages, fntFitString stops at the end of its string, the pad align waits for an idle pad OK')
 sys.exit(1 if fail else 0)
