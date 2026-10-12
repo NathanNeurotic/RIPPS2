@@ -1290,7 +1290,7 @@ index 6427097..685fdbb 100644
  #define TEX_JPG_MAX_FILE (4 * 1024 * 1024)
  static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
 diff --git a/src/themes.c b/src/themes.c
-index 19d513c..e13c651 100644
+index 19d513c..5963f5d 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -58,7 +58,7 @@ extern const char conf_theme_OPL_cfg;
@@ -1472,7 +1472,7 @@ index 19d513c..e13c651 100644
 +// the grid's shape (its draw, the navigation) asks here first, so a widescreen switch takes effect at once
 +static void gridUseLayout(void)
 +{
-+    int wide = gWideScreen ? 1 : 0;
++    int wide = rmWideScale(4) == 3; // the picture as drawn: 720p and 1080i are 16:9 whatever Widescreen says
 +    const grid_layout_t *l;
 +
 +    if (gTheme == NULL || gTheme->grid == NULL || gTheme->gridActive == wide)
@@ -1511,7 +1511,19 @@ index 19d513c..e13c651 100644
      rmDrawQuadGouraud(x0, y0, dark, x1, y0, dark, x0, y0 + fy, clear, x1, y0 + fy, clear);
      rmDrawQuadGouraud(x0, y1 - fy, clear, x1, y1 - fy, clear, x0, y1, dark, x1, y1, dark);
      rmDrawQuadGouraud(x0, y0, dark, x0 + fx, y0, clear, x0, y1, dark, x0 + fx, y1, clear);
-@@ -2690,6 +2748,7 @@ static void drawGridGlow(int cx, int cy, int w, int h)
+@@ -2612,6 +2670,11 @@ static void drawGridCover(struct menu_list *menu, struct submenu_list *it, struc
+             // build 92: <grid>_coverless=serial, just the serial in the pixel font: one line at 2x or more
+             // when it fits, else the code over the number ("SLUS" / "20482"), as large as fits
+             char serial[24];
++            // build 98: with coverless=serial a tile is the game's ID or nothing: its name sits under the grid, and a
++            // file name here ran large and past the tile (FifthFox)
++            if (gTheme->gridCoverless && (src == NULL || src->itemGetStartup == NULL ||
++                                          !gridSerial(src->itemGetStartup(src, it->item.id), serial, sizeof(serial))))
++                return;
+             if (gTheme->gridCoverless && src != NULL && src->itemGetStartup != NULL &&
+                 gridSerial(src->itemGetStartup(src, it->item.id), serial, sizeof(serial))) {
+                 u64 sc = selected ? gTheme->selTextColor : gTheme->textColor;
+@@ -2690,6 +2753,7 @@ static void drawGridGlow(int cx, int cy, int w, int h)
  static void drawGrid(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
  {
      struct submenu_list *p, *first;
@@ -1519,7 +1531,7 @@ index 19d513c..e13c651 100644
      int cols = gTheme->gridColumns, rows = gTheme->gridRows, gap = gTheme->gridSpacing;
      int cur = 0, i, k, w = elem->width, h = elem->height;
  
-@@ -2852,6 +2911,16 @@ static mutable_image_t *initGridBack(config_set_t *themeConfig, theme_t *theme,
+@@ -2852,6 +2916,16 @@ static mutable_image_t *initGridBack(config_set_t *themeConfig, theme_t *theme,
      return img;
  }
  
@@ -1536,7 +1548,7 @@ index 19d513c..e13c651 100644
  static int gridBackFreeSlot(void)
  {
      int i;
-@@ -2881,25 +2950,44 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+@@ -2881,25 +2955,44 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
      // RIPPS2 build 91: Flow and Grid > Grid Layout, RIPPS2's own pages of covers in place of the theme's: 4 x 2,
      // 5 x 2, 3 x 2 Large and 6 x 3 Compact, with RIPPS2's spacing. The grid keeps the theme's centre, and a
      // page shorter than the theme's sits in the middle of the theme's height.
@@ -1600,7 +1612,7 @@ index 19d513c..e13c651 100644
      if (slots < COVER_CACHE_SLOTS)
          slots = COVER_CACHE_SLOTS;
      mutable_image_t *mutableImage = initMutableImage(themePath, themeConfig, theme, name, elem->type, "COV", slots, NULL, NULL);
-@@ -2911,7 +2999,7 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+@@ -2911,7 +3004,7 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
          elem->endElem = &endGrid;
          int slot = gridBackFreeSlot();
          if (slot >= 0) { // build 82: the back covers, for the flip
@@ -1609,7 +1621,7 @@ index 19d513c..e13c651 100644
              gridBacks[slot].elem = gridBacks[slot].img != NULL ? elem : NULL;
          }
          if (!theme->grid) {
-@@ -2919,6 +3007,9 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+@@ -2919,6 +3012,9 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
              theme->gridColumns = cols;
              theme->gridRows = rows;
              theme->gridSpacing = gap;
@@ -1619,7 +1631,7 @@ index 19d513c..e13c651 100644
              // build 92: <name>_coverless=serial, a case with no art shows the game's serial in the in-game
              // menu's pixel font (title, the default: its name on a glass tile); <name>_title=1, the chosen
              // game's name under the grid at <name>_title_y (418) in font slot <name>_title_font (0)
-@@ -5265,6 +5356,9 @@ static int thmLoad(const char *themePath)
+@@ -5265,6 +5361,9 @@ static int thmLoad(const char *themePath)
          newT->glyphSetDef = configGetStr(themeConfig, "glyph_set", &v) ? ripps2GlyphSetParse(v) : RIPPS2_GLYPHSET_THEME;
          // build 96: page_buttons=l2r2 turns the game list's pages on L2 / R2, l1r1 on L1 / R1 (Controller Settings >
          // Page Buttons overrides it)
@@ -1629,7 +1641,7 @@ index 19d513c..e13c651 100644
          newT->pageButtonsDef = 0;
          if (configGetStr(themeConfig, "page_buttons", &v) && v != NULL)
              newT->pageButtonsDef = !strcasecmp(v, "l2r2") ? 2 : !strcasecmp(v, "l1r1") ? 1 : 0;
-@@ -5339,7 +5433,7 @@ static void thmRebuildGuiNames(void)
+@@ -5339,7 +5438,7 @@ static void thmRebuildGuiNames(void)
  
      // built-in coverflow theme occupies the slot right after the disk themes
      guiThemesNames[nThemes + 1] = "<RIPFLOW>"; // RIPPS2 build 70: the built-in coverflow theme is RIPFLOW
@@ -1638,7 +1650,7 @@ index 19d513c..e13c651 100644
      guiThemesNames[nThemes + 3] = NULL;
  }
  
-@@ -5358,7 +5452,7 @@ int thmAddElements(char *path, const char *separator, int forceRefresh)
+@@ -5358,7 +5457,7 @@ int thmAddElements(char *path, const char *separator, int forceRefresh)
      else if (guiThemeID == nThemes + 1)
          snprintf(activeName, sizeof(activeName), "<RIPFLOW>");
      else if (guiThemeID == nThemes + 2)
@@ -1647,7 +1659,7 @@ index 19d513c..e13c651 100644
      const char *temp = NULL;
      int savedMissing = configGetStr(configGetByType(CONFIG_OPL), "theme", &temp) && thmFindGuiID(temp) == 0;
  
-@@ -5413,7 +5507,7 @@ void thmReinit(const char *path)
+@@ -5413,7 +5512,7 @@ void thmReinit(const char *path)
      } else if (guiThemeID == nThemes + 1) {
          snprintf(activeName, sizeof(activeName), "<RIPFLOW>"); // built-in; its id (nThemes+1) shifts as themes are removed
      } else if (guiThemeID == nThemes + 2) {
@@ -1656,7 +1668,7 @@ index 19d513c..e13c651 100644
      }
  
      // One guiLock section across the removal loop AND the rebuild: the frees below invalidate
-@@ -5472,7 +5566,7 @@ int thmSetGuiValue(int themeID, int reload)
+@@ -5472,7 +5571,7 @@ int thmSetGuiValue(int themeID, int reload)
                  gLoadCoverflowBuiltin = 1;
                  loadResult = thmLoad(NULL);
                  gLoadCoverflowBuiltin = 0;
@@ -1665,7 +1677,7 @@ index 19d513c..e13c651 100644
                  gLoadGridBuiltin = 1;
                  loadResult = thmLoad(NULL);
                  gLoadGridBuiltin = 0;
-@@ -5515,7 +5609,7 @@ int thmFindGuiID(const char *theme)
+@@ -5515,7 +5614,7 @@ int thmFindGuiID(const char *theme)
      if (theme) {
          if (strcasecmp(theme, "<RIPFLOW>") == 0 || strcasecmp(theme, "<Coverflow>") == 0)
              return nThemes + 1; // built-in coverflow theme (RIPPS2 build 70: RIPFLOW; <Coverflow> in older settings)

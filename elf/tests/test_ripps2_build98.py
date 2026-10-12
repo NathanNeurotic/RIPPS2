@@ -199,6 +199,17 @@ if 'static int thmBlurPercent(void)' not in th or '"bg_blur"' not in th or 'bg_b
     fail.append('Background Blur: Theme, Off, Weak, Normal, Strong, and bg_blur=weak on RIPGRID')
 if 'static void gridUseLayout(void)' not in th or 'theme->gridWide = wide;' not in th or 'wide_columns=6' not in rd('misc/theme_ripgrid.cfg'):
     fail.append('the Grid keeps a 16:9 layout of its own (RIPGRID: 6 across)')
+if 'int wide = rmWideScale(4) == 3;' not in th:
+    fail.append('the Grid's 16:9 layout must follow the picture as drawn (720p is 16:9 whatever Widescreen says)')
+gc = th[th.index('static void drawGridCover('):]
+gc = gc[:gc.index('
+}
+')]
+if '!gridSerial(src->itemGetStartup(src, it->item.id), serial, sizeof(serial))))
+                return;' not in gc.replace('
+', '
+'):
+    fail.append('with coverless=serial a tile is the game ID or nothing, never its name')
 if 'RIPgrid' in th or '"<RIPGRID>"' not in th:
     fail.append('RIPGRID is written in capitals')
 
