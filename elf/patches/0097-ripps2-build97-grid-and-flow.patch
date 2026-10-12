@@ -50,6 +50,19 @@ index 720f286..f042b0e 100644
  main5:
  	type=ItemsList
  	x=POS_MID
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index 5114977..91457bf 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -1608,6 +1608,8 @@ static int bdmUpdateGameList(item_list_t *itemList)
+             setErrorMessagePathCode(_STR_BDM_PS2_FOLDERS_UNREADABLE, pDeviceData->bdmPrefix, sbGetReadListError());
+         result += pDeviceData->bdmGameCount;
+     }
++    LOG("bdmUpdateGameList: mode %d view %d: %d PS2, %d PS1, %d rows\n", itemList->mode, view, pDeviceData->bdmGameCount,
++        pDeviceData->bdmPs1GameCount, result);
+     return result;
+ }
+ 
 diff --git a/src/menusys.c b/src/menusys.c
 index fc99173..a36fc4c 100644
 --- a/src/menusys.c
@@ -115,6 +128,58 @@ index fc99173..a36fc4c 100644
          return;
      }
      if (gTheme->coverflow)
+diff --git a/src/mixsupport.c b/src/mixsupport.c
+index 16b3b31..116a919 100644
+--- a/src/mixsupport.c
++++ b/src/mixsupport.c
+@@ -177,6 +177,7 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+     view = *src;
+     view.viewOverride = ITEM_VIEW_FORCE_ISO;
+     count = view.itemGetCount(&view);
++    LOG("mixCollect: mode %d has %d PS2 rows\n", mode, count);
+     int folders = folderModeSupported(mode) && view.itemGet != NULL;
+     for (i = 0; i < count; i++) {
+         if (folders) {
+@@ -185,8 +186,10 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+                 continue;
+         }
+         char *name = view.itemGetName(&view, i);
+-        if (name == NULL || name[0] == '\0')
++        if (name == NULL || name[0] == '\0') {
++            LOG("mixCollect: mode %d row %d has no name\n", mode, i);
+             continue;
++        }
+         mixAppend(b, src, mode, i, FAV_KIND_ISO, rank, name, view.itemGetStartup != NULL ? view.itemGetStartup(&view, i) : NULL);
+     }
+ 
+@@ -280,6 +283,7 @@ static int mixUpdateItemList(item_list_t *itemList)
+         }
+         b.arr[kept++] = *r;
+     }
++    LOG("mixUpdateItemList: %d gathered, %d kept (view %d)\n", b.count, kept, view);
+     mixLock();
+     mixArray = b.arr; // published whole, after it is complete
+     mixCount = kept;
+diff --git a/src/supportbase.c b/src/supportbase.c
+index 3330dc0..821b1c6 100644
+--- a/src/supportbase.c
++++ b/src/supportbase.c
+@@ -431,6 +431,7 @@ static int scanForISO(char *path, char type, struct game_list_t **glist, struct
+                 int MountFD = fileXioMount("iso:", fullpath, FIO_MT_RDONLY);
+ 
+                 if (MountFD < 0 || GetStartupExecName("iso:/SYSTEM.CNF;1", startup, GAME_STARTUP_MAX - 1) != 0) {
++                    LOG("scanForISO: %s has no startup (mount %d)\n", fullpath, MountFD);
+                     fileXioUmount("iso:");
+                     *glist = next->next;
+                     free(next);
+@@ -467,6 +468,7 @@ static int scanForISO(char *path, char type, struct game_list_t **glist, struct
+         return -1;
+     }
+ 
++    LOG("scanForISO: %s %d games (cache %d)\n", path, count, cacheLoaded ? (int)cache.count : -1);
+     if (cacheLoaded) {
+         updateISOGameList(path, &cache, *glist, count);
+         freeISOGameListCache(&cache);
 diff --git a/src/themes.c b/src/themes.c
 index d46665d..5ad072a 100644
 --- a/src/themes.c
