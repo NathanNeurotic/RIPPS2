@@ -22,6 +22,6 @@ Controls: arrows move, Enter opens or converts, Backspace goes back, Space plays
 - `studio.py`: the app (pygame).
 - `adpcm.py`: the `.adp` encoder and decoder (the same as `elf/theme/tools/make_adp.py`).
 - `audio_io.py`: reading audio, writing `.adp` and music.
-- `ps2bios.py`: reads a PS2 BIOS dump's sound image (its ROM directory, the BIOS's LZ compression, the SSHD sound banks and SSSQ sequences) and renders them with an SPU2 voice model (ADPCM, the ADSR envelope, pitch, pan, noise). `python ps2bios.py <bios.bin> <folder>` writes every menu sound as a WAV.
+- `ps2bios.py`: reads a PS2 BIOS dump's sound image (its ROM directory, the BIOS's LZ compression, the SSHD sound banks and SSSQ sequences) and renders them with an SPU2 voice model (ADPCM, the ADSR envelope, pitch, pan). `python ps2bios.py <bios.bin> <folder>` writes every menu sound as a WAV.
 - `test_studio.py`: drives the app off screen and checks its output.
 - `build_exe.bat`: builds the Windows app with PyInstaller.

@@ -35,7 +35,39 @@ if 'game = &bdmPathGame;' not in bdm or '!bdmPathLaunch && game != NULL && (bdmG
 if 'configGetInt(configOPL, "ripps2_vcd_usb", &last);' not in bdm or 'vcdBdmaEnvironmentValid(VCD_BDMA_USBEXFAT))' not in bdm:
     fail.append('a USB PS1 launch must remember the fat32 / exFAT answer while the card still matches it')
 
+# Sound: the boot and launch rips (user: "spitty pops"). Programs 60 to 62 were read as the SPU2 noise and played
+# as a random level held for a tenth of a second; they are the bank's first sample (address 0)
+rip = rd('src/ripps2biossnd.c')
+studio = (Path(__file__).resolve().parents[2] / 'tools/audio-studio/ps2bios.py').read_text(encoding='utf-8')
+if 'tn->noise' in rip or 'RBS_NOISE_BASE' in rip or 'noise_voice' in studio or "noise=not (t[15] & 1)" in studio:
+    fail.append('no sequence tone is the SPU2 noise: programs 60 to 62 play the sample at address 0')
+
+# Sound: the beep after the save modals. audsrv_adpcm_init turns every voice up to full, so every voice goes silent
+# right after it, and only a sounding voice is turned up again
+snd = rd('src/sound.c')
+if snd.count('audsrv_adpcm_init();\n    voicesReset();\n    voicesSilence();') != 3 or 'if (!voiceMuted[v] && voiceBusy(v))' not in snd or \
+        'if (voiceBusy(SFX_BOOT_VOICE))' not in snd:
+    fail.append('after every audsrv init each voice must go silent, and audioSetVolume turn up only a sounding voice')
+
+# Sound: one press, one sound
+if 'void sfxFlush(void)' not in snd or 'sfxPendingId = id; // what it opens may still sound this frame' not in snd or \
+        'sfxPendingId = -1; // what the press opened sounds instead' not in snd or 'SFX_DRIVE_ANSWER_MS' not in snd:
+    fail.append('a confirm or cancel must wait for its frame, and what it opened sound instead')
+pad = rd('src/pad.c')
+if 'sfxFlush(); // build 100' not in pad[pad.index('int readPads()'):pad.index('int readPads()') + 400] or \
+        'sfxFlush(); // build 100' not in gui[gui.index('void guiEndFrame(void)'):gui.index('void guiEndFrame(void)') + 200]:
+    fail.append('readPads and guiEndFrame must play a waiting press sound')
+prompt = gui[gui.index('static int guiSettingsPromptSave(void)'):gui.index('static void guiDrawSettingsIndexHints')]
+if 'sfxPlay(SFX_CONFIRM)' in prompt or 'if (id != MENU_SAVE_CHANGES)' not in menu or 'if (selected != saveRow)' not in gui:
+    fail.append('a save must sound once, with its own box')
+note = gui[gui.index('static void guiShowNotifications(void)'):gui.index('static void guiShowNotifications(void)') + 900]
+if 'sfxPlay(' in note or 'sfxPlay(SFX_PAGE_IN)' in th:
+    fail.append('the drive scan notifications and the right stick case flip must be silent')
+dia = rd('src/dia.c')
+if 'diaResetValue(item);\n        sfxPlay(SFX_CANCEL);' not in dia:
+    fail.append('Circle on a focused value must sound as a cancel')
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build100: viewer turn, editor face, flip direction, menu face, clean replace, ISO where it sits, POPSTARTER answer OK')
+print('build100: viewer turn, editor face, flip direction, menu face, clean replace, ISO where it sits, POPSTARTER answer, rips without noise pops, no beep, one press one sound OK')

@@ -248,8 +248,10 @@ def render_osd(files, index, wet=0.3, hold=None):
 # ------------------------------------------------------------------------------ the system music
 def bank_programs(hd: bytes):
     """Programs of an instrument bank (SShd): program -> {vol, pan, tones}. A tone is one layer of an
-    instrument: its sample (address in 8-byte units; a tone without the sample flag is the SPU2 noise),
-    root note and fine tune, envelope, volume and pan."""
+    instrument: its sample (address in 8-byte units; 0 is the bank's first sample), root note and fine tune,
+    envelope, volume and pan. No tone is the SPU2 noise: the last byte's bit 0 only says the sample loops.
+    Read as noise, programs 60 to 62 (the PS2 logo, the boot's low swells) played a random level held for a
+    tenth of a second or more, a pop at every step; they play the one-shot sample at address 0."""
     base = struct.unpack_from('<I', hd, 0x10)[0]
     last = struct.unpack_from('<H', hd, base)[0]
     progs = {}
@@ -265,7 +267,7 @@ def bank_programs(hd: bytes):
             tones.append(dict(key_hi=t[1], root=t[2], fine=struct.unpack('b', t[3:4])[0],
                               addr=struct.unpack_from('<H', t, 4)[0] * 8,
                               adsr1=struct.unpack_from('<H', t, 6)[0], adsr2=struct.unpack_from('<H', t, 8)[0],
-                              key_lo=t[10], vol=t[11], pan=t[12], noise=not (t[15] & 1)))
+                              key_lo=t[10], vol=t[11], pan=t[12]))
         progs[p] = dict(vol=h[1], pan=h[2], tones=tones)
     return progs
 
@@ -326,7 +328,7 @@ SEQUENCES = {   # the BIOS's sequences: their instrument bank, and what each one
     'SNDTM60S': ('SNDBOOT', 'Timer 60'),
 }
 
-TUNING = dict(noise_base=750.0, fine_div=128.0, wet=0.4, room=1.4)   # matched to a recording of a real console
+TUNING = dict(fine_div=128.0, wet=0.4, room=1.4)   # matched to a recording of a real console
 
 
 class _Fixed:
@@ -337,14 +339,6 @@ class _Fixed:
 
     def render(self, n, key_off):
         return self.e[:n]
-
-
-def noise_voice(n, rate, rng):
-    """The SPU2 noise: a random level held for 48000 / rate samples at a time."""
-    hold = max(1.0, RATE / max(rate, 1.0))
-    k = int(n / hold) + 2
-    lv = rng.uniform(-1, 1, k).astype(np.float32)
-    return lv[(np.arange(n) / hold).astype(np.int64)]
 
 
 def _curve(points, n):
@@ -404,7 +398,6 @@ def render_seq(files, name, tail=4.0, max_seconds=None, tuning=None):
             k = held.pop((ch, data[0]), None)
             if k is not None:
                 notes[k]['off'] = s
-    rng = np.random.default_rng(1)
     cache = {}
     buses = {}
     for nt in notes:
@@ -425,13 +418,10 @@ def render_seq(files, name, tail=4.0, max_seconds=None, tuning=None):
             if not len(live):
                 continue
             m = int(live[-1]) + 1            # the voice ends when its envelope does, not with the song
-            if tn['noise']:
-                y = noise_voice(m, tu['noise_base'] * ratio / 64.0, rng) * e[:m]
-            else:
-                if tn['addr'] not in cache:
-                    cache[tn['addr']] = adpcm(bd, tn['addr'])
-                smp, loop = cache[tn['addr']]
-                y = play_voice(smp, loop, ratio, _Fixed(e[:m]), m, None)
+            if tn['addr'] not in cache:
+                cache[tn['addr']] = adpcm(bd, tn['addr'])
+            smp, loop = cache[tn['addr']]
+            y = play_voice(smp, loop, ratio, _Fixed(e[:m]), m, None)
             g = (nt['vel'] / 127.0) * (tn['vol'] / 127.0) * (prog['vol'] / 127.0)
             pan = max(-1.0, min(1.0, ((tn['pan'] - 64) + (prog['pan'] - 64)) / 64.0))
             bus[0, i0:i0 + len(y)] += y * g * math.cos((pan + 1) * math.pi / 4)

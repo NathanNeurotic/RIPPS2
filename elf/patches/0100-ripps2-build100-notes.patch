@@ -14,6 +14,18 @@ index 5b701a5..64fae57 100644
  int bdmMx4sioReport(int *err, char *root, int rootLen); // RIPPS2 build 98: STATUS > DRIVES' MX4SIO line
  // Fill `slots` with the massN: slot index of EVERY mounted device whose driver matches bdmType (root =
  // "mass<i>:/"), up to maxSlots; returns the count. The BDMA equip searches all same-type slots so a
+diff --git a/include/sound.h b/include/sound.h
+index 1b27ec1..c8cd2c0 100644
+--- a/include/sound.h
++++ b/include/sound.h
+@@ -51,6 +51,7 @@ int sfxLoadedSounds(int *skipped);     // build 95: sounds loaded by the last lo
+ int sfxPreviewStart(const char *path); // build 95: Memory Files plays an .adp (its length in ms, < 0: not playable)
+ void sfxPreviewStop(void);             // build 95: the preview stops and the sounds load again
+ void sfxPlay(int id);
++void sfxFlush(void); // build 100: once a frame (readPads, guiEndFrame): a confirm or cancel nothing replaced plays
+ // Per-press audsrv RPC wall time (last / max, ms) -- measured on the dispatch thread.
+ void sfxGetPlayDiag(unsigned int *lastMs, unsigned int *maxMs);
+ // Silent SFX drops (last totals): stale = cursor ticks aged out at dispatch; full = sounds of any
 diff --git a/include/supportbase.h b/include/supportbase.h
 index eb98975..5a6d355 100644
 --- a/include/supportbase.h
@@ -133,11 +145,43 @@ index 003303e..06e73f6 100644
          // ONE PS1 list, TWO cores. Which one runs this title is a property of the ROW -- a .VCD row
          // goes to POPSTARTER, an Ember game folder to ember.elf -- and NEVER of the page, because
          // both kinds sit side by side in the same list. Asking the view here instead of the row is
+diff --git a/src/dia.c b/src/dia.c
+index 7fae9fb..c543a2f 100644
+--- a/src/dia.c
++++ b/src/dia.c
+@@ -1393,7 +1393,7 @@ static int diaHandleInput(struct UIItem *item, int *modified)
+     // circle loses focus, sets old values first
+     if (getKeyOn(cancelButton)) {
+         diaResetValue(item);
+-        sfxPlay(SFX_CONFIRM);
++        sfxPlay(SFX_CANCEL); // build 100: it was the confirm sound
+         return 0;
+     }
+ 
 diff --git a/src/gui.c b/src/gui.c
-index 69daded..a6d5bb4 100644
+index 69daded..0b513e0 100644
 --- a/src/gui.c
 +++ b/src/gui.c
-@@ -3663,11 +3663,11 @@ static int guiSettingsPromptSave(void)
+@@ -324,6 +324,7 @@ u32 guiGetFrameWatchdog(u32 *worstUs, u32 *overruns)
+ void guiEndFrame(void)
+ {
+     rmEndFrame();
++    sfxFlush(); // build 100: a frame without a pad read (a progress screen) still sounds its press
+     static clock_t frameMark = 0;
+ 
+     // clock() is microseconds on the EE. Sampled after rmEndFrame (i.e. after the vsync wait) so
+@@ -440,7 +441,9 @@ static void guiShowNotifications(void)
+         if (!popupArmed) {
+             popupStart = clock();
+             popupArmed = 1;
+-            sfxPlay(SFX_MESSAGE);
++            // build 100: silent. These say what a drive scan found (settings, themes, languages, a partition),
++            // with no press behind them; on a console the scan ends while the list is in use, and the message
++            // sound there was heard as a sound for art appearing (user, 10-12)
+         }
+ 
+         if (showPartPopup) {
+@@ -3663,11 +3666,11 @@ static int guiSettingsPromptSave(void)
              guiDrawBGPlasma();
  
          guiDrawStatusBackdrop(); // RIPPS2: the pillars behind the glass page panel (was a dark wash and two rules)
@@ -152,7 +196,17 @@ index 69daded..a6d5bb4 100644
                          _l(_STR_SETTINGS_SAVE_PROMPT_LINE2), gTheme->textColor);
  
          x = guiAlignSubMenuHints(3, promptHints, promptIcons, RIPPS2_UI_FONT, 12, 1);
-@@ -3743,18 +3743,18 @@ static int guiSettingsShowIndex(int *page)
+@@ -3680,8 +3683,7 @@ static int guiSettingsPromptSave(void)
+         guiEndFrame();
+ 
+         readPads();
+-        if (getKeyOn(guiConfirmKey())) {
+-            sfxPlay(SFX_CONFIRM);
++        if (getKeyOn(guiConfirmKey())) { // build 100: no confirm: the save's own box (saved, or the error) sounds
+             return SETTINGS_PROMPT_SAVE;
+         }
+         if (getKeyOn(guiCancelKey())) {
+@@ -3743,18 +3745,18 @@ static int guiSettingsShowIndex(int *page)
          if (guiDrawBGSettings() == 0)
              guiDrawBGPlasma();
  
@@ -174,8 +228,18 @@ index 69daded..a6d5bb4 100644
              y += spacing;
              if (i == saveRow - 1)
                  y += spacing / 2;
+@@ -3771,7 +3773,8 @@ static int guiSettingsShowIndex(int *page)
+             sfxPlay(SFX_CURSOR);
+             selected = (selected + 1) % itemCount;
+         } else if (getKeyOn(guiConfirmKey())) {
+-            sfxPlay(SFX_CONFIRM);
++            if (selected != saveRow) // build 100: Save Changes sounds with its own box (saved, or the error)
++                sfxPlay(SFX_CONFIRM);
+             if (selected == achRow) {
+                 ripps2Achievements(); // its own page; back here when it closes
+                 readPads();
 diff --git a/src/menusys.c b/src/menusys.c
-index f1b217f..5a0deff 100644
+index f1b217f..7b06cf3 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -1550,7 +1550,7 @@ void menuRenderMenu()
@@ -187,7 +251,17 @@ index f1b217f..5a0deff 100644
          y += spacing;
          // Group the live service/settings actions above the informational/exit actions.
          // Key this to the actual row ID, not enum arithmetic, so retired/reserved IDs cannot move the gap.
-@@ -2278,16 +2278,16 @@ void menuRenderGameMenu()
+@@ -1638,7 +1638,8 @@ void menuHandleInputMenu()
+         // execute the item via looking at the id of it
+         int id = mainMenuCurrent->item.id;
+ 
+-        sfxPlay(SFX_CONFIRM);
++        if (id != MENU_SAVE_CHANGES) // build 100: the save's own box (saved, or the error) is its sound
++            sfxPlay(SFX_CONFIRM);
+ 
+ #ifdef RETROACHIEVEMENTS
+         if (id == MENU_RA_DISC_CHECK) {
+@@ -2278,16 +2279,16 @@ void menuRenderGameMenu()
      int cp = 0; // current position
  
      // game title
@@ -207,7 +281,7 @@ index f1b217f..5a0deff 100644
          y += spacing;
          if (cp == (GAME_SAVE_CHANGES - 1) || cp == (GAME_REMOVE_CHANGES - 1))
              y += spacing / 2;
-@@ -2492,7 +2492,7 @@ void menuRenderAppMenu()
+@@ -2492,7 +2493,7 @@ void menuRenderAppMenu()
      int cp = 0; // current position
  
      // app title
@@ -216,7 +290,7 @@ index f1b217f..5a0deff 100644
  
      // A PS1 row opens this smaller menu, not the PS2 VMC editor. Say why the missing PS2 control
      // is intentional without claiming that Ember and POPSTARTER store their cards identically.
-@@ -2502,7 +2502,7 @@ void menuRenderAppMenu()
+@@ -2502,7 +2503,7 @@ void menuRenderAppMenu()
  
      for (it = appMenu; it; it = it->next, cp++) {
          // render, advance
@@ -225,6 +299,206 @@ index f1b217f..5a0deff 100644
          y += spacing;
      }
  
+diff --git a/src/opl.c b/src/opl.c
+index 130dfd0..46d7c2b 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -425,6 +425,7 @@ static void itemExecSelect(struct menu_item *curMenu)
+ {
+     item_list_t *support = curMenu->userdata;
+     sfxPlay(SFX_CONFIRM);
++    sfxFlush(); // build 100: everything below blocks the GUI thread, so the press sounds now
+     // That confirm just armed a rumble pulse, and everything below blocks the GUI thread without
+     // polling readPads() -- config load, GameID hold, the whole itemLaunch chain. The IOP LATCHES
+     // the actuator, so without this the motor buzzes through the entire loading screen. GUI-thread
+diff --git a/src/pad.c b/src/pad.c
+index 176ca0c..c488407 100644
+--- a/src/pad.c
++++ b/src/pad.c
+@@ -7,6 +7,7 @@
+ #include "include/opl.h"
+ #include "include/pad.h"
+ #include "include/ioman.h"
++#include "include/sound.h" // build 100: sfxFlush
+ #include <libpad.h>
+ #include <timer.h>
+ #include <time.h>
+@@ -765,6 +766,8 @@ int readPads()
+     int i;
+     int pollClean = 1;
+ 
++    sfxFlush(); // build 100: the last frame's press sound, unless what it opened sounded instead
++
+     if (!edgeBaselineFrozen)
+         oldpaddata = paddata;
+     paddata = 0;
+diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
+index 69e0667..ddd8089 100644
+--- a/src/ripps2biossnd.c
++++ b/src/ripps2biossnd.c
+@@ -18,8 +18,15 @@
+ 
+   Build 89: the boot and the PS2 logo before a game are the console's system music, sequences (SNDBOOTS,
+   SNDLOGOS) played on another bank (SNDBOOT). RIPPS2 plays them the way Audio Studio's render_seq does: one
+-  voice per layer of every note (its sample or the SPU2 noise, its envelope with the key off), each
+-  channel through its volume, expression and pan, then the hall, into boot.adp and launch.adp.
++  voice per layer of every note (its sample, its envelope with the key off), each channel through its
++  volume, expression and pan, then the hall, into boot.adp and launch.adp.
++
++  Build 100 (user: boot and launch were choppy, "spitty pops"): no tone is the SPU2 noise. Programs 60 to 62
++  (the PS2 logo, the boot's low swells) were read as noise because a flag bit was clear, and played as a
++  random level held for a tenth of a second or more: a pop at every step. That bit only says the sample
++  loops; those tones play the bank's first sample (address 0, a one-shot packed right before the next one,
++  on every BIOS from SCPH-30000 to 77000). The recordings of a real console have no clicks; neither has
++  the rip now (the PC check, 274 click points on boot and 50 on launch before, 2 and 0 after).
+   An older BIOS (1.00, SCPH-10000) keeps its sounds elsewhere and is refused.
+ 
+   RIPPS2_BIOSSND_HOST_TEST builds only the ripper, for elf/tests and checks against Audio Studio.
+@@ -466,7 +473,6 @@ static rbs_u8 *rbsRender(const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLe
+ 
+ // ---- the system music (build 89): a sequence played on the SNDBOOT bank, mono at 48 kHz
+ #define RBS_RATE       48000
+-#define RBS_NOISE_BASE 750.0f // the SPU2 noise's base rate, matched to a recording of a real console (Audio Studio)
+ #define RBS_PROGS      128
+ #define RBS_NOTES      256
+ #define RBS_POINTS     64
+@@ -475,7 +481,7 @@ static rbs_u8 *rbsRender(const rbs_u8 *hd, int hdLen, const rbs_u8 *bd, int bdLe
+ 
+ typedef struct
+ {
+-    int keyLo, keyHi, root, fine, vol, pan, noise;
++    int keyLo, keyHi, root, fine, vol, pan;
+     unsigned int addr, a1, a2;
+ } rbs_tone_t;
+ typedef struct
+@@ -501,8 +507,7 @@ typedef struct
+ } rbs_smp_t;
+ 
+ // An instrument bank (SShd): its programs, each a few tones (layers) with their key range, root note and
+-// fine tune, sample address (8-byte units; a tone without the sample flag is the SPU2 noise), envelope,
+-// volume and pan
++// fine tune, sample address (8-byte units; address 0 is the bank's first sample), envelope, volume and pan
+ static int rbsBankPrograms(const rbs_u8 *hd, int len, rbs_prog_t *progs)
+ {
+     unsigned int base, last, p, k;
+@@ -529,8 +534,7 @@ static int rbsBankPrograms(const rbs_u8 *hd, int len, rbs_prog_t *progs)
+             tn->a2 = rbsLe16(t + 8);
+             tn->keyLo = t[10];
+             tn->vol = t[11];
+-            tn->pan = t[12];
+-            tn->noise = !(t[15] & 1);
++            tn->pan = t[12]; // t[15] bit 0: the sample loops (its ADPCM flags say so too); never the noise
+         }
+     }
+     return 0;
+@@ -668,7 +672,6 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
+     rbs_smp_t cache[RBS_SAMPLES];
+     float endSec = 0, *mix = NULL, peak = 0;
+     int headVol = 0, nn = 0, total, cap, k, len, ncache = 0;
+-    unsigned int seed = 0x2545F491u;
+     rbs_u8 *adp = NULL;
+ 
+     if (progs == NULL || notes == NULL || ch == NULL || rbsBankPrograms(hd, hdLen, progs) ||
+@@ -687,34 +690,23 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
+         for (t = 0; t < pg->ntones; t++) {
+             const rbs_tone_t *tn = &pg->tone[t];
+             const rbs_smp_t *sp = NULL;
+-            float ratio, g, pn, gl, gr, cg = 0, cl = 0, cr = 0, level = 0, hold = 1;
++            float ratio, g, pn, gl, gr, cg = 0, cl = 0, cr = 0;
+             unsigned long long pos = 0, step; // where the sample is read, 32.32 fixed point: no drift in pitch
+-            int i, c, hi = tn->keyHi > tn->keyLo ? tn->keyHi : tn->keyLo, lastIdx = -1;
++            int i, c, hi = tn->keyHi > tn->keyLo ? tn->keyHi : tn->keyLo;
+             rbs_env_t env;
+             if (nt->note < tn->keyLo || nt->note > hi)
+                 continue;
+-#ifdef RBS_TEST_NONOISE // host checks against Audio Studio: no noise voices (random on both sides), no hall
+-            if (tn->noise)
+-                continue;
+-#endif
+             ratio = powf(2.0f, (nt->note - tn->root + tn->fine / 128.0f) / 12.0f);
+-            if (tn->noise) { // the SPU2 noise: a random level held for 48000 / rate samples at a time
+-                float rate = RBS_NOISE_BASE * ratio / 64.0f;
+-                hold = rate > 1.0f ? RBS_RATE / rate : RBS_RATE;
+-                if (hold < 1.0f)
+-                    hold = 1.0f;
+-            } else {
+-                for (c = 0; c < ncache; c++)
+-                    if (cache[c].addr == tn->addr)
+-                        sp = &cache[c];
+-                if (sp == NULL && ncache < RBS_SAMPLES) {
+-                    cache[ncache].addr = tn->addr;
+-                    if ((cache[ncache].s = rbsAdpcm(bd, bdLen, tn->addr, &cache[ncache].n, &cache[ncache].loop)) != NULL)
+-                        sp = &cache[ncache++];
+-                }
+-                if (sp == NULL || sp->n < 2)
+-                    continue;
++            for (c = 0; c < ncache; c++)
++                if (cache[c].addr == tn->addr)
++                    sp = &cache[c];
++            if (sp == NULL && ncache < RBS_SAMPLES) {
++                cache[ncache].addr = tn->addr;
++                if ((cache[ncache].s = rbsAdpcm(bd, bdLen, tn->addr, &cache[ncache].n, &cache[ncache].loop)) != NULL)
++                    sp = &cache[ncache++];
+             }
++            if (sp == NULL || sp->n < 2)
++                continue;
+             step = (unsigned long long)(ratio * 4294967296.0f);
+             rbsEnvInit(&env, tn->a1, tn->a2);
+             g = nt->vel / 127.0f * tn->vol / 127.0f * pg->vol / 127.0f;
+@@ -723,32 +715,21 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
+             gl = cosf((pn + 1) * RBS_PI4);
+             gr = sinf((pn + 1) * RBS_PI4);
+             for (i = 0; i0 + i < total; i++) {
+-                float e = rbsEnvNext(&env, i == koff), y;
++                float e = rbsEnvNext(&env, i == koff), y, f;
++                int a, b;
+                 if (env.done)
+                     break; // the voice ends when its envelope does
+-                if (tn->noise) {
+-                    int idx = (int)(i / hold);
+-                    if (idx != lastIdx) {
+-                        seed = seed * 1664525u + 1013904223u;
+-                        level = (seed >> 8) / 8388608.0f - 1.0f;
+-                        lastIdx = idx;
+-                    }
+-                    y = level;
+-                } else {
+-                    int a, b;
+-                    float f;
+-                    if ((pos >> 32) >= (unsigned long long)sp->n) {
+-                        if (sp->loop < 0 || sp->loop >= sp->n - 1)
+-                            break;
+-                        while ((pos >> 32) >= (unsigned long long)sp->n)
+-                            pos -= (unsigned long long)(sp->n - sp->loop) << 32;
+-                    }
+-                    a = (int)(pos >> 32);
+-                    f = (unsigned int)pos * (1.0f / 4294967296.0f);
+-                    b = a + 1 < sp->n ? a + 1 : sp->n - 1;
+-                    y = sp->s[a] * (1 - f) + sp->s[b] * f;
+-                    pos += step;
++                if ((pos >> 32) >= (unsigned long long)sp->n) {
++                    if (sp->loop < 0 || sp->loop >= sp->n - 1)
++                        break;
++                    while ((pos >> 32) >= (unsigned long long)sp->n)
++                        pos -= (unsigned long long)(sp->n - sp->loop) << 32;
+                 }
++                a = (int)(pos >> 32);
++                f = (unsigned int)pos * (1.0f / 4294967296.0f);
++                b = a + 1 < sp->n ? a + 1 : sp->n - 1;
++                y = sp->s[a] * (1 - f) + sp->s[b] * f;
++                pos += step;
+                 if ((i & 63) == 0) { // the channel's volume, expression and pan where the note is
+                     float tt = (float)(i0 + i) / RBS_RATE, pc;
+                     cg = rbsCurve(&ch[nt->ch], 0, tt) * rbsCurve(&ch[nt->ch], 1, tt);
+@@ -763,7 +744,7 @@ static rbs_u8 *rbsRenderSeq(const rbs_u8 *sq, int sqLen, const rbs_u8 *hd, int h
+     }
+     for (k = 0; k < total; k++)
+         mix[k] *= headVol / 127.0f;
+-#if defined(RBS_TEST_NONOISE) || defined(RBS_TEST_DRY)
++#ifdef RBS_TEST_DRY
+     len = total;
+ #else
+     len = rbsHall(mix, total, cap, RBS_RATE, 0.4f, 3.0f);
 diff --git a/src/ripps2edit.c b/src/ripps2edit.c
 index 951ca63..6480771 100644
 --- a/src/ripps2edit.c
@@ -459,37 +733,39 @@ index c46c24c..f5511c5 100644
              pitch -= dt * (ry < -24 ? -ry / 127.0f : 1.0f) * 2.0f;
          if (getKeyPressed(KEY_DOWN) || ry > 24)
 diff --git a/src/sound.c b/src/sound.c
-index 024f50f..da2fac4 100644
+index 024f50f..1f31c38 100644
 --- a/src/sound.c
 +++ b/src/sound.c
-@@ -134,6 +134,18 @@ static void voiceMute(int v)
+@@ -134,6 +134,20 @@ static void voiceMute(int v)
      }
  }
  
-+// RIPPS2 build 100: the beep. audsrv_adpcm_init keys every voice off and frees the sounds' SPU memory, and the next
-+// load writes new sounds over it. A key-off is not silence: a voice still in its release (a BIOS rip's long hall)
-+// goes on reading that memory as it is rewritten, and plays it as a tone (heard after the save message, whose own
-+// sound was still ringing when the settings' reload began). Every voice is turned to nothing first.
++// RIPPS2 build 100: the beep (user: after the save modals, a tone none of the rips has). audsrv_adpcm_init keys
++// every voice off, turns every voice up to full (its own code: VOLL and VOLR 0x3fff) and frees the sounds' SPU
++// memory, and the next load writes new sounds over it. A key-off is not silence: a voice still in its release (a
++// BIOS rip's long hall) goes on reading that memory as it is rewritten, at full volume, and plays it as a tone
++// (the save message's sound was still ringing when leaving Interface queued the reload). So right after every
++// init each voice is turned down to nothing, before anything is written, and a voice is turned up again only by
++// the sound that starts on it (sfxStart) or while its sound plays (audioSetVolume).
 +static void voicesSilence(void)
 +{
 +    int v;
 +    for (v = 0; v < SFX_VOICES; v++)
 +        audsrv_adpcm_set_volume_and_pan(v, 0, 0);
-+    DelayThread(2 * 1000); // the volumes reach the SPU before the memory changes
 +}
 +
  // A sound on the voice that has been free the longest. The play is asked first and the volume set once it is
  // accepted, so a voice that turns out to be still sounding keeps its own (muted) volume. The voice, or -1
  static int sfxStart(int id, int volume)
-@@ -417,6 +429,7 @@ int sfxInit(int bootSnd)
-     if (sfxPreviewing)
-         return 0; // Memory Files' preview has the voices; its close loads the set again
+@@ -419,6 +433,7 @@ int sfxInit(int bootSnd)
  
-+    voicesSilence(); // build 100
      audsrv_adpcm_init();
      voicesReset();
++    voicesSilence(); // build 100: init turned every voice up
      sfxInitDefaults();
-@@ -455,6 +468,8 @@ int sfxInit(int bootSnd)
+     audioSetVolume();
+ 
+@@ -455,6 +470,8 @@ int sfxInit(int bootSnd)
      loaded = 0;
      memset(sfxReady, 0, sizeof(sfxReady));
      memset(sfxSkipped, 0, sizeof(sfxSkipped));
@@ -498,7 +774,7 @@ index 024f50f..da2fac4 100644
      for (i = bootSnd ? 0 : 1; i < SFX_COUNT; i++) {
          full_path[0] = '\0';
          if (themeSfx) {
-@@ -462,8 +477,15 @@ int sfxInit(int bootSnd)
+@@ -462,8 +479,15 @@ int sfxInit(int bootSnd)
              ret = sfxRead(full_path, &sfx_files[i]);
              if (ret != 0 && ret != -ENOENT)
                  sfxSkipped[i] = 1;
@@ -515,45 +791,140 @@ index 024f50f..da2fac4 100644
              snprintf(full_path, sizeof(full_path), "%s/%s", audio_path, sfx_files[i].name);
              ret = sfxRead(full_path, &sfx_files[i]);
              if (ret == 0)
-@@ -589,6 +611,7 @@ int sfxPreviewStart(const char *path)
-             }
-         }
+@@ -591,6 +615,7 @@ int sfxPreviewStart(const char *path)
      }
-+    voicesSilence();     // build 100: nothing still ringing reads the memory about to change
      audsrv_adpcm_init(); // every voice off and every sound dropped: the menu's set, and an earlier preview
      voicesReset();
++    voicesSilence(); // build 100: init turned every voice up; nothing still ringing plays the memory about to change
      memset(sfxReady, 0, sizeof(sfxReady));
-@@ -615,6 +638,7 @@ void sfxPreviewStop(void)
- {
-     if (!sfxPreviewing)
+     prevInSpu = 0;
+     if (prevFile.buffer == NULL) { // read once per preview
+@@ -617,6 +642,7 @@ void sfxPreviewStop(void)
          return;
-+    voicesSilence(); // build 100
      audsrv_adpcm_init();
      voicesReset();
++    voicesSilence(); // build 100: init turned every voice up
      if (prevFile.buffer != NULL) {
-@@ -755,8 +779,14 @@ void sfxPlay(int id)
-         return;
+         free(prevFile.buffer);
+         prevFile.buffer = NULL;
+@@ -743,23 +769,25 @@ static void sfxRumble(int id)
+     }
+ }
  
-     // RIPPS2: an event without a sound of its own plays the one it falls back to, or nothing
-+#ifdef __DEBUG
-+    int asked = id; // build 100: every sound asked for, logged below, to find a sound nobody pressed for
-+#endif
-     while (id >= 0 && id < SFX_COUNT && !sfxReady[id])
-         id = sfxFallback[id];
-+#ifdef __DEBUG
-+    LOG("SFX %d -> %d at %u ms\n", asked, id, (unsigned)(cpu_ticks() / SFX_CLOCKS_PER_MS));
-+#endif
-     if (id < 0 || id >= SFX_COUNT || id == SFX_BOOT || !gEnableSFX)
-         return;
+-void sfxPlay(int id)
++/*
++  RIPPS2 build 100: one press, one sound (user: "in some menus confirm causes the cursor and the confirm type sound
++  all from one action"). A press that opens something raised its confirm or cancel and then, in the same frame, the
++  sound of what it opened (a message box, the save prompt, a page). Both started, and build 71's rule cut the
++  confirm 20 to 50 ms in: a tick, then the second sound. Now a confirm or cancel waits for the end of its frame
++  (sfxFlush, from readPads and guiEndFrame: the frame the press's rumble already waits), and a sound raised by
++  what the press opened plays instead of it; a cursor tick in that frame is part of the press and stays silent.
++  A drive that comes up within SFX_DRIVE_ANSWER_MS of a confirm (Start Device, a refresh) answers that press,
++  which already sounded: no connect sound on top (the lab's Start Device played confirm, then connect).
++*/
++#define SFX_DRIVE_ANSWER_MS 3000
++static volatile int sfxPendingId = -1; // a confirm or cancel waiting for the end of its frame
++static volatile u32 sfxLastConfirmTicks = 0;
++
++static void sfxPlayNow(int id)
+ {
+     static u32 lastCursorTicks = 0, lastOneShotTicks = 0;
+     static int lastOneShotId = -1, lastOneShotVoice = -1;
+     int v;
+-
+-    sfxRumble(id);
+-
+-    if (!audio_initialized || sfxPreviewing)
+-        return;
+-
+-    // RIPPS2: an event without a sound of its own plays the one it falls back to, or nothing
+-    while (id >= 0 && id < SFX_COUNT && !sfxReady[id])
+-        id = sfxFallback[id];
+-    if (id < 0 || id >= SFX_COUNT || id == SFX_BOOT || !gEnableSFX)
+-        return;
+-
+     u32 sfxStartTicks = cpu_ticks();
+     if (id == SFX_CURSOR) {
+         if (lastCursorTicks != 0 && (sfxStartTicks - lastCursorTicks) / SFX_CLOCKS_PER_MS < 45)
+@@ -795,6 +823,53 @@ void sfxPlay(int id)
+         sfxMaxPlayMs = costMs;
+ }
  
-@@ -814,6 +844,7 @@ void sfxBootStart(void)
-     audioInit();
-     if (!audio_initialized)
++// build 100: the end of a frame: a confirm or cancel nothing took the place of plays now
++void sfxFlush(void)
++{
++    int id = sfxPendingId;
++    if (id < 0)
++        return;
++    sfxPendingId = -1;
++    if (audio_initialized && !sfxPreviewing && gEnableSFX && id < SFX_COUNT && sfxReady[id])
++        sfxPlayNow(id);
++}
++
++void sfxPlay(int id)
++{
++    int asked = id;
++
++    sfxRumble(id);
++
++    if (!audio_initialized || sfxPreviewing)
++        return;
++
++    // RIPPS2: an event without a sound of its own plays the one it falls back to, or nothing
++    while (id >= 0 && id < SFX_COUNT && !sfxReady[id])
++        id = sfxFallback[id];
++#ifdef __DEBUG
++    LOG("SFX %d -> %d at %u ms\n", asked, id, (unsigned)(cpu_ticks() / SFX_CLOCKS_PER_MS)); // build 100: every ask
++#endif
++    if (asked == SFX_CONFIRM)
++        sfxLastConfirmTicks = cpu_ticks() | 1;
++    if (id < 0 || id >= SFX_COUNT || id == SFX_BOOT || !gEnableSFX)
++        return;
++
++    if ((asked == SFX_BD_CONNECT || asked == SFX_BD_DISCONNECT) && sfxLastConfirmTicks != 0 &&
++        (cpu_ticks() - sfxLastConfirmTicks) / SFX_CLOCKS_PER_MS < SFX_DRIVE_ANSWER_MS)
++        return; // the drive answered a press, which already sounded
++    if (asked == SFX_CONFIRM || asked == SFX_CANCEL) {
++        sfxPendingId = id; // what it opens may still sound this frame
++        return;
++    }
++    if (sfxPendingId >= 0) {
++        if (id == SFX_CURSOR)
++            return; // the press of this frame has its sound
++        if (sfxIsUiOneShot(id))
++            sfxPendingId = -1; // what the press opened sounds instead
++    }
++    sfxPlayNow(id);
++}
++
+ // Build 75 kept mc0:/RIPPS2/QUIETBOOT for a built-in boot sound that played before the settings were read.
+ // With no built-in sounds (build 95) the boot sound waits for the settings, so the marker is not needed.
+ void ripps2QuietBootMark(int bootSoundOn)
+@@ -816,6 +891,7 @@ void sfxBootStart(void)
          return;
-+    voicesSilence(); // build 100
      audsrv_adpcm_init();
      voicesReset();
++    voicesSilence(); // build 100: init turned every voice up
      audioSetVolume();
+ }
+ 
+@@ -2306,9 +2382,13 @@ void audioSetVolume(void)
+         return;
+     }
+ 
+-    for (v = 1; v < SFX_VOICES; v++) // build 95: a muted voice stays muted until its sound has run out
+-        if (!voiceMuted[v])
++    // build 95: a muted voice stays muted until its sound has run out. Build 100: and a voice with no sound of
++    // ours stays at nothing (sfxStart turns it up when one starts): turned up, a voice still in its release after a
++    // reload played the new sounds' memory as it was written (the beep)
++    for (v = 1; v < SFX_VOICES; v++)
++        if (!voiceMuted[v] && voiceBusy(v))
+             audsrv_adpcm_set_volume_and_pan(v, gSFXVolume, 0);
+-    audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
++    if (voiceBusy(SFX_BOOT_VOICE))
++        audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
+     audsrv_set_volume(gBGMVolume);
+ }
 diff --git a/src/supportbase.c b/src/supportbase.c
 index 821b1c6..dc36512 100644
 --- a/src/supportbase.c
@@ -594,18 +965,23 @@ index 821b1c6..dc36512 100644
      // "" for the normal device-root case, so subseg collapses to nothing and the path is unchanged.
      // WITHOUT this, every consumer of sbCreatePath composed a DEVICE-ROOT path for a game the user
 diff --git a/src/themes.c b/src/themes.c
-index 8101eb7..0b40e03 100644
+index 8101eb7..3f22a17 100644
 --- a/src/themes.c
 +++ b/src/themes.c
-@@ -2524,7 +2524,10 @@ static void gridFlipUpdate(const void *selected, int backReady)
+@@ -2524,9 +2524,13 @@ static void gridFlipUpdate(const void *selected, int backReady)
      if (!flipHoldDone && (float)(now - flipHoldSince) / (float)CLOCKS_PER_SEC >= FLIP_HOLD_S) {
          int k = gridFlipFind(selected, 1);
          gridFlips[k].target = !gridFlips[k].target;
 -        gridFlips[k].side = -side; // the leaning side goes away first, as the tilt sends it
+-        flipHoldDone = 1;          // let go and hold again to turn it back
+-        sfxPlay(SFX_PAGE_IN);
 +        // build 100: both turns go the way the stick pushes. The drawn turn is side * pi * eased(pos); going home pos
 +        // runs back to 0, so the home turn needs the opposite sign for the same push. Both used -side, so the turn to
 +        // the back spun against the push while the turn home looked right (user, 10-12).
 +        gridFlips[k].side = gridFlips[k].target ? side : -side;
-         flipHoldDone = 1;          // let go and hold again to turn it back
-         sfxPlay(SFX_PAGE_IN);
++        flipHoldDone = 1; // let go and hold again to turn it back
++        // build 100: silent, like the stick's tilt and peek: it turns when the back cover arrives, and a sound
++        // there was heard as art loading (user: "a confirm type sound when art appears")
      }
+ }
+ 
