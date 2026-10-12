@@ -79,10 +79,12 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       images come in). Reproduce in the lab with a button storm, catch any freeze or crash in a save state.
 - [ ] **The game's background art fades in as soon as it is decoded** on the main view: nothing ahead of it
       delays the fade. (Build 99 may take this further with RiptOPL's art loading round-up.)
-- [ ] **The music under load** (user: the BGM stutters and freezes too). Found in the lab: some music files are
-      refused every time ("not a valid Ogg bitstream"), Audio Studio's own output among them (a 52 s and a
-      180 s track open, 120 s, 240 s and the Ambient rip do not). Find the cause, make every Audio Studio
-      track open, then measure stutter under a button storm with a pilot-tone track (scratchpad pilot.py).
+- [x] **The music under load** (user: the BGM stutters and freezes too). Found in the lab: the PS2's Vorbis
+      library refuses any stream whose Ogg serial has its top bit set (ov_open -132); ffmpeg picks serials at
+      random, so about half of all music never played, Audio Studio's included. The reader now clears the bit
+      and corrects each page's CRC; Audio Studio writes serials under 2^31 (its exe needs a rebuild). With a
+      pilot-tone track (made by Audio Studio) the lab's music held through a button storm: no dropout, no stop.
+      Hardware stutter is device contention: pass 99.
 - [ ] **`.adp` preview cancel is robust**: a frantic press of play / stop / move never loops a load or leaves a
       voice playing.
 - [ ] **File tooltip**: resting on a file for 0.42 s shows its date, size and the other details wLE shows.
@@ -101,6 +103,9 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       `EMBER/games/<folder>` with Ember (`.vcd` with POPSTARTER already works). CHD: neither core reads it.
 
 ## Build 99: RiptOPL's identity contract (ripto's reference), then release (hardware session 2)
+- [ ] **Loading and cancel round-up** (user, 10-11): every device's load speed tuned; the music on a path of its own
+      so it never competes with art and lists (from RAM, or its own IOP stream), measured on hardware; RiptOPL's
+      art loading performance; every cancel (art, previews, scans) robust to frantic input.
 - [ ] Device names by driver, not slot: `mass0:` on the internal exFAT HDD says HDD, not USB (YOUR ACCOUNT
       said "on USB" in the lab). Same in Memory Files, STATUS, toasts and the launch report.
 - [ ] Artwork and config keys exactly as RiptOPL: VCD basename, Ember folder name, ELF basename with `.ELF`;
