@@ -183,8 +183,16 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       so the browser called it corrupted) and the BIBLE copy (was OPL's icon). Host test runs the writer; lab:
       the writer's own files on a card ring in the 3D viewer. Hardware: look at mc0:/RIPPS2 in the PS2 browser
       after a launch on 98.
-- [ ] Launch from Memory Files: `.iso` / `.zso` with RIPPS2's loader or Neutrino, `.cue` / `.bin` in an
+- [x] Launch from Memory Files: `.iso` / `.zso` with RIPPS2's loader or Neutrino, `.cue` / `.bin` in an
       `EMBER/games/<folder>` with Ember (`.vcd` with POPSTARTER already works). CHD: neither core reads it.
+      An .ISO / .ZSO in the drive's own CD or DVD folder is found in its PS2 list by file name (the list held
+      on its PS2 view, as Favourites do) and launched as Storage launches it: its settings (Loader Core:
+      RIPPS2's loader or Neutrino), VMCs, cheats, launch disc, game ID, queued art dropped first. A .CUE or
+      .BIN in EMBER/games/<folder>/ starts that folder with Ember; a CHD explains what to make. Lab: Auto
+      Modellista from mass0:/DVD/ hands off exactly as the same launch from Storage does (both stop in the lab
+      at an IOP reboot asking host0:, the lab's boot-from-host quirk); TEST PS1 from EMBER/games reaches
+      Ember's own launcher (it reports the lab drive's missing bios.bin, as Storage does). Not here: Storage's
+      VMC-on-first-launch (it saves through the menu's current row).
 
 ## Build 99: RiptOPL's identity contract (ripto's reference), then release (hardware session 2)
 - [ ] **Loading and cancel round-up** (user, 10-11): every device's load speed tuned; the music on a path of its own
