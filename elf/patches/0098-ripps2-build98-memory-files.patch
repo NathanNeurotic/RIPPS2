@@ -1276,6 +1276,84 @@ index aea69e4..98a04ef 100644
      bgmPcmRead = NULL;
      bgmPcmEnded = 0;
  }
+diff --git a/src/texcache.c b/src/texcache.c
+index 5726604..8c64e75 100644
+--- a/src/texcache.c
++++ b/src/texcache.c
+@@ -500,6 +500,40 @@ static void artPushFront(load_image_request_t *req)
+     EIntr();
+ }
+ 
++// RIPPS2 build 98: second place in the queue, right behind its head (the chosen cover): the chosen game's background
++// goes ahead of every prefetch and stale request but never in front of the cover. req is not queued yet (push) or is.
++static void artPlaceSecond(load_image_request_t *req, int queued)
++{
++    DIntr();
++    if (queued) {
++        if (gArtCurrentReq == req || req->queueEpoch != gArtQueueEpoch || req->prev == NULL || req->prev == gArtReqList) {
++            EIntr();
++            return; // running, gone, at the head, or already second
++        }
++        req->prev->next = req->next; // out of its place
++        if (req->next)
++            req->next->prev = req->prev;
++        else
++            gArtReqEnd = req->prev;
++    } else {
++        req->queueEpoch = gArtQueueEpoch;
++        gArtQueuedCount++;
++    }
++    if (gArtReqList == NULL) { // an empty queue: it is the head
++        req->prev = req->next = NULL;
++        gArtReqList = gArtReqEnd = req;
++    } else {
++        req->prev = gArtReqList;
++        req->next = gArtReqList->next;
++        if (req->next)
++            req->next->prev = req;
++        else
++            gArtReqEnd = req;
++        gArtReqList->next = req;
++    }
++    EIntr();
++}
++
+ static void artPromote(load_image_request_t *req)
+ {
+     if (req == NULL)
+@@ -1398,7 +1432,9 @@ GSTEXTURE *cacheGetTextureEx(image_cache_t *cache, item_list_t *list, int *cache
+                         // Without this, overlapping lookahead (+2 becomes +1 after one step) kept
+                         // the OLD generation and the worker discarded work the new frame still wanted.
+                         req->focusEpoch = gArtFocusEpoch;
+-                        if (isPriority && !(req->sio2 && gArtNavActive))
++                        if (isPriority == 2 && !(req->sio2 && gArtNavActive))
++                            artPlaceSecond(req, 1); // build 98: the chosen game's background, behind its cover
++                        else if (isPriority && !(req->sio2 && gArtNavActive))
+                             artPromote(req);
+                     }
+                     return NULL;
+@@ -1448,7 +1484,9 @@ GSTEXTURE *cacheGetTextureEx(image_cache_t *cache, item_list_t *list, int *cache
+                         // Without this, overlapping lookahead (+2 becomes +1 after one step) kept
+                         // the OLD generation and the worker discarded work the new frame still wanted.
+                         req->focusEpoch = gArtFocusEpoch;
+-                        if (isPriority && !(req->sio2 && gArtNavActive))
++                        if (isPriority == 2 && !(req->sio2 && gArtNavActive))
++                            artPlaceSecond(req, 1); // build 98: the chosen game's background, behind its cover
++                        else if (isPriority && !(req->sio2 && gArtNavActive))
+                             artPromote(req);
+                     }
+                     return NULL;
+@@ -1649,7 +1687,9 @@ GSTEXTURE *cacheGetTextureEx(image_cache_t *cache, item_list_t *list, int *cache
+         // artPush takes its own DIntr bracket and does the gArtQueuedCount++ inside it. It cannot
+         // fail: no allocation, no queue cap. Priority requests push to the head of the FIFO unless
+         // an SIO2 request is being made while a direction is held (which falls back to tail to protect #340).
+-        if (isPriority && !(req->sio2 && gArtNavActive))
++        if (isPriority == 2 && !(req->sio2 && gArtNavActive))
++            artPlaceSecond(req, 0); // build 98: the chosen game's background, right behind its cover
++        else if (isPriority && !(req->sio2 && gArtNavActive))
+             artPushFront(req);
+         else
+             artPush(req);
 diff --git a/src/textures.c b/src/textures.c
 index 6427097..685fdbb 100644
 --- a/src/textures.c
@@ -1290,7 +1368,7 @@ index 6427097..685fdbb 100644
  #define TEX_JPG_MAX_FILE (4 * 1024 * 1024)
  static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
 diff --git a/src/themes.c b/src/themes.c
-index 19d513c..5963f5d 100644
+index 19d513c..f99b782 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -58,7 +58,7 @@ extern const char conf_theme_OPL_cfg;
@@ -1411,7 +1489,20 @@ index 19d513c..5963f5d 100644
              }
              if (slideW <= 0.0f)
                  return;
-@@ -1797,9 +1823,13 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+@@ -1773,8 +1799,11 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+             // could start before the side covers even reach the queue. Draw an already-cached background
+             // while the selected cover settles; the same frame's Coverflow draw then gets first claim on
+             // visible-neighbour reads. This is admission ordering, not an artificial frame delay.
++            // build 98: asked as priority 2, second in the art queue right behind the cover, so a fast scroll's
++            // leftovers and the neighbours' prefetches no longer stand between the cursor stopping and the
++            // background fading in
+             if (coverflowCoverSettled)
+-                texture = getGameImageTexture(gameImage->cache, menu->item->userdata, &item->item);
++                texture = getGameImageTextureEx(gameImage->cache, menu->item->userdata, &item->item, 2);
+             else
+                 texture = getGameImageCached(gameImage->cache, &item->item);
+         } else {
+@@ -1797,9 +1826,13 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
              }
          }
  
@@ -1426,7 +1517,7 @@ index 19d513c..5963f5d 100644
              if (slideW <= 0.0f)
                  return;
          }
-@@ -2250,6 +2280,9 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+@@ -2250,6 +2283,9 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
              cfBack = gridBackTexture(elem, sourceList, item, 1);
      }
      gridFlipUpdate(item->item.isFolder || cfIsAnimating ? NULL : item, cfBack != NULL);
@@ -1436,7 +1527,7 @@ index 19d513c..5963f5d 100644
  
      int drawOrder[COVERFLOW_MAX];
      int drawCount = 0;
-@@ -2332,13 +2365,15 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+@@ -2332,13 +2368,15 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
          // RIPPS2 build 91: the side covers take the vignette (Vignette Other Covers) in place of the old dim
          u64 coverColor = gDefaultCol;
  
@@ -1455,7 +1546,7 @@ index 19d513c..5963f5d 100644
              if (seeBack)
                  texture = cfBack;
          }
-@@ -2355,7 +2390,7 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+@@ -2355,7 +2393,7 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
          } else {
              rmDrawPixmap(texture, posX, posY, ALIGN_CENTER, drawW, drawH, SCALING_RATIO, coverColor, elem->reflection);
          }
@@ -1464,7 +1555,7 @@ index 19d513c..5963f5d 100644
              ripps2TiltEnd();
          if (gRipps2Vignette && i != centerIdx)
              drawCoverVignette(posX, posY, rmWideScale(drawW), drawH, 1.0f);
-@@ -2492,8 +2527,28 @@ static void gridFlipUpdate(const void *selected, int backReady)
+@@ -2492,8 +2530,28 @@ static void gridFlipUpdate(const void *selected, int backReady)
      }
  }
  
@@ -1493,7 +1584,7 @@ index 19d513c..5963f5d 100644
      return (gTheme != NULL && gTheme->grid != NULL) ? gTheme->gridColumns : 0;
  }
  
-@@ -2573,12 +2628,15 @@ static int gridSerial(const char *startup, char *out, int size)
+@@ -2573,12 +2631,15 @@ static int gridSerial(const char *startup, char *out, int size)
  // width as drawn (through rmWideScale); fade the cover's own ease-in, 0..1.
  static void drawCoverVignette(int cx, int cy, int w, int h, float fade)
  {
@@ -1511,7 +1602,7 @@ index 19d513c..5963f5d 100644
      rmDrawQuadGouraud(x0, y0, dark, x1, y0, dark, x0, y0 + fy, clear, x1, y0 + fy, clear);
      rmDrawQuadGouraud(x0, y1 - fy, clear, x1, y1 - fy, clear, x0, y1, dark, x1, y1, dark);
      rmDrawQuadGouraud(x0, y0, dark, x0 + fx, y0, clear, x0, y1, dark, x0 + fx, y1, clear);
-@@ -2612,6 +2670,11 @@ static void drawGridCover(struct menu_list *menu, struct submenu_list *it, struc
+@@ -2612,6 +2673,11 @@ static void drawGridCover(struct menu_list *menu, struct submenu_list *it, struc
              // build 92: <grid>_coverless=serial, just the serial in the pixel font: one line at 2x or more
              // when it fits, else the code over the number ("SLUS" / "20482"), as large as fits
              char serial[24];
@@ -1523,7 +1614,7 @@ index 19d513c..5963f5d 100644
              if (gTheme->gridCoverless && src != NULL && src->itemGetStartup != NULL &&
                  gridSerial(src->itemGetStartup(src, it->item.id), serial, sizeof(serial))) {
                  u64 sc = selected ? gTheme->selTextColor : gTheme->textColor;
-@@ -2690,6 +2753,7 @@ static void drawGridGlow(int cx, int cy, int w, int h)
+@@ -2690,6 +2756,7 @@ static void drawGridGlow(int cx, int cy, int w, int h)
  static void drawGrid(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
  {
      struct submenu_list *p, *first;
@@ -1531,7 +1622,7 @@ index 19d513c..5963f5d 100644
      int cols = gTheme->gridColumns, rows = gTheme->gridRows, gap = gTheme->gridSpacing;
      int cur = 0, i, k, w = elem->width, h = elem->height;
  
-@@ -2852,6 +2916,16 @@ static mutable_image_t *initGridBack(config_set_t *themeConfig, theme_t *theme,
+@@ -2852,6 +2919,16 @@ static mutable_image_t *initGridBack(config_set_t *themeConfig, theme_t *theme,
      return img;
  }
  
@@ -1548,7 +1639,7 @@ index 19d513c..5963f5d 100644
  static int gridBackFreeSlot(void)
  {
      int i;
-@@ -2881,25 +2955,44 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+@@ -2881,25 +2958,44 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
      // RIPPS2 build 91: Flow and Grid > Grid Layout, RIPPS2's own pages of covers in place of the theme's: 4 x 2,
      // 5 x 2, 3 x 2 Large and 6 x 3 Compact, with RIPPS2's spacing. The grid keeps the theme's centre, and a
      // page shorter than the theme's sits in the middle of the theme's height.
@@ -1612,7 +1703,7 @@ index 19d513c..5963f5d 100644
      if (slots < COVER_CACHE_SLOTS)
          slots = COVER_CACHE_SLOTS;
      mutable_image_t *mutableImage = initMutableImage(themePath, themeConfig, theme, name, elem->type, "COV", slots, NULL, NULL);
-@@ -2911,7 +3004,7 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+@@ -2911,7 +3007,7 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
          elem->endElem = &endGrid;
          int slot = gridBackFreeSlot();
          if (slot >= 0) { // build 82: the back covers, for the flip
@@ -1621,7 +1712,7 @@ index 19d513c..5963f5d 100644
              gridBacks[slot].elem = gridBacks[slot].img != NULL ? elem : NULL;
          }
          if (!theme->grid) {
-@@ -2919,6 +3012,9 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
+@@ -2919,6 +3015,9 @@ static void initGrid(const char *themePath, config_set_t *themeConfig, theme_t *
              theme->gridColumns = cols;
              theme->gridRows = rows;
              theme->gridSpacing = gap;
@@ -1631,7 +1722,7 @@ index 19d513c..5963f5d 100644
              // build 92: <name>_coverless=serial, a case with no art shows the game's serial in the in-game
              // menu's pixel font (title, the default: its name on a glass tile); <name>_title=1, the chosen
              // game's name under the grid at <name>_title_y (418) in font slot <name>_title_font (0)
-@@ -5265,6 +5361,9 @@ static int thmLoad(const char *themePath)
+@@ -5265,6 +5364,9 @@ static int thmLoad(const char *themePath)
          newT->glyphSetDef = configGetStr(themeConfig, "glyph_set", &v) ? ripps2GlyphSetParse(v) : RIPPS2_GLYPHSET_THEME;
          // build 96: page_buttons=l2r2 turns the game list's pages on L2 / R2, l1r1 on L1 / R1 (Controller Settings >
          // Page Buttons overrides it)
@@ -1641,7 +1732,7 @@ index 19d513c..5963f5d 100644
          newT->pageButtonsDef = 0;
          if (configGetStr(themeConfig, "page_buttons", &v) && v != NULL)
              newT->pageButtonsDef = !strcasecmp(v, "l2r2") ? 2 : !strcasecmp(v, "l1r1") ? 1 : 0;
-@@ -5339,7 +5438,7 @@ static void thmRebuildGuiNames(void)
+@@ -5339,7 +5441,7 @@ static void thmRebuildGuiNames(void)
  
      // built-in coverflow theme occupies the slot right after the disk themes
      guiThemesNames[nThemes + 1] = "<RIPFLOW>"; // RIPPS2 build 70: the built-in coverflow theme is RIPFLOW
@@ -1650,7 +1741,7 @@ index 19d513c..5963f5d 100644
      guiThemesNames[nThemes + 3] = NULL;
  }
  
-@@ -5358,7 +5457,7 @@ int thmAddElements(char *path, const char *separator, int forceRefresh)
+@@ -5358,7 +5460,7 @@ int thmAddElements(char *path, const char *separator, int forceRefresh)
      else if (guiThemeID == nThemes + 1)
          snprintf(activeName, sizeof(activeName), "<RIPFLOW>");
      else if (guiThemeID == nThemes + 2)
@@ -1659,7 +1750,7 @@ index 19d513c..5963f5d 100644
      const char *temp = NULL;
      int savedMissing = configGetStr(configGetByType(CONFIG_OPL), "theme", &temp) && thmFindGuiID(temp) == 0;
  
-@@ -5413,7 +5512,7 @@ void thmReinit(const char *path)
+@@ -5413,7 +5515,7 @@ void thmReinit(const char *path)
      } else if (guiThemeID == nThemes + 1) {
          snprintf(activeName, sizeof(activeName), "<RIPFLOW>"); // built-in; its id (nThemes+1) shifts as themes are removed
      } else if (guiThemeID == nThemes + 2) {
@@ -1668,7 +1759,7 @@ index 19d513c..5963f5d 100644
      }
  
      // One guiLock section across the removal loop AND the rebuild: the frees below invalidate
-@@ -5472,7 +5571,7 @@ int thmSetGuiValue(int themeID, int reload)
+@@ -5472,7 +5574,7 @@ int thmSetGuiValue(int themeID, int reload)
                  gLoadCoverflowBuiltin = 1;
                  loadResult = thmLoad(NULL);
                  gLoadCoverflowBuiltin = 0;
@@ -1677,7 +1768,7 @@ index 19d513c..5963f5d 100644
                  gLoadGridBuiltin = 1;
                  loadResult = thmLoad(NULL);
                  gLoadGridBuiltin = 0;
-@@ -5515,7 +5614,7 @@ int thmFindGuiID(const char *theme)
+@@ -5515,7 +5617,7 @@ int thmFindGuiID(const char *theme)
      if (theme) {
          if (strcasecmp(theme, "<RIPFLOW>") == 0 || strcasecmp(theme, "<Coverflow>") == 0)
              return nThemes + 1; // built-in coverflow theme (RIPPS2 build 70: RIPFLOW; <Coverflow> in older settings)

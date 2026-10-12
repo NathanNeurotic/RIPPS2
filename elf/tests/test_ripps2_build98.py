@@ -206,6 +206,10 @@ gc = gc[gc.index('static void drawGridCover('):]
 gc = gc[:gc.index('\n}\n')]
 if '!gridSerial(src->itemGetStartup(src, it->item.id), serial, sizeof(serial))))\n                return;' not in gc:
     fail.append('with coverless=serial a tile is the game ID or nothing, never its name')
+tc = rd('src/texcache.c')
+if 'static void artPlaceSecond(load_image_request_t *req, int queued)' not in tc or tc.count('isPriority == 2 && !(req->sio2 && gArtNavActive)') != 3 or \
+        'texture = getGameImageTextureEx(gameImage->cache, menu->item->userdata, &item->item, 2);' not in th:
+    fail.append("the chosen game's background must be asked for second in the art queue, right behind its cover")
 if 'RIPgrid' in th or '"<RIPGRID>"' not in th:
     fail.append('RIPGRID is written in capitals')
 
