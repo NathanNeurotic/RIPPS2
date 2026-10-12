@@ -96,7 +96,7 @@ if gcc and not fail:
         if b.returncode != 0:
             fail.append('the rip writer did not compile on the PC:\n' + b.stderr[-2000:])
         else:
-            for rel in ('misc/list.icn', 'POPS/list.icn', 'POPS/del.icn'):
+            for rel in ('misc/list.icn', 'POPS/list.icn', 'POPS/del.icn', 'misc/ripps2.icn'):  # the last: RIPPS2's own hat, 3 shapes
                 data = (root / rel).read_bytes()
                 shapes, verts, ref = parse_icon(data)
                 r = subprocess.run([str(exe), str(root / rel), str(tmp / 'o')], capture_output=True, text=True)
@@ -129,6 +129,14 @@ if gcc and not fail:
                     if f[0] != ['1/1/1', '2/2/2', '3/3/3'] or f[-1][2] != '%d/%d/%d' % (verts, verts, verts):
                         fail.append('%s: faces must take the vertices three at a time in order: %r %r' % (rel, f[0], f[-1]))
 
+hat = (root / 'misc/ripps2.icn').read_bytes()
+_, hshapes, htype, _, hverts = struct.unpack_from('<IIIfI', hat, 0)
+if hshapes != 3 or htype != 0x0E or hverts % 3 or hverts > 2000:
+    fail.append('misc/ripps2.icn: %d shapes, type %#x, %d vertices (want 3 shapes, packed texture, at most 2000)' % (hshapes, htype, hverts))
+boot = rd('src/ripps2boot.c')
+if 'int ripps2CardFolderIcon(const char *dir)' not in boot or 'ripps2CardFolderIcon(parent); // build 98' not in boot or \
+        'ripps2CardFolderIcon("mc0:/RIPPS2");' not in rd('src/ripps2status.c') or 'ripps2_icn.o' not in rd('Makefile'):
+    fail.append("RIPPS2's card folder must get its hat icon wherever RIPPS2 makes the folder")
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
