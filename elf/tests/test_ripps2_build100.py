@@ -68,6 +68,9 @@ if 'sfxPlay(SFX_CONFIRM)' in prompt or 'if (id != MENU_SAVE_CHANGES)' not in men
 note = gui[gui.index('static void guiShowNotifications(void)'):gui.index('static void guiShowNotifications(void)') + 900]
 if 'sfxPlay(' in note or 'sfxPlay(SFX_PAGE_IN)' in th:
     fail.append('the drive scan notifications and the right stick case flip must be silent')
+if gui.count('if (previousTheme != themeID) // build 100: only a new theme brings other sounds') != 2 or \
+        'sfxPlayAfterLoad = id;               // it sounds once the new set is in' not in snd:
+    fail.append('leaving Interface must reload the sounds only for a new theme, and a press then sound after the load')
 dia = rd('src/dia.c')
 if 'diaResetValue(item);\n        sfxPlay(SFX_CANCEL);' not in dia:
     fail.append('Circle on a focused value must sound as a cancel')

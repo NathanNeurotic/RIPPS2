@@ -976,7 +976,7 @@ index f40af3f..6e350e4 100644
  
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_DEF_BGM_PATH}}},
 diff --git a/src/gui.c b/src/gui.c
-index 69daded..47fb377 100644
+index 69daded..76cb401 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -324,6 +324,7 @@ u32 guiGetFrameWatchdog(u32 *worstUs, u32 *overruns)
@@ -998,7 +998,17 @@ index 69daded..47fb377 100644
          }
  
          if (showPartPopup) {
-@@ -2749,9 +2752,13 @@ int guiShowAudioConfig(void)
+@@ -1236,7 +1239,8 @@ reshow_ui:
+         }
+         if (appsViewChanged)
+             guiRefreshAppsView();
+-        sfxReload(-1); // RIPPS2 build 95: on the IO worker
++        if (previousTheme != themeID) // build 100: only a new theme brings other sounds (a reload under a ringing
++            sfxReload(-1);             // sound was the beep's moment); RIPPS2 build 95: on the IO worker
+ 
+         if (gEnableBGM && !isBgmPlaying())
+             bgmStart();
+@@ -2749,9 +2753,13 @@ int guiShowAudioConfig(void)
  
      guiSettingsBeginDialog(diaAudioConfig);
      int result;
@@ -1015,7 +1025,17 @@ index 69daded..47fb377 100644
      }
      guiSettingsEndDialog();
      return guiSettingsPageResult(result);
-@@ -3663,11 +3670,11 @@ static int guiSettingsPromptSave(void)
+@@ -3331,7 +3339,8 @@ reshow_interface:
+         }
+         if (appsViewChanged)
+             guiRefreshAppsView();
+-        sfxReload(-1); // RIPPS2 build 95: on the IO worker
++        if (previousTheme != themeID) // build 100: only a new theme brings other sounds (a reload under a ringing
++            sfxReload(-1);             // sound was the beep's moment); RIPPS2 build 95: on the IO worker
+         if (gEnableBGM && !isBgmPlaying())
+             bgmStart();
+ 
+@@ -3663,11 +3672,11 @@ static int guiSettingsPromptSave(void)
              guiDrawBGPlasma();
  
          guiDrawStatusBackdrop(); // RIPPS2: the pillars behind the glass page panel (was a dark wash and two rules)
@@ -1030,7 +1050,7 @@ index 69daded..47fb377 100644
                          _l(_STR_SETTINGS_SAVE_PROMPT_LINE2), gTheme->textColor);
  
          x = guiAlignSubMenuHints(3, promptHints, promptIcons, RIPPS2_UI_FONT, 12, 1);
-@@ -3680,8 +3687,7 @@ static int guiSettingsPromptSave(void)
+@@ -3680,8 +3689,7 @@ static int guiSettingsPromptSave(void)
          guiEndFrame();
  
          readPads();
@@ -1040,7 +1060,7 @@ index 69daded..47fb377 100644
              return SETTINGS_PROMPT_SAVE;
          }
          if (getKeyOn(guiCancelKey())) {
-@@ -3743,18 +3749,18 @@ static int guiSettingsShowIndex(int *page)
+@@ -3743,18 +3751,18 @@ static int guiSettingsShowIndex(int *page)
          if (guiDrawBGSettings() == 0)
              guiDrawBGPlasma();
  
@@ -1062,7 +1082,7 @@ index 69daded..47fb377 100644
              y += spacing;
              if (i == saveRow - 1)
                  y += spacing / 2;
-@@ -3771,7 +3777,8 @@ static int guiSettingsShowIndex(int *page)
+@@ -3771,7 +3779,8 @@ static int guiSettingsShowIndex(int *page)
              sfxPlay(SFX_CURSOR);
              selected = (selected + 1) % itemCount;
          } else if (getKeyOn(guiConfirmKey())) {
@@ -2305,7 +2325,7 @@ index c46c24c..f5511c5 100644
              pitch -= dt * (ry < -24 ? -ry / 127.0f : 1.0f) * 2.0f;
          if (getKeyPressed(KEY_DOWN) || ry > 24)
 diff --git a/src/sound.c b/src/sound.c
-index 024f50f..cbd4f36 100644
+index 024f50f..65883f1 100644
 --- a/src/sound.c
 +++ b/src/sound.c
 @@ -134,6 +134,20 @@ static void voiceMute(int v)
@@ -2418,7 +2438,7 @@ index 024f50f..cbd4f36 100644
      u32 sfxStartTicks = cpu_ticks();
      if (id == SFX_CURSOR) {
          if (lastCursorTicks != 0 && (sfxStartTicks - lastCursorTicks) / SFX_CLOCKS_PER_MS < 45)
-@@ -795,6 +823,53 @@ void sfxPlay(int id)
+@@ -795,6 +823,57 @@ void sfxPlay(int id)
          sfxMaxPlayMs = costMs;
  }
  
@@ -2429,6 +2449,10 @@ index 024f50f..cbd4f36 100644
 +    if (id < 0)
 +        return;
 +    sfxPendingId = -1;
++    if (sfxReloadQueued || sfxReloadBusy) { // the set is being loaded again (leaving a page that changed the theme)
++        sfxPlayAfterLoad = id;               // it sounds once the new set is in
++        return;
++    }
 +    if (audio_initialized && !sfxPreviewing && gEnableSFX && id < SFX_COUNT && sfxReady[id])
 +        sfxPlayNow(id);
 +}
@@ -2472,7 +2496,7 @@ index 024f50f..cbd4f36 100644
  // Build 75 kept mc0:/RIPPS2/QUIETBOOT for a built-in boot sound that played before the settings were read.
  // With no built-in sounds (build 95) the boot sound waits for the settings, so the marker is not needed.
  void ripps2QuietBootMark(int bootSoundOn)
-@@ -816,6 +891,7 @@ void sfxBootStart(void)
+@@ -816,6 +895,7 @@ void sfxBootStart(void)
          return;
      audsrv_adpcm_init();
      voicesReset();
@@ -2480,7 +2504,7 @@ index 024f50f..cbd4f36 100644
      audioSetVolume();
  }
  
-@@ -1825,9 +1901,74 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
+@@ -1825,9 +1905,74 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
  // RIPPS2: the MUSIC folder beside RIPPS2. Its Ogg Vorbis tracks in file name order (a number in front
  // sets the order); Audio settings > Music picks one, the first by default. A disk theme's own music
  // and a typed Default Theme Music path still come first.
@@ -2556,7 +2580,7 @@ index 024f50f..cbd4f36 100644
  }
  
  // One AUDIO folder beside RIPPS2 holds the sound pack and the music, named as RiptOPL names them:
-@@ -1859,13 +2000,27 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
+@@ -1859,13 +2004,27 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
  
  int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
  {
@@ -2590,7 +2614,7 @@ index 024f50f..cbd4f36 100644
      qsort(names, n, RIPPS2_MUSIC_NAME, bgmMusicCmp);
      return n;
  }
-@@ -1912,7 +2067,7 @@ static int bgmMusicPath(char *out, int size)
+@@ -1912,7 +2071,7 @@ static int bgmMusicPath(char *out, int size)
      char dir[256];
      int n = bgmMusicList(names, RIPPS2_MUSIC_MAX), i, pick;
  
@@ -2599,7 +2623,7 @@ index 024f50f..cbd4f36 100644
          return 0;
      pick = bgmMusicDefault(names, n);
      for (i = 0; i < n; i++)
-@@ -1920,6 +2075,10 @@ static int bgmMusicPath(char *out, int size)
+@@ -1920,6 +2079,10 @@ static int bgmMusicPath(char *out, int size)
              pick = i;
              break;
          }
@@ -2610,7 +2634,7 @@ index 024f50f..cbd4f36 100644
      return snprintf(out, size, "%s%s", dir, names[pick]) < size;
  }
  
-@@ -2306,9 +2465,13 @@ void audioSetVolume(void)
+@@ -2306,9 +2469,13 @@ void audioSetVolume(void)
          return;
      }
  
