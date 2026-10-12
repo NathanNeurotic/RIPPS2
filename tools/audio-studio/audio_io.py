@@ -138,13 +138,18 @@ def adp_preview(data):
 
 
 def write_music(x, dst_noext, rate=44100):
-    """Music for RIPPS2: Ogg Vorbis at 192 kbps without tags, or 16-bit WAV without ffmpeg. -> path."""
+    """Music for RIPPS2: Ogg Vorbis at 192 kbps without tags, or 16-bit WAV without ffmpeg. -> path.
+
+    The stream's serial number is chosen here, always under 2^31: RIPPS2 builds before 98 could not open a stream
+    whose serial has its top bit set, and ffmpeg's own pick is random (half of all tracks)."""
     ff = ffmpeg_path()
     pcm = (np.clip(x, -1, 1).T * 32767).astype('<i2')
     if ff:
         dst = str(dst_noext) + '.ogg'
+        serial = int.from_bytes(os.urandom(4), 'little') % 0x7FFFFF00 + 1
         p = subprocess.run([ff, '-v', 'error', '-y', '-f', 's16le', '-ar', str(rate), '-ac', '2', '-i', '-',
-                            '-map_metadata', '-1', '-c:a', 'libvorbis', '-b:a', '192k', dst],
+                            '-map_metadata', '-1', '-c:a', 'libvorbis', '-b:a', '192k',
+                            '-fflags', '+bitexact', '-serial_offset', str(serial), dst],
                            input=pcm.tobytes(), capture_output=True)
         if p.returncode == 0:
             return dst

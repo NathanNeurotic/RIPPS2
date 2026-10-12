@@ -93,5 +93,87 @@ int main(void)
             if r.returncode:
                 fail.append('bgmHoldsPath: ' + r.stdout.strip())
 
-print('\n'.join(fail) or 'build98: card slots kept, thorough delete, CARD FULL up front, sounds theme then AUDIO OK')
+# --- music with a top-bit Ogg serial: the reader clears it and corrects each page's CRC (run on the host)
+if 'src->fixSerial = 1;' not in snd or 'return bgmFixedRead(src, (unsigned char *)ptr, size * nmemb) / size;' not in snd:
+    fail.append('a top-bit serial must be spotted at the open and fixed as it is read')
+if re.search(r'^[^#\n]*bgmOpenTrace', snd[snd.index('static size_t bgmSourceRead('):snd.index('static ov_callbacks bgmSourceCallbacks')], re.M) and \
+        '#ifdef __DEBUG\n        if (bgmOpenTrace)' not in snd.replace('\r\n', '\n'):
+    fail.append('the open trace must stay behind __DEBUG (a host test compiles the reader)')
+
+
+def ogg_crc(b):
+    tab = []
+    for i in range(256):
+        c = i << 24
+        for _ in range(8):
+            c = ((c << 1) ^ 0x04C11DB7) & 0xFFFFFFFF if c & 0x80000000 else (c << 1) & 0xFFFFFFFF
+        tab.append(c)
+    c = 0
+    for x in b:
+        c = ((c << 8) & 0xFFFFFFFF) ^ tab[((c >> 24) ^ x) & 0xFF]
+    return c
+
+
+def ogg_stream(serial, pages=40, seed=7):
+    import random
+    rnd = random.Random(seed)
+    out = bytearray()
+    for n in range(pages):
+        nseg = rnd.choice([1, 3, 17, 60, 128, 255])
+        segs = bytes(rnd.randint(0, 255) for _ in range(nseg))
+        body = bytes(rnd.randint(0, 255) for _ in range(sum(segs)))
+        h = bytearray(b'OggS\0' + bytes([2 if n == 0 else 0]) + (n * 1024).to_bytes(8, 'little') +
+                      serial.to_bytes(4, 'little') + n.to_bytes(4, 'little') + b'\0\0\0\0' + bytes([nseg]) + segs)
+        page = h + body
+        page[22:26] = ogg_crc(page).to_bytes(4, 'little')
+        out += page
+    return bytes(out)
+
+
+if cc:
+    src = snd[snd.index('#define OGG_HDR_MAX'):snd.index('static size_t bgmSourceRead(')]
+    src = src.replace('static int bgmSourceReopen(bgm_source_t *src);', '')
+    neg, pos = ogg_stream(0x9234ABCD), ogg_stream(0x1234ABCD)
+    prog = r'''#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#define BGM_REOPEN_TRIES 4
+typedef struct { FILE *f; long pos; long size; char path[256]; int fixSerial; unsigned char serial[4]; } bgm_source_t;
+static int bgmSourceReopen(bgm_source_t *src) { (void)src; return 0; }
+''' + src + r'''
+int main(int argc, char **argv)
+{
+    static unsigned char want[1 << 20], got[1 << 20];
+    FILE *e = fopen(argv[2], "rb");
+    long n = (long)fread(want, 1, sizeof(want), e), i;
+    fclose(e);
+    bgm_source_t s = {fopen(argv[1], "rb"), 0, n, "", 1, {0xCD, 0xAB, 0x34, 0x92}};
+    size_t r;
+    while ((r = bgmFixedRead(&s, got + s.pos, 2048)) > 0)
+        ;
+    if (s.pos != n || memcmp(got, want, n)) { printf("in 2 KB reads: %ld of %ld bytes, first difference at %ld\n", s.pos, n, (long)(memcmp(got, want, n) ? 0 : -1)); return 1; }
+    srand(5);
+    for (i = 0; i < 400; i++) { /* reads from anywhere, of any length, as the open's seeks make them */
+        long at = rand() % n, len = 1 + rand() % 9000;
+        if (at + len > n) len = n - at;
+        s.pos = at;
+        r = bgmFixedRead(&s, got, (size_t)len);
+        if ((long)r != len || memcmp(got, want + at, len)) { printf("read %ld at %ld differs\n", len, at); return 1; }
+    }
+    return 0;
+}
+'''
+    with tempfile.TemporaryDirectory() as td:
+        open(td + '/neg.ogg', 'wb').write(neg)
+        open(td + '/pos.ogg', 'wb').write(pos)
+        open(td + '/f.c', 'w').write(prog)
+        r = subprocess.run([cc, td + '/f.c', '-o', td + '/f.exe'], capture_output=True, text=True)
+        if r.returncode:
+            fail.append('the serial fix host build: ' + r.stderr[-400:])
+        else:
+            r = subprocess.run([td + '/f.exe', td + '/neg.ogg', td + '/pos.ogg'], capture_output=True, text=True)
+            if r.returncode:
+                fail.append('the serial fix: ' + r.stdout.strip())
+
+print('\n'.join(fail) or 'build98: card slots kept, thorough delete, CARD FULL up front, sounds theme then AUDIO, top-bit Ogg serials play OK')
 sys.exit(1 if fail else 0)
