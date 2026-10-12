@@ -3,7 +3,10 @@
 Static checks on the patched tree (the music path's behaviour is run by RiptOPL's test_bgm_source.py, which compiles
 it against a card that loses descriptors)."""
 import os
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
@@ -41,7 +44,42 @@ for gone in ('"USB POPS folder"', '"USB EMBER folder"', '"USB  (mass0:/neutrino)
     if gone in st:
         fail.append('STATUS still calls mass0: USB whatever it is: %s' % gone)
 
+# Grid's coverless serial: exactly a PS2 startup ID, never a PS1 row's VCD or Ember name
+th = rd('src/themes.c')
+if 'static int gridRowSerial(item_list_t *src, int id, char *out, int size)' not in th or \
+        'libListRowView(src, id) == LIB_VIEW_PS1' not in th or '!gridRowSerial(src, it->item.id, serial, sizeof(serial))' not in th:
+    fail.append("a coverless tile's serial must come from a PS2 row only")
+cc = shutil.which('gcc') or shutil.which('cc')
+if cc:
+    fn = th[th.index('static int gridSerial(const char *startup, char *out, int size)'):]
+    fn = fn[:fn.index('\n}\n') + 3]
+    prog = '#include <stdio.h>\n#include <string.h>\n#include <ctype.h>\n' + fn + r'''
+int main(void)
+{
+    static const char *const in[] = {"SLUS_204.82", "slus_204.82", "SCUS_949.00.Crash Bandicoot", "Crash Bandicoot (USA)",
+                                     "SLUS_2O4.82", "ABCD-Game", "SLUS-204.82", "SLUS_20482", "", "SLES_123.4X"};
+    char out[24];
+    int i;
+    for (i = 0; i < (int)(sizeof(in) / sizeof(in[0])); i++) {
+        int ok = gridSerial(in[i], out, sizeof(out));
+        printf("%s|%s\n", in[i], ok ? out : "-");
+    }
+    return 0;
+}
+'''
+    with tempfile.TemporaryDirectory() as td:
+        open(td + '/g.c', 'w').write(prog)
+        r = subprocess.run([cc, '-std=gnu99', '-Wall', td + '/g.c', '-o', td + '/g.exe'], capture_output=True, text=True)
+        if r.returncode:
+            fail.append('gridSerial did not compile on the PC: ' + r.stderr[-400:])
+        else:
+            got = subprocess.run([td + '/g.exe'], capture_output=True, text=True).stdout.split('\n')
+            want = ['SLUS_204.82|SLUS-20482', 'slus_204.82|SLUS-20482', 'SCUS_949.00.Crash Bandicoot|-', 'Crash Bandicoot (USA)|-',
+                    'SLUS_2O4.82|-', 'ABCD-Game|-', 'SLUS-204.82|-', 'SLUS_20482|-', '|-', 'SLES_123.4X|-']
+            if got[:len(want)] != want:
+                fail.append('gridSerial: %r' % got[:len(want)])
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build99: the music reads the drive in big pieces from RAM, drives named by their driver OK')
+print('build99: the music reads the drive in big pieces from RAM, drives named by their driver, coverless serials are PS2 IDs only OK')

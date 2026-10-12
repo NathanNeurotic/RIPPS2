@@ -543,3 +543,67 @@ index c4eb76e..024f50f 100644
      src->f = bgmFile;
      src->pos = 0;
      snprintf(src->path, sizeof(src->path), "%s", bgmPath);
+diff --git a/src/themes.c b/src/themes.c
+index f99b782..8101eb7 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -2604,25 +2604,33 @@ static void drawPixelText(const char *s, int cx, int cy, int scale, u64 color)
+     }
+ }
+ 
+-// A game's serial as its case shows it, "SLUS_204.82" -> "SLUS-20482"; 0 when the startup is not a serial
++// A game's serial as its case shows it, "SLUS_204.82" -> "SLUS-20482"; 0 when the startup is not one.
++// build 99 (RiptOPL's identity rules): exactly a PS2 startup ID -- four letters, '_', three digits, '.', two
++// digits. Anything longer was copied whole, so a VCD named "SCUS_949.00.Crash..." showed its name as a serial.
+ static int gridSerial(const char *startup, char *out, int size)
+ {
+-    int i, o = 0;
+-    if (startup == NULL || strlen(startup) < 9)
++    int i;
++    if (startup == NULL || strlen(startup) != 11 || size < 11 || startup[4] != '_' || startup[8] != '.')
+         return 0;
+     for (i = 0; i < 4; i++)
+         if (!isalpha((unsigned char)startup[i]))
+             return 0;
+-    if (startup[4] != '_' && startup[4] != '-')
++    for (i = 5; i < 11; i++)
++        if (i != 8 && !isdigit((unsigned char)startup[i]))
++            return 0;
++    for (i = 0; i < 4; i++)
++        out[i] = (char)toupper((unsigned char)startup[i]);
++    snprintf(out + 4, size - 4, "-%.3s%.2s", startup + 5, startup + 9);
++    return 1;
++}
++
++// build 99: a row's serial for a coverless tile: its PS2 startup ID, never a PS1 row's identity, which is its VCD or
++// Ember folder name (a verified PS1 disc ID can come with RiptOPL's PR #869)
++static int gridRowSerial(item_list_t *src, int id, char *out, int size)
++{
++    if (src == NULL || src->itemGetStartup == NULL || libListRowView(src, id) == LIB_VIEW_PS1)
+         return 0;
+-    for (i = 0; startup[i] && o < size - 1; i++) {
+-        char c = startup[i];
+-        if (c == '.')
+-            continue;
+-        out[o++] = c == '_' ? '-' : (char)toupper((unsigned char)c);
+-    }
+-    out[o] = '\0';
+-    return o >= 9;
++    return gridSerial(src->itemGetStartup(src, id), out, size);
+ }
+ 
+ // RIPPS2 build 91: the vignette on the covers not chosen (Flow and Grid > Vignette Other Covers): their edges
+@@ -2675,11 +2683,9 @@ static void drawGridCover(struct menu_list *menu, struct submenu_list *it, struc
+             char serial[24];
+             // build 98: with coverless=serial a tile is the game's ID or nothing: its name sits under the grid, and a
+             // file name here ran large and past the tile (FifthFox)
+-            if (gTheme->gridCoverless && (src == NULL || src->itemGetStartup == NULL ||
+-                                          !gridSerial(src->itemGetStartup(src, it->item.id), serial, sizeof(serial))))
++            if (gTheme->gridCoverless && !gridRowSerial(src, it->item.id, serial, sizeof(serial)))
+                 return;
+-            if (gTheme->gridCoverless && src != NULL && src->itemGetStartup != NULL &&
+-                gridSerial(src->itemGetStartup(src, it->item.id), serial, sizeof(serial))) {
++            if (gTheme->gridCoverless) {
+                 u64 sc = selected ? gTheme->selTextColor : gTheme->textColor;
+                 int n = (int)strlen(serial), room = w - 12, scale = room / (n * 6);
+                 if (scale >= 2)
