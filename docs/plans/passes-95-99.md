@@ -98,6 +98,24 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] **A video that loads forever** (FifthFox, 95: an AVI "from web"): asked whether it was on a local or a
       network device. Reproduce, and make the player give up with a message instead of hanging.
 - [ ] Flow and Grid settings text too large and cramped (FifthFox, 95): check it on the build 96 settings face.
+- [ ] **mc1:/ must never vanish after START DRIVES** (user, 10-12, again: copying from USB or HDD to that slot is
+      impossible; the only way round is starting the drives on Storage first). And the cards are MEMORY CARD 0 and
+      MEMORY CARD 1 (mc0:/, mc1:/), never 1 and 2.
+- [ ] **REGRESSION: the info page's background no longer fades in with the disc and the cover**, and its
+      slideshow does not fade properly (user, on the RIPPS2 theme). Find what changed and restore it.
+- [ ] **L2 / R2 on the Grid turn a whole page** (the set of covers on screen slides over, as at a row's edge);
+      today they move one cover.
+- [ ] **RIPFLOW tilts and flips like RIPGRID**: the centre cover on the main page tips with the right stick and
+      turns over on a 0.42 s hold; on the info page the two screenshots tip as ONE sheet (today askew, each on
+      its own pivot); the main page has no tilt at all.
+- [ ] **Vignette Other Covers: Off, Weak, Full.** Weak is the default at half of today's strength (Full); no bright
+      1 px line down a vignetted cover's side.
+- [ ] **Background art blur** (Artwork settings): Theme, Off, Weak (33 %), Normal (66 %), Strong (100 %, today's
+      RIPGRID frost). A theme key; Adapt and RIPGRID default to Weak.
+- [ ] **Widescreen Grid layout**: its own rows under the Grid's in Flow and Grid (columns, rows, cover size)
+      that apply only to the 16:9 HD modes (720p, 1080i) and widescreen, independent of the standard ones.
+- [ ] **RIPGRID in capitals everywhere** (the theme's name on screen, in docs and in the themes repo), like
+      RIPPS2 and RIPFLOW; a saved `<RIPgrid>` still finds it.
 - [ ] **File tooltip**: resting on a file for 0.42 s shows its date, size and the other details wLE shows.
 - [ ] **Paste overwrites when asked**: a name already there asks Yes / No / Yes to All (the choice highlighted
       in the modal), and an overwrite succeeds (it is skipped today).
@@ -117,8 +135,7 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
 - [ ] **Loading and cancel round-up** (user, 10-11): every device's load speed tuned; the music on a path of its own
       so it never competes with art and lists (from RAM, or its own IOP stream), measured on hardware; RiptOPL's
       art loading performance; every cancel (art, previews, scans) robust to frantic input.
-- [ ] **Grid in widescreen** (FifthFox, 95: large empty sides in 16:9): a flag for more covers per row on wide and HD
-      pictures (a theme key and a Flow and Grid row).
+- [x] **Grid in widescreen** (FifthFox, 95): moved to build 98 (the Widescreen Grid layout rows).
 - Noted, no change: RIPFLOW puts MEMORY FILES left and LAUNCH DISC right on purpose (category_order, a user
   setting). POPSTARTER from iLink crashes on 95 while Ember works (FifthFox): the POPS item below.
 - [ ] Device names by driver, not slot: `mass0:` on the internal exFAT HDD says HDD, not USB (YOUR ACCOUNT
