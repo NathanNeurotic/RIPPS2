@@ -9,7 +9,7 @@
 # draw itself into a bitmap (PrintWindow, PW_RENDERFULLCONTENT), which works off screen. "rec" posts F11 (PCSX2's
 # video capture), "shot" F8 (its screenshot). At the end the lab PCSX2 is closed (killed: its cards are lab copies).
 #
-# Step tokens: wait:<sec>, grab, shot, rec, up, down, left, right, cross, circle, square, triangle, start, select,
+# Step tokens: wait:<sec>, grab, shot, rec, sstate (F1: a save state, for reading a stuck EE), up, down, left, right, cross, circle, square, triangle, start, select,
 #              l1, r1, l2, r2, l3, r3, rup/rdown/rleft/rright (right stick), hold:<button>:<ms>,
 #              kdown:<button> / kup:<button>
 param(
@@ -141,7 +141,7 @@ public static class BG {
 "@
 
 $vk = @{ up=0x26; down=0x28; left=0x25; right=0x27; cross=0x58; circle=0x43; square=0x5A; triangle=0x53;
-         start=0x0D; select=0x08; l1=0x51; r1=0x45; l2=0x31; r2=0x33; f8=0x77; rec=0x7A; l3=0x56; r3=0x42;
+         start=0x0D; select=0x08; l1=0x51; r1=0x45; l2=0x31; r2=0x33; f8=0x77; f1=0x70; rec=0x7A; l3=0x56; r3=0x42;
          rup=0x49; rdown=0x4B; rleft=0x4A; rright=0x4C }
 $extended = @(0x25, 0x26, 0x27, 0x28)
 
@@ -199,6 +199,7 @@ foreach ($s in ($Steps -split ',')) {
     continue
   }
   if ($s -eq 'shot') { Press $vk.f8; Start-Sleep -Milliseconds 1300; "shot"; continue }
+  if ($s -eq 'sstate') { Press $vk.f1; Start-Sleep -Milliseconds 2500; "save state (F1, lab sstates)"; continue }
   if ($s -like 'kdown:*') { Down $vk[$s.Split(':')[1]]; "kdown $($s.Split(':')[1])"; continue }
   if ($s -like 'kup:*') { Up $vk[$s.Split(':')[1]]; "kup $($s.Split(':')[1])"; continue }
   if ($s -like 'hold:*') { $a = $s.Split(':'); Press $vk[$a[1]] ([int]$a[2]); "hold $($a[1])"; continue }
