@@ -329,7 +329,7 @@ index f4fad92..a1fbb6a 100644
      // the path, and the clipboard / what just happened
      fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : "MEMORY FILES", FB_LIT);
 diff --git a/src/sound.c b/src/sound.c
-index aea69e4..cd417cb 100644
+index aea69e4..0d22624 100644
 --- a/src/sound.c
 +++ b/src/sound.c
 @@ -17,6 +17,7 @@
@@ -421,7 +421,34 @@ index aea69e4..cd417cb 100644
  
          if (sfx_files[i].buffer == NULL)
              continue; // an event with no file of its own plays its fallback, or nothing
-@@ -1469,6 +1483,36 @@ static ov_callbacks bgmSourceCallbacks = {
+@@ -1398,6 +1412,8 @@ static int bgmSourceReopen(bgm_source_t *src)
+     return 0;
+ }
+ 
++static int bgmOpenTrace = 0; // build 98: debug builds trace the reads and seeks of a music file's open
++
+ static size_t bgmSourceRead(void *ptr, size_t size, size_t nmemb, void *datasource)
+ {
+     bgm_source_t *src = (bgm_source_t *)datasource;
+@@ -1407,6 +1423,8 @@ static size_t bgmSourceRead(void *ptr, size_t size, size_t nmemb, void *datasour
+         return 0;
+     while (1) {
+         size_t r = fread(ptr, size, nmemb, src->f);
++        if (bgmOpenTrace)
++            LOG("BGM open: read %u x %u at %ld -> %u\n", (unsigned)size, (unsigned)nmemb, src->pos, (unsigned)r);
+         if (r > 0) {
+             src->pos += (long)(r * size);
+             return r;
+@@ -1435,6 +1453,8 @@ static int bgmSourceSeek(void *datasource, ogg_int64_t offset, int whence)
+         return -1;
+     if (target < 0)
+         return -1;
++    if (bgmOpenTrace)
++        LOG("BGM open: seek %d %ld -> %ld (size %ld)\n", whence, (long)offset, target, src->size);
+ 
+     if (fseek(src->f, target, SEEK_SET) != 0) {
+         keep = src->pos;
+@@ -1469,6 +1489,36 @@ static ov_callbacks bgmSourceCallbacks = {
      bgmSourceTell,
  };
  
@@ -458,15 +485,22 @@ index aea69e4..cd417cb 100644
  static int bgmTryLoadPath(const char *bgmPath, const char *source)
  {
      bgm_source_t *src;
-@@ -1497,6 +1541,7 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
+@@ -1495,8 +1545,13 @@ static int bgmTryLoadPath(const char *bgmPath, const char *source)
+         return 0;
+     }
  
-     if (ov_open_callbacks(src, vorbisFile, NULL, 0, bgmSourceCallbacks) == 0) {
+-    if (ov_open_callbacks(src, vorbisFile, NULL, 0, bgmSourceCallbacks) == 0) {
++    bgmOpenTrace = 1;
++    int ovr = ov_open_callbacks(src, vorbisFile, NULL, 0, bgmSourceCallbacks);
++    bgmOpenTrace = 0;
++    LOG("BGM: ov_open %d\n", ovr);
++    if (ovr == 0) {
          LOG("BGM: Loaded %s BGM %s (%ld bytes)\n", source, bgmPath, src->size);
 +        snprintf(bgmOpenPath, sizeof(bgmOpenPath), "%s", bgmPath);
          return 1;
      }
  
-@@ -1644,6 +1689,7 @@ static int bgmLoad(void)
+@@ -1644,6 +1699,7 @@ static int bgmLoad(void)
              if (wavOpen(bgmPath)) { // the vorbis state is not needed for it
                  free(vorbisFile);
                  vorbisFile = NULL;
@@ -474,7 +508,7 @@ index aea69e4..cd417cb 100644
                  return 0;
              }
          } else if (bgmTryLoadPath(bgmPath, "RIPPS2 music"))
-@@ -1752,6 +1798,7 @@ static void bgmDeinit(void)
+@@ -1752,6 +1808,7 @@ static void bgmDeinit(void)
          vorbisFile = NULL;
      }
      wavClose(); // RIPPS2
