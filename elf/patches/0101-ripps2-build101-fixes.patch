@@ -16,6 +16,44 @@ index 7b06cf3..7a5f4ca 100644
      } else if (getKeyOn(KEY_LEFT)) {
          // RIPPS2 build 69: Left/Right switch drives here too; leaving the info page lands on that
          // drive's game list. Build 70: on every theme, Coverflow included (this page is not rotated:
+diff --git a/src/rahunt.c b/src/rahunt.c
+index 1dc166d..78c2653 100644
+--- a/src/rahunt.c
++++ b/src/rahunt.c
+@@ -3,6 +3,8 @@
+ 
+   xeRAbora (the PC client) knows a game's whole set once a console has identified the game: its interface
+   page asks for it as GET /state, JSON, every achievement with its title, description, points and state.
++  That endpoint is the page's own, not the documented console protocol, so it is pinned to xeRAbora
++  v0.1.0-alpha.10 here (ranet.c raFetchState); a newer alpha may change its shape.
+   When OPEN TO THE NETWORK is on in xeRAbora's settings, the console can ask the same thing over the
+   network, so CHECK GAME SUPPORT (ranet.c) does, and saves the set beside the game's list as
+   RA/<serial>.ach:
+diff --git a/src/ranet.c b/src/ranet.c
+index 9206026..8e332dc 100644
+--- a/src/ranet.c
++++ b/src/ranet.c
+@@ -195,6 +195,8 @@ static int ask(int sock, struct sockaddr_in *to, const char *req, char *out, int
+    for GET /state (port 18280, or up to four above when that was taken); with OPEN TO THE NETWORK on in its
+    settings it answers anyone on the network too. The answer is JSON with every achievement of the game
+    the check just identified: its title, how to earn it, its points and whether this account has it.
++   /state is the interface page's own endpoint, not part of the documented console protocol, so its shape is
++   pinned to xeRAbora v0.1.0-alpha.10; a newer alpha may change it.
+    Plain HTTP over TCP, read the way the cover download reads (whole 64-byte blocks into an aligned
+    buffer: rule 1 and 2 above). The text into buf; its length, or -1. */
+ #define RA_UI_PORT   18280
+diff --git a/src/ripps2about.c b/src/ripps2about.c
+index 242933b..7bdfd0f 100644
+--- a/src/ripps2about.c
++++ b/src/ripps2about.c
+@@ -94,6 +94,7 @@ static const ab_row_t abRows[] = {
+     {'S', "game hashes and memory telemetry, made solid on hardware by oMrRexD"},
+     {'T', "xeRAbora by hacan359, rcheevos by RetroAchievements"},
+     {'S', "the PC client that unlocks them; the hash every game is known by"},
++    {'S', "LEFT TO HUNT pinned to v0.1.0-alpha.10 (github.com/hacan359/xerabora)"},
+ 
+     {'H', "IN-GAME MENU"},
+     {'T', "ORBIT's Neutrino fork by danielnuld"},
 diff --git a/src/sound.c b/src/sound.c
 index 65883f1..3f55c17 100644
 --- a/src/sound.c

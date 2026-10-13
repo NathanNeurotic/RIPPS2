@@ -8,6 +8,9 @@
 ### RIPFLOW
 - **Left and Right go through the games on RIPFLOW's info page**, as on its carousel, and the info page stays; they no longer switch drives there. Other themes keep Left and Right for the drives.
 
+### Hotfix (10/13/2026, still build 101)
+- **The README and RIPPS2's About page credit xeRAbora by [hacan359](https://github.com/hacan359), and pin the release.** The RetroAchievements PC client and the console-side RA code RIPPS2 inherits through RiptOPL (MIT / AFL-3.0). **LEFT TO HUNT** reads the interface page's `GET /state` (port 18280), which is xeRAbora's own UI endpoint, not part of the documented console protocol, and can change between alphas, so it is pinned to and tested with **[v0.1.0-alpha.10](https://github.com/hacan359/xerabora/releases/tag/v0.1.0-alpha.10)**; other versions are untested.
+
 ## Build 100 (beta, v1.0.0-beta), changes since build 99
 
 RIPPS2 leaves alpha: build 100 is the first beta, released as **v1.0.0-beta** (About reads BUILD 100 (BETA); first tagged v0.1.0-beta, renamed when the version came to follow the build number).
