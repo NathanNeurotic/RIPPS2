@@ -215,7 +215,7 @@ if 'static void artPlaceSecond(load_image_request_t *req, int queued)' not in tc
 pv = snd[snd.index('int sfxPreviewStart(const char *path)'):]
 pv = pv[:pv.index('int sfxGetSoundDuration(')]
 if 'prevFile.baked = 1;' not in pv or 'for (v = 1; v <= SFX_PREVIEW_VOICES && voiceBusy(v); v++)' not in pv or \
-        'sfxReloadBusy && i < 400' not in pv or 'sfxReload(-1)' in pv or 'sfxReloadAt = clock() + CLOCKS_PER_SEC;' not in pv:
+        '(sfxReloadBusy || sfxLoading) && i < 400' not in pv or 'sfxReload(-1)' in pv or 'sfxReloadAt = clock() + CLOCKS_PER_SEC;' not in pv:
     fail.append('the .adp preview: play again from the SPU2, the file read once, no reload per close, never beside a reload')
 if 'if (sfxReloadQueued)\n        return;' not in snd.replace('\r\n', '\n') or 'sfxReloadTick(); // build 98' not in snd:
     fail.append('sound reloads must not queue twice, and a preview close reloads once things are calm')

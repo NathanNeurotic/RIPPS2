@@ -1,0 +1,216 @@
+diff --git a/src/menusys.c b/src/menusys.c
+index 7b06cf3..7a5f4ca 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -2211,6 +2211,13 @@ void menuHandleInputInfo()
+         menuPrevV();
+     } else if (getKey(KEY_DOWN)) {
+         menuNextV();
++    } else if (gTheme->coverflow && getKey(KEY_LEFT)) {
++        // RIPPS2 build 101 (user: "the RIPFLOW info page shouldn't switch devices on left and right, have it go
++        // through the games instead"): on a carousel theme Left / Right are its games, as on its own page, and the
++        // info page stays; Up / Down too. Held, they repeat like Up / Down.
++        menuPrevV();
++    } else if (gTheme->coverflow && getKey(KEY_RIGHT)) {
++        menuNextV();
+     } else if (getKeyOn(KEY_LEFT)) {
+         // RIPPS2 build 69: Left/Right switch drives here too; leaving the info page lands on that
+         // drive's game list. Build 70: on every theme, Coverflow included (this page is not rotated:
+diff --git a/src/sound.c b/src/sound.c
+index 65883f1..3f55c17 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -126,6 +126,36 @@ static void voicesReset(void) // audsrv_adpcm_init keyed every voice off
+     }
+ }
+ 
++/*
++  RIPPS2 build 101 (user: "whenever I've set things the sound triggers follow out of the menu and begin to bug
++  out ... make sure there is nothing stray in memory from choosing"). A load of the sound set (sfxInit: a new
++  theme, the theme cycle, an IOP reboot, a rip, the AUDIO folder found late on a drive) keys every voice off,
++  frees the sounds and writes them back one by one on the IO worker, which takes seconds when the rips come
++  from a memory card. The menu went on playing through it: a cursor or a page sound was asked of a half-loaded
++  set, and a confirm caught by the load was kept until its end and sounded seconds later, out of the menu it
++  belonged to; the late AUDIO find loaded with no flag at all. Now, while a load waits or runs (sfxSetBusy) the
++  GUI touches no voice: a cursor tick or a drive sound is dropped, and the newest one-shot is held and plays when
++  the set is in only if it was asked within SFX_HELD_FRESH_MS (else it is dropped: no sound turns up after its
++  moment). Every load also forgets which voice the sounds before it took (the last one-shot and its voice).
++*/
++#define SFX_HELD_FRESH_MS 300
++#define SFX_CLOCKS_PER_MS 147456 // EE cpu_ticks() rate (defined again below, the same)
++static volatile int sfxLoading = 0;   // sfxInit is running (on the IO worker)
++static volatile int sfxHeldId = -1;   // the one-shot asked while the set loads
++static volatile u32 sfxHeldTicks = 0; // when (cpu_ticks)
++static volatile int sfxPendingId = -1; // build 100: a confirm or cancel waiting for the end of its frame
++static volatile u32 sfxLastConfirmTicks = 0;
++static u32 lastCursorTicks = 0, lastOneShotTicks = 0; // sfxPlayNow's memory of the last sounds
++static int lastOneShotId = -1, lastOneShotVoice = -1;
++
++static void sfxForgetPresses(void) // which voice the last sounds took: every voice is about to be keyed off
++{
++    lastCursorTicks = 0;
++    lastOneShotTicks = 0;
++    lastOneShotId = -1;
++    lastOneShotVoice = -1;
++}
++
+ static void voiceMute(int v)
+ {
+     if (!voiceMuted[v]) {
+@@ -414,6 +444,9 @@ static clock_t bgmFadeAt = 0;
+ static clock_t bootSoundEnds = 0; // when the boot sound has played out
+ #define BGM_FADE_S 2.0f
+ 
++static volatile int sfxReloadBusy;
++static void sfxPlayHeld(void);
++
+ // Returns the number of sounds loaded, < 0 if audio is not up. The IO worker only (sfxReload queues it)
+ int sfxInit(int bootSnd)
+ {
+@@ -431,6 +464,9 @@ int sfxInit(int bootSnd)
+     if (sfxPreviewing)
+         return 0; // Memory Files' preview has the voices; its close loads the set again
+ 
++    sfxLoading = 1;     // build 101: the GUI touches no voice until the set is in
++    sfxForgetPresses(); // build 101: no memory of a voice from before the load survives it
++    voicesSilence();    // build 101: a tail still ringing is quiet before init turns every voice up
+     audsrv_adpcm_init();
+     voicesReset();
+     voicesSilence(); // build 100: init turned every voice up
+@@ -518,6 +554,9 @@ int sfxInit(int bootSnd)
+         }
+     }
+     sfxLoadedCount = loaded;
++    sfxLoading = 0;
++    if (!sfxReloadBusy) // the late AUDIO find and the boot: a press caught by the load (sfxReloadWork does its own)
++        sfxPlayHeld();
+     return loaded;
+ }
+ 
+@@ -526,8 +565,36 @@ int sfxInit(int bootSnd)
+ static volatile int sfxPlayAfterLoad = -1;
+ static volatile int sfxReloadQueued = 0; // build 98: one reload waits at a time; another ask joins it
+ static volatile int sfxReloadBusy = 0;   // build 98: a reload is talking to audsrv on the IO worker now
++// (declared above too, for sfxInit)
+ static clock_t sfxReloadAt = 0;          // build 98: a reload wanted once things are calm (after a preview)
+ 
++// build 101: a load is waiting or running: the GUI leaves the voices alone
++static int sfxSetBusy(void)
++{
++    return sfxReloadQueued || sfxReloadBusy || sfxLoading;
++}
++
++// build 101: a one-shot asked while the set loads waits; the newest does, unless an earlier one of the same press
++// outranks it (a page sound over its confirm)
++static void sfxHold(int id)
++{
++    u32 now = cpu_ticks();
++    if (sfxHeldId >= 0 && (now - sfxHeldTicks) / SFX_CLOCKS_PER_MS < SFX_PRESS_MS && sfxPressRank(id) < sfxPressRank(sfxHeldId))
++        return;
++    sfxHeldId = id;
++    sfxHeldTicks = now | 1;
++}
++
++// build 101: the set is in: the held one-shot plays if it is still its moment, else it is dropped
++static void sfxPlayHeld(void)
++{
++    int id = sfxHeldId;
++    u32 at = sfxHeldTicks;
++    sfxHeldId = -1;
++    if (id >= 0 && at != 0 && (cpu_ticks() - at) / SFX_CLOCKS_PER_MS < SFX_HELD_FRESH_MS)
++        sfxPlay(id);
++}
++
+ static void sfxReloadWork(void)
+ {
+     int id;
+@@ -536,15 +603,18 @@ static void sfxReloadWork(void)
+     if (!sfxPreviewing) // a preview opened meanwhile: it has the voices, and its close reloads
+         sfxInit(0);
+     sfxReloadBusy = 0;
+-    if ((id = sfxPlayAfterLoad) >= 0) {
++    if ((id = sfxPlayAfterLoad) >= 0) { // the caller's own (a rip's confirm, in the new sounds)
+         sfxPlayAfterLoad = -1;
++        sfxHeldId = -1;
+         sfxPlay(id);
+-    }
++    } else
++        sfxPlayHeld();
+ }
+ 
+ void sfxReload(int thenPlay)
+ {
+-    sfxPlayAfterLoad = thenPlay;
++    if (thenPlay >= 0) // build 101: a second reload asked before the first ran keeps the first one's sound
++        sfxPlayAfterLoad = thenPlay;
+     if (sfxReloadQueued)
+         return; // build 98: the one waiting does it
+     sfxReloadQueued = 1;
+@@ -591,8 +661,8 @@ int sfxPreviewStart(const char *path)
+         return -1;
+     sfxPreviewing = 1; // first: a reload not yet begun now leaves the voices alone
+     sfxReloadAt = 0;
+-    for (i = 0; sfxReloadBusy && i < 400; i++)
+-        DelayThread(10 * 1000); // one already talking to audsrv finishes first
++    for (i = 0; (sfxReloadBusy || sfxLoading) && i < 400; i++)
++        DelayThread(10 * 1000); // one already talking to audsrv finishes first (build 101: the late AUDIO find too)
+     if (prevFile.buffer != NULL && strcmp(prevPath, path) != 0) { // another sound: let the last one's file go
+         free(prevFile.buffer);
+         prevFile.buffer = NULL;
+@@ -780,13 +850,9 @@ static void sfxRumble(int id)
+   which already sounded: no connect sound on top (the lab's Start Device played confirm, then connect).
+ */
+ #define SFX_DRIVE_ANSWER_MS 3000
+-static volatile int sfxPendingId = -1; // a confirm or cancel waiting for the end of its frame
+-static volatile u32 sfxLastConfirmTicks = 0;
+ 
+ static void sfxPlayNow(int id)
+ {
+-    static u32 lastCursorTicks = 0, lastOneShotTicks = 0;
+-    static int lastOneShotId = -1, lastOneShotVoice = -1;
+     int v;
+     u32 sfxStartTicks = cpu_ticks();
+     if (id == SFX_CURSOR) {
+@@ -830,8 +896,8 @@ void sfxFlush(void)
+     if (id < 0)
+         return;
+     sfxPendingId = -1;
+-    if (sfxReloadQueued || sfxReloadBusy) { // the set is being loaded again (leaving a page that changed the theme)
+-        sfxPlayAfterLoad = id;               // it sounds once the new set is in
++    if (sfxSetBusy()) { // the set is being loaded (leaving a page that changed the theme): build 101: it waits,
++        sfxHold(id);    // and sounds once the set is in only if that is still its moment
+         return;
+     }
+     if (audio_initialized && !sfxPreviewing && gEnableSFX && id < SFX_COUNT && sfxReady[id])
+@@ -855,6 +921,11 @@ void sfxPlay(int id)
+ #endif
+     if (asked == SFX_CONFIRM)
+         sfxLastConfirmTicks = cpu_ticks() | 1;
++    if (sfxSetBusy()) { // build 101: the set is loading: a one-shot waits (sfxHold), anything else is dropped
++        if (gEnableSFX && asked >= 0 && asked < SFX_COUNT && asked != SFX_BOOT && sfxIsUiOneShot(asked))
++            sfxHold(asked);
++        return;
++    }
+     if (id < 0 || id >= SFX_COUNT || id == SFX_BOOT || !gEnableSFX)
+         return;
+ 
+@@ -2472,10 +2543,14 @@ void audioSetVolume(void)
+     // build 95: a muted voice stays muted until its sound has run out. Build 100: and a voice with no sound of
+     // ours stays at nothing (sfxStart turns it up when one starts): turned up, a voice still in its release after a
+     // reload played the new sounds' memory as it was written (the beep)
+-    for (v = 1; v < SFX_VOICES; v++)
+-        if (!voiceMuted[v] && voiceBusy(v))
+-            audsrv_adpcm_set_volume_and_pan(v, gSFXVolume, 0);
+-    if (voiceBusy(SFX_BOOT_VOICE))
+-        audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
++    // build 101: not while the set loads (the Audio page's sliders, from the GUI): the load keys every voice off and
++    // its own sounds start at the volume of the moment
++    if (!sfxSetBusy()) {
++        for (v = 1; v < SFX_VOICES; v++)
++            if (!voiceMuted[v] && voiceBusy(v))
++                audsrv_adpcm_set_volume_and_pan(v, gSFXVolume, 0);
++        if (voiceBusy(SFX_BOOT_VOICE))
++            audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
++    }
+     audsrv_set_volume(gBGMVolume);
+ }

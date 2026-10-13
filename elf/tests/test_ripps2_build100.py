@@ -69,7 +69,7 @@ note = gui[gui.index('static void guiShowNotifications(void)'):gui.index('static
 if 'sfxPlay(' in note or 'sfxPlay(SFX_PAGE_IN)' in th:
     fail.append('the drive scan notifications and the right stick case flip must be silent')
 if gui.count('if (previousTheme != themeID) // build 100: only a new theme brings other sounds') != 2 or \
-        'sfxPlayAfterLoad = id;               // it sounds once the new set is in' not in snd:
+        'sfxHold(id);    // and sounds once the set is in only if that is still its moment' not in snd:  # build 101: held, fresh only
     fail.append('leaving Interface must reload the sounds only for a new theme, and a press then sound after the load')
 dia = rd('src/dia.c')
 if 'diaResetValue(item);\n        sfxPlay(SFX_CANCEL);' not in dia:

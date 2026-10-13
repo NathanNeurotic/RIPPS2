@@ -1,5 +1,13 @@
 # RIPPS2 changelog
 
+## Build 101 (beta, in testing), changes since build 100
+
+### Sound that stays where it belongs
+- **No sound turns up after its moment, and none plays from a half-loaded set.** Changing the theme (in Interface or by holding SELECT), an IOP reboot, a rip and the AUDIO folder found late on a drive all load the sounds again: every voice is keyed off and the sounds are written back one by one, which takes seconds when your rips are on a memory card. The menu kept playing through that, so cursor and page sounds were asked of a half-loaded set, and a confirm caught by the load was kept until its end and sounded seconds later, outside the menu it came from. Now nothing touches a voice while a load waits or runs: a cursor tick is dropped, and the newest confirm, cancel or page sound plays when the set is in only if it was pressed within the last 0.3 seconds. Every load also forgets which voice the sounds before it took, and the voices are turned down before the load's reset turns them all up, so no ringing tail flares.
+
+### RIPFLOW
+- **Left and Right go through the games on RIPFLOW's info page**, as on its carousel, and the info page stays; they no longer switch drives there. Other themes keep Left and Right for the drives.
+
 ## Build 100 (beta, v0.1.0-beta), changes since build 99
 
 RIPPS2 leaves alpha: build 100 is the first beta, released as **v0.1.0-beta** (About reads BUILD 100 (BETA)).
