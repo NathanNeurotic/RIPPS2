@@ -316,7 +316,20 @@ for ($n = 0; $n -lt $list.Count; $n++) {
     if ([BG]::GrabOnDesk($script:main, $file)) { "grab $file" } else { "grab failed" }
     continue
   }
-  if ($s -eq 'shot') { Press $vk.f8; Start-Sleep -Milliseconds 1300; "shot"; continue }
+  if ($s -eq 'shot') {
+    # until PCSX2's new PNG is there and holds still (it is written in the background: a run that closed PCSX2
+    # 1.3 s after its last F8 left that screenshot cut short), at most 6 s
+    $snapDir = Join-Path $lab "snaps"; $t0 = (Get-Date).AddSeconds(-0.5)
+    Press $vk.f8
+    $shotFile = $null; $last = -1
+    for ($w = 0; $w -lt 30; $w++) {
+      Start-Sleep -Milliseconds 200
+      if (-not $shotFile) { $shotFile = Get-ChildItem -LiteralPath $snapDir -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime | Select-Object -Last 1 }
+      if ($shotFile) { $now = (Get-Item -LiteralPath $shotFile.FullName).Length; if ($now -gt 0 -and $now -eq $last) { break }; $last = $now }
+    }
+    if ($w -lt 5) { Start-Sleep -Milliseconds (1000 - 200 * $w) } # the old pace, for step lists timed around it
+    "shot" + $(if ($shotFile) { " $($shotFile.Name) ($last bytes)" } else { " (no file seen)" }); continue
+  }
   if ($s -eq 'sstate') { Press $vk.f1; Start-Sleep -Milliseconds 2500; "save state (F1, lab sstates)"; continue }
   if ($s -like 'kdown:*') { Down $vk[$s.Split(':')[1]]; "kdown $($s.Split(':')[1])"; continue }
   if ($s -like 'kup:*') { Up $vk[$s.Split(':')[1]]; "kup $($s.Split(':')[1])"; continue }
