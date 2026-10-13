@@ -249,7 +249,7 @@ converter) added the regressions now in build 95, the POPSTARTER and iLink items
       ripps2-build99-short, renders/ripps2-b99-short.mp4 + YOUTUBE.md). Test me posted 10-12 (message
       1559237125671751770, the ELF attached). Waiting: the Short's YouTube link for the README.
 
-## Build 100: the build 99 notes (user, 10-12; released as v0.1.0-beta, the first beta)
+## Build 100: the build 99 notes (user, 10-12; released as v1.0.0-beta, the first beta; first tagged v0.1.0-beta)
 ### Quick fixes
 - [x] 3D icon viewer: left and right on the D-pad / right stick turn the icon the wrong way.
 - [x] Text editor on the RIPPS2 theme: RIPPS2 Sleek's true case (RIPPS2_CASE_FONT) for every line, the title and the

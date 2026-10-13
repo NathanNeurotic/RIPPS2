@@ -106,7 +106,7 @@ def payload(notes):
     body = {'color': BLUE, 'url': LATEST,
             'fields': [{'name': n, 'value': ' '.join(t)[:1024], 'inline': False} for n, t in feats],
             'image': {'url': 'attachment://ripps2-at-a-glance.png'},
-            'footer': {'text': 'RIPPS2 v0.1.0 beta  |  one .elf, every drive', 'icon_url': 'attachment://ripps2-icon.png'}}
+            'footer': {'text': 'RIPPS2 beta  |  one .elf, every drive', 'icon_url': 'attachment://ripps2-icon.png'}}
     return {'content': '', 'embeds': [head, body], 'allowed_mentions': {'parse': []},
             'attachments': [{'id': 0, 'filename': 'kill-it-ripps2.png'}, {'id': 1, 'filename': 'ripps2-at-a-glance.png'},
                             {'id': 2, 'filename': 'ripps2-icon.png'}]}

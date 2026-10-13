@@ -149,7 +149,7 @@ def banner(build, w=1280, h=480, words=None, halo=False):
 
 
 def stage(build):
-    """Alpha up to build 99; build 100 (v0.1.0) is the first beta."""
+    """Alpha up to build 99; build 100 (v1.0.0) is the first beta."""
     return 'beta' if build >= 100 else 'alpha'
 
 

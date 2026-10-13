@@ -1,4 +1,4 @@
-"""Build 101: the user's notes on the v0.1.0 beta (10/13/2026). Static checks on the patched tree."""
+"""Build 101: the user's notes on the v1.0.0 beta (10/13/2026). Static checks on the patched tree."""
 import os
 import re
 import sys

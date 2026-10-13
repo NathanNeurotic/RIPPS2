@@ -8,9 +8,9 @@
 ### RIPFLOW
 - **Left and Right go through the games on RIPFLOW's info page**, as on its carousel, and the info page stays; they no longer switch drives there. Other themes keep Left and Right for the drives.
 
-## Build 100 (beta, v0.1.0-beta), changes since build 99
+## Build 100 (beta, v1.0.0-beta), changes since build 99
 
-RIPPS2 leaves alpha: build 100 is the first beta, released as **v0.1.0-beta** (About reads BUILD 100 (BETA)).
+RIPPS2 leaves alpha: build 100 is the first beta, released as **v1.0.0-beta** (About reads BUILD 100 (BETA); first tagged v0.1.0-beta, renamed when the version came to follow the build number).
 
 ### Sound, cleaned up
 - **The ripped boot and launch music no longer pop.** Three of the boot bank's instruments (the PS2 logo, the boot's low swells) were read as the SPU2's noise generator and played as a random level held for a tenth of a second: a pop at every step. They are a real recording at the start of the bank. Checked on the PC against a real console's recordings: boot went from 274 click points to 2, launch from 50 to 0. RIPPS2 Audio Studio's renderer is fixed the same way.
