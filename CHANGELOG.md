@@ -28,7 +28,7 @@ RIPPS2 leaves alpha: build 100 is the first beta, released as **v0.1.0-beta** (A
 - **POPSTARTER from USB remembers** whether your drive is FAT32 or exFAT and stops asking (and stops sounding as if it had never been set up) while the drive still matches.
 - **A case turns over from the side you push**, to its back and home again.
 - **The START menu, the game and app menus and the Settings hub** use Adapt's clear face on every theme.
-- **Hotfix (10/12/2026, still build 100): RIPGRID's info page** draws its stars and badges at the default theme's sizes, side by side inside the glass panel. At the images' own sizes the badges (480P, 16:9, NTSC...) overlapped each other and covered the last stars of the rating (seen at 3:46 in the beta reel).
+- **Hotfix (10/12/2026, still build 100): RIPGRID's info page** draws its stars and badges at the default theme's sizes, side by side inside the glass panel, the stars starting at the text's edge. At the images' own sizes the badges (480P, 16:9, NTSC...) overlapped each other and covered the last stars of the rating (seen at 3:46 in the beta reel).
 
 ## Build 99 (testing), changes since build 98
 
