@@ -4,9 +4,13 @@
 // middle one turns to follow the pointer (the nearer the pointer, the quicker it turns), and a touch on
 // either neighbour, or Left / Right, brings that one to the middle.
 //
+// One hat is a link (the `link` element, its data-hat naming which): while it stands in the middle the link
+// lies over it, and pointing at it (or focusing it) rings the bell as RIPPS2's memory card icon does in the
+// PS2 browser (make_hat_icon.py's keys: four rings dying away, then rest, a 1.5 s loop).
+//
 // Usage:
 //   import { createElfShelf } from "./elfshelf.js";
-//   const shelf = createElfShelf(canvas, { interactTarget: heroEl, caption: captionEl });
+//   const shelf = createElfShelf(canvas, { interactTarget: heroEl, caption: captionEl, link: anchorEl });
 //   shelf.show(true | false);  shelf.destroy();
 
 import * as THREE from "three";
@@ -25,7 +29,19 @@ const SLOT_X = 4.1;       // world units between the shelf's three places
 const SIDE_SCALE = 0.78;  // the neighbours stand a little smaller, as RIPFLOW's side covers do
 const SLIDE_S = 0.55;     // a step along the shelf
 
-export function createElfShelf(canvas, { interactTarget = canvas, caption = null } = {}) {
+// the memory card icon's ring, in the icon's frames (60 a second): the curl swings about the hat's own axis,
+// more toward the tip, by RING_SWING radians at full weight; the bell swings a little past the felt holding it
+const RING_KEYS = [[0, 0], [6, 1], [12, 0], [18, -1], [24, 0], [30, 0.6], [36, 0], [42, -0.35], [48, 0], [90, 0]];
+const RING_REST = 48, RING_LOOP = 90, RING_SWING = 0.75, BELL_SWING = Math.pow(1.3, 1.3);
+function ringAt(f) {
+  for (let i = 1; i < RING_KEYS.length; i++) {
+    const [t1, v1] = RING_KEYS[i];
+    if (f <= t1) { const [t0, v0] = RING_KEYS[i - 1], u = (f - t0) / (t1 - t0); return v0 + (v1 - v0) * u * u * (3 - 2 * u); }
+  }
+  return 0;
+}
+
+export function createElfShelf(canvas, { interactTarget = canvas, caption = null, link = null } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -135,18 +151,23 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
   })();
 
   // the felt's flop as a vertex-shader bend about (R, uBendY): above uBendY the cone curls toward +x by
-  // uBend radians over its length, normals turned with it
+  // uBend radians over its length, normals turned with it; then the curl swings about the hat's axis by
+  // uSwing radians at the tip (the icon's ring), less toward the bend
   function bendFelt(mat, u) {
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, u);
       sh.vertexShader = sh.vertexShader
-        .replace("#include <common>", "#include <common>\nuniform float uBend, uBendY, uLen;")
+        .replace("#include <common>", "#include <common>\nuniform float uBend, uBendY, uLen, uSwing;")
         .replace("#include <beginnormal_vertex>", `#include <beginnormal_vertex>
           if (position.y > uBendY) { float bR = (uLen - uBendY) / max(0.05, uBend); float th = (position.y - uBendY) / bR;
-            float c = cos(th), s = sin(th); objectNormal = vec3(c * objectNormal.x - s * objectNormal.y, s * objectNormal.x + c * objectNormal.y, objectNormal.z); }`)
+            float c = cos(th), s = sin(th); objectNormal = vec3(c * objectNormal.x - s * objectNormal.y, s * objectNormal.x + c * objectNormal.y, objectNormal.z);
+            float sw = uSwing * pow((position.y - uBendY) / (uLen - uBendY), 1.3); float cw = cos(sw), sn = sin(sw);
+            objectNormal = vec3(cw * objectNormal.x - sn * objectNormal.z, objectNormal.y, sn * objectNormal.x + cw * objectNormal.z); }`)
         .replace("#include <begin_vertex>", `#include <begin_vertex>
           if (position.y > uBendY) { float bR = (uLen - uBendY) / max(0.05, uBend); float th = (position.y - uBendY) / bR; float r = bR - position.x;
-            transformed.x = bR - r * cos(th); transformed.y = uBendY + r * sin(th); }`);
+            transformed.x = bR - r * cos(th); transformed.y = uBendY + r * sin(th);
+            float sw = uSwing * pow((position.y - uBendY) / (uLen - uBendY), 1.3); float cw = cos(sw), sn = sin(sw);
+            transformed.xz = vec2(cw * transformed.x - sn * transformed.z, sn * transformed.x + cw * transformed.z); }`);
     };
   }
 
@@ -182,7 +203,7 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
       p.setXYZ(i, v.x, v.y, v.z);
     }
     geo.computeVertexNormals();
-    const bendU = { uBend: { value: def.bend }, uBendY: { value: BEND_Y }, uLen: { value: L } };
+    const bendU = { uBend: { value: def.bend }, uBendY: { value: BEND_Y }, uLen: { value: L }, uSwing: { value: 0 } };
     const hat = new THREE.Group();
     const felt = new THREE.MeshPhysicalMaterial({ shadowSide: THREE.FrontSide, map: feltMap, bumpMap: feltBump, bumpScale: 0.5, roughness: 0.92, sheen: 0.6, sheenRoughness: 0.7,
       sheenColor: new THREE.Color(def.sheen), side: THREE.DoubleSide, envMap: env, envMapIntensity: 0.4 });
@@ -195,11 +216,29 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
     fur.rotation.x = Math.PI / 2; fur.position.y = 0.05; fur.castShadow = true; hat.add(fur);
     const bell = new THREE.Mesh(new THREE.SphereGeometry(0.15, 32, 20), bellMat);
     bell.castShadow = true; hat.add(bell);
-    const placeBell = (a) => { // at the bent tip, wherever the spring has the felt
-      const R = (L - BEND_Y) / Math.max(0.05, a);
-      bell.position.set(R - R * Math.cos(a) + 0.04, BEND_Y + R * Math.sin(a) - 0.1, 0);
+    const placeBell = (a, sw = 0) => { // at the bent tip, wherever the spring (and the ring) has the felt
+      const R = (L - BEND_Y) / Math.max(0.05, a), x = R - R * Math.cos(a) + 0.04, b = sw * BELL_SWING;
+      bell.position.set(x * Math.cos(b), BEND_Y + R * Math.sin(a) - 0.1, x * Math.sin(b));
     };
     placeBell(def.bend);
+    // the hat's outline in its own space, for the link laid over it: brim, bend, the curl and the bell
+    const rim = [], curl = [], marks = [];
+    for (let j = 0; j < 8; j++) { const a = (j / 8) * Math.PI * 2;
+      rim.push(new THREE.Vector3(Math.cos(a) * 0.8, -0.05, Math.sin(a) * 0.8), new THREE.Vector3(Math.cos(a) * 0.8, 0.22, Math.sin(a) * 0.8),
+        new THREE.Vector3(Math.cos(a) * 0.45, BEND_Y, Math.sin(a) * 0.45)); }
+    for (let j = 0; j < 16; j++) curl.push(new THREE.Vector3());
+    const outline = (a, sw) => {
+      const R = (L - BEND_Y) / Math.max(0.05, a);
+      for (let j = 0; j < 4; j++) {
+        const th = a * (j + 1) / 4, k = Math.pow((j + 1) / 4, 1.3) * sw, cx = R - R * Math.cos(th), cy = BEND_Y + R * Math.sin(th);
+        for (let q = 0; q < 4; q++) {
+          const x = cx + (q & 1 ? 0.3 : -0.3), z = q & 2 ? 0.3 : -0.3;
+          curl[j * 4 + q].set(x * Math.cos(k) - z * Math.sin(k), cy + (q & 2 ? 0.3 : -0.3), x * Math.sin(k) + z * Math.cos(k));
+        }
+      }
+      marks.length = 0; marks.push(...rim, ...curl, bell.position);
+      return marks;
+    };
 
     // the hat stands in its own pool, sunk to half the fur; the pool keeps still while the hat turns
     const holder = new THREE.Group();
@@ -217,7 +256,7 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
     }
     holder.add(spin);
     // the bell's spring: bend (rad) and its speed
-    holder.userData = { spin, hat, yaw: 0, bendU, placeBell, base: def.bend, bend: def.bend, bendV: 0 };
+    holder.userData = { spin, hat, yaw: 0, bendU, placeBell, outline, base: def.bend, bend: def.bend, bendV: 0 };
     holder.traverse((o) => { if (o.isMesh) o.userData.holder = holder; });
     return holder;
   }
@@ -242,10 +281,51 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
   function step(dir) { target += dir; if (caption) setCaption(); }
   function setCaption() {
     const k = ((Math.round(target) % n) + n) % n;
-    caption.textContent = HATS[k].name;
+    sayCaption(HATS[k].name);
+  }
+  function sayCaption(text) {
+    caption.textContent = text;
     caption.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 380, easing: "cubic-bezier(.2,.7,.3,1)" });
   }
   if (caption) setCaption();
+
+  // ---- the linked hat: pointed at or focused, it rings; a ring always plays out to its rest ----
+  const linkIdx = link ? HATS.findIndex((h) => h.name === (link.dataset.hat || "RIPPS2")) : -1;
+  let linkOn = false, ringHover = false, ringF = RING_REST;
+  const ringStart = () => {
+    if (!ringHover && ringF >= RING_REST) ringF = 0;
+    if (!ringHover && caption && link.dataset.caption) sayCaption(link.dataset.caption);
+    ringHover = true;
+  };
+  const ringStop = () => { if (ringHover && caption) setCaption(); ringHover = false; };
+  if (linkIdx >= 0) {
+    link.style.display = "none";
+    link.addEventListener("pointerenter", ringStart);
+    link.addEventListener("pointerleave", ringStop);
+    link.addEventListener("focus", ringStart);
+    link.addEventListener("blur", ringStop);
+  }
+  const lp = new THREE.Vector3();
+  function placeLink() {
+    const h = hats[linkIdx], on = visible && Math.abs(wrap(linkIdx - pos)) < 0.3;
+    if (on !== linkOn) {
+      linkOn = on;
+      link.style.display = on ? "block" : "none";
+      if (!on) { if (document.activeElement === link) link.blur(); ringStop(); }
+    }
+    if (!on) return;
+    h.updateMatrixWorld(true);
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const p of h.userData.outline(h.userData.bend, h.userData.bendU.uSwing.value)) {
+      lp.copy(p); h.userData.hat.localToWorld(lp).project(camera);
+      x0 = Math.min(x0, lp.x); x1 = Math.max(x1, lp.x); y0 = Math.min(y0, lp.y); y1 = Math.max(y1, lp.y);
+    }
+    const w = canvas.clientWidth, ht = canvas.clientHeight;
+    const left = (x0 + 1) / 2 * w, top = (1 - y1) / 2 * ht;
+    link.style.transform = `translate(${left.toFixed(1)}px, ${top.toFixed(1)}px)`;
+    link.style.width = ((x1 - x0) / 2 * w).toFixed(1) + "px";
+    link.style.height = ((y1 - y0) / 2 * ht).toFixed(1) + "px";
+  }
 
   // ---- pointer ----
   const pointer = new THREE.Vector2(0, 0);
@@ -259,6 +339,7 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
   const onLeave = () => { pointerIn = false; };
   const onDown = (e) => {
     if (!visible) return;
+    if (linkOn && e.target === link) { e.stopImmediatePropagation(); hats[linkIdx].userData.bendV -= 4.5; return; } // the link opens on click
     toNdc(e);
     ray.setFromCamera(pointer, camera);
     const hit = ray.intersectObjects(hats, true)[0];
@@ -310,6 +391,8 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     const t = now / 1000;
     pos += (target - pos) * (1 - Math.exp(-dt / (SLIDE_S / 4)));
+    if (ringHover) ringF = (ringF + dt * 60) % RING_LOOP;
+    else if (ringF < RING_REST) ringF = Math.min(RING_REST, ringF + dt * 60);
 
     hats.forEach((h, k) => {
       const off = wrap(k - pos), a = Math.abs(off);
@@ -339,9 +422,12 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
       ud.bendV += (-(ud.bend - ud.bendGoal) * 42 - ud.bendV * 5.5 + Math.abs(yawV) * 0.9) * dt;
       ud.bend = Math.max(0.15, Math.min(2.4, ud.bend + ud.bendV * dt));
       ud.bendU.uBend.value = ud.bend;
-      ud.placeBell(ud.bend);
+      const sw = k === linkIdx ? RING_SWING * ringAt(ringF) : 0;
+      ud.bendU.uSwing.value = sw;
+      ud.placeBell(ud.bend, sw);
       ud.spin.rotation.y = ud.yaw;
     });
+    if (linkIdx >= 0) placeLink();
     if (visible) renderer.render(scene, camera);
   }
   raf = requestAnimationFrame(frame);
@@ -359,6 +445,10 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
       interactTarget.removeEventListener("pointerleave", onLeave);
       interactTarget.removeEventListener("pointerdown", onDown, { capture: true });
       window.removeEventListener("keydown", onKey);
+      if (linkIdx >= 0) {
+        link.removeEventListener("pointerenter", ringStart); link.removeEventListener("pointerleave", ringStop);
+        link.removeEventListener("focus", ringStart); link.removeEventListener("blur", ringStop);
+      }
       renderer.dispose();
     },
   };

@@ -133,8 +133,13 @@ def banner(build, w=1280, h=480):
     tw = d.textlength(title, font=big)
     d.text((232 + tw + 34, 58), '|', font=big, fill=(90, 140, 255))
     d.text((232 + tw + 34 + d.textlength('|', font=big) + 34, 58), 'Build %d' % build, font=big, fill=(160, 195, 255))
-    d.text((236, 178), 'RIPPS2 alpha  /  real PS2 hardware wanted', font=small, fill=(150, 165, 205))
+    d.text((236, 178), 'RIPPS2 %s  /  real PS2 hardware wanted' % stage(build), font=small, fill=(150, 165, 205))
     return im.convert('RGB')
+
+
+def stage(build):
+    """Alpha up to build 99; build 100 (v0.1.0) is the first beta."""
+    return 'beta' if build >= 100 else 'alpha'
 
 
 def parse_notes(path):
@@ -187,7 +192,7 @@ def payload(build, notes, release, videos=()):
         body['fields'].append({'name': 'What to test on your PS2' + (' (%d to %d)' % (start, n - 1) if start > 1 else ''), 'value': chunk, 'inline': False})
     if report:
         body['fields'].append({'name': 'Tell us', 'value': report[:1024], 'inline': False})
-    body['footer'] = {'text': 'RIPPS2 build %d  |  alpha: keep your usual loader close by' % build, 'icon_url': 'attachment://ripps2-icon.png'}
+    body['footer'] = {'text': 'RIPPS2 build %d  |  %s: keep your usual loader close by' % (build, stage(build)), 'icon_url': 'attachment://ripps2-icon.png'}
     # videos go in the message text, where Discord turns each link into a player above the card
     content = '**Watch build %d:** ' % build + '  |  '.join(videos) if videos else ''
     return {'content': content, 'embeds': [head, body], 'allowed_mentions': {'parse': []},

@@ -43,6 +43,10 @@
     font-size: clamp(1rem, 2.4vw, 1.7rem); color: #f4f8ff; opacity: 0; transition: opacity .5s ease;
     text-shadow: 0 0 6px rgba(200, 222, 255, .8), 0 0 22px rgba(110, 160, 255, .6); }
   .shelf-caption[data-shelf="on"] { opacity: 1; }
+  /* The blue RIPPS2 hat is a link to the beta's psx-place thread: elfshelf.js lays it over the hat */
+  .shelf-link { position: absolute; left: 0; top: 0; z-index: 2; display: none; cursor: pointer; border-radius: 18px;
+    outline: none; -webkit-tap-highlight-color: transparent; }
+  .shelf-link:focus-visible { box-shadow: 0 0 0 2px rgba(170, 205, 255, .75), 0 0 26px rgba(110, 160, 255, .45); }
   .hero[data-tab="storage"] .console { opacity: 0; transition: opacity .5s ease; }
   .hero[data-tab="launch"] .console { opacity: 1; transition: opacity .5s ease; }
 
@@ -64,8 +68,11 @@
 
 <section class="hero" id="hero">
   <canvas id="pillars" aria-hidden="true"></canvas>
-  <canvas class="shelf" id="shelf" aria-label="The elf shelf: touch a hat beside the middle one, or press Left / Right"></canvas>
+  <canvas class="shelf" id="shelf" aria-label="The elf shelf: touch a hat beside the middle one, or press Left / Right; the blue RIPPS2 hat opens the beta's psx-place thread"></canvas>
   <div class="shelf-caption" id="shelf-caption" aria-live="polite"></div>
+  <a class="shelf-link" id="shelf-link" href="https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/"
+     target="_blank" rel="noopener" data-hat="RIPPS2" data-caption="RIPPS2 beta on psx-place"
+     aria-label="RIPPS2 beta: the psx-place thread"></a>
   <div class="hero-content">
     <img class="console" src="assets/console.png" alt="Console" onerror="this.remove()">
   </div>
@@ -108,7 +115,8 @@
   if (arrived === "launch") spark();
 
   try {
-    shelf = createElfShelf(document.getElementById("shelf"), { interactTarget: hero, caption: document.getElementById("shelf-caption") });
+    shelf = createElfShelf(document.getElementById("shelf"), { interactTarget: hero, caption: document.getElementById("shelf-caption"),
+      link: document.getElementById("shelf-link") });
   } catch (e) { console.warn("elf shelf:", e); }
   showTab(arrived === "launch" ? "launch" : current);
 
