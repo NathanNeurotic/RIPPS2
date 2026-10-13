@@ -71,8 +71,10 @@ def mark(box):
     return out
 
 
-def banner(build, w=1280, h=480):
-    """Dark PS2 night, the pillars field low in the frame, and the words."""
+def banner(build, w=1280, h=480, words=None, halo=False):
+    """Dark PS2 night, the pillars field low in the frame, and the words: (left, right, under), the Test me
+    words by default (make_showcase.py passes its own). halo puts a soft blue light behind the title."""
+    left, right, under = words or ('Test me', 'Build %d' % build, 'RIPPS2 %s  /  real PS2 hardware wanted' % stage(build))
     im = Image.new('RGB', (w, h), (2, 6, 20))
     px = im.load()
     for y in range(h):  # the sky: deep at the top, a blue haze at the horizon
@@ -128,12 +130,21 @@ def banner(build, w=1280, h=480):
     im.alpha_composite(mark(140), (66, 56))
     big = font('ripps2_sleek_case.ttf', 104)
     small = font('ripps2_sleek_case.ttf', 40)
-    title = 'Test me'
-    d.text((232, 58), title, font=big, fill=(245, 248, 255))
-    tw = d.textlength(title, font=big)
-    d.text((232 + tw + 34, 58), '|', font=big, fill=(90, 140, 255))
-    d.text((232 + tw + 34 + d.textlength('|', font=big) + 34, 58), 'Build %d' % build, font=big, fill=(160, 195, 255))
-    d.text((236, 178), 'RIPPS2 %s  /  real PS2 hardware wanted' % stage(build), font=small, fill=(150, 165, 205))
+    tw = d.textlength(left, font=big)
+    bar = 232 + tw + 34
+    x2 = bar + d.textlength('|', font=big) + 34
+    if halo:  # the title's light on the night: its own letters, blurred wide, under the sharp ones
+        light = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+        hd = ImageDraw.Draw(light)
+        for xy, txt in (((232, 58), left), ((bar, 58), '|'), ((x2, 58), right)):
+            hd.text(xy, txt, font=big, fill=(70, 130, 255, 210))
+        im.alpha_composite(light.filter(ImageFilter.GaussianBlur(22)))
+        im.alpha_composite(light.filter(ImageFilter.GaussianBlur(6)))
+        d = ImageDraw.Draw(im)
+    d.text((232, 58), left, font=big, fill=(245, 248, 255))
+    d.text((bar, 58), '|', font=big, fill=(90, 140, 255))
+    d.text((x2, 58), right, font=big, fill=(160, 195, 255))
+    d.text((236, 178), under, font=small, fill=(150, 165, 205))
     return im.convert('RGB')
 
 
