@@ -9,6 +9,13 @@
 # draw itself into a bitmap (PrintWindow, PW_RENDERFULLCONTENT), which works off screen. "rec" posts F11 (PCSX2's
 # video capture), "shot" F8 (its screenshot). At the end the lab PCSX2 is closed (killed: its cards are lab copies).
 #
+# Not out of sight entirely (user, 10/13/2026): a small "RIPPS2 lab: AI run" window sits on the user's taskbar for
+# the whole run, shown without taking the focus. It says which step the run is on, previews the hidden screen once a
+# second, and has two buttons. Take over saves a state (F1), closes the hidden PCSX2 and opens PCSX2 on the user's own
+# desktop at that point, to play on by hand. Stop (or closing the window) ends the run. The hidden PCSX2 is tied to this
+# script's process (a job that ends with it), so ending the run in Task Manager closes PCSX2 too. -NoPanel leaves the
+# window out; -Title names the run in it.
+#
 # Step tokens: wait:<sec>, grab, shot, rec, sstate (F1: a save state, for reading a stuck EE), up, down, left, right, cross, circle, square, triangle, start, select,
 #              l1, r1, l2, r2, l3, r3, rup/rdown/rleft/rright (right stick), hold:<button>:<ms>,
 #              kdown:<button> / kup:<button>
@@ -17,7 +24,9 @@ param(
   [string]$Steps = "wait:15,grab",
   [switch]$Keep,
   [string]$Iso = "",
-  [switch]$Attach
+  [switch]$Attach,
+  [string]$Title = "",
+  [switch]$NoPanel
 )
 
 $lab = "B:\Emulation\PlayStation\PCSX2\ripps2-lab"
@@ -26,7 +35,8 @@ $grabDir = Join-Path $PSScriptRoot "grabs"
 New-Item -ItemType Directory -Force $grabDir | Out-Null
 
 Add-Type -AssemblyName System.Drawing
-Add-Type -ReferencedAssemblies System.Drawing @"
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -ReferencedAssemblies System.Drawing, System.Windows.Forms @"
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -137,6 +147,99 @@ public static class BG {
     }
     return true;
   }
+  // The window drawn into a bitmap in memory, for the panel's preview
+  public static System.Drawing.Bitmap GrabBitmap(IntPtr h) {
+    System.Drawing.Bitmap bmp = null;
+    OnDesk(() => {
+      RECT r; GetWindowRect(h, out r); int w = r.R - r.L, hh = r.B - r.T;
+      if (w <= 0 || hh <= 0) return;
+      bmp = new System.Drawing.Bitmap(w, hh);
+      using (var g = System.Drawing.Graphics.FromImage(bmp)) { IntPtr dc = g.GetHdc(); PrintWindow(h, dc, 2); g.ReleaseHdc(dc); }
+    });
+    return bmp;
+  }
+
+  // A job that closes with this process: however the run ends (Task Manager included), the hidden PCSX2 ends with it
+  [StructLayout(LayoutKind.Sequential)] struct JOBOBJECT_BASIC_LIMIT_INFORMATION { public long PerProcessUserTimeLimit, PerJobUserTimeLimit;
+    public uint LimitFlags; public UIntPtr MinimumWorkingSetSize, MaximumWorkingSetSize; public uint ActiveProcessLimit; public UIntPtr Affinity;
+    public uint PriorityClass, SchedulingClass; }
+  [StructLayout(LayoutKind.Sequential)] struct IO_COUNTERS { public ulong R, W, O, RB, WB, OB; }
+  [StructLayout(LayoutKind.Sequential)] struct JOBOBJECT_EXTENDED_LIMIT_INFORMATION { public JOBOBJECT_BASIC_LIMIT_INFORMATION Basic; public IO_COUNTERS Io;
+    public UIntPtr ProcessMemoryLimit, JobMemoryLimit, PeakProcessMemoryUsed, PeakJobMemoryUsed; }
+  [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern IntPtr CreateJobObject(IntPtr sa, string name);
+  [DllImport("kernel32.dll")] static extern bool SetInformationJobObject(IntPtr job, int cls, ref JOBOBJECT_EXTENDED_LIMIT_INFORMATION info, int len);
+  [DllImport("kernel32.dll")] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr proc);
+  [DllImport("kernel32.dll")] static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
+  static IntPtr job = IntPtr.Zero;
+  public static bool TieToThisProcess(int pid) {
+    if (job == IntPtr.Zero) {
+      job = CreateJobObject(IntPtr.Zero, null);
+      var info = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION(); info.Basic.LimitFlags = 0x2000; // JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+      if (job == IntPtr.Zero || !SetInformationJobObject(job, 9, ref info, Marshal.SizeOf(info))) return false;
+    }
+    IntPtr p = OpenProcess(0x0101, false, pid); // PROCESS_TERMINATE | PROCESS_SET_QUOTA
+    if (p == IntPtr.Zero) return false;
+    bool ok = AssignProcessToJobObject(job, p); CloseHandle(p); return ok;
+  }
+}
+
+// The run on the user's own desktop: a taskbar window that never takes the focus, says what the hidden PCSX2 is doing,
+// previews it, and lets the user stop the run or take it over. Statics carry the run's state between the script's
+// thread and the window's.
+public class LabPanel : System.Windows.Forms.Form {
+  public static volatile int Request = 0;    // 1 stop, 2 take over
+  public static volatile string Status = "starting";
+  public static volatile int Run = 0;        // a new run closes an old run's window
+  public static IntPtr Target = IntPtr.Zero; // the hidden PCSX2 window, for the preview
+  int run;
+  System.Windows.Forms.Label status;
+  System.Windows.Forms.PictureBox peek;
+  System.Windows.Forms.Timer timer;
+  DateTime started = DateTime.Now;
+  protected override bool ShowWithoutActivation { get { return true; } }
+
+  LabPanel(string title, string iconFrom, int run) {
+    this.run = run;
+    Text = "RIPPS2 lab: AI run" + (title.Length > 0 ? " (" + title + ")" : "");
+    FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle; MaximizeBox = false; ShowInTaskbar = true;
+    StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+    ClientSize = new System.Drawing.Size(360, 386);
+    var wa = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+    Location = new System.Drawing.Point(wa.Right - Width - 12, wa.Bottom - Height - 12);
+    try { Icon = System.Drawing.Icon.ExtractAssociatedIcon(iconFrom); } catch { }
+    var head = new System.Windows.Forms.Label { Location = new System.Drawing.Point(12, 8), Size = new System.Drawing.Size(336, 48),
+      Text = "An AI test run is using the lab PCSX2 on a hidden desktop. Your keyboard, mouse and controller are untouched; this window never takes the focus." };
+    status = new System.Windows.Forms.Label { Location = new System.Drawing.Point(12, 58), Size = new System.Drawing.Size(336, 18), Text = Status };
+    peek = new System.Windows.Forms.PictureBox { Location = new System.Drawing.Point(12, 80), Size = new System.Drawing.Size(336, 252),
+      SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom, BackColor = System.Drawing.Color.Black };
+    var take = new System.Windows.Forms.Button { Text = "Take over", Location = new System.Drawing.Point(12, 342), Size = new System.Drawing.Size(162, 32) };
+    var stop = new System.Windows.Forms.Button { Text = "Stop run", Location = new System.Drawing.Point(186, 342), Size = new System.Drawing.Size(162, 32) };
+    var tips = new System.Windows.Forms.ToolTip();
+    tips.SetToolTip(take, "Saves a state, closes the hidden run and opens PCSX2 on your desktop at that point, to play on by hand");
+    tips.SetToolTip(stop, "Ends the run and closes the hidden PCSX2 (closing this window does the same)");
+    take.Click += (o, e) => { if (Request == 0) { Request = 2; status.Text = "taking over: saving where it is"; } };
+    stop.Click += (o, e) => { if (Request == 0) { Request = 1; status.Text = "stopping"; } };
+    FormClosing += (o, e) => { if (Run == this.run && Request == 0) Request = 1; };
+    Controls.AddRange(new System.Windows.Forms.Control[] { head, status, peek, take, stop });
+    timer = new System.Windows.Forms.Timer { Interval = 1000 };
+    timer.Tick += Tick; timer.Start();
+  }
+
+  void Tick(object o, EventArgs e) {
+    if (Run != run) { timer.Stop(); Close(); return; }
+    var t = DateTime.Now - started;
+    if (Request == 0) status.Text = string.Format("{0}   ({1}:{2:00})", Status, (int)t.TotalMinutes, t.Seconds);
+    if (Target != IntPtr.Zero && Request == 0 && WindowState != System.Windows.Forms.FormWindowState.Minimized) {
+      try { var b = BG.GrabBitmap(Target); if (b != null) { var old = peek.Image; peek.Image = b; if (old != null) old.Dispose(); } } catch { }
+    }
+  }
+
+  public static void Start(string title, string iconFrom) {
+    int r = ++Run; Request = 0; Status = "starting PCSX2"; Target = IntPtr.Zero;
+    var t = new System.Threading.Thread(() => { System.Windows.Forms.Application.Run(new LabPanel(title, iconFrom, r)); });
+    t.SetApartmentState(System.Threading.ApartmentState.STA); t.IsBackground = true; t.Start();
+  }
+  public static void Finish() { Run++; } // the window closes at its next tick
 }
 "@
 
@@ -175,13 +278,18 @@ if ($Attach) {
   if (-not $env:PS2BG_NODESK) { if ([BG]::OpenDesk()) { "on the lab's own desktop ($([BG]::DeskName)): it cannot take the focus or show" } else { "could not make the lab desktop; running parked off screen" } }
   $launchArgs = "-fastboot -elf `"$Elf`""
   if ($Iso) { $launchArgs += " `"$Iso`"" }
+  if (-not $NoPanel) { [LabPanel]::Start($(if ($Title) { $Title } else { Split-Path -Leaf (Split-Path -Parent $Elf) }), $exe) }
   $pid2 = [BG]::Launch($exe, $launchArgs, $lab)
-  if ($pid2 -le 0) { "could not start PCSX2"; return }
+  if ($pid2 -le 0) { "could not start PCSX2"; [LabPanel]::Finish(); return }
   "launched pid $pid2 (minimized, not activated)"
+  # -Keep leaves PCSX2 running for a later -Attach, so only a run that closes it is tied to this process
+  if (-not $Keep) { if ([BG]::TieToThisProcess($pid2)) { "tied to this run: ending it (Task Manager too) ends PCSX2" } }
 }
+if ($Attach -and -not $NoPanel) { [LabPanel]::Start($(if ($Title) { $Title } else { "attached" }), $exe) }
 $script:main = [IntPtr]::Zero
 for ($i = 0; $i -lt 60 -and $script:main -eq [IntPtr]::Zero; $i++) { Start-Sleep -Milliseconds 250; $script:main = [BG]::MainWindowOnDesk($pid2) }
-if ($script:main -eq [IntPtr]::Zero) { "no PCSX2 window appeared"; return }
+if ($script:main -eq [IntPtr]::Zero) { "no PCSX2 window appeared"; [LabPanel]::Finish(); return }
+[LabPanel]::Target = $script:main
 if (-not $Attach) {
   Start-Sleep -Milliseconds 400
   [BG]::ParkOnDesk($script:main, 1300, 1060)
@@ -190,9 +298,19 @@ if (-not $Attach) {
 }
 Press 0x10 # an unbound key (Shift) first, so the first real press is not lost
 
-foreach ($s in ($Steps -split ',')) {
-  $s = $s.Trim(); if (-not $s) { continue }
-  if ($s -like 'wait:*') { Start-Sleep -Seconds ([double]($s.Split(':')[1])); continue }
+# a wait the panel's buttons can cut short
+function Waiting([double]$sec) {
+  $end = (Get-Date).AddSeconds($sec)
+  while ((Get-Date) -lt $end) { if ([LabPanel]::Request -ne 0) { return }; Start-Sleep -Milliseconds 100 }
+}
+$list = @(($Steps -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+$recOn = $false
+for ($n = 0; $n -lt $list.Count; $n++) {
+  if ([LabPanel]::Request -ne 0) { break }
+  $s = $list[$n]
+  [LabPanel]::Status = "step $($n + 1) of $($list.Count): $s"
+  if ($s -like 'wait:*') { Waiting ([double]($s.Split(':')[1])); continue }
+  if ($s -eq 'rec') { $recOn = -not $recOn }
   if ($s -eq 'grab') {
     $file = Join-Path $grabDir ("grab_{0}.png" -f (Get-Date -Format 'HHmmss_fff'))
     if ([BG]::GrabOnDesk($script:main, $file)) { "grab $file" } else { "grab failed" }
@@ -206,7 +324,32 @@ foreach ($s in ($Steps -split ',')) {
   if ($vk.ContainsKey($s)) { Press $vk[$s]; "press $s" } else { "unknown step '$s'" }
 }
 
-if (-not $Keep) {
+if ([LabPanel]::Request -eq 2 -and -not $Attach) {
+  # take over: finish a recording so its file is whole, save a state, and reopen PCSX2 on the user's desktop there
+  [LabPanel]::Status = "taking over"
+  if ($recOn) { Press $vk.rec; Start-Sleep -Milliseconds 1500 }
+  $sst = Join-Path $lab "sstates"; $t0 = (Get-Date).AddSeconds(-1)
+  Press $vk.f1
+  $state = $null
+  for ($i = 0; $i -lt 50 -and -not $state; $i++) {
+    Start-Sleep -Milliseconds 200
+    $state = Get-ChildItem -LiteralPath $sst -Filter *.p2s -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime | Select-Object -Last 1
+  }
+  if ($state) { # until its size holds still: the state is written in the background
+    $last = -1; for ($i = 0; $i -lt 30; $i++) { $now = (Get-Item -LiteralPath $state.FullName).Length; if ($now -eq $last) { break }; $last = $now; Start-Sleep -Milliseconds 300 }
+  }
+  Stop-Process -Id $pid2 -Force -ErrorAction SilentlyContinue
+  $openArgs = @("-fastboot", "-elf", "`"$Elf`"")
+  if ($state) { $openArgs += @("-statefile", "`"$($state.FullName)`"") }
+  if ($Iso) { $openArgs += "`"$Iso`"" }
+  $mine = Start-Process -FilePath $exe -ArgumentList $openArgs -WorkingDirectory $lab -PassThru
+  "taken over: PCSX2 is open on your desktop (pid $($mine.Id))" + $(if ($state) { ", at the state $($state.Name)" } else { ", from boot (no state was saved)" })
+} elseif ([LabPanel]::Request -eq 1) {
+  if ($recOn) { Press $vk.rec; Start-Sleep -Milliseconds 1500 }
+  if (-not $Attach) { Stop-Process -Id $pid2 -Force -ErrorAction SilentlyContinue }
+  "stopped from the panel" + $(if (-not $Attach) { "; PCSX2 closed" } else { "" })
+} elseif (-not $Keep) {
   Stop-Process -Id $pid2 -Force -ErrorAction SilentlyContinue
   "PCSX2 closed"
 }
+[LabPanel]::Finish()
