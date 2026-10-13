@@ -193,7 +193,23 @@ int main(int argc, char **argv)
             if r.returncode:
                 fail.append('the music ripper must stream a made-up piece whole (%d): %s' % (r.returncode, r.stdout.strip()))
 
+# hotfix (reel 3:46): RIPGRID's info page drew its stars and badges at their images' own sizes, so the badges
+# overlapped each other and the stars. Every one now has a size, and no two share any of the row.
+import re
+grid = rd('misc/theme_ripgrid.cfg')
+row = []
+for name, body in re.findall(r'^(info\d+):\n((?:\t.*\n)+)', grid, re.M):
+    kv = dict(re.findall(r'\t(\w+)=([^\n]*)', body))
+    if kv.get('type') == 'AttributeImage' and kv.get('attribute') in ('Rating', 'Players', 'Scan', 'Aspect', 'Vmode'):
+        if 'width' not in kv or 'height' not in kv:
+            fail.append("RIPGRID's %s (%s) must have a width and height, not its image's own size" % (kv['attribute'], name))
+            continue
+        row.append((int(kv['x']), int(kv['x']) + int(kv['width']), kv['attribute']))
+row.sort()
+if len(row) != 5 or any(row[k][1] > row[k + 1][0] for k in range(len(row) - 1)) or (row and row[-1][1] > 430):
+    fail.append("RIPGRID's stars and badges must sit side by side inside the panel's text edge: %r" % row)
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build100: viewer turn, editor face, flip direction, menu face, clean replace, ISO where it sits, POPSTARTER answer, rips without noise pops, no beep, one press one sound, the menu music rip, OPL AUDIO folders, the card save OK')
+print('build100: viewer turn, editor face, flip direction, menu face, clean replace, ISO where it sits, POPSTARTER answer, rips without noise pops, no beep, one press one sound, the menu music rip, OPL AUDIO folders, the card save, the RIPGRID badge row OK')

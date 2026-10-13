@@ -845,6 +845,80 @@ zcb#M&n{zR~EC%6NnXeE>`2-XUR=^sPmah(yD)Z4g+(%YCO*US(E7HAJ`<&OVg!UZH
 zx&!G-XQY^|6t_y%;7Xx}t;TF$nXgops>GjRZODDS)BF>A>l44LX7zcAxEi<DKKG5j
 qJ2AqE^!RCZz$fCdJ!^ga_x>XXy64y>yjJIAo#SXF<7xN!{Qn1)A&RU3
 
+diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
+index a7952f2..c65c1aa 100644
+--- a/misc/theme_ripgrid.cfg
++++ b/misc/theme_ripgrid.cfg
+@@ -4,6 +4,8 @@
+ launch_disc=pop
+ # RIPPS2 build 96: L2 / R2 turn the grid's pages (Controller Settings > Page Buttons can change it)
+ page_buttons=l2r2
++# RIPPS2 build 100 (hotfix): the info page's stars and badges at the default theme's sizes (111 x 14, 51 x 26),
++# the badges in a row ending at the panel's text edge; at their images' own sizes they overlapped
+ # Theme Name: RIPGRID
+ # Made by: akilluminati47 (Adapt RiptOPL, 8/27/2026), RIPPS2 edition (build 83)
+ # [case.png] [case_overlay.png] RiptOPL's built-in case (b2); [SCR43.png] Adapt's screenshot frame at 4:3
+@@ -189,8 +191,10 @@ info6:
+ 	attribute=Rating
+ 	default=rating/0_Rating
+ 	aligned=0
+-	x=60
+-	y=177
++	x=55
++	y=179
++	width=111
++	height=14
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -199,8 +203,10 @@ info7:
+ 	type=AttributeImage
+ 	attribute=Scan
+ 	aligned=0
+-	x=232
++	x=265
+ 	y=173
++	width=51
++	height=26
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -209,8 +215,10 @@ info8:
+ 	type=AttributeImage
+ 	attribute=Players
+ 	aligned=0
+-	x=182
++	x=208
+ 	y=173
++	width=51
++	height=26
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -316,8 +324,10 @@ info17:
+ 	type=AttributeImage
+ 	attribute=Vmode
+ 	aligned=0
+-	x=332
++	x=379
+ 	y=173
++	width=51
++	height=26
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -326,8 +336,10 @@ info18:
+ 	type=AttributeImage
+ 	attribute=Aspect
+ 	aligned=0
+-	x=282
++	x=322
+ 	y=173
++	width=51
++	height=26
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
 diff --git a/src/bdmsupport.c b/src/bdmsupport.c
 index 003303e..f29cb83 100644
 --- a/src/bdmsupport.c
