@@ -24,6 +24,20 @@ index b952127..6234389 100644
  char *lngGetValue(void);
  void lngEnd(void);
  
+diff --git a/include/ripps2.h b/include/ripps2.h
+index fddcebb..5035369 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -149,7 +149,8 @@ void ripps2DrawPanelFlat(int x, int y, int w, int h, const unsigned char *rgb, i
+ void ripps2DrawPagePanel(void); // menus / settings / dialogs: one clear-glass panel behind the page
+ void ripps2DrawHintBox(int x, int y, int w, int h); // the settings help text's box, in the same glass
+ void ripps2DrawHintBoxA(int x, int y, int w, int h, float a); // build 70: the same, fading (0..1)
+-int ripps2HintText(int x, int y, const char *text, u64 colour); // build 70: a button hint in sentence case; returns the x after it
++int ripps2HintText(int x, int y, const char *text, u64 colour);
++void ripps2HintSmall(int on); // build 104: the next hints a size smaller (a row a translation made too long) // build 70: a button hint in sentence case; returns the x after it
+ int ripps2HintWidth(const char *text);
+ // build 85: what a PS1 handoff is about to do, written to mc0:/RIPPS2/LAUNCH.TXT for a tester to read back
+ // in Memory Files (the file, its size and CRC, its argv, Sony's POPS files or Ember's BIOS beside it, the
 diff --git a/include/ripps2tr.h b/include/ripps2tr.h
 new file mode 100644
 index 0000000..dbd66bb
@@ -2223,7 +2237,7 @@ index 676dde9..9277d80 100644
                      }
                      break;
 diff --git a/src/ripps2cd.c b/src/ripps2cd.c
-index 04719ad..d2dc256 100644
+index 04719ad..79b05c2 100644
 --- a/src/ripps2cd.c
 +++ b/src/ripps2cd.c
 @@ -42,6 +42,7 @@
@@ -2346,7 +2360,29 @@ index 04719ad..d2dc256 100644
      const char *const *texts = longTexts;
      int icons[6] = {gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, SQUARE_ICON, R1_ICON, RIGHT_ICON, TRIANGLE_ICON,
                      gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON};
-@@ -696,9 +697,9 @@ void ripps2CdRender(void)
+@@ -650,6 +651,12 @@ static void cdHints(void)
+     }
+     if (w + gap * 5 > CD_HINT_ROOM)
+         gap = (CD_HINT_ROOM - w) / 5 > 6 ? (CD_HINT_ROOM - w) / 5 : 6;
++    int small = w + gap * 5 > CD_HINT_ROOM; // build 104: still too long (a translation): a size smaller
++    if (small) {
++        ripps2HintSmall(1);
++        for (w = 0, i = 0; i < 6; i++)
++            w += 24 + ripps2HintWidth(texts[i]);
++    }
+     x = (640 - (w + gap * 5)) / 2;
+     for (i = 0; i < 6; i++) {
+         GSTEXTURE *t = icons[i] == RIGHT_ICON ? NULL : thmGetTexture(icons[i]);
+@@ -662,6 +669,8 @@ static void cdHints(void)
+         x += 24;
+         x = ripps2HintText(x, 448, texts[i], CD_SOFT) + gap;
+     }
++    if (small)
++        ripps2HintSmall(0);
+ }
+ 
+ void ripps2CdRender(void)
+@@ -696,9 +705,9 @@ void ripps2CdRender(void)
      lastPlaying = cdState == CD_PLAYING ? playing : 0;
  
      ripps2DrawPanelGlass(CD_X, CD_Y, CD_W, CD_H, 0);
@@ -2359,7 +2395,7 @@ index 04719ad..d2dc256 100644
      rmDrawLine(CD_X + 14, CD_Y + 32, CD_X + CD_W - 14, CD_Y + 32, CD_PRIM(0x4A, 0x72, 0xDC, 0x60));
  
      // the tracks, a page of them round the pick
-@@ -716,14 +717,14 @@ void ripps2CdRender(void)
+@@ -716,14 +725,14 @@ void ripps2CdRender(void)
          snprintf(buf, sizeof(buf), "%02d", t);
          u64 col = (cdState != CD_STOPPED && t == playing) ? CD_BLUE : (t == cdSel ? CD_LIT : CD_SOFT);
          fntRenderString(rowFont, CD_X + 22, y, ALIGN_VCENTER, 0, 0, buf, col);
@@ -2376,7 +2412,7 @@ index 04719ad..d2dc256 100644
      fntRenderString(gTheme->fonts[11], rx, CD_Y + 52, ALIGN_VCENTER, 0, 0, buf, CD_LIT);
      cdTime(at, buf, sizeof(buf));
      cdTime(length, len, sizeof(len));
-@@ -735,7 +736,7 @@ void ripps2CdRender(void)
+@@ -735,7 +744,7 @@ void ripps2CdRender(void)
      rmDrawRect(rx, CD_Y + 90, 216, 4, CD_PRIM(0x03, 0x08, 0x22, 0x80));
      if (length > 0)
          rmDrawRect(rx, CD_Y + 90, (int)(216.0f * (at > length ? 1.0f : (float)at / (float)length)), 4, CD_PRIM(0x4A, 0x8C, 0xF0, 0x80));
@@ -2672,7 +2708,7 @@ index 1bf483c..6c6d39d 100644
          return 0;
      }
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index eea0f99..cf0070e 100644
+index eea0f99..7b5b45f 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -61,6 +61,7 @@
@@ -3369,7 +3405,39 @@ index eea0f99..cf0070e 100644
      int i, n = 6, w = 0, gap = 18, room = FB_HINT_RIGHT - (640 - FB_HINT_RIGHT);
      for (i = 0; i < n; i++)
          w += 24 + ripps2HintWidth(wide[i]);
-@@ -2602,7 +2603,7 @@ static void fbTipTime(const unsigned char *t, char *out, int size)
+@@ -2573,7 +2574,21 @@ static void fbHintLayout(void)
+ 
+ static void fbHintRow(const int *icons, const char *const *texts, int n, int x, int y)
+ {
+-    int i, gap = fbHintGap;
++    int i, gap = fbHintGap, w = 0, small = 0;
++    // build 104: a row a translation made too wide for its place closes up, then reads a size smaller, centred
++    for (i = 0; i < n; i++)
++        w += 24 + ripps2HintWidth(texts[i]);
++    if (x + w + gap * (n - 1) > FB_HINT_RIGHT) {
++        gap = 6;
++        if (w + gap * (n - 1) > FB_HINT_RIGHT - (640 - FB_HINT_RIGHT)) {
++            ripps2HintSmall(1);
++            small = 1;
++            for (w = 0, i = 0; i < n; i++)
++                w += 24 + ripps2HintWidth(texts[i]);
++        }
++        if (x + w + gap * (n - 1) > FB_HINT_RIGHT)
++            x = (640 - (w + gap * (n - 1))) / 2;
++    }
+     for (i = 0; i < n; i++) {
+         GSTEXTURE *t = thmGetTexture(icons[i]);
+         if (t != NULL)
+@@ -2581,6 +2596,8 @@ static void fbHintRow(const int *icons, const char *const *texts, int n, int x,
+         x += 24;
+         x = ripps2HintText(x, y, texts[i], FB_SOFT) + gap;
+     }
++    if (small)
++        ripps2HintSmall(0);
+ }
+ 
+ // RIPPS2: the browser has a drive open or an operation running (Storage's probes hold off)
+@@ -2602,7 +2619,7 @@ static void fbTipTime(const unsigned char *t, char *out, int size)
  {
      int year = t[6] | (t[7] << 8);
      if (year < 1980 || year > 2100 || t[5] < 1 || t[5] > 12 || t[4] < 1 || t[4] > 31)
@@ -3378,7 +3446,7 @@ index eea0f99..cf0070e 100644
      else
          snprintf(out, size, "%04d-%02d-%02d  %02d:%02d", year, t[5], t[4], t[3], t[2]);
  }
-@@ -2617,12 +2618,12 @@ static void fbTipWork(void)
+@@ -2617,12 +2634,12 @@ static void fbTipWork(void)
          memmove(path + 4, path + 5, strlen(path + 5) + 1);
      memset(&st, 0, sizeof(st));
      if (fileXioGetStat(path, &st) < 0) {
@@ -3393,7 +3461,7 @@ index eea0f99..cf0070e 100644
          else {
              char num[32], grp[40];
              int n, o = 0, k;
-@@ -2634,12 +2635,12 @@ static void fbTipWork(void)
+@@ -2634,12 +2651,12 @@ static void fbTipWork(void)
                      grp[o++] = ',';
              }
              grp[o] = '\0';
@@ -3409,7 +3477,7 @@ index eea0f99..cf0070e 100644
      }
      snprintf(fbTipKey, sizeof(fbTipKey), "%s", fbTipPath);
      fbTipState = 2;
-@@ -2701,11 +2702,11 @@ void ripps2RenderFiles(void)
+@@ -2701,11 +2718,11 @@ void ripps2RenderFiles(void)
          if (fbDrivesDone) { // every driver is up: the last look
              fbDrivesDone = 0;
              fbStarted = 0;
@@ -3423,7 +3491,7 @@ index eea0f99..cf0070e 100644
      }
      if (!fbBusy)
          fbRestoreCursor();
-@@ -2716,13 +2717,13 @@ void ripps2RenderFiles(void)
+@@ -2716,13 +2733,13 @@ void ripps2RenderFiles(void)
      }
  
      // the path, and the clipboard / what just happened
@@ -3439,7 +3507,7 @@ index eea0f99..cf0070e 100644
      else
          buf[0] = '\0';
      if (buf[0])
-@@ -2741,7 +2742,7 @@ void ripps2RenderFiles(void)
+@@ -2741,7 +2758,7 @@ void ripps2RenderFiles(void)
              rmDrawRect(170, 236, 300, 6, FB_PRIM(0x03, 0x08, 0x22, 0x80));
              rmDrawRect(170, 236, (int)(300 * p), 6, FB_PRIM(0x4A, 0x8C, 0xF0, 0x80));
              if (fbOp == FB_OP_PASTE && fbTotalFiles > 0) // build 91: every file down the trees, counted as it goes
@@ -3448,7 +3516,7 @@ index eea0f99..cf0070e 100644
              else
                  snprintf(buf, sizeof(buf), "%d / %d", fbDoneItems, fbTotalItems);
              fntRenderString(smallFont, 320, 258, ALIGN_CENTER, 0, 0, buf, FB_SOFT);
-@@ -2750,7 +2751,7 @@ void ripps2RenderFiles(void)
+@@ -2750,7 +2767,7 @@ void ripps2RenderFiles(void)
      }
  
      if (fbCount == 0)
@@ -3457,7 +3525,37 @@ index eea0f99..cf0070e 100644
  
      for (i = 0; i < FB_ROWS && fbTop + i < fbCount; i++) {
          fb_entry_t *e = &fbList[fbTop + i];
-@@ -2797,7 +2798,7 @@ void ripps2RenderFiles(void)
+@@ -2767,17 +2784,23 @@ void ripps2RenderFiles(void)
+         if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START) {
+             // a drive: its label, its path on the right; the start row: START DRIVES, what it starts
+             const char *main = e->kind == FB_KIND_DEVICE ? e->title : e->name, *side = e->kind == FB_KIND_DEVICE ? e->name : e->title;
+-            fntRenderString(rowFont, tx, y + 9, ALIGN_VCENTER, 0, 0, main, col);
+-            fntRenderString(smallFont, FB_RIGHT - fntCalcDimensions(smallFont, side), y + 9, ALIGN_VCENTER, 0, 0, side, FB_DIM);
++            int sx = FB_RIGHT - fntCalcDimensions(smallFont, side);
++            // build 104: the name stops short of what is on its right (DÉMARRER LES PÉRIPHÉRIQUES ran into it), the
++            // chosen row sliding it through its room
++            fntRenderStringFit(rowFont, tx, y + 9, ALIGN_VCENTER, sx - 12 - tx, main, col, cur);
++            fntRenderString(smallFont, sx, y + 9, ALIGN_VCENTER, 0, 0, side, FB_DIM);
+         } else if (e->kind == FB_KIND_SAVE) {
+-            fntRenderString(rowFont, tx, y + 9, ALIGN_VCENTER, 0, 0, e->title, col);
+-            fntRenderString(smallFont, FB_RIGHT - fntCalcDimensions(smallFont, e->name), y + 9, ALIGN_VCENTER, 0, 0, e->name, FB_DIM);
++            int sx = FB_RIGHT - fntCalcDimensions(smallFont, e->name);
++            fntRenderStringFit(rowFont, tx, y + 9, ALIGN_VCENTER, sx - 12 - tx, e->title, col, cur);
++            fntRenderString(smallFont, sx, y + 9, ALIGN_VCENTER, 0, 0, e->name, FB_DIM);
+         } else {
+-            fntRenderString(rowFont, tx, y + 9, ALIGN_VCENTER, 0, 0, e->name, col);
++            int sx = FB_RIGHT;
+             if (e->kind != FB_KIND_DIR) {
+                 fbSizeText(e->size, buf, sizeof(buf));
+-                fntRenderString(smallFont, FB_RIGHT - fntCalcDimensions(smallFont, buf), y + 9, ALIGN_VCENTER, 0, 0, buf, FB_DIM);
++                sx = FB_RIGHT - fntCalcDimensions(smallFont, buf);
++                fntRenderString(smallFont, sx, y + 9, ALIGN_VCENTER, 0, 0, buf, FB_DIM);
+             }
++            fntRenderStringFit(rowFont, tx, y + 9, ALIGN_VCENTER, sx - 12 - tx, e->name, col, cur);
+         }
+     }
+     if (fbCount > FB_ROWS) { // where you are in a long folder
+@@ -2797,7 +2820,7 @@ void ripps2RenderFiles(void)
              int ry = y + 10 + i * 24;
              if (i == fbMenuSel)
                  rmDrawRect(x + 4, ry, w - 8, 22, FB_PRIM(0x1E, 0x3C, 0x96, 0x60));
@@ -3466,7 +3564,7 @@ index eea0f99..cf0070e 100644
          }
      }
  
-@@ -2810,32 +2811,32 @@ void ripps2RenderFiles(void)
+@@ -2810,32 +2833,32 @@ void ripps2RenderFiles(void)
      int hx = fbHintX, hy = 448;
      int selIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
      if (fbMenuOpen) {
@@ -5302,7 +5400,7 @@ index 0000000..180fddd
 +    return 1;
 +}
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 88e8159..783a09b 100644
+index 88e8159..a8992b2 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -40,10 +40,11 @@
@@ -5584,7 +5682,7 @@ index 88e8159..783a09b 100644
  
      float glyphA = ripps2GlyphsAlpha(RIPPS2_GLYPH_FORMATIONS); // every frame, the name shown or not (RIPPSettings)
      static int named = -1;
-@@ -1371,46 +1406,80 @@ void ripps2DrawHintBox(int x, int y, int w, int h)
+@@ -1371,49 +1406,103 @@ void ripps2DrawHintBox(int x, int y, int w, int h)
  
  // RIPPS2 build 70: button hints read in sentence case ("Copy to audio", not "COPY TO AUDIO") in the
  // theme's lowercase font: the menus name things, the hints explain. Short codes stay in capitals.
@@ -5664,6 +5762,25 @@ index 88e8159..783a09b 100644
      return out;
  }
  
++// build 104: a row of hints a translation made too long for its place draws them a size smaller (ripps2HintSmall, set
++// by the row around its hints and cleared after): RIPPS2 Sleek Case at 12 in place of the theme's font15
++static int hintSmall = 0;
++
++void ripps2HintSmall(int on)
++{
++    hintSmall = on;
++}
++
++static int hintFont(int font)
++{
++    static int small = FNT_ERROR;
++    if (!hintSmall)
++        return font;
++    if (small == FNT_ERROR)
++        small = fntLoadFile("builtin:ripps2sleekcase", 12);
++    return small != FNT_ERROR ? small : font;
++}
++
 +// build 104: the English handed in is translated here (a text already translated passes through), so the hint rows'
 +// tables of English read in the chosen language; 160 bytes, a hint in UTF-8
  int ripps2HintWidth(const char *text)
@@ -5671,7 +5788,7 @@ index 88e8159..783a09b 100644
 -    char b[96];
 -    return fntCalcDimensions(RIPPS2_CASE_FONT, hintCase(text, b, sizeof(b)));
 +    char b[160];
-+    return fntCalcDimensions(RIPPS2_CASE_FONT, hintCase(_t(text), b, sizeof(b)));
++    return fntCalcDimensions(hintFont(RIPPS2_CASE_FONT), hintCase(_t(text), b, sizeof(b)));
  }
  
  int ripps2HintText(int x, int y, const char *text, u64 colour)
@@ -5679,10 +5796,16 @@ index 88e8159..783a09b 100644
 -    char b[96];
 -    hintCase(text, b, sizeof(b));
 +    char b[160];
++    int font = hintFont(thmPageFont(15));
 +    hintCase(_t(text), b, sizeof(b));
      // build 102: thmPageFont is the theme's font15 everywhere but About and STATUS, which read in RIPPS2's own faces
-     fntRenderString(thmPageFont(15), x, y, ALIGN_VCENTER, 0, 0, b, colour);
-     return x + fntCalcDimensions(thmPageFont(15), b);
+-    fntRenderString(thmPageFont(15), x, y, ALIGN_VCENTER, 0, 0, b, colour);
+-    return x + fntCalcDimensions(thmPageFont(15), b);
++    fntRenderString(font, x, y, ALIGN_VCENTER, 0, 0, b, colour);
++    return x + fntCalcDimensions(font, b);
+ }
+ 
+ // ---- Screen switches: one glass panel moves between pages (no fade through black) ----
 diff --git a/src/vcdsupport.c b/src/vcdsupport.c
 index 75abf47..bd34d63 100644
 --- a/src/vcdsupport.c
