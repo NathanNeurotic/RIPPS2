@@ -21109,7 +21109,7 @@ index 0000000..c3296f9
 +- **Swap stacks in the menu (unload UDPFS, load SMB, check, reload):** the ministack can't be
 +  unloaded safely without an IOP reset, and it would drop the UDPFS session mid-browse.
 diff --git a/ee_core/Makefile b/ee_core/Makefile
-index a23b94a..619b4de 100644
+index a23b94a..c6951f0 100644
 --- a/ee_core/Makefile
 +++ b/ee_core/Makefile
 @@ -60,8 +60,12 @@ endif
@@ -21126,7 +21126,7 @@ index a23b94a..619b4de 100644
  endif
  
  # RIPPS2 build 87: the in-game menu's PCSX2 test flavour (igrmenu.c). Never for a release.
-@@ -69,6 +73,13 @@ ifeq ($(IGR_MENU_TEST),1)
+@@ -69,9 +73,21 @@ ifeq ($(IGR_MENU_TEST),1)
  EE_CFLAGS += -DIGR_MENU_TEST
  endif
  
@@ -21140,6 +21140,14 @@ index a23b94a..619b4de 100644
  EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
  
  EE_LDFLAGS = -nostartfiles -nostdlib -Tlinkfile -L$(PS2SDK)/ee/lib -s -Wl,-Map,$(MAPFILE)
++# RIPPS2 build 103: unused functions and data are left out (each in its own section, dropped at link). RiptOPL's
++# fixes since 10/10 grew ee_core by 2.4 KB, past the room RIPPS2's in-game menu and its 4 KB thread stack need
++# under 0x97000. g_ee_core_config, which the menu finds by its magic, is referenced throughout and stays.
++EE_CFLAGS += -ffunction-sections -fdata-sections
++EE_LDFLAGS += -Wl,--gc-sections
+ EE_LIBS += -lpatches
+ 
+ ifeq ($(PADEMU),1)
 diff --git a/ee_core/include/coreconfig.h b/ee_core/include/coreconfig.h
 index e9e43fb..12e9d8f 100644
 --- a/ee_core/include/coreconfig.h
