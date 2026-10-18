@@ -25455,10 +25455,10 @@ index 0000000..6cfd585
 +#endif
 diff --git a/include/ra_features.h b/include/ra_features.h
 new file mode 100644
-index 0000000..c14ee2b
+index 0000000..eb5c71d
 --- /dev/null
 +++ b/include/ra_features.h
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,16 @@
 +#ifndef RIPTOPL_RA_FEATURES_H
 +#define RIPTOPL_RA_FEATURES_H
 +
@@ -25468,7 +25468,10 @@ index 0000000..c14ee2b
 +   state: cards may flicker or freeze games. This compile-time switch can still
 +   exclude the renderer path in developer builds; it is not the user setting. */
 +#ifndef RA_EXPERIMENTAL_CARD_DMA
-+#define RA_EXPERIMENTAL_CARD_DMA 1
++/* RIPPS2 build 103: off. RIPPS2's in-game menu (igrmenu.c) and its LEFT TO HUNT list need the room in ee_core that
++   the card renderer takes: with both, ee_core ran past its 0x97000 floor. RIPPS2 uses xeRAbora, not the Caduceus
++   cards, and its own menu shows the unlocks. */
++#define RA_EXPERIMENTAL_CARD_DMA 0
 +#endif
 +
 +#endif
