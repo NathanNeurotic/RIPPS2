@@ -150,9 +150,10 @@ w = int(flow['info19']['width'])
 if any(b - a < w for a, b in zip(xs, xs[1:])):
     fail.append("RIPFLOW's badges must not overlap")
 
-# 13. About wraps its rows to the column, in the faces it draws with
+# 13. About wraps its rows to the column, in the faces it draws with, each row's lines as even as they go
 about = rd('src/ripps2about.c')
-if 'abWrap();' not in about or 'abWidth(font, t + off, n - off) > AB_ROOM' not in about or 'i < abLineCount' not in about:
+if 'abWrap();' not in about or 'abWidth(font, t + off, n - off) > room' not in about or 'abWrapRow(i, room - 8, 0, 0) == k' not in about \
+        or 'i < abLineCount' not in about:
     fail.append("About must wrap its rows to AB_ROOM and draw the wrapped lines")
 
 # 14. logos just above their panels: valign=bottom stands the art's visible foot on its box; elements start clean

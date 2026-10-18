@@ -900,7 +900,7 @@ index 9c1cd2f..1d233c9 100644
      gsKit_TexManager_bind(gsGlobal, inlay);
      {
 diff --git a/src/ripps2about.c b/src/ripps2about.c
-index 943797d..8f58b98 100644
+index 943797d..4d97674 100644
 --- a/src/ripps2about.c
 +++ b/src/ripps2about.c
 @@ -33,6 +33,8 @@
@@ -912,7 +912,7 @@ index 943797d..8f58b98 100644
  
  #define AB_LIT  0x80
  #define AB_TEXT 0x67
-@@ -182,20 +184,84 @@ static int abRowH(char kind)
+@@ -182,20 +184,101 @@ static int abRowH(char kind)
      return kind == 'H' ? AB_HEAD_H : kind == 'G' ? AB_GAP : AB_LINE_H;
  }
  
@@ -940,39 +940,56 @@ index 943797d..8f58b98 100644
 +    return rmUnScaleX(fntCalcDimensions(font, b));
 +}
 +
++// Lay row i out as lines no wider than room from abLines[at]; store: write them, else only count. Returns the count.
++static int abWrapRow(int i, int room, int at, int store)
++{
++    const ab_row_t *r = &abRows[i];
++    const char *t = r->text != NULL ? r->text : "";
++    int off = 0, len = (int)strlen(t), font = abFont(r->kind), count = 0;
++
++    do {
++        int n, fit = 0;
++        // the most whole words from off that fit; a single word wider than the room goes on its own line
++        for (n = off; n <= len; n++) {
++            if (t[n] != ' ' && t[n] != '\0')
++                continue;
++            if (n - off >= 120)
++                break;
++            if (fit > 0 && abWidth(font, t + off, n - off) > room)
++                break;
++            fit = n - off;
++        }
++        if (fit <= 0)
++            fit = len - off;
++        if (store && at + count < AB_LINES) {
++            abLines[at + count].kind = r->kind;
++            abLines[at + count].row = (short)i;
++            abLines[at + count].off = (short)off;
++            abLines[at + count].len = (short)fit;
++        }
++        count++;
++        off += fit;
++        while (t[off] == ' ')
++            off++;
++    } while (off < len);
++    return count;
++}
++
++// Each row as few lines as it needs, and those lines as even as they go: a row that needs k lines is laid out at the
++// narrowest width that still takes k (so a long credit does not leave one word alone on its last line)
 +static void abWrap(void)
 +{
 +    int i;
 +
 +    abLineCount = 0;
 +    for (i = 0; i < AB_COUNT && abLineCount < AB_LINES; i++) {
-+        const ab_row_t *r = &abRows[i];
-+        const char *t = r->text != NULL ? r->text : "";
-+        int off = 0, len = (int)strlen(t), font = abFont(r->kind);
-+
-+        do {
-+            int n, fit = 0;
-+            // the most whole words from off that fit; a single word wider than the room goes on its own line
-+            for (n = off; n <= len; n++) {
-+                if (t[n] != ' ' && t[n] != '\0')
-+                    continue;
-+                if (n - off >= 120)
-+                    break;
-+                if (fit > 0 && abWidth(font, t + off, n - off) > AB_ROOM)
-+                    break;
-+                fit = n - off;
-+            }
-+            if (fit <= 0)
-+                fit = len - off;
-+            abLines[abLineCount].kind = r->kind;
-+            abLines[abLineCount].row = (short)i;
-+            abLines[abLineCount].off = (short)off;
-+            abLines[abLineCount].len = (short)fit;
-+            abLineCount++;
-+            off += fit;
-+            while (t[off] == ' ')
-+                off++;
-+        } while (off < len && abLineCount < AB_LINES);
++        int room = AB_ROOM, k = abWrapRow(i, AB_ROOM, 0, 0);
++        if (k > 1)
++            while (room > AB_ROOM / k && abWrapRow(i, room - 8, 0, 0) == k)
++                room -= 8;
++        if (abLineCount + k > AB_LINES)
++            break;
++        abLineCount += abWrapRow(i, room, abLineCount, 1);
 +    }
 +}
 +
@@ -1002,7 +1019,7 @@ index 943797d..8f58b98 100644
          y += h;
          if (r->kind == 'G' || mid < AB_TOP - 10 || mid > AB_BOTTOM + 10)
              continue;
-@@ -211,14 +277,14 @@ static void abDraw(float scroll)
+@@ -211,14 +294,14 @@ static void abDraw(float scroll)
              a = 1.0f;
          int alpha = (int)(0x80 * a);
          if (r->kind == 'H') {
@@ -1021,7 +1038,7 @@ index 943797d..8f58b98 100644
      }
  }
  
-@@ -232,6 +298,8 @@ void ripps2ShowAbout(const char *version, const char *build)
+@@ -232,6 +315,8 @@ void ripps2ShowAbout(const char *version, const char *build)
      if (RIPPS2_BUILD > 0)
          snprintf(abRelease, sizeof(abRelease), "BUILD %d (%s)", RIPPS2_BUILD, RIPPS2_STAGE);
      snprintf(abBuild, sizeof(abBuild), "%s", build);
@@ -1030,7 +1047,7 @@ index 943797d..8f58b98 100644
      end = (float)abHeight() + (AB_BOTTOM - AB_TOP) / 3.0f; // scrolled this far, the last row has left the top
  
      while (1) {
-@@ -269,8 +337,8 @@ void ripps2ShowAbout(const char *version, const char *build)
+@@ -269,8 +354,8 @@ void ripps2ShowAbout(const char *version, const char *build)
  
          rmStartFrame();
          guiDrawBGPlasma();
@@ -1041,7 +1058,7 @@ index 943797d..8f58b98 100644
          rmDrawLine(30, 46, 610, 46, GS_SETREG_RGBAQ(0x4A, 0x72, 0xDC, 0x60, 0));
          abDraw(scroll);
          // the hints
-@@ -289,5 +357,6 @@ void ripps2ShowAbout(const char *version, const char *build)
+@@ -289,5 +374,6 @@ void ripps2ShowAbout(const char *version, const char *build)
              break;
          }
      }
