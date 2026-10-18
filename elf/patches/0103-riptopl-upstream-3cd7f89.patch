@@ -21109,19 +21109,24 @@ index 0000000..c3296f9
 +- **Swap stacks in the menu (unload UDPFS, load SMB, check, reload):** the ministack can't be
 +  unloaded safely without an IOP reset, and it would drop the UDPFS session mid-browse.
 diff --git a/ee_core/Makefile b/ee_core/Makefile
-index a23b94a..d4d90bd 100644
+index a23b94a..619b4de 100644
 --- a/ee_core/Makefile
 +++ b/ee_core/Makefile
-@@ -60,7 +60,7 @@ endif
+@@ -60,8 +60,12 @@ endif
  # member under it -- so a stale obj/ here reads EECoreConfig_t through the wrong
  # offsets and loads the wrong module blob. Run make clean when switching it.
  ifeq ($(RETROACHIEVEMENTS),1)
 -EE_OBJS += ra.o ra_overlay.o
 +EE_OBJS += ra.o ra_overlay.o ra_pulse.o
  EE_CFLAGS += -DRETROACHIEVEMENTS
++# RIPPS2 build 103: the experimental Caduceus cards' renderer is left out of ee_core. RIPPS2's in-game menu
++# (igrmenu.c) and its 4 KB thread stack need that room: with both, ee_core ran past its 0x97000 floor. RIPPS2 has no
++# setting that turns the cards on, so the menu never reserves their packet (rawatch.c keeps upstream's switch).
++EE_CFLAGS += -DRA_EXPERIMENTAL_CARD_DMA=0
  endif
  
-@@ -69,6 +69,13 @@ ifeq ($(IGR_MENU_TEST),1)
+ # RIPPS2 build 87: the in-game menu's PCSX2 test flavour (igrmenu.c). Never for a release.
+@@ -69,6 +73,13 @@ ifeq ($(IGR_MENU_TEST),1)
  EE_CFLAGS += -DIGR_MENU_TEST
  endif
  
@@ -25455,10 +25460,10 @@ index 0000000..6cfd585
 +#endif
 diff --git a/include/ra_features.h b/include/ra_features.h
 new file mode 100644
-index 0000000..eb5c71d
+index 0000000..c14ee2b
 --- /dev/null
 +++ b/include/ra_features.h
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,13 @@
 +#ifndef RIPTOPL_RA_FEATURES_H
 +#define RIPTOPL_RA_FEATURES_H
 +
@@ -25468,10 +25473,7 @@ index 0000000..eb5c71d
 +   state: cards may flicker or freeze games. This compile-time switch can still
 +   exclude the renderer path in developer builds; it is not the user setting. */
 +#ifndef RA_EXPERIMENTAL_CARD_DMA
-+/* RIPPS2 build 103: off. RIPPS2's in-game menu (igrmenu.c) and its LEFT TO HUNT list need the room in ee_core that
-+   the card renderer takes: with both, ee_core ran past its 0x97000 floor. RIPPS2 uses xeRAbora, not the Caduceus
-+   cards, and its own menu shows the unlocks. */
-+#define RA_EXPERIMENTAL_CARD_DMA 0
++#define RA_EXPERIMENTAL_CARD_DMA 1
 +#endif
 +
 +#endif

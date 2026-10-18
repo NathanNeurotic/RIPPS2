@@ -145,6 +145,8 @@ make clean
 make LOCALVERSION=RIPPS2 DIRTY= REVISION="$UP_REV" GIT_HASH="$UP_HASH" RETROACHIEVEMENTS=1 ${RIPPS2_MAKE_FLAGS:-} release || {
   # build 87: an ee_core over its stack floor still leaves its map: say by how much
   [ -f ee_core/ee_core.map ] && grep -E '(_end_bss|_stack_size|_stack) = ' ee_core/ee_core.map | sed 's/^ */ee_core: /'
+  # build 103: and what each object takes (text, data, bss), to see where the room went
+  for o in ee_core/obj/*.o; do mips64r5900el-ps2-elf-size "$o" 2>/dev/null | tail -n1 | sed 's/^/ee_core size: /'; done
   exit 1
 }
 
