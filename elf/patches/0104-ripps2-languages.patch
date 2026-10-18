@@ -11,6 +11,19 @@ index fae7eb8..b1a4631 100644
  		dia.o ioman.o texcache.o themes.o supportbase.o bdmsupport.o netsupport.o ethsupport.o httpcatalog.o httpsupport.o udpfssupport.o hddsupport.o zso.o lz4.o launchdiag.o \
  		appsupport.o mmcesupport.o artindex.o vcdsupport.o cuesupport.o libview.o retrogem.o folderbrowse.o gui.o guigame.o vmc_groups.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o cheatconfig.o sound.o ps2cnf.o tar.o saveicon.o cfgtitle.o
  
+diff --git a/include/lang.h b/include/lang.h
+index b952127..6234389 100644
+--- a/include/lang.h
++++ b/include/lang.h
+@@ -20,6 +20,8 @@ int lngAddLanguages(char *path, const char *separator, int mode);
+ void lngInit(void);
+ /** Load the optional Unicode fallback after settings home relocation is resolved. */
+ void lngInitFallbackFont(void);
++/** RIPPS2 build 104: languages in the settings home and its LNG folder, once the config has chosen the home. */
++void lngAddHomeLanguages(void);
+ char *lngGetValue(void);
+ void lngEnd(void);
+ 
 diff --git a/include/ripps2tr.h b/include/ripps2tr.h
 new file mode 100644
 index 0000000..dbd66bb
@@ -490,7 +503,7 @@ index 56c7cca..e10380f 100644
          guiEndFrame();
      }
 diff --git a/src/lang.c b/src/lang.c
-index 4b7dd56..9a756ea 100644
+index 4b7dd56..6bb34ce 100644
 --- a/src/lang.c
 +++ b/src/lang.c
 @@ -6,10 +6,13 @@
@@ -599,6 +612,37 @@ index 4b7dd56..9a756ea 100644
  }
  
  char *lngGetValue(void)
+@@ -196,6 +245,30 @@ void lngInitFallbackFont(void)
+     }
+ }
+ 
++// RIPPS2 build 104: the settings home (mc?:/RIPPS2 first since build 100, else where RIPPS2 started) and its LNG
++// folder hold languages too. lngInit's scan saw only the legacy mc?:OPL, before the config chose the home; this runs
++// once it has (opl.c, beside lngInitFallbackFont).
++void lngAddHomeLanguages(void)
++{
++    const char *home = configGetHomePath();
++    char path[256], base[64];
++    if (home == NULL || home[0] == '\0')
++        return;
++    const size_t len = strlen(home);
++    const char *sep = (home[len - 1] == '/' || home[len - 1] == ':') ? "" : "/";
++    // the legacy folder again would list its languages twice
++    snprintf(base, sizeof(base), "%s", gBaseMCDir);
++    if (base[0] == 'm' && base[1] == 'c' && base[2] == '?')
++        base[2] = home[2];
++    snprintf(path, sizeof(path), "%s", home);
++    if (path[0] && path[strlen(path) - 1] == '/')
++        path[strlen(path) - 1] = '\0';
++    if (strcasecmp(path, base) != 0)
++        lngAddLanguages((char *)home, "/", -1);
++    snprintf(path, sizeof(path), "%s%sLNG", home, sep);
++    lngAddLanguages(path, "/", -1);
++}
++
+ void lngInit(void)
+ {
+     fntInit();
 diff --git a/src/menusys.c b/src/menusys.c
 index b2f50e4..7766422 100644
 --- a/src/menusys.c
@@ -623,7 +667,7 @@ index b2f50e4..7766422 100644
  
  #ifdef RETROACHIEVEMENTS
 diff --git a/src/opl.c b/src/opl.c
-index c4d90fa..1599236 100644
+index c4d90fa..f15c4fd 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -5,6 +5,7 @@
@@ -660,6 +704,14 @@ index c4d90fa..1599236 100644
          }
          ripps2ShowViewWord(word, logo, caption);
      }
+@@ -5643,6 +5644,7 @@ static void init(void)
+     // Resolve the optional title font only NOW, from the final settings owner.
+     // No filesystem probes occur later on the rendering or game-list paths.
+     lngInitFallbackFont();
++    lngAddHomeLanguages(); // RIPPS2 build 104: lang_<Name>.lng in RIPPS2's own folder or its LNG
+     guiSetBootStatus(_l(_STR_BOOT_READY));
+     guiRenderGreetingScreen();
+     gBootInProgress = 0;
 diff --git a/src/ripps2.c b/src/ripps2.c
 index 29f60db..1526d6e 100644
 --- a/src/ripps2.c

@@ -144,6 +144,9 @@ for need in ('ripps2TrIsKeyed(buf, size)', 'ripps2TrLabel(cat, internalEnglish[s
     if need not in lang:
         fail.append('lang.c: ' + need)
 
+if 'lngAddHomeLanguages(); //' not in rd('src/opl.c') or 'void lngAddHomeLanguages(void)' not in lang:
+    fail.append('the settings home and its LNG folder are scanned for languages once the config has chosen the home')
+
 # 3. a letter a font lacks comes from the language font, then the fallback, at the font's own size
 fnt = rd('src/fntsys.c')
 for need in ('static FT_Face fntAltFace(font_t *font, int k)', 'fntDropAltFacesLocked(0);', 'fntDropAltFacesLocked(1);',
