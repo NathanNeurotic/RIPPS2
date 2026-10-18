@@ -1110,6 +1110,22 @@ index 75b818a..d1f66e5 100644
      if (changed)
          ripps2SaveSettingsInBackground();
      readPads();
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 498e0b6..88e8159 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -1411,8 +1411,9 @@ int ripps2HintText(int x, int y, const char *text, u64 colour)
+ {
+     char b[96];
+     hintCase(text, b, sizeof(b));
+-    fntRenderString(RIPPS2_CASE_FONT, x, y, ALIGN_VCENTER, 0, 0, b, colour);
+-    return x + fntCalcDimensions(RIPPS2_CASE_FONT, b);
++    // build 102: thmPageFont is the theme's font15 everywhere but About and STATUS, which read in RIPPS2's own faces
++    fntRenderString(thmPageFont(15), x, y, ALIGN_VCENTER, 0, 0, b, colour);
++    return x + fntCalcDimensions(thmPageFont(15), b);
+ }
+ 
+ // ---- Screen switches: one glass panel moves between pages (no fade through black) ----
 diff --git a/src/sound.c b/src/sound.c
 index 3f55c17..ba589f0 100644
 --- a/src/sound.c
