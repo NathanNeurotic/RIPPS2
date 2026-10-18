@@ -1,6 +1,6 @@
 # RIPPS2 changelog
 
-## Build 102 (beta, not released yet), changes since build 101
+## Build 102 (beta, v1.0.2-beta), changes since build 101
 
 ### Sound
 - **No more beeping while a read is stuck.** When the music's file read stalls (a drive still coming back after an in-game reset, a busy card, the ripped menu music read straight from a drive), audsrv ran out of music and played the last tenth of a second over and over: the beeping. The music now keeps audsrv fed with silence until its next piece arrives.
