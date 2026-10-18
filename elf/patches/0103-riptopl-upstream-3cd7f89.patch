@@ -43576,7 +43576,7 @@ index 70e31d3..06870fe 100644
      int pageid = gid / GLYPH_CACHE_PAGE_SIZE;
      int idx = gid % GLYPH_CACHE_PAGE_SIZE;
 diff --git a/src/gui.c b/src/gui.c
-index 18f0174..c40f704 100644
+index 18f0174..56c7cca 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -6,7 +6,12 @@
@@ -43631,7 +43631,7 @@ index 18f0174..c40f704 100644
                                                  {&ripps2HandleInputLaunch, &ripps2RenderLaunch, 1},
                                                  {&ripps2HandleInputMemory, &ripps2RenderMemory, 1},
 -                                                {&ripps2HandleInputFiles, &ripps2RenderFiles, 1}};
-+                                                {&ripps2HandleInputFiles, &ripps2RenderFiles, 1}}
++                                                {&ripps2HandleInputFiles, &ripps2RenderFiles, 1}
 +#ifdef RETROACHIEVEMENTS
 +                                                ,
 +                                                {&menuHandleInputAchievements, &menuRenderAchievements, 1} // GUI_SCREEN_ACHIEVEMENTS (8)
@@ -43928,7 +43928,7 @@ index 18f0174..c40f704 100644
      netConfigLastProtocol = -1;
      netConfigUpdater(1);
  
-@@ -1629,9 +1727,26 @@ reshow_network:
+@@ -1629,9 +1727,23 @@ reshow_network:
          // NOTE(rebuild): the fork also reads the SMB dialect row back here (item 4).
          int netProtocolWas = gNetworkProtocol;
          guiNetProtocolStore(netProtoVal2, netAccessVal2);
@@ -43948,14 +43948,11 @@ index 18f0174..c40f704 100644
 +        raNetForgetPeer();
 +#endif
          applyConfig(-1, -1, 0);
-+#ifdef RETROACHIEVEMENTS
-+        if (gRAMode != previousRAMode)
-+            menuReinitMainMenu();
-+#endif
++        // build 103: no RA Mode row on RIPPS2's Network page (its Achievements page holds RA), so no mode change here
  
          // OK is an Apply action for the live SMB stack, not merely a RAM/config edit -- and after a
          // failed connect it is labelled Reconnect, so it reconnects even with nothing changed. Any
-@@ -1751,7 +1866,7 @@ int guiShowVcdUsbMode(void)
+@@ -1751,7 +1863,7 @@ int guiShowVcdUsbMode(void)
  static void guiSetBdmaSettings(struct UIItem *ui)
  {
      static const char *bdmaSourceStrs[] = {NULL, NULL, NULL, NULL, NULL, NULL};
@@ -43964,7 +43961,7 @@ index 18f0174..c40f704 100644
      // Order matches enum VCD_USB_BDMA_MODE: Ask / exFAT / fat32. The two driver labels are the ones the
      // per-launch prompt already uses, so the row and the dialog it replaces read identically.
      static const char *vcdUsbBdmaStrs[] = {NULL, NULL, NULL, NULL};
-@@ -1769,6 +1884,7 @@ static void guiSetBdmaSettings(struct UIItem *ui)
+@@ -1769,6 +1881,7 @@ static void guiSetBdmaSettings(struct UIItem *ui)
      bdmaModeStrs[3] = _l(_STR_BDMA_MODE_MMCE);
      bdmaModeStrs[4] = _l(_STR_BDMA_MODE_ATA);
      bdmaModeStrs[5] = _l(_STR_BDMA_MODE_ILINK);
@@ -43972,7 +43969,7 @@ index 18f0174..c40f704 100644
      vcdUsbBdmaStrs[0] = _l(_STR_VCD_USB_BDMA_ASK);
      vcdUsbBdmaStrs[1] = _l(_STR_VCD_USB_MODE_EXFAT);
      vcdUsbBdmaStrs[2] = _l(_STR_VCD_USB_MODE_FAT32);
-@@ -2037,6 +2153,59 @@ static int guiPopsNetUpdater(int modified)
+@@ -2037,6 +2150,59 @@ static int guiPopsNetUpdater(int modified)
  // POPStarter -> Network Settings (VCD over SMB). The local memory-card snapshot remains the sole
  // write owner. The explicit import path only copies valid POPS/*.DAT values into the editor, so the
  // normal change-detection/Replace flow still decides whether anything is committed to an MC.
@@ -44032,7 +44029,7 @@ index 18f0174..c40f704 100644
  void guiShowPopsNetConfig(void)
  {
      size_t i;
-@@ -2072,6 +2241,10 @@ void guiShowPopsNetConfig(void)
+@@ -2072,6 +2238,10 @@ void guiShowPopsNetConfig(void)
  
      for (;;) {
          int result = diaExecuteDialog(diaPopsNetConfig, -1, 1, &guiPopsNetUpdater);
@@ -44043,7 +44040,7 @@ index 18f0174..c40f704 100644
          if (result == NETCFG_POPS_IMPORT) {
              vcd_popsnet_t imported;
              int importResult;
-@@ -2352,7 +2525,9 @@ void guiShowArtworkConfig(void)
+@@ -2352,7 +2522,9 @@ void guiShowArtworkConfig(void)
  {
      diaSetInt(diaArtworkConfig, UICFG_COVERART, gEnableArt);
      diaSetInt(diaArtworkConfig, UICFG_ENABLE_DISCART, gEnableDiscArt);
@@ -44053,7 +44050,7 @@ index 18f0174..c40f704 100644
      diaSetInt(diaArtworkConfig, UICFG_ENABLE_ART_TAR, gEnableArtTar);
      diaSetEnum(diaArtworkConfig, UICFG_ART_DELAY, artDelayNames);
      diaSetInt(diaArtworkConfig, UICFG_ART_DELAY, artDelayToEnum(gArtDelay));
-@@ -2364,7 +2539,11 @@ void guiShowArtworkConfig(void)
+@@ -2364,7 +2536,11 @@ void guiShowArtworkConfig(void)
      if (ret) {
          diaGetInt(diaArtworkConfig, UICFG_COVERART, &gEnableArt);
          diaGetInt(diaArtworkConfig, UICFG_ENABLE_DISCART, &gEnableDiscArt);
@@ -44065,7 +44062,7 @@ index 18f0174..c40f704 100644
          {
              int blur = 0; // build 98: Background Blur
              if (diaGetInt(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, &blur) && blur >= 0 && blur <= 4)
-@@ -3157,6 +3336,8 @@ static int guiSettingsShowSources(void)
+@@ -3157,6 +3333,8 @@ static int guiSettingsShowSources(void)
      diaSetInt(ui, CFG_ENABLEUSB, gEnableUSB);
      diaSetInt(ui, CFG_ENABLEILK, gEnableILK);
      diaSetInt(ui, CFG_ENABLEMX4SIO, gEnableMX4SIO);
@@ -44074,7 +44071,7 @@ index 18f0174..c40f704 100644
      diaSetInt(ui, CFG_ENABLEBDMHDD, gEnableBdmHDD);
      diaSetEnabled(ui, CFG_ENABLEBDMHDD, 1);
      diaSetEnabled(ui, CFG_HDDMODE, 1);
-@@ -3194,6 +3375,11 @@ reshow_sources:
+@@ -3194,6 +3372,11 @@ reshow_sources:
          diaGetInt(ui, CFG_ENABLEUSB, &gEnableUSB);
          diaGetInt(ui, CFG_ENABLEILK, &gEnableILK);
          diaGetInt(ui, CFG_ENABLEMX4SIO, &gEnableMX4SIO);
@@ -44086,7 +44083,7 @@ index 18f0174..c40f704 100644
          diaGetInt(ui, CFG_ENABLEBDMHDD, &gEnableBdmHDD);
          guiSourcesNetRowsRead(ui);
  
-@@ -3281,6 +3467,7 @@ static int guiSettingsShowInterface(void)
+@@ -3281,6 +3464,7 @@ static int guiSettingsShowInterface(void)
      const char **langNamesSnap = NULL;
      int themeID, langID, previousTheme, previousVMode, result;
      int gameViewChanged = 0;
@@ -44094,7 +44091,7 @@ index 18f0174..c40f704 100644
      int appsViewChanged = 0;
  
      if (ui == NULL)
-@@ -3306,6 +3493,7 @@ static int guiSettingsShowInterface(void)
+@@ -3306,6 +3490,7 @@ static int guiSettingsShowInterface(void)
      diaSetInt(ui, UICFG_AUTOREFRESH, gAutoRefresh);
      diaSetInt(ui, UICFG_NOTIFICATIONS, gEnableNotifications);
      diaSetInt(ui, UICFG_GAME_TYPE_LABELS, gGameTypeLabels);
@@ -44102,7 +44099,7 @@ index 18f0174..c40f704 100644
      // Keep the editor reachable even when the current theme has no active Coverflow view; users
      // need to be able to configure it before enabling or switching to a Coverflow-capable theme.
      diaSetVisible(ui, UICFG_COVERFLOW_BUTTON, 1);
-@@ -3352,6 +3540,11 @@ reshow_interface:
+@@ -3352,6 +3537,11 @@ reshow_interface:
          diaGetInt(ui, UICFG_AUTOREFRESH, &gAutoRefresh);
          diaGetInt(ui, UICFG_NOTIFICATIONS, &gEnableNotifications);
          diaGetInt(ui, UICFG_GAME_TYPE_LABELS, &gGameTypeLabels);
@@ -44114,7 +44111,7 @@ index 18f0174..c40f704 100644
          gameViewChanged = guiReadGameViewPicker(ui);
          appsViewChanged = guiReadAppsViewPicker(ui);
          diaGetInt(ui, UICFG_VMODE, &gVMode);
-@@ -3367,8 +3560,12 @@ reshow_interface:
+@@ -3367,8 +3557,12 @@ reshow_interface:
  
          if (previousTheme != themeID && isBgmPlaying())
              bgmStop();
@@ -44128,7 +44125,7 @@ index 18f0174..c40f704 100644
              guiRefreshGameViews();
          }
          if (appsViewChanged)
-@@ -3611,87 +3808,6 @@ enum gui_settings_prompt_result {
+@@ -3611,87 +3805,6 @@ enum gui_settings_prompt_result {
      SETTINGS_PROMPT_CONTINUE
  };
  
@@ -44216,7 +44213,7 @@ index 18f0174..c40f704 100644
  static int guiSettingsPromptSave(void)
  {
      int promptHints[3] = {_STR_SETTINGS_SAVE, _STR_SETTINGS_EXIT_WITHOUT_SAVING, _STR_SETTINGS_CONTINUE_EDITING};
-@@ -3790,9 +3906,8 @@ static int guiSettingsShowIndex(int *page)
+@@ -3790,9 +3903,8 @@ static int guiSettingsShowIndex(int *page)
          // Keep the exact running build visible on the Settings hub so bug reports do not require
          // opening About/Credits just to discover the version. OPL_VERSION already includes the
          // release/revision/hash/toolchain suffix used everywhere else in the build.
@@ -44228,7 +44225,7 @@ index 18f0174..c40f704 100644
  
          y = (gTheme->usedHeight >> 1) - (spacing * (itemCount >> 1));
          for (int i = 0; i < itemCount; i++) {
-@@ -3819,14 +3934,8 @@ static int guiSettingsShowIndex(int *page)
+@@ -3819,14 +3931,8 @@ static int guiSettingsShowIndex(int *page)
                  ripps2Achievements(); // its own page; back here when it closes
                  readPads();
              } else if (selected == saveRow) {
@@ -44244,7 +44241,7 @@ index 18f0174..c40f704 100644
              } else {
                  *page = selected;
                  return 1;
-@@ -3843,8 +3952,11 @@ static int guiSettingsShowIndex(int *page)
+@@ -3843,8 +3949,11 @@ static int guiSettingsShowIndex(int *page)
                      return 0;
                  }
              } else if (promptResult == SETTINGS_PROMPT_EXIT) {
@@ -44257,7 +44254,7 @@ index 18f0174..c40f704 100644
                  guiSettingsSavePending = 0;
                  return 0;
              }
-@@ -3861,7 +3973,6 @@ static void guiShowSettingsFromPage(int page, int showIndexFirst)
+@@ -3861,7 +3970,6 @@ static void guiShowSettingsFromPage(int page, int showIndexFirst)
  
      guiSettingsShellActive = 1;
      guiSettingsSavePending = 0;
@@ -44265,7 +44262,7 @@ index 18f0174..c40f704 100644
      if (showIndexFirst && !guiSettingsShowIndex(&page)) {
          hddDiscardOplHomeSelection();
          guiSettingsShellActive = 0;
-@@ -4069,12 +4180,13 @@ static void guiHandleOp(struct gui_update_t *item)
+@@ -4069,12 +4177,13 @@ static void guiHandleOp(struct gui_update_t *item)
  
          case GUI_OP_APPEND_MENU:
              result = submenuAppendItem(item->menu.subMenu, item->submenu.icon_id, item->submenu.text, item->submenu.id, item->submenu.text_id);
@@ -44283,7 +44280,7 @@ index 18f0174..c40f704 100644
              // coverflow wrap tail: submenuAppendItem always returns the new tail
              item->menu.menu->last = result;
              if (!item->menu.menu->submenu) { // first subitem in list
-@@ -4333,9 +4445,7 @@ static void guiRenderGreeting(int alpha)
+@@ -4333,9 +4442,7 @@ static void guiRenderGreeting(int alpha)
      // Boot info: the RiptOPL version + a live status line, faded with the splash.
      // Reuses RIPPS2_UI_FONT (always-loaded built-in) and the same OPL_VERSION About shows.
      u64 infoColor = GS_SETREG_RGBA(0x80, 0x80, 0x80, alpha);
@@ -44294,7 +44291,7 @@ index 18f0174..c40f704 100644
      // Prefer an IO-thread boot-step label (the localizer) over the main-thread scan/Ready line,
      // so a wedged step names itself. gBootStickyLabel is a single atomic pointer to a static string.
      const char *bootLine = gBootStickyLabel;
-@@ -5052,6 +5162,8 @@ void guiMainLoop(void)
+@@ -5052,6 +5159,8 @@ void guiMainLoop(void)
          guiShowRANotices();
  #endif
  
@@ -44303,7 +44300,7 @@ index 18f0174..c40f704 100644
          // handle deferred operations (RIPPS2 build 70: a few milliseconds' worth a frame)
          guiHandleDeferredOpsBudget(GUI_OPS_FRAME_BUDGET_US);
  
-@@ -5511,6 +5623,42 @@ void guiGameHandleDeferedIO(int *ptr, struct UIItem *ui, int type, void *data)
+@@ -5511,6 +5620,42 @@ void guiGameHandleDeferedIO(int *ptr, struct UIItem *ui, int type, void *data)
      }
  }
  
