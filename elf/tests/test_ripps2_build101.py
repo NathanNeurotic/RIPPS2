@@ -8,15 +8,15 @@ root = Path(os.environ.get('RIPTOPL_DIR', '.'))
 rd = lambda p: (root / p).read_text(encoding='utf-8').replace('\r\n', '\n')
 fail = []
 
-# RIPFLOW's info page: Left / Right are its games (as on its carousel), never a drive
+# RIPFLOW's info page: Left / Right are its games (as on its carousel), never a drive. Build 102 made it every theme's
+# (test_ripps2_build102.py checks that), so here: Left / Right step the games and no info page steps drives
 menu = rd('src/menusys.c')
 info = menu[menu.index('void menuHandleInputInfo()'):menu.index('void menuRenderGameMenu()')]
-left, right, drive = (info.find('gTheme->coverflow && getKey(KEY_LEFT)'), info.find('gTheme->coverflow && getKey(KEY_RIGHT)'),
-                      info.find('menuDriveStep(-1);'))
-if left < 0 or right < 0 or drive < 0 or not (left < right < drive):
-    fail.append("RIPFLOW's info page must take Left / Right for its games before the drive step")
-elif 'menuPrevV();' not in info[left:right] or 'menuNextV();' not in info[right:drive]:
-    fail.append("RIPFLOW's info page: Left must be the previous game, Right the next")
+left, right = info.find('getKey(KEY_LEFT)'), info.find('getKey(KEY_RIGHT)')
+if left < 0 or right < 0 or 'menuDriveStep(' in info:
+    fail.append("the info page must take Left / Right for its games, never the drive step")
+elif 'menuPrevV();' not in info[left:right] or 'menuNextV();' not in info[right:right + 80]:
+    fail.append("the info page: Left must be the previous game, Right the next")
 
 # the sound set's loads: the GUI touches no voice while one waits or runs, a held sound plays only in its moment
 snd = rd('src/sound.c')

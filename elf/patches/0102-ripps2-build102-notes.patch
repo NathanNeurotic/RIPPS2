@@ -1,0 +1,1756 @@
+diff --git a/.github/scripts/test_theme_text_room.py b/.github/scripts/test_theme_text_room.py
+index 4f55693..7ab0e8a 100644
+--- a/.github/scripts/test_theme_text_room.py
++++ b/.github/scripts/test_theme_text_room.py
+@@ -38,7 +38,7 @@ def function_text(source, signature, where):
+ 
+ 
+ def define(source, name):
+-    match = re.search(r'^#define ' + name + r'\s+(\d+)', source, re.M)
++    match = re.search(r'^#define ' + name + r'\s+(\d+(?:\.\d+)?f?)', source, re.M)
+     if match is None:
+         failures.append('#define %s not found' % name)
+         return '0'
+@@ -52,14 +52,16 @@ width_fn = function_text(fntsys, 'static int fntTextWidth(', 'src/fntsys.c')
+ HARNESS = r'''
+ #include <stdio.h>
+ #include <string.h>
++#include <math.h>
+ 
+ #define ALIGN_NONE    0
+ #define ALIGN_VCENTER (2 << 0)
+ #define ALIGN_RIGHT   (1 << 2)
+ #define ALIGN_HCENTER (2 << 2)
+ #define THM_TEXT_GAP @GAP@
+-#define FNT_MARQUEE_STEP_MS @STEP@
+-#define FNT_MARQUEE_PAUSE @PAUSE@
++/* RIPPS2 build 102: the marquee slides its text through a clipped window (units a second, held at each end) */
++#define FNT_MARQUEE_PX_S @PXS@
++#define FNT_MARQUEE_HOLD_S @HOLD@
+ #define CLOCKS_PER_SEC 1000
+ typedef unsigned long long u64;
+ typedef struct { int x0, y0, x1, y1; } thm_box_t;
+@@ -75,15 +77,20 @@ static int fntCalcDimensions(int id, const char *str)
+     return n * 10;
+ }
+ static int rmUnScaleX(int x) { return x; }
++static int rmScaleX(int x) { return x; }
+ static long fakeClock;
+ static long clock(void) { return fakeClock; }
++static float fntSubX;
++static int fntClipX0, fntClipX1;
+ 
+-static int drawnX, drawnWidth, drawnAligned;
++static int drawnX, drawnWidth, drawnAligned, drawnClip0, drawnClip1;
++static float drawnSub;
+ static char drawn[512];
+ static int fntRenderString(int id, int x, int y, short aligned, int width, int height, const char *s, u64 colour)
+ {
+     (void)id; (void)y; (void)height; (void)colour;
+     drawnX = x; drawnWidth = width; drawnAligned = aligned;
++    drawnClip0 = fntClipX0; drawnClip1 = fntClipX1; drawnSub = fntSubX;
+     snprintf(drawn, sizeof(drawn), "%s", s);
+     return x + fntCalcDimensions(0, s);
+ }
+@@ -140,21 +147,31 @@ int main(void)
+     fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 0);
+     expectStr("not selected: ends in ...", drawn, "ABCDEFG...");
+ 
+-    fakeClock = 0; /* holding at the start */
+-    fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 1);
+-    expectStr("scroll: starts at the beginning", drawn, "ABCDEFGHIJKLMNOP");
+-    expectInt("scroll: clipped to the room", drawnWidth, 100);
+-    fakeClock = (long)(FNT_MARQUEE_PAUSE + 3) * FNT_MARQUEE_STEP_MS; /* 3 steps in */
+-    fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 1);
+-    expectStr("scroll: moves one character per step", drawn, "DEFGHIJKLMNOP");
+-    /* The last stop is 6 characters in ("GHIJKLMNOP" fits); two steps past it is inside the end pause,
+-       which holds there before the cycle loops back to the start. */
+-    fakeClock = (long)(FNT_MARQUEE_PAUSE + 6 + 2) * FNT_MARQUEE_STEP_MS;
+-    fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 1);
+-    expectStr("scroll: holds on the last window", drawn, "GHIJKLMNOP");
+-    fakeClock = (long)(6 + 2 * FNT_MARQUEE_PAUSE) * FNT_MARQUEE_STEP_MS; /* one full cycle: back to the start */
+-    fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 1);
+-    expectStr("scroll: loops back to the start", drawn, "ABCDEFGHIJKLMNOP");
++    /* RIPPS2 build 102: the scroll slides the whole string through the room, clipped to it. The text is 160 wide in
++       a room of 100: 60 to slide. */
++    {
++        float slide = 60.0f / FNT_MARQUEE_PX_S;
++        fakeClock = 0; /* holding at the start */
++        fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 1);
++        expectStr("scroll: the whole string", drawn, "ABCDEFGHIJKLMNOP");
++        expectInt("scroll: starts at the room's left", drawnX, 50);
++        expectInt("scroll: clipped to the room (left)", drawnClip0, 50);
++        expectInt("scroll: clipped to the room (right)", drawnClip1, 150);
++        expectInt("scroll: the clip is let go after", fntClipX0 | fntClipX1, 0);
++        fakeClock = (long)((FNT_MARQUEE_HOLD_S + 0.5f) * 1000.0f); /* half a second into the slide */
++        fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 1);
++        expectInt("scroll: slides at its pace", drawnX, 50 - (int)(0.5f * FNT_MARQUEE_PX_S));
++        if (drawnSub > 0.0f || drawnSub <= -1.0f) {
++            printf("FAIL scroll: the fraction of a unit is a part of one, leftwards (%f)\n", drawnSub);
++            fails++;
++        }
++        fakeClock = (long)((FNT_MARQUEE_HOLD_S + slide + 0.5f) * 1000.0f); /* inside the end hold */
++        fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 1);
++        expectInt("scroll: holds at the end", drawnX, 50 - 60);
++        fakeClock = (long)((2.0f * FNT_MARQUEE_HOLD_S + slide + 0.1f) * 1000.0f); /* past one pass: back at the start */
++        fntRenderStringFit(0, 50, 0, ALIGN_NONE, 100, "ABCDEFGHIJKLMNOP", 0, 1);
++        expectInt("scroll: loops back to the start", drawnX, 50);
++    }
+ 
+     fntRenderStringFit(0, 320, 0, ALIGN_HCENTER, 100, "ABCDEFGHIJKLMNOP", 0, 0);
+     expectInt("centred: the window is centred on x", drawnX, 320 - 50);
+@@ -187,14 +204,14 @@ int main(void)
+ 
+ if room_fn and fit_fn and width_fn:
+     program = (HARNESS.replace('@GAP@', define(themes, 'THM_TEXT_GAP'))
+-               .replace('@STEP@', define(fntsys, 'FNT_MARQUEE_STEP_MS'))
+-               .replace('@PAUSE@', define(fntsys, 'FNT_MARQUEE_PAUSE'))
++               .replace('@PXS@', define(fntsys, 'FNT_MARQUEE_PX_S'))
++               .replace('@HOLD@', define(fntsys, 'FNT_MARQUEE_HOLD_S'))
+                .replace('@FUNCTIONS@', room_fn + width_fn + fit_fn))
+     with tempfile.TemporaryDirectory() as tmp:
+         src = Path(tmp) / 'room.c'
+         exe = Path(tmp) / ('room.exe' if sys.platform == 'win32' else 'room')
+         src.write_text(program, encoding='utf-8')
+-        build = subprocess.run(['gcc', '-std=gnu99', '-Wall', '-Werror', '-Wno-unused-function', '-o', str(exe), str(src)],
++        build = subprocess.run(['gcc', '-std=gnu99', '-Wall', '-Werror', '-Wno-unused-function', '-o', str(exe), str(src), '-lm'],
+                                capture_output=True, text=True, check=False)
+         if build.returncode != 0:
+             failures.append('harness did not compile:\n' + build.stderr)
+diff --git a/include/fntsys.h b/include/fntsys.h
+index c727dd4..17bb5c5 100644
+--- a/include/fntsys.h
++++ b/include/fntsys.h
+@@ -42,6 +42,7 @@ int fntRenderStringFit(int id, int x, int y, short aligned, int room, const char
+  */
+ void fntFitString(int id, char *string, size_t width);
+ void fntSetLineHeight(int height); // RIPPS2: multi-line text line step, 0 = MENU_ITEM_HEIGHT
++void fntSetSubUnit(float x, float y); // RIPPS2 build 102: the next strings move by this fraction of a unit (0, 0 after)
+ 
+ /** Calculates the width of the given text string
+  * We can't use the height for alignment, as the horizontal center would depends of the contained text itself */
+diff --git a/include/sound.h b/include/sound.h
+index a491fa8..5c9c5c4 100644
+--- a/include/sound.h
++++ b/include/sound.h
+@@ -54,6 +54,7 @@ int sfxPreviewStart(const char *path); // build 95: Memory Files plays an .adp (
+ void sfxPreviewStop(void);             // build 95: the preview stops and the sounds load again
+ void sfxPlay(int id);
+ void sfxFlush(void); // build 100: once a frame (readPads, guiEndFrame): a confirm or cancel nothing replaced plays
++void sfxIntroStarted(void); // build 102: the intro's towers have begun: the boot sound may play
+ // Per-press audsrv RPC wall time (last / max, ms) -- measured on the dispatch thread.
+ void sfxGetPlayDiag(unsigned int *lastMs, unsigned int *maxMs);
+ // Silent SFX drops (last totals): stale = cursor ticks aged out at dispatch; full = sounds of any
+diff --git a/include/themes.h b/include/themes.h
+index 044bb09..bc4a0db 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -242,6 +242,7 @@ typedef struct theme
+     int hintsColumnDef;                 // hints_layout: -1 not set, 0 row, 1 column
+     int hintsSpacing;                   // hints_spacing: a column's line pitch
+     int glyphSetDef;                    // glyph_set: RIPPS2_GLYPHSET_* (THEME: its own PNGs)
++    int soundsAudio;                    // build 102: sounds=audio: the AUDIO folder's sounds, never the theme's own
+     int pageButtonsDef;                 // build 96: page_buttons= l1r1 (1) | l2r2 (2); 0: RIPPS2's own (L2 top, R2 end)
+     int glyphSetLoaded;                 // the set its glyph textures hold now
+     char glyphPath[192];                // where its own glyph PNGs load from ("" for a built-in theme)
+@@ -322,6 +323,24 @@ theme_element_t *thmFamilyItemsList(theme_elems_t *family, theme_element_t *fall
+ 
+ // Indices are shifted in GUI, as we add the internal default theme at 0
+ int thmSetGuiValue(int themeID, int reload);
++// RIPPS2 build 102: a theme's own colours, as the Colours page edits them (NULL name: RIPPS2 and RIPFLOW)
++const char *thmColorName(int themeID);
++int thmColorsGet(const char *name, unsigned char c[6][3]);
++void thmColorsSet(const char *name, unsigned char c[6][3]);
++void thmColorsClear(const char *name);
++// build 102: the theme on show plays the AUDIO folder's sounds (the ripped map), not a sound folder of its own
++extern volatile int gThemeSoundsAudio;
++// RIPPS2 build 102: About and STATUS in RIPPS2's own faces on every theme (Begin as the page opens, End as it closes)
++void thmPageFontsBegin(void);
++void thmPageFontsEnd(void);
++int thmPageFont(int slot);
++// RIPPS2 build 102: an app's case, set on it from its menu (user: "apps cases should display as ps1 square by default")
++#define THM_APP_CASE_PS1   0 // square, as a PS1 game's: the default
++#define THM_APP_CASE_PS2   1 // tall, as a PS2 game's
++#define THM_APP_CASE_THEME 2 // as the theme draws it
++#define THM_APP_CASES_N    3
++int thmAppCaseShape(const char *title);
++void thmAppCaseShapeSet(const char *title, int shape);
+ int thmGetGuiValue(void);
+ int thmFindGuiID(const char *theme);
+ int thmGetPanelRect(int infoPage, int *x, int *y, int *w, int *h); // RIPPS2: the page's glass panel
+diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
+index a94c7bf..8051a03 100644
+--- a/misc/theme_coverflow.cfg
++++ b/misc/theme_coverflow.cfg
+@@ -37,14 +37,18 @@ font11_size=18
+ font11_caps=1
+ font12=builtin:ripflowbold
+ font12_size=22
+-font13=builtin:ripflow
+-font13_size=15
++# build 102: font13 is RIPPS2 Sleek Case, the source name's (the MenuText at the bottom), as the case font reads
++# everywhere else; no RIPPS2 page draws with font13
++font13=builtin:ripps2sleekcase
++font13_size=17
+ font14=builtin:ripflowbold
+ font14_size=64
+ font14_caps=1
+ font15=builtin:ripflow
+ font15_size=16
+ coverflow_cover_offset=0
++# build 102: the White glyph set (L3 and R3 included); Controller Settings > Hints and Glyphs can change it
++glyph_set=white
+ main0:
+ 	type=Background
+ 	pattern=BG
+@@ -282,7 +286,7 @@ main17:
+ # switch it, and RIPPSettings can put the D-pad's Up / Down either side
+ main18:
+ 	type=MenuText
+-	font=7
++	font=13
+ 	x=POS_MID
+ 	y=-30
+ 	aligned=1
+@@ -465,62 +469,66 @@ info18:
+ 	width=590
+ 	height=60
+ 	wrap=1
++# build 102 (user: "ripflows badges and ratings sizes need to be refined"): the badges at their images' own shape (51 x 26,
++# so 44 x 22), 6 apart, the first's left edge on the text's (33); up to build 101 they were 32 x 16 at 31 apart, a pixel
++# over each other. The rating at its image's shape too (111 x 14, so 143 x 18), its stars ending on the description's
++# right edge (623), on the badges' line
+ info19:
+ 	type=AttributeImage
+ 	attribute=#Media
+ 	default=APP
+-	width=32
+-	height=16
++	width=44
++	height=22
+ 	x=55
+ 	y=-252
+ info20:
+ 	type=AttributeImage
+ 	attribute=#Format
+ 	default=ELF
+-	width=32
+-	height=16
+-	x=86
++	width=44
++	height=22
++	x=105
+ 	y=-252
+ info21:
+ 	type=AttributeImage
+ 	attribute=Vmode
+ 	default=missing
+-	width=32
+-	height=16
+-	x=117
++	width=44
++	height=22
++	x=155
+ 	y=-252
+ info22:
+ 	type=AttributeImage
+ 	attribute=Aspect
+ 	default=missing
+-	width=32
+-	height=16
+-	x=148
++	width=44
++	height=22
++	x=205
+ 	y=-252
+ info23:
+ 	type=AttributeImage
+ 	attribute=Scan
+ 	default=missing
+-	width=32
+-	height=16
+-	x=179
++	width=44
++	height=22
++	x=255
+ 	y=-252
+ info24:
+ 	type=AttributeImage
+ 	attribute=Players
+ 	default=missing
+-	width=32
+-	height=16
+-	x=210
++	width=44
++	height=22
++	x=305
+ 	y=-252
+ info25:
+ 	type=AttributeImage
+ 	attribute=Rating
+ 	default=no_Rating
+-	x=-76
++	x=-88
+ 	y=-252
+-	width=128
+-	height=16
++	width=143
++	height=18
+ info26:
+ 	type=GameImage
+ 	pattern=SCR
+diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
+index 4141346..73fc74a 100644
+--- a/misc/theme_ripgrid.cfg
++++ b/misc/theme_ripgrid.cfg
+@@ -4,6 +4,8 @@
+ launch_disc=pop
+ # RIPPS2 build 96: L2 / R2 turn the grid's pages (Controller Settings > Page Buttons can change it)
+ page_buttons=l2r2
++# build 102: the Standard glyph set (L3 and R3 included); Controller Settings > Hints and Glyphs can change it
++glyph_set=standard
+ # RIPPS2 build 100 (hotfix): the info page's stars and badges at the default theme's sizes (111 x 14, 51 x 26),
+ # the badges in a row ending at the panel's text edge; at their images' own sizes they overlapped. The stars fill
+ # the right 64 of the rating's 111, so its box starts at 8 to put the first star on the text's edge (55)
+@@ -25,20 +27,33 @@ default_font=builtin:ripps2sleek
+ default_font_size=17
+ font1=builtin:ripps2sleekcase
+ font1_size=16
++# build 102 (user: "make the ripgrid cd player and file tree like ripflow but the category pages should appear like
++# ripps2"). The slots RIPPS2's own pages draw with: Launch Disc's line (font3) and the START prompts (font6) at
++# RIPPS2's faces; the menus (font4), small text (font5), Memory Files' and the CD player's rows (font8) and the
++# CD's title (font11) at RIPFLOW's. RIPGRID's own text moved off them, looking as it did: the release (font2,
++# was font5), the grid's case titles (font12, was font4), the developer and the genre (font13, was font6).
+ font2=builtin:ripps2sleek
+-font2_size=17
+-font3=builtin:ripps2sleekbold
+-font3_size=16
+-font4=builtin:ripps2sleekbold
+-font4_size=20
++font2_size=20
++font3=builtin:ripps2
++font3_size=13
++font4=builtin:ripflowbold
++font4_size=17
++font4_caps=1
++font5=builtin:ripflow
++font5_size=15
++font6=builtin:ripps2sleekbold
++font6_size=20
++font8=builtin:ripflow
++font8_size=17
++font11=builtin:ripflowbold
++font11_size=18
++font11_caps=1
++font12=builtin:ripps2sleekbold
++font12_size=20
++font13=builtin:ripps2sleekbold
++font13_size=17
+ font15=builtin:ripps2sleekcase
+ font15_size=15
+-# build 92: font5 is RIPPS2 Sleek here (the pack's RIPGRID uses Planet N, which is not RIPPS2's to build in);
+-# font6 is RIPPS2 Sleek Bold, all capitals, for the developer and the genre
+-font5=builtin:ripps2sleek
+-font5_size=20
+-font6=builtin:ripps2sleekbold
+-font6_size=17
+ # build 97: the chosen game's name under the grid, in RIPPS2 Sleek Bold
+ font7=builtin:ripps2sleekbold
+ font7_size=22
+@@ -81,17 +96,20 @@ main3:
+ 	tint=22
+ 	tint_color=#28C5F9
+ 	frame=0
++# build 102 (user: "ripgrid should raise a touch so its padding on the upper row is equal to the bottom"): the grid's
++# top at 80, so the PS2 mark's foot (63) to the first row and the last row (392) to the name under it (its letters'
++# tops near 410) are both about 17
+ main4:
+ 	type=Grid
+ 	pattern=COV
+ 	x=320
+-	y=84
++	y=80
+ 	width=107
+ 	height=150
+ 	columns=4
+ 	rows=2
+ 	spacing=12
+-	font=4
++	font=12
+ 	tilt=1
+ 	tilt_scale=160
+ 	coverless=serial
+@@ -106,7 +124,7 @@ main5:
+ 	width=DIM_INF
+ 	height=24
+ 	aligned=1
+-	font=4
++	font=12
+ 	hidden=1
+ main6:
+ 	type=LoadingIcon
+@@ -124,7 +142,7 @@ main8:
+ 	y=25
+ 	aligned=1
+ 	width=225
+-	font=2
++	font=0
+ info0:
+ 	type=Background
+ 	pattern=BG
+@@ -249,7 +267,7 @@ info10:
+ 	y=330
+ 	width=375
+ 	wrap=0
+-	font=6
++	font=13
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -262,7 +280,7 @@ info11:
+ 	x=55
+ 	y=358
+ 	width=375
+-	font=5
++	font=2
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -275,7 +293,7 @@ info12:
+ 	x=55
+ 	y=385
+ 	width=375
+-	font=6
++	font=13
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -286,14 +304,17 @@ info13:
+ 	x=POS_MID
+ 	y=-41
+ 	font=1
++# build 102 (user: "ripgrid info page needs line up of content slightly so its exact"): the screenshots stand flush
++# with the text's glass (160 to 415), 15 apart, centred in the room right of it (440 to 640, 20 each side). They
++# were 170 x 128 about 532: 6 above the glass, 11 below it and 7 from it against 23 from the edge
+ info14:
+ 	type=GameImage
+ 	pattern=SCR
+ 	scaled=1
+-	x=532
+-	y=230
+-	width=170
+-	height=128
++	x=540
++	y=220
++	width=160
++	height=120
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -302,10 +323,10 @@ info15:
+ 	type=GameImage
+ 	pattern=SCR2
+ 	scaled=1
+-	x=532
+-	y=362
+-	width=170
+-	height=128
++	x=540
++	y=355
++	width=160
++	height=120
+ 	tilt=1
+ 	tilt_x=320
+ 	tilt_y=260
+@@ -347,7 +368,7 @@ info18:
+ 	tilt_scale=75
+ appsInfo5:
+ 	type=ItemCover
+-	x=532
++	x=540
+ 	y=262
+ 	tilt=1
+ 	tilt_x=320
+diff --git a/src/fntsys.c b/src/fntsys.c
+index dad9e95..70e31d3 100644
+--- a/src/fntsys.c
++++ b/src/fntsys.c
+@@ -14,6 +14,7 @@
+ 
+ #include <sys/types.h>
+ #include <time.h> // clock(): fntRenderStringFit's scroll timing
++#include <math.h> // fmodf: the marquee's place in its pass (build 102)
+ #include <ft2build.h>
+ 
+ #include FT_FREETYPE_H
+@@ -607,6 +608,21 @@ static void fntUpdateAspectRatioLocked(void)
+     }
+ }
+ 
++/* RIPPS2 build 102 (user: "make the text scrolling smooth 60fps"). A string can be moved by a fraction of a
++   640 x 480 unit (fntSubX / fntSubY, in units, turned into display pixels as the string is placed) and cut at the
++   sides of a window (fntClipX0..fntClipX1, display pixels; equal: no window), a glyph that crosses its edge drawn
++   in part. The marquee (fntRenderStringFit) slides its text through that window a display pixel at a time, every
++   frame, where it used to jump a whole character every 200 ms; the description roll places each line to the
++   display pixel instead of the unit. Set by the caller around one string and cleared after it. */
++static float fntSubX = 0.0f, fntSubY = 0.0f;
++static int fntClipX0 = 0, fntClipX1 = 0;
++
++void fntSetSubUnit(float x, float y)
++{
++    fntSubX = x;
++    fntSubY = y;
++}
++
+ static void fntRenderGlyph(fnt_glyph_cache_entry_t *glyph, int pen_x, int pen_y)
+ {
+     // only if glyph has atlas placement
+@@ -632,6 +648,19 @@ static void fntRenderGlyph(fnt_glyph_cache_entry_t *glyph, int pen_x, int pen_y)
+ 
+         quad.txt = &glyph->atlas->surface;
+ 
++        if (fntClipX1 > fntClipX0) { // build 102: the marquee's window: outside it nothing, across its edge a part
++            if (quad.br.x <= fntClipX0 || quad.ul.x >= fntClipX1)
++                return;
++            if (quad.ul.x < fntClipX0) {
++                quad.ul.u += fntClipX0 - quad.ul.x; // the atlas is drawn a texel to a pixel
++                quad.ul.x = fntClipX0;
++            }
++            if (quad.br.x > fntClipX1) {
++                quad.br.u -= quad.br.x - fntClipX1;
++                quad.br.x = fntClipX1;
++            }
++        }
++
+         rmDrawQuad(&quad);
+     }
+ }
+@@ -658,6 +687,10 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+     y = rmScaleY(y);
+     width = rmScaleX(width);
+     height = rmScaleY(height);
++    if (fntSubX != 0.0f || fntSubY != 0.0f) { // build 102: a fraction of a unit, to the display pixel
++        x += (int)floorf(fntSubX * rmScaleX(64) / 64.0f + 0.5f);
++        y += (int)floorf(fntSubY * rmScaleY(64) / 64.0f + 0.5f);
++    }
+ 
+     if (aligned & ALIGN_HCENTER) {
+         if (width) {
+@@ -787,6 +820,10 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+     y = rmScaleY(y);
+     width = rmScaleX(width);
+     height = rmScaleY(height);
++    if (fntSubX != 0.0f || fntSubY != 0.0f) { // build 102: a fraction of a unit, to the display pixel
++        x += (int)floorf(fntSubX * rmScaleX(64) / 64.0f + 0.5f);
++        y += (int)floorf(fntSubY * rmScaleY(64) / 64.0f + 0.5f);
++    }
+ 
+     if (aligned & ALIGN_HCENTER) {
+         if (width) {
+@@ -886,14 +923,15 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+ 
+ // Draw `string` in a window `room` units wide (the same unscaled units as x), starting at x -- or centred
+ // on x when `aligned` has ALIGN_HCENTER, exactly where fntRenderString would centre it. Text that fits is
+-// drawn exactly as fntRenderString draws it. Text that does not: with `scroll` it scrolls through the whole
+-// string, one character per FNT_MARQUEE_STEP_MS, holding FNT_MARQUEE_PAUSE steps at each end; without it,
+-// it is cut to end in "...". Returns the end x, like fntRenderString.
++// drawn exactly as fntRenderString draws it. Text that does not: with `scroll` it slides the whole string through
++// the window at FNT_MARQUEE_PX_S, a display pixel at a time, holding FNT_MARQUEE_HOLD_S at each end (build 102; it
++// stepped a whole character every 200 ms before); without it, it is cut to end in "...". Returns the end x, like
++// fntRenderString.
+ //
+ // Shared by the settings dialogs (dia.c, #732: values ran off the edge on 4:3) and theme text (themes.c),
+ // which stops long text at the next theme element instead of drawing over it.
+-#define FNT_MARQUEE_STEP_MS 200 // one character per step
+-#define FNT_MARQUEE_PAUSE   5   // steps held at each end
++#define FNT_MARQUEE_PX_S   36.0f // build 102: units a second (one character every 200 ms was about this pace)
++#define FNT_MARQUEE_HOLD_S 1.0f  // held at each end
+ 
+ static int fntTextWidth(int id, const char *text)
+ {
+@@ -926,21 +964,22 @@ int fntRenderStringFit(int id, int x, int y, short aligned, int room, const char
+     }
+     at[n] = i;
+ 
+-    // Binary searches: this runs every frame, so measure O(log n) times, not once per character.
+-    if (scroll) {
+-        for (lo = 0, hi = n; lo < hi;) { // first character from which the rest fits = the last stop
+-            mid = (lo + hi) / 2;
+-            if (fntTextWidth(id, &string[at[mid]]) <= room)
+-                hi = mid;
+-            else
+-                lo = mid + 1;
+-        }
+-        int step = (int)((clock() / (CLOCKS_PER_SEC / 1000) / FNT_MARQUEE_STEP_MS) % (lo + 2 * FNT_MARQUEE_PAUSE)) - FNT_MARQUEE_PAUSE;
+-        step = step < 0 ? 0 : (step > lo ? lo : step);
+-        fntRenderString(id, x, y, aligned, room, 0, &string[at[step]], colour);
++    if (scroll) { // build 102: slid through the window, held at each end
++        float span = (float)(fntTextWidth(id, string) - room), slide = span / FNT_MARQUEE_PX_S;
++        float t = fmodf((float)clock() / (float)CLOCKS_PER_SEC, slide + 2.0f * FNT_MARQUEE_HOLD_S) - FNT_MARQUEE_HOLD_S;
++        float off = t <= 0.0f ? 0.0f : (t >= slide ? span : t * FNT_MARQUEE_PX_S);
++        int whole = (int)off;
++        fntClipX0 = rmScaleX(x);
++        fntClipX1 = rmScaleX(x + room);
++        fntSubX = -(off - (float)whole);
++        fntRenderString(id, x - whole, y, aligned, 0, 0, string, colour);
++        fntSubX = 0.0f;
++        fntClipX0 = fntClipX1 = 0;
+         return x + room;
+     }
+ 
++    // Binary search: this runs every frame, so measure O(log n) times, not once per character.
++
+     room -= fntTextWidth(id, "...");
+     if (room < 0) // not even "..." fits
+         return x;
+diff --git a/src/gui.c b/src/gui.c
+index 76cb401..18f0174 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -2480,6 +2480,9 @@ void guiShowColorsConfig(void)
+ {
+     int themeID = thmGetGuiValue();
+     int editable = (themeID == 0 || themeID == thmFindGuiID("<RIPFLOW>"));
++    // build 102: a theme with colours of its own (RIPGRID, a disk theme) has them edited for it, not greyed out
++    const char *own = editable ? NULL : thmColorName(themeID);
++    unsigned char shown[6][3];
+     int keep[8] = {gRipps2Glyphs, gRipps2Palette, gRipps2Hints, gRipps2CatBar, gRipps2CatSwap, gRipps2SrcName, gRipps2Recents, gRipps2UserSet};
+     int keepTransition = gRipps2Transition; // build 92
+ 
+@@ -2502,13 +2505,19 @@ void guiShowColorsConfig(void)
+         diaSetU64Color(diaColorsConfig, UICFG_TXTCOL, gTheme->textColor);
+         diaSetU64Color(diaColorsConfig, UICFG_SELCOL, gTheme->selTextColor);
+     }
+-    diaSetEnabled(diaColorsConfig, UICFG_BGCOL, editable);
+-    diaSetEnabled(diaColorsConfig, UICFG_UICOL, editable);
+-    diaSetEnabled(diaColorsConfig, UICFG_TITLECOL, editable);
+-    diaSetEnabled(diaColorsConfig, UICFG_TXTCOL, editable);
+-    diaSetEnabled(diaColorsConfig, UICFG_SELCOL, editable);
+-    diaSetEnabled(diaColorsConfig, UICFG_PLASCOL, editable);
+-    diaSetEnabled(diaColorsConfig, UICFG_RESETCOL, editable);
++    diaGetColor(diaColorsConfig, UICFG_BGCOL, shown[0]); // build 102: what the page opened with
++    diaGetColor(diaColorsConfig, UICFG_UICOL, shown[1]);
++    diaGetColor(diaColorsConfig, UICFG_TITLECOL, shown[2]);
++    diaGetColor(diaColorsConfig, UICFG_TXTCOL, shown[3]);
++    diaGetColor(diaColorsConfig, UICFG_SELCOL, shown[4]);
++    diaGetColor(diaColorsConfig, UICFG_PLASCOL, shown[5]);
++    diaSetEnabled(diaColorsConfig, UICFG_BGCOL, editable || own != NULL);
++    diaSetEnabled(diaColorsConfig, UICFG_UICOL, editable || own != NULL);
++    diaSetEnabled(diaColorsConfig, UICFG_TITLECOL, editable || own != NULL);
++    diaSetEnabled(diaColorsConfig, UICFG_TXTCOL, editable || own != NULL);
++    diaSetEnabled(diaColorsConfig, UICFG_SELCOL, editable || own != NULL);
++    diaSetEnabled(diaColorsConfig, UICFG_PLASCOL, editable || own != NULL);
++    diaSetEnabled(diaColorsConfig, UICFG_RESETCOL, editable || own != NULL);
+ 
+     int ret = diaExecuteDialog(diaColorsConfig, -1, 1, &guiRipps2SettingsUpdater);
+     if (ret)
+@@ -2543,8 +2552,33 @@ void guiShowColorsConfig(void)
+             diaGetColor(diaColorsConfig, UICFG_SELCOL, gDefaultSelTextColor);
+             diaGetColor(diaColorsConfig, UICFG_PLASCOL, gDefaultPlasBlendColor);
+         }
+-        if (ret == UICFG_RESETCOL)
++        if (ret == UICFG_RESETCOL && editable)
+             setDefaultColors();
++        if (own != NULL) { // build 102: this theme's own colours: kept for it, or (Reset) its file's again
++            unsigned char c[6][3];
++            diaGetColor(diaColorsConfig, UICFG_BGCOL, c[0]);
++            diaGetColor(diaColorsConfig, UICFG_UICOL, c[1]);
++            diaGetColor(diaColorsConfig, UICFG_TITLECOL, c[2]);
++            diaGetColor(diaColorsConfig, UICFG_TXTCOL, c[3]);
++            diaGetColor(diaColorsConfig, UICFG_SELCOL, c[4]);
++            diaGetColor(diaColorsConfig, UICFG_PLASCOL, c[5]);
++            int reload = 0;
++            if (ret == UICFG_RESETCOL) {
++                thmColorsClear(own); // reloaded: its elements take its own colours again
++                reload = 1;
++            } else if (memcmp(c, shown, sizeof(c)) != 0) {
++                thmColorsSet(own, c); // reloaded: its elements are built with them
++                reload = 1;
++            }
++            if (reload) {
++                guiSettingsSavePending = 1;
++                if (thmSetGuiValue(themeID, 1)) { // as a new Grid Layout does: the menus take the reloaded theme
++                    int m;
++                    for (m = 0; m < MODE_COUNT; m++)
++                        moduleUpdateMenu(m, 1, 0);
++                }
++            }
++        }
+ 
+         applyConfig(themeID, -1, 1);
+     }
+@@ -4956,6 +4990,7 @@ void guiIntroLoop(void)
+     // background init finishes, and the menu comes in once both are ready, with the camera still
+     // settling into the idle Storage view. No input reaches the menu before it is on screen.
+     gIntroSplashActive = 1;
++    sfxIntroStarted(); // build 102: the towers' swoop starts with this loop's first frame, and the boot sound with it
+     while (!endIntro) {
+         guiStartFrame();
+ 
+@@ -4989,6 +5024,7 @@ void guiMainLoop(void)
+         showPartPopup = 1;
+ 
+     // RIPPS2: the music is started by bgmBootTick (below, and in the intro) once the sounds are loaded
++    sfxIntroStarted(); // build 102: a boot that skipped the intro still gets its boot sound
+ 
+     while (!gTerminate) {
+         guiStartFrame();
+diff --git a/src/menusys.c b/src/menusys.c
+index 7a5f4ca..ac18457 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -81,12 +81,32 @@ enum APP_MENU_IDs {
+     APP_DELETE,
+     APP_GLOBAL_PS_SETTINGS,
+     APP_EMBER_GAME_SETTINGS,
++    APP_CASE_SHAPE, // RIPPS2 build 102
+ };
+ 
+ // global menu variables
+ static menu_list_t *menu;
+ static menu_list_t *selected_item;
+ 
++// RIPPS2 build 102: the app menu's Case Shape line (the app's case: PS1 square, PS2 tall or the theme's), its
++// words kept here so the line reads its value; saved once as the menu closes
++static char appCaseLabel[40];
++static int appCaseChanged;
++
++static const char *appCaseTitle(void)
++{
++    return selected_item != NULL && selected_item->item != NULL && selected_item->item->current != NULL ?
++               selected_item->item->current->item.text :
++               NULL;
++}
++
++static void appCaseLabelUpdate(void)
++{
++    int shape = thmAppCaseShape(appCaseTitle());
++    snprintf(appCaseLabel, sizeof(appCaseLabel), "Case Shape: %s",
++             shape == THM_APP_CASE_PS2 ? "PS2 (tall)" : shape == THM_APP_CASE_THEME ? "Theme" : "PS1 (square)");
++}
++
+ static int actionStatus;
+ static int menuSaveResult; // last per-game configWrite() result, published by _menuSaveConfig
+ static int itemConfigId;
+@@ -726,9 +746,14 @@ void menuInitAppMenu(void)
+     if (appMenu)
+         submenuDestroy(&appMenu);
+ 
+-    // initialize the menu
+-    submenuAppendItem(&appMenu, -1, NULL, APP_RENAME, _STR_RENAME);
+-    submenuAppendItem(&appMenu, -1, NULL, APP_DELETE, _STR_DELETE);
++    // initialize the menu. Build 102: Case Shape always; Rename and Delete only where RIPPS2 may write
++    appCaseLabelUpdate();
++    appCaseChanged = 0;
++    submenuAppendItem(&appMenu, -1, appCaseLabel, APP_CASE_SHAPE, -1);
++    if (gEnableWrite) {
++        submenuAppendItem(&appMenu, -1, NULL, APP_RENAME, _STR_RENAME);
++        submenuAppendItem(&appMenu, -1, NULL, APP_DELETE, _STR_DELETE);
++    }
+ 
+     appMenuCurrent = appMenu;
+ }
+@@ -2211,22 +2236,14 @@ void menuHandleInputInfo()
+         menuPrevV();
+     } else if (getKey(KEY_DOWN)) {
+         menuNextV();
+-    } else if (gTheme->coverflow && getKey(KEY_LEFT)) {
+-        // RIPPS2 build 101 (user: "the RIPFLOW info page shouldn't switch devices on left and right, have it go
+-        // through the games instead"): on a carousel theme Left / Right are its games, as on its own page, and the
+-        // info page stays; Up / Down too. Held, they repeat like Up / Down.
++    } else if (getKey(KEY_LEFT)) {
++        // RIPPS2 build 101 gave RIPFLOW's info page its games on Left / Right; build 102 (user: "don't let any of
++        // the themes change the source on the info pages, so they can just cycle games with left right up down")
++        // does it on every theme: the info page never switches drives (build 69 to 101 did, and left the page).
++        // Held, they repeat like Up / Down.
+         menuPrevV();
+-    } else if (gTheme->coverflow && getKey(KEY_RIGHT)) {
++    } else if (getKey(KEY_RIGHT)) {
+         menuNextV();
+-    } else if (getKeyOn(KEY_LEFT)) {
+-        // RIPPS2 build 69: Left/Right switch drives here too; leaving the info page lands on that
+-        // drive's game list. Build 70: on every theme, Coverflow included (this page is not rotated:
+-        // Up / Down are its games, so Left / Right stepping a game was a second Up / Down).
+-        menuDriveStep(-1);
+-        guiSwitchScreen(GUI_SCREEN_MAIN);
+-    } else if (getKeyOn(KEY_RIGHT)) {
+-        menuDriveStep(1);
+-        guiSwitchScreen(GUI_SCREEN_MAIN);
+     } else if (getKeyOn(KEY_L1)) {
+         ripps2StepCategory(-1); // RIPPS2 build 69: L1/R1 switch categories, from the info page as well
+     } else if (getKeyOn(KEY_R1)) {
+@@ -2549,7 +2566,11 @@ void menuHandleInputAppMenu()
+ 
+         sfxPlay(SFX_CONFIRM);
+ 
+-        if (menuID == APP_RENAME) {
++        if (menuID == APP_CASE_SHAPE) { // build 102: PS1, PS2, Theme, round again
++            thmAppCaseShapeSet(appCaseTitle(), (thmAppCaseShape(appCaseTitle()) + 1) % THM_APP_CASES_N);
++            appCaseLabelUpdate();
++            appCaseChanged = 1;
++        } else if (menuID == APP_RENAME) {
+             menuRenameGame(&appMenu);
+         } else if (menuID == APP_DELETE) {
+             menuDeleteGame(&appMenu);
+@@ -2563,6 +2584,10 @@ void menuHandleInputAppMenu()
+     }
+ 
+     if (getKeyOn(KEY_START) || getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
++        if (appCaseChanged) { // build 102: the case shapes chosen here, saved with the settings
++            appCaseChanged = 0;
++            saveConfig(CONFIG_OPL, 0);
++        }
+         guiSwitchScreen(GUI_SCREEN_MAIN);
+     }
+ }
+diff --git a/src/opl.c b/src/opl.c
+index 82efcbf..7001666 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -345,7 +345,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
+         unsigned char flags = (mod->support->mode == FAV_MODE) ? favGetFlags(mod->support) :
+                               (mod->support->mode == MIX_MODE) ? mixGetFlags(mod->support) :
+                                                                  mod->support->flags;
+-        if (!(flags & MODE_FLAG_NO_COMPAT) || gEnableWrite)
++        if (!(flags & MODE_FLAG_NO_COMPAT) || gEnableWrite || mod->support->mode == APP_MODE) // build 102: Case Shape
+             menuAddHint(&mod->menuItem, _STR_OPTIONS, TRIANGLE_ICON);
+ 
+         menuAddHint(&mod->menuItem, _STR_REFRESH, SELECT_ICON);
+@@ -849,7 +849,8 @@ static void itemExecTriangle(struct menu_item *curMenu)
+                 guiGameLoadConfig(support, gameMenuLoadConfig(NULL));
+             }
+         } else {
+-            if (menuCheckParentalLock() == 0 && gEnableWrite) {
++            // build 102: the apps' menu opens without write access too (its Case Shape line); Rename and Delete need it
++            if (menuCheckParentalLock() == 0 && (gEnableWrite || support->mode == APP_MODE)) {
+                 menuInitAppMenu();
+                 guiSwitchScreen(GUI_SCREEN_APP_MENU);
+             }
+diff --git a/src/renderman.c b/src/renderman.c
+index 9c1cd2f..1d233c9 100644
+--- a/src/renderman.c
++++ b/src/renderman.c
+@@ -595,9 +595,16 @@ static void rmDrawReflection(GSTEXTURE *txt, rm_quad_t *q, float bottomY, float
+ 
+     const int strips = 12;
+     const int topAlpha = 0x23; // gsKit modulate alpha right under the cover (reduced again, ~27% below original); fades to 0
++    /* RIPPS2 build 102 (user: "cover reflections need to fade with their covers"): the mirror takes the cover's own
++       colour, so a cover fading in or out (its alpha below 0x80), or dimmed beside the centre one (its RGB), takes its
++       reflection with it. Up to build 101 the mirror was drawn at full strength whatever the cover's colour was. */
++    int coverA = (int)((q->color >> 24) & 0xFF), cr = (int)(q->color & 0xFF), cg = (int)((q->color >> 8) & 0xFF),
++        cb = (int)((q->color >> 16) & 0xFF);
++    if (coverA > 0x80)
++        coverA = 0x80;
+     int s;
+     for (s = 0; s < strips; s++) {
+-        int a = topAlpha * (strips - 1 - s) / (strips - 1);
++        int a = topAlpha * (strips - 1 - s) / (strips - 1) * coverA / 0x80;
+         if (a <= 0)
+             break;
+         // Strip s spans [s, s+1]/strips of the reflection height; v runs botV (waterline)
+@@ -607,13 +614,13 @@ static void rmDrawReflection(GSTEXTURE *txt, rm_quad_t *q, float bottomY, float
+         float v0 = botV + (q->ul.v - botV) * s / strips;
+         float v1 = botV + (q->ul.v - botV) * (s + 1) / strips;
+         if (gTiltOn)
+-            rmTiltTexRect(txt, q->ul.x, y0, q->ul.u, v0, q->br.x, y1, q->br.u, v1, GS_SETREG_RGBA(0x80, 0x80, 0x80, a));
++            rmTiltTexRect(txt, q->ul.x, y0, q->ul.u, v0, q->br.x, y1, q->br.u, v1, GS_SETREG_RGBA(cr, cg, cb, a));
+         else
+             gsKit_prim_sprite_texture(gsGlobal, txt,
+                                       q->ul.x + fRenderXOff, y0 + fRenderYOff,
+                                       q->ul.u, v0,
+                                       q->br.x + fRenderXOff, y1 + fRenderYOff,
+-                                      q->br.u, v1, order, GS_SETREG_RGBA(0x80, 0x80, 0x80, a));
++                                      q->br.u, v1, order, GS_SETREG_RGBA(cr, cg, cb, a));
+         order++;
+     }
+ }
+@@ -690,8 +697,9 @@ void rmDrawOverlayPixmap(GSTEXTURE *overlay, int x, int y, short aligned, int w,
+ 
+     if ((inlay->PSM == GS_PSM_CT32) || (inlay->Clut && inlay->ClutPSM == GS_PSM_CT32))
+         gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
+-    else
+-        gsGlobal->PrimAlphaEnable = GS_SETTING_OFF;
++    else // RIPPS2 build 102: a fading cover (alpha below 0x80) blends even with no alpha of its own, as rmDrawQuad does:
++        // a JPG cover in a case popped in at full strength while its case and the rest of the page faded in
++        gsGlobal->PrimAlphaEnable = ((color >> 24) & 0xFF) < 0x80 ? GS_SETTING_ON : GS_SETTING_OFF;
+ 
+     gsKit_TexManager_bind(gsGlobal, inlay);
+     {
+diff --git a/src/ripps2about.c b/src/ripps2about.c
+index 943797d..7cf5503 100644
+--- a/src/ripps2about.c
++++ b/src/ripps2about.c
+@@ -211,14 +211,14 @@ static void abDraw(float scroll)
+             a = 1.0f;
+         int alpha = (int)(0x80 * a);
+         if (r->kind == 'H') {
+-            fntRenderString(gTheme->fonts[4], 320, mid + 3, ALIGN_CENTER, 0, 0, r->text, GS_SETREG_RGBA(AB_LIT, AB_LIT, AB_LIT, alpha));
+-            int w = fntCalcDimensions(gTheme->fonts[4], r->text) / 2 + 18;
++            fntRenderString(thmPageFont(4), 320, mid + 3, ALIGN_CENTER, 0, 0, r->text, GS_SETREG_RGBA(AB_LIT, AB_LIT, AB_LIT, alpha));
++            int w = fntCalcDimensions(thmPageFont(4), r->text) / 2 + 18;
+             rmDrawLine(320 - w - 40, mid + 3, 320 - w, mid + 3, GS_SETREG_RGBAQ(0x4A, 0x72, 0xDC, alpha / 2, 0));
+             rmDrawLine(320 + w, mid + 3, 320 + w + 40, mid + 3, GS_SETREG_RGBAQ(0x4A, 0x72, 0xDC, alpha / 2, 0));
+         } else if (r->kind == 'T')
+-            fntRenderString(gTheme->fonts[5], 320, mid, ALIGN_CENTER, 0, 0, r->text, GS_SETREG_RGBA(AB_TEXT, AB_TEXT + 4, AB_TEXT + 0x13, alpha));
++            fntRenderString(thmPageFont(5), 320, mid, ALIGN_CENTER, 0, 0, r->text, GS_SETREG_RGBA(AB_TEXT, AB_TEXT + 4, AB_TEXT + 0x13, alpha));
+         else
+-            fntRenderString(gTheme->fonts[10], 320, mid, ALIGN_CENTER, 0, 0, r->text, GS_SETREG_RGBA(0x4C, 0x52, 0x64, alpha));
++            fntRenderString(thmPageFont(10), 320, mid, ALIGN_CENTER, 0, 0, r->text, GS_SETREG_RGBA(0x4C, 0x52, 0x64, alpha));
+     }
+ }
+ 
+@@ -233,6 +233,7 @@ void ripps2ShowAbout(const char *version, const char *build)
+         snprintf(abRelease, sizeof(abRelease), "BUILD %d (%s)", RIPPS2_BUILD, RIPPS2_STAGE);
+     snprintf(abBuild, sizeof(abBuild), "%s", build);
+     end = (float)abHeight() + (AB_BOTTOM - AB_TOP) / 3.0f; // scrolled this far, the last row has left the top
++    thmPageFontsBegin(); // build 102: RIPPS2's own faces, on every theme
+ 
+     while (1) {
+         clock_t now = clock();
+@@ -269,8 +270,8 @@ void ripps2ShowAbout(const char *version, const char *build)
+ 
+         rmStartFrame();
+         guiDrawBGPlasma();
+-        fntRenderString(gTheme->fonts[4], 30, 30, ALIGN_VCENTER, 0, 0, "ABOUT", GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80));
+-        fntRenderString(gTheme->fonts[4], 610 - fntCalcDimensions(gTheme->fonts[4], "RIPPS2"), 30, ALIGN_VCENTER, 0, 0, "RIPPS2", GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
++        fntRenderString(thmPageFont(4), 30, 30, ALIGN_VCENTER, 0, 0, "ABOUT", GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80));
++        fntRenderString(thmPageFont(4), 610 - fntCalcDimensions(thmPageFont(4), "RIPPS2"), 30, ALIGN_VCENTER, 0, 0, "RIPPS2", GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
+         rmDrawLine(30, 46, 610, 46, GS_SETREG_RGBAQ(0x4A, 0x72, 0xDC, 0x60, 0));
+         abDraw(scroll);
+         // the hints
+@@ -289,5 +290,6 @@ void ripps2ShowAbout(const char *version, const char *build)
+             break;
+         }
+     }
++    thmPageFontsEnd();
+     readPads();
+ }
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index 9b7c0c6..eea0f99 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -1396,6 +1396,8 @@ static void fbRunElf(const fb_entry_t *e)
+     ripps2LaunchAborted();
+ }
+ 
++static opl_io_module_t *fbGameModuleStarted(void); // build 102: below, with fbGameSourceStarted
++
+ // build 73: a PS1 game (.VCD) in a drive's POPS folder starts the way Storage starts it, through
+ // POPSTARTER: the user's own copy where there is one, else the one RIPPS2 carries, written beside it
+ static void fbRunVcd(const fb_entry_t *e)
+@@ -1409,12 +1411,9 @@ static void fbRunVcd(const fb_entry_t *e)
+         guiMsgBox("PS1 games start from the POPS folder at the top of a drive. Move this .VCD there and try again.", 0, NULL);
+         return;
+     }
+-    if (!strncmp(fbPath, "mass", 4) && fbPath[4] >= '0' && fbPath[4] <= '7')
+-        mod = oplGetModule(BDM_MODE + (fbPath[4] - '0'));
+-    else if (!strncmp(fbPath, "mmce", 4))
+-        mod = oplGetModule(MMCE_MODE);
++    mod = fbGameModuleStarted(); // build 102: its games started here if Storage has not
+     if (mod == NULL || mod->support == NULL || mod->support->itemLaunchVcd == NULL) {
+-        guiMsgBox("This drive's games are not started yet. Open it once in Storage, then start the game here or there.", 0, NULL);
++        guiMsgBox("This drive's games could not be started. Open it once in Storage, then start the game here or there.", 0, NULL);
+         return;
+     }
+     snprintf(name, sizeof(name), "%.*s", n, e->name);
+@@ -1445,6 +1444,40 @@ static item_list_t *fbGameSource(void)
+     return mod->support;
+ }
+ 
++/* build 102 (user: "when a drive is started with the file browser and I try to launch a game, the drive needed to be
++   opened in the Storage category too before launching or it would error"). START DRIVES loads every drive's driver,
++   so the browser reads the drive, but the drive's games (Storage's list for it, which a launch goes through) start
++   only with Storage's Start Device. A launch from here now starts them the way All Games' Start does
++   (ripps2StartSources) and waits for the drive's list, which the IO worker publishes, before it goes on. */
++#define FB_SOURCE_WAIT_TENTHS 60 // 6 s
++static item_list_t *fbGameSourceStarted(void)
++{
++    item_list_t *src = fbGameSource();
++    int i;
++
++    if (src != NULL && src->enabled)
++        return src;
++    guiRenderTextScreen("Starting this drive's games");
++    ripps2StartSources();
++    for (i = 0; i < FB_SOURCE_WAIT_TENTHS && ((src = fbGameSource()) == NULL || !src->enabled); i++)
++        DelayThread(100 * 1000);
++    return src != NULL && src->enabled ? src : NULL;
++}
++
++// the same for a PS1 game: the drive's module, its games started first
++static opl_io_module_t *fbGameModuleStarted(void)
++{
++    opl_io_module_t *mod = NULL;
++
++    if (fbGameSourceStarted() == NULL && strncmp(fbPath, "mmce", 4) != 0)
++        return NULL;
++    if (!strncmp(fbPath, "mass", 4) && fbPath[4] >= '0' && fbPath[4] <= '7')
++        mod = oplGetModule(BDM_MODE + (fbPath[4] - '0'));
++    else if (!strncmp(fbPath, "mmce", 4))
++        mod = oplGetModule(MMCE_MODE);
++    return mod;
++}
++
+ // 1 a PS2 disc image, 2 a PS1 one for Ember, 3 a CHD (which neither core reads), 0 none of these
+ static int fbGameKind(const char *name)
+ {
+@@ -1515,12 +1548,12 @@ static void fbRunIsoAt(item_list_t *src, const fb_entry_t *e)
+ static void fbRunIso(const fb_entry_t *e)
+ {
+     char ask[200], want[160], full[ISO_GAME_NAME_MAX + GAME_STARTUP_MAX + 8], startup[GAME_STARTUP_MAX + 1];
+-    item_list_t *src = fbGameSource(), view;
++    item_list_t *src = fbGameSourceStarted(), view; // build 102: its games started here if Storage has not
+     const char *prefix;
+     int i, count, found = -1, cd;
+ 
+     if (src == NULL || src->itemGetPrefix == NULL || src->itemGet == NULL || src->itemLaunch == NULL || src->itemGetConfig == NULL) {
+-        guiMsgBox("This drive's games are not started yet. Open it once in Storage, then start the game here or there.", 0, NULL);
++        guiMsgBox("This drive's games could not be started. Open it once in Storage, then start the game here or there.", 0, NULL);
+         return;
+     }
+     prefix = src->itemGetPrefix(src);
+@@ -1574,7 +1607,7 @@ static void fbRunCue(const fb_entry_t *e)
+ {
+     char want[48], folder[CUE_NAME_MAX], ask[200];
+     const char *colon = strchr(fbPath, ':'), *rest;
+-    item_list_t *src = fbGameSource();
++    item_list_t *src = fbGameSourceStarted(); // build 102: its games started here if Storage has not
+     int n;
+ 
+     (void)e;
+@@ -1588,7 +1621,7 @@ static void fbRunCue(const fb_entry_t *e)
+         return;
+     }
+     if (src == NULL || src->itemLaunchCue == NULL) {
+-        guiMsgBox("This drive's games are not started yet. Open it once in Storage, then start the game here or there.", 0, NULL);
++        guiMsgBox("This drive's games could not be started. Open it once in Storage, then start the game here or there.", 0, NULL);
+         return;
+     }
+     snprintf(folder, sizeof(folder), "%.*s", n, rest + strlen(want));
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index 75b818a..d1f66e5 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -344,13 +344,14 @@ void ripps2Status(void)
+     stScan();
+     sel = stNextAction(-1, 1);
+     readPads();
++    thmPageFontsBegin(); // build 102: RIPPS2's own faces, on every theme (RIPFLOW's STATUS read in its capitals)
+     while (1) {
+         readPads();
+         rmStartFrame();
+         ripps2DrawBackground();
+         ripps2DrawPagePanel();
+-        fntRenderString(gTheme->fonts[5], ST_X, 44, ALIGN_VCENTER, 0, 0, "STATUS", ST_GOLD);
+-        fntRenderString(RIPPS2_CASE_TITLE_FONT, ST_X, 66, ALIGN_VCENTER, 0, 0, "RIPPS2's homebrew", ST_LIT);
++        fntRenderString(thmPageFont(5), ST_X, 44, ALIGN_VCENTER, 0, 0, "STATUS", ST_GOLD);
++        fntRenderString(thmPageFont(9), ST_X, 66, ALIGN_VCENTER, 0, 0, "RIPPS2's homebrew", ST_LIT);
+         rmDrawLine(ST_X, 82, ST_X + ST_W, 82, ST_PRIM(0x4A, 0x72, 0xDC, 0x60));
+ 
+         // keep the chosen row in the viewport, its section's name with it where it fits; build 96: the right
+@@ -406,20 +407,20 @@ void ripps2Status(void)
+             int h = stRowH(r);
+             if (y + h > ST_TOP - 4 && y < ST_BOTTOM) {
+                 if (r->kind == ROW_HEAD) {
+-                    fntRenderString(gTheme->fonts[5], ST_X, y + 20, ALIGN_VCENTER, 0, 0, r->text, ST_GOLD);
+-                    fntRenderString(RIPPS2_CASE_FONT, ST_X + ST_W - rmUnScaleX(fntCalcDimensions(RIPPS2_CASE_FONT, r->aside)), y + 20, ALIGN_VCENTER, 0, 0, r->aside, ST_SOFT);
++                    fntRenderString(thmPageFont(5), ST_X, y + 20, ALIGN_VCENTER, 0, 0, r->text, ST_GOLD);
++                    fntRenderString(thmPageFont(15), ST_X + ST_W - rmUnScaleX(fntCalcDimensions(thmPageFont(15), r->aside)), y + 20, ALIGN_VCENTER, 0, 0, r->aside, ST_SOFT);
+                     rmDrawLine(ST_X, y + h - 3, ST_X + ST_W, y + h - 3, ST_PRIM(0x4A, 0x72, 0xDC, 0x30));
+                 } else if (r->kind == ROW_STATUS) {
+                     rmDrawRect(ST_X, y + 6, 6, 6, r->ok ? ST_PRIM(0x50, 0xC8, 0x78, 0x80) : ST_PRIM(0x60, 0x66, 0x78, 0x80));
+-                    fntRenderStringFit(RIPPS2_CASE_FONT, ST_X + 14, y + 9, ALIGN_VCENTER, ST_W - 14, r->text, r->ok ? ST_OK : ST_SOFT, 1);
++                    fntRenderStringFit(thmPageFont(15), ST_X + 14, y + 9, ALIGN_VCENTER, ST_W - 14, r->text, r->ok ? ST_OK : ST_SOFT, 1);
+                 } else {
+                     int cur = i == sel;
+                     if (cur) {
+                         rmDrawRect(ST_X - 8, y, ST_W + 16, h - 4, ST_PRIM(0x1E, 0x3C, 0x96, 0x58));
+                         rmDrawRect(ST_X - 8, y, 3, h - 4, ST_PRIM(0x6A, 0x9A, 0xFF, 0x80));
+                     }
+-                    fntRenderString(gTheme->fonts[8], ST_X + 14, y + 12, ALIGN_VCENTER, 0, 0, r->text, cur ? ST_LIT : ST_SOFT);
+-                    fntRenderString(RIPPS2_CASE_FONT, ST_X + ST_W - rmUnScaleX(fntCalcDimensions(RIPPS2_CASE_FONT, r->aside)), y + 12, ALIGN_VCENTER, 0, 0, r->aside,
++                    fntRenderString(thmPageFont(8), ST_X + 14, y + 12, ALIGN_VCENTER, 0, 0, r->text, cur ? ST_LIT : ST_SOFT);
++                    fntRenderString(thmPageFont(15), ST_X + ST_W - rmUnScaleX(fntCalcDimensions(thmPageFont(15), r->aside)), y + 12, ALIGN_VCENTER, 0, 0, r->aside,
+                                     cur ? ST_SOFT : ST_DIM);
+                 }
+             }
+@@ -492,6 +493,7 @@ void ripps2Status(void)
+             readPads();
+         }
+     }
++    thmPageFontsEnd();
+     if (changed)
+         ripps2SaveSettingsInBackground();
+     readPads();
+diff --git a/src/sound.c b/src/sound.c
+index 3f55c17..ba589f0 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -447,6 +447,34 @@ static clock_t bootSoundEnds = 0; // when the boot sound has played out
+ static volatile int sfxReloadBusy;
+ static void sfxPlayHeld(void);
+ 
++/* RIPPS2 build 102 (user: "the console boot sound needs to play as soon as the towers first zoom, instead of when the
++   ELF loads"). The boot sound used to start the moment the IO worker had loaded it, which could be before the
++   intro's first frame. Now the load only marks it ready, and the GUI's frame tick (bgmBootTick) plays it on the
++   first frame both are true: the intro has begun (sfxIntroStarted) and the sound is in. One thread plays it, once. */
++static volatile int sfxBootPending = 0; // loaded, waiting for the towers
++static volatile int sfxIntroOn = 0;     // the intro's towers have begun their swoop
++
++void sfxIntroStarted(void)
++{
++    sfxIntroOn = 1;
++}
++
++static void sfxBootPlay(void)
++{
++    if (!sfxBootPending || !sfxIntroOn)
++        return;
++    sfxBootPending = 0;
++    if (!sfxReady[SFX_BOOT] || !gEnableSFX || !gEnableBootSND)
++        return;
++    audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
++    if (audsrv_ch_play_adpcm(SFX_BOOT_VOICE, &sfx[SFX_BOOT]) >= 0) {
++        voiceStart[SFX_BOOT_VOICE] = clock();
++        voiceLen[SFX_BOOT_VOICE] = (unsigned int)sfx_files[SFX_BOOT].duration_ms * (CLOCKS_PER_SEC / 1000);
++        voiceSound[SFX_BOOT_VOICE] = SFX_BOOT;
++        bootSoundEnds = clock() + (clock_t)sfx_files[SFX_BOOT].duration_ms * (CLOCKS_PER_SEC / 1000);
++    }
++}
++
+ // Returns the number of sounds loaded, < 0 if audio is not up. The IO worker only (sfxReload queues it)
+ int sfxInit(int bootSnd)
+ {
+@@ -478,7 +506,7 @@ int sfxInit(int bootSnd)
+     // ships six of the fifteen, so a ripped launch, disc or save sound went silent on it.
+     int themeID = thmGetGuiValue();
+     char *thmPath = thmGetFilePath(themeID);
+-    if (thmPath != NULL) { // a disk theme's own sound folder
++    if (thmPath != NULL && !gThemeSoundsAudio) { // a disk theme's own sound folder (build 102: unless sounds=audio)
+         snprintf(sound_path, sizeof(sound_path), "%ssound", thmPath);
+         DIR *dir = opendir(sound_path);
+         if (dir != NULL) {
+@@ -543,15 +571,8 @@ int sfxInit(int bootSnd)
+         LOG("SFX: Loaded %s, size=%d, duration=%dms\n", full_path, sfx_files[i].size, sfx_files[i].duration_ms);
+         sfxReady[i] = 1;
+         loaded++;
+-        if (i == SFX_BOOT && gEnableSFX && gEnableBootSND) { // it plays now; the rest load under it
+-            audsrv_adpcm_set_volume_and_pan(SFX_BOOT_VOICE, gBootSndVolume, 0);
+-            if (audsrv_ch_play_adpcm(SFX_BOOT_VOICE, &sfx[SFX_BOOT]) >= 0) {
+-                voiceStart[SFX_BOOT_VOICE] = clock();
+-                voiceLen[SFX_BOOT_VOICE] = (unsigned int)sfx_files[SFX_BOOT].duration_ms * (CLOCKS_PER_SEC / 1000);
+-                voiceSound[SFX_BOOT_VOICE] = SFX_BOOT;
+-                bootSoundEnds = clock() + (clock_t)sfx_files[SFX_BOOT].duration_ms * (CLOCKS_PER_SEC / 1000);
+-            }
+-        }
++        if (i == SFX_BOOT && gEnableSFX && gEnableBootSND) // build 102: it plays with the towers' first frame
++            sfxBootPending = 1;                                // (sfxBootPlay, from the GUI's frame tick)
+     }
+     sfxLoadedCount = loaded;
+     sfxLoading = 0;
+@@ -1028,13 +1049,17 @@ static void bgmStarterThread(void *arg)
+     ExitDeleteThread();
+ }
+ 
++static void bgmStartWaiting(void); // build 102
++
+ // Every GUI frame, from the intro on: starts the music once the sounds are in, then raises it
+ void bgmBootTick(void)
+ {
+     static int started = 0;
+     static clock_t lastStep = 0;
+ 
++    sfxBootPlay();     // build 102: the boot sound, with the towers' first frame
+     sfxReloadTick(); // build 98: the reload a preview's close asked for
++    bgmStartWaiting(); // build 102: a start that waited for a stopped stream's decoder
+ 
+     if (started)
+         audioLateTick(); // build 74: an AUDIO folder on a drive that started after the boot
+@@ -1354,6 +1379,24 @@ bad:
+ 
+ // PCM bytes the stream plays per millisecond, set by bgmStart from its format.
+ static int bgmBytesPerMs = 0;
++/* RIPPS2 build 102 (user: "a crazy audio beeping bug ... happens when loading is stuck, and switching can cause a long
++   hang before clearing"). audsrv's IOP play thread never checks its ring: run dry, it goes on reading round it and
++   plays the same tenth of a second over and over (ps2sdk iop/sound/audsrv/src/audsrv.c, play_thread) until data
++   comes again. The decoder runs dry whenever its file read stalls (a drive still coming up after an in-game reset,
++   a busy card), and the ripped BIOS music is a WAV read straight from the drive. So while no chunk is ready the
++   playback thread keeps audsrv's queue above BGM_STARVE_FEEDS feeds with silence. And a stop no longer holds the
++   menu while the decoder sits in a read: it waits BGM_STOP_READ_SLICES, then leaves the decoder to finish on its
++   own (bgmAbandoned); the next start waits for it and cleans up after it instead of starting a second one over the
++   same buffers and file. */
++#define BGM_STARVE_FEEDS     3    // audsrv feeds (512 samples each) kept queued while the decoder is late
++#define BGM_STARVE_POLL_US   4000 // how often the playback thread looks while it waits for a chunk
++#define BGM_STOP_READ_SLICES 2    // ~0.4 s for a decoder that is inside a read
++static int bgmFeedBytes = 0;                    // one audsrv feed of this stream's format, in bytes
++static volatile unsigned char bgmIoStarted = 0; // the decoder has run (the playback thread's end test)
++static volatile int bgmAbandoned = 0;           // a stop left a decoder still in its read
++static volatile int bgmStartWanted = 0;         // a start waits for that decoder to finish
++static const char bgmSilence[4096];
++volatile unsigned int gBgmSilenceFeeds = 0;     // feeds of silence given while the decoder was late (the HUD's)
+ // Most room bgmQueueChunk waits for before queueing: one chunk, or less when the audsrv ring is small.
+ // audsrv sizes its ring at ten SPU2 feeds of the stream format and starts a stream with only half of it
+ // free, so an 11025 Hz stream never has room for a whole chunk and neither does the start of a 12 kHz
+@@ -1447,12 +1490,37 @@ static int bgmQueueChunk(const char *chunk)
+     return 1;
+ }
+ 
++// build 102: no chunk ready: keep audsrv's queue above BGM_STARVE_FEEDS feeds with silence
++static void bgmFeedSilence(void)
++{
++    int queued, want;
++
++    if (bgmFeedBytes <= 0)
++        return;
++    queued = audsrv_queued();
++    if (queued < 0 || queued >= BGM_STARVE_FEEDS * bgmFeedBytes)
++        return;
++    want = BGM_STARVE_FEEDS * bgmFeedBytes - queued;
++    if (want > (int)sizeof(bgmSilence))
++        want = sizeof(bgmSilence);
++    want &= ~3;
++    if (want > 0 && audsrv_play_audio(bgmSilence, want) > 0)
++        gBgmSilenceFeeds++;
++}
++
+ static void bgmThread(void *arg)
+ {
+     bgmThreadRunning = 1;
+ 
+     while (!terminateFlag) {
+-        WaitSema(outSema);
++        // build 102: wait for a chunk without letting audsrv run dry (it would loop its ring: the beeping)
++        if (PollSema(outSema) < 0) {
++            if (bgmIoStarted && !bgmIoThreadRunning && bgmBufferedChunks <= 0)
++                break; // the decoder has finished and everything it gave has played
++            bgmFeedSilence();
++            DelayThread(BGM_STARVE_POLL_US);
++            continue;
++        }
+         if (terminateFlag)
+             break;
+ 
+@@ -1472,6 +1540,7 @@ static void bgmThread(void *arg)
+         if (bgmBufferedChunks <= 0 && !terminateFlag && bgmIoThreadRunning) {
+             int cushionWait = 0;
+             while (!terminateFlag && bgmIoThreadRunning && bgmBufferedChunks < 16 && cushionWait < 20) {
++                bgmFeedSilence(); // build 102: audsrv must not run dry while the cushion builds
+                 DelayThread(5 * 1000);
+                 cushionWait++;
+             }
+@@ -1515,6 +1584,7 @@ static void bgmIoThread(void *arg)
+     int decodeTotal, bitStream;
+ 
+     bgmIoThreadRunning = 1;
++    bgmIoStarted = 1; // build 102
+     bgmDecodePrio = BGM_THREAD_BASE_PRIO + 1;
+     do {
+         WaitSema(inSema);
+@@ -2225,6 +2295,7 @@ static int bgmInit(void)
+     wrPtr = 0;
+     bgmThreadRunning = 0;
+     bgmIoThreadRunning = 0;
++    bgmIoStarted = 0; // build 102
+     bgmBufferedChunks = 0;
+     bgmBufferPrimed = 0;
+     bgmIoThrottle = 0;
+@@ -2320,6 +2391,18 @@ void bgmStart(void)
+         LOG("BGM: %s: ERROR: not initialized!\n", __FUNCTION__);
+         return;
+     }
++    // build 102: a stop left a decoder in its read: a second stream must not start over the same buffers and
++    // file. Once it has finished, what it held is let go here; until then the start waits (bgmBootTick)
++    if (bgmAbandoned) {
++        if (bgmIoThreadRunning || bgmThreadRunning) {
++            bgmStartWanted = 1;
++            LOG("BGM: the last stream's decoder is still in a read: the music starts once it has finished\n");
++            return;
++        }
++        bgmAbandoned = 0;
++        bgmDeinit();
++    }
++    bgmStartWanted = 0;
+ 
+     int ret = bgmInit();
+     if (ret >= 0) {
+@@ -2347,6 +2430,8 @@ void bgmStart(void)
+         audsrvFmt.freq = rate;
+         audsrvFmt.bits = 16;
+         bgmBytesPerMs = (int)((rate * channels * 2) / 1000);
++        // build 102: one audsrv feed (512 samples at 48 kHz, in this rate and format), as audsrv sizes it
++        bgmFeedBytes = (int)(((512 * rate) / 48000) << (1 + (channels == 2)));
+ 
+         if (audsrv_set_format(&audsrvFmt) != AUDSRV_ERR_NOERROR) {
+             // No audsrv upsampler for this rate (16 kHz, say): its ring would never drain. The blocking
+@@ -2391,12 +2476,24 @@ void bgmStart(void)
+ // RIPPS2: the CD player's stream. Whatever music was playing stops; bgmStopPcm ends it again, and the
+ // menu music starts over once the player is closed (bgmBootTick's job is done by then, so the caller
+ // restarts it).
++// build 102: a start that waited for a stopped stream's decoder to finish its read (bgmBootTick, every frame)
++static void bgmStartWaiting(void)
++{
++    if (bgmStartWanted && !bgmIoThreadRunning && !bgmThreadRunning && (gEnableBGM || bgmPcmExternal != NULL))
++        bgmStart();
++}
++
+ int bgmStartPcm(int (*read)(char *buf, int size), int rate, int channels)
+ {
++    int i;
++
+     if (!audio_initialized)
+         return -1;
+     if (isBgmPlaying() || bgmPcmExternal != NULL) // a CD stream that ran out still has its threads to free
+         bgmStop();
++    // build 102: a CD is asked for: a decoder a stop left in its read gets up to 2 s to finish first
++    for (i = 0; bgmAbandoned && (bgmIoThreadRunning || bgmThreadRunning) && i < 100; i++)
++        DelayThread(20 * 1000);
+     bgmPcmExternal = read;
+     bgmPcmRate = rate;
+     bgmPcmChannels = channels;
+@@ -2455,23 +2552,29 @@ void bgmStop(void)
+     SignalSema(outSema);
+     WakeupThread(bgmThreadID);
+ 
++    bgmStartWanted = 0; // build 102: a stop also drops a start that was waiting
+     threadId = GetThreadId();
+     int waits = BGM_STOP_WAIT_SLICES;
+-    while (bgmIoThreadRunning && waits-- > 0) {
++    // the playback thread first: it stops audsrv, so whatever the decoder does next, nothing more sounds
++    while (bgmThreadRunning && waits-- > 0) {
+         SetAlarm(200 * 16, &bgmShutdownDelayCallback, (void *)threadId);
+         SleepThread();
+     }
+-    waits = BGM_STOP_WAIT_SLICES;
+-    while (bgmThreadRunning && waits-- > 0) {
++    // build 102: a decoder inside a read (a stalled drive) gets BGM_STOP_READ_SLICES, not the full wait
++    waits = gBgmInRead ? BGM_STOP_READ_SLICES : BGM_STOP_WAIT_SLICES;
++    while (bgmIoThreadRunning && waits-- > 0) {
+         SetAlarm(200 * 16, &bgmShutdownDelayCallback, (void *)threadId);
+         SleepThread();
+     }
+ 
+     if (bgmIoThreadRunning || bgmThreadRunning) {
+-        LOG("BGM: threads did not stop (io=%d play=%d) -- abandoning\n",
++        LOG("BGM: threads did not stop (io=%d play=%d) -- left to finish; the next start cleans up\n",
+             (int)bgmIoThreadRunning, (int)bgmThreadRunning);
++        bgmAbandoned = 1; // build 102: bgmStart waits for them and lets go of what they held
++        bgmIsPlaying = 0;
+         return;
+     }
++    bgmAbandoned = 0; // build 102: everything stopped: what the old stream held goes now
+ 
+     bgmDeinit();
+ 
+diff --git a/src/themes.c b/src/themes.c
+index 3f22a17..dc8708a 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -674,9 +674,12 @@ static void thmDrawWrapRoll(theme_element_t *elem, mutable_text_t *mt, int step,
+             if (below < 0.0f)
+                 a *= fmaxf(0.0f, 1.0f + below / step);
+             if (a > 0.01f) {
++                int iy = (int)floorf(ly);
+                 snprintf(line, sizeof(line), "%.*s", n < (int)sizeof(line) - 1 ? n : (int)sizeof(line) - 1, p);
+-                fntRenderString(elem->font, elem->posX, (int)ly, elem->aligned, 0, 0, line,
++                fntSetSubUnit(0.0f, ly - (float)iy); // build 102: placed to the display pixel, so the roll is smooth
++                fntRenderString(elem->font, elem->posX, iy, elem->aligned, 0, 0, line,
+                                 (elem->color & ~(0xFFULL << 24)) | ((u64)(int)(base * a) << 24));
++                fntSetSubUnit(0.0f, 0.0f);
+             }
+         }
+         p = e ? e + 1 : p + n;
+@@ -1284,6 +1287,7 @@ static GSTEXTURE *getGameImageCached(image_cache_t *cache, struct submenu_item *
+ // Favourites element redirection (defined in the Coverflow section below; used by both draw
+ // paths so an APP favourite renders with the apps element, not the game cover element).
+ static theme_element_t *thmGetElemForItem(struct menu_list *menu, struct submenu_list *item, theme_element_t *elem);
++static int thmAppShapeBox(struct menu_list *menu, struct submenu_list *item, theme_element_t *elem, int aligned, int *x, int *y, int *w, int *h); // build 102
+ 
+ #ifdef RETROACHIEVEMENTS
+ /* RA: the mark over the cover of a checked, tracked game. What
+@@ -1851,8 +1855,21 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+         // and <name>_alpha lets what is behind it show through (the Storage viewport's art).
+         int imageAlpha = slideW < 1.0f ? (int)((float)drawElem->imageAlpha * slideW) : drawElem->imageAlpha;
+         u64 imageCol = imageAlpha < 0x80 ? GS_SETREG_RGBA(0x80, 0x80, 0x80, imageAlpha) : gDefaultCol;
++        // build 102: an app's case in the box its Case Shape gives it, the case's window scaled with it
++        int ix = drawElem->posX, iy = drawElem->posY, iw = drawElem->width, ih = drawElem->height;
++        int shaped = thmAppShapeBox(menu, item, drawElem, drawElem->aligned, &ix, &iy, &iw, &ih);
+         rmSetReflectionYOffset(drawElem->reflectionOffset);
+-        if (gameImage->overlayTexture) {
++        if (shaped && gameImage->overlayTexture) {
++            image_texture_t *ov = gameImage->overlayTexture;
++            int ow = drawElem->width, oh = drawElem->height;
++            rmDrawOverlayPixmap(&ov->source, ix, iy, drawElem->aligned, iw, ih, drawElem->scaled, imageCol, texture,
++                                ov->upperLeft_x * iw / ow, ov->upperLeft_y * ih / oh, ov->upperRight_x * iw / ow, ov->upperRight_y * ih / oh,
++                                ov->lowerLeft_x * iw / ow, ov->lowerLeft_y * ih / oh, ov->lowerRight_x * iw / ow, ov->lowerRight_y * ih / oh, drawElem->reflection);
++            if (gameImage->overlayTexture2)
++                rmDrawPixmap(&gameImage->overlayTexture2->source, ix, iy, drawElem->aligned, iw, ih, drawElem->scaled, imageCol, drawElem->reflection);
++        } else if (shaped)
++            rmDrawPixmap(texture, ix, iy, drawElem->aligned, iw, ih, drawElem->scaled, imageCol, drawElem->reflection);
++        else if (gameImage->overlayTexture) {
+             rmDrawOverlayPixmap(&gameImage->overlayTexture->source, drawElem->posX, drawElem->posY, drawElem->aligned, drawElem->width, drawElem->height, drawElem->scaled, imageCol,
+                                 texture, gameImage->overlayTexture->upperLeft_x, gameImage->overlayTexture->upperLeft_y, gameImage->overlayTexture->upperRight_x, gameImage->overlayTexture->upperRight_y,
+                                 gameImage->overlayTexture->lowerLeft_x, gameImage->overlayTexture->lowerLeft_y, gameImage->overlayTexture->lowerRight_x, gameImage->overlayTexture->lowerRight_y, drawElem->reflection);
+@@ -2015,6 +2032,7 @@ static theme_element_t *thmGetElemForItem(struct menu_list *menu, struct submenu
+ 
+     mutable_image_t *img = (mutable_image_t *)elem->extended;
+ 
++
+     // Favourites with an opt-in per-kind family (favsVcd* for PS1 rows, favsApps* for app rows): take
+     // the cover the theme DECLARED there -- on that family's own page (the Favourites PS1 / ELF view)
+     // and on the All shelf alike. Inherited fallback copies are skipped, so an undeclared cover slot
+@@ -2045,6 +2063,50 @@ static theme_element_t *thmGetElemForItem(struct menu_list *menu, struct submenu
+     return (kindElem != NULL) ? kindElem : elem;
+ }
+ 
++// build 102: is this row an app (its case takes the app's Case Shape)? The same test thmGetElemForItem makes
++static int thmItemIsApp(struct menu_list *menu, struct submenu_list *item)
++{
++    item_list_t *menuList;
++    int rowView;
++
++    if (item == NULL || item->item.isFolder || menu == NULL || menu->item == NULL || (menuList = (item_list_t *)menu->item->userdata) == NULL)
++        return 0;
++    rowView = libListRowView(menuList, item->item.id);
++    return rowView == LIB_VIEW_ELF || rowView == LIB_VIEW_PS1_ELF ||
++           (menuList->mode == FAV_MODE && favGetItemSourceMode(item->item.id) == APP_MODE);
++}
++
++/* build 102: the box an app's case draws in, by its Case Shape: PS1 (the default) makes a tall box square, as wide as
++   it was; PS2 makes a square or wide one a PS2 case (143 x 201), as high as it was. Only a cover (COV, COV2) is
++   shaped, never an app's background or screenshots. The bottom edge stays where it was (aligned: the centre moves by
++   half the change; top-left: the top by all of it, the left by half), so the case stands where the theme put it.
++   *w / *h in and out, *x / *y with them; 1 when the box changed. */
++static int thmAppShapeBox(struct menu_list *menu, struct submenu_list *item, theme_element_t *elem, int aligned, int *x, int *y, int *w, int *h)
++{
++    mutable_image_t *img = elem != NULL ? (mutable_image_t *)elem->extended : NULL;
++    int nw = *w, nh = *h, shape;
++
++    if (*w <= 0 || *h <= 0 || img == NULL || img->cache == NULL || img->cache->suffix == NULL ||
++        strncmp(img->cache->suffix, "COV", 3) != 0 || !thmItemIsApp(menu, item))
++        return 0;
++    shape = thmAppCaseShape(item->item.text);
++    if (shape == THM_APP_CASE_PS1 && nh > nw)
++        nh = nw;
++    else if (shape == THM_APP_CASE_PS2 && nh * 143 < nw * 201)
++        nw = nh * 143 / 201;
++    if (nw == *w && nh == *h)
++        return 0;
++    if (aligned) {
++        *y += (*h - nh) / 2;
++    } else {
++        *y += *h - nh;
++        *x += (*w - nw) / 2;
++    }
++    *w = nw;
++    *h = nh;
++    return 1;
++}
++
+ static int cfAnimFrameCount = 0;
+ 
+ // Arms a slide animation in direction dir (+1 next / -1 prev). No-op (instant move) when
+@@ -2344,6 +2406,11 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+         // (coverWidth) for even carousel spacing. On single-type tabs coverElem == elem, so this is
+         // identical to the old coverHeight*drawW/coverWidth. csw is div-guarded >= 1 above.
+         int drawH = csh * drawW / csw;
++        {
++            // build 102: an app's case by its Case Shape (the carousel's spacing stays the same: it is not the width)
++            int sx = 0, sy = 0;
++            thmAppShapeBox(menu, covers[i], coverElem, 1, &sx, &sy, &drawW, &drawH);
++        }
+ 
+         // Auto-center the VISIBLE cover (case frame box) from THIS cover's overlay corners: the
+         // frame can sit off-center (e.g. apps_case = top-left 186 of 256). No overlay => no shift.
+@@ -2667,6 +2734,7 @@ static void drawGridCover(struct menu_list *menu, struct submenu_list *it, struc
+ 
+     if (img == NULL)
+         return;
++    thmAppShapeBox(menu, it, coverElem, 1, &cx, &cy, &w, &h); // build 102: an app's case by its Case Shape
+     if (back != NULL) { // build 82: a turned case shows its back cover, the art alone
+         u64 col = selected ? GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80) : GS_SETREG_RGBA(0x70, 0x70, 0x70, 0x80);
+         rmDrawPixmap(back, cx, cy, ALIGN_CENTER, w, h, SCALING_RATIO, col, elem->reflection && selected);
+@@ -2870,7 +2938,11 @@ static void drawGrid(struct menu_list *menu, struct submenu_list *item, config_s
+         float drawTurn = seeBack ? turn - (turn > 0 ? 3.14159265f : -3.14159265f) : turn;
+         if (elem->tilt || turn != 0.0f)
+             ripps2TiltBeginTurn(selX, selY, elem->tilt ? elem->tiltScale : 0, drawTurn);
+-        drawGridGlow(selX, selY, rmWideScale(sw), sh);
++        {
++            int gx = selX, gy = selY, gw = sw, gh = sh; // build 102: the glow round the app's case as it is shaped
++            thmAppShapeBox(menu, item, thmGetElemForItem(menu, item, elem), 1, &gx, &gy, &gw, &gh);
++            drawGridGlow(gx, gy, rmWideScale(gw), gh);
++        }
+         drawGridCover(menu, item, elem, src, selX, selY, sw, sh, 1, seeBack ? selBack : NULL);
+         if (elem->tilt || turn != 0.0f)
+             ripps2TiltEnd();
+@@ -4850,6 +4922,169 @@ void thmGlyphSetRefresh(void)
+         thmGlyphSetLoad(gTheme, ripps2GlyphSetFor(gTheme->glyphSetDef), 1);
+ }
+ 
++/* RIPPS2 build 102 (user: "the color pickers get skipped in the menu on some themes, idk why"). The Colours page
++   edits the settings' palette, which RIPPS2's own theme and RIPFLOW draw with; every other theme (RIPGRID, a disk
++   theme) sets its colours in its own file, so the pickers were greyed out there and the cursor skipped them. Now
++   they edit that theme's colours: kept under the theme's name (rcol_<name>_<what> in the settings), laid over its
++   own when it loads (before its elements are built, so they take them), and Reset gives the theme its own back. */
++static const char *const thmColorWhat[6] = {"bg", "ui", "title", "text", "sel", "plas"};
++static const char *thmLoadingColorName = NULL; // the theme thmLoad is loading, by its colours' name
++volatile int gThemeSoundsAudio = 0;             // build 102: the theme on show has sounds=audio
++
++static void thmColorKey(char *key, int size, const char *name, int what)
++{
++    char n[21];
++    int i;
++
++    for (i = 0; name[i] && i < 20; i++)
++        n[i] = isalnum((unsigned char)name[i]) ? name[i] : '_';
++    n[i] = '\0';
++    snprintf(key, size, "rcol_%s_%s", n, thmColorWhat[what]);
++}
++
++// the name a theme's own colours are kept under; NULL for RIPPS2 and RIPFLOW, which take the settings' palette
++const char *thmColorName(int themeID)
++{
++    if (themeID <= 0 || themeID == nThemes + 1)
++        return NULL;
++    if (themeID == nThemes + 2)
++        return "RIPGRID";
++    if (themeID - 1 < nThemes && themes[themeID - 1].name != NULL)
++        return themes[themeID - 1].name;
++    return NULL;
++}
++
++// 1 when the user has set this theme's colours: c is background, UI text, title, text, selection, plasma
++int thmColorsGet(const char *name, unsigned char c[6][3])
++{
++    config_set_t *cfg = configGetByType(CONFIG_OPL);
++    char key[CONFIG_KEY_NAME_LEN];
++    int w;
++
++    if (name == NULL || cfg == NULL)
++        return 0;
++    for (w = 0; w < 6; w++) {
++        thmColorKey(key, sizeof(key), name, w);
++        if (!configGetColor(cfg, key, c[w]))
++            return 0;
++    }
++    return 1;
++}
++
++void thmColorsSet(const char *name, unsigned char c[6][3])
++{
++    config_set_t *cfg = configGetByType(CONFIG_OPL);
++    char key[CONFIG_KEY_NAME_LEN];
++    int w;
++
++    if (name == NULL || cfg == NULL)
++        return;
++    for (w = 0; w < 6; w++) {
++        thmColorKey(key, sizeof(key), name, w);
++        configSetColor(cfg, key, c[w]);
++    }
++}
++
++void thmColorsClear(const char *name)
++{
++    config_set_t *cfg = configGetByType(CONFIG_OPL);
++    char key[CONFIG_KEY_NAME_LEN];
++    int w;
++
++    if (name == NULL || cfg == NULL)
++        return;
++    for (w = 0; w < 6; w++) {
++        thmColorKey(key, sizeof(key), name, w);
++        configRemoveKey(cfg, key);
++    }
++}
++
++static void thmApplyUserColors(theme_t *t, const char *name)
++{
++    unsigned char c[6][3];
++
++    if (!thmColorsGet(name, c))
++        return;
++    memcpy(t->bgColor, c[0], 3);
++    t->uiTextColor = GS_SETREG_RGBA(c[1][0], c[1][1], c[1][2], 0x80);
++    t->titleColor = GS_SETREG_RGBA(c[2][0], c[2][1], c[2][2], 0x80);
++    t->textColor = GS_SETREG_RGBA(c[3][0], c[3][1], c[3][2], 0x80);
++    t->selTextColor = GS_SETREG_RGBA(c[4][0], c[4][1], c[4][2], 0x80);
++    memcpy(t->plasBlendColor, c[5], 3);
++}
++
++/* RIPPS2 build 102 (user: "allow users to set if an app uses ps1/ps2 case shape for art in the settings on it
++   individually", and "apps cases should display as ps1 square by default"). An app's case: PS1 square (the default),
++   PS2 tall, or as the theme draws it. Kept in the settings under a hash of the app's name (acase_<8 hex>: 1 PS2, 2 the
++   theme's; no key PS1), set from the app's menu (Triangle). Every cover asks per frame, so the settings are read into
++   a small table once and again only when they are loaded anew. The shape is the case's box (thmAppShapeBox). */
++#define THM_APP_CASES 64
++static struct
++{
++    config_set_t *cfg;
++    struct config_value_t *head;
++    int count;
++    unsigned int hash[THM_APP_CASES];
++    unsigned char shape[THM_APP_CASES];
++} thmAppCases;
++
++static unsigned int thmAppHash(const char *title)
++{
++    unsigned int h = 2166136261u; // FNV-1a
++    while (*title)
++        h = (h ^ (unsigned char)*title++) * 16777619u;
++    return h;
++}
++
++static void thmAppCasesRead(config_set_t *cfg)
++{
++    struct config_value_t *v;
++    unsigned int h;
++
++    thmAppCases.cfg = cfg;
++    thmAppCases.head = cfg != NULL ? cfg->head : NULL;
++    thmAppCases.count = 0;
++    for (v = thmAppCases.head; v != NULL && thmAppCases.count < THM_APP_CASES; v = v->next)
++        if (!strncmp(v->key, "acase_", 6) && sscanf(v->key + 6, "%8x", &h) == 1 && v->val[0] >= '1' && v->val[0] < '0' + THM_APP_CASES_N) {
++            thmAppCases.hash[thmAppCases.count] = h;
++            thmAppCases.shape[thmAppCases.count++] = (unsigned char)(v->val[0] - '0');
++        }
++}
++
++int thmAppCaseShape(const char *title)
++{
++    config_set_t *cfg = configGetByType(CONFIG_OPL);
++    unsigned int h;
++    int i;
++
++    if (title == NULL || cfg == NULL)
++        return THM_APP_CASE_PS1;
++    if (thmAppCases.cfg != cfg || thmAppCases.head != cfg->head)
++        thmAppCasesRead(cfg);
++    if (thmAppCases.count == 0)
++        return THM_APP_CASE_PS1;
++    h = thmAppHash(title);
++    for (i = 0; i < thmAppCases.count; i++)
++        if (thmAppCases.hash[i] == h)
++            return thmAppCases.shape[i];
++    return THM_APP_CASE_PS1;
++}
++
++void thmAppCaseShapeSet(const char *title, int shape)
++{
++    config_set_t *cfg = configGetByType(CONFIG_OPL);
++    char key[16];
++
++    if (title == NULL || cfg == NULL)
++        return;
++    snprintf(key, sizeof(key), "acase_%08x", thmAppHash(title));
++    if (shape > THM_APP_CASE_PS1 && shape < THM_APP_CASES_N)
++        configSetInt(cfg, key, shape);
++    else
++        configRemoveKey(cfg, key);
++    thmAppCasesRead(cfg);
++}
++
+ static void thmSetColors(theme_t *theme)
+ {
+     memcpy(theme->bgColor, gDefaultBgColor, 3);
+@@ -4952,6 +5187,56 @@ static void thmLoadFonts(config_set_t *themeConfig, const char *themePath, theme
+     theme->diaTipFont = diaTipFont != FNT_ERROR ? diaTipFont : theme->fonts[15];
+ }
+ 
++/* RIPPS2 build 102 (user: "ripflow status page font and ripps2 about pages font slots on all themes"). About and
++   STATUS read in RIPPS2's own faces on every theme, as Settings has since build 96: the slots they draw with
++   (thmPageFace) at RIPPS2's sizes. Up to build 101 each theme's own slots drew them, so RIPFLOW's STATUS heading
++   came out in Roboto Bold capitals and a theme without those slots drew About in its one default face. The faces
++   load as the page opens (thmPageFontsBegin) and go as it closes; on RIPPS2's own theme they are its own slots. */
++static const struct
++{
++    int slot;
++    const char *face;
++    int size;
++} thmPageFace[] = {{4, "builtin:ripps2sleekbold", 15}, {5, "builtin:ripps2", 14}, {8, "builtin:ripps2", 16},
++                   {9, "builtin:ripps2sleekcase", 22}, {10, "builtin:ripps2", 12}, {15, "builtin:ripps2sleekcase", 15}};
++#define THM_PAGE_FACES ((int)(sizeof(thmPageFace) / sizeof(thmPageFace[0])))
++static int thmPageFontsDepth = 0, thmPageHandle[THM_PAGE_FACES];
++
++void thmPageFontsBegin(void)
++{
++    int i;
++
++    if (thmPageFontsDepth++ > 0)
++        return; // a page opened from the page: its faces are in already
++    for (i = 0; i < THM_PAGE_FACES; i++)
++        thmPageHandle[i] = thmGetGuiValue() == 0 ? FNT_ERROR : fntLoadFile((char *)thmPageFace[i].face, thmPageFace[i].size);
++}
++
++void thmPageFontsEnd(void)
++{
++    int i;
++
++    if (thmPageFontsDepth <= 0 || --thmPageFontsDepth > 0)
++        return;
++    for (i = 0; i < THM_PAGE_FACES; i++) {
++        if (thmPageHandle[i] != FNT_ERROR)
++            fntRelease(thmPageHandle[i]);
++        thmPageHandle[i] = FNT_ERROR;
++    }
++}
++
++// the face for a slot on About and STATUS: RIPPS2's, else (none loaded, or RIPPS2's own theme) the theme's own slot
++int thmPageFont(int slot)
++{
++    int i;
++
++    if (thmPageFontsDepth > 0)
++        for (i = 0; i < THM_PAGE_FACES; i++)
++            if (thmPageFace[i].slot == slot && thmPageHandle[i] != FNT_ERROR)
++                return thmPageHandle[i];
++    return gTheme->fonts[slot];
++}
++
+ // Bound the MMCE-art drain before a theme swap. On timeout the current theme
+ // remains active and a later trigger can retry.
+ #define THM_MMCE_ART_ABORT_WAIT_TICKS 500
+@@ -5069,6 +5354,9 @@ static int thmLoad(const char *themePath)
+     if (configGetColor(themeConfig, "sel_text_color", color))
+         newT->selTextColor = GS_SETREG_RGBA(color[0], color[1], color[2], 0x80);
+ 
++    // build 102: the user's colours for this theme (the Colours page), over its own and before its elements
++    thmApplyUserColors(newT, thmLoadingColorName);
++
+     if (configGetInt(themeConfig, "coverflow_cover_offset", &intValue)) {
+         // clamp -- this feeds coverWidth * offset / 256 in drawCoverFlow; an
+         // unbounded value from an untrusted theme .cfg would signed-overflow that
+@@ -5372,6 +5660,10 @@ static int thmLoad(const char *themePath)
+         if (configGetInt(themeConfig, "hints_spacing", &intValue) && intValue >= 12 && intValue <= 96)
+             newT->hintsSpacing = intValue;
+         newT->glyphSetDef = configGetStr(themeConfig, "glyph_set", &v) ? ripps2GlyphSetParse(v) : RIPPS2_GLYPHSET_THEME;
++        // build 102 (user: "slot the adapt themes to use our ripped audio map"): sounds=audio plays the AUDIO folder's
++        // sounds (BIOS Sounds > Rip, the user's map) and never a sound folder in the theme, which a theme pack copied
++        // over an older edition (Adapt shipped six sounds up to build 99) can still have
++        newT->soundsAudio = configGetStr(themeConfig, "sounds", &v) && v != NULL && !strcasecmp(v, "audio");
+         // build 96: page_buttons=l2r2 turns the game list's pages on L2 / R2, l1r1 on L1 / R1 (Controller Settings >
+         // Page Buttons overrides it)
+         newT->bgBlurDef = 100; // build 98: bg_blur=off|weak|normal|strong, the frost's strength
+@@ -5423,6 +5715,7 @@ static int thmLoad(const char *themePath)
+     if (curT == NULL)
+         cacheCancelPendingImageLoads(); // first load: pre-cacheInit, nothing queued -- plain no-op drain
+     gTheme = newT;
++    gThemeSoundsAudio = newT->soundsAudio; // build 102: for the sound load (sound.c), which runs on the IO thread
+     thmFree(curT);
+     return 0;
+ }
+@@ -5578,6 +5871,7 @@ int thmSetGuiValue(int themeID, int reload)
+     if (themeID != -1) {
+         if (guiThemeID != themeID || reload) {
+             int loadResult;
++            thmLoadingColorName = thmColorName(themeID); // build 102: its colours' name, for thmLoad
+             if (themeID == nThemes + 1) {
+                 // built-in coverflow theme: load the embedded buffer via thmLoad(NULL).
+                 // Checked BEFORE the themes[themeID - 1] access below (which would be OOB).
+@@ -5590,6 +5884,7 @@ int thmSetGuiValue(int themeID, int reload)
+                 gLoadGridBuiltin = 0;
+             } else
+                 loadResult = thmLoad(themeID != 0 ? themes[themeID - 1].filePath : NULL);
++            thmLoadingColorName = NULL; // build 102: only that load: any other (the default, a drive gone) takes none
+ 
+             // #120: an abandoned load (wedged MMCE art worker) keeps the CURRENT theme -- do not
+             // commit the new id, so the next thmAddElements/settings-apply trigger retries it.

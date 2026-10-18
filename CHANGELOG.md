@@ -1,5 +1,39 @@
 # RIPPS2 changelog
 
+## Build 102 (beta, not released yet), changes since build 101
+
+### Sound
+- **No more beeping while a read is stuck.** When the music's file read stalls (a drive still coming back after an in-game reset, a busy card, the ripped menu music read straight from a drive), audsrv ran out of music and played the last tenth of a second over and over: the beeping. The music now keeps audsrv fed with silence until its next piece arrives.
+- **Switching away from stuck music no longer hangs the menu.** Stopping the music waited up to 3.2 seconds for each of its two threads while one sat in that read. A thread inside a read now gets 0.4 seconds; after that it is left to finish on its own, and the next music start waits for it and cleans up after it instead of starting a second stream over the same buffers.
+- **The console boot sound starts with the towers**, on the intro's first frame, instead of the moment the sound had loaded (which could be before anything was on screen).
+- **`sounds=audio`, a new theme key:** the theme always plays your AUDIO folder's sounds (your ripped map) and never a sound folder of its own. Adapt and Adapt Rx set it, so an Adapt copied over an older one (which shipped six sounds up to build 99) plays your rips.
+
+### Every theme
+- **No info page switches the source any more.** Left, Right, Up and Down go through the games on every theme (build 101 did it for RIPFLOW only).
+- **The Colours page works on every theme.** On RIPGRID and on themes from a drive the colour rows were greyed out, so the cursor skipped them. Now they edit that theme's own colours, kept for that theme alone; Reset gives it back its own.
+- **Reflections fade with their covers**, and a cover inside a case fades in with the rest of the page (a JPG cover popped in at full strength while its case faded; RIPPS2's info page case was the one you saw).
+- **Long text slides smoothly**, a pixel at a time every frame, where it jumped a letter every fifth of a second; a long description rolls to the pixel too.
+- **About and STATUS read in RIPPS2's own faces on every theme**, as Settings has since build 96 (RIPFLOW's STATUS heading was in its capitals).
+- **An app's case is a PS1 square by default**, on every theme. Triangle on an app opens its menu (now also where RIPPS2 may not write, for this line alone) with **Case Shape: PS1 (square) / PS2 (tall) / Theme**, kept for that app.
+
+### Memory Files
+- **A game started from the file browser starts its drive's games itself.** A drive opened only through START DRIVES had its files readable but its games not started, so a launch from there failed until the drive was opened once in Storage. RIPPS2 now starts them and waits for the drive's list before launching.
+
+### RIPFLOW
+- **The White glyph set** (L3 and R3 included). **The source name at the bottom is in RIPPS2 Sleek Case.**
+- **Badges and the rating at their images' own shapes:** badges 44 x 22, six apart, starting on the text's edge (they were 32 x 16 and overlapped by a pixel); the rating 143 x 18, ending on the description's right edge.
+
+### RIPGRID
+- **The Standard glyph set** (L3 and R3 included).
+- **The grid sits 4 higher**, so the space above its first row (from the PS2 mark) matches the space under its last (to the game's name).
+- **The info page lines up:** the screenshots stand flush with the text's glass, top and bottom, centred in the room beside it.
+- **The CD player and file tree read like RIPFLOW's, Launch Disc and Memory Files like RIPPS2's** (START LASER, START BROWSER and the disc line). RIPGRID's own text keeps its look.
+
+### Adapt and Adapt Rx (RIPPS2-themes, edition 102)
+- **The Standard glyph set**, **your ripped sounds** (`sounds=audio`) and **hints in RIPPS2 Sleek Case** on every page, the menus' hints included.
+- **The apps page fits:** the games' glass and list (the apps' own glass ran up into the category bar), with the app's case under LAUNCH DISC as a PS1 square. The apps info page shows the case square too.
+- **The info page's screenshots stand flush with the text's glass.**
+
 ## Build 101 (beta, v1.0.1-beta), changes since build 100
 
 ### Sound that stays where it belongs
