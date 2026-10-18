@@ -136,6 +136,8 @@ def conversions(s):
         if i < len(s) and s[i] == '%':
             i += 1
             continue
+        if i >= len(s):  # a lone % at the end ("0%"): text, not a conversion
+            break
         sig = ''
         while i < len(s) and s[i] in '-+ #0':
             i += 1

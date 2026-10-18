@@ -35,6 +35,7 @@ samples = {
     'Delete %d items?': 'Supprimer %d éléments ?',
     '%d new, %d not in the collection, %d failed': '%d nouvelles, %s absentes',  # refused: a %s for a %d
     'Line one\nLine two': 'Ligne un\nLigne deux\tfin \\ ok',
+    'Ripping: 0%': 'Extraction : 0%',
 }
 keyed = ['# a test file', ripps2lang.MARK]
 for en, tr in samples.items():
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
     assert(strcmp(_t("%d new, %d not in the collection, %d failed"), "%d new, %d not in the collection, %d failed") == 0);
     assert(strcmp(_t("Line one\nLine two"), "Ligne un\nLigne deux\tfin \\ ok") == 0);
     assert(strcmp(_t("NOT THERE"), "NOT THERE") == 0);
+    assert(strcmp(_t("Ripping: 0%"), "Extraction : 0%") == 0); // a lone % at the end is text
     assert(ripps2TrLabel(c, "COPY") != NULL && ripps2TrLabel(c, "NOT THERE") == NULL);
     // the same file again: the catalogue it already has (pointers given out stay good)
     int n2;
@@ -118,6 +120,7 @@ else:
         td = Path(td)
         (td / 'include').mkdir()
         (td / 'include' / 'opl.h').write_text(STUB_OPL)
+        (td / 'include' / 'ioman.h').write_text('')  # LOG comes from the stub opl.h
         (td / 'tamtypes.h').write_text(STUB_TAM)
         shutil.copy(root / 'include' / 'ripps2tr.h', td / 'include' / 'ripps2tr.h')
         shutil.copy(root / 'include' / 'utf8.h', td / 'include' / 'utf8.h')

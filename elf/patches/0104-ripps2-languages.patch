@@ -4729,10 +4729,10 @@ index d1f66e5..34e4410 100644
  
 diff --git a/src/ripps2tr.c b/src/ripps2tr.c
 new file mode 100644
-index 0000000..75b2a80
+index 0000000..180fddd
 --- /dev/null
 +++ b/src/ripps2tr.c
-@@ -0,0 +1,470 @@
+@@ -0,0 +1,471 @@
 +/*
 + RIPPS2 build 104: RIPPS2's own words, and Open PS2 Loader's, in the language the user picked.
 + Licenced under Academic Free License version 3.0
@@ -4740,6 +4740,7 @@ index 0000000..75b2a80
 + */
 +
 +#include "include/opl.h"
++#include "include/ioman.h" // LOG
 +#include "include/ripps2tr.h"
 +#include "include/utf8.h"
 +
@@ -4787,8 +4788,8 @@ index 0000000..75b2a80
 +        s++;
 +        if (*s == '%')
 +            continue;
-+        if (*s == '\0')
-+            return -1;
++        if (*s == '\0') // a lone % at the end ("0%" in a progress line): text, not a conversion
++            break;
 +        while (*s && strchr("-+ #0", *s)) // flags
 +            s++;
 +        while (*s && ((*s >= '0' && *s <= '9') || *s == '*' || *s == '.' || *s == '$')) { // width, precision
