@@ -2708,7 +2708,7 @@ index 1bf483c..6c6d39d 100644
          return 0;
      }
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index eea0f99..7b5b45f 100644
+index eea0f99..ffb190a 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -61,6 +61,7 @@
@@ -3531,7 +3531,7 @@ index eea0f99..7b5b45f 100644
              const char *main = e->kind == FB_KIND_DEVICE ? e->title : e->name, *side = e->kind == FB_KIND_DEVICE ? e->name : e->title;
 -            fntRenderString(rowFont, tx, y + 9, ALIGN_VCENTER, 0, 0, main, col);
 -            fntRenderString(smallFont, FB_RIGHT - fntCalcDimensions(smallFont, side), y + 9, ALIGN_VCENTER, 0, 0, side, FB_DIM);
-+            int sx = FB_RIGHT - fntCalcDimensions(smallFont, side);
++            int sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, side));
 +            // build 104: the name stops short of what is on its right (DÉMARRER LES PÉRIPHÉRIQUES ran into it), the
 +            // chosen row sliding it through its room
 +            fntRenderStringFit(rowFont, tx, y + 9, ALIGN_VCENTER, sx - 12 - tx, main, col, cur);
@@ -3539,7 +3539,7 @@ index eea0f99..7b5b45f 100644
          } else if (e->kind == FB_KIND_SAVE) {
 -            fntRenderString(rowFont, tx, y + 9, ALIGN_VCENTER, 0, 0, e->title, col);
 -            fntRenderString(smallFont, FB_RIGHT - fntCalcDimensions(smallFont, e->name), y + 9, ALIGN_VCENTER, 0, 0, e->name, FB_DIM);
-+            int sx = FB_RIGHT - fntCalcDimensions(smallFont, e->name);
++            int sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, e->name));
 +            fntRenderStringFit(rowFont, tx, y + 9, ALIGN_VCENTER, sx - 12 - tx, e->title, col, cur);
 +            fntRenderString(smallFont, sx, y + 9, ALIGN_VCENTER, 0, 0, e->name, FB_DIM);
          } else {
@@ -3548,7 +3548,7 @@ index eea0f99..7b5b45f 100644
              if (e->kind != FB_KIND_DIR) {
                  fbSizeText(e->size, buf, sizeof(buf));
 -                fntRenderString(smallFont, FB_RIGHT - fntCalcDimensions(smallFont, buf), y + 9, ALIGN_VCENTER, 0, 0, buf, FB_DIM);
-+                sx = FB_RIGHT - fntCalcDimensions(smallFont, buf);
++                sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, buf));
 +                fntRenderString(smallFont, sx, y + 9, ALIGN_VCENTER, 0, 0, buf, FB_DIM);
              }
 +            fntRenderStringFit(rowFont, tx, y + 9, ALIGN_VCENTER, sx - 12 - tx, e->name, col, cur);
@@ -5400,7 +5400,7 @@ index 0000000..180fddd
 +    return 1;
 +}
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 88e8159..a8992b2 100644
+index 88e8159..74dfddc 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -40,10 +40,11 @@
@@ -5682,7 +5682,7 @@ index 88e8159..a8992b2 100644
  
      float glyphA = ripps2GlyphsAlpha(RIPPS2_GLYPH_FORMATIONS); // every frame, the name shown or not (RIPPSettings)
      static int named = -1;
-@@ -1371,49 +1406,103 @@ void ripps2DrawHintBox(int x, int y, int w, int h)
+@@ -1371,49 +1406,104 @@ void ripps2DrawHintBox(int x, int y, int w, int h)
  
  // RIPPS2 build 70: button hints read in sentence case ("Copy to audio", not "COPY TO AUDIO") in the
  // theme's lowercase font: the menus name things, the hints explain. Short codes stay in capitals.
@@ -5788,7 +5788,8 @@ index 88e8159..a8992b2 100644
 -    char b[96];
 -    return fntCalcDimensions(RIPPS2_CASE_FONT, hintCase(text, b, sizeof(b)));
 +    char b[160];
-+    return fntCalcDimensions(hintFont(RIPPS2_CASE_FONT), hintCase(_t(text), b, sizeof(b)));
++    // in 640 x 480 units, as the rows lay out (it gave display pixels: in a 704-wide mode every hint read 10% wide)
++    return rmUnScaleX(fntCalcDimensions(hintFont(RIPPS2_CASE_FONT), hintCase(_t(text), b, sizeof(b))));
  }
  
  int ripps2HintText(int x, int y, const char *text, u64 colour)
@@ -5802,7 +5803,7 @@ index 88e8159..a8992b2 100644
 -    fntRenderString(thmPageFont(15), x, y, ALIGN_VCENTER, 0, 0, b, colour);
 -    return x + fntCalcDimensions(thmPageFont(15), b);
 +    fntRenderString(font, x, y, ALIGN_VCENTER, 0, 0, b, colour);
-+    return x + fntCalcDimensions(font, b);
++    return x + rmUnScaleX(fntCalcDimensions(font, b));
  }
  
  // ---- Screen switches: one glass panel moves between pages (no fade through black) ----
