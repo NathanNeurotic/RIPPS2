@@ -30,27 +30,30 @@ index 1dc166d..78c2653 100644
    network, so CHECK GAME SUPPORT (ranet.c) does, and saves the set beside the game's list as
    RA/<serial>.ach:
 diff --git a/src/ranet.c b/src/ranet.c
-index 9206026..8e332dc 100644
+index 9206026..1a10d20 100644
 --- a/src/ranet.c
 +++ b/src/ranet.c
-@@ -195,6 +195,8 @@ static int ask(int sock, struct sockaddr_in *to, const char *req, char *out, int
+@@ -195,6 +195,11 @@ static int ask(int sock, struct sockaddr_in *to, const char *req, char *out, int
     for GET /state (port 18280, or up to four above when that was taken); with OPEN TO THE NETWORK on in its
     settings it answers anyone on the network too. The answer is JSON with every achievement of the game
     the check just identified: its title, how to earn it, its points and whether this account has it.
 +   /state is the interface page's own endpoint, not part of the documented console protocol, so its shape is
-+   pinned to xeRAbora v0.1.0-alpha.10; a newer alpha may change it.
++   pinned to xeRAbora v0.1.0-alpha.18 (10/17/2026, on its author's advice: alpha.10 is unstable, and the
++   "checked_only" key rahunt.c looks for is in /state only from alpha.11 on); a newer alpha may change it.
++   The discovery answer already names the client and its version (RAO1 OK <client>/<version>), so a later
++   build can check it before asking for /state.
     Plain HTTP over TCP, read the way the cover download reads (whole 64-byte blocks into an aligned
     buffer: rule 1 and 2 above). The text into buf; its length, or -1. */
  #define RA_UI_PORT   18280
 diff --git a/src/ripps2about.c b/src/ripps2about.c
-index 242933b..7bdfd0f 100644
+index 242933b..943797d 100644
 --- a/src/ripps2about.c
 +++ b/src/ripps2about.c
 @@ -94,6 +94,7 @@ static const ab_row_t abRows[] = {
      {'S', "game hashes and memory telemetry, made solid on hardware by oMrRexD"},
      {'T', "xeRAbora by hacan359, rcheevos by RetroAchievements"},
      {'S', "the PC client that unlocks them; the hash every game is known by"},
-+    {'S', "LEFT TO HUNT pinned to v0.1.0-alpha.10 (github.com/hacan359/xerabora)"},
++    {'S', "LEFT TO HUNT pinned to v0.1.0-alpha.18 (github.com/hacan359/xerabora)"},
  
      {'H', "IN-GAME MENU"},
      {'T', "ORBIT's Neutrino fork by danielnuld"},

@@ -9,7 +9,10 @@
 - **Left and Right go through the games on RIPFLOW's info page**, as on its carousel, and the info page stays; they no longer switch drives there. Other themes keep Left and Right for the drives.
 
 ### Hotfix (10/13/2026, still build 101)
-- **The README and RIPPS2's About page credit xeRAbora by [hacan359](https://github.com/hacan359), and pin the release.** The RetroAchievements PC client and the console-side RA code RIPPS2 inherits through RiptOPL (MIT / AFL-3.0). **LEFT TO HUNT** reads the interface page's `GET /state` (port 18280), which is xeRAbora's own UI endpoint, not part of the documented console protocol, and can change between alphas, so it is pinned to and tested with **[v0.1.0-alpha.10](https://github.com/hacan359/xerabora/releases/tag/v0.1.0-alpha.10)**; other versions are untested.
+- **The README and RIPPS2's About page credit xeRAbora by [hacan359](https://github.com/hacan359), and pin the release.** The RetroAchievements PC client and the console-side RA code RIPPS2 inherits through RiptOPL (MIT / AFL-3.0). **LEFT TO HUNT** reads the interface page's `GET /state` (port 18280), which is xeRAbora's own UI endpoint, not part of the documented console protocol, and can change between alphas, so it was pinned to **v0.1.0-alpha.10** (moved to alpha.18 on 10/17, below).
+
+### Hotfix (10/17/2026, still build 101)
+- **LEFT TO HUNT is pinned to xeRAbora [v0.1.0-alpha.18](https://github.com/hacan359/xerabora/releases/tag/v0.1.0-alpha.18)**, on its author's advice: alpha.10 is unstable and fixes land in every alpha. alpha.10 could not have worked anyway: the `checked_only` key RIPPS2 finds the game's set by is in `/state` only from alpha.11 on. alpha.18's `/state` was checked against RIPPS2's reader (the `game` object with `serial` and `checked_only`, then `achievements` with title, description, points and state); its new keys (`mode`, `rp`) are skipped. The About page names alpha.18.
 
 ## Build 100 (beta, v1.0.0-beta), changes since build 99
 
