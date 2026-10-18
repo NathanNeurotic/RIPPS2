@@ -14,14 +14,14 @@
 - **Reflections fade with their covers**, and a cover inside a case fades in with the rest of the page (a JPG cover popped in at full strength while its case faded; RIPPS2's info page case was the one you saw).
 - **Long text slides smoothly**, a pixel at a time every frame, where it jumped a letter every fifth of a second; a long description rolls to the pixel too.
 - **Two theme element keys (`blur`, `widecrop`) start off on every element** unless the theme sets them; they were never cleared, so an element could pick up a value left in memory.
-- **About and STATUS read in RIPPS2's own faces on every theme**, as Settings has since build 96 (RIPFLOW's STATUS heading was in its capitals).
+- **About and STATUS read in RIPPS2's own faces on every theme**, as Settings has since build 96 (RIPFLOW's STATUS heading was in its capitals), their hint rows included. **About's credits wrap** to the column between words, so no line runs out of the panel.
 - **An app's case is a PS1 square by default**, on every theme. Triangle on an app opens its menu (now also where RIPPS2 may not write, for this line alone) with **Case Shape: PS1 (square) / PS2 (tall) / Theme**, kept for that app.
 
 ### Memory Files
 - **A game started from the file browser starts its drive's games itself.** A drive opened only through START DRIVES had its files readable but its games not started, so a launch from there failed until the drive was opened once in Storage. RIPPS2 now starts them and waits for the drive's list before launching.
 
 ### RIPFLOW
-- **The White glyph set** (L3 and R3 included). **The source name at the bottom is in RIPPS2 Sleek Case.**
+- **The White glyph set** (L3 and R3 included), and **the hints in RIPPS2 Sleek Case**, as on every other theme.
 - **Badges and the rating at their images' own shapes:** badges 44 x 22, six apart, starting on the text's edge (they were 32 x 16 and overlapped by a pixel); the rating 143 x 18, ending on the description's right edge.
 
 ### RIPGRID

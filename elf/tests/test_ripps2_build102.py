@@ -138,16 +138,24 @@ for a, b in (('info14', 'info15'),):
     if top != 160 or bottom != 415:
         fail.append("RIPGRID's screenshots must stand flush with the text's glass (160 to 415)")
 
-# 12. RIPFLOW: the source name in the case font, the badges not over each other
-if flow['main2' if False else [k for k in flow if flow[k].get('type') == 'MenuText'][0]].get('font') != '13' \
-        or flow[''].get('font13') != 'builtin:ripps2sleekcase':
-    fail.append("RIPFLOW's source name must be in RIPPS2 Sleek Case (font13)")
+# 12. RIPFLOW: the hints in RIPPS2 Sleek Case (font15) as on every other theme, the source name in its own face
+# (font7, as before build 102), the badges not over each other
+menutext = [k for k in flow if flow[k].get('type') == 'MenuText'][0]
+if flow[menutext].get('font') != '7' or flow[''].get('font13') != 'builtin:ripflow':
+    fail.append("RIPFLOW's source name keeps its own face (font7)")
+if flow[''].get('font15') != 'builtin:ripps2sleekcase' or grid[''].get('font15') != 'builtin:ripps2sleekcase':
+    fail.append('the hints (font15) are RIPPS2 Sleek Case on RIPFLOW and RIPGRID alike')
 xs = sorted(int(flow['info%d' % n]['x']) for n in range(19, 25))
 w = int(flow['info19']['width'])
 if any(b - a < w for a, b in zip(xs, xs[1:])):
     fail.append("RIPFLOW's badges must not overlap")
 
-# 13. logos just above their panels: valign=bottom stands the art's visible foot on its box; elements start clean
+# 13. About wraps its rows to the column, in the faces it draws with
+about = rd('src/ripps2about.c')
+if 'abWrap();' not in about or 'abWidth(font, t + off, n - off) > AB_ROOM' not in about or 'i < abLineCount' not in about:
+    fail.append("About must wrap its rows to AB_ROOM and draw the wrapped lines")
+
+# 14. logos just above their panels: valign=bottom stands the art's visible foot on its box; elements start clean
 if 'iy += (texture->Height - 1 - vb) * ih / texture->Height;' not in thm or 'elem->artBottom = 1;' not in thm:
     fail.append("valign=bottom must stand the art's lowest visible row on its box")
 ib = thm.find('theme_element_t *elem = (theme_element_t *)malloc(sizeof(theme_element_t));')

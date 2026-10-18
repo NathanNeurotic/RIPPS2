@@ -187,39 +187,34 @@ index 044bb09..72ffdcc 100644
  int thmFindGuiID(const char *theme);
  int thmGetPanelRect(int infoPage, int *x, int *y, int *w, int *h); // RIPPS2: the page's glass panel
 diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
-index a94c7bf..8051a03 100644
+index a94c7bf..4be6be4 100644
 --- a/misc/theme_coverflow.cfg
 +++ b/misc/theme_coverflow.cfg
-@@ -37,14 +37,18 @@ font11_size=18
- font11_caps=1
- font12=builtin:ripflowbold
- font12_size=22
--font13=builtin:ripflow
--font13_size=15
-+# build 102: font13 is RIPPS2 Sleek Case, the source name's (the MenuText at the bottom), as the case font reads
-+# everywhere else; no RIPPS2 page draws with font13
-+font13=builtin:ripps2sleekcase
-+font13_size=17
+@@ -1,7 +1,7 @@
+ # No global colour keys: see thmLoad() in src/themes.c (#574).
+ # RIPPS2 build 70: RIPFLOW's own faces, Roboto Condensed for text and its Bold Condensed for menus
+ # (elf/theme/fonts/ROBOTO-LICENSE.txt); _caps=1 draws a face's menu names in capitals while the
+-# tooltips and hints (font15) keep their lowercase. Same slots as the RIPPS2 theme.
++# tooltips and hints (font15, RIPPS2 Sleek Case from build 102) keep their lowercase. Same slots as the RIPPS2 theme.
+ # RIPPS2 build 81: RIPFLOW puts Memory Files first on the category bar unless the user has picked an order
+ category_order=memory_files_first
+ # RIPPS2 build 91: as a game launches its disc pops in and spins up (Flow and Grid > Launch Disc can change it)
+@@ -42,9 +42,13 @@ font13_size=15
  font14=builtin:ripflowbold
  font14_size=64
  font14_caps=1
- font15=builtin:ripflow
- font15_size=16
+-font15=builtin:ripflow
+-font15_size=16
++# build 102 (user: "the one for the hints switch to the sleek case font to match all others"): font15, the hints'
++# and the typed text's face, is RIPPS2 Sleek Case as on RIPPS2's own theme and RIPGRID
++font15=builtin:ripps2sleekcase
++font15_size=15
  coverflow_cover_offset=0
 +# build 102: the White glyph set (L3 and R3 included); Controller Settings > Hints and Glyphs can change it
 +glyph_set=white
  main0:
  	type=Background
  	pattern=BG
-@@ -282,7 +286,7 @@ main17:
- # switch it, and RIPPSettings can put the D-pad's Up / Down either side
- main18:
- 	type=MenuText
--	font=7
-+	font=13
- 	x=POS_MID
- 	y=-30
- 	aligned=1
 @@ -465,62 +469,66 @@ info18:
  	width=590
  	height=60
@@ -905,10 +900,109 @@ index 9c1cd2f..1d233c9 100644
      gsKit_TexManager_bind(gsGlobal, inlay);
      {
 diff --git a/src/ripps2about.c b/src/ripps2about.c
-index 943797d..7cf5503 100644
+index 943797d..8f58b98 100644
 --- a/src/ripps2about.c
 +++ b/src/ripps2about.c
-@@ -211,14 +211,14 @@ static void abDraw(float scroll)
+@@ -33,6 +33,8 @@
+ #define AB_HEAD_H  30
+ #define AB_LINE_H  20
+ #define AB_GAP     16
++#define AB_ROOM    560 // build 102: a line wider than this wraps (the column inside the header rule, 40 to 600)
++#define AB_LINES   240 // display lines after the wrap (the rows are about 150)
+ 
+ #define AB_LIT  0x80
+ #define AB_TEXT 0x67
+@@ -182,20 +184,84 @@ static int abRowH(char kind)
+     return kind == 'H' ? AB_HEAD_H : kind == 'G' ? AB_GAP : AB_LINE_H;
+ }
+ 
++/* RIPPS2 build 102 (user: "the about pages text needs to wrap better so it won't run outside the panel anymore"). Each
++   row is laid out as lines no wider than AB_ROOM in the face it is drawn in, broken between words, once as the page
++   opens (its faces are in by then). A line is a piece of its row's own string, so nothing is copied. */
++typedef struct
++{
++    char kind;
++    short row, off, len;
++} ab_line_t;
++
++static ab_line_t abLines[AB_LINES];
++static int abLineCount;
++
++static int abFont(char kind)
++{
++    return kind == 'H' ? thmPageFont(4) : kind == 'T' ? thmPageFont(5) : thmPageFont(10);
++}
++
++static int abWidth(int font, const char *text, int len)
++{
++    char b[128];
++    snprintf(b, sizeof(b), "%.*s", len, text);
++    return rmUnScaleX(fntCalcDimensions(font, b));
++}
++
++static void abWrap(void)
++{
++    int i;
++
++    abLineCount = 0;
++    for (i = 0; i < AB_COUNT && abLineCount < AB_LINES; i++) {
++        const ab_row_t *r = &abRows[i];
++        const char *t = r->text != NULL ? r->text : "";
++        int off = 0, len = (int)strlen(t), font = abFont(r->kind);
++
++        do {
++            int n, fit = 0;
++            // the most whole words from off that fit; a single word wider than the room goes on its own line
++            for (n = off; n <= len; n++) {
++                if (t[n] != ' ' && t[n] != '\0')
++                    continue;
++                if (n - off >= 120)
++                    break;
++                if (fit > 0 && abWidth(font, t + off, n - off) > AB_ROOM)
++                    break;
++                fit = n - off;
++            }
++            if (fit <= 0)
++                fit = len - off;
++            abLines[abLineCount].kind = r->kind;
++            abLines[abLineCount].row = (short)i;
++            abLines[abLineCount].off = (short)off;
++            abLines[abLineCount].len = (short)fit;
++            abLineCount++;
++            off += fit;
++            while (t[off] == ' ')
++                off++;
++        } while (off < len && abLineCount < AB_LINES);
++    }
++}
++
+ static int abHeight(void)
+ {
+     int i, h = 0;
+-    for (i = 0; i < AB_COUNT; i++)
+-        h += abRowH(abRows[i].kind);
++    for (i = 0; i < abLineCount; i++)
++        h += abRowH(abLines[i].kind);
+     return h;
+ }
+ 
+ static void abDraw(float scroll)
+ {
+     int i, y = AB_TOP + (AB_BOTTOM - AB_TOP) / 3 - (int)scroll; // the first heading starts a third of the way down
+-    for (i = 0; i < AB_COUNT; i++) {
+-        const ab_row_t *r = &abRows[i];
+-        int h = abRowH(r->kind), mid = y + h / 2;
++    for (i = 0; i < abLineCount; i++) {
++        const ab_line_t *l = &abLines[i];
++        char text[128];
++        int h = abRowH(l->kind), mid = y + h / 2;
++        ab_row_t line = {l->kind, text}; // build 102: this line of its row
++        const ab_row_t *r = &line;
++        snprintf(text, sizeof(text), "%.*s", l->len, abRows[l->row].text != NULL ? abRows[l->row].text + l->off : "");
+         y += h;
+         if (r->kind == 'G' || mid < AB_TOP - 10 || mid > AB_BOTTOM + 10)
+             continue;
+@@ -211,14 +277,14 @@ static void abDraw(float scroll)
              a = 1.0f;
          int alpha = (int)(0x80 * a);
          if (r->kind == 'H') {
@@ -927,15 +1021,16 @@ index 943797d..7cf5503 100644
      }
  }
  
-@@ -233,6 +233,7 @@ void ripps2ShowAbout(const char *version, const char *build)
+@@ -232,6 +298,8 @@ void ripps2ShowAbout(const char *version, const char *build)
+     if (RIPPS2_BUILD > 0)
          snprintf(abRelease, sizeof(abRelease), "BUILD %d (%s)", RIPPS2_BUILD, RIPPS2_STAGE);
      snprintf(abBuild, sizeof(abBuild), "%s", build);
-     end = (float)abHeight() + (AB_BOTTOM - AB_TOP) / 3.0f; // scrolled this far, the last row has left the top
 +    thmPageFontsBegin(); // build 102: RIPPS2's own faces, on every theme
++    abWrap();            // build 102: the rows as lines that fit, in those faces
+     end = (float)abHeight() + (AB_BOTTOM - AB_TOP) / 3.0f; // scrolled this far, the last row has left the top
  
      while (1) {
-         clock_t now = clock();
-@@ -269,8 +270,8 @@ void ripps2ShowAbout(const char *version, const char *build)
+@@ -269,8 +337,8 @@ void ripps2ShowAbout(const char *version, const char *build)
  
          rmStartFrame();
          guiDrawBGPlasma();
@@ -946,7 +1041,7 @@ index 943797d..7cf5503 100644
          rmDrawLine(30, 46, 610, 46, GS_SETREG_RGBAQ(0x4A, 0x72, 0xDC, 0x60, 0));
          abDraw(scroll);
          // the hints
-@@ -289,5 +290,6 @@ void ripps2ShowAbout(const char *version, const char *build)
+@@ -289,5 +357,6 @@ void ripps2ShowAbout(const char *version, const char *build)
              break;
          }
      }
