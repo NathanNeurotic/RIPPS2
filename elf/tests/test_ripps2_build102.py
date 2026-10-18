@@ -147,6 +147,18 @@ w = int(flow['info19']['width'])
 if any(b - a < w for a, b in zip(xs, xs[1:])):
     fail.append("RIPFLOW's badges must not overlap")
 
+# 13. logos just above their panels: valign=bottom stands the art's visible foot on its box; elements start clean
+if 'iy += (texture->Height - 1 - vb) * ih / texture->Height;' not in thm or 'elem->artBottom = 1;' not in thm:
+    fail.append("valign=bottom must stand the art's lowest visible row on its box")
+ib = thm.find('theme_element_t *elem = (theme_element_t *)malloc(sizeof(theme_element_t));')
+head = thm[ib:thm.find('snprintf(elemProp, sizeof(elemProp), "%s_x", name);', ib)]
+for f in ('elem->blur = 0;', 'elem->wideCrop = 0;', 'elem->artBottom = 0;'):
+    if f not in head:
+        fail.append('a new element must start with %s' % f)
+lg = grid['info5']
+if lg.get('valign') != 'bottom' or int(lg['y']) + int(lg['height']) // 2 >= 160:
+    fail.append("RIPGRID's logo must stand on its box's foot, just above the glass (160)")
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)

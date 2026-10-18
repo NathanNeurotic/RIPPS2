@@ -13,6 +13,7 @@
 - **The Colours page works on every theme.** On RIPGRID and on themes from a drive the colour rows were greyed out, so the cursor skipped them. Now they edit that theme's own colours, kept for that theme alone; Reset gives it back its own.
 - **Reflections fade with their covers**, and a cover inside a case fades in with the rest of the page (a JPG cover popped in at full strength while its case faded; RIPPS2's info page case was the one you saw).
 - **Long text slides smoothly**, a pixel at a time every frame, where it jumped a letter every fifth of a second; a long description rolls to the pixel too.
+- **Two theme element keys (`blur`, `widecrop`) start off on every element** unless the theme sets them; they were never cleared, so an element could pick up a value left in memory.
 - **About and STATUS read in RIPPS2's own faces on every theme**, as Settings has since build 96 (RIPFLOW's STATUS heading was in its capitals).
 - **An app's case is a PS1 square by default**, on every theme. Triangle on an app opens its menu (now also where RIPPS2 may not write, for this line alone) with **Case Shape: PS1 (square) / PS2 (tall) / Theme**, kept for that app.
 
@@ -26,13 +27,15 @@
 ### RIPGRID
 - **The Standard glyph set** (L3 and R3 included).
 - **The grid sits 4 higher**, so the space above its first row (from the PS2 mark) matches the space under its last (to the game's name).
-- **The info page lines up:** the screenshots stand flush with the text's glass, top and bottom, centred in the room beside it.
+- **The info page lines up:** the screenshots stand flush with the text's glass, top and bottom, centred in the room beside it; the release date sits evenly between the developer and the genre.
+- **The logo stands just above the text's glass**, every game's at the same height (a new key, `valign=bottom`, finds where each logo image's visible part ends, since some come with a lot of clear space round them and others with none).
 - **The CD player and file tree read like RIPFLOW's, Launch Disc and Memory Files like RIPPS2's** (START LASER, START BROWSER and the disc line). RIPGRID's own text keeps its look.
 
 ### Adapt and Adapt Rx (RIPPS2-themes, edition 102)
 - **The Standard glyph set**, **your ripped sounds** (`sounds=audio`) and **hints in RIPPS2 Sleek Case** on every page, the menus' hints included.
 - **The apps page fits:** the games' glass and list (the apps' own glass ran up into the category bar), with the app's case under LAUNCH DISC as a PS1 square. The apps info page shows the case square too.
-- **The info page's screenshots stand flush with the text's glass.**
+- **The info page's screenshots stand flush with the text's glass, and the logo just above it** (`valign=bottom`).
+- **The disc and case line up with the list:** at real-life proportions to each other (a 120 mm disc over a 135 x 190 mm case), the disc's top level with the list glass's top and the case's foot with its foot. The disc no longer stands up by the category bar.
 
 ## Build 101 (beta, v1.0.1-beta), changes since build 100
 
