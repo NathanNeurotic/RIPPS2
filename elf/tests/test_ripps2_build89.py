@@ -12,9 +12,10 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from r2src import unwrap, TR_STUBS  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
-rd = lambda p: (root / p).read_text(encoding='utf-8')
+rd = lambda p: unwrap((root / p).read_text(encoding='utf-8'))  # build 104: as before _t
 rip, ember, vcd, sysc, dia = rd('src/ripps2biossnd.c'), rd('src/ripps2ember.c'), rd('src/vcdsupport.c'), rd('src/system.c'), rd('src/dia.c')
 fail = []
 

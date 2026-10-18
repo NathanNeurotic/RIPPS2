@@ -161,4 +161,9 @@ mkdir -p "$OUT"
 ELF="$(ls RIPTOPL-*.ELF | head -n1)"
 cp -f "$ELF" "$OUT/RIPPS2.elf"
 echo "Built $ELF -> out/RIPPS2.elf"
+
+# build 104: the language pack. `make release` made lng_src/ (Open PS2 Loader's translations with RiptOPL's lng_fork
+# filled in); RIPPS2's own words come from elf/lang. Keyed by the English, so a pack keeps working in later builds.
+python3 "$HERE/lang/ripps2lang.py" extract "$SRC" --check || echo "::warning::elf/lang/_strings.yml is out of date"
+python3 "$HERE/lang/ripps2lang.py" pack "$SRC" "$OUT"
 ls -la "$OUT"

@@ -5,10 +5,11 @@ PS2's file calls are the host's), unpacks the bundled tar.gz into a temporary fo
 every file with the archive; the write order is recorded to check system.toml comes last."""
 import os, re, subprocess, sys, tarfile, tempfile
 from pathlib import Path
+from r2src import unwrap  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
 tgz = Path(__file__).resolve().parents[1] / 'neutrino' / 'neutrino-1.8.0.tar.gz'
-src = (root / 'src/ripps2ember.c').read_text()
+src = unwrap((root / 'src/ripps2ember.c').read_text())  # build 104: as before _t
 start = src.index('#define NEUTRINO_TAR_SIZE')
 end = src.index('// No Neutrino anywhere RIPPS2 looks')
 code = src[start:end]

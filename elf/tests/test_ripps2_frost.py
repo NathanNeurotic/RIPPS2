@@ -6,9 +6,10 @@ Builds a 640x480 T8 texture the way src/textures.c stores one (palette entries 8
 and the sampling step)."""
 import os, random, re, subprocess, sys, tempfile
 from pathlib import Path
+from r2src import unwrap  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
-src = (root / 'src/ripps2ui.c').read_text()
+src = unwrap((root / 'src/ripps2ui.c').read_text())  # build 104: as before _t
 code = src[src.index('#define FROST_W 80'):src.index('void ripps2DrawFrost(')]
 random.seed(7)
 W, H = 640, 480

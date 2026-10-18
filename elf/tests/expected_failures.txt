@@ -19,3 +19,4 @@ test_ra_mstack_link.py ranet.c also keeps the replying PC for LEFT TO HUNT (g_pe
 test_save_icons.py RIPFLOW shows no SaveIcon on its carousel page (build 103 merge keeps RIPFLOW's layout)
 test_theme_metadata.py RIPPS2's attribute text rolls long descriptions and reads the metadata database (rollStart, metaDbGetStr, lineHeight), which the harness lacks
 test_theme_text_room.py RIPPS2 keeps its own Favourites star after the title instead of upstream's star column (build 103 merge); the marquee half passes
+test_cjk_font_fallback.py build 104: a letter a font lacks is drawn from that font's own faces of the language font, then the fallback (font_CJK), at its size, not from the fallback slot at the slot's size; test_ripps2_build104.py checks it

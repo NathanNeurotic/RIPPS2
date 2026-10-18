@@ -12,10 +12,11 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from r2src import unwrap, TR_STUBS  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
 pillars = Path(__file__).resolve().parents[1]  # elf/
-rd = lambda p: (root / p).read_text(encoding='utf-8')
+rd = lambda p: unwrap((root / p).read_text(encoding='utf-8'))  # build 104: as before _t
 thm, gui, mk, dia, opl, hints, hdr = (rd('src/themes.c'), rd('src/gui.c'), rd('Makefile'), rd('src/dialogs.c'), rd('src/opl.c'),
                                       rd('src/ripps2hints.c'), rd('include/ripps2.h'))
 fail = []
@@ -161,7 +162,7 @@ if cc and not fail:
             (td / 'ripps2hints_host.h').write_text(HOST_H)
             (td / 'm.c').write_text(MAIN)
             exe = td / 'm.exe'
-            r = subprocess.run([cc, '-DRIPPS2_HINTS_HOST_TEST', '-I', str(td), str(td / 'm.c'), str(root / 'src/ripps2hints.c'), '-o', str(exe)],
+            r = subprocess.run([cc, '-DRIPPS2_HINTS_HOST_TEST', '-I', str(td), '-I', str(root), str(td / 'm.c'), str(root / 'src/ripps2hints.c'), '-o', str(exe)],
                                capture_output=True, text=True)
             if r.returncode:
                 fail.append('ripps2hints.c must build on the PC: ' + r.stderr[-600:])

@@ -8,9 +8,10 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from r2src import unwrap, TR_STUBS  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
-rd = lambda p: (root / p).read_text(encoding='utf-8').replace('\r\n', '\n')
+rd = lambda p: unwrap((root / p).read_text(encoding='utf-8').replace('\r\n', '\n'))  # build 104: as before _t
 fail = []
 
 # the music's own read path: big pieces into RAM, a short track whole, the old direct reads without the memory

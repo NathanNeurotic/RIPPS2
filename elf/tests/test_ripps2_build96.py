@@ -8,9 +8,10 @@ import os
 import re
 import sys
 from pathlib import Path
+from r2src import unwrap, TR_STUBS  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
-rd = lambda p: (root / p).read_text(encoding='utf-8')
+rd = lambda p: unwrap((root / p).read_text(encoding='utf-8'))  # build 104: as before _t
 dia, dlg, gui, lng = rd('src/dia.c'), rd('src/dialogs.c'), rd('src/gui.c'), rd('lng_tmpl/_base.yml')
 fail = []
 

@@ -8,9 +8,10 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from r2src import unwrap, TR_STUBS  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
-src = (root / 'src/ripps2edit.c').read_text(encoding='utf-8').replace('\r\n', '\n')
+src = unwrap((root / 'src/ripps2edit.c').read_text(encoding='utf-8').replace('\r\n', '\n'))  # build 104: as before _t
 fail = []
 
 for needle, why in (('#define ED_MAX_LINES 4096', 'the editor holds 4096 lines'),

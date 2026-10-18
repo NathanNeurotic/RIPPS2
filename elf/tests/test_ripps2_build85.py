@@ -6,9 +6,10 @@ import os
 import re
 import sys
 from pathlib import Path
+from r2src import unwrap, TR_STUBS  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
-rd = lambda p: (root / p).read_text(encoding='utf-8')
+rd = lambda p: unwrap((root / p).read_text(encoding='utf-8'))  # build 104: as before _t
 rm, gui, cd, vcd, sysc, st = rd('src/renderman.c'), rd('src/gui.c'), rd('src/ripps2cd.c'), rd('src/vcdsupport.c'), rd('src/system.c'), rd('src/ripps2status.c')
 bdm, mmce = rd('src/bdmsupport.c'), rd('src/mmcesupport.c')
 fail = []

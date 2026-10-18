@@ -3,10 +3,11 @@ import os
 import re
 import sys
 from pathlib import Path
+from r2src import unwrap, TR_STUBS  # noqa: E402
 
 root = Path(os.environ.get('RIPTOPL_DIR', '.'))
 here = Path(__file__).resolve().parents[1]  # elf/
-rd = lambda p: (root / p).read_text(encoding='utf-8').replace('\r\n', '\n')
+rd = lambda p: unwrap((root / p).read_text(encoding='utf-8').replace('\r\n', '\n'))  # build 104: as before _t
 fail = []
 
 # 1. the version: the upstream merged (commit + revision) goes to make; the build number's digits to the header
