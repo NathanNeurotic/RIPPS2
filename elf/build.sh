@@ -165,5 +165,7 @@ echo "Built $ELF -> out/RIPPS2.elf"
 # build 104: the language pack. `make release` made lng_src/ (Open PS2 Loader's translations with RiptOPL's lng_fork
 # filled in); RIPPS2's own words come from elf/lang. Keyed by the English, so a pack keeps working in later builds.
 python3 "$HERE/lang/ripps2lang.py" extract "$SRC" --check || echo "::warning::elf/lang/_strings.yml is out of date"
+# fontTools cuts the big CJK font down to the letters a language uses (without it the pack carries it whole)
+python3 -c "import fontTools" 2>/dev/null || pip3 install --quiet --break-system-packages fonttools || true
 python3 "$HERE/lang/ripps2lang.py" pack "$SRC" "$OUT"
 ls -la "$OUT"

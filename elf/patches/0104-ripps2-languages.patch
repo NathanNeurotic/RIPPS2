@@ -109,7 +109,7 @@ index f0cd46c..28c3da5 100644
              if (!tv)
                  tv = _l(_STR_NO_ITEMS);
 diff --git a/src/fntsys.c b/src/fntsys.c
-index 06870fe..245567e 100644
+index 06870fe..ca069ed 100644
 --- a/src/fntsys.c
 +++ b/src/fntsys.c
 @@ -11,6 +11,7 @@
@@ -120,7 +120,7 @@ index 06870fe..245567e 100644
  
  #include <sys/types.h>
  #include <time.h> // clock(): fntRenderStringFit's scroll timing
-@@ -36,8 +37,8 @@ extern int size_ripflow_raw;
+@@ -36,8 +37,9 @@ extern int size_ripflow_raw;
  extern void *ripflowbold_raw;
  extern int size_ripflowbold_raw;
  
@@ -128,10 +128,11 @@ index 06870fe..245567e 100644
 -#define FNT_CAPS(f, c) ((f)->caps && (c) >= 'a' && (c) <= 'z' ? (c) - 32 : (c))
 +// RIPPS2 build 70: a caps font draws a-z as A-Z; build 104: and every other lowercase letter as its capital
 +#define FNT_CAPS(f, c) ((f)->caps ? ripps2Upper(c) : (c))
++#define FNT_ZERO_WIDTH(c) (((c) >= 0x200B && (c) <= 0x200F) || (c) == 0xFEFF)
  
  /// Maximal count of atlases per font
  #define ATLAS_MAX    4
-@@ -90,6 +91,16 @@ typedef struct
+@@ -90,6 +92,16 @@ typedef struct
      /// RIPPS2: the face the main font's 1 is drawn from (Planet N's own 1 is its I); NULL elsewhere
      FT_Face oneFace;
  
@@ -148,7 +149,7 @@ index 06870fe..245567e 100644
      /// Nonzero if font is used
      int isValid;
  
-@@ -151,6 +162,7 @@ static void fntUnlock(void)
+@@ -151,6 +163,7 @@ static void fntUnlock(void)
  
  static void fntUpdateAspectRatioLocked(void);
  static int fntCalcDimensionsLocked(font_t *font, const char *str);
@@ -156,7 +157,7 @@ index 06870fe..245567e 100644
  
  static rm_quad_t quad;
  static uint32_t codepoint, state;
-@@ -264,6 +276,10 @@ static void fntInitSlot(font_t *font)
+@@ -264,6 +277,10 @@ static void fntInitSlot(font_t *font)
  {
      font->face = NULL;
      font->oneFace = NULL;
@@ -167,7 +168,7 @@ index 06870fe..245567e 100644
      font->glyphCache = NULL;
      font->cacheMaxPageID = -1;
      font->dataPtr = NULL;
-@@ -287,6 +303,12 @@ static void fntDeleteSlot(font_t *font)
+@@ -287,6 +304,12 @@ static void fntDeleteSlot(font_t *font)
          FT_Done_Face(font->oneFace);
          font->oneFace = NULL;
      }
@@ -180,7 +181,7 @@ index 06870fe..245567e 100644
  
      if (font->dataPtr) {
          free(font->dataPtr);
-@@ -370,6 +392,8 @@ static int fntLoadSlotLocked(font_t *font, void *buffer, int bufferSize, int own
+@@ -370,6 +393,8 @@ static int fntLoadSlotLocked(font_t *font, void *buffer, int bufferSize, int own
      fntInitSlot(font);
      if (owned)
          font->dataPtr = buffer;
@@ -189,7 +190,7 @@ index 06870fe..245567e 100644
  
      // load the font via memory handle
      int error = FT_New_Memory_Face(font_library, (FT_Byte *)buffer, bufferSize, 0, &font->face);
-@@ -460,6 +484,7 @@ int fntLoadFallback(char *path)
+@@ -460,6 +485,7 @@ int fntLoadFallback(char *path)
  
      fntLock();
      fallbackFontID = id;
@@ -197,7 +198,7 @@ index 06870fe..245567e 100644
      fntUnlock();
      return 0;
  }
-@@ -477,9 +502,12 @@ int fntLoadDefault(char *path)
+@@ -477,9 +503,12 @@ int fntLoadDefault(char *path)
      // draw can be using the old face, cache or atlases when they go.
      fntLock();
      if (fntLoadSlotLocked(&newFont, buffer, bufferSize, owned, FNTSYS_DEFAULT_SIZE) != FNT_ERROR) {
@@ -210,7 +211,7 @@ index 06870fe..245567e 100644
          result = 0;
      }
      fntUnlock();
-@@ -550,19 +578,45 @@ static int fntGlyphAtlasPlace(font_t *font, fnt_glyph_cache_entry_t *glyph, FT_G
+@@ -550,19 +579,45 @@ static int fntGlyphAtlasPlace(font_t *font, fnt_glyph_cache_entry_t *glyph, FT_G
      return 0;
  }
  
@@ -266,7 +267,7 @@ index 06870fe..245567e 100644
      // calc page id and in-page index from glyph id
      int pageid = gid / GLYPH_CACHE_PAGE_SIZE;
      int idx = gid % GLYPH_CACHE_PAGE_SIZE;
-@@ -588,6 +642,19 @@ static fnt_glyph_cache_entry_t *fntCacheGlyph(font_t *font, uint32_t gid)
+@@ -588,6 +643,19 @@ static fnt_glyph_cache_entry_t *fntCacheGlyph(font_t *font, uint32_t gid)
      }
  
      FT_Face face = (gid == '1' && font->oneFace != NULL) ? font->oneFace : font->face; // RIPPS2: the flagged 1
@@ -286,7 +287,7 @@ index 06870fe..245567e 100644
      int error = FT_Load_Char(face, gid, FT_LOAD_RENDER);
      if (error) {
          LOG("FNTSYS Error loading glyph - %d\n", error);
-@@ -646,10 +713,25 @@ static void fntUpdateAspectRatioLocked(void)
+@@ -646,10 +714,25 @@ static void fntUpdateAspectRatioLocked(void)
              FT_Set_Char_Size(fonts[i].face, fonts[i].fontSize * 64, fonts[i].fontSize * 64, fDPI * ws, fDPI * hs);
              if (fonts[i].oneFace != NULL) // RIPPS2: the stand-in 1 at the same size
                  FT_Set_Char_Size(fonts[i].oneFace, fonts[i].fontSize * 64, fonts[i].fontSize * 64, fDPI * ws, fDPI * hs);
@@ -312,6 +313,50 @@ index 06870fe..245567e 100644
  /* RIPPS2 build 102 (user: "make the text scrolling smooth 60fps"). A string can be moved by a fraction of a
     640 x 480 unit (fntSubX / fntSubY, in units, turned into display pixels as the string is placed) and cut at the
     sides of a window (fntClipX0..fntClipX1, display pixels; equal: no window), a glyph that crosses its edge drawn
+@@ -769,7 +852,9 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+     for (; *string; ++string) {
+         if (utf8Decode(&state, &codepoint, *string)) // accumulate the codepoint value
+             continue;
+-            codepoint = FNT_CAPS(font, codepoint);
++        if (FNT_ZERO_WIDTH(codepoint)) // build 104: the zero-width marks some translations carry draw nothing
++            continue;
++        codepoint = FNT_CAPS(font, codepoint);
+ 
+         glyph = fntCacheGlyph(font, codepoint);
+         if (!glyph)
+@@ -830,7 +915,9 @@ static void fntRenderSubRTL(font_t *font, const char *startRTL, const char *stri
+     for (; startRTL != string; ++startRTL) {
+         if (utf8Decode(&state, &codepoint, *startRTL))
+             continue;
+-            codepoint = FNT_CAPS(font, codepoint);
++        if (FNT_ZERO_WIDTH(codepoint)) // build 104: the zero-width marks some translations carry draw nothing
++            continue;
++        codepoint = FNT_CAPS(font, codepoint);
+ 
+         glyph = fntCacheGlyph(font, codepoint);
+         if (!glyph)
+@@ -900,7 +987,9 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+     for (; *string; ++string) {
+         if (utf8Decode(&state, &codepoint, *string)) // accumulate the codepoint value
+             continue;
+-            codepoint = FNT_CAPS(font, codepoint);
++        if (FNT_ZERO_WIDTH(codepoint)) // build 104: the zero-width marks some translations carry draw nothing
++            continue;
++        codepoint = FNT_CAPS(font, codepoint);
+ 
+         glyph = fntCacheGlyph(font, codepoint);
+         if (!glyph)
+@@ -1155,7 +1244,9 @@ static int fntCalcDimensionsLocked(font_t *font, const char *str)
+     for (; *str; ++str) {
+         if (utf8Decode(&state, &codepoint, *str)) // accumulate the codepoint value
+             continue;
+-            codepoint = FNT_CAPS(font, codepoint);
++        if (FNT_ZERO_WIDTH(codepoint)) // build 104: the zero-width marks some translations carry draw nothing
++            continue;
++        codepoint = FNT_CAPS(font, codepoint);
+ 
+         // Could just as well only get the glyph dimensions
+         // but it is probable the glyphs will be needed anyway
 diff --git a/src/gui.c b/src/gui.c
 index 56c7cca..e10380f 100644
 --- a/src/gui.c

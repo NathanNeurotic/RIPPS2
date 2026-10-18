@@ -140,6 +140,150 @@ LOWER = {
 }
 
 
+# Build 104 (languages): the rest of what RIPPS2's translations write, drawn the same way. Capitals only; the caps
+# cut maps each lowercase letter to its capital, the case-true cut draws a lowercase that has no shape in LOWER as
+# its capital at x-height (small caps).
+CYRILLIC = {
+    '\u0411': [[(4, 5.2), (4, 6), (0, 6), (0, 0), (4, 0), (4, 3.2), (0, 3.2)]],              # BE: a flag tells it from 6
+    '\u0413': [[(3.6, 6), (0, 6), (0, 0)]],                                                  # GHE
+    '\u0414': [[(-0.4, -1), (-0.4, 0), (4.6, 0), (4.6, -1)], [(0.6, 0), (0.6, 6), (4, 6), (4, 0)]],  # DE
+    '\u0416': [[(0, 6), (2.5, 3), (0, 0)], [(5, 6), (2.5, 3), (5, 0)], [(2.5, 6), (2.5, 0)]],  # ZHE
+    '\u0417': [[(0, 6), (4, 6), (1.8, 3.4), (4, 3.4), (4, 0), (0, 0)]],                      # ZE: the 3
+    '\u0418': [[(0, 6), (0, 0), (4, 6), (4, 0)]],                                            # I
+    '\u041B': [[(0, 0), (1, 0), (1, 6), (4, 6), (4, 0)]],                                    # EL
+    '\u041F': [[(0, 0), (0, 6), (4, 6), (4, 0)]],                                            # PE
+    '\u0423': [[(0, 6), (0, 3), (4, 3)], [(4, 6), (4, 0), (0, 0)]],                          # U
+    '\u0424': [[(0, 4.8), (0, 1.2), (5, 1.2), (5, 4.8), (0, 4.8)], [(2.5, 6), (2.5, 0)]],    # EF
+    '\u0426': [[(0, 6), (0, 0), (4, 0), (4, 6)], [(4, 0), (4.8, 0), (4.8, -1)]],             # TSE
+    '\u0427': [[(0, 6), (0, 3), (4, 3)], [(4, 6), (4, 0)]],                                  # CHE
+    '\u0428': [[(0, 6), (0, 0), (5, 0), (5, 6)], [(2.5, 0), (2.5, 6)]],                      # SHA
+    '\u0429': [[(0, 6), (0, 0), (5, 0), (5, 6)], [(2.5, 0), (2.5, 6)], [(5, 0), (5.8, 0), (5.8, -1)]],  # SHCHA
+    '\u042A': [[(0, 6), (1, 6), (1, 0), (4, 0), (4, 3), (1, 3)]],                            # HARD SIGN
+    '\u042B': [[(0, 6), (0, 0), (3, 0), (3, 3), (0, 3)], [(5, 6), (5, 0)]],                  # YERU
+    '\u042C': [[(0, 6), (0, 0), (4, 0), (4, 3), (0, 3)]],                                    # SOFT SIGN
+    '\u042D': [[(0, 6), (4, 6), (4, 0), (0, 0)], [(1.6, 3), (4, 3)]],                        # E
+    '\u042E': [[(0, 6), (0, 0)], [(0, 3), (1.6, 3)], [(1.6, 0), (1.6, 6), (5, 6), (5, 0), (1.6, 0)]],  # YU
+    '\u042F': [[(4, 0), (4, 6), (0, 6), (0, 3), (4, 3)], [(2.2, 3), (0, 0)]],                # YA: the R turned round
+    '\u0404': [[(4, 6), (0, 6), (0, 0), (4, 0)], [(0, 3), (2.4, 3)]],                        # UKRAINIAN IE
+    '\u0490': [[(0, 0), (0, 6), (3.6, 6), (3.6, 7.2)]],                                      # GHE WITH UPTURN
+    '\u0402': [[(0, 6), (4, 6)], [(1.2, 6), (1.2, 0)], [(1.2, 3.4), (4, 3.4), (4, 0), (3, 0)]],  # DJE
+    '\u040B': [[(0, 6), (4, 6)], [(1.2, 6), (1.2, 0)], [(1.2, 3.4), (4, 3.4), (4, 0)]],      # TSHE
+    '\u0409': [[(0, 0), (1, 0), (1, 6), (3.4, 6), (3.4, 0), (6, 0), (6, 3), (3.4, 3)]],      # LJE
+    '\u040A': [[(0, 0), (0, 6)], [(0, 3), (3.4, 3)], [(3.4, 6), (3.4, 0), (6, 0), (6, 3), (3.4, 3)]],  # NJE
+    '\u040F': [[(0, 6), (0, 0), (4, 0), (4, 6)], [(2, 0), (2, -1)]],                         # DZHE
+}
+# Cyrillic letters drawn as the Latin letter they look like
+CYRILLIC_AS = {'\u0410': 'A', '\u0412': 'B', '\u0415': 'E', '\u041A': 'K', '\u041C': 'M', '\u041D': 'H',
+               '\u041E': 'O', '\u0420': 'P', '\u0421': 'C', '\u0422': 'T', '\u0425': 'X', '\u0406': 'I',
+               '\u0408': 'J', '\u0405': 'S'}
+GREEK = {
+    '\u0393': [[(3.6, 6), (0, 6), (0, 0)]],                                                  # GAMMA
+    '\u0394': [[(0, 0), (2, 6), (4, 0), (0, 0)]],                                            # DELTA
+    '\u0398': [[(0, 0), (0, 6), (4, 6), (4, 0), (0, 0)], [(1.2, 3), (2.8, 3)]],              # THETA
+    '\u039B': [[(0, 0), (2, 6), (4, 0)]],                                                    # LAMDA
+    '\u039E': [[(0, 6), (4, 6)], [(0.6, 3), (3.4, 3)], [(0, 0), (4, 0)]],                    # XI
+    '\u03A0': [[(0, 0), (0, 6), (4, 6), (4, 0)]],                                            # PI
+    '\u03A3': [[(4, 6), (0, 6), (2, 3), (0, 0), (4, 0)]],                                    # SIGMA
+    '\u03A6': [[(0, 4.8), (0, 1.2), (5, 1.2), (5, 4.8), (0, 4.8)], [(2.5, 6), (2.5, 0)]],    # PHI
+    '\u03A8': [[(0, 6), (0, 3), (4, 3), (4, 6)], [(2, 6), (2, 0)]],                          # PSI
+    '\u03A9': [[(0, 0), (1.2, 0), (0, 1.4), (0, 6), (4, 6), (4, 1.4), (2.8, 0), (4, 0)]],    # OMEGA
+}
+GREEK_AS = {'\u0391': 'A', '\u0392': 'B', '\u0395': 'E', '\u0396': 'Z', '\u0397': 'H', '\u0399': 'I',
+            '\u039A': 'K', '\u039C': 'M', '\u039D': 'N', '\u039F': 'O', '\u03A1': 'P', '\u03A4': 'T',
+            '\u03A5': 'Y', '\u03A7': 'X'}
+# Latin letters with no decomposition: the ligatures and the barred and stroked ones
+LATIN_EXTRA = {
+    '\u00C6': [[(0, 0), (0, 6), (5, 6)], [(2.6, 6), (2.6, 0), (5, 0)], [(0, 3), (4.4, 3)]],   # AE
+    '\u0152': [[(5, 6), (0, 6), (0, 0), (5, 0)], [(2.6, 6), (2.6, 0)], [(2.6, 3), (4.4, 3)]],  # OE
+    '\u00D8': [[(0, 0), (0, 6), (4, 6), (4, 0), (0, 0)], [(0, 0), (4, 6)]],                  # O WITH STROKE
+    '\u0141': [[(0.8, 6), (0.8, 0), (4.4, 0)], [(0, 2.4), (1.8, 3.6)]],                      # L WITH STROKE
+    '\u0110': [[(0.8, 0), (0.8, 6), (3.8, 6), (4.8, 5), (4.8, 1), (3.8, 0), (0.8, 0)], [(0, 3), (1.8, 3)]],  # D WITH STROKE
+    '\u0126': [[(0, 0), (0, 6)], [(4, 0), (4, 6)], [(0, 3), (4, 3)], [(-0.6, 4.8), (4.6, 4.8)]],  # H WITH STROKE
+    '\u0166': [[(0, 6), (4, 6)], [(2, 6), (2, 0)], [(1, 3), (3, 3)]],                        # T WITH STROKE
+    '\u1E9E': [[(0, 0), (0, 6), (4, 6), (1.6, 3.4), (4, 3.4), (4, 0), (1.6, 0)]],            # CAPITAL SHARP S
+    '\u00DE': [[(0, 0), (0, 6)], [(0, 4.6), (4, 4.6), (4, 1.6), (0, 1.6)]],                  # THORN
+    '\u014A': [[(0, 0), (0, 6), (4, 6), (4, -1), (2.6, -1)]],                                # ENG
+}
+LATIN_EXTRA_AS = {'\u00D0': '\u0110', '\u0131': 'I'}  # ETH is drawn as D with stroke; dotless i is I
+# the case-true cut: lowercase Cyrillic and Greek letters that look like a Latin lowercase are drawn as it
+CASE_LOWER_AS = {'\u0430': 'a', '\u0435': 'e', '\u043E': 'o', '\u0440': 'p', '\u0441': 'c', '\u0445': 'x',
+                 '\u0443': 'y', '\u0456': 'i', '\u0458': 'j', '\u0455': 's', '\u03BF': 'o'}
+PUNCT_EXTRA = {
+    '\u00A1': [[(0, 4.2), (0, 0)], [(0, 6), (0, 6.01)]],                                     # inverted !
+    '\u00BF': [[(2, 6), (2, 6.01)], [(2, 4.2), (2, 3), (0, 3), (0, 0), (4, 0)]],             # inverted ?
+    '\u00B7': [[(0, 3), (0, 3.01)]],                                                         # middle dot
+    '\u2026': [[(0, 0), (0, 0.01)], [(1.2, 0), (1.2, 0.01)], [(2.4, 0), (2.4, 0.01)]],       # ellipsis
+    '\u2013': [[(0, 3), (3.6, 3)]],                                                          # en dash
+    '\u2014': [[(0, 3), (5.4, 3)]],                                                          # em dash (upstream texts)
+    '\u2018': [[(0, 4.4), (0, 6)]],                                                          # quotes: straight, as '
+    '\u2019': [[(0, 6), (0, 4.4)]],
+    '\u201C': [[(0, 6), (0, 4.4)], [(1.2, 6), (1.2, 4.4)]],
+    '\u201D': [[(0, 6), (0, 4.4)], [(1.2, 6), (1.2, 4.4)]],
+    '\u00AB': [[(1.6, 4.6), (0, 3), (1.6, 1.4)], [(3.2, 4.6), (1.6, 3), (3.2, 1.4)]],        # guillemets
+    '\u00BB': [[(0, 4.6), (1.6, 3), (0, 1.4)], [(1.6, 4.6), (3.2, 3), (1.6, 1.4)]],
+    '\u00B0': [[(0, 6), (1.2, 6), (1.2, 4.8), (0, 4.8), (0, 6)]],                             # degree
+    '\u00D7': [[(0, 1.6), (2.8, 4.4)], [(0, 4.4), (2.8, 1.6)]],                              # multiplication sign
+    '\u2192': [[(0, 3), (4, 3)], [(2.6, 4.4), (4, 3), (2.6, 1.6)]],                          # arrow
+}
+ZERO_WIDTH = (0x200B, 0x200C, 0x200D, 0x200E, 0x200F, 0xFEFF)
+
+# Marks, drawn above a letter (x from its centre, y up from the mark's line) or below it (y down from the baseline;
+# 'ogonek' from its right side). Heights fit 0.7 of a unit; a bold cut draws them a little lower.
+MARKS_ABOVE = {
+    0x0300: [[(-0.4, 0.7), (0.4, 0)]],                                    # grave
+    0x0301: [[(-0.4, 0), (0.4, 0.7)]],                                    # acute (and the Greek tonos)
+    0x0302: [[(-0.8, 0), (0, 0.7), (0.8, 0)]],                            # circumflex
+    0x0303: [[(-1, 0.1), (-0.35, 0.6), (0.35, 0.1), (1, 0.6)]],           # tilde
+    0x0304: [[(-0.9, 0.35), (0.9, 0.35)]],                                # macron
+    0x0306: [[(-0.8, 0.7), (-0.8, 0), (0.8, 0), (0.8, 0.7)]],             # breve, square as the letters
+    0x0307: [[(0, 0.3), (0, 0.31)]],                                      # dot above
+    0x0308: [[(-0.7, 0.3), (-0.7, 0.31)], [(0.7, 0.3), (0.7, 0.31)]],    # diaeresis
+    0x0309: [[(-0.4, 0.7), (0.4, 0.7), (0.4, 0.35), (0, 0.35), (0, 0)]],  # hook above
+    0x030A: [[(-0.45, 0), (-0.45, 0.8), (0.45, 0.8), (0.45, 0), (-0.45, 0)]],  # ring
+    0x030B: [[(-0.9, 0), (-0.3, 0.7)], [(0.3, 0), (0.9, 0.7)]],           # double acute
+    0x030C: [[(-0.8, 0.7), (0, 0), (0.8, 0.7)]],                          # caron
+}
+MARKS_BELOW = {
+    0x0323: [[(0, -0.9), (0, -0.89)]],                                    # dot below
+    0x0326: [[(0, -0.5), (0, -1.4)]],                                     # comma below
+    0x0327: [[(0, 0), (0, -0.6), (0.6, -0.6), (0.6, -1.2), (-0.4, -1.2)]],  # cedilla
+}
+OGONEK = [[(-0.1, 0), (-0.6, -0.5), (-0.6, -1.2), (0.2, -1.2)]]
+
+
+def _span(polys):
+    xs = [x for p in polys for x, _ in p]
+    ys = [y for p in polys for _, y in p]
+    return min(xs), max(xs), min(ys), max(ys)
+
+
+def compose(base, marks, stroke):
+    """base's polylines with the marks of a decomposed letter (NFD) put on, or None for a mark not drawn here."""
+    x0, x1, _, top = _span(base)
+    cx, su = (x0 + x1) / 2.0, stroke / U
+    h = 0.7 if su < 1 else 0.55
+    out = [list(p) for p in base]
+    level = top + su + 0.35
+    for m in marks:
+        cp = ord(m)
+        if cp in MARKS_ABOVE:
+            out += [[(cx + x, level + y * h / 0.7) for x, y in p] for p in MARKS_ABOVE[cp]]
+            level += h + su + 0.2
+        elif cp in MARKS_BELOW:
+            out += [[(cx + x, y) for x, y in p] for p in MARKS_BELOW[cp]]
+        elif cp == 0x0328:
+            out += [[(x1 + x, y) for x, y in p] for p in OGONEK]
+        elif cp == 0x031B:  # horn: up and out from the top right
+            out += [[(x1, top - 0.4), (x1 + 0.8, top - 0.4), (x1 + 0.8, top + 0.5)]]
+        else:
+            return None
+    return out
+
+
+def small_caps(polys):
+    return [[(x, y * 4.0 / 6.0) for x, y in p] for p in polys]
+
+
 def stroke_rect(p, q, half):
     """The four corners of a stroke from p to q, extended half a stroke past each end."""
     (x0, y0), (x1, y1) = p, q
@@ -252,6 +396,92 @@ def build(s_variant, bold=False, case=False):
             order.append(name)
             cmap[ord(ch)] = name
 
+    # build 104: Cyrillic, Greek, the special Latin letters and the punctuation translations use
+    shapes = {}  # every capital's polylines, by character, for the accents below
+    shapes.update({ch: p for ch, p in defs.items()})
+    for table in (CYRILLIC, GREEK, LATIN_EXTRA):
+        shapes.update(table)
+    for table in (CYRILLIC_AS, GREEK_AS, LATIN_EXTRA_AS):
+        for ch, like in table.items():
+            shapes[ch] = shapes[like]
+
+    def add(cp, polys):
+        name = 'g%04X' % cp
+        glyph, adv = draw_polylines(polys, stroke)
+        glyf[name], hmtx[name] = glyph, (adv, 0)
+        order.append(name)
+        cmap[cp] = name
+        return name
+
+    def lower_of(ch):  # the lowercase this capital maps from (a capital whose lowercase is itself: None)
+        lo = ch.lower()
+        return lo if len(lo) == 1 and lo != ch else None
+
+    for table in (CYRILLIC, GREEK, LATIN_EXTRA, PUNCT_EXTRA):
+        for ch, polys in table.items():
+            name = add(ord(ch), polys)
+            lo = lower_of(ch)
+            if lo is not None and table is not PUNCT_EXTRA:
+                if case:
+                    add(ord(lo), small_caps(polys))
+                else:
+                    cmap[ord(lo)] = name
+    for table in (CYRILLIC_AS, GREEK_AS, LATIN_EXTRA_AS):
+        for ch, like in table.items():
+            if ord(ch) not in cmap:
+                cmap[ord(ch)] = cmap[ord(like)]
+            lo = lower_of(ch)
+            if lo is not None and ord(lo) not in cmap:
+                if case and lo in CASE_LOWER_AS:
+                    cmap[ord(lo)] = cmap[ord(CASE_LOWER_AS[lo])]
+                elif case:
+                    add(ord(lo), small_caps(shapes[like]))
+                else:
+                    cmap[ord(lo)] = cmap[ord(like)]
+    if case:  # dotless i is its own lowercase
+        add(0x0131, [[(0, 0), (0, 4)]])
+    if ord('\u03C2') not in cmap:  # final sigma
+        cmap[0x03C2] = cmap[0x03A3] if not case else cmap.get(0x03C3, cmap[0x03A3])
+    if ord('\u00DF') not in cmap:  # sharp s: its capital in the caps cut, a small capital in the case cut
+        cmap[0x00DF] = cmap[0x1E9E] if not case else add(0x00DF, small_caps(LATIN_EXTRA['\u1E9E']))
+    glyf['zw'], hmtx['zw'] = empty, (0, 0)  # zero-width characters in the translations draw nothing
+    order.append('zw')
+    for cp in ZERO_WIDTH:
+        cmap[cp] = 'zw'
+
+    # accents: each letter its decomposition says is a base and marks, drawn with them
+    dotless = {'i': [[(0, 0), (0, 4)]], 'j': [[(1.2, 4), (1.2, -1.6), (0, -1.6)]]}  # i and j lose their dot under a mark
+    for cp in list(range(0xC0, 0x250)) + list(range(0x1E00, 0x1F00)) + list(range(0x370, 0x400)) + list(range(0x400, 0x530)):
+        if cp in cmap:
+            continue
+        ch = chr(cp)
+        d = unicodedata.normalize('NFD', ch)
+        if len(d) < 2:
+            continue
+        base, marks = d[0], d[1:]
+        if base.isupper() or not base.isalpha():
+            polys = shapes.get(base)
+        elif case and (base in LOWER or base in CASE_LOWER_AS):
+            like = CASE_LOWER_AS.get(base, base)
+            polys = dotless.get(like, LOWER[like])
+        elif case:
+            up = base.upper()
+            polys = small_caps(shapes[up]) if len(up) == 1 and up in shapes else None
+        else:  # the caps cut: a lowercase letter is its capital (the capital's own glyph when it has one)
+            if len(ch.upper()) == 1 and ord(ch.upper()) in cmap:
+                cmap[cp] = cmap[ord(ch.upper())]
+                continue
+            up = unicodedata.normalize('NFD', ch.upper())
+            if len(up) < 2 or up[1:] != marks:
+                up = base.upper() + marks
+            base, marks = up[0], up[1:]
+            polys = shapes.get(base)
+        if polys is None:
+            continue
+        polys = compose(polys, marks, stroke)
+        if polys is not None:
+            add(cp, polys)
+
     # accented Latin letters fall back to their base letter, so other languages stay readable
     for cp in range(0xC0, 0x250):
         base = unicodedata.normalize('NFD', chr(cp))[0]
@@ -267,7 +497,7 @@ def build(s_variant, bold=False, case=False):
     style = ('Bold' if bold else 'Regular') + (' Case' if case else '')
     fb.setupNameTable({'familyName': 'RIPPS2 Sleek', 'styleName': style,
                        'uniqueFontIdentifier': 'RIPPS2 Sleek ' + style, 'fullName': 'RIPPS2 Sleek ' + style,
-                       'psName': 'RIPPS2Sleek-' + style.replace(' ', ''), 'version': 'Version 1.2'})
+                       'psName': 'RIPPS2Sleek-' + style.replace(' ', ''), 'version': 'Version 1.3'})
     fb.setupOS2(sTypoAscender=750, sTypoDescender=-170, sTypoLineGap=0, usWinAscent=ASC, usWinDescent=-DESC,
                 sCapHeight=CAP, sxHeight=round(4 * U) if case else CAP)
     fb.setupPost()

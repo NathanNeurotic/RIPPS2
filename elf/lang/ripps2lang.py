@@ -250,6 +250,86 @@ def font_names(data):
 
 # ---- the pack ----
 
+# The fonts Open PS2 Loader's language repository carries (thirdparty/font_<Language>) that RIPPS2 may pass on: only
+# families whose licence lets anyone redistribute them. Its Persian font (IRANSans, commercial), its Romanian one (a
+# company's own typeface) and two of unknown origin (Japanese, Korean) are never shipped; another family stands in.
+FREE_FAMILIES = {
+    'DejaVu Sans': 'Bitstream Vera licence with DejaVu changes in the public domain (dejavu-fonts.github.io)',
+    'Free Sans': 'GNU FreeFont: GPL-3.0 with the font exception (gnu.org/software/freefont)',
+    'FreeSans': 'GNU FreeFont: GPL-3.0 with the font exception (gnu.org/software/freefont)',
+    'Roboto': 'Apache License 2.0 (github.com/googlefonts/roboto)',
+    'Roboto Condensed': 'Apache License 2.0 (github.com/googlefonts/roboto)',
+    'Droid Sans Fallback': 'Apache License 2.0 (Android Open Source Project)',
+    'Open Sans': 'Apache License 2.0 / SIL Open Font License 1.1 (github.com/googlefonts/opensans)',
+}
+# where a language's own font is not a free one, or it has none, the font of another language that covers it
+FONT_FROM = {'Persian': 'Arabic', 'Romana': 'Croatian', 'Japanese': 'SChinese', 'Korean': 'SChinese',
+             'Ryukyuan': 'SChinese', 'Serbian': 'Bulgarian', 'Albanian': 'Croatian', 'Galician': 'Croatian',
+             'Laotian': 'Laotian'}
+FONT_ANY = ('Croatian', 'Bulgarian', 'Arabic', 'SChinese')  # the last resort, in order
+SUBSET_OVER = 400 * 1024  # a font bigger than this goes in the pack cut to the letters its language uses
+
+
+def font_family(data):
+    n = font_names(data)
+    return n.get(16) or n.get(1) or ''
+
+
+def font_free(data):
+    fam = font_family(data)
+    for k, why in FREE_FAMILIES.items():
+        if fam == k or fam.startswith(k + ' '):
+            return why
+    return None
+
+
+def font_subset(data, chars):
+    """data cut to chars, ASCII and Latin-1 (RIPPS2's own words and a game's name in Latin letters): bytes, or None
+    without fontTools."""
+    try:
+        from fontTools import subset
+        from fontTools.ttLib import TTFont
+    except ImportError:
+        return None
+    font = TTFont(io.BytesIO(data))
+    opts = subset.Options()
+    opts.layout_features = []
+    opts.name_IDs = ['*']
+    opts.notdef_outline = True
+    opts.glyph_names = False
+    opts.hinting = False
+    sub_ = subset.Subsetter(opts)
+    sub_.populate(unicodes=sorted(set(range(0x20, 0x100)) | set(range(0x2010, 0x2027)) | set(range(0x3000, 0x3020)) |
+                                  set(range(0xFF01, 0xFF5F)) | {ord(c) for c in chars}))
+    sub_.subset(font)
+    buf = io.BytesIO()
+    font.save(buf)
+    return buf.getvalue()
+
+
+def pick_font(tree, lang, need):
+    """(file name in the pack, bytes, family, licence note, letters it still lacks) for a language, or None."""
+    tried = [lang, FONT_FROM.get(lang)] + list(FONT_ANY)
+    best = None
+    for src in tried:
+        if src is None:
+            continue
+        for ext in ('ttf', 'otf'):
+            p = os.path.join(tree, 'lng_src', 'thirdparty', 'font_%s.%s' % (src, ext))
+            if not os.path.exists(p):
+                continue
+            data = open(p, 'rb').read()
+            why = font_free(data)
+            if why is None:
+                continue
+            have = font_cmap(data)
+            lack = [c for c in need if ord(c) not in have]
+            if best is None or len(lack) < len(best[4]):
+                best = ('font_%s.%s' % (lang, ext), data, font_family(data), why, lack)
+            if not lack:
+                return best
+    return best
+
 def opl_translations(path):
     if not os.path.exists(path):
         return {}
@@ -319,33 +399,35 @@ def pack(tree, out):
         for lang in langs:
             text, chars, (n, n_mine, n_tmpl) = build_language(tree, lang, base, english_template, report)
             z.writestr('LNG/lang_%s.lng' % lang, text.encode('utf-8'))
-            need = sorted(c for c in chars if ord(c) >= 0x80 and ord(c) not in builtin and not c.isspace())
+            need = sorted(c for c in chars if ord(c) >= 0x80 and ord(c) not in builtin and not c.isspace()
+                          and not 0x200B <= ord(c) <= 0x200F)
             font_note = 'built-in fonts'
             if need:
-                font = None
-                for ext in ('ttf', 'otf'):
-                    p = os.path.join(tree, 'lng_src', 'thirdparty', 'font_%s.%s' % (lang, ext))
-                    if os.path.exists(p):
-                        font = p
-                        break
-                if font is None:
+                got = pick_font(tree, lang, need)
+                if got is None:
                     font_note = 'NO FONT: %d letters the built-in fonts lack' % len(need)
                 else:
-                    data = open(font, 'rb').read()
-                    have = font_cmap(data)
-                    lack = [c for c in need if ord(c) not in have]
+                    name, data, family, why, lack = got
+                    size = len(data)
+                    if size > SUBSET_OVER:
+                        cut = font_subset(data, chars)
+                        if cut is not None:
+                            data = cut
+                    z.writestr('LNG/' + name, data)
                     names = font_names(data)
-                    z.writestr('LNG/' + os.path.basename(font), data)
-                    font_note = '%s (%s)%s' % (os.path.basename(font), names.get(4, '?'),
-                                               ', lacks %d: %s' % (len(lack), ''.join(lack[:20])) if lack else '')
-                    licences.append('%s\n  name: %s\n  copyright: %s\n  licence: %s\n  licence URL: %s\n' % (
-                        os.path.basename(font), names.get(4, ''), names.get(0, ''), names.get(13, ''), names.get(14, '')))
+                    font_note = '%s: %s, %d KB%s%s' % (name, family, len(data) // 1024,
+                                                      ' (cut from %d KB)' % (size // 1024) if len(data) < size else '',
+                                                      ', lacks %d: %s' % (len(lack), ''.join(lack[:20])) if lack else '')
+                    licences.append('%s: %s\n  %s\n  the font says: %s\n' % (name, family, why, (names.get(0, '') or '').strip()[:200]))
             notes.append('%-14s %4d strings (%3d of RIPPS2\'s %d), %s' % (lang, n, n_mine, n_tmpl, font_note))
         z.writestr('LNG/README.txt', README_PACK.encode('utf-8'))
         if licences:
             z.writestr('LNG/FONTS.txt', ('The fonts in this folder come from Open PS2 Loader\'s language pack\n'
-                                         '(github.com/ps2homebrew/Open-PS2-Loader-lang, thirdparty/). What each says of itself:\n\n'
+                                         '(github.com/ps2homebrew/Open-PS2-Loader-lang, thirdparty/); a big one is cut to the\n'
+                                         'letters its language uses. Each is free to pass on under its own licence:\n\n'
                                          + '\n'.join(licences)).encode('utf-8'))
+    for line in licences:
+        print('lang font: ' + line.replace('\n', ' | ').strip(' |'))
     for line in notes:
         print('lang: ' + line)
     for line in report:
@@ -363,7 +445,7 @@ A language that needs letters RIPPS2's own fonts do not have (Greek, Cyrillic, A
 has its font_<Language> file here too: keep it beside its lang_<Language>.lng.
 
 These files are keyed by the English, so they keep working with later RIPPS2 builds: a string a later build adds shows
-in English until the next pack. Corrections and new languages: github.com/akilluminati47/ps2-pillars (elf/lang).
+in English until the next pack. Corrections and new languages: github.com/akilluminati47/RIPPS2 (elf/lang).
 '''
 
 
