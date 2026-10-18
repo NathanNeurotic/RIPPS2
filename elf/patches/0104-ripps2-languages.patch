@@ -578,17 +578,17 @@ index b2f50e4..7766422 100644
  
  #ifdef RETROACHIEVEMENTS
 diff --git a/src/opl.c b/src/opl.c
-index c4d90fa..901c793 100644
+index c4d90fa..1599236 100644
 --- a/src/opl.c
 +++ b/src/opl.c
-@@ -79,6 +79,7 @@
- #else
- #ifdef __DEBUG
- #include "include/debug.h"
+@@ -5,6 +5,7 @@
+ */
+ 
+ #include "include/opl.h"
 +#include "include/ripps2tr.h" // RIPPS2 build 104: _t
- #define LOG_INIT() \
-     do {           \
-     } while (0)
+ #ifdef RETROACHIEVEMENTS
+ #include "include/achievements.h"
+ #endif
 @@ -646,19 +647,19 @@ static void itemExecToggleView(struct menu_item *curMenu)
              if (view == LIB_VIEW_PS1)
                  logo = RIPPS2_PS1_LOGO;
@@ -5205,7 +5205,7 @@ index 0000000..180fddd
 +    return 1;
 +}
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 88e8159..2c56af5 100644
+index 88e8159..97a1bc1 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -40,10 +40,11 @@
@@ -5368,7 +5368,7 @@ index 88e8159..2c56af5 100644
                      }
                  }
              }
-@@ -1079,24 +1088,24 @@ static void discPollWorker(void)
+@@ -1079,24 +1088,28 @@ static void discPollWorker(void)
          case SCECdDVDV:
              // an ESR-patched game reads as DVD video, its own files beside the video ones
              fd = open("cdrom0:\\SYSTEM.CNF;1", O_RDONLY);
@@ -5391,14 +5391,18 @@ index 88e8159..2c56af5 100644
              if (type != SCECdDVDVR && (n = ripps2CdAudioTracks()) > 0) {
                  discSound = 1;
 -                snprintf(line, sizeof(line), "CD WITH %d SOUND TRACK%s: START LASER PLAYS %s", n, n == 1 ? "" : "S", n == 1 ? "IT" : "THEM");
-+                snprintf(line, sizeof(line), _t("CD WITH %d SOUND TRACK%s: START LASER PLAYS %s"), n, n == 1 ? "" : "S", n == 1 ? _t("IT") : _t("THEM"));
++                // build 104: one whole sentence for one track and one for more, so a translation needs no S and IT / THEM
++                if (n == 1)
++                    snprintf(line, sizeof(line), _t("CD WITH 1 SOUND TRACK: START LASER PLAYS IT"));
++                else
++                    snprintf(line, sizeof(line), _t("CD WITH %d SOUND TRACKS: START LASER PLAYS THEM"), n);
              } else
 -                snprintf(line, sizeof(line), "A DISC RIPPS2 CANNOT START");
 +                snprintf(line, sizeof(line), _t("A DISC RIPPS2 CANNOT START"));
  #endif
              break;
      }
-@@ -1127,7 +1136,7 @@ void ripps2DiscWatch(void)
+@@ -1127,7 +1140,7 @@ void ripps2DiscWatch(void)
      if (now == 0)
          now = 1;
      if (discReadAt == 0 && trayOpen < 0) { // the first frame: the boot read, a little later
@@ -5407,7 +5411,7 @@ index 88e8159..2c56af5 100644
          discReadAt = now + (clock_t)(DISC_BOOT_S * CLOCKS_PER_SEC);
          trayOpen = 0;
          trayAt = now;
-@@ -1150,10 +1159,10 @@ void ripps2DiscWatch(void)
+@@ -1150,10 +1163,10 @@ void ripps2DiscWatch(void)
          int st = sceCdStatus(), isOpen = st >= 0 && (st & DISC_SHELL_OPEN) != 0;
          trayAt = now;
          if (isOpen && trayOpen != 1) {
@@ -5420,7 +5424,7 @@ index 88e8159..2c56af5 100644
              discReadAt = now + (clock_t)(DISC_SETTLE_S * CLOCKS_PER_SEC);
              discRetries = 0;
              discFromTray = 1;
-@@ -1188,11 +1197,11 @@ void ripps2RenderLaunch(void)
+@@ -1188,11 +1201,11 @@ void ripps2RenderLaunch(void)
          ripps2CdRender();
          return;
      }
@@ -5434,7 +5438,7 @@ index 88e8159..2c56af5 100644
  }
  
  void ripps2HandleInputLaunch(void)
-@@ -1231,7 +1240,7 @@ void ripps2HandleInputLaunch(void)
+@@ -1231,7 +1244,7 @@ void ripps2HandleInputLaunch(void)
          int r = sysLaunchDisc(&guiRenderProbeFrame);
          if (r < 0 && r != SYS_DISC_CANCELLED) {
              guiMsgBoxSound(SFX_ERROR);
@@ -5443,7 +5447,7 @@ index 88e8159..2c56af5 100644
          }
          discReadAt = clock() + 1; // look again
          readPads();
-@@ -1262,7 +1271,7 @@ void ripps2RenderMemory(void)
+@@ -1262,7 +1275,7 @@ void ripps2RenderMemory(void)
      ripps2RenderCategoryBar();
      // the same footnotes as LAUNCH DISC: the prompt where START LASER sits, the formation on the line of
      // the disc note (small, between small Left / Right), its count just under it
@@ -5452,7 +5456,7 @@ index 88e8159..2c56af5 100644
  
      float glyphA = ripps2GlyphsAlpha(RIPPS2_GLYPH_FORMATIONS); // every frame, the name shown or not (RIPPSettings)
      static int named = -1;
-@@ -1371,46 +1380,80 @@ void ripps2DrawHintBox(int x, int y, int w, int h)
+@@ -1371,46 +1384,80 @@ void ripps2DrawHintBox(int x, int y, int w, int h)
  
  // RIPPS2 build 70: button hints read in sentence case ("Copy to audio", not "COPY TO AUDIO") in the
  // theme's lowercase font: the menus name things, the hints explain. Short codes stay in capitals.
