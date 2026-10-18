@@ -21,8 +21,9 @@ if '#define ED_FONT RIPPS2_CASE_FONT' not in ed or 'gTheme->fonts[' in ed:
     fail.append('the text editor must draw every word in RIPPS2 Sleek true case')
 if 'gridFlips[k].side = gridFlips[k].target ? side : -side;' not in th:
     fail.append('the case flip must turn the way the stick pushes, to the back and home')
+# build 103: the Settings hub's version line moved to the tooltips' face (the same family, smaller): one fewer in gui.c
 if '#define RIPPS2_MENU_FONT RIPPS2_DIA_FONT' not in rd('include/themes.h') or menu.count('RIPPS2_MENU_FONT') < 5 or \
-        gui.count('RIPPS2_MENU_FONT') < 6:
+        gui.count('RIPPS2_MENU_FONT') < 5 or 'gTheme->diaTipFont, screenWidth >> 1, 72' not in gui:
     fail.append("the START menu, the Settings hub, its save prompt and the game / app menus must use Adapt's face")
 
 # Memory Files

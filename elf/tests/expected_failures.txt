@@ -8,3 +8,14 @@ test_settings_back_keeps_edits.py NBD Server moved from the main menu to Setting
 test_settings_fit.py RIPPS2's own colours replace RiptOPL's plasma palette
 test_site_sync.py RiptOPL's documentation-site tool (needs bs4); RIPPS2 does not publish that site
 test_vmode_confirm.py the confirm prompt draws in RIPPS2's font over its pillars; the harness stubs RiptOPL's theme fonts
+test_custom_font_load.py its harness builds fntReadData without RIPPS2's built-in fonts (ripps2, sleek, sleekbold, sleekcase, ripflow) (build 103 merge)
+test_igr_polling.py the VBLANK handler also opens RIPPS2's in-game menu (IGR_MenuOpen, IGR_HoldInterrupts), which the harness does not carry (build 87; build 103 merge)
+test_libview_l3_rescan.py L3 shows RIPPS2's view word (ripps2ShowViewWord) where the harness expects RiptOPL's toast (build 81)
+test_logo_art_toggle.py RIPPS2 keeps its own list rows (star after the title, rows on the theme's pitch), so the third guard (upstream's star column) is not there; both draw sites are guarded (build 103 merge)
+test_page_animation.py page turns try the Grid's own pages first (menuGridPage, build 82), which the harness lacks
+test_psbbn_flow.py RIPPS2 has no built-in <PSBBN Flow> (nThemes + 2 is RIPGRID); the element types are kept (build 103 merge)
+test_ra_cards_setting.py RIPPS2's Network page carries no RetroAchievements rows; its Achievements page has them (build 70)
+test_ra_mstack_link.py ranet.c also keeps the replying PC for LEFT TO HUNT (g_peer, build 94), which the harness does not declare
+test_save_icons.py RIPFLOW shows no SaveIcon on its carousel page (build 103 merge keeps RIPFLOW's layout)
+test_theme_metadata.py RIPPS2's attribute text rolls long descriptions and reads the metadata database (rollStart, metaDbGetStr, lineHeight), which the harness lacks
+test_theme_text_room.py RIPPS2 keeps its own Favourites star after the title instead of upstream's star column (build 103 merge); the marquee half passes

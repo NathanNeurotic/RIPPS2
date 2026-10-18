@@ -17,12 +17,13 @@ for p in "${PATCHES[@]}"; do
 done
 PREV=$(git write-tree)
 unset GIT_INDEX_FILE
-git diff-index --cached -p --binary "$PREV" > "$LAST"
+# build 103: vendored mbedTLS comes from the upstream commit at build time (elf/build.sh), never through a patch
+git diff-index --cached -p --binary "$PREV" -- . ':(exclude)third_party/mbedtls' > "$LAST"
 # check: the whole series reproduces the index
 export GIT_INDEX_FILE="$SP/idx_regen"
 git read-tree 65d4b89
 for p in "${PATCHES[@]}"; do git apply --cached --whitespace=nowarn "$p"; done
 T=$(git write-tree)
 unset GIT_INDEX_FILE
-if [ -n "$(git diff-index --cached --name-only "$T")" ]; then echo "SERIES MISMATCH"; exit 1; fi
+if [ -n "$(git diff-index --cached --name-only "$T" -- . ':(exclude)third_party/mbedtls')" ]; then echo "SERIES MISMATCH"; exit 1; fi
 echo "regenerated $(basename "$LAST") ($(wc -l < "$LAST") lines); series reproduces the tree"

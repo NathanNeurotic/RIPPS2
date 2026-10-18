@@ -55,7 +55,10 @@ with tempfile.TemporaryDirectory() as d:
         want = ['1 0', '1 1', '1 2', '2 2']
         if got != want:
             fail.append('SELECT tap/hold: want refreshes,cycles %s, got %s' % (want, got))
-if ms.count('getKeyOn(KEY_SELECT)') != 1:
+# build 103: only in the game list's handler (upstream's achievements screen has its own SELECT)
+main = ms[ms.index('void menuHandleInputMain()'):]
+main = main[:main.index('\n}\n')]
+if main.count('getKeyOn(KEY_SELECT)') != 1:
     fail.append('the old press-to-refresh SELECT branch must be gone')
 
 # --- Grid: real art only, fading in; a glass title tile when there is none; a breathing glow

@@ -24,6 +24,16 @@ for p in "$HERE"/patches/*.patch; do
   git -C "$SRC" apply --whitespace=nowarn "$p"
 done
 
+# Build 103: the RiptOPL upstream RIPPS2 has merged (elf/RIPTOPL_UPSTREAM: its commit, then its revision, the
+# commit count + 2 RiptOPL's Makefile numbers a build by). The pin stays 65d4b89 and upstream arrives as patches,
+# so this is what the version names. Vendored sources upstream carries whole come straight from that commit,
+# untouched, instead of through a patch: mbedTLS (the RA edition's HTTPS game-ID lookup, Apache-2.0).
+read -r UP_COMMIT UP_REV < "$HERE/RIPTOPL_UPSTREAM"
+git -C "$SRC" fetch -q --depth 1 origin "$UP_COMMIT"
+git -C "$SRC" checkout -q FETCH_HEAD -- third_party/mbedtls
+UP_HASH="$(printf '%s' "$UP_COMMIT" | cut -c1-7)"
+echo "RiptOPL upstream merged: $UP_HASH (revision $UP_REV)"
+
 # build 76: --prepare-only stops here, with RiptOPL and every patch applied, for the host tests
 # (.github/workflows/build-elf.yml runs them on a plain Ubuntu runner, which has no ps2dev toolchain)
 if [ "${1:-}" = "--prepare-only" ]; then
@@ -64,7 +74,10 @@ cp -f "$HERE/neutrino/neutrino-1.8.0.tar.gz" "$SRC/misc/neutrino.tar.gz"
 # The build number shown in About: the number of the last patch (build N is patch N); beta from build 100
 LAST="$(ls "$HERE"/patches/0*.patch | tail -n1)"
 NUM="$(basename "$LAST" | cut -c1-4 | sed 's/^0*//')"
-printf '#define RIPPS2_BUILD %s\n#define RIPPS2_STAGE "%s"\n' "$NUM" "${RIPPS2_STAGE:-BETA}" > "$SRC/include/ripps2_build.h"
+# Build 103: and the version, the build number's digits (102: v1.0.2-beta, 110: v1.1.0-beta)
+STAGE="${RIPPS2_STAGE:-BETA}"
+VER="v$((NUM / 100)).$(((NUM / 10) % 10)).$((NUM % 10))-$(printf '%s' "$STAGE" | tr 'A-Z' 'a-z')"
+printf '#define RIPPS2_BUILD %s\n#define RIPPS2_STAGE "%s"\n#define RIPPS2_VERSION "%s"\n' "$NUM" "$STAGE" "$VER" > "$SRC/include/ripps2_build.h"
 # A private sound pack baked into this build only (never set by the public workflow: RIPPS2 carries
 # no one else's sounds). A folder of <event>.adp files, from elf/theme/tools/make_sound_pack.py.
 if [ -n "${RIPPS2_SOUND_PACK:-}" ]; then
@@ -127,7 +140,9 @@ make clean
 # RIPPS2_MAKE_FLAGS: extra make flags, e.g. DEBUG=1 EESIO_DEBUG=1 for a build that logs over EE SIO
 # RETROACHIEVEMENTS=1 (build 70, SpiritofRA): RiptOPL's RetroAchievements flavour, the shipping loader
 # plus achievements; telemetry stays off until the user turns it on (Achievements in the main menu)
-make LOCALVERSION=RIPPS2 DIRTY= RETROACHIEVEMENTS=1 ${RIPPS2_MAKE_FLAGS:-} release || {
+# Build 103: REVISION and GIT_HASH name the upstream merged (RIPTOPL_UPSTREAM), not the one-commit clone of the pin
+# (which made every RIPPS2 say v1.2.0-Beta-3-65d4b89)
+make LOCALVERSION=RIPPS2 DIRTY= REVISION="$UP_REV" GIT_HASH="$UP_HASH" RETROACHIEVEMENTS=1 ${RIPPS2_MAKE_FLAGS:-} release || {
   # build 87: an ee_core over its stack floor still leaves its map: say by how much
   [ -f ee_core/ee_core.map ] && grep -E '(_end_bss|_stack_size|_stack) = ' ee_core/ee_core.map | sed 's/^ */ee_core: /'
   exit 1

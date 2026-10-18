@@ -1,5 +1,15 @@
 # RIPPS2 changelog
 
+## Build 103 (beta, not released yet), changes since build 102
+
+### RiptOPL, brought up to date
+- **RIPPS2 now carries RiptOPL up to 10/18/2026** (rebuild/main 3cd7f89, 548 commits since build 84's merge). Among them: in-game reset input that a busy game can no longer starve (#973), settings saves that survive a failed write (#971), safer IOP resets and VMC handling, UDPFS reconnects, RetroAchievements fixes and its achievement card, CFG Titles shown in lists (#918), a CJK title fallback font (#917), per-game parental locks, the option to hide logo art, and 3D save icons for PS1 games.
+- **RIPPS2's own look and features stay as they were** where the two met: the in-game menu runs inside upstream's new reset thread, Show Recents sits on the new crash-safe favourites file code, the star stays after a game's title, RIPGRID keeps its own colours, and upstream's new favourites notices say Starred Games.
+- Not taken up yet: upstream's built-in PSBBN Flow theme (its slot is RIPGRID's; its element types are in, for themes on a drive), and its achievement browser and network RA rows (RIPPS2's Achievements page covers them).
+
+### The version tells the truth
+- **About now reads "v1.0.3-beta, BUILD 103"**, and the Settings hub and the boot screen read **"RIPPS2 v1.0.3-beta (build 103) on RiptOPL v1.2.0-Beta-4032-3cd7f89"**. Every RIPPS2 up to build 102 said "RiptOPL v1.2.0-Beta-3-65d4b89" whatever upstream it carried, because the build only ever cloned the one pinned commit; the version now names the upstream actually merged (`elf/RIPTOPL_UPSTREAM`).
+
 ## Build 102 (beta, v1.0.2-beta), changes since build 101
 
 ### Sound

@@ -18,7 +18,7 @@ fail = []
 if 'igrmenu.o' not in emk:
     fail.append('igrmenu.c must be built into ee_core')
 # the config fields are appended after the RA block, never inserted
-if cfg.index('int IgrMenu;') < cfg.index('void *raWorkArea;'):
+if cfg.index('int IgrMenu;') < cfg.index('char raHost[16];'):  # build 103: upstream's RA block now ends here
     fail.append('the in-game menu fields must come after the RetroAchievements block')
 if 'config->IgrMenu = gRipps2IgrMenu;' not in sysc or 'sbGetRaInfo(&config->RaTotal, &config->RaUnlocked)' not in sysc:
     fail.append('the launch must hand ee_core the menu switch and the RA numbers')

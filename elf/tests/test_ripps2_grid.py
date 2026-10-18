@@ -9,7 +9,7 @@ root = Path(os.environ.get('RIPTOPL_DIR', '.'))
 th = (root / 'src/themes.c').read_text()
 ms = (root / 'src/menusys.c').read_text()
 fail = []
-if '"Grid"};' not in th or 'ELEM_TYPE_GRID' not in th:
+if '"Grid",' not in th or 'ELEM_TYPE_GRID' not in th:  # build 103: upstream's PSBBNFlow and SaveIcon follow it
     fail.append('the engine must know the Grid element type')
 if 'theme->grid = elem;' not in th or 'elem->drawElem = &drawGrid;' not in th:
     fail.append('initGrid must register the grid and its draw')
