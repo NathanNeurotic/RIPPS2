@@ -25,16 +25,15 @@ index b952127..6234389 100644
  void lngEnd(void);
  
 diff --git a/include/ripps2.h b/include/ripps2.h
-index fddcebb..5035369 100644
+index fddcebb..3f34be2 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
-@@ -149,7 +149,8 @@ void ripps2DrawPanelFlat(int x, int y, int w, int h, const unsigned char *rgb, i
- void ripps2DrawPagePanel(void); // menus / settings / dialogs: one clear-glass panel behind the page
+@@ -150,6 +150,8 @@ void ripps2DrawPagePanel(void); // menus / settings / dialogs: one clear-glass p
  void ripps2DrawHintBox(int x, int y, int w, int h); // the settings help text's box, in the same glass
  void ripps2DrawHintBoxA(int x, int y, int w, int h, float a); // build 70: the same, fading (0..1)
--int ripps2HintText(int x, int y, const char *text, u64 colour); // build 70: a button hint in sentence case; returns the x after it
-+int ripps2HintText(int x, int y, const char *text, u64 colour);
-+void ripps2HintSmall(int on); // build 104: the next hints a size smaller (a row a translation made too long) // build 70: a button hint in sentence case; returns the x after it
+ int ripps2HintText(int x, int y, const char *text, u64 colour); // build 70: a button hint in sentence case; returns the x after it
++void ripps2HintSmall(int on); // build 104: the next hints a size smaller (a row a translation made too long)
++int ripps2HintSmallFont(void); // build 104: that smaller font, for a theme's hint row (FNT_ERROR if it would not load)
  int ripps2HintWidth(const char *text);
  // build 85: what a PS1 handoff is about to do, written to mc0:/RIPPS2/LAUNCH.TXT for a tester to read back
  // in Memory Files (the file, its size and CRC, its argv, Sony's POPS files or Ember's BIOS beside it, the
@@ -5469,7 +5468,7 @@ index 0000000..180fddd
 +    return 1;
 +}
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 88e8159..74dfddc 100644
+index 88e8159..4c43dd2 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -40,10 +40,11 @@
@@ -5751,7 +5750,7 @@ index 88e8159..74dfddc 100644
  
      float glyphA = ripps2GlyphsAlpha(RIPPS2_GLYPH_FORMATIONS); // every frame, the name shown or not (RIPPSettings)
      static int named = -1;
-@@ -1371,49 +1406,104 @@ void ripps2DrawHintBox(int x, int y, int w, int h)
+@@ -1371,49 +1406,113 @@ void ripps2DrawHintBox(int x, int y, int w, int h)
  
  // RIPPS2 build 70: button hints read in sentence case ("Copy to audio", not "COPY TO AUDIO") in the
  // theme's lowercase font: the menus name things, the hints explain. Short codes stay in capitals.
@@ -5850,6 +5849,15 @@ index 88e8159..74dfddc 100644
 +    return small != FNT_ERROR ? small : font;
 +}
 +
++int ripps2HintSmallFont(void)
++{
++    int was = hintSmall, f;
++    hintSmall = 1;
++    f = hintFont(FNT_ERROR);
++    hintSmall = was;
++    return f;
++}
++
 +// build 104: the English handed in is translated here (a text already translated passes through), so the hint rows'
 +// tables of English read in the chosen language; 160 bytes, a hint in UTF-8
  int ripps2HintWidth(const char *text)
@@ -5876,6 +5884,46 @@ index 88e8159..74dfddc 100644
  }
  
  // ---- Screen switches: one glass panel moves between pages (no fade through black) ----
+diff --git a/src/themes.c b/src/themes.c
+index 0e9fbce..513194e 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -4169,20 +4169,32 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+             // RIPPS2: fit the row between the screen margins. A full row (Menu, Run, Info, Options,
+             // Refresh, Favorite, PS1) is wider than a gap of elem->width allows, so the gap tightens
+             // (never below 4) and the row is placed from the measured width, left or centred.
+-            int total = 0, gap = elem->width;
++            int total = 0, gap = elem->width, font = elem->font;
+             int margin = elem->aligned ? 24 : elem->posX;
+             for (i = 0; i < n; i++)
+-                total += hintEntryWidth(row[i], labels, elem->font);
++                total += hintEntryWidth(row[i], labels, font);
+             int avail = screenWidth - 2 * margin;
++            // build 104: a row a translation made too long even at the tightest gap reads a size smaller (the
++            // Russian row with RIPGRID's Source hint ran off both edges, lab 10/19), and never starts off the left
++            if (n > 1 && total + 4 * (n - 1) > avail) {
++                int small = ripps2HintSmallFont();
++                if (small != FNT_ERROR && small != font) {
++                    font = small;
++                    for (total = 0, i = 0; i < n; i++)
++                        total += hintEntryWidth(row[i], labels, font);
++                }
++            }
+             if (n > 1 && total + gap * (n - 1) > avail) {
+                 gap = (avail - total) / (n - 1);
+                 if (gap < 4)
+                     gap = 4;
+             }
+             int x = elem->aligned ? (screenWidth - (total + gap * (n - 1))) / 2 : elem->posX;
++            if (x < 4)
++                x = 4;
+ 
+             for (i = 0; i < n; i++)
+-                x = drawHintEntry(row[i], labels, elem->font, x, elem->posY, col, iconCol) + gap;
++                x = drawHintEntry(row[i], labels, font, x, elem->posY, col, iconCol) + gap;
+         }
+         if (showSource) {
+             menu_hint_item_t *h2 = menu->item->hints;
 diff --git a/src/vcdsupport.c b/src/vcdsupport.c
 index 75abf47..bd34d63 100644
 --- a/src/vcdsupport.c

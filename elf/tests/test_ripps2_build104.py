@@ -163,6 +163,9 @@ dia = rd('src/dia.c')
 if 'cjk = diaHintHasCjk(wordStart, wordLen);' not in dia or 'if (wordLen < 256 && !cjk) {' not in dia \
         or 'if (lineW > 0 && cjk) {' not in dia:
     fail.append('dia.c: a settings hint\'s CJK run fills its line and breaks between characters (lab 10/19)')
+thm = rd('src/themes.c')
+if 'int small = ripps2HintSmallFont();' not in thm or 'x = drawHintEntry(row[i], labels, font, x, elem->posY' not in thm:
+    fail.append('themes.c: a theme hint row too long at the tightest gap reads a size smaller (lab 10/19)')
 ui = rd('src/ripps2ui.c')
 if 'hintCase(_t(text), b, sizeof(b))' not in ui or 'ripps2Utf8Upper(text, word, sizeof(word))' not in ui:
     fail.append('ripps2ui.c: hints translate and sentence-case in UTF-8; the source toast capitalises in UTF-8')
