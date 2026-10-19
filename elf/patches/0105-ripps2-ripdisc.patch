@@ -141,10 +141,10 @@ index 79b05c2..5a2f8e2 100644
          guiMsgBoxSound(SFX_ERROR);
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
 new file mode 100644
-index 0000000..2feb99b
+index 0000000..c32550b
 --- /dev/null
 +++ b/src/ripps2disc.c
-@@ -0,0 +1,1366 @@
+@@ -0,0 +1,1469 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -173,6 +173,13 @@ index 0000000..2feb99b
 +  2048-byte sectors with retries, sound through the CD player's CDDA reads, and a PS1 data track in 2340-byte
 +  reads with each sector's 12 sync bytes put back. The screen is drawn a few times a second while it runs, with
 +  what is done and what is left. A cancel (asked first) or a failure removes everything the rip wrote.
++
++  How long: the confirm step says it before START, so a long rip is no surprise. A rip runs at the slower of the
++  drive and the storage it goes to, which is mostly the storage: the PS2's USB (1.1) takes about 1 MB/s at best (a
++  4.4 GB DVD to a stick is over an hour), while the internal exFAT HDD keeps up with the drive (a DVD at up to 4x,
++  2 to 5 MB/s, faster at the disc's edge; a CD at up to 24x). Until a rip has measured this console, a careful
++  guess for that kind of storage and disc; after one, what it really did, kept in the settings
++  (ripdisc_kbs_<storage>_<cd|dvd>). While it runs, the time left comes from its own progress.
 +
 +  Both AUDIO and MEDIA get a README.txt (ripps2WriteReadme) saying what goes in them.
 +*/
@@ -264,6 +271,13 @@ index 0000000..2feb99b
 +static int rdFd = -1, rdPart = 0, rdSplit = 0;
 +static u32 rdPartLeft = 0;
 +static char rdPartBase[200];
++
++// how long: the kind of storage a rip goes to, and what each takes in KB/s, a CD's and a DVD's
++enum { RD_DEST_USB = 0, RD_DEST_HDD, RD_DEST_MX4SIO, RD_DEST_ILINK, RD_DEST_MMCE, RD_DEST_OTHER, RD_DEST_COUNT };
++static const char *const rdDestKey[RD_DEST_COUNT] = {"usb", "hdd", "mx4sio", "ilink", "mmce", "other"};
++static const unsigned short rdGuessKbs[RD_DEST_COUNT][2] = {{800, 800}, {1400, 2400}, {600, 600}, {1400, 1600}, {400, 400}, {700, 700}};
++static int rdDest = RD_DEST_OTHER;
++static char rdEstBase[200]; // where media is to go, before its folder is picked (MEDIA's drive)
 +
 +// progress
 +static u64 rdDone = 0;
@@ -734,7 +748,7 @@ index 0000000..2feb99b
 +        if (mins < 1)
 +            snprintf(left, sizeof(left), _t("LESS THAN A MINUTE LEFT"));
 +        else
-+            snprintf(left, sizeof(left), _t("ABOUT %d MIN LEFT"), mins);
++            rdMinutes(mins, 1, left, sizeof(left));
 +    }
 +
 +    rmStartFrame();
@@ -753,6 +767,87 @@ index 0000000..2feb99b
 +    }
 +    rmEndFrame();
 +    return 1;
++}
++
++// ---- how long ----
++
++static int rdDestOfPath(const char *path)
++{
++    if (!strncmp(path, "mass", 4) && path[4] >= '0' && path[4] <= '7') {
++        switch (bdmSlotDeviceType(path[4] - '0')) {
++            case BDM_TYPE_USB:
++                return RD_DEST_USB;
++            case BDM_TYPE_ATA:
++                return RD_DEST_HDD;
++            case BDM_TYPE_SDC:
++                return RD_DEST_MX4SIO;
++            case BDM_TYPE_ILINK:
++                return RD_DEST_ILINK;
++        }
++        return RD_DEST_OTHER;
++    }
++    if (!strncmp(path, "mmce", 4))
++        return RD_DEST_MMCE;
++    if (!strncmp(path, "pfs", 3) || !strncmp(path, "hdd", 3))
++        return RD_DEST_HDD;
++    return RD_DEST_OTHER;
++}
++
++static int rdDestOfType(int bdmType)
++{
++    return bdmType == BDM_TYPE_USB ? RD_DEST_USB : bdmType == BDM_TYPE_ATA ? RD_DEST_HDD : bdmType == BDM_TYPE_SDC ? RD_DEST_MX4SIO :
++           bdmType == BDM_TYPE_ILINK ? RD_DEST_ILINK : RD_DEST_OTHER;
++}
++
++static int rdIsDvd(void)
++{
++    return rdKind == RIPPS2_DISC_PS2DVD || rdKind == RIPPS2_DISC_ESR || rdKind == RIPPS2_DISC_VIDEO;
++}
++
++static void rdRateKey(char *key, int size)
++{
++    snprintf(key, size, "ripdisc_kbs_%s_%s", rdDestKey[rdDest], rdIsDvd() ? "dvd" : "cd");
++}
++
++// KB/s for this storage and disc: what the last rip there did, else the guess
++static int rdRateKbs(void)
++{
++    char key[40];
++    int kbs = 0;
++    config_set_t *cfg = configGetByType(CONFIG_OPL);
++    rdRateKey(key, sizeof(key));
++    if (cfg == NULL || !configGetInt(cfg, key, &kbs) || kbs < 50)
++        kbs = rdGuessKbs[rdDest][rdIsDvd()];
++    return kbs;
++}
++
++// After a rip of some size: what it really ran at, for the next estimate
++static void rdLearnRate(void)
++{
++    char key[40];
++    double secs = ripps2Seconds() - rdBegan;
++    config_set_t *cfg = configGetByType(CONFIG_OPL);
++    if (cfg == NULL || rdDone < 64ULL * 1024 * 1024 || secs < 20.0)
++        return;
++    rdRateKey(key, sizeof(key));
++    configSetInt(cfg, key, (int)((double)(rdDone / 1024) / secs));
++    saveConfig(CONFIG_OPL, 0);
++}
++
++// "ABOUT 12 MIN", "ABOUT 1 H 21 MIN" (left: "... LEFT")
++static void rdMinutes(int mins, int left, char *out, int size)
++{
++    if (mins < 1)
++        mins = 1;
++    if (mins >= 90) {
++        if (left)
++            snprintf(out, size, _t("ABOUT %d H %02d MIN LEFT"), mins / 60, mins % 60);
++        else
++            snprintf(out, size, _t("ABOUT %d H %02d MIN"), mins / 60, mins % 60);
++    } else if (left)
++        snprintf(out, size, _t("ABOUT %d MIN LEFT"), mins);
++    else
++        snprintf(out, size, _t("ABOUT %d MIN"), mins);
 +}
 +
 +// ---- the confirm step ----
@@ -871,7 +966,7 @@ index 0000000..2feb99b
 +// drives: Left / Right picks the drive a game goes to. place: where media goes ("" before it is picked).
 +static int rdConfirm(int drives, const char *place)
 +{
-+    char what[96], size[24], to[260], note[160];
++    char what[96], size[24], to[260], note[160], took[48];
 +    int stage = 0, split = 0, y, okKey = gSelectButton, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
 +    int okIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
 +    int labelFont = gTheme->fonts[5], valueFont = gTheme->fonts[4];
@@ -882,6 +977,8 @@ index 0000000..2feb99b
 +    readPads();
 +    while (1) {
 +        note[0] = '\0';
++        rdDest = drives ? rdDestOfType(rdSlotType[rdSlotSel]) : rdDestOfPath(place[0] ? place : rdEstBase);
++        rdMinutes((int)(rdBytes / 1024 / (u64)rdRateKbs() / 60), 0, took, sizeof(took));
 +        if (drives) {
 +            char path[200];
 +            split = rdGameTarget(path, sizeof(path));
@@ -899,12 +996,15 @@ index 0000000..2feb99b
 +
 +        rmStartFrame();
 +        rdPage();
-+        ripps2DrawPanelGlass(50, 112, 540, 236, 0);
++        ripps2DrawPanelGlass(50, 104, 540, 262, 0);
 +        fntRenderString(valueFont, 320, 136, ALIGN_CENTER, 0, 0, "RIPDISC", RD_LIT);
 +        fntRenderStringFit(labelFont, 320, 164, ALIGN_CENTER, 500, what, RD_SOFT, 1);
 +        y = 204;
 +        fntRenderString(labelFont, 74, y, ALIGN_VCENTER, 0, 0, _t("SIZE"), RD_DIM);
 +        fntRenderString(valueFont, 170, y, ALIGN_VCENTER, 0, 0, size, RD_LIT);
++        y += 30;
++        fntRenderString(labelFont, 74, y, ALIGN_VCENTER, 0, 0, _t("TIME"), RD_DIM);
++        fntRenderString(valueFont, 170, y, ALIGN_VCENTER, 0, 0, took, RD_LIT);
 +        y += 30;
 +        fntRenderString(labelFont, 74, y, ALIGN_VCENTER, 0, 0, _t("TO"), RD_DIM);
 +        fntRenderStringFit(valueFont, 170, y, ALIGN_VCENTER, 400, to, RD_LIT, 1);
@@ -1091,7 +1191,7 @@ index 0000000..2feb99b
 +    rdGameName(name, sizeof(name));
 +    if (split && !rdId[0]) {
 +        guiMsgBoxSound(SFX_ERROR);
-+        guiMsgBox(_t("This game has no ID RIPPS2 can read, which its parts would be named by. Rip it to an exFAT drive instead."), 0, NULL);
++        guiMsgBox(_t("RIPPS2 cannot read this game's ID, which its 1 GB parts are named by. Rip it to the internal exFAT HDD instead."), 0, NULL);
 +        return;
 +    }
 +    if (!split) {
@@ -1196,6 +1296,7 @@ index 0000000..2feb99b
 +    rdFd = -1;
 +    sceCdStop();
 +    sceCdSync(0);
++    rdLearnRate();
 +    guiMsgBoxSound(SFX_SAVE);
 +    if (rdKind == RIPPS2_DISC_PS1)
 +        snprintf(msg, sizeof(msg), _t("Ripped to %s as a BIN and CUE. It is in the PS1 games list, played with Ember."), dir);
@@ -1322,7 +1423,7 @@ index 0000000..2feb99b
 +    kind = ripps2DiscInfo(id, sizeof(id), title, sizeof(title));
 +    if (kind != rdKind || !rdIsMedia(kind)) {
 +        guiMsgBoxSound(SFX_ERROR);
-+        guiMsgBox(_t("The disc in the drive is not the one that was ripped to the clipboard. Hold SELECT on LAUNCH DISC again."), 0, NULL);
++        guiMsgBox(_t("The disc in the drive is not the one on the clipboard. Hold SELECT on LAUNCH DISC again."), 0, NULL);
 +        return 0;
 +    }
 +    if (!strncmp(dir, "mc", 2)) {
@@ -1357,6 +1458,7 @@ index 0000000..2feb99b
 +    rdMadeCount = 0;
 +    sceCdStop();
 +    sceCdSync(0);
++    rdLearnRate();
 +    sfxPlay(SFX_SAVE);
 +    snprintf(made, size, "%s", folder);
 +    return kind == RIPPS2_DISC_AUDIO ? 2 : 1;
@@ -1395,13 +1497,14 @@ index 0000000..2feb99b
 +        return;
 +    }
 +    rdBufFree();
++    if (!rdMediaBase(rdEstBase, sizeof(rdEstBase))) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("Media rips to a USB drive, the HDD or an MMCE card, and none is started. Connect one, then open Storage once."), 0, NULL);
++        return;
++    }
 +    if (rdConfirm(0, "")) {
 +        char base[200], home[220], what[48];
-+        if (!rdMediaBase(base, sizeof(base))) {
-+            guiMsgBoxSound(SFX_ERROR);
-+            guiMsgBox(_t("Media rips to a USB drive, the HDD or an MMCE card, and none is started. Connect one, then open Storage once."), 0, NULL);
-+            return;
-+        }
++        snprintf(base, sizeof(base), "%s", rdEstBase);
 +        snprintf(home, sizeof(home), "%sMEDIA", base);
 +        mkdir(home, 0777);
 +        strcat(home, "/");

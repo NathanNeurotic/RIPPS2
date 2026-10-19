@@ -474,6 +474,53 @@ strings:
   'The copy stopped: the disc could not be read or the drive could not take more. Nothing was kept.': 'La copia si è fermata: il disco non è stato letto o l''unità non accettava altro. Non è stato conservato niente.'
   ? This audio CD's table of contents could not be read. Clean the disc, close the tray again and try once more. (TYPE %02X, TOC
   : Impossibile leggere l'indice di questo CD audio. Pulisci il disco, richiudi il vassoio e riprova. (TIPO %02X, TOC
+  '%s OF %s   %d%%': '%s DI %s   %d%%'
+  '%s is already there. Replace it?': '%s è già presente. Sostituirlo?'
+  '%u MB': '%u MB'
+  '%u.%02u GB': '%u,%02u GB'
+  A BIN and CUE for Ember, in the PS1 games list.: Un BIN e un CUE per Ember, nell'elenco dei giochi PS1.
+  A FOLDER YOU PICK IN MEMORY FILES: UNA CARTELLA SCELTA IN FILE DI MEMORIA
+  A game rips to a USB drive, the exFAT HDD, MX4SIO or iLink, and none is started. Connect one, then open Storage once.: Un gioco si estrae su una chiavetta USB, l'hard disk exFAT, un MX4SIO o un iLink, e nessuno è avviato. Collegane uno, poi apri Archiviazione una volta.
+  A memory card is far too small for a disc. Paste it on a USB drive, the HDD or an MMCE card.: Una memory card è troppo piccola per un disco. Incollalo su una chiavetta USB, l'hard disk o una scheda MMCE.
+  ABOUT %d H %02d MIN: CIRCA %d H %02d MIN
+  ABOUT %d H %02d MIN LEFT: CIRCA %d H %02d MIN RIMASTI
+  ABOUT %d MIN: CIRCA %d MIN
+  ABOUT %d MIN LEFT: CIRCA %d MIN RIMASTI
+  ADD THIS GAME TO YOUR STORAGE: AGGIUNGI QUESTO GIOCO ALL'ARCHIVIAZIONE
+  ADD THIS MEDIA TO YOUR FILES: AGGIUNGI QUESTI CONTENUTI AI TUOI FILE
+  ANOTHER DRIVE: ALTRA UNITÀ
+  AUDIO CD   %d TRACKS   %u:%02u: CD AUDIO   %d TRACCE   %u:%02u
+  CONFIRM: CONFERMA
+  DRIVE: UNITÀ
+  DVD VIDEO: VIDEO DVD
+  HDD (exFAT): HARD DISK (exFAT)
+  HOLD: TIENI PREMUTO
+  LESS THAN A MINUTE LEFT: MENO DI UN MINUTO RIMASTO
+  Media rips to a USB drive, the HDD or an MMCE card, and none is started. Connect one, then open Storage once.: I contenuti si estraggono su una chiavetta USB, l'hard disk o una scheda MMCE, e nessuno è avviato. Collegane uno, poi apri Archiviazione una volta.
+  'Only a DVD video you made yourself: a bought film is copy protected, and the drive will not read it.': 'Solo un video DVD fatto da te: un film acquistato è protetto dalla copia e l''unità non lo legge.'
+  'Over 4 GB: saved as 1 GB parts with ul.cfg, as Open PS2 Loader does, since a FAT32 drive holds 4 GB a file.': 'Oltre 4 GB: salvato in parti da 1 GB con ul.cfg, come fa Open PS2 Loader, perché un''unità FAT32 contiene 4 GB per file.'
+  PS1 GAME: GIOCO PS1
+  PS2 GAME: GIOCO PS2
+  READING THE DISC: LETTURA DEL DISCO
+  READY: PRONTO
+  RIPDISC could not read what is on the disc. Clean it, put it back and try again.: RIPDISC non è riuscito a leggere il contenuto del disco. Puliscilo, reinseriscilo e riprova.
+  RIPDISC found no VIDEO_TS folder it can read on this DVD.: RIPDISC non ha trovato su questo DVD nessuna cartella VIDEO_TS leggibile.
+  RIPPS2 cannot read this game's ID, which its 1 GB parts are named by. Rip it to the internal exFAT HDD instead.: RIPPS2 non riesce a leggere l'ID di questo gioco, che dà il nome alle sue parti da 1 GB. Estrailo invece sull'hard disk interno exFAT.
+  Ripped as %d parts of 1 GB with ul.cfg on the drive. It is in your games list.: Estratto in %d parti da 1 GB con ul.cfg sull'unità. È nel tuo elenco dei giochi.
+  Ripped to %s as a BIN and CUE. It is in the PS1 games list, played with Ember.: Estratto in %s come BIN e CUE. È nell'elenco dei giochi PS1, si gioca con Ember.
+  Ripped to %s. It is in your games list.: Estratto in %s. È nel tuo elenco dei giochi.
+  SIZE: DIMENSIONE
+  Stop the rip? What it has written so far is removed.: Interrompere l'estrazione? Quanto scritto finora verrà rimosso.
+  TIME: DURATA
+  TO: DESTINAZIONE
+  The disc in the drive is not the one on the clipboard. Hold SELECT on LAUNCH DISC again.: Il disco nell'unità non è quello negli appunti. Tieni premuto di nuovo SELECT su AVVIA DISCO.
+  'The rip stopped: the drive could not take more. Check it has room and is not write protected. Nothing was kept.': 'L''estrazione si è fermata: l''unità non accettava altro. Controlla che abbia spazio e non sia protetta da scrittura. Non è stato conservato niente.'
+  ? 'The rip stopped: the drive would not read the disc. A bought DVD film is copy protected and cannot be ripped; a scratched or dirty disc can also stop it. Nothing was kept.'
+  : 'L''estrazione si è fermata: l''unità non è riuscita a leggere il disco. Un film in DVD acquistato è protetto dalla copia e non si può estrarre; anche un disco graffiato o sporco può fermarla. Non è stato conservato niente.'
+  'The rip stopped: the drive would not read the disc. Clean it, put it back and try again. Nothing was kept.': 'L''estrazione si è fermata: l''unità non è riuscita a leggere il disco. Puliscilo, reinseriscilo e riprova. Non è stato conservato niente.'
+  This game is already on the drive as split parts. Delete it in Storage first to rip it again.: Questo gioco è già sull'unità in parti separate. Eliminalo prima in Archiviazione per estrarlo di nuovo.
+  USB DRIVE: CHIAVETTA USB
+  iLINK DRIVE: UNITÀ iLINK
   ASPECT: PROPORZIONI
   CHOOSE: SCEGLI
   CLEAR: CANCELLA
@@ -542,7 +589,6 @@ strings:
   DELETE WHOLE SAVES HERE: ELIMINA QUI I SALVATAGGI INTERI
   DELETED: ELIMINATI
   DONE: FATTO
-  DRIVE: UNITÀ
   DRIVES STARTED: UNITÀ AVVIATE
   Delete %d items?: Eliminare %d elementi?
   Delete %s?: Eliminare %s?
@@ -563,7 +609,6 @@ strings:
   FULL: PIENO
   HDD (APA PARTITIONS): HARD DISK (PARTIZIONI APA)
   HDD (OPL HOME): HARD DISK (CARTELLA OPL)
-  HDD (exFAT): HARD DISK (exFAT)
   HDD MANAGER: GESTIONE HARD DISK
   HEIGHT: ALTEZZA
   HIGH: ALTA
@@ -624,6 +669,7 @@ strings:
   RENAME FAILED: RINOMINA NON RIUSCITA
   RENAMED: RINOMINATO
   RIP 3D ICON: ESTRAI ICONA 3D
+  RIPPED: ESTRATTO
   RUN: ESEGUI
   Reading the disc image: Lettura dell'immagine disco
   Ripping the icon: Estrazione dell'icona
@@ -646,19 +692,16 @@ strings:
   UNPACK PSU HERE: ESTRAI IL PSU QUI
   UNPACKED: ESTRATTI
   UNPACKING: ESTRAZIONE
-  USB DRIVE: CHIAVETTA USB
   USB, HDD, MMCE, AND MORE: USB, HARD DISK, MMCE E ALTRO
   Unpack the save %s %s?: Estrarre il salvataggio %s %s?
   WITH L2: CON L2
   WRITE: SCRITTURA
   YES TO ALL: SÌ A TUTTI
   YES, REPLACE IT: SÌ, SOSTITUISCILO
-  iLINK DRIVE: UNITÀ iLINK
   into this folder: in questa cartella
   onto this memory card: su questa memory card
   '%d PARTITIONS   %s FREE OF %s': '%d PARTIZIONI   %s LIBERI SU %s'
   '%s IS IN USE: TRY AGAIN': '%s È IN USO: RIPROVA'
-  '%u MB': '%u MB'
   '%u.%u GB': '%u.%u GB'
   COULD NOT REMOVE %s (%d): IMPOSSIBILE RIMUOVERE %s (%d)
   HDL GAME: GIOCO HDL
@@ -848,7 +891,6 @@ strings:
   'CD WITH 1 SOUND TRACK: START LASER PLAYS IT': 'CD CON 1 TRACCIA AUDIO: START LASER LA RIPRODUCE'
   DISC READ: LETTURA DEL DISCO
   DOUBLE HELIX: DOPPIA ELICA
-  DVD VIDEO: VIDEO DVD
   'ESR DISC: A PATCHED PS2 GAME': 'DISCO ESR: UN GIOCO PS2 CON PATCH'
   GOLDEN SPIRAL: SPIRALE AUREA
   ICOSAHEDRON: ICOSAEDRO
@@ -857,11 +899,8 @@ strings:
   LISSAJOUS: LISSAJOUS
   MOBIUS STRIP: NASTRO DI MÖBIUS
   No disc RIPPS2 can start is in the drive. Insert a PS1 or PS2 game, a DVD video or an ESR disc, then press Start.: Nell'unità non c'è nessun disco che RIPPS2 possa avviare. Inserisci un gioco PS1 o PS2, un DVD video o un disco ESR, poi premi Start.
-  PS1 GAME: GIOCO PS1
-  PS2 GAME: GIOCO PS2
   PS2 GAME   %s: GIOCO PS2   %s
   PS2 GAME   %s   %s: GIOCO PS2   %s   %s
-  READING THE DISC: LETTURA DEL DISCO
   SEVEN-POINT STAR: STELLA A SETTE PUNTE
   START BROWSER: START BROWSER
   START LASER: START LASER
