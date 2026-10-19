@@ -565,6 +565,7 @@ strings:
   : Ce jeu démarre via Neutrino, et il n'y a pas de Neutrino là où RIPPS2 regarde (Paramètres, le périphérique du jeu, les cartes mémoire). RIPPS2 inclut Neutrino 1.8.0 par rickgaiser (AFL-3.0). L'installer maintenant ? Vous choisissez ensuite où.
   '%d / %d FILES': '%d / %d FICHIERS'
   '%d FOLDERS AND CONTENTS': '%d DOSSIERS ET CONTENU'
+  '%d FOLDERS, %d FOUND': '%d DOSSIERS, %d TROUVÉS'
   '%s BYTES': '%s OCTETS'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s ne ressemble pas à un fichier texte. L''ouvrir quand même dans l''éditeur de texte ?'
   '%u KB FREE%s': '%u KO LIBRES%s'
@@ -617,14 +618,12 @@ strings:
   HIGH: HAUT
   IN / OUT: DEDANS / DEHORS
   IN USE: UTILISÉ
-  INSTALLER: INSTALLATEUR
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: EST DÉJÀ ICI (ENCORE %d). LE REMPLACER ?
   IS ALREADY HERE. REPLACE IT?: EST DÉJÀ ICI. LE REMPLACER ?
   KEEP IT: LE GARDER
   LOW: BAS
   MARK: MARQUER
   MARK ALL: TOUT MARQUER
-  MC EXPLOIT: EXPLOIT MC
   MEMORY CARD %c: CARTE MÉMOIRE %c
   MEMORY FILES SETTINGS: PARAMÈTRES DE FICHIERS MÉMOIRE
   MODIFIED  %s: MODIFIÉ LE  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: NON CONNECTÉ
   NOT EMPTY: NON VIDE
   NOT FOUND: INTROUVABLE
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : Aucun installateur trouvé. Placez l'ELF de votre installateur d'exploit de carte mémoire (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) dans APPS sur une carte mémoire ou une clé USB, puis choisissez à nouveau cette option.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: Rien nommé « %s » sur les périphériques listés. DÉMARRER LES PÉRIPHÉRIQUES dans la liste démarre les autres.
   'OFF': DÉSACTIVÉ
   ONE FORMATION STAYS IN: UNE FORMATION RESTE ACTIVE
   OPEN: OUVRIR
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: Lecture de l'image disque
   Ripping the icon: Extraction de l'icône
   Run %s?: Lancer %s ?
+  SEARCH: RECHERCHE
+  'SEARCH: %s   %d FOUND': 'RECHERCHE : %s   %d TROUVÉS'
+  SEARCHING: RECHERCHE EN COURS
   SELECT: SÉLECTIONNER
   SETTINGS: PARAMÈTRES
   SLOW: LENT
@@ -684,6 +685,7 @@ strings:
   START DRIVES: DÉMARRER LES PÉRIPHÉRIQUES
   STARTING...: DÉMARRAGE...
   Starting this drive's games: Démarrage des jeux de ce périphérique
+  Stopped before anything named "%s" was found.: Arrêté avant de trouver quoi que ce soit nommé « %s ».
   TEXT: TEXTE
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: L'icône est dans %s/ en OBJ (un par forme), MTL et PNG.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: Cette image disque n'a pas de fichier de démarrage PS2 (SYSTEM.CNF), elle ne peut donc pas démarrer.

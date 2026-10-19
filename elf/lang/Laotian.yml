@@ -565,6 +565,7 @@ strings:
   : ເກມນີ້ເລີ່ມ ຜ່ານ Neutrino, ແລະ ບໍ່ມີ Neutrino ໃນບ່ອນທີ່ RIPPS2 ຊອກ (ການຕັ້ງຄ່າ, ໄດຣຟ໌ຂອງເກມ, ເມມໂມຣີກາດ). RIPPS2 ມີ Neutrino 1.8.0 ໂດຍ rickgaiser (AFL-3.0). ຕິດຕັ້ງມັນ ດຽວນີ້ ບໍ? ຕໍ່ໄປ ທ່ານເລືອກບ່ອນ.
   '%d / %d FILES': '%d / %d ໄຟລ໌'
   '%d FOLDERS AND CONTENTS': '%d ໂຟນເດີ ແລະ ເນື້ອໃນ'
+  '%d FOLDERS, %d FOUND': '%d ໂຟນເດີ, ພົບ %d'
   '%s BYTES': '%s ໄບຕ໌'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s ບໍ່ຄືໄຟລ໌ຂໍ້ຄວາມ. ເປີດມັນ ໃນໂຕແກ້ໄຂຂໍ້ຄວາມ ຢູ່ດີ ບໍ?'
   '%u KB FREE%s': ວ່າງ %u KB%s
@@ -617,14 +618,12 @@ strings:
   HIGH: ສູງ
   IN / OUT: ເຂົ້າ / ອອກ
   IN USE: ກຳລັງໃຊ້
-  INSTALLER: ໂຕຕິດຕັ້ງ
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: ມີຢູ່ນີ້ແລ້ວ (ເຫຼືອອີກ %d). ແທນທີ່ ບໍ?
   IS ALREADY HERE. REPLACE IT?: ມີຢູ່ນີ້ແລ້ວ. ແທນທີ່ ບໍ?
   KEEP IT: ເກັບໄວ້
   LOW: ຕ່ຳ
   MARK: ໝາຍ
   MARK ALL: ໝາຍທັງໝົດ
-  MC EXPLOIT: MC EXPLOIT
   MEMORY CARD %c: ເມມໂມຣີກາດ %c
   MEMORY FILES SETTINGS: ການຕັ້ງຄ່າ ໄຟລ໌ໃນໜ່ວຍຄວາມຈຳ
   MODIFIED  %s: ແກ້ໄຂເມື່ອ  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: ບໍ່ໄດ້ເຊື່ອມຕໍ່
   NOT EMPTY: ບໍ່ວ່າງ
   NOT FOUND: ບໍ່ພົບ
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : ບໍ່ພົບໂຕຕິດຕັ້ງ. ວາງ ELF ຂອງໂຕຕິດຕັ້ງ exploit ເມມໂມຣີກາດ (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) ໃນ APPS ເທິງເມມໂມຣີກາດ ຫຼື USB, ແລ້ວເລືອກອັນນີ້ອີກ.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: ບໍ່ມີຫຍັງຊື່ "%s" ໃນໄດຣຟ໌ທີ່ລະບຸໄວ້. ເລີ່ມໄດຣຟ໌ ໃນລາຍຊື່ໄດຣຟ໌ ຈະເລີ່ມອັນທີ່ເຫຼືອ.
   'OFF': ປິດ
   ONE FORMATION STAYS IN: ຮູບແບບໜຶ່ງ ຍັງຢູ່
   OPEN: ເປີດ
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: ກຳລັງອ່ານ ຮູບແຜ່ນ
   Ripping the icon: ກຳລັງຖອດ ໄອຄອນ
   Run %s?: ເປີດໃຊ້ %s ບໍ?
+  SEARCH: ຊອກຫາ
+  'SEARCH: %s   %d FOUND': 'ຊອກຫາ: %s   ພົບ %d'
+  SEARCHING: ກຳລັງຊອກຫາ
   SELECT: ເລືອກ
   SETTINGS: ການຕັ້ງຄ່າ
   SLOW: ຊ້າ
@@ -684,6 +685,7 @@ strings:
   START DRIVES: ເລີ່ມໄດຣຟ໌
   STARTING...: ກຳລັງເລີ່ມ...
   Starting this drive's games: ກຳລັງເລີ່ມ ເກມຂອງໄດຣຟ໌ນີ້
+  Stopped before anything named "%s" was found.: ຢຸດກ່ອນທີ່ຈະພົບສິ່ງທີ່ຊື່ "%s".
   TEXT: ຂໍ້ຄວາມ
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: ໄອຄອນຢູ່ໃນ %s/ ເປັນ OBJ (ໜຶ່ງອັນຕໍ່ຮູບຊົງ), MTL ແລະ PNG.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: ຮູບແຜ່ນນີ້ ບໍ່ມີໄຟລ໌ບູດ PS2 (SYSTEM.CNF), ດັ່ງນັ້ນ ເລີ່ມບໍ່ໄດ້.

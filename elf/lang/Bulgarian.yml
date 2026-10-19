@@ -565,6 +565,7 @@ strings:
   : Тази игра стартира чрез Neutrino, а там, където търси RIPPS2 (Настройки, устройството на играта, картите с памет), няма Neutrino. RIPPS2 носи Neutrino 1.8.0 от rickgaiser (AFL-3.0). Да се инсталира ли сега? След това избирате къде.
   '%d / %d FILES': '%d / %d ФАЙЛА'
   '%d FOLDERS AND CONTENTS': '%d ПАПКИ И СЪДЪРЖАНИЕ'
+  '%d FOLDERS, %d FOUND': '%d ПАПКИ, НАМЕРЕНИ %d'
   '%s BYTES': '%s БАЙТА'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s не прилича на текстов файл. Да се отвори ли все пак в текстовия редактор?'
   '%u KB FREE%s': '%u KB СВОБОДНИ%s'
@@ -617,14 +618,12 @@ strings:
   HIGH: ВИСОКО
   IN / OUT: ВХОД / ИЗХОД
   IN USE: В УПОТРЕБА
-  INSTALLER: ИНСТАЛАТОР
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: ВЕЧЕ Е ТУК (ОСТАВАТ ОЩЕ %d). ДА СЕ ЗАМЕНИ ЛИ?
   IS ALREADY HERE. REPLACE IT?: ВЕЧЕ Е ТУК. ДА СЕ ЗАМЕНИ ЛИ?
   KEEP IT: ЗАПАЗВАНЕ
   LOW: НИСКО
   MARK: МАРКИРАНЕ
   MARK ALL: МАРКИРАНЕ НА ВСИЧКО
-  MC EXPLOIT: MC EXPLOIT
   MEMORY CARD %c: КАРТА С ПАМЕТ %c
   MEMORY FILES SETTINGS: НАСТРОЙКИ НА ФАЙЛОВЕТЕ В ПАМЕТТА
   MODIFIED  %s: ПРОМЕНЕНО  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: НЕ Е СВЪРЗАНО
   NOT EMPTY: НЕ Е ПРАЗНО
   NOT FOUND: НЕ Е НАМЕРЕНО
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : Не е намерен инсталатор. Сложете ELF файла на инсталатора на вашия exploit за карта с памет (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) в APPS на карта с памет или USB флашка и после изберете това отново.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: Нищо с име „%s“ на изброените устройства. СТАРТИРАНЕ НА УСТРОЙСТВА в списъка с устройства стартира останалите.
   'OFF': ИЗКЛ.
   ONE FORMATION STAYS IN: ЕДНА ФОРМАЦИЯ ОСТАВА
   OPEN: ОТВАРЯНЕ
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: Четене на образа на диска
   Ripping the icon: Извличане на иконата
   Run %s?: Да се изпълни ли %s?
+  SEARCH: ТЪРСЕНЕ
+  'SEARCH: %s   %d FOUND': 'ТЪРСЕНЕ: %s   НАМЕРЕНИ %d'
+  SEARCHING: ТЪРСИ СЕ
   SELECT: ИЗБОР
   SETTINGS: НАСТРОЙКИ
   SLOW: БАВНО
@@ -684,6 +685,7 @@ strings:
   START DRIVES: СТАРТИРАНЕ НА УСТРОЙСТВА
   STARTING...: СТАРТИРАНЕ...
   Starting this drive's games: Стартиране на игрите от това устройство
+  Stopped before anything named "%s" was found.: Спряно, преди да бъде намерено нещо с име „%s“.
   TEXT: ТЕКСТ
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: Иконата е в %s/ като OBJ (по един за всяка форма), MTL и PNG.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: Този образ на диск няма файл за зареждане на PS2 (SYSTEM.CNF), затова не може да стартира.

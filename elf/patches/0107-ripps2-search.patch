@@ -1,0 +1,285 @@
+diff --git a/src/ripps2disc.c b/src/ripps2disc.c
+index c32550b..27c17d3 100644
+--- a/src/ripps2disc.c
++++ b/src/ripps2disc.c
+@@ -132,6 +132,8 @@ static const unsigned short rdGuessKbs[RD_DEST_COUNT][2] = {{800, 800}, {1400, 2
+ static int rdDest = RD_DEST_OTHER;
+ static char rdEstBase[200]; // where media is to go, before its folder is picked (MEDIA's drive)
+ 
++static void rdMinutes(int mins, int left, char *out, int size); // "ABOUT 12 MIN", below with the estimate
++
+ // progress
+ static u64 rdDone = 0;
+ static double rdBegan = 0, rdDrawnAt = 0;
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index c650dec..b92dbbc 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -2025,9 +2025,10 @@ static void fbHint(int icon, const char *text, int *x, int y); // drawn with the
+ static void fbHintLayout(void);
+ static int fbHintX = 34, fbHintGap = 18; // where every hint row starts, and its gap (fbHintLayout)
+ // build 69: ORBITS took HDD MANAGER's tile (the HDD MANAGER is Square on an internal APA drive now)
+-enum { FB_TILE_BROWSER = 0, FB_TILE_EDITOR, FB_TILE_ORBITS, FB_TILE_EXPLOIT, FB_TILE_POWER, FB_TILE_EXIT, FB_TILE_COUNT };
+-static const char *const fbTileLine1[FB_TILE_COUNT] = {N_("FILE"), N_("TEXT"), "ORBIT", N_("MC EXPLOIT"), N_("POWER"), N_("EXIT")};
+-static const char *const fbTileLine2[FB_TILE_COUNT] = {N_("BROWSER"), N_("EDITOR"), N_("SETTINGS"), N_("INSTALLER"), N_("OFF"), N_("BROWSER")};
++// build 107: SEARCH took MC EXPLOIT INSTALLER's tile (the user's request)
++enum { FB_TILE_BROWSER = 0, FB_TILE_EDITOR, FB_TILE_ORBITS, FB_TILE_SEARCH, FB_TILE_POWER, FB_TILE_EXIT, FB_TILE_COUNT };
++static const char *const fbTileLine1[FB_TILE_COUNT] = {N_("FILE"), N_("TEXT"), "ORBIT", N_("SEARCH"), N_("POWER"), N_("EXIT")};
++static const char *const fbTileLine2[FB_TILE_COUNT] = {N_("BROWSER"), N_("EDITOR"), N_("SETTINGS"), N_("FILES"), N_("OFF"), N_("BROWSER")};
+ #define FB_TILE_W   172
+ #define FB_TILE_H   150
+ #define FB_TILE_GAP 14
+@@ -2048,61 +2049,197 @@ static void fbGridShow(int open)
+     fbGridAt = clock();
+ }
+ 
+-// An installer the user keeps for their memory cards (FreeMcBoot, OpenTuna, wLaunchELF R3Z...)
+-static int fbFindInstallers(char found[][96], int max)
++// ---- SEARCH (build 107): any file or folder by name, on every drive the browser lists ----
++// Folders are walked breadth first from each drive's top (a queue on the heap, one folder open at a time, so a memory
++// card's or an MMCE's driver never holds more than one), up to 10 levels down; a name containing what was typed
++// (any case) is a result, 150 at most. The screen says how far it has got; back stops it, keeping what it found.
++// Results open in the tree where they are, the cursor on them.
++static int fbHeldStep(int key); // below, with the tree's input
++static void fbGlyph(int kind, int x, int y, u64 col); // below, with its drawing
++#define FB_FIND_MAX   150
++#define FB_FIND_DEPTH 10
++#define FB_FIND_QUEUE 600
++#define FB_FIND_PATH  200
++static char fbFindTerm[48];
++static char (*fbFound)[FB_FIND_PATH] = NULL; // full paths; a folder's ends in '/'
++static int fbFoundCount = 0, fbFindDirs = 0;
++
++static int fbNameHas(const char *name, const char *term)
++{
++    int n = strlen(term), i;
++    for (i = 0; name[i]; i++)
++        if (!strncasecmp(name + i, term, n))
++            return 1;
++    return 0;
++}
++
++static void fbFindFrame(const char *where)
+ {
+-    static const char *const folders[] = {"mc0:/APPS/", "mc1:/APPS/", "mc0:/BOOT/", "mc1:/BOOT/", "mass0:/", "mass0:/APPS/", NULL};
+-    static const char *const keys[] = {"fmcb", "install", "tuna", "r3z", "booter", NULL};
+-    int i, n = 0;
+-    for (i = 0; folders[i] != NULL && n < max; i++) {
+-        DIR *d = opendir(folders[i]);
+-        struct dirent *de;
+-        if (d == NULL)
++    char line[64];
++    int x;
++    rmStartFrame();
++    ripps2DrawBackground();
++    ripps2DrawPagePanel();
++    fntRenderString(gTheme->fonts[4], 320, 196, ALIGN_CENTER, 0, 0, _t("SEARCHING"), FB_LIT);
++    snprintf(line, sizeof(line), _t("%d FOLDERS, %d FOUND"), fbFindDirs, fbFoundCount);
++    fntRenderString(gTheme->fonts[5], 320, 224, ALIGN_CENTER, 0, 0, line, FB_SOFT);
++    fntRenderStringFit(gTheme->fonts[5], 320, 248, ALIGN_CENTER, 540, where, FB_DIM, 0);
++    x = 320 - (24 + ripps2HintWidth(_t("STOP"))) / 2;
++    fbHint(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _t("STOP"), &x, 440);
++    rmEndFrame();
++}
++
++// 1 when it ran to the end, 0 when back stopped it
++static int fbFindWalk(void)
++{
++    char(*queue)[FB_FIND_PATH] = malloc(FB_FIND_QUEUE * FB_FIND_PATH);
++    unsigned char *depth = malloc(FB_FIND_QUEUE);
++    int head = 0, tail = 0, i, stopped = 0, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    double drawn = 0;
++
++    if (queue == NULL || depth == NULL) {
++        free(queue);
++        free(depth);
++        return 1;
++    }
++    for (i = 0; i < fbDevCacheCount && tail < FB_FIND_QUEUE; i++) // the drives the browser lists (its last look)
++        if (fbDevCache[i].kind == FB_KIND_DEVICE && strcmp(fbDevCache[i].name, "hdd0:") != 0) {
++            snprintf(queue[tail], FB_FIND_PATH, "%s", fbDevCache[i].name);
++            depth[tail++] = 0;
++        }
++    while (head < tail && fbFoundCount < FB_FIND_MAX && !stopped) {
++        char *dir = queue[head % FB_FIND_QUEUE];
++        int level = depth[head % FB_FIND_QUEUE];
++        DIR *d;
++        struct dirent *e;
++        head++;
++        if (ripps2Seconds() - drawn > 0.15) {
++            drawn = ripps2Seconds();
++            fbFindFrame(dir);
++            readPads();
++            if (getKeyOn(backKey)) {
++                stopped = 1;
++                break;
++            }
++        }
++        if ((d = opendir(dir)) == NULL)
+             continue;
+-        while (n < max && (de = readdir(d)) != NULL) {
+-            char low[FB_NAME];
+-            int k, j;
+-            if (!fbHasSuffix(de->d_name, ".elf"))
++        fbFindDirs++;
++        while (fbFoundCount < FB_FIND_MAX && (e = readdir(d)) != NULL) {
++            int isDir, len = strlen(dir) + strlen(e->d_name);
++            if (e->d_name[0] == '.' || len + 2 >= FB_FIND_PATH)
+                 continue;
+-            for (j = 0; de->d_name[j] && j < FB_NAME - 1; j++)
+-                low[j] = (de->d_name[j] >= 'A' && de->d_name[j] <= 'Z') ? de->d_name[j] + 32 : de->d_name[j];
+-            low[j] = '\0';
+-            for (k = 0; keys[k] != NULL; k++)
+-                if (strstr(low, keys[k]) != NULL) {
+-                    snprintf(found[n++], 96, "%s%s", folders[i], de->d_name);
+-                    break;
+-                }
++#ifdef DT_REG
++            isDir = e->d_type == DT_DIR ? 1 : e->d_type == DT_REG ? 0 : fbIsDirEntry(dir, e); // a stat only when the driver did not say
++#else
++            isDir = fbIsDirEntry(dir, e);
++#endif
++            if (fbNameHas(e->d_name, fbFindTerm))
++                snprintf(fbFound[fbFoundCount++], FB_FIND_PATH, "%s%s%s", dir, e->d_name, isDir ? "/" : "");
++            if (isDir && level < FB_FIND_DEPTH && tail - head < FB_FIND_QUEUE - 1) {
++                snprintf(queue[tail % FB_FIND_QUEUE], FB_FIND_PATH, "%s%s/", dir, e->d_name);
++                depth[tail % FB_FIND_QUEUE] = level + 1;
++                tail++;
++            }
+         }
+         closedir(d);
+     }
+-    return n;
++    free(queue);
++    free(depth);
++    return !stopped;
+ }
+ 
+-static void fbRunInstaller(void)
++// The results, a page of them at a time: a name, the folder it is in under it. 1 when one was opened
++static int fbFindResults(void)
+ {
+-    static char found[6][96];
+-    const char *items[6];
+-    int n = fbFindInstallers(found, 6), pick = 0, i;
+-    if (n == 0) {
+-        guiMsgBox(_t("No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again."), 0, NULL);
+-        return;
+-    }
+-    if (n > 1) {
+-        for (i = 0; i < n; i++)
+-            items[i] = found[i];
+-        pick = ripps2PickList(items, n);
+-        if (pick < 0)
+-            return;
++    char head[96], name[FB_NAME], parent[256];
++    int sel = 0, top = 0, rows = 8, i, okKey = gSelectButton, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    int okIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
++
++    readPads();
++    while (1) {
++        int x, y = FB_LIST_Y + 8;
++        rmStartFrame();
++        ripps2DrawBackground();
++        ripps2DrawPagePanel();
++        snprintf(head, sizeof(head), _t("SEARCH: %s   %d FOUND"), fbFindTerm, fbFoundCount);
++        fntRenderStringFit(gTheme->fonts[4], FB_X, 30, ALIGN_VCENTER, FB_RIGHT - FB_X, head, FB_LIT, 0);
++        rmDrawLine(FB_X, 46, FB_RIGHT, 46, FB_PRIM(0x4A, 0x72, 0xDC, 0x60));
++        for (i = top; i < fbFoundCount && i < top + rows; i++, y += 42) {
++            const char *p = fbFound[i];
++            int len = strlen(p), isDir = len > 0 && p[len - 1] == '/', k = len - 1 - isDir;
++            while (k > 0 && p[k - 1] != '/')
++                k--;
++            snprintf(name, sizeof(name), "%.*s", len - k - isDir, p + k);
++            snprintf(parent, sizeof(parent), "%.*s", k, p);
++            if (i == sel) {
++                rmDrawRect(FB_X - 4, y - 4, FB_RIGHT - FB_X + 8, 40, FB_PRIM(0x1E, 0x3C, 0x96, 0x60));
++                rmDrawRect(FB_X - 4, y - 4, 3, 40, FB_PRIM(0x6A, 0x9A, 0xFF, 0x80));
++            }
++            fbGlyph(isDir ? FB_KIND_DIR : FB_KIND_FILE, FB_X + 4, y + 8, i == sel ? FB_LIT : FB_SOFT);
++            fntRenderStringFit(gTheme->fonts[8], FB_X + 26, y + 8, ALIGN_VCENTER, FB_RIGHT - FB_X - 30, name, i == sel ? FB_LIT : FB_SOFT, i == sel);
++            fntRenderStringFit(gTheme->fonts[5], FB_X + 26, y + 26, ALIGN_VCENTER, FB_RIGHT - FB_X - 30, parent, FB_DIM, 0);
++        }
++        x = fbHintX;
++        fbHint(okIcon, _t("OPEN"), &x, 448);
++        fbHint(backIcon, _t("BACK"), &x, 448);
++        rmEndFrame();
++
++        readPads();
++        if (fbHeldStep(KEY_UP) && sel > 0) {
++            sel--;
++            sfxPlay(SFX_CURSOR);
++        } else if (fbHeldStep(KEY_DOWN) && sel < fbFoundCount - 1) {
++            sel++;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKeyOn(KEY_L1)) {
++            sel = sel > rows ? sel - rows : 0;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKeyOn(KEY_R1)) {
++            sel = sel + rows < fbFoundCount ? sel + rows : fbFoundCount - 1;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKeyOn(okKey)) { // the tree, in the folder it is in, the cursor on it
++            const char *p = fbFound[sel];
++            int len = strlen(p), isDir = len > 0 && p[len - 1] == '/', k = len - 1 - isDir;
++            while (k > 0 && p[k - 1] != '/')
++                k--;
++            snprintf(name, sizeof(name), "%.*s", len - k - isDir, p + k);
++            snprintf(parent, sizeof(parent), "%.*s", k, p);
++            sfxPlay(SFX_CONFIRM);
++            fbGridOpen = 0;
++            fbOpenPath(parent, name);
++            return 1;
++        } else if (getKeyOn(backKey)) {
++            sfxPlay(SFX_CANCEL);
++            return 0;
++        }
++        if (sel < top)
++            top = sel;
++        if (sel >= top + rows)
++            top = sel - rows + 1;
+     }
+-    char ask[160];
+-    snprintf(ask, sizeof(ask), _t("Run %s?"), found[pick]);
+-    if (!guiMsgBox(ask, 1, NULL))
++}
++
++static void fbSearch(void)
++{
++    char term[48], msg[200];
++    int done;
++
++    snprintf(term, sizeof(term), "%s", fbFindTerm);
++    if (!guiShowKeyboard(term, sizeof(term)) || term[0] == '\0')
+         return;
+-    char *argv[1] = {found[pick]};
+-    ripps2PlayLaunchSequence();
+-    deinit(UNMOUNT_EXCEPTION, IO_MODE_SELECTED_ALL_SPARE);
+-    sysLoadELFApp(found[pick], NULL, 1, argv, 1, 0);
+-    ripps2LaunchAborted();
++    if (fbFound == NULL && (fbFound = malloc(FB_FIND_MAX * FB_FIND_PATH)) == NULL)
++        return;
++    snprintf(fbFindTerm, sizeof(fbFindTerm), "%s", term);
++    fbFoundCount = fbFindDirs = 0;
++    done = fbFindWalk();
++    if (fbFoundCount == 0) {
++        snprintf(msg, sizeof(msg), done ? _t("Nothing named \"%s\" on the drives listed. START DRIVES in the drive list starts the rest.") :
++                                          _t("Stopped before anything named \"%s\" was found."), fbFindTerm);
++        guiMsgBox(msg, 0, NULL);
++        return;
++    }
++    fbFindResults();
+ }
+ 
+ // ---- ORBIT SETTINGS: over the orbs themselves, every change seen as it is made ----
+@@ -2237,9 +2374,9 @@ static void fbTile(int t)
+             sfxPlay(SFX_CONFIRM);
+             fbOrbitsPage();
+             break;
+-        case FB_TILE_EXPLOIT:
++        case FB_TILE_SEARCH: // build 107
+             sfxPlay(SFX_CONFIRM);
+-            fbRunInstaller();
++            fbSearch();
+             break;
+         case FB_TILE_POWER:
+             sfxPlay(SFX_CONFIRM);

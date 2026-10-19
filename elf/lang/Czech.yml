@@ -565,6 +565,7 @@ strings:
   : Tato hra se spouští přes Neutrino a tam, kde RIPPS2 hledá (Nastavení, disk hry, paměťové karty), žádné Neutrino není. RIPPS2 s sebou nese Neutrino 1.8.0 od rickgaisera (AFL-3.0). Nainstalovat ho teď? Potom vyberete kam.
   '%d / %d FILES': '%d / %d SOUBORŮ'
   '%d FOLDERS AND CONTENTS': '%d SLOŽEK A OBSAH'
+  '%d FOLDERS, %d FOUND': '%d SLOŽEK, NALEZENO %d'
   '%s BYTES': '%s BAJTŮ'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s nevypadá jako textový soubor. Přesto otevřít v textovém editoru?'
   '%u KB FREE%s': '%u KB VOLNO%s'
@@ -617,14 +618,12 @@ strings:
   HIGH: VYSOKÁ
   IN / OUT: DOVNITŘ / VEN
   IN USE: POUŽÍVÁ SE
-  INSTALLER: INSTALÁTOR
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: UŽ TU JE (ZBÝVÁ %d). NAHRADIT?
   IS ALREADY HERE. REPLACE IT?: UŽ TU JE. NAHRADIT?
   KEEP IT: PONECHAT
   LOW: NÍZKÁ
   MARK: OZNAČIT
   MARK ALL: OZNAČIT VŠE
-  MC EXPLOIT: MC EXPLOIT
   MEMORY CARD %c: PAMĚŤOVÁ KARTA %c
   MEMORY FILES SETTINGS: NASTAVENÍ PAMĚŤOVÝCH SOUBORŮ
   MODIFIED  %s: ZMĚNĚNO  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: NEPŘIPOJENO
   NOT EMPTY: NENÍ PRÁZDNÉ
   NOT FOUND: NENALEZENO
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : Instalátor nenalezen. Dejte ELF instalátoru exploitu paměťové karty (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) do APPS na paměťové kartě nebo USB disku a pak tuto položku vyberte znovu.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: Na uvedených jednotkách nic s názvem „%s“ není. SPUSTIT JEDNOTKY v seznamu jednotek spustí ostatní.
   'OFF': VYPNUTO
   ONE FORMATION STAYS IN: JEDNA FORMACE ZŮSTÁVÁ
   OPEN: OTEVŘÍT
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: Čtení obrazu disku
   Ripping the icon: Vyjímání ikony
   Run %s?: Spustit %s?
+  SEARCH: HLEDAT
+  'SEARCH: %s   %d FOUND': 'HLEDAT: %s   NALEZENO %d'
+  SEARCHING: HLEDÁ SE
   SELECT: VYBRAT
   SETTINGS: NASTAVENÍ
   SLOW: POMALU
@@ -684,6 +685,7 @@ strings:
   START DRIVES: SPUSTIT DISKY
   STARTING...: SPOUŠTĚNÍ...
   Starting this drive's games: Spouštění her tohoto disku
+  Stopped before anything named "%s" was found.: Zastaveno dřív, než se našlo něco s názvem „%s“.
   TEXT: TEXT
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: Ikona je v %s/ jako OBJ (jeden pro každý tvar), MTL a PNG.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: Tento obraz disku nemá zaváděcí soubor PS2 (SYSTEM.CNF), takže se nemůže spustit.

@@ -114,12 +114,19 @@ def hdd(d):  # an opened drive: platter split into partitions, the head's arm, t
     circle(d, 77, 70, 2.6, fill=True)
 
 
-def exploit(d):  # a PS2 memory card taking an install: the card's cut corner, its label, an arrow in
+def exploit(d):  # (until build 106) a PS2 memory card taking an install: the card's cut corner, its label, an arrow in
     poly(d, [(26, 10), (64, 10), (72, 18), (72, 86), (26, 86)])
     rrect(d, 33, 18, 64, 40, 3, w=W * 0.7)
     line(d, (49, 48), (49, 74))
     poly(d, [(39, 64), (49, 74), (59, 64)], closed=False)
     line(d, (36, 80), (62, 80), w=W * 0.7)
+
+
+def search(d):  # build 107 SEARCH: a magnifier over a page of names, its handle down to the right
+    circle(d, 40, 40, 23)
+    for y, x1 in ((31, 52), (40, 52), (49, 45)):  # the names it reads through the lens
+        line(d, (28, y), (x1, y), w=W * 0.7)
+    line(d, (57, 57), (82, 82), w=W * 1.7)
 
 
 def power(d):  # the power mark: a ring open at the top, symmetric about the stroke through it
@@ -153,7 +160,7 @@ def orbits(d):  # the orbit settings: two tilted rings round a core, an orb ridi
 
 # Row order is the settings grid's tile order (ripps2files.c FB_TILE_*); the HDD drawing stays at the
 # end for the HDD MANAGER, now a Square action on a hard drive (build 69)
-ICONS = [browser, editor, orbits, exploit, power, exitb, hdd]
+ICONS = [browser, editor, orbits, search, power, exitb, hdd]  # build 107: SEARCH in MC EXPLOIT's place
 
 atlas = Image.new('RGBA', (CELL * len(ICONS), CELL * 2), (255, 255, 255, 0))
 for i, fn in enumerate(ICONS):

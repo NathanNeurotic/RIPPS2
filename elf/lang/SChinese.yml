@@ -565,6 +565,7 @@ strings:
   : 这个游戏通过 Neutrino 启动，而 RIPPS2 查找的位置（设置、游戏所在驱动器、记忆卡）都没有 Neutrino。RIPPS2 附带 rickgaiser 的 Neutrino 1.8.0（AFL-3.0）。现在安装吗？接下来选择位置。
   '%d / %d FILES': '%d / %d 个文件'
   '%d FOLDERS AND CONTENTS': '%d 个文件夹及内容'
+  '%d FOLDERS, %d FOUND': '%d 个文件夹，找到 %d 个'
   '%s BYTES': '%s 字节'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s 看起来不像文本文件。仍要在文本编辑器中打开吗？'
   '%u KB FREE%s': 剩余 %u KB%s
@@ -617,14 +618,12 @@ strings:
   HIGH: 高
   IN / OUT: 进 / 出
   IN USE: 使用中
-  INSTALLER: 安装器
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: 已存在（还剩 %d 个）。替换吗？
   IS ALREADY HERE. REPLACE IT?: 已存在。替换吗？
   KEEP IT: 保留
   LOW: 低
   MARK: 标记
   MARK ALL: 全部标记
-  MC EXPLOIT: 记忆卡漏洞
   MEMORY CARD %c: 记忆卡 %c
   MEMORY FILES SETTINGS: 记忆文件设置
   MODIFIED  %s: 修改于  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: 未连接
   NOT EMPTY: 不为空
   NOT FOUND: 未找到
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : 未找到安装器。请把记忆卡漏洞安装器的 ELF（FreeMcBoot、OpenTuna、wLaunchELF R3Z……）放到记忆卡或 U 盘的 APPS 中，然后再选这一项。
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: 列出的驱动器上没有名为“%s”的内容。驱动器列表中的“启动驱动器”可启动其余驱动器。
   'OFF': 关
   ONE FORMATION STAYS IN: 至少保留一个阵列
   OPEN: 打开
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: 正在读取光盘镜像
   Ripping the icon: 正在提取图标
   Run %s?: 运行 %s？
+  SEARCH: 搜索
+  'SEARCH: %s   %d FOUND': 搜索：%s   找到 %d 个
+  SEARCHING: 正在搜索
   SELECT: 选择
   SETTINGS: 设置
   SLOW: 慢
@@ -684,6 +685,7 @@ strings:
   START DRIVES: 启动驱动器
   STARTING...: 正在启动...
   Starting this drive's games: 正在启动此驱动器的游戏
+  Stopped before anything named "%s" was found.: 在找到名为“%s”的内容之前已停止。
   TEXT: 文本
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: 图标位于 %s/，为 OBJ（每个形状一个）、MTL 和 PNG。
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: 这个光盘镜像没有 PS2 启动文件（SYSTEM.CNF），因此无法启动。

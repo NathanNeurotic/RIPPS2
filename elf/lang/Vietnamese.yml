@@ -565,6 +565,7 @@ strings:
   : Trò chơi này chạy qua Neutrino, và không có Neutrino ở những chỗ RIPPS2 tìm (Cài đặt, ổ của trò chơi, thẻ nhớ). RIPPS2 mang theo Neutrino 1.8.0 của rickgaiser (AFL-3.0). Cài ngay? Tiếp theo bạn chọn chỗ cài.
   '%d / %d FILES': '%d / %d TỆP'
   '%d FOLDERS AND CONTENTS': '%d THƯ MỤC VÀ NỘI DUNG'
+  '%d FOLDERS, %d FOUND': '%d THƯ MỤC, TÌM THẤY %d'
   '%s BYTES': '%s BYTE'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s có vẻ không phải tệp văn bản. Vẫn mở trong trình sửa văn bản?'
   '%u KB FREE%s': TRỐNG %u KB%s
@@ -617,14 +618,12 @@ strings:
   HIGH: CAO
   IN / OUT: VÀO / RA
   IN USE: ĐANG DÙNG
-  INSTALLER: TRÌNH CÀI
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: ĐÃ CÓ Ở ĐÂY (CÒN %d NỮA). THAY THẾ?
   IS ALREADY HERE. REPLACE IT?: ĐÃ CÓ Ở ĐÂY. THAY THẾ?
   KEEP IT: GIỮ LẠI
   LOW: THẤP
   MARK: ĐÁNH DẤU
   MARK ALL: ĐÁNH DẤU TẤT CẢ
-  MC EXPLOIT: EXPLOIT THẺ NHỚ
   MEMORY CARD %c: THẺ NHỚ %c
   MEMORY FILES SETTINGS: CÀI ĐẶT TỆP BỘ NHỚ
   MODIFIED  %s: SỬA LÚC  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: CHƯA KẾT NỐI
   NOT EMPTY: KHÔNG TRỐNG
   NOT FOUND: KHÔNG TÌM THẤY
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : Không tìm thấy trình cài. Hãy đặt tệp ELF của trình cài exploit thẻ nhớ (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) vào APPS trên thẻ nhớ hoặc USB, rồi chọn lại mục này.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: Không có gì tên "%s" trên các ổ trong danh sách. KHỞI ĐỘNG Ổ trong danh sách ổ sẽ khởi động các ổ còn lại.
   'OFF': TẮT
   ONE FORMATION STAYS IN: PHẢI GIỮ MỘT ĐỘI HÌNH
   OPEN: MỞ
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: Đang đọc ảnh đĩa
   Ripping the icon: Đang trích biểu tượng
   Run %s?: Chạy %s?
+  SEARCH: TÌM KIẾM
+  'SEARCH: %s   %d FOUND': 'TÌM KIẾM: %s   TÌM THẤY %d'
+  SEARCHING: ĐANG TÌM
   SELECT: CHỌN
   SETTINGS: CÀI ĐẶT
   SLOW: CHẬM
@@ -684,6 +685,7 @@ strings:
   START DRIVES: KHỞI ĐỘNG Ổ
   STARTING...: ĐANG KHỞI ĐỘNG...
   Starting this drive's games: Đang khởi động trò chơi của ổ này
+  Stopped before anything named "%s" was found.: Đã dừng trước khi tìm thấy gì tên "%s".
   TEXT: VĂN BẢN
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: Biểu tượng nằm trong %s/ dưới dạng OBJ (mỗi hình một tệp), MTL và PNG.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: Ảnh đĩa này không có tệp khởi động PS2 (SYSTEM.CNF), nên không chạy được.

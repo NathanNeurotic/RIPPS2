@@ -565,6 +565,7 @@ strings:
   : Bu oyun Neutrino ile başlar ve RIPPS2'nin baktığı yerlerde (Ayarlar, oyunun sürücüsü, hafıza kartları) Neutrino yok. RIPPS2, rickgaiser'ın Neutrino 1.8.0'ını (AFL-3.0) taşır. Şimdi kurulsun mu? Ardından yerini seçersiniz.
   '%d / %d FILES': '%d / %d DOSYA'
   '%d FOLDERS AND CONTENTS': '%d KLASÖR VE İÇERİKLERİ'
+  '%d FOLDERS, %d FOUND': '%d KLASÖR, %d BULUNDU'
   '%s BYTES': '%s BAYT'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s bir metin dosyasına benzemiyor. Yine de metin düzenleyicide açılsın mı?'
   '%u KB FREE%s': '%u KB BOŞ%s'
@@ -617,14 +618,12 @@ strings:
   HIGH: YÜKSEK
   IN / OUT: GİRİŞ / ÇIKIŞ
   IN USE: KULLANIMDA
-  INSTALLER: YÜKLEYİCİ
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: ZATEN BURADA (%d TANE DAHA VAR). DEĞİŞTİRİLSİN Mİ?
   IS ALREADY HERE. REPLACE IT?: ZATEN BURADA. DEĞİŞTİRİLSİN Mİ?
   KEEP IT: KORU
   LOW: DÜŞÜK
   MARK: İŞARETLE
   MARK ALL: TÜMÜNÜ İŞARETLE
-  MC EXPLOIT: MC EXPLOIT
   MEMORY CARD %c: HAFIZA KARTI %c
   MEMORY FILES SETTINGS: HAFIZA DOSYALARI AYARLARI
   MODIFIED  %s: DEĞİŞTİRİLDİ  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: BAĞLI DEĞİL
   NOT EMPTY: BOŞ DEĞİL
   NOT FOUND: BULUNAMADI
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : Yükleyici bulunamadı. Hafıza kartı exploit yükleyicinizin ELF dosyasını (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) bir hafıza kartında veya USB bellekte APPS içine koyun, sonra bunu yeniden seçin.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: Listelenen sürücülerde "%s" adlı bir şey yok. Sürücü listesindeki SÜRÜCÜLERİ BAŞLAT diğerlerini başlatır.
   'OFF': KAPALI
   ONE FORMATION STAYS IN: BİR DİZİLİŞ KALMALI
   OPEN: AÇ
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: Disk görüntüsü okunuyor
   Ripping the icon: Simge çıkarılıyor
   Run %s?: '%s çalıştırılsın mı?'
+  SEARCH: ARA
+  'SEARCH: %s   %d FOUND': 'ARA: %s   %d BULUNDU'
+  SEARCHING: ARANIYOR
   SELECT: SEÇ
   SETTINGS: AYARLAR
   SLOW: YAVAŞ
@@ -684,6 +685,7 @@ strings:
   START DRIVES: SÜRÜCÜLERİ BAŞLAT
   STARTING...: BAŞLATILIYOR...
   Starting this drive's games: Bu sürücünün oyunları başlatılıyor
+  Stopped before anything named "%s" was found.: '"%s" adlı bir şey bulunmadan durduruldu.'
   TEXT: METİN
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: Simge %s/ içinde OBJ (her şekil için bir tane), MTL ve PNG olarak duruyor.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: Bu disk görüntüsünde PS2 önyükleme dosyası (SYSTEM.CNF) yok, bu yüzden başlayamaz.

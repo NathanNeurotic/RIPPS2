@@ -565,6 +565,7 @@ strings:
   : تبدأ هذه اللعبة عبر Neutrino، ولا يوجد Neutrino حيث يبحث RIPPS2 (الإعدادات، ومحرك اللعبة، وبطاقات الذاكرة). يحمل RIPPS2 الإصدار Neutrino 1.8.0 من rickgaiser (AFL-3.0). هل تريد تثبيته الآن؟ بعد ذلك تختار المكان.
   '%d / %d FILES': '%d / %d ملف'
   '%d FOLDERS AND CONTENTS': '%d مجلد ومحتوياتها'
+  '%d FOLDERS, %d FOUND': '%d مجلد، وُجد %d'
   '%s BYTES': '%s بايت'
   '%s does not look like a text file. Open it in the text editor anyway?': لا يبدو %s ملفاً نصياً. فتحه في محرر النصوص على أي حال؟
   '%u KB FREE%s': '%u كيلوبايت حرة%s'
@@ -617,14 +618,12 @@ strings:
   HIGH: عالٍ
   IN / OUT: دخول / خروج
   IN USE: قيد الاستخدام
-  INSTALLER: المثبّت
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: موجود هنا بالفعل (بقي %d). استبداله؟
   IS ALREADY HERE. REPLACE IT?: موجود هنا بالفعل. استبداله؟
   KEEP IT: الإبقاء عليه
   LOW: منخفض
   MARK: تحديد
   MARK ALL: تحديد الكل
-  MC EXPLOIT: MC EXPLOIT
   MEMORY CARD %c: بطاقة الذاكرة %c
   MEMORY FILES SETTINGS: إعدادات ملفات الذاكرة
   MODIFIED  %s: عُدّل  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: غير متصل
   NOT EMPTY: ليس فارغاً
   NOT FOUND: غير موجود
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : لم يُعثر على مثبّت. ضع ملف ELF لمثبّت ثغرة بطاقة الذاكرة (FreeMcBoot، OpenTuna، wLaunchELF R3Z...) في APPS على بطاقة ذاكرة أو ذاكرة USB، ثم اختر هذا مجدداً.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: لا شيء باسم "%s" على المحركات المدرجة. يبدأ "تشغيل المحركات" في قائمة المحركات البقية.
   'OFF': إيقاف
   ONE FORMATION STAYS IN: يبقى تشكيل واحد
   OPEN: فتح
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: جارٍ قراءة صورة القرص
   Ripping the icon: جارٍ استخراج الأيقونة
   Run %s?: تشغيل %s؟
+  SEARCH: بحث
+  'SEARCH: %s   %d FOUND': 'بحث: %s   وُجد %d'
+  SEARCHING: جارٍ البحث
   SELECT: اختيار
   SETTINGS: الإعدادات
   SLOW: بطيء
@@ -684,6 +685,7 @@ strings:
   START DRIVES: تشغيل المحركات
   STARTING...: جارٍ البدء...
   Starting this drive's games: جارٍ تشغيل ألعاب هذا المحرك
+  Stopped before anything named "%s" was found.: توقف قبل العثور على أي شيء باسم "%s".
   TEXT: نص
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: الأيقونة موجودة في %s/ بصيغة OBJ (واحد لكل شكل) وMTL وPNG.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: لا تحتوي صورة القرص هذه على ملف إقلاع PS2 (SYSTEM.CNF)، لذا لا يمكن تشغيلها.

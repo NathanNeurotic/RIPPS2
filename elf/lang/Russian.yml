@@ -565,6 +565,7 @@ strings:
   : Эта игра запускается через Neutrino, а там, где ищет RIPPS2 (Настройки, накопитель игры, карты памяти), Neutrino нет. RIPPS2 содержит Neutrino 1.8.0 от rickgaiser (AFL-3.0). Установить сейчас? Затем вы выберете, куда.
   '%d / %d FILES': '%d / %d ФАЙЛОВ'
   '%d FOLDERS AND CONTENTS': '%d ПАПОК С СОДЕРЖИМЫМ'
+  '%d FOLDERS, %d FOUND': '%d ПАПОК, НАЙДЕНО %d'
   '%s BYTES': '%s БАЙТ'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s не похож на текстовый файл. Всё равно открыть в текстовом редакторе?'
   '%u KB FREE%s': '%u КБ СВОБОДНО%s'
@@ -617,14 +618,12 @@ strings:
   HIGH: ВЫСОКО
   IN / OUT: ВКЛ. / ВЫКЛ.
   IN USE: ЗАНЯТО
-  INSTALLER: УСТАНОВЩИК
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: УЖЕ ЕСТЬ ЗДЕСЬ (ЕЩЁ %d). ЗАМЕНИТЬ?
   IS ALREADY HERE. REPLACE IT?: УЖЕ ЕСТЬ ЗДЕСЬ. ЗАМЕНИТЬ?
   KEEP IT: ОСТАВИТЬ
   LOW: НИЗКО
   MARK: ОТМЕТИТЬ
   MARK ALL: ОТМЕТИТЬ ВСЁ
-  MC EXPLOIT: ЭКСПЛОЙТ MC
   MEMORY CARD %c: КАРТА ПАМЯТИ %c
   MEMORY FILES SETTINGS: НАСТРОЙКИ ФАЙЛОВ ПАМЯТИ
   MODIFIED  %s: ИЗМЕНЁН  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: НЕ ПОДКЛЮЧЕНО
   NOT EMPTY: НЕ ПУСТО
   NOT FOUND: НЕ НАЙДЕНО
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : Установщик не найден. Положите ELF вашего установщика эксплойта карты памяти (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) в APPS на карте памяти или USB-накопителе, затем снова выберите этот пункт.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: На перечисленных накопителях нет ничего с именем «%s». ЗАПУСК НАКОПИТЕЛЕЙ в списке накопителей запускает остальные.
   'OFF': ВЫКЛ.
   ONE FORMATION STAYS IN: ОДНА ФИГУРА ОСТАЁТСЯ
   OPEN: ОТКРЫТЬ
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: Чтение образа диска
   Ripping the icon: Извлечение значка
   Run %s?: Запустить %s?
+  SEARCH: ПОИСК
+  'SEARCH: %s   %d FOUND': 'ПОИСК: %s   НАЙДЕНО %d'
+  SEARCHING: ИДЁТ ПОИСК
   SELECT: ВЫБРАТЬ
   SETTINGS: НАСТРОЙКИ
   SLOW: МЕДЛЕННО
@@ -684,6 +685,7 @@ strings:
   START DRIVES: ЗАПУСТИТЬ НАКОПИТЕЛИ
   STARTING...: ЗАПУСК...
   Starting this drive's games: Запуск игр этого накопителя
+  Stopped before anything named "%s" was found.: Остановлено до того, как нашлось что-то с именем «%s».
   TEXT: ТЕКСТ
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: Значок лежит в %s/ в виде OBJ (по одному на фигуру), MTL и PNG.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: В этом образе диска нет загрузочного файла PS2 (SYSTEM.CNF), поэтому он не запускается.

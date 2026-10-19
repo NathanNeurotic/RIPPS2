@@ -565,6 +565,7 @@ strings:
   : このゲームは Neutrino で起動しますが、RIPPS2 が探す場所（設定、ゲームのドライブ、メモリーカード）に Neutrino がありません。RIPPS2 は rickgaiser の Neutrino 1.8.0（AFL-3.0）を同梱しています。今インストールしますか？次に場所を選びます。
   '%d / %d FILES': '%d / %d ファイル'
   '%d FOLDERS AND CONTENTS': '%d フォルダと中身'
+  '%d FOLDERS, %d FOUND': '%d フォルダー、%d 件見つかりました'
   '%s BYTES': '%s バイト'
   '%s does not look like a text file. Open it in the text editor anyway?': '%s はテキストファイルではないようです。それでもテキストエディターで開きますか？'
   '%u KB FREE%s': 空き %u KB%s
@@ -617,14 +618,12 @@ strings:
   HIGH: 高
   IN / OUT: イン / アウト
   IN USE: 使用中
-  INSTALLER: インストーラー
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: は既にあります（残り %d 件）。置き換えますか？
   IS ALREADY HERE. REPLACE IT?: は既にあります。置き換えますか？
   KEEP IT: 残す
   LOW: 低
   MARK: マーク
   MARK ALL: すべてマーク
-  MC EXPLOIT: MC エクスプロイト
   MEMORY CARD %c: メモリーカード %c
   MEMORY FILES SETTINGS: メモリーファイル設定
   MODIFIED  %s: 更新日時  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: 未接続
   NOT EMPTY: 空ではありません
   NOT FOUND: 見つかりません
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : インストーラーが見つかりません。メモリーカードのエクスプロイトのインストーラー ELF（FreeMcBoot、OpenTuna、wLaunchELF R3Z...）をメモリーカードか USB メモリの APPS に置いてから、もう一度これを選んでください。
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: 表示中のドライブに「%s」という名前のものはありません。ドライブ一覧の「ドライブを起動」で残りを起動できます。
   'OFF': オフ
   ONE FORMATION STAYS IN: フォーメーションは 1 つ残ります
   OPEN: 開く
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: ディスクイメージを読み込み中
   Ripping the icon: アイコンを抽出中
   Run %s?: '%s を実行しますか？'
+  SEARCH: 検索
+  'SEARCH: %s   %d FOUND': 検索：%s   %d 件
+  SEARCHING: 検索中
   SELECT: 選択
   SETTINGS: 設定
   SLOW: 遅い
@@ -684,6 +685,7 @@ strings:
   START DRIVES: ドライブを開始
   STARTING...: 開始中...
   Starting this drive's games: このドライブのゲームを開始中
+  Stopped before anything named "%s" was found.: 「%s」という名前のものが見つかる前に止めました。
   TEXT: テキスト
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: アイコンは %s/ に OBJ（形ごとに 1 つ）、MTL、PNG として入っています。
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: このディスクイメージには PS2 の起動ファイル（SYSTEM.CNF）がないため、起動できません。

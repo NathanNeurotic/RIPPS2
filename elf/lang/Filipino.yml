@@ -565,6 +565,7 @@ strings:
   : Sa pamamagitan ng Neutrino nagsisimula ang larong ito, at walang Neutrino kung saan naghahanap ang RIPPS2 (Settings, ang drive ng laro, ang mga memory card). Dala ng RIPPS2 ang Neutrino 1.8.0 ni rickgaiser (AFL-3.0). I-install ito ngayon? Susunod, pipili ka kung saan.
   '%d / %d FILES': '%d / %d FILE'
   '%d FOLDERS AND CONTENTS': '%d FOLDER AT LAMAN'
+  '%d FOLDERS, %d FOUND': '%d FOLDER, %d NAHANAP'
   '%s BYTES': '%s BYTE'
   '%s does not look like a text file. Open it in the text editor anyway?': Mukhang hindi text file ang %s. Buksan pa rin ito sa text editor?
   '%u KB FREE%s': '%u KB LIBRE%s'
@@ -617,14 +618,12 @@ strings:
   HIGH: MATAAS
   IN / OUT: PASOK / LABAS
   IN USE: GINAGAMIT
-  INSTALLER: INSTALLER
   IS ALREADY HERE (%d MORE TO GO). REPLACE IT?: NARITO NA (%d PA ANG NATITIRA). PALITAN?
   IS ALREADY HERE. REPLACE IT?: NARITO NA. PALITAN?
   KEEP IT: ITABI
   LOW: MABABA
   MARK: MARKAHAN
   MARK ALL: MARKAHAN LAHAT
-  MC EXPLOIT: MC EXPLOIT
   MEMORY CARD %c: MEMORY CARD %c
   MEMORY FILES SETTINGS: MGA SETTING NG MEMORY FILES
   MODIFIED  %s: BINAGO  %s
@@ -641,8 +640,7 @@ strings:
   NOT CONNECTED: HINDI NAKAKONEKTA
   NOT EMPTY: MAY LAMAN
   NOT FOUND: HINDI NAHANAP
-  ? No installer found. Put your memory card exploit installer ELF (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) in APPS on a memory card or USB drive, then choose this again.
-  : Walang nahanap na installer. Ilagay ang ELF ng iyong memory card exploit installer (FreeMcBoot, OpenTuna, wLaunchELF R3Z...) sa APPS sa memory card o USB drive, saka piliin ulit ito.
+  Nothing named "%s" on the drives listed. START DRIVES in the drive list starts the rest.: Walang may pangalang "%s" sa mga drive na nakalista. Ang START DRIVES sa listahan ng drive ang magsisimula sa iba.
   'OFF': NAKA-OFF
   ONE FORMATION STAYS IN: MANANATILI ANG ISANG FORMATION
   OPEN: BUKSAN
@@ -677,6 +675,9 @@ strings:
   Reading the disc image: Binabasa ang disc image
   Ripping the icon: Kinukuha ang icon
   Run %s?: Patakbuhin ang %s?
+  SEARCH: MAGHANAP
+  'SEARCH: %s   %d FOUND': 'MAGHANAP: %s   %d NAHANAP'
+  SEARCHING: NAGHAHANAP
   SELECT: PUMILI
   SETTINGS: SETTINGS
   SLOW: MABAGAL
@@ -684,6 +685,7 @@ strings:
   START DRIVES: SIMULAN ANG MGA DRIVE
   STARTING...: SINISIMULAN...
   Starting this drive's games: Sinisimulan ang mga laro ng drive na ito
+  Stopped before anything named "%s" was found.: Huminto bago may nahanap na may pangalang "%s".
   TEXT: TEXT
   The icon is in %s/ as OBJ (one for each shape), MTL and PNG.: Nasa %s/ ang icon bilang OBJ (isa para sa bawat hugis), MTL at PNG.
   This disc image has no PS2 boot file (SYSTEM.CNF), so it cannot start.: Walang PS2 boot file (SYSTEM.CNF) ang disc image na ito, kaya hindi ito masisimulan.
