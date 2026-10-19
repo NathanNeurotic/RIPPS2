@@ -21,7 +21,11 @@ Asked for by Algol (French, psx-place). One ELF; the words come from a language 
 - [ ] Arabic and Persian drawn right to left with joined letters. Needs a font with Arabic Presentation Forms A and B
       (the user picks the source; full DejaVu Sans has them), then: shape to presentation forms and reverse each line
       after wrapping, in fntsys, keeping Latin and digit runs in their order.
-- [ ] Lab: French and one non-Latin language on RIPPS2, RIPGRID, RIPFLOW and Adapt (long words, wraps, hints).
+- [x] Lab: French and one non-Latin language on RIPPS2, RIPGRID, RIPFLOW and Adapt (long words, wraps, hints).
+      10/19: French and German (RIPPS2), Russian (all four), Japanese (RIPPS2: STATUS, Launch Disc, settings
+      hints). Fixed from it: Sleek Case lowercase б (read as в), CJK settings hints wrapping a clause whole, a theme
+      hint row overflowing both edges (now a size smaller). Not seen yet: Arabic/Persian (left to right still),
+      Greek, Turkish, Vietnamese on screen (the pack report shows their fonts have every letter).
 
 ## Build 105: RIPDISC (a disc to storage or files)
 The user's design:
