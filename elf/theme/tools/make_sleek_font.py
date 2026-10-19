@@ -208,6 +208,9 @@ LATIN_EXTRA_AS = {'\u00D0': '\u0110', '\u0131': 'I'}  # ETH is drawn as D with s
 # the case-true cut: lowercase Cyrillic and Greek letters that look like a Latin lowercase are drawn as it
 CASE_LOWER_AS = {'\u0430': 'a', '\u0435': 'e', '\u043E': 'o', '\u0440': 'p', '\u0441': 'c', '\u0445': 'x',
                  '\u0443': 'y', '\u0456': 'i', '\u0458': 'j', '\u0455': 's', '\u03BF': 'o'}
+# the case-true cut: a lowercase whose small capital loses what tells it apart. Be shrunk to x-height kept its flag
+# too small to see and read as ve ("Vyvrat" for Vybrat, lab 10/19), so it gets its ascender: a b with a top bar.
+CASE_LOWER = {'\u0431': [[(2.8, 6), (0, 6), (0, 0), (3, 0), (3, 4), (0, 4)]]}
 PUNCT_EXTRA = {
     '\u00A1': [[(0, 4.2), (0, 0)], [(0, 6), (0, 6.01)]],                                     # inverted !
     '\u00BF': [[(2, 6), (2, 6.01)], [(2, 4.2), (2, 3), (0, 3), (0, 0), (4, 0)]],             # inverted ?
@@ -423,7 +426,7 @@ def build(s_variant, bold=False, case=False):
             lo = lower_of(ch)
             if lo is not None and table is not PUNCT_EXTRA:
                 if case:
-                    add(ord(lo), small_caps(polys))
+                    add(ord(lo), CASE_LOWER.get(lo) or small_caps(polys))
                 else:
                     cmap[ord(lo)] = name
     for table in (CYRILLIC_AS, GREEK_AS, LATIN_EXTRA_AS):
@@ -497,7 +500,7 @@ def build(s_variant, bold=False, case=False):
     style = ('Bold' if bold else 'Regular') + (' Case' if case else '')
     fb.setupNameTable({'familyName': 'RIPPS2 Sleek', 'styleName': style,
                        'uniqueFontIdentifier': 'RIPPS2 Sleek ' + style, 'fullName': 'RIPPS2 Sleek ' + style,
-                       'psName': 'RIPPS2Sleek-' + style.replace(' ', ''), 'version': 'Version 1.3'})
+                       'psName': 'RIPPS2Sleek-' + style.replace(' ', ''), 'version': 'Version 1.4'})
     fb.setupOS2(sTypoAscender=750, sTypoDescender=-170, sTypoLineGap=0, usWinAscent=ASC, usWinDescent=-DESC,
                 sCapHeight=CAP, sxHeight=round(4 * U) if case else CAP)
     fb.setupPost()
