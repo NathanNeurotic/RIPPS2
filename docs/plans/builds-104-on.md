@@ -74,6 +74,9 @@ How it maps onto the code (read 10/19):
   screenshots show the player's own.
 - OPL's IGS (ee_core igs_api.c) is GPL-3: write it fresh. ORBIT's AFL neutrino-igr shows how the frame under the
   menu is read (BITBLTBUF/TRXDIR). ee_core room is tight (build 103: gc-sections, stack 0x2C80).
+- **Power off from the in-game menu** (user, 10/19): a shutdown item as the menu's LAST choice, confirmed like Exit
+  (the first press arms it and says so, the second powers the console off), so a player can turn the PS2 off right
+  there in the game.
 
 ## Build 107: search in Memory Files
 - The Memory Files settings tiles: **MC EXPLOIT INSTALLER becomes SEARCH**, with a new icon. It finds any file

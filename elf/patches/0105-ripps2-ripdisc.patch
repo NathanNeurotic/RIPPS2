@@ -141,10 +141,10 @@ index 79b05c2..5a2f8e2 100644
          guiMsgBoxSound(SFX_ERROR);
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
 new file mode 100644
-index 0000000..728674f
+index 0000000..2feb99b
 --- /dev/null
 +++ b/src/ripps2disc.c
-@@ -0,0 +1,1342 @@
+@@ -0,0 +1,1366 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -180,6 +180,7 @@ index 0000000..728674f
 +#include <stdio.h>
 +#include <stdlib.h>
 +#include <string.h>
++#include <ctype.h>
 +#include <fcntl.h>
 +#include <unistd.h>
 +#include <sys/stat.h>
@@ -785,20 +786,43 @@ index 0000000..728674f
 +}
 +
 +// The game's name for its files: the title from the metadata, else the disc's label, else its ID
-+static void rdGameName(char *out, int size)
++// Is a disc's label only its ID again ("SCPS_150.13", "SLUS-20062")? Letters and digits compared, nothing else
++static int rdLabelIsId(void)
 +{
-+    rdSafeName(rdTitle[0] ? rdTitle : rdLabel[0] ? rdLabel : rdId[0] ? rdId : "GAME", out, size);
-+    if (!out[0])
-+        snprintf(out, size, "%s", rdId[0] ? rdId : "GAME");
++    const char *a = rdLabel, *b = rdId;
++    while (1) {
++        while (*a && !isalnum((unsigned char)*a))
++            a++;
++        while (*b && !isalnum((unsigned char)*b))
++            b++;
++        if (!*a || !*b)
++            return !*a && !*b;
++        if (toupper((unsigned char)*a++) != toupper((unsigned char)*b++))
++            return 0;
++    }
++}
++
++// 1 when it is a name of its own, 0 when it is only the ID (no title, and a label that is the ID)
++static int rdGameName(char *out, int size)
++{
++    out[0] = '\0';
++    if (rdTitle[0])
++        rdSafeName(rdTitle, out, size);
++    else if (rdLabel[0] && !(rdId[0] && rdLabelIsId()))
++        rdSafeName(rdLabel, out, size);
++    if (out[0])
++        return 1;
++    snprintf(out, size, "%s", rdId[0] ? rdId : "GAME");
++    return 0;
 +}
 +
 +// Where the game goes on the drive picked, and whether it is split (over 4 GB on a drive that may be FAT32)
 +static int rdGameTarget(char *path, int size)
 +{
 +    char prefix[160], name[64];
-+    int slot = rdSlot[rdSlotSel], split = 0;
++    int slot = rdSlot[rdSlotSel], split = 0, named;
 +
-+    rdGameName(name, sizeof(name));
++    named = rdGameName(name, sizeof(name));
 +    if (rdKind == RIPPS2_DISC_PS1) {
 +        name[48] = '\0';
 +        snprintf(path, size, "mass%d:/%s/%s/%s/%s.bin", slot, cueEmberFolder(), EMBER_GAMES_FOLDER, name, name);
@@ -809,9 +833,9 @@ index 0000000..728674f
 +        name[UL_GAME_NAME_MAX] = '\0';
 +        snprintf(path, size, "%sul.%08X.%s.00", prefix, USBA_crc32(name), rdId);
 +        split = 1;
-+    } else if (rdId[0])
++    } else if (rdId[0] && named) // OPL's <ID>.<name>.iso
 +        snprintf(path, size, "%s%s/%s.%s.iso", prefix, rdKind == RIPPS2_DISC_PS2CD ? "CD" : "DVD", rdId, name);
-+    else
++    else // only the ID: <ID>.iso, which OPL reads the ID of from inside
 +        snprintf(path, size, "%s%s/%s.iso", prefix, rdKind == RIPPS2_DISC_PS2CD ? "CD" : "DVD", name);
 +    return split;
 +}
