@@ -127,6 +127,10 @@ int main(int argc, char **argv)
     rtlCheck("\xd8\xaa" "\xd8\xb9" "\xd8\xb0" "\xd9\x91" "\xd8\xb1" "", 0, "\xef\xba\x97" "\xef\xbb\x8c" "\xef\xba\xac" "\xd9\x91" "\xef\xba\xad" "");
     rtlCheck("\xd9\x86" "\xd8\xb3" "\xd8\xae" " 3 \xd9\x85" "\xd9\x86" " 7", 1, "7 \xef\xbb\xa6" "\xef\xbb\xa3" " 3 \xef\xba\xa6" "\xef\xba\xb4" "\xef\xbb\xa7" "");
     rtlCheck("(\xd8\xa8" ")", 1, "(\xef\xba\x8f" ")");
+    // a full stop after a number ends the sentence (it stays with the line); between two digits it is the number's
+    rtlCheck("\xd8\xa8" " PRO2. \xd8\xa8" "", 1, "\xef\xba\x8f" " .PRO2 \xef\xba\x8f" "");
+    rtlCheck("\xd8\xa8" " 1.5 \xd8\xa8" "", 1, "\xef\xba\x8f" " 1.5 \xef\xba\x8f" "");
+    rtlCheck("\xd8\xa8" " 12:00 \xd9\x88" " 3/4", 1, "3/4 \xef\xbb\xad" " 12:00 \xef\xba\x8f" "");
     assert(ripps2Rtl("abc def", out, sizeof(out), 1) == NULL); // no right-to-left letter: drawn as it is
     assert(ripps2Rtl("\xd8\xa7\xd9\x84", out, 3, 1) == NULL); // does not fit
     assert(ripps2RtlChar(0x0627) && ripps2RtlChar(0xFEFB) && !ripps2RtlChar(0x0661) && !ripps2RtlChar('A'));

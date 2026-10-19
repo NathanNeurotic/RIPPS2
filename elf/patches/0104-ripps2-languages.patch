@@ -5089,10 +5089,10 @@ index d1f66e5..34e4410 100644
  
 diff --git a/src/ripps2tr.c b/src/ripps2tr.c
 new file mode 100644
-index 0000000..d6720de
+index 0000000..7007c12
 --- /dev/null
 +++ b/src/ripps2tr.c
-@@ -0,0 +1,791 @@
+@@ -0,0 +1,792 @@
 +/*
 + RIPPS2 build 104: RIPPS2's own words, and Open PS2 Loader's, in the language the user picked.
 + Licenced under Academic Free License version 3.0
@@ -5771,11 +5771,12 @@ index 0000000..d6720de
 +    u8 d;
 +    for (i = s; i < e; i++)
 +        trRtlDir[i] = ripps2RtlChar(trRtlOut[i]) ? 1 : (trNeutral(trRtlOut[i]) ? 2 : 0);
-+    for (i = s; i < e; i++) { // a number keeps its signs: 50%, 1.5, 12:00, 3/4
++    for (i = s; i < e; i++) { // a number keeps its signs: 50% (by a digit), 1.5, 12:00, 3/4 (between two digits)
 +        u32 c = trRtlOut[i];
-+        if (trRtlDir[i] == 2 && (c == '%' || c == '.' || c == ',' || c == ':' || c == '/' || c == '+' || c == '-') &&
-+            ((i > s && trDigit(trRtlOut[i - 1])) || (i + 1 < e && trDigit(trRtlOut[i + 1]))))
-+            trRtlDir[i] = 0;
++        int before = i > s && trDigit(trRtlOut[i - 1]), after = i + 1 < e && trDigit(trRtlOut[i + 1]);
++        if (trRtlDir[i] == 2 && ((c == '%' && (before || after)) ||
++                                 ((c == '.' || c == ',' || c == ':' || c == '/' || c == '+' || c == '-') && before && after)))
++            trRtlDir[i] = 0; // a full stop after "PRO2" ends the sentence: it stays with the line
 +    }
 +    for (i = s; i < e;) {
 +        if (trRtlDir[i] != 2) {
