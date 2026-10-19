@@ -16,11 +16,14 @@ Asked for by Algol (French, psx-place). One ELF; the words come from a language 
       `elf/lang/<Language>.yml`, OPL's translations and RiptOPL's overlays; licences checked for every font.
       CI's pack report (10/19): every language's letters are in its font except Laotian (no free Lao font) and
       Persian (upstream's pre-joined letters; the font_Arabic DejaVu subset has no presentation forms).
-- [x] Translations: French first and complete, then every language in RiptOPL's list (32 of 33; Ryukyuan's gaps come
-      from Japanese, `STRINGS_FROM`). Laotian not done: no font.
-- [ ] Arabic and Persian drawn right to left with joined letters. Needs a font with Arabic Presentation Forms A and B
-      (the user picks the source; full DejaVu Sans has them), then: shape to presentation forms and reverse each line
-      after wrapping, in fntsys, keeping Latin and digit runs in their order.
+- [x] Translations: French first and complete, then every language in RiptOPL's list (33 of 33; Ryukyuan's gaps come
+      from Japanese, `STRINGS_FROM`). Laotian (10/19) in Noto Sans Lao, fetched with the user's OK; Lao/Thai lines
+      break between syllables (`trSea` in ripps2tr.c).
+- [x] Arabic and Persian drawn right to left with joined letters (10/19). DejaVu Sans with the presentation forms
+      (user's OK), cut by `elf/lang/make_lang_fonts.py`; `ripps2Rtl` (ripps2tr.c) shapes from a Unicode-made table
+      (`make_arabic_forms.py`) and orders each line (simplified bidi: L runs kept, brackets mirrored) in
+      fntRenderString, measuring the shaped text; zero-advance marks centre over their letter. Persian's 249
+      pre-joined upstream lines dropped by the pack and translated. Left: right alignment of RTL lines.
 - [x] Lab: French and one non-Latin language on RIPPS2, RIPGRID, RIPFLOW and Adapt (long words, wraps, hints).
       10/19: French and German (RIPPS2), Russian (all four), Japanese (RIPPS2: STATUS, Launch Disc, settings
       hints). Fixed from it: Sleek Case lowercase б (read as в), CJK settings hints wrapping a clause whole, a theme
@@ -43,6 +46,25 @@ The user's design:
 - A `README.txt` in AUDIO and in MEDIA, written by RIPPS2 and user friendly: what the BIOS sound effects and the CD
   player's music are, what RIPDISC puts in MEDIA, and that any track copied from a CD into AUDIO shows in the BGM
   selection (per theme) without renaming it to bgm_04. Combine with the notes RIPPS2 already has (STATUS, hints).
+
+How it maps onto the code (read 10/19):
+- **What is in the drive** is already known: `discPollWorker` (ripps2ui.c) sorts the disc on the IO worker (PS1 game,
+  PS2 game with its ID and metadata title, ESR, DVD video, audio CD, a CD with sound tracks). It gains a kind and the
+  ID/title as data, and a game's size from its ISO 9660 primary volume descriptor (sector 16, offset 80: the volume's
+  sectors), so the modal can say "rippable" without asking the drive again.
+- **The modal** draws in `ripps2RenderLaunch` over START LASER (glass via `ripps2DrawPanelGlass`, as the CD player);
+  a launch-page clock starts when the disc line settles and the page is shown. SELECT is free on that page; the hold
+  reuses the game list's theme-cycle timing (menusys.c, 4.2 s), with a ring filling round the glyph.
+- **Reading and writing** follows the CD player's copy (`cdCopy`, ripps2cd.c): chunked `sceCdRead` with retries on
+  the IO-free GUI path, a progress frame with cancel, the file removed on failure. Games: 2048-byte sectors to
+  `<drive>/DVD|CD/<ID>.<Title>.iso` (a DVD over 4 GB needs exFAT or the internal HDD: refused up front on a FAT32
+  stick). PS1 games: 2352-byte sectors to `EMBER/<Title>/<Title>.bin` plus a `.cue` (Ember plays CUE/BIN). Audio
+  CDs: one WAV a track (cdWavHeader) in `MEDIA/<name>/`. DVD video: VIDEO_TS's files copied through cdrom0:.
+- **Placing media** goes through Memory Files (ripps2files.c): the clipboard (`fbClip*`) gets a RIPPED kind that
+  names the disc instead of files; PASTE in the chosen folder starts the rip there. MEDIA beside AUDIO is the folder
+  the browser opens on.
+- Lab: PCSX2 mounts an ISO or a CUE as the disc, so a PS2 ISO, a PS1 CUE/BIN and an audio-CD CUE can each be ripped
+  to the lab's exFAT HDD image and the result compared byte for byte (md5) with the source.
 
 ## Build 106: RIPSHOT (screenshots in game)
 - In the in-game pause menu: a screenshot item. Taking one flashes the pause menu and shows a preview with

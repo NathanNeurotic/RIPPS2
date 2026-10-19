@@ -34,7 +34,7 @@ Build 55's [reel](media/ripps2-b55-reel.mp4) and short clips: [info page](media/
 
 ## In your language
 
-From build 104 every word RIPPS2 shows translates, its own pages and hints as well as Open PS2 Loader's settings. Each build comes with **`RIPPS2-languages.zip`**: copy its `LNG` folder to the top of a USB drive, the HDD's OPL partition or an MMCE card (or the files in it to `mc0:/RIPPS2`), then pick the language in **Settings > Display Settings > Language**. 32 languages read RIPPS2 whole, from French, Spanish, German and Portuguese to Russian, Greek, Turkish, Vietnamese, Chinese, Japanese and Korean; a language that needs other letters has its font in the pack beside it. Arabic and Persian are translated but not yet drawn right to left. Corrections and new languages go in [`elf/lang`](elf/lang) (one `<Language>.yml` each; `python3 elf/lang/ripps2lang.py check` checks them).
+From build 104 every word RIPPS2 shows translates, its own pages and hints as well as Open PS2 Loader's settings. Each build comes with **`RIPPS2-languages.zip`**: copy its `LNG` folder to the top of a USB drive, the HDD's OPL partition or an MMCE card (or the files in it to `mc0:/RIPPS2`), then pick the language in **Settings > Display Settings > Language**. 33 languages read RIPPS2 whole, from French, Spanish, German and Portuguese to Russian, Greek, Turkish, Vietnamese, Lao, Chinese, Japanese and Korean, and Arabic and Persian right to left with their letters joined; a language that needs other letters has its font in the pack beside it. Corrections and new languages go in [`elf/lang`](elf/lang) (one `<Language>.yml` each; `python3 elf/lang/ripps2lang.py check` checks them).
 
 ## Your own sounds and music
 

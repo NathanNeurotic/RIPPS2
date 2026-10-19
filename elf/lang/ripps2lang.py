@@ -371,6 +371,15 @@ def prejoined(text):
     return any(0xFB50 <= ord(c) <= 0xFDFF or 0xFE70 <= ord(c) <= 0xFEFF for c in text)
 
 
+FOREIGN_SCRIPTS = {'Laotian': (0x0E00, 0x0E7F)}  # Thai
+
+
+def other_script(lang, text):
+    """A line written partly in a script the language does not use (and its font does not carry)."""
+    span = FOREIGN_SCRIPTS.get(lang)
+    return span is not None and any(span[0] <= ord(c) <= span[1] for c in text)
+
+
 def build_language(tree, lang, base, english_template, report):
     """(the .lng text, every character it uses) for one language."""
     opl = opl_translations(os.path.join(tree, 'lng_src', lang + '.yml'))
@@ -378,6 +387,10 @@ def build_language(tree, lang, base, english_template, report):
     if dropped:  # Persian's older half: elf/lang/Persian.yml has these labels written plain
         report.append('%s: %d upstream lines stored pre-joined left out (RIPPS2 joins the letters itself)' % (lang, len(dropped)))
         opl = {k: v for k, v in opl.items() if not prejoined(v)}
+    foreign = [k for k, v in opl.items() if other_script(lang, v)]
+    if foreign:  # RiptOPL's Lao overlay: 9 lines half in Thai, which font_Laotian has no letters for
+        report.append('%s: %d upstream lines in another script left out (elf/lang has them)' % (lang, len(foreign)))
+        opl = {k: v for k, v in opl.items() if not other_script(lang, v)}
     mine, label_fill = ripps2_translations(lang)
     via = STRINGS_FROM.get(lang)
     if via:

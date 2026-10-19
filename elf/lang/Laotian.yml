@@ -957,11 +957,20 @@ labels:
   FORUM_DETAILS: 'ຟໍຣັມ ຊ່ວຍເຫຼືອ:'
   INFO_TITLE: ຫົວຂໍ້
   INFO_DEVELOPER: ຜູ້ພັດທະນາ
+  HINT_DEFAULT_CORE: ຄ່າເລີ່ມຕົ້ນລວມ ສະເພາະບ່ອນທີ່ຮອງຮັບທັງສອງ core. UDPFS/UDPBD ໃຊ້ Neutrino ສະເໝີ; SMB/HTTP ໃຊ້ <OPL> ສະເໝີ. ການເລືອກ Loader Core ຂອງແຕ່ລະເກມ ຈະແທນອັນນີ້ ບ່ອນທີ່ມີ.
   HINT_NEUTRINO_AUTO_ELF: ສົ່ງ ELF ບູດຂອງເກມ ໃຫ້ Neutrino ເພື່ອຊອກການຕັ້ງຄ່າ ຂອງແຕ່ລະເກມ. ເປີດເປັນຄ່າເລີ່ມຕົ້ນ; ຕົວເລືອກ ELF ບູດ ທີ່ຕັ້ງເອງ ມີສິດກ່ອນ.
+  HINT_NEUTRINO_GSM_COMP: ການແກ້ field-flipping ສຳລັບເກມທີ່ສັ່ນ ຫຼື ຈໍຂາດ ພາຍໃຕ້ໂໝດວິດີໂອ Neutrino ທີ່ບັງຄັບ. ຕ້ອງຕັ້ງໂໝດວິດີໂອ Neutrino ກ່ອນ.
   HINT_POPSTARTER_PATH: ບ່ອນທີ່ POPSTARTER.ELF ຢູ່. ຖ້າປ່ອຍວ່າງ, RIPPS2 ຈະໃສ່ອັນທີ່ມັນພົບ ເທິງໄດຣຟ໌; ພິມທັບ ເພື່ອໃຊ້ອັນອື່ນ, ເຊັ່ນ usb:/POPS/POPSTARTER.ELF
+  HINT_VCD_HIDE_GAMEID: ສະເພາະການສະແດງ -- ເຊື່ອງ ID ເກມທີ່ຢູ່ໜ້າຊື່ (ເຊັ່ນ SLUS_005.51.) ຈາກຊື່ໃນລາຍການ PS1/VCD. ຊື່ທີ່ບໍ່ມີ ID ສະແດງຕາມເດີມ. ບໍ່ປ່ຽນການເປີດເກມ, ຮູບປົກ ຫຼື ດາວ.
+  HINT_VMC_SLOT_DISABLE: ເປີດເກມ ໂດຍບໍ່ມີ VMC ຂອງຊ່ອງນີ້ ແຕ່ຍັງເກັບການຕັ້ງຄ່າກາດໄວ້. ສະເພາະການເປີດດ້ວຍ Neutrino; ເກມຈະໃຊ້ເມມໂມຣີກາດແທ້ ໃນຊ່ອງນັ້ນ.
   NEUTRINO_ARGS_TOO_LONG: ອາກິວເມັນ Neutrino ຍາວເກີນ ທີ່ບັນທຶກໄດ້. ເຮັດໃຫ້ຊ່ອງໜຶ່ງ ສັ້ນລົງ ກ່ອນບັນທຶກ.
   NEUTRINO_LAUNCH_ARGS_OVERFLOW: ອາກິວເມັນ ເລີ່ມ Neutrino ເກີນຂີດຈຳກັດ ທີ່ປອດໄພ. ເຮັດໃຫ້ ອາກິວເມັນ ລວມ ຫຼື ຂອງເກມ ສັ້ນລົງ.
   NEUTRINO_AUTO_ELF: ELF ບູດ ອັດຕະໂນມັດ (-elf)
+  NEUTRINO_TOML_SYNC_FAILED: ການຕັ້ງຄ່າເຄືອຂ່າຍ ຂອງ Neutrino (bsd toml) ຫາຍໄປ ຫຼື ຂຽນບໍ່ໄດ້ -- ຍົກເລີກການເປີດເກມ, ກວດເບິ່ງໂຟນເດີ neutrino.
+  NEUTRINO_TOO_FRAGMENTED: ແຕກເປັນທ່ອນຫຼາຍເກີນໄປ ສຳລັບ Neutrino (%d ທ່ອນ, ຂີດຈຳກັດ %d ລວມ VMC) -- ກຳລັງລອງໃຊ້ OPL core ແທນ.
+  NET_UDPFS_TAB_HINT: ເປີດ UDPFS ແລ້ວ -- ອອກຈາກການຕັ້ງຄ່າ, ເປີດໜ້າ ເກມ UDPFS ແລ້ວກົດ ຢືນຢັນ ເພື່ອເຊື່ອມຕໍ່. ຢູ່ PC ໃຫ້ແລ່ນ udpfsd -fsroot <ໂຟນເດີເກມ>.
+  NET_UDPBD_TAB_HINT: ເປີດອຸປະກອນບລັອກ ຜ່ານເຄືອຂ່າຍແລ້ວ -- ແທັບຂອງມັນຈະປາກົດ ເມື່ອເຊີບເວີ PC ຕອບ (udpfsd -bdpath ສຳລັບ UDPFS Image, udpbd-server ສຳລັບ UDPBD).
+  NEUTRINO_TOO_FRAGMENTED_NET: ແຕກເປັນທ່ອນຫຼາຍເກີນໄປ ສຳລັບ Neutrino (%d ທ່ອນ, ຂີດຈຳກັດ %d ລວມ VMC) -- ຈັດລຽງໄຟລ໌ (defragment) ຢູ່ PC; ຍົກເລີກການເປີດເກມ.
   HINT_NEUTRINO_PATH: 'neutrino.elf ຢູ່ໃສ? <not set> = ອຸປະກອນຂອງເກມ -> mc0/mc1. ເສັ້ນທາງເຕັມ ທີ່ກຳນົດເອງ ຈະລອງກ່ອນ. ຕົວຢ່າງ: mass0:/neutrino/neutrino.elf | ata:/neutrino/neutrino.elf | mmce0:/neutrino/neutrino.elf | mc0:/neutrino/neutrino.elf | pfs0:/neutrino/neutrino.elf'
   GAME_VIEW_MODE: ການສະແດງ ເກມ PS2/PS1
   HINT_GAME_VIEW_MODE: ທັງໝົດ ສະແດງເກມ PS2 ແລະ PS1 ນຳກັນ ແລະ L3 ປ່ຽນ ທັງໝົດ, PS1, PS2. PS2 ຫຼື PS1 ສະແດງສະເພາະປະເພດນັ້ນ ແລະ ປິດ L3. APPS ແລະ ເກມທີ່ມັກ ມີກົດການສະແດງ ຂອງມັນເອງ.
