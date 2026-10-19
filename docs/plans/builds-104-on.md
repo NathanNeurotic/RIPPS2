@@ -30,7 +30,14 @@ Asked for by Algol (French, psx-place). One ELF; the words come from a language 
       hint row overflowing both edges (now a size smaller). Not seen yet: Arabic/Persian (left to right still),
       Greek, Turkish, Vietnamese on screen (the pack report shows their fonts have every letter).
 
-## Build 105: RIPDISC (a disc to storage or files)
+## Build 105: RIPDISC (a disc to storage or files): done 10/19, released in v1.0.7-beta
+- [x] Panel after 4.2 s, SELECT held 4.2 s, confirm (size, TIME, place), START; games to ISO / UL parts (over 4 GB on
+      a drive that may be FAT32) / PS1 BIN+CUE in EMBER/games; media via Memory Files (RIPPED clipboard, PASTE, MEDIA
+      beside AUDIO, audio CD folder named on the keyboard after); README.txt in AUDIO and MEDIA; any .ogg/.wav in
+      AUDIO is music. Time estimate before START, learned per storage kind (ripdisc_kbs_<storage>_<cd|dvd>).
+- [x] Lab 10/19: POINIES POIN (1.2 GB) from PCSX2's drive to a fresh exFAT HDD image (scratchpad mkexfat.py) is
+      byte for byte the source. Not lab-checked: DVD video, audio CD (PCSX2 types no image as an audio CD), PS1,
+      UL parts, dual layer: on the testers' list.
 The user's design:
 - On the launch disc page, after **4.2 s** on the page, a clean glass panel fades in at the centre as a modal, only
   when the disc can be ripped: a short header **RIPDISC** and one line ("add this game to your storage" for a game,
@@ -66,7 +73,19 @@ How it maps onto the code (read 10/19):
 - Lab: PCSX2 mounts an ISO or a CUE as the disc, so a PS2 ISO, a PS1 CUE/BIN and an audio-CD CUE can each be ripped
   to the lab's exFAT HDD image and the result compared byte for byte (md5) with the source.
 
-## Build 106: RIPSHOT (screenshots in game)
+## Build 106 (as built): POWER OFF in the in-game menu, the star on the left, list keys: done 10/19
+- [x] POWER OFF, the in-game menu's last item, second press (not for a disc game). The panel is drawn on the host
+      by test_ripps2_build87.py; the lab could not reach a game (its known launch hang), so consoles confirm it.
+- [x] Star left by default (own column), Settings > Game Sources > Starred Games Star (Theme/Left/Right/Hidden); a
+      left star sends the decorator to the row end. ItemsList keys star, star_image, highlight (bar/line/none),
+      decorator_all, decorator_ps2/_ps1/_app; RIPPS2-themes has them (THEME_KEYS.md, glossary, checker, Adapt).
+
+## RIPSHOT (screenshots in game): moved to its own build, not started
+Findings 10/19 (why it did not fit in 106 under the usage limit): nothing in-game can create a file unless the
+IOP has a file system driver live for that drive (OPL's GPL IGS writes with fioOpen after the pause); the frame
+must be read back from GS memory (a GS-to-EE transfer the menu does not do yet) and ee_core has about 11 KB
+of room. Paths: keep a small image in RAM the game is not using and write it when RIPPS2 is back, or
+pre-allocate a file before launch and write its sectors as VMC writes do. The design stays as below.
 - In the in-game pause menu: a screenshot item. Taking one flashes the pause menu and shows a preview with
   **Delete** and **Keep**; only Keep saves.
 - Saved neatly and plainly named, to either or both (a setting): an individual game folder in MEDIA, or OPL's
@@ -78,7 +97,9 @@ How it maps onto the code (read 10/19):
   (the first press arms it and says so, the second powers the console off), so a player can turn the PS2 off right
   there in the game.
 
-## Build 107: search in Memory Files
+## Build 107: search in Memory Files: done 10/19, released in v1.0.7-beta
+- [x] SEARCH FILES in MC EXPLOIT INSTALLER's tile (magnifier icon), breadth first over the browser's drives, one
+      folder open at a time, 10 deep, 150 results; a result opens the tree with the cursor on it. Lab: the tile.
 - The Memory Files settings tiles: **MC EXPLOIT INSTALLER becomes SEARCH**, with a new icon. It finds any file
   (media, saves, games, ELFs) by name on the started drives and opens the file tree where it is.
 

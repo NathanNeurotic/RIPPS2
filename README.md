@@ -1,21 +1,21 @@
-<p align="center"><img src="media/ripps2-test-me.png" alt="RIPPS2: Test me, build 102, the beta, the dead elf in its blue hat over the towers"></p>
+<p align="center"><img src="media/ripps2-test-me.png" alt="RIPPS2: Test me, build 107, the beta, the dead elf in its blue hat over the towers"></p>
 
 # RIPPS2
 
-> ### Kill it: RIPPS2 build 102, v1.0.2 beta
+> ### Rip it: RIPPS2 build 107, v1.0.7 beta
 > **RIP PS2, the ELF killer.** ELF-sufficient, never ELF-destructive: your other ELFs stay safe on the [shelf](https://akilluminati47.github.io/RIPPS2/) (nothing is deleted unless you ask), they just get a well-earned rest.
-> 1. **[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf)** (always the newest release) (one file, about 3 MB), and the **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** if you like (Adapt, Adapt Rx, edition 102; RIPGRID and RIPFLOW are built in).
+> 1. **[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf)** (always the newest release) (one file, about 3 MB), and the **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** if you like (Adapt, Adapt Rx, edition 107; RIPGRID and RIPFLOW are built in), and **[RIPPS2-languages.zip](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip)** for RIPPS2 in your language (33 of them).
 > 2. Copy it to a USB stick or memory card, and launch it from FreeMcBoot, PS2BBL, wLaunchELF or whatever you already use to start homebrew. In PCSX2: **System > Start File** and pick `RIPPS2.elf`.
 > 3. Tell us how it went: [the psx-place thread](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/), [an issue](https://github.com/akilluminati47/RIPPS2/issues), or **#RIPPS2** on the developers' Discord, [discord.gg/ggkCDWqhE](https://discord.gg/ggkCDWqhE) (invite good for October 2026).
 >
-> [What's new in build 102](https://github.com/akilluminati47/RIPPS2/releases/tag/v1.0.2-beta) | [Changelog](CHANGELOG.md) | **[Watch the beta reel](https://youtu.be/LPjdK_E1jjM)** (9:45, every chapter in its description; earlier: [the build 99 Short](https://www.youtube.com/shorts/Ov5iA-tMcI8), [build 88's](https://www.youtube.com/shorts/Sqprz22tdtg), [the build 83 reel](https://youtu.be/A27N9s6tumk) and [its Short](https://youtube.com/shorts/4QBe5UO2KxM)) | [Every release](https://github.com/akilluminati47/RIPPS2/releases) | [Talk about it on psx-place](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/)<br>
+> [What's new in build 107](https://github.com/akilluminati47/RIPPS2/releases/tag/v1.0.7-beta) | [Changelog](CHANGELOG.md) | **[Watch the beta reel](https://youtu.be/LPjdK_E1jjM)** (9:45, every chapter in its description; earlier: [the build 99 Short](https://www.youtube.com/shorts/Ov5iA-tMcI8), [build 88's](https://www.youtube.com/shorts/Sqprz22tdtg), [the build 83 reel](https://youtu.be/A27N9s6tumk) and [its Short](https://youtube.com/shorts/4QBe5UO2KxM)) | [Every release](https://github.com/akilluminati47/RIPPS2/releases) | [Talk about it on psx-place](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/)<br>
 > [Theme RIPPS2](https://github.com/akilluminati47/RIPPS2-themes) (no rebuild, agent friendly) | [Fill your AUDIO folder](#the-sound-ripps2-was-made-with) with RIPPS2 Audio Studio | [See a theme in true 720p and 1080i: RIPPCSX2](https://github.com/akilluminati47/RIPPCSX2/releases/latest) (PCSX2 with HDTV output)
 
 RIPPS2 is a PS2 front end in a single `.elf`: a teardown and rebuild of [RiptOPL](https://github.com/NathanNeurotic/Open-PS2-Loader) (the Open PS2 Loader fork) with its own look, launchers, file browser and save tools. Glass towers stand behind your games and orbit formations behind your files, all drawn live by the PS2.
 
-- **LAUNCH DISC** boots PS2, PS1 and DVD video discs, says which game is in the drive before you start it, and plays audio CDs with the towers turned into a spectrum analyzer.
-- **STORAGE** is your game library: every drive in one list, with art, an info page whose art crossfades with the screenshots, per-game settings, and R3 to star a game into Starred Games.
-- **MEMORY FILES** is a built-in file browser: copy, move and delete across memory cards, USB and HDD; open OPL's VMC card images like folders; export and import PSU saves; edit text files; open pictures and play AVI video full screen; Start opens its settings. Square on a memory card opens the **CARD MANAGER**: back a card up to a VMC, write a VMC's saves back, erase the game saves, format.
+- **LAUNCH DISC** boots PS2, PS1 and DVD video discs, says which game is in the drive before you start it, and plays audio CDs with the towers turned into a spectrum analyzer. **RIPDISC** (build 105) rips the disc in the drive: a game to your storage, a CD or DVD video to your files.
+- **STORAGE** is your game library: every drive in one list, with art, an info page whose art crossfades with the screenshots, per-game settings, and R3 to star a game into Starred Games (the star sits at the start of the row; Settings > Game Sources > Starred Games Star moves or hides it).
+- **MEMORY FILES** is a built-in file browser: copy, move and delete across memory cards, USB and HDD; open OPL's VMC card images like folders; export and import PSU saves; edit text files; open pictures and play AVI video full screen; Start opens its settings, where **SEARCH FILES** finds any file or folder by name on every started drive and opens the tree where it is. Square on a memory card opens the **CARD MANAGER**: back a card up to a VMC, write a VMC's saves back, erase the game saves, format.
 
 It is **beta** from build 100: a hundred builds of alpha, tested on consoles and in PCSX2 by ripto, nuno6573, zackcage6, eliminator1403, FifthFox and Mr.sus.60. Keep your usual loader close by, and tell us what breaks: feedback is what makes RIPPS2.
 
@@ -25,7 +25,7 @@ It is **beta** from build 100: a hundred builds of alpha, tested on consoles and
 - **RIPFLOW**, the built-in cover carousel (and RIPGRID, built in too), a launch disc that pops in or spins as a game starts, **Hints and Glyphs** (your own button hints, badges and four glyph sets), and **Colors and More**: six color themes (RIPPS2, Ember, Blood, Ectoplasm, Amethyst, Bone), D-pad glyphs, fading hints and category bar, the source name as a toast in the middle of the page; themes can pick all of it for themselves, and your own settings always win.
 - **Everything it needs, on board.** Neutrino 1.8.0, POPSTARTER and Ember ride inside the one `.elf` and install themselves where your games are; **STATUS** on the START menu shows where each one is and installs or sets it up.
 - **BIBLE**: PS2BBL 1.2.0 set up for RIPPS2, on a memory card or the internal HDD, so the console boots straight into it. Boot Loader > Manage shows what each card starts.
-- **An in-game menu** (Settings > General > In-Game Menu, off until consoles have shown it safe): L1+L2+R1+R2+SELECT+START pauses a game under Resume, Achievements and Exit Game, drawn over the game's own picture; Achievements lists what you have left to hunt and how to earn it.
+- **An in-game menu** (Settings > General > In-Game Menu, off until consoles have shown it safe): L1+L2+R1+R2+SELECT+START pauses a game under Resume, Achievements, Exit Game and Power Off (build 106: turns the PS2 off right there, on a second press), drawn over the game's own picture; Achievements lists what you have left to hunt and how to earn it.
 - **Achievements** (SpiritofRA): RetroAchievements telemetry through the [xeRAbora](https://github.com/hacan359/xerabora) client on your PC (pinned to [v0.1.0-alpha.18](https://github.com/hacan359/xerabora/releases/tag/v0.1.0-alpha.18)), badges on tracked games, the disc in the tray, and **YOUR ACCOUNT**, every game you have checked with what you have unlocked and, with xeRAbora open to the network, **LEFT TO HUNT**: every locked achievement and how to earn it.
 - **Cover Art** fetched by the PS2 itself over HTTPS, **720p and 1080i** drawn in one pass at full detail (text the right size since build 82), your **AUDIO** folder found on any drive, and towers and orbs that run all night at a steady 60 fps.
 - **Guard rails**: every build runs RiptOPL's host checks and RIPPS2's own, and a new warning in a RIPPS2 file fails it.
@@ -36,9 +36,31 @@ Build 55's [reel](media/ripps2-b55-reel.mp4) and short clips: [info page](media/
 
 From build 104 every word RIPPS2 shows translates, its own pages and hints as well as Open PS2 Loader's settings. Each build comes with **`RIPPS2-languages.zip`**: copy its `LNG` folder to the top of a USB drive, the HDD's OPL partition or an MMCE card (or the files in it to `mc0:/RIPPS2`), then pick the language in **Settings > Display Settings > Language**. 33 languages read RIPPS2 whole, from French, Spanish, German and Portuguese to Russian, Greek, Turkish, Vietnamese, Lao, Chinese, Japanese and Korean, and Arabic and Persian right to left with their letters joined; a language that needs other letters has its font in the pack beside it. Corrections and new languages go in [`elf/lang`](elf/lang) (one `<Language>.yml` each; `python3 elf/lang/ripps2lang.py check` checks them).
 
+<p align="center">
+<img src="media/b107/06-arabic.jpg" width="32%" alt="Settings in Arabic: right to left, the letters joined">
+<img src="media/b107/07-lao.jpg" width="32%" alt="Storage in Lao, the category bar and hints in Noto Sans Lao">
+<img src="media/b107/04-star-left.jpg" width="32%" alt="Storage: a starred game's star at the start of its row, the titles lined up">
+</p>
+
+## Rip a disc
+
+Put the disc in the drive and open **LAUNCH DISC**. After a few seconds a glass panel offers **RIPDISC**: hold **SELECT** until its ring fills. The next step says what the disc is, its size, **how long it should take** and where it goes; confirm, then **START**.
+
+- **A PS2 game** becomes an ISO in a drive's DVD or CD folder, in your games list. Over 4 GB on a USB stick, MX4SIO or iLink (any of which may be FAT32) it is saved as Open PS2 Loader's 1 GB parts with ul.cfg instead; on the internal exFAT HDD it stays one ISO.
+- **A PS1 game** becomes a BIN and CUE in `EMBER/games/<Title>/`, played with Ember.
+- **An audio CD or a DVD video** goes to your files: Memory Files opens on **MEDIA** (beside AUDIO) with the disc on the clipboard as **RIPPED**; PASTE in any folder rips it there. A CD lands as WAVs (copy one into AUDIO and it is in your menu music), a DVD you made as its VIDEO_TS files. Bought films are copy protected and the drive will not read them.
+
+The PS2's USB is slow (USB 1.1, about 1 MB a second): a full DVD to a stick takes over an hour, to the internal exFAT HDD a fraction of that. The estimate learns your console's own speed from your first rip.
+
+<p align="center">
+<img src="media/b107/02-ripdisc-confirm.jpg" width="32%" alt="RIPDISC's confirm step: the game, its size and the ISO it becomes">
+<img src="media/b107/03-ripdisc-progress.jpg" width="32%" alt="RIPDISC ripping: how much is done and the minutes left">
+<img src="media/b107/05-search.jpg" width="32%" alt="Memory Files settings: SEARCH FILES in place of the MC exploit installer">
+</p>
+
 ## Your own sounds and music
 
-Put an `AUDIO` folder beside `RIPPS2.elf`. It takes sound effects as `.adp` files named for their events (RiptOPL's `boot`, `cancel`, `confirm`, `cursor`, `message`, `transition`, `bd_connect`, `bd_disconnect`, and RIPPS2's `page_in`, `page_out`, `error`, `save`, `launch`, `disc`, `random`), and music as `bgm_01 Title.ogg`, `bgm_02 Title.ogg` and so on (Ogg Vorbis without tags, or 16-bit WAV). Settings > Audio Settings > Music picks the track. **[RIPPS2 Audio Studio](tools/audio-studio)** does all of it on your PC: browse to any sound or song, hear it as it is and as the PS2 will play it, convert it (or a whole folder) into `output/AUDIO`, and copy that folder beside `RIPPS2.elf` with a USB stick and RIPPS2's Memory Files. Point it at the BIOS dump of your own PS2 and it renders the console's own menu sounds and system music from it, ready to use. (`elf/theme/tools/make_adp.py` and `make_sound_pack.py` still do the same from the command line.) RIPPS2 ships no sounds or music at all: since build 95 it has none built in, so without an `AUDIO` folder it is silent, and **STATUS > SOUNDS** says what it found.
+Put an `AUDIO` folder beside `RIPPS2.elf`. It takes sound effects as `.adp` files named for their events (RiptOPL's `boot`, `cancel`, `confirm`, `cursor`, `message`, `transition`, `bd_connect`, `bd_disconnect`, and RIPPS2's `page_in`, `page_out`, `error`, `save`, `launch`, `disc`, `random`), and music as any `.ogg` (Ogg Vorbis without tags) or 16-bit `.wav`: `bgm_01 Title.ogg`, `bgm_02 Title.ogg` set the order and the title, and since build 105 any other name is listed as it is, so a track ripped from a CD needs no renaming. Settings > Audio Settings > Music picks the track. RIPPS2 writes a `README.txt` into AUDIO (and MEDIA) saying all of this. **[RIPPS2 Audio Studio](tools/audio-studio)** does all of it on your PC: browse to any sound or song, hear it as it is and as the PS2 will play it, convert it (or a whole folder) into `output/AUDIO`, and copy that folder beside `RIPPS2.elf` with a USB stick and RIPPS2's Memory Files. Point it at the BIOS dump of your own PS2 and it renders the console's own menu sounds and system music from it, ready to use. (`elf/theme/tools/make_adp.py` and `make_sound_pack.py` still do the same from the command line.) RIPPS2 ships no sounds or music at all: since build 95 it has none built in, so without an `AUDIO` folder it is silent, and **STATUS > SOUNDS** says what it found.
 
 ### The sound RIPPS2 was made with
 

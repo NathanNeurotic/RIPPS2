@@ -1,6 +1,52 @@
 # RIPPS2 changelog
 
-## Build 104 (beta, not released yet), changes since build 103
+## Build 107 (beta, v1.0.7-beta), changes since build 106
+
+### Search in Memory Files
+- **SEARCH FILES takes MC EXPLOIT INSTALLER's place** in Memory Files' settings grid (START in the browser), with a magnifier for its icon. Type part of a name on the keyboard: every drive the browser lists (memory cards, USB, the exFAT HDD, MX4SIO, iLink, MMCE, the HDD's OPL home) is searched for files and folders whose name holds it, in any case: media, saves, games, ELFs, art.
+- **Results open where they are.** The list shows each name with the folder it is in under it; Cross (or Circle, with Circle as confirm) opens the file tree in that folder with the cursor on it, ready to copy, run or rename. L1 / R1 page through the results.
+- **It keeps out of the drives' way:** one folder is open at a time (a memory card or MMCE driver never holds two), it goes ten folders deep and stops at 150 results, and the screen shows how many folders it has read. Back stops it and keeps what it found. A drive that is not started is not searched: START DRIVES in the drive list starts the rest.
+- The memory card exploit installer launcher is gone (keep your installer ELF in APPS and run it from the browser, as any ELF).
+
+### Fix
+- **Build 105's time estimate** failed to build (a function used before it was declared); found by CI, fixed here.
+
+## Build 106 (beta, in v1.0.7-beta), changes since build 105
+
+### POWER OFF from the game
+- **The in-game menu's last choice is POWER OFF** (L1+L2+R1+R2+SELECT+START opens the menu, with In-Game Menu on in Settings > General). Like EXIT GAME it asks first: the first press arms it and the panel says "PRESS X AGAIN TO TURN THE PS2 OFF" in red, the second turns the console off, the same way the power button's single press does. Unsaved progress is lost, and it says so.
+- A game started from a disc keeps the console's own power button (the disc driver in the BIOS has no power-off call RIPPS2 can make); POWER OFF says so instead of doing nothing.
+
+### The star on the left
+- **A starred game's star now sits at the start of its row**, in a column of its own, so every title lines up whether it is starred or not. That is the default on every built-in theme and on Adapt.
+- **Settings > Game Sources > Starred Games Star** (under Starred Games Page Start Mode): Theme, Left, Right (after the title, as before) or Hidden. Kept with your settings.
+- **A theme's row icon moves out of its way:** with the star on the left, a list's per-game icon (the `decorator`) is drawn at the row's right end, so the two never overlap.
+
+### New theme keys for the games list (RIPPS2-themes has them, in THEME_KEYS.md, the key glossary and the checker)
+- `star`: `left` (the default), `right` or `hidden`. The user's setting wins.
+- `star_image`: the star's own picture for that list (else the theme's `fav_mark.png`, else RIPPS2's).
+- `highlight`: the selected row as `bar` (the PS2-blue bar, the default), `line` (a line under the row) or `none`.
+- `decorator_all`: one picture as every row's icon; `decorator_ps2`, `decorator_ps1`, `decorator_app`: one for each kind of row. A game's own icon (`decorator=ICO`) comes first, then its kind's, then the one for all.
+
+## Build 105 (beta, in v1.0.7-beta), changes since build 104
+
+### RIPDISC: your disc, kept
+- **Launch Disc offers to rip what is in the drive.** After 4.2 seconds on the page, when the disc can be ripped, a glass panel fades in at the centre: RIPDISC, "add this game to your storage" (or "this media to your files") and SELECT Hold. Hold SELECT for 4.2 seconds (a ring fills round the glyph) to open the confirm step.
+- **The confirm step says what it will do before it starts:** what the disc is, its size, how long it should take and where it goes. Confirm, then START rips; back cancels at any point before. Left / Right picks the drive a game goes to when more than one is started.
+- **How long, said up front.** The time comes from what the kind of storage can take: the PS2's USB is USB 1.1, about 1 MB a second at best, so a 4 GB DVD to a USB stick is over an hour, while the internal exFAT HDD keeps up with the drive (a DVD at up to 4x, a CD at up to 24x). After your first rip RIPPS2 remembers the speed it really got for that kind of drive and disc, so the next estimate is your console's own. While it runs: how much is done, the percentage and the time left (hours past 90 minutes). Cancelling asks first, then removes everything written.
+- **PS2 games** become an ISO in the drive's DVD or CD folder (`<ID>.<Title>.iso`, or `<ID>.iso` when there is no title), where the games list finds it. A game over 4 GB going to a drive that may be FAT32 (USB, MX4SIO, iLink: the PS2 cannot tell FAT32 from exFAT) is saved as Open PS2 Loader's 1 GB parts with its ul.cfg entry instead, which every drive takes; on the internal exFAT HDD it stays one ISO. Dual-layer DVDs are measured layer by layer. An ESR disc rips as the game it is.
+- **PS1 games** become a BIN and CUE (2352-byte sectors, every track, each data sector's sync put back) in `EMBER/games/<Title>/`, in the PS1 games list for Ember.
+- **Audio CDs and DVD videos go to your files.** Confirm opens Memory Files on a new **MEDIA** folder (beside AUDIO), with the disc on the clipboard reading **RIPPED** where it would say COPIED. Go to any folder, Triangle, **PASTE**: the confirm step again, then START. An audio CD becomes a folder of WAVs (Track 01.wav..., CD quality) and the keyboard opens by itself to name the folder; a DVD video becomes its VIDEO_TS files (1 GB at most each, so FAT32 takes them). A bought film is copy protected: the drive refuses its video and the rip says so.
+- **Checked in the lab:** a 1.2 GB PS2 game ripped from PCSX2's drive to an exFAT HDD came out byte for byte the source (same MD5).
+
+### AUDIO and MEDIA explain themselves
+- **Any .ogg or .wav in AUDIO is music**, listed in Settings > Audio Settings > Music by its own name: a track copied in from a ripped CD needs no renaming to `bgm_04`. (`bgm_01 Title.ogg` names still set the order and the title.)
+- **README.txt in AUDIO and MEDIA**, written by RIPPS2 the first time it uses the folder (a CD track copy, the BIOS sound and music rips, RIPDISC): what goes where, the event names, how the music list works, how to rip a disc. Never written to a memory card.
+
+### Languages
+- RIPDISC's 42 new lines read in all 33 languages.
+
+## Build 104 (beta, in v1.0.7-beta), changes since build 103
 
 ### RIPPS2 in your language
 - **RIPPS2's own words translate now**, not only Open PS2 Loader's settings: the category pages, Storage, Memory Files and the card manager, the CD player, BIBLE and BOOT LOCK, the achievements pages, About, every hint and message. One ELF for every language; the words come from a language pack.
@@ -13,7 +59,7 @@
 - **Laotian** is translated whole, in Noto Sans Lao (in the pack with its licence). Lao, like Chinese, has no spaces between words: its lines break between syllables, never before a vowel sign or tone mark nor after a leading vowel.
 - Not yet: Arabic and Persian lines start from the left edge as the theme places them (a right-aligned layout for them is still to come). The in-game menu stays English.
 
-## Build 103 (beta, not released yet), changes since build 102
+## Build 103 (beta, in v1.0.7-beta), changes since build 102
 
 ### RiptOPL, brought up to date
 - **RIPPS2 now carries RiptOPL up to 10/18/2026** (rebuild/main 3cd7f89, 548 commits since build 84's merge). Among them: in-game reset input that a busy game can no longer starve (#973), settings saves that survive a failed write (#971), safer IOP resets and VMC handling, UDPFS reconnects, RetroAchievements fixes and its achievement card, CFG Titles shown in lists (#918), a CJK title fallback font (#917), per-game parental locks, the option to hide logo art, and 3D save icons for PS1 games.
