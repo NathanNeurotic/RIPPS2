@@ -267,6 +267,9 @@ FONT_FROM = {'Persian': 'Arabic', 'Romana': 'Croatian', 'Japanese': 'SChinese', 
              'Ryukyuan': 'SChinese', 'Serbian': 'Bulgarian', 'Albanian': 'Croatian', 'Galician': 'Croatian',
              'Laotian': 'Laotian'}
 FONT_ANY = ('Croatian', 'Bulgarian', 'Arabic', 'SChinese')  # the last resort, in order
+# a language with no RIPPS2 file of its own fills its gaps from one its readers all read (every Ryukyuan reader reads
+# Japanese): that language's labels where upstream's file has none, then its RIPPS2 strings
+STRINGS_FROM = {'Ryukyuan': 'Japanese'}
 SUBSET_OVER = 400 * 1024  # a font bigger than this goes in the pack cut to the letters its language uses
 
 
@@ -349,6 +352,12 @@ def build_language(tree, lang, base, english_template, report):
     """(the .lng text, every character it uses) for one language."""
     opl = opl_translations(os.path.join(tree, 'lng_src', lang + '.yml'))
     mine, label_fill = ripps2_translations(lang)
+    via = STRINGS_FROM.get(lang)
+    if via:
+        via_opl = opl_translations(os.path.join(tree, 'lng_src', via + '.yml'))
+        via_mine, via_fill = ripps2_translations(via)
+    else:
+        via_opl, via_mine, via_fill = {}, {}, {}
     entries, chars, refused = {}, set(), []
 
     def add(en, tr, origin, override):
@@ -365,7 +374,7 @@ def build_language(tree, lang, base, english_template, report):
 
     for d in base['gui_strings']:  # Open PS2 Loader's labels, by their English here; RIPPS2's labels: only the gaps
         label, en = d['label'], d['string']
-        tr = opl.get(label) or label_fill.get(label)
+        tr = opl.get(label) or label_fill.get(label) or via_opl.get(label) or via_fill.get(label)
         add(en, tr, label, False)
     known = set(english_template)
     n_mine = 0
@@ -376,6 +385,10 @@ def build_language(tree, lang, base, english_template, report):
         if tr:
             n_mine += 1
         add(en, tr, 'RIPPS2', True)
+    for en, tr in via_mine.items():  # the stand-in's, only where this language has nothing of its own
+        if en in known and not mine.get(en) and tr:
+            n_mine += 1
+            add(en, tr, 'RIPPS2 (%s)' % via, False)
     for origin, en in refused:
         report.append('%s: %s refused, its %% conversions differ from the English "%s"' % (lang, origin, en[:60]))
     lines = ['# RIPPS2 language file: %s. Made by RIPPS2\'s build from Open PS2 Loader\'s translations, RiptOPL\'s and' % lang,
@@ -419,7 +432,8 @@ def pack(tree, out):
                                                       ' (cut from %d KB)' % (size // 1024) if len(data) < size else '',
                                                       ', lacks %d: %s' % (len(lack), ''.join(lack[:20])) if lack else '')
                     licences.append('%s: %s\n  %s\n  the font says: %s\n' % (name, family, why, (names.get(0, '') or '').strip()[:200]))
-            notes.append('%-14s %4d strings (%3d of RIPPS2\'s %d), %s' % (lang, n, n_mine, n_tmpl, font_note))
+            notes.append('%-14s %4d strings (%3d of RIPPS2\'s %d%s), %s' % (
+                lang, n, n_mine, n_tmpl, ', gaps from %s' % STRINGS_FROM[lang] if lang in STRINGS_FROM else '', font_note))
         z.writestr('LNG/README.txt', README_PACK.encode('utf-8'))
         if licences:
             z.writestr('LNG/FONTS.txt', ('The fonts in this folder come from Open PS2 Loader\'s language pack\n'

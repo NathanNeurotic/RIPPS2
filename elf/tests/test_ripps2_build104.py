@@ -183,6 +183,20 @@ for f in sorted(lang_dir.glob('*.yml')):
         if tr and not ripps2lang.same_conversions(en, tr):
             fail.append('%s: %% conversions differ for "%s"' % (f.name, en[:50]))
 
+# 7. a language that fills its gaps from another (Ryukyuan from Japanese) gets that one's RIPPS2 strings in its pack
+for lang, via in ripps2lang.STRINGS_FROM.items():
+    if not (lang_dir / (via + '.yml')).exists():
+        fail.append('STRINGS_FROM: %s fills from %s, which has no elf/lang file' % (lang, via))
+        continue
+    with tempfile.TemporaryDirectory() as t:
+        (Path(t) / 'lng_src').mkdir()
+        empty = {'gui_strings': [{'label': 'SETTINGS', 'string': 'Settings'}]}
+        text, _, (_, n_mine, n_tmpl) = ripps2lang.build_language(t, lang, empty, ripps2lang.template_load(), [])
+        via_mine, _ = ripps2lang.ripps2_translations(via)
+        want = sum(1 for en, tr in via_mine.items() if tr and en in set(ripps2lang.template_load()))
+        if n_mine != want:
+            fail.append('%s: %d of RIPPS2\'s strings from %s, expected %d' % (lang, n_mine, via, want))
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
