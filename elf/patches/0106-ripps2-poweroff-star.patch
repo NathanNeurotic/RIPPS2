@@ -1,0 +1,449 @@
+diff --git a/ee_core/src/igrmenu.c b/ee_core/src/igrmenu.c
+index 1018b9f..d319b56 100644
+--- a/ee_core/src/igrmenu.c
++++ b/ee_core/src/igrmenu.c
+@@ -11,6 +11,10 @@
+   loader or the browser, as before). No animation: the panel is drawn when it opens and when the
+   choice moves, and nothing in between.
+ 
++  Build 106: POWER OFF, the last choice, turns the console off from the game (the user's request), confirmed as
++  EXIT GAME is, on a second press. A disc game keeps the ROM's power button instead (its CDVDMAN has no OPL
++  shutdown call), and the item says so.
++
+   Build 94: when the launch brought a hunt list (RA/<serial>.ach, packed in module storage), the
+   confirm button on ACHIEVEMENTS opens LEFT TO HUNT: one locked achievement at a time, its title, its
+   points and how it is earned, Up / Down (or confirm) for the next, back to return.
+@@ -37,17 +41,18 @@
+ #endif
+ #include "igrmenu.h"
+ 
+-// ---- the panel, in its own units (one font pixel at scale 1): 160 x 106, or 320 x 212 at scale 2
++// ---- the panel, in its own units (one font pixel at scale 1): 160 x 116, or 320 x 232 at scale 2
+ #define PW         160
+-#define PH         106
++#define PH         116
+ #define ROW_TITLE  4
+ #define ROW_SEP1   14
+ #define ROW_ITEM0  18
+ #define ITEM_STEP  10
+-#define ROW_SEP2   49
+-#define ROW_INFO0  53
++#define ROW_SEP2   59
++#define ROW_INFO0  63
+ #define INFO_STEP  10
+-#define ROW_HINT   95
++#define ROW_HINT   105
++#define IGRM_ITEMS 4 // RESUME, ACHIEVEMENTS, EXIT GAME, POWER OFF (build 106)
+ #define TEXT_X     8
+ #define ITEM_X     20
+ #define TEXT_CHARS 24 // (PW - 2 * TEXT_X) / 6
+@@ -157,6 +162,7 @@ typedef struct
+     int unlocks;  // unlocks the PC reported this session
+     const u8 *hunt; // build 94: LEFT TO HUNT, raHuntBlob's entries (NULL: none)
+     int huntCount;
++    int canPowerOff; // build 106: not a disc game (the ROM's CDVDMAN keeps the power button)
+ } igrm_info_t;
+ 
+ #define IGRM_LINES 14
+@@ -323,7 +329,7 @@ static void igrmComposeHunt(const igrm_info_t *in, int at)
+     igrmText(ROW_HINT, TEXT_X, C_DIM, s);
+ }
+ 
+-static const char *const igrmItem[3] = {"RESUME", "ACHIEVEMENTS", "EXIT GAME"};
++static const char *const igrmItem[IGRM_ITEMS] = {"RESUME", "ACHIEVEMENTS", "EXIT GAME", "POWER OFF"};
+ 
+ static void igrmCompose(const igrm_info_t *in, int sel, int armed)
+ {
+@@ -336,7 +342,7 @@ static void igrmCompose(const igrm_info_t *in, int sel, int armed)
+     igrmSep2 = ROW_SEP2;
+     igrmText(ROW_TITLE, TEXT_X, C_TITLE, "RIPPS2");
+     igrmText(ROW_TITLE, PW - TEXT_X - (igrmLen(id) * 6 - 1), C_DIM, id);
+-    for (i = 0; i < 3; i++) {
++    for (i = 0; i < IGRM_ITEMS; i++) {
+         if (i == sel)
+             igrmText(ROW_ITEM0 + i * ITEM_STEP, TEXT_X, C_SEL, "\x03");
+         igrmText(ROW_ITEM0 + i * ITEM_STEP, ITEM_X, i == sel ? C_SEL : C_ITEM, igrmItem[i]);
+@@ -384,6 +390,20 @@ static void igrmCompose(const igrm_info_t *in, int sel, int armed)
+             } else
+                 igrmText(y + 3 * INFO_STEP, TEXT_X, C_DIM, in->tracking ? "TRACKING ON" : "SET IN ACHIEVEMENTS");
+             break;
++        case 3: // POWER OFF (build 106)
++            if (!in->canPowerOff) {
++                igrmText(y, TEXT_X, C_TEXT, "A DISC GAME TURNS OFF");
++                igrmText(y + INFO_STEP, TEXT_X, C_TEXT, "WITH THE POWER BUTTON");
++                break;
++            }
++            if (armed) {
++                igrmCat(igrmCat(igrmCat(s, "PRESS "), ok), " AGAIN");
++                igrmText(y, TEXT_X, C_WARN, s);
++                igrmText(y + INFO_STEP, TEXT_X, C_WARN, "TO TURN THE PS2 OFF");
++            } else
++                igrmText(y, TEXT_X, C_TEXT, "TURN THE PS2 OFF HERE");
++            igrmText(y + 3 * INFO_STEP, TEXT_X, C_WARN, "UNSAVED PROGRESS IS LOST");
++            break;
+         default: // EXIT GAME
+             if (armed) {
+                 igrmCat(igrmCat(igrmCat(s, "PRESS "), ok), " AGAIN TO LEAVE");
+@@ -484,8 +504,8 @@ int igrmTestRender(const igrm_info_t *in, int sel, int armed, int sx, int sy, u8
+     igrmSx = sx;
+     igrmSy = sy;
+     igrmBpp = 3;
+-    if (sel >= 3) // build 94: LEFT TO HUNT's entry sel - 3
+-        igrmComposeHunt(in, sel - 3);
++    if (sel >= IGRM_ITEMS) // build 94: LEFT TO HUNT's entry sel - IGRM_ITEMS (build 106: 4 items)
++        igrmComposeHunt(in, sel - IGRM_ITEMS);
+     else
+         igrmCompose(in, sel, armed);
+     for (y = 0; y < PH * sy; y++)
+@@ -691,6 +711,7 @@ int IGR_MenuRun(u16 (*buttons)(void))
+     info.confirmCircle = config->IgrConfirmCircle;
+     info.gameId = gameId;
+     info.exitPath = config->ExitPath;
++    info.canPowerOff = config->GameMode != DISC_MODE; // build 106
+ #ifdef RETROACHIEVEMENTS
+     info.raBuilt = 1;
+     info.raKnown = config->RaKnown;
+@@ -732,19 +753,19 @@ int IGR_MenuRun(u16 (*buttons)(void))
+             } else if (pressed & PAD_START)
+                 break;
+         } else if (pressed & (PAD_UP | PAD_DOWN)) {
+-            sel = (sel + ((pressed & PAD_UP) ? 2 : 1)) % 3;
++            sel = (sel + ((pressed & PAD_UP) ? IGRM_ITEMS - 1 : 1)) % IGRM_ITEMS;
+             armed = 0;
+             dirty = 1;
+         } else if (pressed & ok) {
+             if (sel == 0)
+                 break;
+-            if (sel == 2) { // EXIT GAME takes a second press: progress is lost
++            if (sel == 2 || (sel == 3 && info.canPowerOff)) { // EXIT GAME and POWER OFF take a second press: progress is lost
+                 if (armed) {
+-                    result = IGR_MENU_EXIT;
++                    result = sel == 2 ? IGR_MENU_EXIT : IGR_MENU_POWEROFF;
+                     break;
+                 }
+                 armed = dirty = 1;
+-            } else if (info.huntCount > 0) { // ACHIEVEMENTS: what is left to hunt (build 94)
++            } else if (sel == 1 && info.huntCount > 0) { // ACHIEVEMENTS: what is left to hunt (build 94)
+                 hunt = 0;
+                 dirty = 1;
+             }
+diff --git a/include/dialogs.h b/include/dialogs.h
+index 1b25ee1..d78dc9f 100644
+--- a/include/dialogs.h
++++ b/include/dialogs.h
+@@ -77,6 +77,7 @@ enum UI_ITEMS {
+     CFG_APPMODE,
+     CFG_MMCEMODE,
+     CFG_FAVMODE,
++    CFG_RIPPS2_STARSIDE, // RIPPS2 build 106: Starred Games Star
+     CFG_MMCEPREFIX,
+     CFG_MMCESLOT,
+     CFG_MMCEIGRSLOT,
+diff --git a/include/themes.h b/include/themes.h
+index ef23a1a..f28ef61 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -84,8 +84,18 @@ typedef struct
+     // RIPPS2 build 70: <name>_hidden=1 keeps the list for navigation and the art warming but draws no
+     // rows (RIPFLOW: covers only, no title under a highlight)
+     int hidden;
++    // RIPPS2 build 106: the star and the row icons, keys on the list (see drawItemsList)
++    int starSide;                 // <name>_star: left (THM_STAR_LEFT, the default), right, hidden
++    image_texture_t *starImage;   // <name>_star_image: the star's picture (else the theme's fav_mark)
++    int highlight;                // <name>_highlight: bar (THM_HL_BAR, the default), line, none
++    image_texture_t *decoAll;     // <name>_decorator_all: one row icon for every game
++    image_texture_t *decoKind[3]; // <name>_decorator_ps2 / _ps1 / _app: a row icon for each kind of row
+ } items_list_t;
+ 
++enum { THM_STAR_LEFT = 0, THM_STAR_RIGHT, THM_STAR_HIDDEN };
++enum { THM_HL_BAR = 0, THM_HL_LINE, THM_HL_NONE };
++extern int gRipps2StarSide; // RIPPS2 build 106: Settings > Game Sources > Starred Games Star: 0 Theme, 1 Left, 2 Right, 3 Hidden
++
+ // Forward declaration: an element carries a back-pointer to the family it was parsed into (see
+ // theme_element_t::family), and theme_elems_t itself is defined below, after the element.
+ struct theme_elems;
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index a92299f..c32e426 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1521,6 +1521,8 @@ gui_strings:
+   string: "How the button hints and glyphs look. Every row starts on Theme, what the theme chose; any other choice is yours and wins over every theme."
+ - label: RIPPS2_HINT_LAYOUT
+   string: Hint Layout
++- label: HINT_RIPPS2_STARSIDE
++  string: "Where a starred game's star sits in the games list. Left: its own column at the start of every row. Right: after the title. Hidden: no star. Theme: what the theme says. A theme's row icon moves to the other end, so the two never overlap."
+ - label: HINT_RIPPS2_HINT_LAYOUT
+   string: "Row: the hints in one line. Column: one hint a line, a list down the side, starting where the theme puts its hints."
+ - label: RIPPS2_HINT_LABELS
+diff --git a/src/dialogs.c b/src/dialogs.c
+index 119090d..4b0424f 100644
+--- a/src/dialogs.c
++++ b/src/dialogs.c
+@@ -513,6 +513,11 @@ struct UIItem diaDeviceConfig[] = {
+     {UI_ENUM, CFG_FAVMODE, 1, 1, _STR_HINT_FAVMODE, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"Starred Games Star", -1}}}, // build 106
++    {UI_SPACER},
++    {UI_ENUM, CFG_RIPPS2_STARSIDE, 1, 1, _STR_HINT_RIPPS2_STARSIDE, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+     {UI_BREAK},
+diff --git a/src/gui.c b/src/gui.c
+index e10380f..cf2a693 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -927,6 +927,9 @@ static void guiSourcesNetRowsRead(struct UIItem *ui)
+ // Keep its APA selector semantics identical to the shell: merely opening/saving another field
+ // must not normalize a legacy custom hdd_partition, while an explicit selector interaction may.
+ 
++// RIPPS2 build 106: Starred Games Star (gRipps2StarSide): Theme follows the list's <name>_star key
++static const char *guiStarSides[] = {N_("Theme"), N_("Left"), N_("Right"), N_("Hidden"), NULL};
++
+ static int guiDeviceConfigUpdater(int modified)
+ {
+     if (modified)
+@@ -946,6 +949,8 @@ void guiShowDeviceConfig(void)
+     diaSetEnum(diaDeviceConfig, CFG_HDDMODE, deviceModes);
+     diaSetEnum(diaDeviceConfig, CFG_APPMODE, deviceModes);
+     diaSetEnum(diaDeviceConfig, CFG_FAVMODE, deviceModes);
++    diaSetEnum(diaDeviceConfig, CFG_RIPPS2_STARSIDE, guiStarSides); // build 106
++    diaSetInt(diaDeviceConfig, CFG_RIPPS2_STARSIDE, gRipps2StarSide);
+ 
+     int deviceModeIndex = gRipps2StartLast ? RIPPS2_DEFDEVICE_LAST : guiIoModeToDeviceType(gDefaultDevice); // build 96
+     diaSetInt(diaDeviceConfig, CFG_DEFDEVICE, deviceModeIndex);
+@@ -991,6 +996,7 @@ reshow_device:
+         diaGetInt(diaDeviceConfig, CFG_APPMODE, &gAPPStartMode);
+         diaGetInt(diaDeviceConfig, CFG_MMCEMODE, &gMMCEStartMode);
+         diaGetInt(diaDeviceConfig, CFG_FAVMODE, &gFAVStartMode);
++        diaGetInt(diaDeviceConfig, CFG_RIPPS2_STARSIDE, &gRipps2StarSide); // build 106
+ 
+         diaGetInt(diaDeviceConfig, CFG_ENABLEUSB, &gEnableUSB);
+         diaGetInt(diaDeviceConfig, CFG_ENABLEILK, &gEnableILK);
+@@ -3332,6 +3338,8 @@ static int guiSettingsShowSources(void)
+     diaSetInt(ui, CFG_HDDMODE, gHDDStartMode);
+     diaSetInt(ui, CFG_APPMODE, gAPPStartMode);
+     diaSetInt(ui, CFG_FAVMODE, gFAVStartMode);
++    diaSetEnum(ui, CFG_RIPPS2_STARSIDE, guiStarSides); // build 106
++    diaSetInt(ui, CFG_RIPPS2_STARSIDE, gRipps2StarSide);
+     diaSetInt(ui, CFG_ENABLEUSB, gEnableUSB);
+     diaSetInt(ui, CFG_ENABLEILK, gEnableILK);
+     diaSetInt(ui, CFG_ENABLEMX4SIO, gEnableMX4SIO);
+@@ -3371,6 +3379,7 @@ reshow_sources:
+         diaGetInt(ui, CFG_APPMODE, &gAPPStartMode);
+         diaGetInt(ui, CFG_MMCEMODE, &gMMCEStartMode);
+         diaGetInt(ui, CFG_FAVMODE, &gFAVStartMode);
++        diaGetInt(ui, CFG_RIPPS2_STARSIDE, &gRipps2StarSide); // build 106
+         diaGetInt(ui, CFG_ENABLEUSB, &gEnableUSB);
+         diaGetInt(ui, CFG_ENABLEILK, &gEnableILK);
+         diaGetInt(ui, CFG_ENABLEMX4SIO, &gEnableMX4SIO);
+diff --git a/src/opl.c b/src/opl.c
+index f15c4fd..6d521a1 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -3954,6 +3954,9 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_BGM_VOLUME, &gBGMVolume);
+             configGetStrCopy(configOPL, CONFIG_OPL_DEFAULT_BGM_PATH, gDefaultBGMPath, sizeof(gDefaultBGMPath));
+             configGetStrCopy(configOPL, "ripps2_music", gRipps2Music, sizeof(gRipps2Music)); // RIPPS2
++            configGetInt(configOPL, "ripps2_star_side", &gRipps2StarSide); // build 106
++            if (gRipps2StarSide < 0 || gRipps2StarSide > 3)
++                gRipps2StarSide = 0;
+         }
+ 
+         // BOOT-DEVICE RECONCILE. The device OPL is RUNNING FROM always has its transport enabled.
+@@ -4445,6 +4448,7 @@ static void _saveConfig()
+         configSetInt(configOPL, CONFIG_OPL_BGM_VOLUME, gBGMVolume);
+         configSetStr(configOPL, CONFIG_OPL_DEFAULT_BGM_PATH, gDefaultBGMPath);
+         configSetStr(configOPL, "ripps2_music", gRipps2Music); // RIPPS2
++        configSetInt(configOPL, "ripps2_star_side", gRipps2StarSide); // build 106
+         configSetInt(configOPL, CONFIG_OPL_XSENSITIVITY, gXSensitivity);
+         configSetInt(configOPL, CONFIG_OPL_YSENSITIVITY, gYSensitivity);
+ 
+diff --git a/src/themes.c b/src/themes.c
+index 513194e..8dc296a 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -3746,6 +3746,27 @@ static void drawBDMIndex(struct menu_list *menu, struct submenu_list *item, conf
+         rmDrawPixmap(indexTex, elem->posX, elem->posY, elem->aligned, elem->width, elem->height, elem->scaled, gDefaultCol, 0);
+ }
+ 
++int gRipps2StarSide = 0; // RIPPS2 build 106: 0 follows the list's <name>_star key
++
++// RIPPS2 build 106: which of a list's per-kind row icons a row takes: 0 a PS2 game, 1 a PS1 one, 2 an app
++static int thmRowKind(item_list_t *list, submenu_list_t *row)
++{
++    int view;
++    if (list->mode == APP_MODE)
++        return 2;
++    view = libListRowView(list, row->item.id);
++    return view == LIB_VIEW_PS1 ? 1 : view == LIB_VIEW_ELF ? 2 : 0;
++}
++
++/*
++  RIPPS2 build 106: the star and the row icons (the user's design). A starred game's star sits LEFT by default, in
++  its own column at the start of every row so the titles stay lined up; RIGHT puts it after the title (as before);
++  HIDDEN draws none. Settings > Game Sources > Starred Games Star picks, else the list's <name>_star key. With the
++  star on the left, the row icon (the theme's decorator) moves to the row's right end, so the two never overlap.
++  The row icon is the game's own (decorator=ICO: ART/<ID>_ICO), else the list's icon for its kind
++  (<name>_decorator_ps2 / _ps1 / _app), else one for every row (<name>_decorator_all), else the decorator's default.
++  <name>_highlight: bar (the PS2-blue bar, as before), line (a line under the row) or none.
++*/
+ static void drawItemsList(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
+ {
+     // devices= filter: the nav pointer (gTheme->itemsList) is resolved with the SAME matching rules
+@@ -3852,12 +3873,31 @@ static void drawItemsList(struct menu_list *menu, struct submenu_list *item, con
+         // centreline, so any theme's face sits in the middle of the highlight bar with nothing to adjust
+         posY = rowTop + (rowStep - MENU_ITEM_HEIGHT) / 2 + 3;
+         int textDy = rowStep / 2 - fntCenterOffset(elem->font, elem->aligned) - (posY - rowTop);
++        // build 106: the star's side (the user's, else the list's), and where the row icon goes
++        int starSide = gRipps2StarSide > 0 ? gRipps2StarSide - 1 : itemsList->starSide;
++        int gameIcon = itemsList->decoratorImage != NULL && !isHiddenArtworkCache(itemsList->decoratorImage->cache);
++        int haveDeco = gameIcon || itemsList->decoAll != NULL || itemsList->decoKind[0] != NULL || itemsList->decoKind[1] != NULL ||
++                       itemsList->decoKind[2] != NULL;
++        int decoRight = haveDeco && starSide == THM_STAR_LEFT;
++        int starCol = starSide == THM_STAR_LEFT ? MENU_ITEM_HEIGHT + 3 : 0;
++        int textX = elem->posX + starCol + (haveDeco && !decoRight ? DECORATOR_SIZE : 0);
++        // where thmComputeTextRooms ends the titles (it measured from after a left decorator), pulled in for a right one
++        int roomEnd = elem->posX + (itemsList->decoratorImage != NULL ? DECORATOR_SIZE : 0) + elem->textRoom;
++        if (decoRight && roomEnd > elem->posX + elem->width - DECORATOR_SIZE - 6)
++            roomEnd = elem->posX + elem->width - DECORATOR_SIZE - 6;
++        int textRoom = elem->textRoom > 0 ? roomEnd - textX : 0;
++        GSTEXTURE *starTex = itemsList->starImage != NULL ? &itemsList->starImage->source : thmGetTexture(FAV_MARK);
++        if (elem->textRoom > 0 && textRoom < 40)
++            textRoom = 40;
+         while (ps && !itemsList->hidden && (others++ < itemsList->displayedItems)) {
+             if (ps == item) {
+                 color = gTheme->selTextColor;
+-                // RIPPS2: the highlighted row fills its whole row: a PS2-blue bar with a light leading edge
+-                rmDrawRect(posX - 12, rowTop + 1, elem->width + 12, rowStep - 2, GS_SETREG_RGBAQ(0x1E, 0x3C, 0x9C, 0x5C, 0x00));
+-                rmDrawRect(posX - 12, rowTop + 1, 3, rowStep - 2, GS_SETREG_RGBAQ(0xB4, 0xC8, 0xFF, 0x80, 0x00));
++                if (itemsList->highlight == THM_HL_BAR) {
++                    // RIPPS2: the highlighted row fills its whole row: a PS2-blue bar with a light leading edge
++                    rmDrawRect(posX - 12, rowTop + 1, elem->width + 12, rowStep - 2, GS_SETREG_RGBAQ(0x1E, 0x3C, 0x9C, 0x5C, 0x00));
++                    rmDrawRect(posX - 12, rowTop + 1, 3, rowStep - 2, GS_SETREG_RGBAQ(0xB4, 0xC8, 0xFF, 0x80, 0x00));
++                } else if (itemsList->highlight == THM_HL_LINE) // build 106: a line under the row
++                    rmDrawRect(posX - 12, rowTop + rowStep - 3, elem->width + 12, 2, GS_SETREG_RGBAQ(0xB4, 0xC8, 0xFF, 0x80, 0x00));
+             } else
+                 color = elem->color;
+ 
+@@ -3881,39 +3921,35 @@ static void drawItemsList(struct menu_list *menu, struct submenu_list *item, con
+                 }
+             }
+ 
+-            if (itemsList->decoratorImage &&
+-                !isHiddenArtworkCache(itemsList->decoratorImage->cache)) {
++            if (haveDeco && !ps->item.isFolder) {
+                 GSTEXTURE *itemIconTex = NULL;
++                image_texture_t *fallback = itemsList->decoKind[thmRowKind(list, ps)];
+ 
+-                if (!ps->item.isFolder) {
++                if (gameIcon) {
+                     // Admission happened center-out above. Farther visible rows draw only what is
+                     // already resident, so a 10-20-row viewport cannot flood USB with loose PNG opens.
+                     itemIconTex = getGameImageCached(itemsList->decoratorImage->cache, &ps->item);
+                 }
+-
++                if (fallback == NULL)
++                    fallback = itemsList->decoAll;
++                if (fallback == NULL && itemsList->decoratorImage != NULL)
++                    fallback = itemsList->decoratorImage->defaultTexture;
++                if ((itemIconTex == NULL || itemIconTex->Mem == NULL) && fallback != NULL)
++                    itemIconTex = &fallback->source;
+                 if (itemIconTex && itemIconTex->Mem)
+-                    rmDrawPixmap(itemIconTex, posX, posY, elem->aligned, DECORATOR_SIZE, DECORATOR_SIZE, elem->scaled, gDefaultCol, 0);
+-                else if (itemsList->decoratorImage->defaultTexture)
+-                    rmDrawPixmap(&itemsList->decoratorImage->defaultTexture->source, posX, posY, elem->aligned, DECORATOR_SIZE, DECORATOR_SIZE, elem->scaled, gDefaultCol, 0);
+-
+-                if (elem->textRoom > 0)
+-                    textEndX = fntRenderStringFit(elem->font, elem->posX + DECORATOR_SIZE, posY + textDy, elem->aligned, elem->textRoom, dispText, color, ps == item);
+-                else
+-                    textEndX = fntRenderString(elem->font, elem->posX + DECORATOR_SIZE, posY + textDy, elem->aligned, elem->width, elem->height, dispText, color);
+-            } else {
+-                // Decorator-less Lists use the same center-out warming above; their separate COV
+-                // element draws the selected cover. No additional per-visible-row reads start here.
+-                if (elem->textRoom > 0)
+-                    textEndX = fntRenderStringFit(elem->font, elem->posX, posY + textDy, elem->aligned, elem->textRoom, dispText, color, ps == item);
+-                else
+-                    textEndX = fntRenderString(elem->font, elem->posX, posY + textDy, elem->aligned, elem->width, elem->height, dispText, color);
++                    rmDrawPixmap(itemIconTex, decoRight ? posX + elem->width - DECORATOR_SIZE : posX + starCol, posY, elem->aligned, DECORATOR_SIZE,
++                                 DECORATOR_SIZE, elem->scaled, gDefaultCol, 0);
+             }
++            // Decorator-less Lists use the same center-out warming above; their separate COV
++            // element draws the selected cover. No additional per-visible-row reads start here.
++            if (elem->textRoom > 0)
++                textEndX = fntRenderStringFit(elem->font, textX, posY + textDy, elem->aligned, textRoom, dispText, color, ps == item);
++            else
++                textEndX = fntRenderString(elem->font, textX, posY + textDy, elem->aligned, elem->width, elem->height, dispText, color);
+ 
+-            if (ps->item.favourited) { // RIPPS2: the star right after the title, on the title's row
+-                GSTEXTURE *favTex = thmGetTexture(FAV_MARK);
+-                if (favTex != NULL && favTex->Mem != NULL)
+-                    rmDrawPixmap(favTex, textEndX + 4, posY, elem->aligned, MENU_ITEM_HEIGHT, MENU_ITEM_HEIGHT, elem->scaled, gDefaultCol, 0);
+-            }
++            if (ps->item.favourited && starSide != THM_STAR_HIDDEN && starTex != NULL && starTex->Mem != NULL) // RIPPS2: the star
++                rmDrawPixmap(starTex, starSide == THM_STAR_LEFT ? posX : textEndX + 4, posY, elem->aligned, MENU_ITEM_HEIGHT, MENU_ITEM_HEIGHT,
++                             elem->scaled, gDefaultCol, 0);
+ 
+             posY += rowStep;
+             rowTop += rowStep;
+@@ -3922,9 +3958,34 @@ static void drawItemsList(struct menu_list *menu, struct submenu_list *item, con
+     }
+ }
+ 
++// RIPPS2 build 106: a picture a list key names (<name>_<key>=file.png in the theme's folder); NULL when none
++static image_texture_t *thmListImage(const char *themePath, config_set_t *themeConfig, const char *name, const char *key)
++{
++    char prop[64];
++    const char *file = NULL;
++    snprintf(prop, sizeof(prop), "%s_%s", name, key);
++    if (!configGetStr(themeConfig, prop, &file) || file == NULL || file[0] == '\0')
++        return NULL;
++    return initImageTexture(themePath, themeConfig, name, file, 0);
++}
++
++static void endItemsList(theme_element_t *elem)
++{
++    items_list_t *list = (items_list_t *)elem->extended;
++    int i;
++    if (list != NULL) {
++        freeImageTexture(list->starImage);
++        freeImageTexture(list->decoAll);
++        for (i = 0; i < 3; i++)
++            freeImageTexture(list->decoKind[i]);
++    }
++    endBasic(elem);
++}
++
+ static void initItemsList(const char *themePath, config_set_t *themeConfig, theme_t *theme, theme_element_t *elem, const char *name, const char *decorator)
+ {
+     char elemProp[64];
++    const char *value = NULL;
+ 
+     items_list_t *itemsList = (items_list_t *)malloc(sizeof(items_list_t));
+ 
+@@ -3948,8 +4009,22 @@ static void initItemsList(const char *themePath, config_set_t *themeConfig, them
+     itemsList->hidden = 0;
+     snprintf(elemProp, sizeof(elemProp), "%s_hidden", name);
+     configGetInt(themeConfig, elemProp, &itemsList->hidden);
++    // build 106: the star, the highlight and the row icons
++    itemsList->starSide = THM_STAR_LEFT;
++    snprintf(elemProp, sizeof(elemProp), "%s_star", name);
++    if (configGetStr(themeConfig, elemProp, &value) && value != NULL)
++        itemsList->starSide = !strcasecmp(value, "right") ? THM_STAR_RIGHT : !strcasecmp(value, "hidden") ? THM_STAR_HIDDEN : THM_STAR_LEFT;
++    itemsList->highlight = THM_HL_BAR;
++    snprintf(elemProp, sizeof(elemProp), "%s_highlight", name);
++    if (configGetStr(themeConfig, elemProp, &value) && value != NULL)
++        itemsList->highlight = !strcasecmp(value, "line") ? THM_HL_LINE : !strcasecmp(value, "none") ? THM_HL_NONE : THM_HL_BAR;
++    itemsList->starImage = thmListImage(themePath, themeConfig, name, "star_image");
++    itemsList->decoAll = thmListImage(themePath, themeConfig, name, "decorator_all");
++    itemsList->decoKind[0] = thmListImage(themePath, themeConfig, name, "decorator_ps2");
++    itemsList->decoKind[1] = thmListImage(themePath, themeConfig, name, "decorator_ps1");
++    itemsList->decoKind[2] = thmListImage(themePath, themeConfig, name, "decorator_app");
+     elem->extended = itemsList;
+-    // elem->endElem = &endBasic; does the job
++    elem->endElem = &endItemsList;
+ 
+     elem->drawElem = &drawItemsList;
+ }

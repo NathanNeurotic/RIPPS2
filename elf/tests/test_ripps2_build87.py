@@ -69,15 +69,15 @@ if cc and not fail:
         (td / 't.c').write_text(r'''
 #include <stdio.h>
 #include "igrmenu.c"
-static u8 buf[320 * 212 * 3];
-static int text(void) { int i, n = 0; for (i = 0; i < 320 * 212 * 3; i += 3) n += buf[i] == 255 && buf[i + 1] == 255; return n; }
+static u8 buf[320 * 232 * 3];
+static int text(void) { int i, n = 0; for (i = 0; i < 320 * 232 * 3; i += 3) n += buf[i] == 255 && buf[i + 1] == 255; return n; }
 int main(void)
 {
     igrm_info_t a = {0, "SLUS_209.46", "mc0:/BOOT/RIPPS2.ELF", 1, 1, 40, 12, 1, 2};
     int sel, h;
-    for (sel = 0; sel < 3; sel++) {
+    for (sel = 0; sel < 4; sel++) /* build 106: POWER OFF is the fourth */ {
         h = igrmTestRender(&a, sel, 0, 2, 2, buf);
-        if (h != 212 || text() == 0) return 10 + sel;
+        if (h != 232 || text() == 0) return 10 + sel;
     }
     igrmTestRender(&a, 1, 0, 2, 2, buf);
     if (igrmLine[igrmLines - 1].glyph[0] != G_CIRCLE) return 20;

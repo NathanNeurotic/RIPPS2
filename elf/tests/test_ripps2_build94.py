@@ -141,7 +141,7 @@ int main(void)
 #include <string.h>
 #include "igrmenu.c"
 #include "include/rahunt.h"
-static u8 buf[320 * 212 * 3];
+static u8 buf[320 * 232 * 3];
 static u8 blob[RA_HUNT_BLOB];
 static ra_hunt_t list[3] = {
     {0, 10, "First Crash", "Cause a takedown in any race"},
@@ -156,7 +156,7 @@ static void save(const char *dir, const char *name)
     if (!dir[0]) return;
     snprintf(path, sizeof(path), "%s/%s.ppm", dir, name);
     if ((f = fopen(path, "wb")) == NULL) return;
-    fprintf(f, "P6 320 212 255\n");
+    fprintf(f, "P6 320 232 255\n");
     fwrite(buf, 1, sizeof(buf), f);
     fclose(f);
 }
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
     if (count != 3 || igrmLine[igrmLines - 1].glyph[0] != G_CROSS) return 1; /* ok SEE THEM */
     for (k = 0; k < 3; k++) {
         char name[16];
-        if (igrmTestRender(&a, 3 + k, 0, 2, 2, buf) != 212) return 2;
+        if (igrmTestRender(&a, 4 + k, 0, 2, 2, buf) != 232) return 2;
         sprintf(name, "hunt%d", k);
         save(dir, name);
         if (igrmLines > IGRM_LINES || longest() > TEXT_CHARS) return 10 + k;
@@ -180,7 +180,7 @@ int main(int argc, char **argv)
         if (igrmLine[igrmLines - 1].y != ROW_HINT || igrmLine[igrmLines - 1].glyph[0] == G_CROSS) return 30 + k;
     }
     /* the long one is cut with "..." on its last row */
-    igrmTestRender(&a, 4, 0, 2, 2, buf);
+    igrmTestRender(&a, 5, 0, 2, 2, buf); /* hunt entry 1 (build 106: after 4 items) */
     {
         igrm_line_t *l = &igrmLine[igrmLines - 2];
         if (l->glyph[l->len - 1] != '.' - 32) return 40;
