@@ -93,7 +93,7 @@ index 0000000..dbd66bb
 +
 +#endif
 diff --git a/src/dia.c b/src/dia.c
-index f0cd46c..28c3da5 100644
+index f0cd46c..9dd5d24 100644
 --- a/src/dia.c
 +++ b/src/dia.c
 @@ -15,6 +15,7 @@
@@ -124,7 +124,70 @@ index f0cd46c..28c3da5 100644
  }
  
  /// returns true if the item is controllable (e.g. a value can be changed on it)
-@@ -1172,7 +1173,9 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+@@ -756,6 +757,23 @@ static float diaTipAlpha(const struct UIItem *item)
+     return diaTipEase(t / DIA_TIP_IN_S) * (1.0f - diaTipEase((t - DIA_TIP_HOLD_S) / DIA_TIP_OUT_S));
+ }
+ 
++// RIPPS2 build 104: Chinese, Japanese and Korean put no spaces between words, so a "word" here can be a whole
++// clause. One with such letters fills the line it starts on and breaks between characters; a Latin word, a path or a
++// URL still moves to the next line whole. UTF-8 lead bytes E3..ED are U+3000..U+DFFF (CJK punctuation, kana,
++// ideographs, Hangul); EF BC..BF is U+FF00..U+FFFF (fullwidth forms). A continuation byte is never one of these.
++static int diaHintHasCjk(const char *s, int len)
++{
++    const unsigned char *q = (const unsigned char *)s, *end = q + len;
++
++    for (; q < end; q++) {
++        if (*q >= 0xE3 && *q <= 0xED)
++            return 1;
++        if (*q == 0xEF && q + 1 < end && q[1] >= 0xBC)
++            return 1;
++    }
++    return 0;
++}
++
+ static int diaHintUtf8CharLen(const char *p)
+ {
+     unsigned char c;
+@@ -869,6 +887,7 @@ static void diaDrawHint(const struct UIItem *item)
+         const char *wordStart;
+         int wordLen;
+         int wordW;
++        int cjk;
+ 
+         // Explicit line breaks in translated strings remain line breaks.
+         if (*p == '\r' || *p == '\n') {
+@@ -899,9 +918,10 @@ static void diaDrawHint(const struct UIItem *item)
+         while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n')
+             p++;
+         wordLen = (int)(p - wordStart);
++        cjk = diaHintHasCjk(wordStart, wordLen);
+ 
+         // Normal words use the font's complete-string measurement so kerning/spacing stays exact.
+-        if (wordLen < 256) {
++        if (wordLen < 256 && !cjk) {
+             char word[256];
+ 
+             memcpy(word, wordStart, wordLen);
+@@ -940,8 +960,16 @@ static void diaDrawHint(const struct UIItem *item)
+ 
+         // An over-wide token (URL, path, hash, malformed translation, etc.) has no whitespace where
+         // ordinary word wrapping can break it. Split only that token, and only at UTF-8 character
+-        // boundaries, so it cannot escape the box or corrupt localized text.
+-        if (lineW > 0) {
++        // boundaries, so it cannot escape the box or corrupt localized text. CJK text goes on from where the line
++        // is, after the space it had, and breaks between its characters below.
++        if (lineW > 0 && cjk) {
++            if (wlen >= wrappedSize - 1) {
++                truncated = 1;
++                break;
++            }
++            wrapped[wlen++] = ' ';
++            lineW += spaceW;
++        } else if (lineW > 0) {
+             if (lines >= maxLines || wlen >= wrappedSize - 1) {
+                 truncated = 1;
+                 break;
+@@ -1172,7 +1200,9 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
              int eidx = item->intvalue.current;
              if (eidx < 0 || eidx >= ecount)
                  eidx = 0;

@@ -159,6 +159,10 @@ if 'font = &fonts[fallbackFontID];' in fnt:
 # 4. the shared draws translate what they are handed
 if 'return _t(def);' not in rd('src/dia.c') or '_t(item->intvalue.enumvalues[eidx])' not in rd('src/dia.c'):
     fail.append('dia.c: English labels and enum values go through _t')
+dia = rd('src/dia.c')
+if 'cjk = diaHintHasCjk(wordStart, wordLen);' not in dia or 'if (wordLen < 256 && !cjk) {' not in dia \
+        or 'if (lineW > 0 && cjk) {' not in dia:
+    fail.append('dia.c: a settings hint\'s CJK run fills its line and breaks between characters (lab 10/19)')
 ui = rd('src/ripps2ui.c')
 if 'hintCase(_t(text), b, sizeof(b))' not in ui or 'ripps2Utf8Upper(text, word, sizeof(word))' not in ui:
     fail.append('ripps2ui.c: hints translate and sentence-case in UTF-8; the source toast capitalises in UTF-8')
