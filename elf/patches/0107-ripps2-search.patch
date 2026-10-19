@@ -12,7 +12,7 @@ index c32550b..27c17d3 100644
  static u64 rdDone = 0;
  static double rdBegan = 0, rdDrawnAt = 0;
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index c650dec..b92dbbc 100644
+index c650dec..39e41c1 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -2025,9 +2025,10 @@ static void fbHint(int icon, const char *text, int *x, int y); // drawn with the
@@ -29,7 +29,7 @@ index c650dec..b92dbbc 100644
  #define FB_TILE_W   172
  #define FB_TILE_H   150
  #define FB_TILE_GAP 14
-@@ -2048,61 +2049,197 @@ static void fbGridShow(int open)
+@@ -2048,61 +2049,198 @@ static void fbGridShow(int open)
      fbGridAt = clock();
  }
  
@@ -101,10 +101,11 @@ index c650dec..b92dbbc 100644
 +            depth[tail++] = 0;
 +        }
 +    while (head < tail && fbFoundCount < FB_FIND_MAX && !stopped) {
-+        char *dir = queue[head % FB_FIND_QUEUE];
++        char dir[FB_FIND_PATH]; // its own copy: the queue it came from takes the folders found in it
 +        int level = depth[head % FB_FIND_QUEUE];
 +        DIR *d;
 +        struct dirent *e;
++        memcpy(dir, queue[head % FB_FIND_QUEUE], FB_FIND_PATH);
 +        head++;
 +        if (ripps2Seconds() - drawn > 0.15) {
 +            drawn = ripps2Seconds();
@@ -271,7 +272,7 @@ index c650dec..b92dbbc 100644
  }
  
  // ---- ORBIT SETTINGS: over the orbs themselves, every change seen as it is made ----
-@@ -2237,9 +2374,9 @@ static void fbTile(int t)
+@@ -2237,9 +2375,9 @@ static void fbTile(int t)
              sfxPlay(SFX_CONFIRM);
              fbOrbitsPage();
              break;
