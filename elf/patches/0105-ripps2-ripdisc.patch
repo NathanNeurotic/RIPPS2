@@ -1,0 +1,1830 @@
+diff --git a/Makefile b/Makefile
+index b1a4631..f68d04c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -138,7 +138,7 @@ ifneq ($(GIT_TAG),latest)
+ endif
+ endif
+ 
+-FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
++FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2disc.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
+ 		dia.o ioman.o texcache.o themes.o supportbase.o bdmsupport.o netsupport.o ethsupport.o httpcatalog.o httpsupport.o udpfssupport.o hddsupport.o zso.o lz4.o launchdiag.o \
+ 		appsupport.o mmcesupport.o artindex.o vcdsupport.o cuesupport.o libview.o retrogem.o folderbrowse.o gui.o guigame.o vmc_groups.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o cheatconfig.o sound.o ps2cnf.o tar.o saveicon.o cfgtitle.o
+ 
+diff --git a/include/bdmsupport.h b/include/bdmsupport.h
+index 2cb6a65..1948878 100644
+--- a/include/bdmsupport.h
++++ b/include/bdmsupport.h
+@@ -89,6 +89,7 @@ int bdmHDDIsPresent(u32 timeoutMs);
+ int bdmGetDeviceRootByType(int bdmType, char *root, int rootLen);
+ int bdmSlotDeviceType(int slot); // RIPPS2: BDM_TYPE_* of what is mounted at mass<slot>:, -2 when nothing is
+ const char *bdmSlotDriveName(int slot);
++void bdmSlotGamesPrefix(int slot, char *out, int size); // RIPPS2 build 105: where mass<slot>:'s CD/DVD folders and ul.cfg are
+ // RIPPS2 build 100: start the ISO/ZSO at path (on this BDM drive) where it sits, as Storage starts a game; returns only if
+ // the launch did not happen
+ void bdmLaunchIsoAt(item_list_t *itemList, const char *path, const char *startup, int dvd, config_set_t *configSet); // RIPPS2 build 99: USB, HDD, iLINK, MX4SIO, UDPBD or DRIVE by its driver; NULL: none
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 3f34be2..06ed9f3 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -19,6 +19,20 @@ void ripps2CdStart(void); // START LASER on an audio CD: reads its TOC and plays
+ int ripps2CdAudioTracks(void); // the CD in the drive's sound tracks (its TOC read); 0 when none
+ void ripps2CdRender(void);
+ void ripps2CdInput(void);
++// build 105: RIPDISC reads the CD through the player's own TOC and sound reads
++int ripps2CdTracks(unsigned int *start, unsigned char *audio, int max); // tracks 1..n (start[n + 1]: the lead-out); 0 when none
++int ripps2CdReadAudio(unsigned int lsn, unsigned int n, void *buf);     // n sectors of sound, 2352 bytes each; 0 when refused
++
++// ---- RIPDISC (ripps2disc.c, build 105): the disc in the drive copied to storage or files, from LAUNCH DISC ----
++enum { RIPPS2_DISC_NONE = 0, RIPPS2_DISC_PS1, RIPPS2_DISC_PS2CD, RIPPS2_DISC_PS2DVD, RIPPS2_DISC_ESR, RIPPS2_DISC_VIDEO,
++       RIPPS2_DISC_AUDIO, RIPPS2_DISC_OTHER };
++int ripps2DiscInfo(char *id, int idSize, char *title, int titleSize); // ripps2ui.c: what the disc watcher found (RIPPS2_DISC_*)
++void ripps2DiscWaitIdle(void);  // ripps2ui.c: the watcher's read finished, so the drive is the caller's
++void ripps2DiscRipRender(void); // LAUNCH DISC: the RIPDISC panel over the page
++int ripps2DiscRipInput(void);   // ...SELECT held on it; 1 when it took the pad
++int ripps2DiscRipHere(const char *dir, char *made, int size); // Memory Files' PASTE of RIPPED media: 1 done, 2 done (name it), 0 not
++void ripps2FilesRipped(const char *what, const char *dir);    // ripps2files.c: RIPPED media on the clipboard, the browser on dir
++void ripps2WriteReadme(const char *base, int media);          // base's AUDIO/README.txt (0) or MEDIA/README.txt (1), when missing
+ void ripps2PillarMusic(int on); // ripps2bg.c: the towers settle and light up to what is playing
+ 
+ // ---- BOOT LOCK (ripps2boot.c): PS2BBL starts RIPPS2 at power on ----
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index ae0c390..e772090 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -1059,6 +1059,13 @@ const char *bdmSlotDriveName(int slot)
+     }
+ }
+ 
++void bdmSlotGamesPrefix(int slot, char *out, int size)
++{
++    char root[16];
++    snprintf(root, sizeof(root), "mass%d:/", slot);
++    bdmBuildGamePrefix(out, size, root);
++}
++
+ // RIPPS2 build 69: what is mounted at mass<slot>: (BDM_TYPE_*), or -2 when nothing is. The file
+ // browser names drives by it (USB, MX4SIO, iLink, exFAT HDD) instead of calling every one "mass".
+ int bdmSlotDeviceType(int slot)
+diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
+index f81646c..2a536f2 100644
+--- a/src/ripps2biossnd.c
++++ b/src/ripps2biossnd.c
+@@ -1166,6 +1166,7 @@ void ripps2RipBiosSoundsDialog(void)
+     dir[strlen(dir) - 1] = '\0';
+     mkdir(dir, 0777);
+     strcat(dir, "/");
++    ripps2WriteReadme(base, 0); // build 105: what the folder holds
+     guiRenderTextScreen(_t("Ripping this console's sounds"));
+     n = ripps2BiosSoundsFromImage(img, size, rbsWrite, dir);
+     free(img);
+@@ -1277,6 +1278,8 @@ void ripps2RipBiosMusicDialog(void)
+     snprintf(path, sizeof(path), "%s", dirs[pick - 1]);
+     path[strlen(path) - 1] = '\0';
+     mkdir(path, 0777);
++    path[strlen(path) - 5] = '\0'; // build 105: "<base>AUDIO" -> "<base>", for AUDIO's README.txt
++    ripps2WriteReadme(path, 0);
+     snprintf(path, sizeof(path), "%s%s", dirs[pick - 1], RBS_MUSIC_FILE);
+     wasPlaying = isBgmPlaying();
+     if (wasPlaying)
+diff --git a/src/ripps2cd.c b/src/ripps2cd.c
+index 79b05c2..5a2f8e2 100644
+--- a/src/ripps2cd.c
++++ b/src/ripps2cd.c
+@@ -222,6 +222,19 @@ int ripps2CdAudioTracks(void)
+     return n;
+ }
+ 
++// RIPPS2 build 105: the tracks for RIPDISC, read from the TOC as the player reads them
++int ripps2CdTracks(unsigned int *start, unsigned char *audio, int max)
++{
++    int t;
++    if (cdOpen || !cdReadToc() || cdCount + 2 > max)
++        return 0;
++    for (t = 1; t <= cdCount + 1; t++) {
++        start[t] = cdStart[t];
++        audio[t] = t <= cdCount ? cdAudio[t] : 0;
++    }
++    return cdCount;
++}
++
+ static int cdTrackAt(u32 lsn)
+ {
+     int t;
+@@ -270,6 +283,16 @@ static int cdReadSectors(u32 lsn, u32 n, u8 *buf, sceCdRMode *m)
+ #endif
+ }
+ 
++int ripps2CdReadAudio(unsigned int lsn, unsigned int n, void *buf) // build 105: RIPDISC's sound
++{
++    sceCdRMode m;
++    m.trycount = 5;
++    m.spindlctrl = SCECdSpinNom;
++    m.datapattern = SCECdSecS2352;
++    m.pad = 0;
++    return cdReadSectors(lsn, n, (u8 *)buf, &m);
++}
++
+ static int cdSlow = 0; // this play reads at 2x: the drive refused its own speed
+ 
+ static int cdStreamRead(char *buf, int size)
+@@ -564,8 +587,10 @@ static void cdCopy(int track)
+     if (cdState != CD_STOPPED)
+         cdHalt(CD_STOPPED);
+ 
++    snprintf(path, sizeof(path), "%s", dir);
+     strcat(dir, "AUDIO");
+     mkdir(dir, 0777);
++    ripps2WriteReadme(path, 0); // build 105: what the folder is for, beside the track
+     snprintf(path, sizeof(path), "%s/bgm %s.wav", dir, name); // music in AUDIO is bgm*: the picker lists it
+     if ((f = fopen(path, "wb")) == NULL) {
+         guiMsgBoxSound(SFX_ERROR);
+diff --git a/src/ripps2disc.c b/src/ripps2disc.c
+new file mode 100644
+index 0000000..f4e3d38
+--- /dev/null
++++ b/src/ripps2disc.c
+@@ -0,0 +1,1326 @@
++/*
++  Copyright 2026, RIPPS2 contributors
++  Licenced under Academic Free License version 3.0
++  Review OpenUsbLd README & LICENSE files for further details.
++
++  RIPDISC (RIPPS2 build 105): the disc in the drive, copied to storage or to files, from LAUNCH DISC.
++
++  After 4.2 s on the page, when the disc can be ripped, a glass panel fades in at the centre: RIPDISC, one line
++  (add this game to your storage / add this media to your files) and SELECT, Hold. SELECT held 4.2 s (a ring fills
++  round it) opens the confirm step: what the disc is, its size and where it goes. Confirm, then START rips.
++
++  - A PS2 game (CD, DVD, or an ESR disc): an ISO in a drive's CD or DVD folder, <ID>.<Title>.iso, where the games
++    list finds it. Left / Right picks the drive (USB, the exFAT HDD, MX4SIO, iLink). A game over 4 GB on a drive
++    that may be FAT32 (anything but the internal HDD: the PS2 cannot tell FAT32 from exFAT on a stick) goes in
++    Open PS2 Loader's split format instead, which every drive takes: 1 GB parts (ul.<crc>.<ID>.00, .01 ...) and
++    its entry in the drive's ul.cfg.
++  - A PS1 game: a BIN and a CUE (every track, 2352 bytes a sector) in the drive's EMBER/games/<Title>/, as Ember
++    plays them.
++  - Media (an audio CD, a CD's sound tracks, a DVD video): confirm, then Memory Files opens on MEDIA (beside
++    AUDIO) with the disc on its clipboard, RIPPED where it would say COPIED. PASTE in the folder chosen, confirm,
++    START. An audio CD lands as a folder of WAVs (Track 01.wav ...), whose name the keyboard then asks for; a DVD
++    video as its VIDEO_TS files (1 GB at most each, so FAT32 takes them). A bought DVD film is copy protected:
++    the drive will not read its video, and the rip stops saying so.
++
++  The reads are libcdvd's, on the GUI thread as the CD player's copy is (the disc watcher waited out first):
++  2048-byte sectors with retries, sound through the CD player's CDDA reads, and a PS1 data track in 2340-byte
++  reads with each sector's 12 sync bytes put back. The screen is drawn a few times a second while it runs, with
++  what is done and what is left. A cancel (asked first) or a failure removes everything the rip wrote.
++
++  Both AUDIO and MEDIA get a README.txt (ripps2WriteReadme) saying what goes in them.
++*/
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <sys/stat.h>
++#include <time.h>
++#include <math.h>
++#include <malloc.h>
++#include <kernel.h>
++#include <delaythread.h>
++#include <libcdvd.h>
++
++#include "include/opl.h"
++#include "include/gui.h"
++#include "include/renderman.h"
++#include "include/fntsys.h"
++#include "include/themes.h"
++#include "include/textures.h"
++#include "include/pad.h"
++#include "include/system.h" // USBA_crc32: a split game's part names
++#include "include/ioman.h"  // LOG
++#include "include/iosupport.h"
++#include "include/sound.h"
++#include "include/ripps2.h"
++#include "include/bdmsupport.h"  // the drives a game can go to
++#include "include/supportbase.h" // USBExtreme_game_entry_t: ul.cfg's records
++#include "include/cuesupport.h"  // Ember's folders
++#include "include/ripps2tint.h"  // RIPPSettings Color Theme: last, so every colour below goes through it
++#include "include/ripps2tr.h"    // _t, RIPPS2's words in the chosen language
++
++#define RD_HOLD_S    4.2f // on the page before the panel shows, and SELECT held to open it
++#define RD_FADE_S    0.6f
++#define RD_DATA      2048
++#define RD_RAW       2352
++#define RD_XA        2340 // a CD sector without its 12 sync bytes
++#define RD_READ      32   // data sectors a read: 64 KB
++#define RD_RAW_READ  16   // raw sectors a read, as the CD player's
++#define RD_BUF_SECS  96   // sectors written at a time (the buffer holds 96 raw ones)
++#define RD_UL_PART   0x40000000u // Open PS2 Loader's split games: 1 GB parts
++#define RD_FAT32_MAX 0xFFFFFFFFull
++#define RD_SLOTS     8
++#define RD_TRACKS    99
++#define RD_FILES     64
++#define RD_MADE      110 // files and folders a rip makes (99 tracks, a DVD's VIDEO_TS)
++
++#define RD_LIT  GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80)
++#define RD_SOFT GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)
++#define RD_DIM  GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80)
++#define RD_PRIM(r, g, b, a) GS_SETREG_RGBAQ((r), (g), (b), (a), 0x00)
++
++enum { RD_OK = 1, RD_READ_FAIL = 0, RD_WRITE_FAIL = -1, RD_CANCEL = -2 };
++
++// the disc being ripped
++static int rdKind = RIPPS2_DISC_NONE;
++static char rdId[16], rdTitle[48], rdLabel[33];
++static u32 rdSectors;  // the data a game's ISO holds (2048-byte sectors)
++static u64 rdBytes;    // what the rip writes
++static int rdTracks;
++static u32 rdStart[RD_TRACKS + 2]; // a CD's tracks: start[1..n], start[n + 1] the lead-out
++static unsigned char rdAudio[RD_TRACKS + 2];
++static u8 *rdBuf = NULL;
++static u8 rdOne[RD_RAW + 64] __attribute__((aligned(64))); // one sector read again on its own
++
++// a DVD video's files
++typedef struct
++{
++    char name[32];
++    u32 lba, size;
++    unsigned char isDir, inAudioTs;
++} rd_file_t;
++static rd_file_t rdFiles[RD_FILES];
++static int rdFileCount = 0;
++
++// the drives a game can go to
++static int rdSlot[RD_SLOTS], rdSlotType[RD_SLOTS], rdSlotCount = 0, rdSlotSel = 0;
++
++// what the rip made, removed again if it does not finish
++static char rdMade[RD_MADE][160];
++static unsigned char rdMadeDir[RD_MADE];
++static int rdMadeCount = 0;
++
++// the file being written; a split game's part
++static int rdFd = -1, rdPart = 0, rdSplit = 0;
++static u32 rdPartLeft = 0;
++static char rdPartBase[200];
++
++// progress
++static u64 rdDone = 0;
++static double rdBegan = 0, rdDrawnAt = 0;
++static const char *rdWhat = "";
++
++// the panel on LAUNCH DISC
++static double rdPageSince = 0, rdLastFrame = 0, rdHoldSince = 0;
++static int rdPageKind = -1, rdHolding = 0;
++static float rdShown = 0.0f;
++
++static int rdIsGame(int kind)
++{
++    return kind == RIPPS2_DISC_PS2CD || kind == RIPPS2_DISC_PS2DVD || kind == RIPPS2_DISC_ESR || kind == RIPPS2_DISC_PS1;
++}
++
++static int rdIsMedia(int kind)
++{
++    return kind == RIPPS2_DISC_AUDIO || kind == RIPPS2_DISC_VIDEO;
++}
++
++static u64 rdAlpha(u64 c, int a)
++{
++    return (c & ~(0xFFULL << 24)) | ((u64)(a < 0 ? 0 : a > 0x80 ? 0x80 : a) << 24);
++}
++
++static u32 rdLe32(const u8 *p)
++{
++    return p[0] | (p[1] << 8) | (p[2] << 16) | ((u32)p[3] << 24);
++}
++
++static void rdPut32(u8 *p, u32 v)
++{
++    p[0] = v;
++    p[1] = v >> 8;
++    p[2] = v >> 16;
++    p[3] = v >> 24;
++}
++
++// "4.38 GB", "612 MB"
++static void rdSize(u64 bytes, char *out, int size)
++{
++    if (bytes >= 1000000000ULL)
++        snprintf(out, size, _t("%u.%02u GB"), (unsigned)(bytes / 1000000000ULL), (unsigned)(bytes % 1000000000ULL / 10000000ULL));
++    else
++        snprintf(out, size, _t("%u MB"), (unsigned)((bytes + 999999ULL) / 1000000ULL));
++}
++
++// A name a FAT drive and Ember take: no \ / : * ? " < > |, no control codes, no dots or spaces at the ends
++static void rdSafeName(const char *in, char *out, int size)
++{
++    int i, n = 0;
++    for (i = 0; in[i] && n < size - 1; i++) {
++        unsigned char c = in[i];
++        out[n++] = (c < 0x20 || strchr("\\/:*?\"<>|", c) != NULL) ? ' ' : c;
++    }
++    out[n] = '\0';
++    while (n > 0 && (out[n - 1] == ' ' || out[n - 1] == '.'))
++        out[--n] = '\0';
++    for (i = 0; out[i] == ' ' || out[i] == '.'; i++)
++        ;
++    if (i > 0)
++        memmove(out, out + i, strlen(out + i) + 1);
++}
++
++// ---- reading ----
++
++// n sectors from lsn in one of libcdvd's sector forms (as RiptOPL's own RetroAchievements hash reads them)
++static int rdRead(u32 lsn, u32 n, void *buf, int pattern)
++{
++    sceCdRMode m;
++    int attempt;
++
++    m.trycount = 32;
++    m.datapattern = pattern;
++    m.pad = 0;
++    for (attempt = 0; attempt < 6; attempt++) {
++        m.spindlctrl = attempt < 3 ? SCECdSpinNom : SCECdSpinStm;
++        sceCdDiskReady(0);
++        if (!sceCdRead(lsn, n, buf, &m))
++            continue; // refused before it started: the drive was not ready
++        sceCdSync(0);
++        if (sceCdGetError() == SCECdErNO)
++            return 1;
++    }
++    LOG("RIPDISC: sector %u (+%u) could not be read\n", lsn, n);
++    return 0;
++}
++
++static const u8 rdSync[12] = {0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00};
++
++// n raw sectors of a PS1 data track: read without their sync (2340 bytes each), then spread out to 2352 with it
++static int rdReadRaw(u32 lsn, u32 n, u8 *out)
++{
++    int i;
++    if (rdRead(lsn, n, out, SCECdSecS2340)) {
++        for (i = (int)n - 1; i >= 0; i--) {
++            memmove(out + i * RD_RAW + 12, out + i * RD_XA, RD_XA);
++            memcpy(out + i * RD_RAW, rdSync, 12);
++        }
++        return 1;
++    }
++    for (i = 0; i < (int)n; i++) { // one at a time: a sector the drive will not give as data is asked for raw
++        if (rdRead(lsn + i, 1, rdOne, SCECdSecS2340)) {
++            memcpy(out + i * RD_RAW, rdSync, 12);
++            memcpy(out + i * RD_RAW + 12, rdOne, RD_XA);
++        } else if (!ripps2CdReadAudio(lsn + i, 1, out + i * RD_RAW))
++            return 0;
++    }
++    return 1;
++}
++
++// The primary volume descriptor at at + 16: its size in sectors (0: none) and its label
++static u32 rdVolume(u32 at, char *label)
++{
++    int n;
++    if (!rdRead(at + 16, 1, rdOne, SCECdSecS2048) || rdOne[0] != 1 || memcmp(rdOne + 1, "CD001", 5) != 0)
++        return 0;
++    if (label != NULL) {
++        memcpy(label, rdOne + 40, 32);
++        label[32] = '\0';
++        for (n = 31; n >= 0 && (label[n] == ' ' || label[n] == '\0'); n--)
++            label[n] = '\0';
++    }
++    return rdLe32(rdOne + 80);
++}
++
++// The entries of the ISO 9660 folder at lba (size bytes); . and .. left out
++static int rdDir(u32 lba, u32 size, rd_file_t *out, int max, int audioTs)
++{
++    u32 s, sectors = (size + RD_DATA - 1) / RD_DATA;
++    int count = 0;
++    for (s = 0; s < sectors && s < 16; s++) {
++        int o = 0;
++        if (!rdRead(lba + s, 1, rdOne, SCECdSecS2048))
++            return -1;
++        while (o + 34 <= RD_DATA) {
++            int len = rdOne[o], nl = rdOne[o + 32], i;
++            const char *nm = (const char *)rdOne + o + 33;
++            if (len == 0)
++                break; // the rest of the sector is padding
++            if (len < 34 || o + len > RD_DATA)
++                break;
++            if (!(nl == 1 && (nm[0] == 0 || nm[0] == 1)) && count < max) {
++                rd_file_t *f = &out[count++];
++                for (i = 0; i < nl && i < (int)sizeof(f->name) - 1 && nm[i] != ';'; i++)
++                    f->name[i] = nm[i];
++                while (i > 0 && f->name[i - 1] == '.') // "VIDEO_TS." for a name with no extension
++                    i--;
++                f->name[i] = '\0';
++                f->lba = rdLe32(rdOne + o + 2);
++                f->size = rdLe32(rdOne + o + 10);
++                f->isDir = (rdOne[o + 25] & 0x02) != 0;
++                f->inAudioTs = audioTs;
++            }
++            o += len;
++        }
++    }
++    return count;
++}
++
++// A DVD video's VIDEO_TS (and AUDIO_TS) files, and their size
++static int rdVideoScan(void)
++{
++    rd_file_t root[24];
++    int n, i, k;
++    u32 rootLba, rootSize;
++
++    rdFileCount = 0;
++    rdBytes = 0;
++    if (!rdRead(16, 1, rdOne, SCECdSecS2048) || rdOne[0] != 1 || memcmp(rdOne + 1, "CD001", 5) != 0)
++        return 0;
++    memcpy(rdLabel, rdOne + 40, 32);
++    rdLabel[32] = '\0';
++    for (i = 31; i >= 0 && (rdLabel[i] == ' ' || rdLabel[i] == '\0'); i--)
++        rdLabel[i] = '\0';
++    rootLba = rdLe32(rdOne + 156 + 2);
++    rootSize = rdLe32(rdOne + 156 + 10);
++    if ((n = rdDir(rootLba, rootSize, root, 24, 0)) <= 0)
++        return 0;
++    for (k = 0; k < 2; k++) { // VIDEO_TS first, then AUDIO_TS (most often empty)
++        const char *want = k == 0 ? "VIDEO_TS" : "AUDIO_TS";
++        for (i = 0; i < n; i++)
++            if (root[i].isDir && !strcasecmp(root[i].name, want)) {
++                int got = rdDir(root[i].lba, root[i].size, rdFiles + rdFileCount, RD_FILES - rdFileCount, k);
++                if (got < 0)
++                    return 0;
++                rdFileCount += got;
++                break;
++            }
++        if (k == 0 && rdFileCount == 0)
++            return 0; // no VIDEO_TS: not a DVD video RIPDISC knows
++    }
++    for (i = 0; i < rdFileCount; i++)
++        if (!rdFiles[i].isDir)
++            rdBytes += rdFiles[i].size;
++    return rdBytes > 0;
++}
++
++// What is on the disc and how much: the ISO's sectors, the CD's tracks, a DVD video's files
++static int rdMeasure(void)
++{
++    u32 n;
++    int t, dual = 0;
++    u32 layer1 = 0;
++
++    rdLabel[0] = '\0';
++    rdTracks = 0;
++    rdSectors = 0;
++    rdBytes = 0;
++    switch (rdKind) {
++        case RIPPS2_DISC_PS2CD:
++        case RIPPS2_DISC_PS2DVD:
++        case RIPPS2_DISC_ESR:
++            sceCdMmode(rdKind == RIPPS2_DISC_PS2CD ? SCECdMmodeCd : SCECdMmodeDvd);
++            if ((n = rdVolume(0, rdLabel)) == 0)
++                return 0;
++            // a dual layer DVD: the second layer has its own volume descriptor, 16 sectors into it
++            if (rdKind != RIPPS2_DISC_PS2CD && sceCdReadDvdDualInfo(&dual, &layer1) && dual && layer1 > 16) {
++                u32 n1 = rdVolume(layer1, NULL);
++                if (n1 > 0)
++                    n = layer1 + n1;
++            }
++            rdSectors = n;
++            rdBytes = (u64)n * RD_DATA;
++            return n > 16;
++        case RIPPS2_DISC_PS1:
++            sceCdMmode(SCECdMmodeCd);
++            n = rdVolume(0, rdLabel);
++            rdTracks = ripps2CdTracks(rdStart, rdAudio, RD_TRACKS + 2);
++            if (rdTracks <= 1) { // one data track: as long as its volume says (the TOC's lead-out is not always there)
++                if (n == 0)
++                    return 0;
++                rdTracks = 1;
++                rdStart[1] = 0;
++                rdStart[2] = n;
++                rdAudio[1] = 0;
++            }
++            rdBytes = (u64)rdStart[rdTracks + 1] * RD_RAW;
++            return rdBytes > 0;
++        case RIPPS2_DISC_AUDIO:
++            sceCdMmode(SCECdMmodeCd);
++            if ((rdTracks = ripps2CdTracks(rdStart, rdAudio, RD_TRACKS + 2)) <= 0)
++                return 0;
++            for (t = 1; t <= rdTracks; t++)
++                if (rdAudio[t])
++                    rdBytes += (u64)(rdStart[t + 1] - rdStart[t]) * RD_RAW + 44;
++            return rdBytes > 0;
++        case RIPPS2_DISC_VIDEO:
++            sceCdMmode(SCECdMmodeDvd);
++            return rdVideoScan();
++    }
++    return 0;
++}
++
++// ---- writing ----
++
++static void rdMadeAdd(const char *path, int isDir)
++{
++    if (rdMadeCount < RD_MADE) {
++        snprintf(rdMade[rdMadeCount], sizeof(rdMade[0]), "%s", path);
++        rdMadeDir[rdMadeCount++] = isDir;
++    }
++}
++
++static void rdMkdir(const char *path) // a folder made here is removed with the rest if the rip does not finish
++{
++    if (mkdir(path, 0777) == 0)
++        rdMadeAdd(path, 1);
++}
++
++static void rdUndo(void)
++{
++    int i;
++    if (rdFd >= 0) {
++        close(rdFd);
++        rdFd = -1;
++    }
++    for (i = rdMadeCount - 1; i >= 0; i--) { // files first (they were added after their folders), then the folders
++        if (rdMadeDir[i])
++            rmdir(rdMade[i]);
++        else
++            remove(rdMade[i]);
++    }
++    rdMadeCount = 0;
++}
++
++static int rdCreate(const char *path)
++{
++    rdFd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
++    if (rdFd < 0)
++        return 0;
++    rdMadeAdd(path, 0);
++    return 1;
++}
++
++static int rdNextPart(void)
++{
++    char path[220];
++    if (rdFd >= 0)
++        close(rdFd);
++    snprintf(path, sizeof(path), "%s%02x", rdPartBase, rdPart++);
++    rdPartLeft = RD_UL_PART;
++    return rdCreate(path);
++}
++
++static int rdWrite(const void *data, u32 bytes)
++{
++    const u8 *p = data;
++    while (bytes > 0) {
++        u32 n = bytes;
++        if (rdSplit) {
++            if (rdPartLeft == 0 && !rdNextPart())
++                return 0;
++            if (n > rdPartLeft)
++                n = rdPartLeft;
++        }
++        if (write(rdFd, p, n) != (int)n)
++            return 0;
++        p += n;
++        bytes -= n;
++        if (rdSplit)
++            rdPartLeft -= n;
++    }
++    return 1;
++}
++
++static void rdWavHeader(u8 *h, u32 bytes) // 16-bit stereo at 44.1 kHz, as the CD player's copies
++{
++    memcpy(h, "RIFF", 4);
++    rdPut32(h + 4, 36 + bytes);
++    memcpy(h + 8, "WAVEfmt ", 8);
++    rdPut32(h + 16, 16);
++    h[20] = 1;
++    h[21] = 0;
++    h[22] = 2;
++    h[23] = 0;
++    rdPut32(h + 24, 44100);
++    rdPut32(h + 28, 44100 * 4);
++    h[32] = 4;
++    h[33] = 0;
++    h[34] = 16;
++    h[35] = 0;
++    memcpy(h + 36, "data", 4);
++    rdPut32(h + 40, bytes);
++}
++
++// ---- drawing ----
++
++static void rdHint(int icon, const char *text, int *x, int y, int a)
++{
++    GSTEXTURE *t = thmGetTexture(icon);
++    if (t != NULL) {
++        rmDrawPixmap(t, *x, y - 10, ALIGN_NONE, 20, 20, SCALING_RATIO, rdAlpha(RD_LIT, a), 0);
++        *x += 24;
++    }
++    *x = ripps2HintText(*x, y, text, rdAlpha(RD_SOFT, a)) + 18;
++}
++
++static int rdHintWidth(const char *text)
++{
++    return 24 + ripps2HintWidth(text) + 18;
++}
++
++static void rdHintPair(int iconA, const char *a, int iconB, const char *b, int y)
++{
++    int x = 320 - (rdHintWidth(a) + rdHintWidth(b) - 18) / 2;
++    rdHint(iconA, a, &x, y, 0x80);
++    rdHint(iconB, b, &x, y, 0x80);
++}
++
++static void rdRing(int cx, int cy, float r, float p, int a)
++{
++    int i, n = 36;
++    for (i = 0; i < n; i++) {
++        float a0 = -1.5707963f + 6.2831853f * i / n, a1 = -1.5707963f + 6.2831853f * (i + 1) / n;
++        u64 c = (float)i < p * n ? RD_PRIM(0x5C, 0x98, 0xFF, a) : RD_PRIM(0x1E, 0x2A, 0x50, a / 2);
++        rmDrawLine(cx + (int)(r * cosf(a0)), cy + (int)(r * sinf(a0)), cx + (int)(r * cosf(a1)), cy + (int)(r * sinf(a1)), c);
++    }
++}
++
++static void rdPage(void) // the page under every RIPDISC step: the towers and the category bar
++{
++    ripps2DrawBackground();
++    thmDrawBackdrop();
++    ripps2RenderCategoryBar();
++}
++
++void ripps2DiscRipRender(void)
++{
++    double now = ripps2Seconds();
++    int kind = ripps2DiscInfo(NULL, 0, NULL, 0);
++    int w = 400, h = 118, x = (640 - w) / 2, y = 146, ia, hx;
++    float t, a;
++    const char *hold = _t("HOLD");
++
++    if (now - rdLastFrame > 0.5 || kind != rdPageKind) { // back on the page, or another disc in the drive
++        rdPageSince = now;
++        rdHolding = 0;
++    }
++    rdLastFrame = now;
++    rdPageKind = kind;
++    rdShown = 0.0f;
++    if (!rdIsGame(kind) && !rdIsMedia(kind))
++        return;
++    t = (float)(now - rdPageSince) - RD_HOLD_S;
++    if (t <= 0.0f)
++        return;
++    a = t >= RD_FADE_S ? 1.0f : t / RD_FADE_S;
++    a = a * a * (3.0f - 2.0f * a);
++    rdShown = a;
++    ia = (int)(0x80 * a);
++
++    ripps2DrawHintBoxA(x, y, w, h, a);
++    fntRenderString(gTheme->fonts[4], 320, y + 26, ALIGN_CENTER, 0, 0, "RIPDISC", rdAlpha(RD_LIT, ia));
++    fntRenderString(gTheme->fonts[5], 320, y + 54, ALIGN_CENTER, 0, 0,
++                    rdIsGame(kind) ? _t("ADD THIS GAME TO YOUR STORAGE") : _t("ADD THIS MEDIA TO YOUR FILES"), rdAlpha(RD_SOFT, ia));
++    hx = 320 - (24 + ripps2HintWidth(hold)) / 2;
++    if (rdHolding) {
++        float p = (float)(now - rdHoldSince) / RD_HOLD_S;
++        rdRing(hx + 10, y + 88, 15.0f, p > 1.0f ? 1.0f : p, ia);
++    }
++    rdHint(SELECT_ICON, hold, &hx, y + 88, ia);
++}
++
++// The rip's screen, a few times a second: what, how far, how long is left; 0 when it is to stop (asked first)
++static int rdTick(void)
++{
++    char done[24], total[24], line[96], left[64];
++    double now = ripps2Seconds();
++    int backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    float p = rdBytes > 0 ? (float)((double)rdDone / (double)rdBytes) : 0.0f;
++
++    readPads();
++    if (getKeyOn(backKey)) {
++        guiMsgBoxSound(SFX_ERROR);
++        if (guiMsgBox(_t("Stop the rip? What it has written so far is removed."), 1, NULL))
++            return 0;
++        rdDrawnAt = 0;
++    }
++    if (now - rdDrawnAt < 0.2 && rdDone < rdBytes)
++        return 1;
++    rdDrawnAt = now;
++    if (p > 1.0f)
++        p = 1.0f;
++    rdSize(rdDone, done, sizeof(done));
++    rdSize(rdBytes, total, sizeof(total));
++    snprintf(line, sizeof(line), _t("%s OF %s   %d%%"), done, total, (int)(p * 100.0f));
++    left[0] = '\0';
++    if (now - rdBegan > 8.0 && p > 0.005f) {
++        int mins = (int)(((now - rdBegan) / p - (now - rdBegan)) / 60.0 + 0.5);
++        if (mins < 1)
++            snprintf(left, sizeof(left), _t("LESS THAN A MINUTE LEFT"));
++        else
++            snprintf(left, sizeof(left), _t("ABOUT %d MIN LEFT"), mins);
++    }
++
++    rmStartFrame();
++    rdPage();
++    ripps2DrawPanelGlass(60, 150, 520, 170, 0);
++    fntRenderString(gTheme->fonts[5], 320, 178, ALIGN_CENTER, 0, 0, "RIPDISC", RD_SOFT);
++    fntRenderStringFit(gTheme->fonts[4], 320, 206, ALIGN_CENTER, 480, rdWhat, RD_LIT, 1);
++    rmDrawRect(150, 232, 340, 6, RD_PRIM(0x03, 0x08, 0x22, 0x80));
++    rmDrawRect(150, 232, (int)(340 * p), 6, RD_PRIM(0x4A, 0x8C, 0xF0, 0x80));
++    fntRenderString(gTheme->fonts[5], 320, 262, ALIGN_CENTER, 0, 0, line, RD_SOFT);
++    if (left[0])
++        fntRenderString(gTheme->fonts[5], 320, 286, ALIGN_CENTER, 0, 0, left, RD_DIM);
++    {
++        int x = 320 - (rdHintWidth(_t("CANCEL")) - 18) / 2;
++        rdHint(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _t("CANCEL"), &x, 448, 0x80);
++    }
++    rmEndFrame();
++    return 1;
++}
++
++// ---- the confirm step ----
++
++static const char *rdDriveName(int type)
++{
++    return type == BDM_TYPE_USB ? _t("USB DRIVE") : type == BDM_TYPE_SDC ? "MX4SIO" : type == BDM_TYPE_ILINK ? _t("iLINK DRIVE") :
++                                  type == BDM_TYPE_ATA ? _t("HDD (exFAT)") : _t("DRIVE");
++}
++
++// The drives a game can go to: every started BDM drive but a network one; the one RIPPS2 runs from first picked
++static void rdFindDrives(void)
++{
++    char boot[64];
++    int i, t;
++    rdSlotCount = 0;
++    rdSlotSel = 0;
++    for (i = 0; i < RD_SLOTS; i++) {
++        if (!bdmSlotEverConnected(BDM_MODE + i))
++            continue;
++        t = bdmSlotDeviceType(i);
++        if (t == -2 || t == BDM_TYPE_UDPBD)
++            continue;
++        rdSlot[rdSlotCount] = i;
++        rdSlotType[rdSlotCount++] = t;
++    }
++    if (ripps2GetBootPath(boot, sizeof(boot)) && !strncmp(boot, "mass", 4) && boot[4] >= '0' && boot[4] <= '7')
++        for (i = 0; i < rdSlotCount; i++)
++            if (rdSlot[i] == boot[4] - '0')
++                rdSlotSel = i;
++}
++
++// The game's name for its files: the title from the metadata, else the disc's label, else its ID
++static void rdGameName(char *out, int size)
++{
++    rdSafeName(rdTitle[0] ? rdTitle : rdLabel[0] ? rdLabel : rdId[0] ? rdId : "GAME", out, size);
++    if (!out[0])
++        snprintf(out, size, "%s", rdId[0] ? rdId : "GAME");
++}
++
++// Where the game goes on the drive picked, and whether it is split (over 4 GB on a drive that may be FAT32)
++static int rdGameTarget(char *path, int size)
++{
++    char prefix[160], name[64];
++    int slot = rdSlot[rdSlotSel], split = 0;
++
++    rdGameName(name, sizeof(name));
++    if (rdKind == RIPPS2_DISC_PS1) {
++        name[48] = '\0';
++        snprintf(path, size, "mass%d:/%s/%s/%s/%s.bin", slot, cueEmberFolder(), EMBER_GAMES_FOLDER, name, name);
++        return 0;
++    }
++    bdmSlotGamesPrefix(slot, prefix, sizeof(prefix));
++    if (rdBytes > RD_FAT32_MAX && rdSlotType[rdSlotSel] != BDM_TYPE_ATA) {
++        name[UL_GAME_NAME_MAX] = '\0';
++        snprintf(path, size, "%sul.%08X.%s.00", prefix, USBA_crc32(name), rdId);
++        split = 1;
++    } else if (rdId[0])
++        snprintf(path, size, "%s%s/%s.%s.iso", prefix, rdKind == RIPPS2_DISC_PS2CD ? "CD" : "DVD", rdId, name);
++    else
++        snprintf(path, size, "%s%s/%s.iso", prefix, rdKind == RIPPS2_DISC_PS2CD ? "CD" : "DVD", name);
++    return split;
++}
++
++static void rdKindLine(char *out, int size)
++{
++    int t, n = 0;
++    u32 sec = 0;
++    switch (rdKind) {
++        case RIPPS2_DISC_PS1:
++            snprintf(out, size, "%s   %s   %s", _t("PS1 GAME"), rdId, rdTitle[0] ? rdTitle : rdLabel);
++            break;
++        case RIPPS2_DISC_ESR:
++        case RIPPS2_DISC_PS2CD:
++        case RIPPS2_DISC_PS2DVD:
++            snprintf(out, size, "%s   %s   %s", _t("PS2 GAME"), rdId, rdTitle[0] ? rdTitle : rdLabel);
++            break;
++        case RIPPS2_DISC_AUDIO:
++            for (t = 1; t <= rdTracks; t++)
++                if (rdAudio[t]) {
++                    n++;
++                    sec += rdStart[t + 1] - rdStart[t];
++                }
++            snprintf(out, size, _t("AUDIO CD   %d TRACKS   %u:%02u"), n, sec / 75 / 60, sec / 75 % 60);
++            break;
++        default:
++            snprintf(out, size, "%s   %s", _t("DVD VIDEO"), rdLabel);
++            break;
++    }
++}
++
++// The step before a rip: what it is, its size, where it goes; confirm, then START. 1 to rip, 0 not.
++// drives: Left / Right picks the drive a game goes to. place: where media goes ("" before it is picked).
++static int rdConfirm(int drives, const char *place)
++{
++    char what[96], size[24], to[260], note[160];
++    int stage = 0, split = 0, y, okKey = gSelectButton, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    int okIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
++    int labelFont = gTheme->fonts[5], valueFont = gTheme->fonts[4];
++
++    rdKindLine(what, sizeof(what));
++    rdSize(rdBytes, size, sizeof(size));
++    sfxPlay(SFX_MESSAGE);
++    readPads();
++    while (1) {
++        note[0] = '\0';
++        if (drives) {
++            char path[200];
++            split = rdGameTarget(path, sizeof(path));
++            snprintf(to, sizeof(to), "%s: %s", rdDriveName(rdSlotType[rdSlotSel]), path);
++            if (split)
++                snprintf(note, sizeof(note), _t("Over 4 GB: saved as 1 GB parts with ul.cfg, as Open PS2 Loader does, since a FAT32 drive holds 4 GB a file."));
++            else if (rdKind == RIPPS2_DISC_PS1)
++                snprintf(note, sizeof(note), _t("A BIN and CUE for Ember, in the PS1 games list."));
++        } else if (place[0])
++            snprintf(to, sizeof(to), "%s", place);
++        else
++            snprintf(to, sizeof(to), _t("A FOLDER YOU PICK IN MEMORY FILES"));
++        if (rdKind == RIPPS2_DISC_VIDEO && !note[0])
++            snprintf(note, sizeof(note), _t("Only a DVD video you made yourself: a bought film is copy protected, and the drive will not read it."));
++
++        rmStartFrame();
++        rdPage();
++        ripps2DrawPanelGlass(50, 112, 540, 236, 0);
++        fntRenderString(valueFont, 320, 136, ALIGN_CENTER, 0, 0, "RIPDISC", RD_LIT);
++        fntRenderStringFit(labelFont, 320, 164, ALIGN_CENTER, 500, what, RD_SOFT, 1);
++        y = 204;
++        fntRenderString(labelFont, 74, y, ALIGN_VCENTER, 0, 0, _t("SIZE"), RD_DIM);
++        fntRenderString(valueFont, 170, y, ALIGN_VCENTER, 0, 0, size, RD_LIT);
++        y += 30;
++        fntRenderString(labelFont, 74, y, ALIGN_VCENTER, 0, 0, _t("TO"), RD_DIM);
++        fntRenderStringFit(valueFont, 170, y, ALIGN_VCENTER, 400, to, RD_LIT, 1);
++        if (drives && rdSlotCount > 1) {
++            GSTEXTURE *l = thmGetTexture(LEFT_ICON), *r = thmGetTexture(RIGHT_ICON);
++            y += 24;
++            if (l != NULL)
++                rmDrawPixmap(l, 170, y - 8, ALIGN_NONE, 16, 16, SCALING_RATIO, RD_LIT, 0);
++            if (r != NULL)
++                rmDrawPixmap(r, 190, y - 8, ALIGN_NONE, 16, 16, SCALING_RATIO, RD_LIT, 0);
++            fntRenderString(labelFont, 214, y, ALIGN_VCENTER, 0, 0, _t("ANOTHER DRIVE"), RD_SOFT);
++        }
++        if (note[0]) {
++            y += 30;
++            fntRenderStringFit(labelFont, 74, y, ALIGN_VCENTER, 496, note, RD_SOFT, 1);
++        }
++        if (stage == 0)
++            rdHintPair(okIcon, _t("CONFIRM"), backIcon, _t("CANCEL"), 380);
++        else {
++            fntRenderString(valueFont, 320, 380, ALIGN_CENTER, 0, 0, _t("READY"), RD_LIT);
++            rdHintPair(START_ICON, _t("RIP"), backIcon, _t("BACK"), 412);
++        }
++        rmEndFrame();
++
++        readPads();
++        if (drives && rdSlotCount > 1 && stage == 0 && (getKeyOn(KEY_LEFT) || getKeyOn(KEY_RIGHT))) {
++            rdSlotSel = (rdSlotSel + (getKeyOn(KEY_RIGHT) ? 1 : rdSlotCount - 1)) % rdSlotCount;
++            sfxPlay(SFX_CURSOR);
++        } else if (stage == 0 && getKeyOn(okKey)) {
++            sfxPlay(SFX_CONFIRM);
++            if (!drives && !place[0])
++                return 1; // media: next, the place, in Memory Files
++            stage = 1;
++        } else if (stage == 1 && getKeyOn(KEY_START)) {
++            sfxPlay(SFX_CONFIRM);
++            return 1;
++        } else if (getKeyOn(backKey)) {
++            sfxPlay(SFX_CANCEL);
++            if (stage == 0)
++                return 0;
++            stage = 0;
++        }
++    }
++}
++
++// ---- the rips ----
++
++static int rdBufReady(void)
++{
++    if (rdBuf == NULL)
++        rdBuf = memalign(64, RD_BUF_SECS * RD_RAW);
++    return rdBuf != NULL;
++}
++
++static void rdBufFree(void)
++{
++    free(rdBuf);
++    rdBuf = NULL;
++}
++
++static void rdBegin(const char *what, u64 bytes)
++{
++    rdWhat = what;
++    rdDone = 0;
++    rdBytes = bytes;
++    rdBegan = ripps2Seconds();
++    rdDrawnAt = 0;
++    rdMadeCount = 0;
++    rdFd = -1;
++    rdSplit = 0;
++}
++
++// The data sectors [from, to) into the open file (or split parts)
++static int rdCopyData(u32 from, u32 to)
++{
++    u32 lsn = from;
++    while (lsn < to) {
++        u32 fill = 0;
++        while (fill < RD_BUF_SECS && lsn < to) {
++            u32 n = to - lsn;
++            if (n > RD_READ)
++                n = RD_READ;
++            if (n > RD_BUF_SECS - fill)
++                n = RD_BUF_SECS - fill;
++            if (!rdRead(lsn, n, rdBuf + fill * RD_DATA, SCECdSecS2048))
++                return RD_READ_FAIL;
++            fill += n;
++            lsn += n;
++        }
++        if (!rdWrite(rdBuf, fill * RD_DATA))
++            return RD_WRITE_FAIL;
++        rdDone += (u64)fill * RD_DATA;
++        if (!rdTick())
++            return RD_CANCEL;
++    }
++    return RD_OK;
++}
++
++// A CD's raw sectors [from, to) of one track: sound as it is, data with its sync put back
++static int rdCopyRaw(u32 from, u32 to, int audio)
++{
++    u32 lsn = from;
++    while (lsn < to) {
++        u32 fill = 0;
++        while (fill < RD_BUF_SECS && lsn < to) {
++            u32 n = to - lsn;
++            if (n > RD_RAW_READ)
++                n = RD_RAW_READ;
++            if (n > RD_BUF_SECS - fill)
++                n = RD_BUF_SECS - fill;
++            if (!(audio ? ripps2CdReadAudio(lsn, n, rdBuf + fill * RD_RAW) : rdReadRaw(lsn, n, rdBuf + fill * RD_RAW)))
++                return RD_READ_FAIL;
++            fill += n;
++            lsn += n;
++        }
++        if (!rdWrite(rdBuf, fill * RD_RAW))
++            return RD_WRITE_FAIL;
++        rdDone += (u64)fill * RD_RAW;
++        if (!rdTick())
++            return RD_CANCEL;
++    }
++    return RD_OK;
++}
++
++// What went wrong, said plainly; everything written removed
++static void rdFailed(int r)
++{
++    rdUndo();
++    sceCdStop();
++    sceCdSync(0);
++    if (r == RD_CANCEL)
++        return;
++    guiMsgBoxSound(SFX_ERROR);
++    if (r == RD_READ_FAIL)
++        guiMsgBox(rdKind == RIPPS2_DISC_VIDEO ?
++                      _t("The rip stopped: the drive would not read the disc. A bought DVD film is copy protected and cannot be ripped; a scratched or dirty disc can also stop it. Nothing was kept.") :
++                      _t("The rip stopped: the drive would not read the disc. Clean it, put it back and try again. Nothing was kept."),
++                  0, NULL);
++    else
++        guiMsgBox(_t("The rip stopped: the drive could not take more. Check it has room and is not write protected. Nothing was kept."), 0, NULL);
++}
++
++static void rdCueTime(u32 lsn, char *out, int size)
++{
++    snprintf(out, size, "%02u:%02u:%02u", lsn / 75 / 60, lsn / 75 % 60, lsn % 75);
++}
++
++static int rdWriteCue(const char *path, const char *binName)
++{
++    char line[160], at[16];
++    int fd, t, n;
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
++        return 0;
++    rdMadeAdd(path, 0);
++    n = snprintf(line, sizeof(line), "FILE \"%s\" BINARY\r\n", binName);
++    if (write(fd, line, n) != n) {
++        close(fd);
++        return 0;
++    }
++    for (t = 1; t <= rdTracks; t++) {
++        n = snprintf(line, sizeof(line), "  TRACK %02d %s\r\n", t, rdAudio[t] ? "AUDIO" : "MODE2/2352");
++        if (t > 1 && rdAudio[t] && !rdAudio[t - 1] && rdStart[t] >= 150) { // the gap before the first sound track
++            rdCueTime(rdStart[t] - 150, at, sizeof(at));
++            n += snprintf(line + n, sizeof(line) - n, "    INDEX 00 %s\r\n", at);
++        }
++        rdCueTime(rdStart[t], at, sizeof(at));
++        n += snprintf(line + n, sizeof(line) - n, "    INDEX 01 %s\r\n", at);
++        if (write(fd, line, n) != n) {
++            close(fd);
++            return 0;
++        }
++    }
++    close(fd);
++    return 1;
++}
++
++// A game to the drive picked: an ISO, split parts and ul.cfg, or a PS1 game's BIN and CUE
++static void rdRipGame(void)
++{
++    char path[220], name[64], dir[200], what[96], msg[320];
++    int slot = rdSlot[rdSlotSel], split, r = RD_OK, t;
++
++    split = rdGameTarget(path, sizeof(path));
++    rdGameName(name, sizeof(name));
++    if (split && !rdId[0]) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("This game has no ID RIPPS2 can read, which its parts would be named by. Rip it to an exFAT drive instead."), 0, NULL);
++        return;
++    }
++    if (!split) {
++        int fd = open(path, O_RDONLY);
++        if (fd >= 0) {
++            close(fd);
++            snprintf(msg, sizeof(msg), _t("%s is already there. Replace it?"), path);
++            if (!guiMsgBox(msg, 1, NULL))
++                return;
++        }
++    } else { // a split game of this ID already in ul.cfg: Storage deletes it, not this
++        USBExtreme_game_entry_t e;
++        char cfg[180];
++        int fd;
++        bdmSlotGamesPrefix(slot, cfg, sizeof(cfg) - 8);
++        strcat(cfg, "ul.cfg");
++        if ((fd = open(cfg, O_RDONLY)) >= 0) {
++            int found = 0;
++            while (!found && read(fd, &e, sizeof(e)) == sizeof(e))
++                found = !strncmp(e.startup, rdId, GAME_STARTUP_MAX);
++            close(fd);
++            if (found) {
++                guiMsgBoxSound(SFX_ERROR);
++                guiMsgBox(_t("This game is already on the drive as split parts. Delete it in Storage first to rip it again."), 0, NULL);
++                return;
++            }
++        }
++    }
++
++    snprintf(what, sizeof(what), "%s", rdTitle[0] ? rdTitle : name);
++    rdBegin(what, rdBytes);
++    if (rdKind == RIPPS2_DISC_PS1) {
++        snprintf(dir, sizeof(dir), "mass%d:/%s", slot, cueEmberFolder());
++        rdMkdir(dir);
++        snprintf(dir + strlen(dir), sizeof(dir) - strlen(dir), "/%s", EMBER_GAMES_FOLDER);
++        rdMkdir(dir);
++        name[48] = '\0';
++        snprintf(dir + strlen(dir), sizeof(dir) - strlen(dir), "/%s", name);
++        rdMkdir(dir);
++        if (!rdCreate(path))
++            r = RD_WRITE_FAIL;
++        sceCdMmode(SCECdMmodeCd);
++        for (t = 1; t <= rdTracks && r == RD_OK; t++)
++            r = rdCopyRaw(rdStart[t], rdStart[t + 1], rdAudio[t]);
++        if (r == RD_OK) {
++            char cue[300], bin[80];
++            close(rdFd);
++            rdFd = -1;
++            snprintf(bin, sizeof(bin), "%s.bin", name);
++            snprintf(cue, sizeof(cue), "%s/%s.cue", dir, name);
++            if (!rdWriteCue(cue, bin))
++                r = RD_WRITE_FAIL;
++        }
++    } else {
++        char prefix[160];
++        bdmSlotGamesPrefix(slot, prefix, sizeof(prefix));
++        if (split) {
++            USBExtreme_game_entry_t e;
++            char nm[UL_GAME_NAME_MAX + 1];
++            int nl = strlen(name) < UL_GAME_NAME_MAX ? strlen(name) : UL_GAME_NAME_MAX;
++            memcpy(nm, name, nl);
++            nm[nl] = '\0';
++            snprintf(rdPartBase, sizeof(rdPartBase), "%sul.%08X.%s.", prefix, USBA_crc32(nm), rdId);
++            rdSplit = 1;
++            rdPart = 0;
++            rdPartLeft = 0;
++            sceCdMmode(rdKind == RIPPS2_DISC_PS2CD ? SCECdMmodeCd : SCECdMmodeDvd);
++            r = rdCopyData(0, rdSectors);
++            if (r == RD_OK) { // the parts are all there: now ul.cfg lists the game
++                int fd;
++                close(rdFd);
++                rdFd = -1;
++                memset(&e, 0, sizeof(e));
++                memcpy(e.name, nm, nl);
++                memcpy(e.magic, "ul.", 3);
++                memcpy(e.startup, rdId, strlen(rdId) < GAME_STARTUP_MAX ? strlen(rdId) : GAME_STARTUP_MAX);
++                e.parts = rdPart;
++                e.media = rdKind == RIPPS2_DISC_PS2CD ? 0x12 : 0x14;
++                e.Byte08 = 0x08;
++                snprintf(dir, sizeof(dir), "%sul.cfg", prefix);
++                if ((fd = open(dir, O_WRONLY | O_CREAT | O_APPEND, 0644)) < 0 || write(fd, &e, sizeof(e)) != sizeof(e))
++                    r = RD_WRITE_FAIL;
++                if (fd >= 0)
++                    close(fd);
++            }
++        } else {
++            snprintf(dir, sizeof(dir), "%s%s", prefix, rdKind == RIPPS2_DISC_PS2CD ? "CD" : "DVD");
++            rdMkdir(dir);
++            if (!rdCreate(path))
++                r = RD_WRITE_FAIL;
++            sceCdMmode(rdKind == RIPPS2_DISC_PS2CD ? SCECdMmodeCd : SCECdMmodeDvd);
++            if (r == RD_OK)
++                r = rdCopyData(0, rdSectors);
++        }
++    }
++    if (r != RD_OK) {
++        rdFailed(r);
++        return;
++    }
++    if (rdFd >= 0)
++        close(rdFd);
++    rdFd = -1;
++    sceCdStop();
++    sceCdSync(0);
++    guiMsgBoxSound(SFX_SAVE);
++    if (rdKind == RIPPS2_DISC_PS1)
++        snprintf(msg, sizeof(msg), _t("Ripped to %s as a BIN and CUE. It is in the PS1 games list, played with Ember."), dir);
++    else if (split)
++        snprintf(msg, sizeof(msg), _t("Ripped as %d parts of 1 GB with ul.cfg on the drive. It is in your games list."), rdPart);
++    else
++        snprintf(msg, sizeof(msg), _t("Ripped to %s. It is in your games list."), path);
++    guiMsgBox(msg, 0, NULL);
++}
++
++// An audio CD's sound tracks, one WAV each, into dir
++static int rdRipAudio(const char *dir)
++{
++    char path[220];
++    u8 head[44];
++    int t, r = RD_OK;
++
++    sceCdMmode(SCECdMmodeCd);
++    sceCdDiskReady(0);
++    for (t = 1; t <= rdTracks && r == RD_OK; t++) {
++        u32 bytes;
++        if (!rdAudio[t])
++            continue;
++        bytes = (rdStart[t + 1] - rdStart[t]) * RD_RAW;
++        snprintf(path, sizeof(path), "%s/Track %02d.wav", dir, t);
++        if (!rdCreate(path))
++            return RD_WRITE_FAIL;
++        rdWavHeader(head, bytes);
++        if (!rdWrite(head, sizeof(head)))
++            return RD_WRITE_FAIL;
++        rdDone += sizeof(head);
++        r = rdCopyRaw(rdStart[t], rdStart[t + 1], 1);
++        close(rdFd);
++        rdFd = -1;
++    }
++    return r;
++}
++
++// A DVD video's VIDEO_TS (and AUDIO_TS) files into dir
++static int rdRipVideo(const char *dir)
++{
++    char path[220];
++    int i, r = RD_OK;
++
++    sceCdMmode(SCECdMmodeDvd);
++    snprintf(path, sizeof(path), "%s/VIDEO_TS", dir);
++    rdMkdir(path);
++    for (i = 0; i < rdFileCount && r == RD_OK; i++) {
++        rd_file_t *f = &rdFiles[i];
++        u32 sectors = (f->size + RD_DATA - 1) / RD_DATA, lsn = f->lba, left = f->size;
++        if (f->isDir)
++            continue;
++        snprintf(path, sizeof(path), "%s/%s", dir, f->inAudioTs ? "AUDIO_TS" : "VIDEO_TS");
++        if (f->inAudioTs)
++            rdMkdir(path);
++        snprintf(path + strlen(path), sizeof(path) - strlen(path), "/%s", f->name);
++        if (!rdCreate(path))
++            return RD_WRITE_FAIL;
++        while (sectors > 0) { // the last sector holds only what is left of the file
++            u32 n = sectors > RD_BUF_SECS ? RD_BUF_SECS : sectors, k = 0, bytes;
++            while (k < n) {
++                u32 m = n - k > RD_READ ? RD_READ : n - k;
++                if (!rdRead(lsn + k, m, rdBuf + k * RD_DATA, SCECdSecS2048))
++                    return RD_READ_FAIL;
++                k += m;
++            }
++            bytes = n * RD_DATA < left ? n * RD_DATA : left;
++            if (!rdWrite(rdBuf, bytes))
++                return RD_WRITE_FAIL;
++            rdDone += bytes;
++            left -= bytes;
++            lsn += n;
++            sectors -= n;
++            if (!rdTick())
++                return RD_CANCEL;
++        }
++        close(rdFd);
++        rdFd = -1;
++    }
++    if (r == RD_OK) { // players look for it, empty or not
++        snprintf(path, sizeof(path), "%s/AUDIO_TS", dir);
++        rdMkdir(path);
++    }
++    return r;
++}
++
++// Where MEDIA goes: beside AUDIO (RIPPS2's own folder, or the drive AUDIO was found on), else the top of the drive
++// RIPPS2 runs from, or of the first started one; a memory card is never it
++static int rdMediaBase(char *out, int size)
++{
++    if (ripps2AudioBase(out, size, 1) && strncmp(out, "mc", 2) != 0)
++        return 1;
++    rdFindDrives();
++    if (rdSlotCount > 0) {
++        snprintf(out, size, "mass%d:/", rdSlot[rdSlotSel]);
++        return 1;
++    }
++    return 0;
++}
++
++// The folder the rip lands in, made under dir: "Audio CD", else "Audio CD 2", ...
++static void rdFreeName(const char *dir, const char *want, char *out, int size)
++{
++    char path[260];
++    int i;
++    snprintf(out, size, "%s", want);
++    for (i = 2; i < 100; i++) {
++        snprintf(path, sizeof(path), "%s%s", dir, out);
++        if (mkdir(path, 0777) == 0) {
++            rdMadeAdd(path, 1);
++            return;
++        }
++        snprintf(out, size, "%s %d", want, i);
++    }
++}
++
++int ripps2DiscRipHere(const char *dir, char *made, int size)
++{
++    char id[16], title[48], base[260], folder[64], what[96];
++    int kind, r;
++
++    made[0] = '\0';
++    ripps2DiscWaitIdle();
++    kind = ripps2DiscInfo(id, sizeof(id), title, sizeof(title));
++    if (kind != rdKind || !rdIsMedia(kind)) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("The disc in the drive is not the one that was ripped to the clipboard. Hold SELECT on LAUNCH DISC again."), 0, NULL);
++        return 0;
++    }
++    if (!strncmp(dir, "mc", 2)) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("A memory card is far too small for a disc. Paste it on a USB drive, the HDD or an MMCE card."), 0, NULL);
++        return 0;
++    }
++    if (!rdBufReady() || !rdMeasure()) {
++        rdBufFree();
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("RIPDISC could not read what is on the disc. Clean it, put it back and try again."), 0, NULL);
++        return 0;
++    }
++    if (!rdConfirm(0, dir)) {
++        rdBufFree();
++        return 0;
++    }
++    rdKindLine(what, sizeof(what));
++    rdBegin(what, rdBytes);
++    rdSafeName(kind == RIPPS2_DISC_VIDEO && rdLabel[0] ? rdLabel : kind == RIPPS2_DISC_VIDEO ? "DVD Video" : "Audio CD", folder, sizeof(folder));
++    rdFreeName(dir, folder[0] ? folder : "Disc", folder, sizeof(folder));
++    snprintf(base, sizeof(base), "%s%s", dir, folder);
++    r = kind == RIPPS2_DISC_AUDIO ? rdRipAudio(base) : rdRipVideo(base);
++    rdBufFree();
++    if (r != RD_OK) {
++        rdFailed(r);
++        return 0;
++    }
++    if (rdFd >= 0)
++        close(rdFd);
++    rdFd = -1;
++    rdMadeCount = 0;
++    sceCdStop();
++    sceCdSync(0);
++    sfxPlay(SFX_SAVE);
++    snprintf(made, size, "%s", folder);
++    return kind == RIPPS2_DISC_AUDIO ? 2 : 1;
++}
++
++// SELECT held on the panel: what the disc is, then the confirm step and the rip (a game), or Memory Files (media)
++static void rdOpen(void)
++{
++    ripps2DiscWaitIdle();
++    rdKind = ripps2DiscInfo(rdId, sizeof(rdId), rdTitle, sizeof(rdTitle));
++    if (!rdIsGame(rdKind) && !rdIsMedia(rdKind))
++        return;
++    rmStartFrame();
++    rdPage();
++    fntRenderString(gTheme->fonts[4], 320, 240, ALIGN_CENTER, 0, 0, _t("READING THE DISC"), RD_SOFT);
++    rmEndFrame();
++    if (!rdBufReady() || !rdMeasure()) {
++        rdBufFree();
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(rdKind == RIPPS2_DISC_VIDEO ? _t("RIPDISC found no VIDEO_TS folder it can read on this DVD.") :
++                                                _t("RIPDISC could not read what is on the disc. Clean it, put it back and try again."),
++                  0, NULL);
++        return;
++    }
++    if (rdIsGame(rdKind)) {
++        rdFindDrives();
++        if (rdSlotCount == 0) {
++            rdBufFree();
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(_t("A game rips to a USB drive, the exFAT HDD, MX4SIO or iLink, and none is started. Connect one, then open Storage once."), 0, NULL);
++            return;
++        }
++        if (rdConfirm(1, ""))
++            rdRipGame();
++        rdBufFree();
++        return;
++    }
++    rdBufFree();
++    if (rdConfirm(0, "")) {
++        char base[200], home[220], what[48];
++        if (!rdMediaBase(base, sizeof(base))) {
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(_t("Media rips to a USB drive, the HDD or an MMCE card, and none is started. Connect one, then open Storage once."), 0, NULL);
++            return;
++        }
++        snprintf(home, sizeof(home), "%sMEDIA", base);
++        mkdir(home, 0777);
++        strcat(home, "/");
++        ripps2WriteReadme(base, 1);
++        ripps2WriteReadme(base, 0); // AUDIO's too, when it is there
++        snprintf(what, sizeof(what), "%s", rdKind == RIPPS2_DISC_AUDIO ? _t("AUDIO CD") : _t("DVD VIDEO"));
++        ripps2FilesRipped(what, home);
++    }
++}
++
++int ripps2DiscRipInput(void)
++{
++    if (rdShown <= 0.0f) {
++        rdHolding = 0;
++        return 0;
++    }
++    if (getKeyOn(KEY_SELECT)) {
++        rdHolding = 1;
++        rdHoldSince = ripps2Seconds();
++        return 1;
++    }
++    if (!rdHolding)
++        return 0;
++    if (!getKeyPressed(KEY_SELECT)) {
++        rdHolding = 0;
++        return 1;
++    }
++    if (ripps2Seconds() - rdHoldSince >= RD_HOLD_S) {
++        rdHolding = 0;
++        sfxPlay(SFX_CONFIRM);
++        rdOpen();
++        rdPageSince = ripps2Seconds(); // back on the page: the panel waits its 4.2 s again
++        readPads();
++    }
++    return 1;
++}
++
++// ---- README.txt in AUDIO and MEDIA ----
++
++static const char rdReadmeAudio[] =
++    "RIPPS2 AUDIO folder\r\n"
++    "===================\r\n"
++    "\r\n"
++    "RIPPS2 plays the sounds and the music in this folder. It ships none of its own:\r\n"
++    "without this folder it is silent. STATUS > SOUNDS says what it found here.\r\n"
++    "\r\n"
++    "Sound effects: .adp files named for their events\r\n"
++    "  boot, cancel, confirm, cursor, message, transition, bd_connect, bd_disconnect,\r\n"
++    "  page_in, page_out, error, save, launch, disc, random\r\n"
++    "  Settings > Audio Settings > BIOS Sounds > Rip writes your own PS2's menu sounds\r\n"
++    "  here from its BIOS, with the boot and game launch music played from the BIOS's\r\n"
++    "  own notes.\r\n"
++    "\r\n"
++    "Music: any .ogg (Ogg Vorbis, no tags) or .wav (16-bit) file\r\n"
++    "  Settings > Audio Settings > Music lists every one. A name like\r\n"
++    "  \"bgm_01 Title.ogg\" sets its place in the list and its title, but any other name\r\n"
++    "  is listed as it is: a CD track copied here from MEDIA (or with the CD player's\r\n"
++    "  COPY TO AUDIO) needs no renaming.\r\n"
++    "\r\n"
++    "Ripped discs\r\n"
++    "  Whole CDs and DVD videos ripped with RIPDISC (LAUNCH DISC, hold SELECT) go to\r\n"
++    "  the MEDIA folder beside this one, apart from the sounds and music here.\r\n"
++    "\r\n"
++    "RIPPS2 Audio Studio (tools/audio-studio in the RIPPS2 repository) does all of this\r\n"
++    "on a PC: it converts any sound or song, and renders the BIOS sounds too.\r\n";
++
++static const char rdReadmeMedia[] =
++    "RIPPS2 MEDIA folder\r\n"
++    "===================\r\n"
++    "\r\n"
++    "RIPDISC puts the CDs and DVD videos you rip here, apart from the sounds and\r\n"
++    "music in AUDIO.\r\n"
++    "\r\n"
++    "Ripping a disc\r\n"
++    "  1. Put the disc in the drive and open LAUNCH DISC.\r\n"
++    "  2. After a few seconds the RIPDISC panel shows. Hold SELECT until its ring fills.\r\n"
++    "  3. Check the size, confirm, pick the folder in Memory Files (the clipboard says\r\n"
++    "     RIPPED), choose PASTE, then press START.\r\n"
++    "\r\n"
++    "What goes where\r\n"
++    "  Audio CD   a folder named for the CD (the keyboard asks for its name), one WAV\r\n"
++    "             a track: Track 01.wav ..., CD quality (44.1 kHz, 16-bit stereo).\r\n"
++    "  DVD video  a folder named for the disc with its VIDEO_TS files; a PC plays the\r\n"
++    "             folder as a DVD. Only DVDs you made yourself: a bought film is copy\r\n"
++    "             protected and the drive will not read it.\r\n"
++    "  PS2 game   not here: an ISO in the drive's DVD or CD folder (or 1 GB parts and\r\n"
++    "             ul.cfg when it is over 4 GB), so it is in your games list.\r\n"
++    "  PS1 game   not here: a BIN and CUE in EMBER/games/<title>/, played with Ember.\r\n"
++    "\r\n"
++    "Music for the menus\r\n"
++    "  Copy any WAV from here into the AUDIO folder beside RIPPS2: it shows in\r\n"
++    "  Settings > Audio Settings > Music as it is, with no renaming.\r\n";
++
++void ripps2WriteReadme(const char *base, int media)
++{
++    char path[300];
++    int fd;
++    if (base == NULL || base[0] == '\0' || !strncmp(base, "mc", 2)) // a memory card keeps its room for saves
++        return;
++    snprintf(path, sizeof(path), "%s%s/README.txt", base, media ? "MEDIA" : "AUDIO");
++    if ((fd = open(path, O_RDONLY)) >= 0) {
++        close(fd);
++        return;
++    }
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
++        return; // no such folder
++    write(fd, media ? rdReadmeMedia : rdReadmeAudio, media ? sizeof(rdReadmeMedia) - 1 : sizeof(rdReadmeAudio) - 1);
++    close(fd);
++}
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index ae5c48d..c650dec 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -112,6 +112,7 @@ static int fbClipCount = 0, fbClipCut = 0;
+ static unsigned char fbClipReplace[FB_CLIP_MAX]; // build 98: a name already there, replaced by this paste (asked first)
+ static volatile int fbReplacing = 0;             // build 98: the copy running now replaces what it finds
+ static char fbClipVmc[256]; // the card image the clipboard was filled in ("" = none)
++static char fbRipWhat[48];  // build 105: RIPDISC's media on the clipboard ("AUDIO CD"), ripped where it is pasted
+ 
+ // inside a PS2 card image: its path ("" = not in one), whether it is read only, its free space
+ static char fbVmc[256];
+@@ -1052,11 +1053,15 @@ static void fbWhat(char *out, int size, int dirs, int files)
+         snprintf(out, size, "%d %s, %d %s", dirs, dirs == 1 ? _t("FOLDER") : _t("FOLDERS"), files, files == 1 ? _t("FILE") : _t("FILES"));
+ }
+ 
+-// the clipboard's: "FOLDER AND CONTENTS COPIED", "3 FILES CUT"
++// the clipboard's: "FOLDER AND CONTENTS COPIED", "3 FILES CUT", "AUDIO CD RIPPED"
+ static void fbClipWhat(char *out, int size)
+ {
+     char what[48];
+     int i, dirs = 0;
++    if (fbRipWhat[0]) {
++        snprintf(out, size, "%s %s", fbRipWhat, _t("RIPPED"));
++        return;
++    }
+     for (i = 0; i < fbClipCount; i++)
+         dirs += fbClipIsDir[i] ? 1 : 0;
+     fbWhat(what, sizeof(what), dirs, fbClipCount - dirs);
+@@ -1294,6 +1299,20 @@ void ripps2FilesEnter(void)
+     guiSwitchScreen(GUI_SCREEN_RIPPS2_FILES);
+ }
+ 
++// RIPPS2 build 105: RIPDISC's media on the clipboard, RIPPED where it would say COPIED, and the browser open on
++// MEDIA: PASTE in the folder picked rips the disc there
++void ripps2FilesRipped(const char *what, const char *dir)
++{
++    char text[80];
++    snprintf(fbRipWhat, sizeof(fbRipWhat), "%s", what);
++    fbClipCount = 0;
++    fbClipWhat(text, sizeof(text));
++    fbSetToast(text);
++    if (!fbBusy)
++        fbOpenPath(dir, NULL);
++    guiSwitchScreen(GUI_SCREEN_RIPPS2_FILES);
++}
++
+ static void fbUp(void)
+ {
+     char parent[256], last[FB_NAME];
+@@ -1838,7 +1857,7 @@ static void fbMenuBuild(void)
+         if (canChange)
+             fbMenuItems[fbMenuCount++] = FB_ACT_CUT;
+     }
+-    if (inFolder && fbClipCount > 0 && canChange)
++    if (inFolder && canChange && (fbClipCount > 0 || (fbRipWhat[0] && !inVmc && !fbIsMc(fbPath))))
+         fbMenuItems[fbMenuCount++] = FB_ACT_PASTE;
+     if (inFolder && !inVmc && fbClipHas(1))
+         fbMenuItems[fbMenuCount++] = FB_ACT_PASTE_PSU;
+@@ -1859,6 +1878,32 @@ static void fbMenuBuild(void)
+     fbMenuSel = 0;
+ }
+ 
++// build 105: PASTE with a disc on the clipboard: RIPDISC rips it here (its confirm step first); an audio CD's
++// folder is then named on the keyboard, which opens by itself
++static void fbPasteRipped(void)
++{
++    char made[FB_NAME], name[FB_NAME], from[320], to[320];
++    int r;
++
++    sfxPlay(SFX_CONFIRM);
++    r = ripps2DiscRipHere(fbPath, made, sizeof(made));
++    if (r > 0) {
++        fbRipWhat[0] = '\0';
++        fbSetToast(_t("RIPPED"));
++        snprintf(fbKeepName, sizeof(fbKeepName), "%s", made);
++        snprintf(name, sizeof(name), "%s", made);
++        if (r == 2 && guiShowKeyboard(name, sizeof(name)) && name[0] && strcmp(name, made) != 0) {
++            fbJoin(from, sizeof(from), fbPath, made);
++            fbJoin(to, sizeof(to), fbPath, name);
++            if (rename(from, to) == 0)
++                snprintf(fbKeepName, sizeof(fbKeepName), "%s", name);
++            else
++                fbSetToast(_t("RENAME FAILED"));
++        }
++    }
++    fbRun(FB_OP_SCAN, _t("READING"));
++}
++
+ static void fbAction(int act)
+ {
+     char ask[160], name[FB_NAME], from[320], to[320];
+@@ -1876,6 +1921,7 @@ static void fbAction(int act)
+             break;
+         case FB_ACT_COPY:
+         case FB_ACT_CUT:
++            fbRipWhat[0] = '\0'; // build 105: a disc waiting on the clipboard gives way
+             fbClipCount = fbSelection(fbClip, fbClipIsDir, FB_CLIP_MAX);
+             snprintf(fbClipDir, sizeof(fbClipDir), "%s", fbPath);
+             snprintf(fbClipVmc, sizeof(fbClipVmc), "%s", fbVmcPath(fbVmc, fbPath, NULL, 0) ? fbVmc : "");
+@@ -1888,6 +1934,10 @@ static void fbAction(int act)
+         case FB_ACT_PASTE:
+         case FB_ACT_PASTE_PSU:
+         case FB_ACT_UNPACK:
++            if (act == FB_ACT_PASTE && fbRipWhat[0]) {
++                fbPasteRipped();
++                break;
++            }
+             sfxPlay(SFX_CONFIRM);
+             fbPasteMode = act == FB_ACT_PASTE_PSU ? FB_PASTE_PSU : act == FB_ACT_UNPACK ? FB_PASTE_UNPACK : FB_PASTE_PLAIN;
+             fbTotalItems = fbClipCount;
+@@ -2738,7 +2788,7 @@ void ripps2RenderFiles(void)
+     fntRenderString(uiFont, FB_X, 30, ALIGN_VCENTER, 0, 0, fbPath[0] ? fbPath : _t("MEMORY FILES"), FB_LIT);
+     if (fbToastAt != 0 && (float)(clock() - fbToastAt) / CLOCKS_PER_SEC < 2.5f)
+         snprintf(buf, sizeof(buf), "%s", fbToast);
+-    else if (fbClipCount > 0)
++    else if (fbClipCount > 0 || fbRipWhat[0])
+         fbClipWhat(buf, sizeof(buf));
+     else if (fbVmcPath(fbVmc, fbPath, NULL, 0))
+         snprintf(buf, sizeof(buf), _t("%u KB FREE%s"), fbVmcFreeKb, fbVmcRO ? _t(", READ ONLY") : "");
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 4c43dd2..d8b91b4 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -1059,10 +1059,65 @@ static void discTitle(const char *id, char *out, int size)
+ 
+ static volatile int discSound = 0; // the disc is no audio CD to the drive, but has sound tracks
+ 
++// RIPPS2 build 105: what is in the drive for RIPDISC (RIPPS2_DISC_*), a game's ID and title with it
++static volatile int discKind = RIPPS2_DISC_NONE;
++static char discId[16], discName[48];
++
++// "KEY = value" from SYSTEM.CNF text: BOOT2 on a PS2 disc, BOOT on a PS1 one (BOOT2 is not BOOT: its "2" is no "=")
++static int discCnfValue(const char *cnf, const char *key, char *out, int size)
++{
++    const char *p = cnf;
++    int k = strlen(key);
++    while ((p = strstr(p, key)) != NULL) {
++        const char *q = p + k;
++        while (*q == ' ' || *q == '\t')
++            q++;
++        if (*q == '=' && (p == cnf || p[-1] == '\n' || p[-1] == '\r' || p[-1] == ' ')) {
++            int i = 0;
++            q++;
++            while (*q == ' ' || *q == '\t')
++                q++;
++            while (*q && *q != '\r' && *q != '\n' && *q != ' ' && *q != '\t' && i < size - 1)
++                out[i++] = *q++;
++            out[i] = '\0';
++            return i > 0;
++        }
++        p += k;
++    }
++    return 0;
++}
++
++// A game's ID from its SYSTEM.CNF ("cdrom0:\SLUS_200.62;1" -> "SLUS_200.62")
++static int discBootId(int ps1, char *id, int size)
++{
++    char cnf[512], path[64];
++    const char *s;
++    int fd = open("cdrom0:\\SYSTEM.CNF;1", O_RDONLY), n, i;
++
++    id[0] = '\0';
++    if (fd < 0)
++        return 0;
++    n = read(fd, cnf, sizeof(cnf) - 1);
++    close(fd);
++    if (n <= 0)
++        return 0;
++    cnf[n] = '\0';
++    if (!discCnfValue(cnf, ps1 ? "BOOT" : "BOOT2", path, sizeof(path)))
++        return 0;
++    s = strrchr(path, '\\');
++    s = s ? s + 1 : path;
++    if (strchr(s, ':') != NULL)
++        s = strchr(s, ':') + 1;
++    for (i = 0; s[i] && s[i] != ';' && i < size - 1; i++)
++        id[i] = s[i];
++    id[i] = '\0';
++    return i > 0;
++}
++
+ static void discPollWorker(void)
+ {
+-    char line[80] = "", cnf[512], path[64], id[16], title[48];
+-    int type = sceCdGetDiskType(), fd, n, i;
++    char line[80] = "", id[16] = "", title[48] = "";
++    int type = sceCdGetDiskType(), fd, n, kind = RIPPS2_DISC_NONE;
+ 
+     discRetry = 0;
+     discSound = 0;
+@@ -1079,52 +1134,49 @@ static void discPollWorker(void)
+         case SCECdPSCD:
+         case SCECdPSCDDA:
+             snprintf(line, sizeof(line), _t("PS1 GAME"));
++            kind = RIPPS2_DISC_PS1;
++            if (discBootId(1, id, sizeof(id)))
++                discTitle(id, title, sizeof(title));
+             break;
+         case SCECdPS2CD:
+         case SCECdPS2CDDA:
+         case SCECdPS2DVD:
+             snprintf(line, sizeof(line), _t("PS2 GAME"));
+-            fd = open("cdrom0:\\SYSTEM.CNF;1", O_RDONLY);
+-            if (fd >= 0) {
+-                n = read(fd, cnf, sizeof(cnf) - 1);
+-                close(fd);
+-                if (n > 0) {
+-                    cnf[n] = '\0';
+-                    if (sysParseBoot2(cnf, path, sizeof(path)) == 0) {
+-                        const char *s = strrchr(path, '\\');
+-                        s = s ? s + 1 : path;
+-                        if (strchr(s, ':') != NULL)
+-                            s = strchr(s, ':') + 1;
+-                        for (i = 0; s[i] && s[i] != ';' && i < (int)sizeof(id) - 1; i++)
+-                            id[i] = s[i];
+-                        id[i] = '\0';
+-                        discTitle(id, title, sizeof(title));
+-                        if (title[0])
+-                            snprintf(line, sizeof(line), _t("PS2 GAME   %s   %s"), id, title);
+-                        else
+-                            snprintf(line, sizeof(line), _t("PS2 GAME   %s"), id);
+-                    }
+-                }
++            kind = type == SCECdPS2DVD ? RIPPS2_DISC_PS2DVD : RIPPS2_DISC_PS2CD;
++            if (discBootId(0, id, sizeof(id))) {
++                discTitle(id, title, sizeof(title));
++                if (title[0])
++                    snprintf(line, sizeof(line), _t("PS2 GAME   %s   %s"), id, title);
++                else
++                    snprintf(line, sizeof(line), _t("PS2 GAME   %s"), id);
+             }
+             break;
+         case SCECdDVDV:
+             // an ESR-patched game reads as DVD video, its own files beside the video ones
+             fd = open("cdrom0:\\SYSTEM.CNF;1", O_RDONLY);
+             snprintf(line, sizeof(line), fd >= 0 ? _t("ESR DISC: A PATCHED PS2 GAME") : _t("DVD VIDEO"));
+-            if (fd >= 0)
++            kind = fd >= 0 ? RIPPS2_DISC_ESR : RIPPS2_DISC_VIDEO;
++            if (fd >= 0) {
+                 close(fd);
++                if (discBootId(0, id, sizeof(id)))
++                    discTitle(id, title, sizeof(title));
++            }
+             break;
+         case SCECdCDDA:
+             snprintf(line, sizeof(line), _t("AUDIO CD: START LASER PLAYS IT"));
++            kind = RIPPS2_DISC_AUDIO;
+             break;
+         default:
+ #ifdef RIPPS2_CD_TEST
+             snprintf(line, sizeof(line), _t("AUDIO CD: START LASER PLAYS IT (CDTEST FILES)")); // PCSX2 types no image as one
++            kind = RIPPS2_DISC_AUDIO;
+ #else
+             // build 69: a CD the drive does not call an audio CD may still carry sound (CD-Extra,
+             // mixed mode, a burned disc): its table of contents says
++            kind = RIPPS2_DISC_OTHER;
+             if (type != SCECdDVDVR && (n = ripps2CdAudioTracks()) > 0) {
+                 discSound = 1;
++                kind = RIPPS2_DISC_AUDIO;
+                 // build 104: one whole sentence for one track and one for more, so a translation needs no S and IT / THEM
+                 if (n == 1)
+                     snprintf(line, sizeof(line), _t("CD WITH 1 SOUND TRACK: START LASER PLAYS IT"));
+@@ -1136,6 +1188,9 @@ static void discPollWorker(void)
+             break;
+     }
+     snprintf(discLine, sizeof(discLine), "%s", line);
++    snprintf(discId, sizeof(discId), "%s", id);
++    snprintf(discName, sizeof(discName), "%s", title);
++    discKind = discRetry ? RIPPS2_DISC_NONE : kind; // set last: RIPDISC reads it first
+     if (discFromTray && type != SCECdNODISC && !discRetry) {
+         discArrived = 1; // the GUI sounds it (sfxPlay is the GUI thread's)
+         discFromTray = 0;
+@@ -1214,6 +1269,23 @@ int ripps2DiscQuiet(void)
+     return n <= 1;
+ }
+ 
++int ripps2DiscInfo(char *id, int idSize, char *title, int titleSize)
++{
++    int kind = discKind;
++    if (id != NULL)
++        snprintf(id, idSize, "%s", discId);
++    if (title != NULL)
++        snprintf(title, titleSize, "%s", discName);
++    return kind;
++}
++
++void ripps2DiscWaitIdle(void)
++{
++    int wait;
++    for (wait = 0; discPollBusy && wait < 100; wait++)
++        DelayThread(50 * 1000);
++}
++
+ void ripps2RenderLaunch(void)
+ {
+     ripps2DrawBackground();
+@@ -1228,6 +1300,7 @@ void ripps2RenderLaunch(void)
+         fntRenderString(gTheme->fonts[3], 320, 450, ALIGN_CENTER, 0, 0, discLine, COLOR_SOFT);
+     else
+         fntRenderString(gTheme->fonts[3], 320, 450, ALIGN_CENTER, 0, 0, _t("INSERT PS1/PS2 GAME OR CD/DVD MEDIA"), COLOR_DIM);
++    ripps2DiscRipRender(); // build 105: RIPDISC, over the page once it has been up a while
+ }
+ 
+ void ripps2HandleInputLaunch(void)
+@@ -1236,6 +1309,8 @@ void ripps2HandleInputLaunch(void)
+         ripps2CdInput();
+         return;
+     }
++    if (ripps2DiscRipInput()) // build 105: SELECT held on the RIPDISC panel
++        return;
+     if (getKeyOn(KEY_R1)) {
+         ripps2StepCategory(1);
+     } else if (getKeyOn(KEY_L1)) {
+diff --git a/src/sound.c b/src/sound.c
+index ba589f0..fba1776 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -2077,7 +2077,7 @@ static int bgmHomeHasMusic(const char *prefix)
+     static char names[RIPPS2_MUSIC_MAX][RIPPS2_MUSIC_NAME];
+     char sub[64];
+     snprintf(sub, sizeof(sub), "%sAUDIO", prefix);
+-    return bgmMusicScan("", sub, 1, names, 0, RIPPS2_MUSIC_MAX) > 0;
++    return bgmMusicScan("", sub, 0, names, 0, RIPPS2_MUSIC_MAX) > 0;
+ }
+ 
+ // a drive's OPL root ("mass0:/", "pfs0:/"), from its update (the IO worker)
+@@ -2119,7 +2119,9 @@ int bgmMusicHome(int i, char *out, int size)
+ // One AUDIO folder beside RIPPS2 holds the sound pack and the music, named as RiptOPL names them:
+ // <event>.adp for the sounds and bgm*.ogg / bgm*.wav for the music, which plays in name order (a
+ // number sets it: bgm_01 Slideshow.ogg, bgm_02 Details.ogg; a plain bgm.ogg works too). Each entry is
+-// the track's path under RIPPS2's folder. A MUSIC folder (builds 61 to 65) still counts.
++// the track's path under RIPPS2's folder. A MUSIC folder (builds 61 to 65) still counts. Since build 105
++// every .ogg and .wav in AUDIO is music, whatever its name: a track copied in from a ripped CD
++// (MEDIA/<CD>/Track 01.wav) is listed as it is, with no bgm_04 to give it.
+ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*names)[RIPPS2_MUSIC_NAME], int n, int max)
+ {
+     char path[256];
+@@ -2149,7 +2151,7 @@ int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
+     int n = 0, i, k, j;
+ 
+     if (ripps2AudioBase(dir, sizeof(dir) - 8, 0)) {
+-        n = bgmMusicScan(dir, "AUDIO", 1, names, 0, max);
++        n = bgmMusicScan(dir, "AUDIO", 0, names, 0, max); // build 105: any .ogg / .wav (the sounds are .adp)
+         n = bgmMusicScan(dir, "MUSIC", 0, names, n, max);
+     } else
+         dir[0] = '\0';
+@@ -2157,7 +2159,7 @@ int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
+         if (!strcmp(bgmHomes[i], dir))
+             continue; // RIPPS2's own folder, read above
+         snprintf(sub, sizeof(sub), "%sAUDIO", bgmHomes[i]);
+-        k = bgmMusicScan("", sub, 1, names, n, max);
++        k = bgmMusicScan("", sub, 0, names, n, max);
+         for (j = n; j < k; j++) { // one of the same name already listed (beside RIPPS2 first) wins
+             int d, dup = 0;
+             for (d = 0; d < n && !dup; d++)
