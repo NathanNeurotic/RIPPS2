@@ -5,17 +5,22 @@ run (warn before PCSX2 runs), fixes folded into that build's patch, then tick it
 
 ## Build 104: languages (all major ones at once)
 Asked for by Algol (French, psx-place). One ELF; the words come from a language pack.
-- [ ] `_t("English")` for every on-screen string in RIPPS2's own files (N_ for tables, `_t` where shown), and the
+- [x] `_t("English")` for every on-screen string in RIPPS2's own files (N_ for tables, `_t` where shown), and the
       RIPPS2 strings in RiptOPL's files.
-- [ ] Keyed language files (`#!RIPPS2LANG 1`: FNV-1a of the English, a tab, the translation) carry Open PS2 Loader's
+- [x] Keyed language files (`#!RIPPS2LANG 1`: FNV-1a of the English, a tab, the translation) carry Open PS2 Loader's
       strings and RIPPS2's, so a pack made for one build keeps working in the next. Old line-numbered files still load.
-- [ ] A letter a font lacks comes from the language font, then font_CJK, at that font's own size; caps fonts, the
+- [x] A letter a font lacks comes from the language font, then font_CJK, at that font's own size; caps fonts, the
       hints' sentence case and the source toast handle accented, Greek and Cyrillic letters; CJK lines break
       between characters.
-- [ ] `RIPPS2-languages.zip` (LNG/lang_<Name>.lng plus the fonts a script needs) built in CI from
+- [x] `RIPPS2-languages.zip` (LNG/lang_<Name>.lng plus the fonts a script needs) built in CI from
       `elf/lang/<Language>.yml`, OPL's translations and RiptOPL's overlays; licences checked for every font.
-- [ ] Translations: French first and complete, then every language in RiptOPL's list; Arabic and Persian drawn right
-      to left with joined letters.
+      CI's pack report (10/19): every language's letters are in its font except Laotian (no free Lao font) and
+      Persian (upstream's pre-joined letters; the font_Arabic DejaVu subset has no presentation forms).
+- [x] Translations: French first and complete, then every language in RiptOPL's list (32 of 33; Ryukyuan's gaps come
+      from Japanese, `STRINGS_FROM`). Laotian not done: no font.
+- [ ] Arabic and Persian drawn right to left with joined letters. Needs a font with Arabic Presentation Forms A and B
+      (the user picks the source; full DejaVu Sans has them), then: shape to presentation forms and reverse each line
+      after wrapping, in fntsys, keeping Latin and digit runs in their order.
 - [ ] Lab: French and one non-Latin language on RIPPS2, RIPGRID, RIPFLOW and Adapt (long words, wraps, hints).
 
 ## Build 105: RIPDISC (a disc to storage or files)
