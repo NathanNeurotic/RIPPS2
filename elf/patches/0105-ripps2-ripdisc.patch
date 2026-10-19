@@ -141,10 +141,10 @@ index 79b05c2..5a2f8e2 100644
          guiMsgBoxSound(SFX_ERROR);
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
 new file mode 100644
-index 0000000..f4e3d38
+index 0000000..728674f
 --- /dev/null
 +++ b/src/ripps2disc.c
-@@ -0,0 +1,1326 @@
+@@ -0,0 +1,1342 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -390,6 +390,22 @@ index 0000000..f4e3d38
 +    return rdLe32(rdOne + 80);
 +}
 +
++// One quick look, no retries: the size of the volume whose descriptor is at lsn, else 0 (past a disc's end too)
++static u32 rdVolumeAt(u32 lsn)
++{
++    sceCdRMode m;
++    m.trycount = 1;
++    m.spindlctrl = SCECdSpinNom;
++    m.datapattern = SCECdSecS2048;
++    m.pad = 0;
++    if (!sceCdRead(lsn, 1, rdOne, &m))
++        return 0;
++    sceCdSync(0);
++    if (sceCdGetError() != SCECdErNO || rdOne[0] != 1 || memcmp(rdOne + 1, "CD001", 5) != 0)
++        return 0;
++    return rdLe32(rdOne + 80);
++}
++
 +// The entries of the ISO 9660 folder at lba (size bytes); . and .. left out
 +static int rdDir(u32 lba, u32 size, rd_file_t *out, int max, int audioTs)
 +{
@@ -466,8 +482,7 @@ index 0000000..f4e3d38
 +static int rdMeasure(void)
 +{
 +    u32 n;
-+    int t, dual = 0;
-+    u32 layer1 = 0;
++    int t;
 +
 +    rdLabel[0] = '\0';
 +    rdTracks = 0;
@@ -480,11 +495,12 @@ index 0000000..f4e3d38
 +            sceCdMmode(rdKind == RIPPS2_DISC_PS2CD ? SCECdMmodeCd : SCECdMmodeDvd);
 +            if ((n = rdVolume(0, rdLabel)) == 0)
 +                return 0;
-+            // a dual layer DVD: the second layer has its own volume descriptor, 16 sectors into it
-+            if (rdKind != RIPPS2_DISC_PS2CD && sceCdReadDvdDualInfo(&dual, &layer1) && dual && layer1 > 16) {
-+                u32 n1 = rdVolume(layer1, NULL);
-+                if (n1 > 0)
-+                    n = layer1 + n1;
++            // a dual layer DVD, found as Open PS2 Loader finds one in an ISO: layer 1's own volume descriptor is at
++            // the sector layer 0's gives as its size, and layer 1 starts 16 sectors before it
++            if (rdKind != RIPPS2_DISC_PS2CD) {
++                u32 n1 = rdVolumeAt(n);
++                if (n1 > 16)
++                    n = n - 16 + n1;
 +            }
 +            rdSectors = n;
 +            rdBytes = (u64)n * RD_DATA;
