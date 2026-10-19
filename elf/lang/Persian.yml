@@ -884,20 +884,269 @@ strings:
   Copying %s: در حال کپی %s
   LAUNCH ANYWAY: با این حال اجرا کن
 labels:
+  SAVE_CHANGES: ذخیره تغییرات
+  BACK: بازگشت
+  NETCONFIG: تنظیمات شبکه
+  SHOW_ADVANCED_OPTS: گزینه‌های پیشرفته
+  NO_ITEMS: پیش‌فرض
+  SETTINGS_SAVED: تنظیمات در %s ذخیره شد
+  ERROR_SAVING_SETTINGS: خطا در نوشتن تنظیمات!
+  EXIT: خروج
+  SETTINGS: تنظیمات
+  MENU: منو
+  BDM_GAMES: بازی‌های BDM
+  HDD_GAMES: بازی‌های HDD
+  NET_GAMES: بازی‌های ETH
+  APPS: برنامه‌ها
+  THEME: پوسته
+  LANGUAGE: زبان
+  CONFIRMATION_POFF: سیستم خاموش می‌شود.
+  CONFIRMATION_EXIT: خروج به مرورگر؟
+  CONFIRMATION_CANCEL_UPDATE: به‌روزرسانی لغو شود؟
+  HDD_NOT_CONNECTED_ERROR: '%d: هارد شناسایی نشد.'
+  HDD_NOT_FORMATTED_ERROR: '%d: هارد فرمت نشده است.'
+  NETWORK_STARTUP_ERROR: '%d: خطا در راه‌اندازی شبکه.'
+  NETWORK_STARTUP_ERROR_NETIF: '%d: هیچ آداپتور شبکه‌ای شناسایی نشد.'
+  NETWORK_STARTUP_ERROR_CONN: '%d: اتصال به سرور SMB ممکن نیست.'
+  NETWORK_STARTUP_ERROR_LOGON: '%d: ورود به سرور SMB ممکن نیست.'
+  NETWORK_STARTUP_ERROR_SHARE: '%d: باز کردن اشتراک SMB ممکن نیست.'
+  NETWORK_SHARE_LIST_ERROR: '%d: فهرست کردن اشتراک‌های SMB ممکن نیست.'
+  NETWORK_GAMES_LIST_ERROR: '%d: فهرست کردن بازی‌ها ممکن نیست.'
+  NETWORK_ERROR_DHCP_FAIL: '%d: سرور DHCP در دسترس نیست.'
+  NETWORK_ERROR_LINK_FAIL: '%d: اتصال شبکه وجود ندارد.'
+  'ON': روشن
+  'OFF': خاموش
+  OK: تأیید
+  SELECT: انتخاب
+  CANCEL: لغو
+  CIRCLE: دایره
+  CROSS: ضربدر
+  GAMES_LIST: فهرست بازی‌ها
+  COMPAT_SETTINGS: تنظیمات بازی
+  REMOVE_ALL_SETTINGS: حذف تنظیمات
+  SCROLLING: سرعت پیمایش
+  SLOW: کند
+  MEDIUM: متوسط
+  FAST: سریع
+  DEFDEVICE: منوی پیش‌فرض
+  LOAD_FROM_DISC: بارگذاری از دیسک
+  PLEASE_WAIT: لطفاً صبر کنید.
+  ERROR_LOADING_ID: خطا در بارگذاری شناسه بازی.
+  AUTOSORT: مرتب‌سازی الفبایی بازی‌ها
+  ERR_LOADING_LANGFILE: خطا در بارگذاری فایل زبان.
+  NO_CONTROLLER: دسته‌ای شناسایی نشد، در انتظار...
+  WIDE_SCREEN: صفحه عریض
+  POWEROFF: خاموش کردن
+  LOADING_SETTINGS: در حال بارگذاری پیکربندی...
+  SAVING_SETTINGS: در حال ذخیره پیکربندی...
+  START_DEVICE: شروع دستگاه
+  REFRESH: تازه‌سازی
   BDMMODE: حالت شروع BDM
+  HDDMODE: حالت شروع هارد (APA)
+  ETHMODE: حالت شروع ETH
+  APPMODE: حالت شروع برنامه‌ها
+  AUTO: خودکار
+  MANUAL: دستی
+  STARTNBD: شروع سرور NBD
+  STARTINGNBD: در حال شروع سرور NBD...
+  RUNNINGNBD: سرور NBD در حال اجراست...
+  STARTFAILNBD: شروع سرور NBD ناموفق بود.
+  UNLOADNBD: در حال بستن سرور NBD...
+  EXITTO: مسیر IGR
+  BGCOLOR: رنگ پس‌زمینه
+  TXTCOLOR: رنگ متن
+  CAT_SMB_SERVER: '- سرور SMB -'
+  IP_ADDRESS_TYPE: نوع نشانی IP
+  IP_ADDRESS_TYPE_STATIC: ثابت
+  IP_ADDRESS: نشانی IP
+  MASK: ماسک
+  DNS_SERVER: سرور DNS
+  PORT: درگاه
+  SHARE: اشتراک
+  USER: کاربر
+  PASSWORD: رمز عبور
+  NOT_SET: <تنظیم نشده>
+  ADDRESS_TYPE: نوع نشانی
+  ADDR_TYPE_IP: IP
+  ACCEPT: پذیرفتن
+  DELETE_WARNING: این مورد برای همیشه حذف می‌شود، ادامه می‌دهید؟
+  RENAME: تغییر نام
+  DELETE: حذف
+  RUN: اجرا
+  GFX_SETTINGS: تنظیمات نمایش
+  LASTPLAYED: به خاطر سپردن آخرین بازی
+  SELECTBUTTON: دکمه انتخاب
+  ERR_FRAGMENTED: خطا، بازی تکه‌تکه است.
+  ERR_FILE_INVALID: خطا، اجرای این مورد ممکن نشد.
+  TEST: آزمایش تغییرات
+  HINT_GUEST: برای ورود مهمان (GUEST) خالی بگذارید.
   HINT_MODE1: خواندن دقیق
+  HINT_MODE2: حالت همزمان
+  HINT_MODE3: جدا کردن فراخوان‌های سیستمی
+  HINT_MODE4: رد کردن ویدیوها
+  HINT_MODE5: شبیه‌سازی DVD-DL
+  HINT_MODE6: غیرفعال کردن IGR
+  HINT_VMC_SIZE: تغییر اندازه، VMC را دوباره فرمت می‌کند.
+  CREATE: ساختن
+  START: شروع
+  MODIFY: ویرایش
+  ABORT: توقف
+  RESET: بازنشانی
+  USE_GENERIC: استفاده از عمومی
+  VMC_SCREEN: پیکربندی VMC
+  VMC_NAME: نام
+  SIZE: اندازه
+  VMC_STATUS: وضعیت
+  VMC_PROGRESS: پیشرفت
+  VMC_FILE_EXISTS: فایل VMC وجود دارد.
+  VMC_FILE_ERROR: فایل VMC نامعتبر است، اندازه نادرست است.
+  VMC_FILE_NEW: فایل VMC باید ساخته شود.
+  ERR_VMC_CONTINUE: خطا در دسترسی به VMC %s. با کارت حافظه در شیار %d ادامه شود؟
+  AUTOREFRESH: تازه‌سازی خودکار
+  ABOUT: درباره
+  DEVS: برنامه‌نویسان
+  QANDA: تضمین کیفیت
+  BDM_PREFIX: مسیر پیشوند BDM
+  HINT_EXITPATH: پس از IGR یک ELF سفارشی را اجرا می‌کند. از کارت حافظه (mc0:/mc1:) یا فلش USB با FAT32 (mass:/) استفاده کنید؛ برای USB، RiptOPL پیشنهاد می‌کند درایورهایی را که بازنشانی لازم دارد به پوشه SYS-CONF کارت حافظه بیفزاید. پس از بازنشانی به MMCE نمی‌توان رسید؛ از طریق یک لودر کارت حافظه مانند PS2BBL زنجیره کنید.
+  HINT_SPINDOWN: مقدار به دقیقه، 0 برای غیرفعال کردن توقف چرخش.
+  HDD_SPINDOWN: توقف خودکار چرخش هارد
+  VMODE: حالت ویدیو
+  UICOLOR: رنگ کادر گفت‌وگو
+  SELCOLOR: رنگ انتخاب
+  RESETCOLOR: بازنشانی رنگ‌ها
+  INFO: اطلاعات
+  ALTSTARTUP: ELF سفارشی
+  COLOR_SELECTION: انتخاب رنگ
+  RECONNECT: اتصال دوباره
+  HINT_SHARENAME: برای فهرست کردن اشتراک‌ها خالی بگذارید.
+  ETH_PREFIX: مسیر پیشوند ETH
+  BACKSPACE: پاک کردن
+  SPACE: فاصله
+  ENTER: ورود
+  MODE: حالت
+  VMC_SLOT1: شیار VMC 1
+  VMC_SLOT2: شیار VMC 2
+  GAME_ID: شناسه بازی
+  DMA_MODE: حالت DMA
   VSYNC: V-Sync
+  MODE1: حالت 1
+  MODE2: حالت 2
+  MODE3: حالت 3
+  MODE4: حالت 4
+  MODE5: حالت 5
+  MODE6: حالت 6
+  GSCONFIG: پیکربندی GSM
+  ETH_OPMODE: حالت پیوند اترنت
+  ETH_100MFDX: 100Mbit دوطرفه کامل
+  ETH_100MHDX: 100Mbit نیم‌دوطرفه
+  ETH_10MFDX: 10Mbit دوطرفه کامل
+  ETH_10MHDX: 10Mbit نیم‌دوطرفه
+  GSM_SETTINGS: تنظیمات GSM
+  HINT_ENABLEGSM: GSM را روشن یا خاموش می‌کند.
+  HINT_GSMVMODE: حالت نمایش سفارشی اجباری.
+  XOFFSET: موقعیت افقی
+  HINT_XOFFSET: تنظیم افقی.
+  YOFFSET: موقعیت عمودی
+  HINT_YOFFSET: تنظیم عمودی.
+  OVERSCAN: اورسکن
+  HINT_OVERSCAN: تنظیم اورسکن.
+  GSMSKIPVIDEOS: رد کردن FMV
+  HINT_GSMSKIPVIDEOS: ویدیوهای تمام‌حرکتی را رد می‌کند.
+  CHEAT_SETTINGS: تنظیمات تقلب
+  HINT_ENABLECHEAT: به موتور تقلب PS2RD اجازه می‌دهد بازی شما را وصله کند.
+  CHEATMODE: حالت موتور تقلب PS2RD
+  HINT_CHEATMODE: انتخاب خودکار یا انتخاب تقلب‌های بازی.
+  CHEATMODEAUTO: انتخاب خودکار تقلب‌ها
+  CHEATMODESELECT: انتخاب تقلب‌های بازی
+  ERR_CHEATS_LOAD_FAILED: 'خطا: بارگذاری فایل تقلب ناموفق بود.'
+  NO_CHEATS_FOUND: هیچ تقلبی پیدا نشد.
+  DL_DEFAULTS: دریافت پیش‌فرض‌ها
+  NET_UPDATE: به‌روزرسانی شبکه
+  NET_UPDATE_ALL: بازنویسی سوابق موجود
+  NET_UPDATE_FAILED: به‌روزرسانی ناموفق بود.
+  NET_UPDATE_CONN_FAILED: اتصال به سرور به‌روزرسانی ممکن نشد.
+  NET_UPDATE_DONE: به‌روزرسانی کامل شد.
+  NET_UPDATE_CANCELLED: به‌روزرسانی لغو شد.
+  CONFIRMATION_SETTINGS_UPDATE: تنظیمات از شبکه دریافت شود؟
+  CUSTOMIZED_SETTINGS: تنظیمات سفارشی
+  DOWNLOADED_DEFAULTS: پیش‌فرض‌های دریافت‌شده
+  AUTO_START_IN_N_SECS: شروع خودکار تا %i ثانیه...
+  AUTOSTARTLAST: شروع خودکار
+  HINT_AUTOSTARTLAST: مقدار به ثانیه، 0 برای غیرفعال کردن شروع خودکار.
+  PS2LOGO: لوگوی PS2
+  HINT_PS2LOGO: برای لوگوی دیسک معتبری که با منطقه کنسول جور باشد نمایش داده می‌شود.
+  PADEMUCONFIG: شبیه‌سازی دسته
+  PADEMU_SETTINGS: تنظیمات شبیه‌ساز دسته
+  HINT_PADEMU_ENABLE: شبیه‌ساز دسته را برای بازی انتخاب‌شده روشن یا خاموش می‌کند.
+  PADEMU_MODE: حالت شبیه‌ساز دسته
+  HINT_PADEMU_MODE: حالت شبیه‌ساز دسته را انتخاب کنید.
+  DS34USB_MODE: DualShock3/4 USB
+  DS34BT_MODE: DualShock3/4 BT
+  PADPORT: 'تنظیمات برای درگاه:'
+  HINT_PAD_PORT: درگاه شبیه‌ساز دسته را برای تنظیمات انتخاب کنید.
+  HINT_PADEMU_PORT: شبیه‌ساز دسته را برای درگاه انتخاب‌شده روشن یا خاموش می‌کند.
+  HINT_PADEMU_VIB: لرزش را برای درگاه انتخاب‌شده شبیه‌ساز دسته روشن یا خاموش می‌کند.
+  USBDG_MAC: 'نشانی MAC آداپتور بلوتوث USB:'
+  PAD_MAC: 'دسته DS جفت‌شده با نشانی MAC:'
+  PAIR: جفت کردن
+  PAIR_PAD: جفت کردن دسته DS
+  HINT_PAIRPAD: دسته DS را با نشانی MAC آداپتور بلوتوث جفت می‌کند.
+  NOT_CONNECTED: وصل نیست
+  BTINFO: اطلاعات آداپتور بلوتوث
+  HINT_BTINFO: اطلاعات بیشتر و قابلیت‌های پشتیبانی‌شده را نشان می‌دهد.
+  HCIVER: 'نسخه HCI:'
+  LMPVER: 'نسخه LMP:'
+  MANUFACTURER: 'شناسه سازنده:'
+  SUPFEATURES: 'قابلیت‌های پشتیبانی‌شده:'
+  'YES': بله
+  'NO': خیر
+  BT_SUPPORTED: آداپتور بلوتوث باید با دسته‌های DS3/DS4 کاملاً سازگار باشد.
+  BT_NOTSUPPORTED: آداپتور بلوتوث ممکن است با دسته‌های DS3/DS4 درست کار نکند.
   MTAP_ENABLE: شبیه‌سازی مولتی‌تپ
+  HINT_MTAP_ENABLE: شبیه‌سازی مولتی‌تپ را برای بازی انتخاب‌شده روشن یا خاموش می‌کند.
+  MTAP_PORT: 'شبیه‌ساز مولتی‌تپ روی درگاه:'
+  HINT_MTAP_PORT: درگاه شبیه‌سازی مولتی‌تپ را انتخاب کنید.
   HINT_PADEMU_WORKAROUND: برخی دسته‌های DS3 تقلبی به یک راه‌حل جایگزین نیاز دارند؛ این گزینه آن را فعال می‌کند.
+  GSM_FIELD_FIX: شبیه‌سازی جابه‌جایی فیلد
+  HINT_GSM_FIELD_FIX: اصلاح برای بازی‌هایی که در حالت‌های ویدیوی پیش‌رونده دچار اشکال می‌شوند.
+  PARENLOCKCONFIG: تنظیمات قفل والدین
+  PARENLOCK_PASSWORD: رمز قفل والدین
+  PARENLOCK_PASSWORD_HINT: برای غیرفعال کردن قفل والدین خالی بگذارید.
+  PARENLOCK_ENTER_PASSWORD_TITLE: رمز قفل والدین را وارد کنید
+  PARENLOCK_PASSWORD_INCORRECT: رمز قفل والدین نادرست است.
+  PARENLOCK_DISABLE_WARNING: قفل والدین غیرفعال شد.
+  BUILD_DETAILS: 'گزینه‌های بیلد:'
+  PARENLOCK_INVALID_PASSWORD: 'خطا: این رمز قابل استفاده نیست.'
+  ERR_VMC_FRAGMENTED_CONTINUE: فایل VMC %s تکه‌تکه است. با کارت حافظه در شیار %d ادامه شود؟
+  AUDIO_SETTINGS: تنظیمات صدا
+  SFX_VOLUME: بلندی جلوه‌های صوتی
+  BOOT_SND_VOLUME: بلندی صدای راه‌اندازی
+  CFM_VMODE_CHG: تغییر حالت ویدیو تأیید شود؟
+  CACHE_HDD_GAME_LIST: حافظه نهان فهرست بازی‌ها (HDD APA)
   CFG_NOTIFICATION: پیکربندی از %s بارگذاری شد
   THM_NOTIFICATION: پوسته از %s بارگذاری شد
   LNG_NOTIFICATION: زبان از %s بارگذاری شد
   PARTITION_NOTIFICATION: پارتیشن %s سوار شد.
+  GAME_SETTINGS_SAVED: تنظیمات بازی ذخیره شد.
+  GAME_SETTINGS_REMOVED: تنظیمات %s حذف شد.
+  NET_UPDATE_HINT: وقتی روشن باشد، تنظیمات سازگاری بازی‌های موجود را بازنویسی می‌کند.
+  SETTINGS_SOURCE: حالت تنظیمات
+  GLOBAL_SETTINGS: سراسری
+  PERGAME_SETTINGS: هر بازی
+  ALL_SETTINGS: همه
+  GAME_SETTINGS_PROMPT: تنظیماتی را که باید حذف شوند انتخاب کنید.
+  FORUM_DETAILS: 'انجمن‌های پشتیبانی:'
+  INFO_TITLE: عنوان
+  INFO_GENRE: ژانر
+  INFO_RELEASE: انتشار
+  INFO_DEVELOPER: سازنده
+  INFO_DESCRIPTION: توضیحات
   HINT_NEUTRINO_AUTO_ELF: ELF راه‌اندازی بازی را برای یافتن پیکربندی هر عنوان به Neutrino می‌دهد. به‌طور پیش‌فرض روشن است؛ گزینه ELF راه‌اندازی که دستی تنظیم شود اولویت دارد.
   HINT_POPSTARTER_PATH: جای POPSTARTER.ELF. اگر خالی بماند، RIPPS2 یکی را که روی یک درایو پیدا کند در آن می‌نویسد؛ برای استفاده از دیگری روی آن بنویسید، مانند usb:/POPS/POPSTARTER.ELF
   NEUTRINO_ARGS_TOO_LONG: آرگومان‌های Neutrino از طول قابل ذخیره بیشترند. پیش از ذخیره یک فیلد را کوتاه کنید.
   NEUTRINO_LAUNCH_ARGS_OVERFLOW: آرگومان‌های اجرای Neutrino از حد ایمن فراتر رفته‌اند. آرگومان‌های سراسری یا بازی را کوتاه کنید.
   NEUTRINO_AUTO_ELF: ELF راه‌اندازی خودکار (-elf)
+  UDPBD_NEEDS_STATIC_IP: UDPFS/UDPBD از IP ثابت ذخیره‌شده PS2 استفاده می‌کنند. برای این انتقال‌ها ثابت اجباری است؛ ترجیح DHCP شما برای SMB/HTTP حفظ می‌شود.
   HINT_NEUTRINO_PATH: 'neutrino.elf کجاست؟ <not set> = دستگاه بازی -> mc0/mc1. مسیر کامل سفارشی اول امتحان می‌شود. نمونه‌ها: mass0:/neutrino/neutrino.elf | ata:/neutrino/neutrino.elf | mmce0:/neutrino/neutrino.elf | mc0:/neutrino/neutrino.elf | pfs0:/neutrino/neutrino.elf'
   GAME_VIEW_MODE: نمایش بازی‌های PS2/PS1
   HINT_GAME_VIEW_MODE: همه بازی‌های PS2 و PS1 را با هم نشان می‌دهد و L3 میان همه، PS1 و PS2 می‌چرخد. PS2 یا PS1 فقط همان نوع را نشان می‌دهد و L3 را غیرفعال می‌کند. برنامه‌ها و علاقه‌مندی‌ها قواعد نمایش خودشان را دارند.

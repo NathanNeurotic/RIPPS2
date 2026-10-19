@@ -261,7 +261,14 @@ FREE_FAMILIES = {
     'Roboto Condensed': 'Apache License 2.0 (github.com/googlefonts/roboto)',
     'Droid Sans Fallback': 'Apache License 2.0 (Android Open Source Project)',
     'Open Sans': 'Apache License 2.0 / SIL Open Font License 1.1 (github.com/googlefonts/opensans)',
+    'Noto Sans Lao': 'SIL Open Font License 1.1 (github.com/notofonts/lao)',
 }
+# RIPPS2's own language fonts (elf/lang/fonts, made by make_lang_fonts.py), ahead of upstream's: Arabic and Persian
+# need every presentation form RIPPS2 joins their letters into, and upstream has no free Lao font. Each one's licence
+# text goes into the pack beside it.
+OWN_FONTS = {'Arabic': ('DejaVuSans-Arabic.ttf', 'LICENSE-DejaVu.txt'),
+             'Persian': ('DejaVuSans-Arabic.ttf', 'LICENSE-DejaVu.txt'),
+             'Laotian': ('NotoSansLao-Regular.ttf', 'OFL-NotoSansLao.txt')}
 # where a language's own font is not a free one, or it has none, the font of another language that covers it
 FONT_FROM = {'Persian': 'Arabic', 'Romana': 'Croatian', 'Japanese': 'SChinese', 'Korean': 'SChinese',
              'Ryukyuan': 'SChinese', 'Serbian': 'Bulgarian', 'Albanian': 'Croatian', 'Galician': 'Croatian',
@@ -314,6 +321,16 @@ def pick_font(tree, lang, need):
     """(file name in the pack, bytes, family, licence note, letters it still lacks) for a language, or None."""
     tried = [lang, FONT_FROM.get(lang)] + list(FONT_ANY)
     best = None
+    if lang in OWN_FONTS:
+        p = os.path.join(HERE, 'fonts', OWN_FONTS[lang][0])
+        data = open(p, 'rb').read()
+        why = font_free(data)
+        if why is not None:
+            have = font_cmap(data)
+            lack = [c for c in need if ord(c) not in have]
+            best = ('font_%s.ttf' % lang, data, font_family(data), why, lack)
+            if not lack:
+                return best
     for src in tried:
         if src is None:
             continue
@@ -348,9 +365,19 @@ def ripps2_translations(lang):
     return dict(data.get('strings') or {}), dict(data.get('labels') or {})
 
 
+def prejoined(text):
+    """An upstream line stored already joined (Arabic presentation forms, in an order made for a renderer that only
+    flipped runs): RIPPS2 now joins and lays out right-to-left text itself, so such a line would come out scrambled."""
+    return any(0xFB50 <= ord(c) <= 0xFDFF or 0xFE70 <= ord(c) <= 0xFEFF for c in text)
+
+
 def build_language(tree, lang, base, english_template, report):
     """(the .lng text, every character it uses) for one language."""
     opl = opl_translations(os.path.join(tree, 'lng_src', lang + '.yml'))
+    dropped = [k for k, v in opl.items() if prejoined(v)]
+    if dropped:  # Persian's older half: elf/lang/Persian.yml has these labels written plain
+        report.append('%s: %d upstream lines stored pre-joined left out (RIPPS2 joins the letters itself)' % (lang, len(dropped)))
+        opl = {k: v for k, v in opl.items() if not prejoined(v)}
     mine, label_fill = ripps2_translations(lang)
     via = STRINGS_FROM.get(lang)
     if via:
@@ -406,6 +433,7 @@ def pack(tree, out):
     langs = sorted(f[:-4] for f in os.listdir(os.path.join(tree, 'lng_src')) if f.endswith('.yml') and f != 'English.yml')
     builtin = font_cmap(open(os.path.join(tree, 'thirdparty', 'PoeVeticaNew.ttf'), 'rb').read())
     report, notes, licences = [], [], []
+    written = set()  # licence texts already in the pack
     os.makedirs(out, exist_ok=True)
     zpath = os.path.join(out, 'RIPPS2-languages.zip')
     with zipfile.ZipFile(zpath, 'w', zipfile.ZIP_DEFLATED) as z:
@@ -431,14 +459,25 @@ def pack(tree, out):
                     font_note = '%s: %s, %d KB%s%s' % (name, family, len(data) // 1024,
                                                       ' (cut from %d KB)' % (size // 1024) if len(data) < size else '',
                                                       ', lacks %d: %s' % (len(lack), ''.join(lack[:20])) if lack else '')
-                    licences.append('%s: %s\n  %s\n  the font says: %s\n' % (name, family, why, (names.get(0, '') or '').strip()[:200]))
+                    licence_file = ''
+                    own = OWN_FONTS.get(lang)
+                    if own is not None and data == open(os.path.join(HERE, 'fonts', own[0]), 'rb').read():
+                        licence_file = own[1]  # RIPPS2's own: its licence text goes beside it, once
+                        if licence_file not in written:
+                            z.writestr('LNG/' + licence_file, open(os.path.join(HERE, 'fonts', licence_file), 'rb').read())
+                            written.add(licence_file)
+                    licences.append('%s: %s\n  %s\n  the font says: %s\n%s' % (
+                        name, family, why, (names.get(0, '') or '').strip()[:200],
+                        '  from RIPPS2 (elf/lang/fonts); its licence in full: %s\n' % licence_file if licence_file else ''))
             notes.append('%-14s %4d strings (%3d of RIPPS2\'s %d%s), %s' % (
                 lang, n, n_mine, n_tmpl, ', gaps from %s' % STRINGS_FROM[lang] if lang in STRINGS_FROM else '', font_note))
         z.writestr('LNG/README.txt', README_PACK.encode('utf-8'))
         if licences:
             z.writestr('LNG/FONTS.txt', ('The fonts in this folder come from Open PS2 Loader\'s language pack\n'
-                                         '(github.com/ps2homebrew/Open-PS2-Loader-lang, thirdparty/); a big one is cut to the\n'
-                                         'letters its language uses. Each is free to pass on under its own licence:\n\n'
+                                         '(github.com/ps2homebrew/Open-PS2-Loader-lang, thirdparty/), except Arabic, Persian and\n'
+                                         'Laotian\'s, which RIPPS2 carries (DejaVu Sans with every joined Arabic letter, Noto Sans\n'
+                                         'Lao); a big one is cut to the letters its language uses. Each is free to pass on under\n'
+                                         'its own licence:\n\n'
                                          + '\n'.join(licences)).encode('utf-8'))
     for line in licences:
         print('lang font: ' + line.replace('\n', ' | ').strip(' |'))

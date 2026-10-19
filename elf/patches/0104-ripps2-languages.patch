@@ -39,10 +39,10 @@ index fddcebb..3f34be2 100644
  // in Memory Files (the file, its size and CRC, its argv, Sony's POPS files or Ember's BIOS beside it, the
 diff --git a/include/ripps2tr.h b/include/ripps2tr.h
 new file mode 100644
-index 0000000..dbd66bb
+index 0000000..f362d13
 --- /dev/null
 +++ b/include/ripps2tr.h
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,55 @@
 +#ifndef __RIPPS2_TR_H
 +#define __RIPPS2_TR_H
 +
@@ -89,10 +89,17 @@ index 0000000..dbd66bb
 +char *ripps2Utf8Copy(char *out, int size, const char *in);
 +// Could a line break go before the character at s (a CJK ideograph, kana or hangul, or after one)?
 +int ripps2Utf8BreakAt(const char *start, const char *s);
++// Arabic and Persian: in with its Arabic letters joined (their presentation forms, lam-alef as one) and, with
++// reorder, each line laid out right to left for drawing from the left (Latin words and numbers keep their order,
++// brackets turn round), in out (size bytes). NULL when in has no right-to-left letters (draw it as it is) or the
++// result does not fit. One caller at a time: fntsys calls it under its lock.
++const char *ripps2Rtl(const char *in, char *out, int size, int reorder);
++// A right-to-left letter (Hebrew, Arabic and their presentation forms; not the Arabic digits)?
++int ripps2RtlChar(unsigned int c);
 +
 +#endif
 diff --git a/src/dia.c b/src/dia.c
-index f0cd46c..9dd5d24 100644
+index f0cd46c..f682d77 100644
 --- a/src/dia.c
 +++ b/src/dia.c
 @@ -15,6 +15,7 @@
@@ -123,14 +130,15 @@ index f0cd46c..9dd5d24 100644
  }
  
  /// returns true if the item is controllable (e.g. a value can be changed on it)
-@@ -756,6 +757,23 @@ static float diaTipAlpha(const struct UIItem *item)
+@@ -756,6 +757,26 @@ static float diaTipAlpha(const struct UIItem *item)
      return diaTipEase(t / DIA_TIP_IN_S) * (1.0f - diaTipEase((t - DIA_TIP_HOLD_S) / DIA_TIP_OUT_S));
  }
  
 +// RIPPS2 build 104: Chinese, Japanese and Korean put no spaces between words, so a "word" here can be a whole
 +// clause. One with such letters fills the line it starts on and breaks between characters; a Latin word, a path or a
 +// URL still moves to the next line whole. UTF-8 lead bytes E3..ED are U+3000..U+DFFF (CJK punctuation, kana,
-+// ideographs, Hangul); EF BC..BF is U+FF00..U+FFFF (fullwidth forms). A continuation byte is never one of these.
++// ideographs, Hangul); EF BC..BF is U+FF00..U+FFFF (fullwidth forms); E0 B8..BB is U+0E00..U+0EFF, Thai and Lao,
++// which write no spaces between words either. A continuation byte is never a lead byte.
 +static int diaHintHasCjk(const char *s, int len)
 +{
 +    const unsigned char *q = (const unsigned char *)s, *end = q + len;
@@ -140,6 +148,8 @@ index f0cd46c..9dd5d24 100644
 +            return 1;
 +        if (*q == 0xEF && q + 1 < end && q[1] >= 0xBC)
 +            return 1;
++        if (*q == 0xE0 && q + 1 < end && q[1] >= 0xB8 && q[1] <= 0xBB)
++            return 1;
 +    }
 +    return 0;
 +}
@@ -147,7 +157,7 @@ index f0cd46c..9dd5d24 100644
  static int diaHintUtf8CharLen(const char *p)
  {
      unsigned char c;
-@@ -869,6 +887,7 @@ static void diaDrawHint(const struct UIItem *item)
+@@ -869,6 +890,7 @@ static void diaDrawHint(const struct UIItem *item)
          const char *wordStart;
          int wordLen;
          int wordW;
@@ -155,7 +165,7 @@ index f0cd46c..9dd5d24 100644
  
          // Explicit line breaks in translated strings remain line breaks.
          if (*p == '\r' || *p == '\n') {
-@@ -899,9 +918,10 @@ static void diaDrawHint(const struct UIItem *item)
+@@ -899,9 +921,10 @@ static void diaDrawHint(const struct UIItem *item)
          while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n')
              p++;
          wordLen = (int)(p - wordStart);
@@ -167,7 +177,7 @@ index f0cd46c..9dd5d24 100644
              char word[256];
  
              memcpy(word, wordStart, wordLen);
-@@ -940,8 +960,16 @@ static void diaDrawHint(const struct UIItem *item)
+@@ -940,8 +963,16 @@ static void diaDrawHint(const struct UIItem *item)
  
          // An over-wide token (URL, path, hash, malformed translation, etc.) has no whitespace where
          // ordinary word wrapping can break it. Split only that token, and only at UTF-8 character
@@ -186,7 +196,18 @@ index f0cd46c..9dd5d24 100644
              if (lines >= maxLines || wlen >= wrappedSize - 1) {
                  truncated = 1;
                  break;
-@@ -1172,7 +1200,9 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+@@ -964,7 +995,9 @@ static void diaDrawHint(const struct UIItem *item)
+                     charBytes = 1;
+                 glyphW = diaHintGlyphWidth(q, charBytes);
+ 
+-                if (lineW > 0 && lineW + glyphW > innerW) {
++                // a CJK, Thai or Lao run breaks only where those scripts allow (not before a closing mark, a vowel
++                // or tone mark of the letter before); a URL or path anywhere
++                if (lineW > 0 && lineW + glyphW > innerW && (!cjk || ripps2Utf8BreakAt(wordStart, q))) {
+                     if (lines >= maxLines || wlen >= wrappedSize - 1) {
+                         truncated = 1;
+                         break;
+@@ -1172,7 +1205,9 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
              int eidx = item->intvalue.current;
              if (eidx < 0 || eidx >= ecount)
                  eidx = 0;
@@ -198,7 +219,7 @@ index f0cd46c..9dd5d24 100644
              if (!tv)
                  tv = _l(_STR_NO_ITEMS);
 diff --git a/src/fntsys.c b/src/fntsys.c
-index 06870fe..ca069ed 100644
+index 06870fe..d59e71c 100644
 --- a/src/fntsys.c
 +++ b/src/fntsys.c
 @@ -11,6 +11,7 @@
@@ -402,7 +423,35 @@ index 06870fe..ca069ed 100644
  /* RIPPS2 build 102 (user: "make the text scrolling smooth 60fps"). A string can be moved by a fraction of a
     640 x 480 unit (fntSubX / fntSubY, in units, turned into display pixels as the string is placed) and cut at the
     sides of a window (fntClipX0..fntClipX1, display pixels; equal: no window), a glyph that crosses its edge drawn
-@@ -769,7 +852,9 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+@@ -719,6 +802,7 @@ void fntSetLineHeight(int height)
+ #ifndef __RTL
+ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t height, const char *string, u64 colour)
+ {
++    static char rtlDraw[2048]; // build 104: under the font lock
+     if (string == NULL)
+         return 0;
+     fntLock();
+@@ -750,6 +834,12 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+ 
+     quad.color = colour;
+ 
++    // build 104: Arabic and Persian, their letters joined and each line laid out right to left, then drawn from the
++    // left like any other text (measured above from the same joined letters, so a centred line stays centred)
++    const char *visual = ripps2Rtl(string, rtlDraw, sizeof(rtlDraw), 1);
++    if (visual != NULL)
++        string = visual;
++
+     int pen_x = x;
+     int xmax = x + width;
+     int ymax = y + height;
+@@ -765,11 +855,16 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+     // we should instead have a dynamic layout routine that'll replace spaces with newlines as appropriate
+     // because that'll make the code run only once per N frames, not every frame
+ 
++    // build 104: the letter a mark goes over (where it was drawn, its advance) and the top of the last mark put above it
++    int markBaseX = 0, markBaseAdv = 0, markAbove = 0;
++
+     // cache glyphs and render as we go
      for (; *string; ++string) {
          if (utf8Decode(&state, &codepoint, *string)) // accumulate the codepoint value
              continue;
@@ -413,7 +462,40 @@ index 06870fe..ca069ed 100644
  
          glyph = fntCacheGlyph(font, codepoint);
          if (!glyph)
-@@ -830,7 +915,9 @@ static void fntRenderSubRTL(font_t *font, const char *startRTL, const char *stri
+@@ -788,6 +883,7 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+         if (width) {
+             if (codepoint == '\n') {
+                 pen_x = x;
++                markBaseAdv = 0;
+                 y += rmScaleY(fntLineStep > 0 ? fntLineStep : MENU_ITEM_HEIGHT); // hmax is too tight and unordered, generally
+                 continue;
+             }
+@@ -801,6 +897,24 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+             }
+         }
+ 
++        // build 104: a mark with no advance that its font draws to the right of the pen (Noto Sans Lao's vowels and tone
++        // marks, DejaVu's Arabic vowel marks: placed by OpenType positioning, which fntsys does not read) is centred
++        // over the letter before it, and a second mark above that letter stacks over the first. A Latin combining
++        // mark, drawn to the left of the pen, is left as it is.
++        if (glyph->shx == 0 && glyph->width > 0 && glyph->ox >= 0 && markBaseAdv > 0) {
++            int my = y, bottom = glyph->oy + (int)glyph->height; // from the baseline, up is negative
++            if (bottom <= 0) {
++                if (markAbove < 0 && bottom > markAbove - 1)
++                    my -= bottom - (markAbove - 1);
++                markAbove = glyph->oy + (my - y);
++            }
++            fntRenderGlyph(glyph, markBaseX + (markBaseAdv - (int)glyph->width) / 2 - glyph->ox, my);
++            continue;
++        }
++        markBaseX = pen_x;
++        markBaseAdv = glyph->shx >> 6;
++        markAbove = 0;
++
+         fntRenderGlyph(glyph, pen_x, y);
+         pen_x += glyph->shx >> 6;
+     }
+@@ -830,7 +944,9 @@ static void fntRenderSubRTL(font_t *font, const char *startRTL, const char *stri
      for (; startRTL != string; ++startRTL) {
          if (utf8Decode(&state, &codepoint, *startRTL))
              continue;
@@ -424,7 +506,7 @@ index 06870fe..ca069ed 100644
  
          glyph = fntCacheGlyph(font, codepoint);
          if (!glyph)
-@@ -900,7 +987,9 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
+@@ -900,7 +1016,9 @@ int fntRenderString(int id, int x, int y, short aligned, size_t width, size_t he
      for (; *string; ++string) {
          if (utf8Decode(&state, &codepoint, *string)) // accumulate the codepoint value
              continue;
@@ -435,7 +517,22 @@ index 06870fe..ca069ed 100644
  
          glyph = fntCacheGlyph(font, codepoint);
          if (!glyph)
-@@ -1155,7 +1244,9 @@ static int fntCalcDimensionsLocked(font_t *font, const char *str)
+@@ -1141,9 +1259,14 @@ int fntCalcDimensions(int id, const char *str)
+ static int fntCalcDimensionsLocked(font_t *font, const char *str)
+ {
+     int w = 0;
++    static char rtlMeasure[2048]; // build 104: under the font lock, like every caller of this
+ 
+     if (str == NULL)
+         return 0;
++    // build 104: Arabic and Persian are measured as drawn, their letters joined (a joined letter is narrower)
++    const char *joined = ripps2Rtl(str, rtlMeasure, sizeof(rtlMeasure), 0);
++    if (joined != NULL)
++        str = joined;
+ 
+     uint32_t codepoint;
+     uint32_t state = UTF8_ACCEPT;
+@@ -1155,7 +1278,9 @@ static int fntCalcDimensionsLocked(font_t *font, const char *str)
      for (; *str; ++str) {
          if (utf8Decode(&state, &codepoint, *str)) // accumulate the codepoint value
              continue;
@@ -4992,10 +5089,10 @@ index d1f66e5..34e4410 100644
  
 diff --git a/src/ripps2tr.c b/src/ripps2tr.c
 new file mode 100644
-index 0000000..180fddd
+index 0000000..d6720de
 --- /dev/null
 +++ b/src/ripps2tr.c
-@@ -0,0 +1,471 @@
+@@ -0,0 +1,791 @@
 +/*
 + RIPPS2 build 104: RIPPS2's own words, and Open PS2 Loader's, in the language the user picked.
 + Licenced under Academic Free License version 3.0
@@ -5442,6 +5539,24 @@ index 0000000..180fddd
 +           (c >= 0xFF00 && c <= 0xFFEF) || (c >= 0x20000 && c <= 0x2FFFF);
 +}
 +
++// Thai and Lao write no spaces between words either; a line breaks between letters, but never before a vowel or
++// tone mark that belongs to the letter before it, nor after a vowel written ahead of its letter
++static int trSea(u32 c)
++{
++    return c >= 0x0E00 && c <= 0x0EFF;
++}
++
++static int trSeaNoBefore(u32 c)
++{
++    return (c >= 0x0E30 && c <= 0x0E3A) || c == 0x0E45 || (c >= 0x0E47 && c <= 0x0E4E) || (c >= 0x0EB0 && c <= 0x0EBC) ||
++           (c >= 0x0EC6 && c <= 0x0ECE);
++}
++
++static int trSeaNoAfter(u32 c)
++{
++    return (c >= 0x0E40 && c <= 0x0E44) || (c >= 0x0EC0 && c <= 0x0EC4);
++}
++
 +int ripps2Utf8BreakAt(const char *start, const char *s)
 +{
 +    // never before closing punctuation or the long-vowel mark, never after an opening bracket
@@ -5457,6 +5572,8 @@ index 0000000..180fddd
 +        p--;
 +    here = trDecodeAt(s);
 +    before = trDecodeAt(p);
++    if (trSea(here) || trSea(before)) // Thai and Lao: between letters, keeping each mark and vowel with its letter
++        return !(trSea(here) && trSeaNoBefore(here)) && !(trSea(before) && trSeaNoAfter(before));
 +    if (!trWide(here) && !trWide(before))
 +        return 0;
 +    for (i = 0; noBefore[i]; i++)
@@ -5466,6 +5583,306 @@ index 0000000..180fddd
 +        if (before == noAfter[i])
 +            return 0;
 +    return 1;
++}
++
++// ---- Arabic and Persian: joined, and right to left (RIPPS2 build 104) ----
++//
++// RIPPS2 draws text from the left, one glyph after another, with no shaping engine. A string with right-to-left
++// letters is turned into what that drawing needs: each Arabic letter becomes the presentation form its neighbours
++// call for (isolated, final, initial, medial; lam with alef as one ligature), then each line is laid out right to
++// left. The language pack's font_Arabic and font_Persian (a DejaVu Sans cut) carry the presentation forms.
++
++// GENERATED by ps2-pillars elf/lang/make_arabic_forms.py (Unicode 16.0.0): base, isolated, final, initial, medial
++static const u16 trArab[][5] = {
++    {0x0621, 0xFE80, 0x0000, 0x0000, 0x0000}, // ARABIC LETTER HAMZA
++    {0x0622, 0xFE81, 0xFE82, 0x0000, 0x0000}, // ARABIC LETTER ALEF WITH MADDA ABOVE
++    {0x0623, 0xFE83, 0xFE84, 0x0000, 0x0000}, // ARABIC LETTER ALEF WITH HAMZA ABOVE
++    {0x0624, 0xFE85, 0xFE86, 0x0000, 0x0000}, // ARABIC LETTER WAW WITH HAMZA ABOVE
++    {0x0625, 0xFE87, 0xFE88, 0x0000, 0x0000}, // ARABIC LETTER ALEF WITH HAMZA BELOW
++    {0x0626, 0xFE89, 0xFE8A, 0xFE8B, 0xFE8C}, // ARABIC LETTER YEH WITH HAMZA ABOVE
++    {0x0627, 0xFE8D, 0xFE8E, 0x0000, 0x0000}, // ARABIC LETTER ALEF
++    {0x0628, 0xFE8F, 0xFE90, 0xFE91, 0xFE92}, // ARABIC LETTER BEH
++    {0x0629, 0xFE93, 0xFE94, 0x0000, 0x0000}, // ARABIC LETTER TEH MARBUTA
++    {0x062A, 0xFE95, 0xFE96, 0xFE97, 0xFE98}, // ARABIC LETTER TEH
++    {0x062B, 0xFE99, 0xFE9A, 0xFE9B, 0xFE9C}, // ARABIC LETTER THEH
++    {0x062C, 0xFE9D, 0xFE9E, 0xFE9F, 0xFEA0}, // ARABIC LETTER JEEM
++    {0x062D, 0xFEA1, 0xFEA2, 0xFEA3, 0xFEA4}, // ARABIC LETTER HAH
++    {0x062E, 0xFEA5, 0xFEA6, 0xFEA7, 0xFEA8}, // ARABIC LETTER KHAH
++    {0x062F, 0xFEA9, 0xFEAA, 0x0000, 0x0000}, // ARABIC LETTER DAL
++    {0x0630, 0xFEAB, 0xFEAC, 0x0000, 0x0000}, // ARABIC LETTER THAL
++    {0x0631, 0xFEAD, 0xFEAE, 0x0000, 0x0000}, // ARABIC LETTER REH
++    {0x0632, 0xFEAF, 0xFEB0, 0x0000, 0x0000}, // ARABIC LETTER ZAIN
++    {0x0633, 0xFEB1, 0xFEB2, 0xFEB3, 0xFEB4}, // ARABIC LETTER SEEN
++    {0x0634, 0xFEB5, 0xFEB6, 0xFEB7, 0xFEB8}, // ARABIC LETTER SHEEN
++    {0x0635, 0xFEB9, 0xFEBA, 0xFEBB, 0xFEBC}, // ARABIC LETTER SAD
++    {0x0636, 0xFEBD, 0xFEBE, 0xFEBF, 0xFEC0}, // ARABIC LETTER DAD
++    {0x0637, 0xFEC1, 0xFEC2, 0xFEC3, 0xFEC4}, // ARABIC LETTER TAH
++    {0x0638, 0xFEC5, 0xFEC6, 0xFEC7, 0xFEC8}, // ARABIC LETTER ZAH
++    {0x0639, 0xFEC9, 0xFECA, 0xFECB, 0xFECC}, // ARABIC LETTER AIN
++    {0x063A, 0xFECD, 0xFECE, 0xFECF, 0xFED0}, // ARABIC LETTER GHAIN
++    {0x0641, 0xFED1, 0xFED2, 0xFED3, 0xFED4}, // ARABIC LETTER FEH
++    {0x0642, 0xFED5, 0xFED6, 0xFED7, 0xFED8}, // ARABIC LETTER QAF
++    {0x0643, 0xFED9, 0xFEDA, 0xFEDB, 0xFEDC}, // ARABIC LETTER KAF
++    {0x0644, 0xFEDD, 0xFEDE, 0xFEDF, 0xFEE0}, // ARABIC LETTER LAM
++    {0x0645, 0xFEE1, 0xFEE2, 0xFEE3, 0xFEE4}, // ARABIC LETTER MEEM
++    {0x0646, 0xFEE5, 0xFEE6, 0xFEE7, 0xFEE8}, // ARABIC LETTER NOON
++    {0x0647, 0xFEE9, 0xFEEA, 0xFEEB, 0xFEEC}, // ARABIC LETTER HEH
++    {0x0648, 0xFEED, 0xFEEE, 0x0000, 0x0000}, // ARABIC LETTER WAW
++    {0x0649, 0xFEEF, 0xFEF0, 0xFBE8, 0xFBE9}, // ARABIC LETTER ALEF MAKSURA
++    {0x064A, 0xFEF1, 0xFEF2, 0xFEF3, 0xFEF4}, // ARABIC LETTER YEH
++    {0x0671, 0xFB50, 0xFB51, 0x0000, 0x0000}, // ARABIC LETTER ALEF WASLA
++    {0x0677, 0xFBDD, 0x0000, 0x0000, 0x0000}, // ARABIC LETTER U WITH HAMZA ABOVE
++    {0x0679, 0xFB66, 0xFB67, 0xFB68, 0xFB69}, // ARABIC LETTER TTEH
++    {0x067A, 0xFB5E, 0xFB5F, 0xFB60, 0xFB61}, // ARABIC LETTER TTEHEH
++    {0x067B, 0xFB52, 0xFB53, 0xFB54, 0xFB55}, // ARABIC LETTER BEEH
++    {0x067E, 0xFB56, 0xFB57, 0xFB58, 0xFB59}, // ARABIC LETTER PEH
++    {0x067F, 0xFB62, 0xFB63, 0xFB64, 0xFB65}, // ARABIC LETTER TEHEH
++    {0x0680, 0xFB5A, 0xFB5B, 0xFB5C, 0xFB5D}, // ARABIC LETTER BEHEH
++    {0x0683, 0xFB76, 0xFB77, 0xFB78, 0xFB79}, // ARABIC LETTER NYEH
++    {0x0684, 0xFB72, 0xFB73, 0xFB74, 0xFB75}, // ARABIC LETTER DYEH
++    {0x0686, 0xFB7A, 0xFB7B, 0xFB7C, 0xFB7D}, // ARABIC LETTER TCHEH
++    {0x0687, 0xFB7E, 0xFB7F, 0xFB80, 0xFB81}, // ARABIC LETTER TCHEHEH
++    {0x0688, 0xFB88, 0xFB89, 0x0000, 0x0000}, // ARABIC LETTER DDAL
++    {0x068C, 0xFB84, 0xFB85, 0x0000, 0x0000}, // ARABIC LETTER DAHAL
++    {0x068D, 0xFB82, 0xFB83, 0x0000, 0x0000}, // ARABIC LETTER DDAHAL
++    {0x068E, 0xFB86, 0xFB87, 0x0000, 0x0000}, // ARABIC LETTER DUL
++    {0x0691, 0xFB8C, 0xFB8D, 0x0000, 0x0000}, // ARABIC LETTER RREH
++    {0x0698, 0xFB8A, 0xFB8B, 0x0000, 0x0000}, // ARABIC LETTER JEH
++    {0x06A4, 0xFB6A, 0xFB6B, 0xFB6C, 0xFB6D}, // ARABIC LETTER VEH
++    {0x06A6, 0xFB6E, 0xFB6F, 0xFB70, 0xFB71}, // ARABIC LETTER PEHEH
++    {0x06A9, 0xFB8E, 0xFB8F, 0xFB90, 0xFB91}, // ARABIC LETTER KEHEH
++    {0x06AD, 0xFBD3, 0xFBD4, 0xFBD5, 0xFBD6}, // ARABIC LETTER NG
++    {0x06AF, 0xFB92, 0xFB93, 0xFB94, 0xFB95}, // ARABIC LETTER GAF
++    {0x06B1, 0xFB9A, 0xFB9B, 0xFB9C, 0xFB9D}, // ARABIC LETTER NGOEH
++    {0x06B3, 0xFB96, 0xFB97, 0xFB98, 0xFB99}, // ARABIC LETTER GUEH
++    {0x06BA, 0xFB9E, 0xFB9F, 0x0000, 0x0000}, // ARABIC LETTER NOON GHUNNA
++    {0x06BB, 0xFBA0, 0xFBA1, 0xFBA2, 0xFBA3}, // ARABIC LETTER RNOON
++    {0x06BE, 0xFBAA, 0xFBAB, 0xFBAC, 0xFBAD}, // ARABIC LETTER HEH DOACHASHMEE
++    {0x06C0, 0xFBA4, 0xFBA5, 0x0000, 0x0000}, // ARABIC LETTER HEH WITH YEH ABOVE
++    {0x06C1, 0xFBA6, 0xFBA7, 0xFBA8, 0xFBA9}, // ARABIC LETTER HEH GOAL
++    {0x06C5, 0xFBE0, 0xFBE1, 0x0000, 0x0000}, // ARABIC LETTER KIRGHIZ OE
++    {0x06C6, 0xFBD9, 0xFBDA, 0x0000, 0x0000}, // ARABIC LETTER OE
++    {0x06C7, 0xFBD7, 0xFBD8, 0x0000, 0x0000}, // ARABIC LETTER U
++    {0x06C8, 0xFBDB, 0xFBDC, 0x0000, 0x0000}, // ARABIC LETTER YU
++    {0x06C9, 0xFBE2, 0xFBE3, 0x0000, 0x0000}, // ARABIC LETTER KIRGHIZ YU
++    {0x06CB, 0xFBDE, 0xFBDF, 0x0000, 0x0000}, // ARABIC LETTER VE
++    {0x06CC, 0xFBFC, 0xFBFD, 0xFBFE, 0xFBFF}, // ARABIC LETTER FARSI YEH
++    {0x06D0, 0xFBE4, 0xFBE5, 0xFBE6, 0xFBE7}, // ARABIC LETTER E
++    {0x06D2, 0xFBAE, 0xFBAF, 0x0000, 0x0000}, // ARABIC LETTER YEH BARREE
++    {0x06D3, 0xFBB0, 0xFBB1, 0x0000, 0x0000}, // ARABIC LETTER YEH BARREE WITH HAMZA ABOVE
++};
++// GENERATED END
++
++static const u16 trLamAlef[4][3] = { // the alef after a lam: the ligature alone, and after a letter that joins it
++    {0x0622, 0xFEF5, 0xFEF6},
++    {0x0623, 0xFEF7, 0xFEF8},
++    {0x0625, 0xFEF9, 0xFEFA},
++    {0x0627, 0xFEFB, 0xFEFC}};
++
++#define TR_RTL_MAX 1024 // characters in one string; a longer one is drawn as it is
++static u32 trRtlIn[TR_RTL_MAX], trRtlOut[TR_RTL_MAX];
++static u8 trRtlDir[TR_RTL_MAX]; // a line's directions: 1 right to left, 0 left to right, 2 neutral (resolved below)
++
++static const u16 *trArabForms(u32 c)
++{
++    int lo = 0, hi = (int)(sizeof(trArab) / sizeof(trArab[0])) - 1;
++    while (lo <= hi) {
++        int mid = (lo + hi) / 2;
++        if (trArab[mid][0] == c)
++            return trArab[mid];
++        if (trArab[mid][0] < c)
++            lo = mid + 1;
++        else
++            hi = mid - 1;
++    }
++    return NULL;
++}
++
++// A vowel mark or the like, drawn over or under its letter: joining passes over it
++static int trArabMark(u32 c)
++{
++    return (c >= 0x0610 && c <= 0x061A) || (c >= 0x064B && c <= 0x065F) || c == 0x0670 || (c >= 0x06D6 && c <= 0x06DC) ||
++           (c >= 0x06DF && c <= 0x06E4) || c == 0x06E7 || c == 0x06E8 || (c >= 0x06EA && c <= 0x06ED);
++}
++
++static int trJoinsNext(u32 c) // joins the letter after it: a dual-joining letter, or the tatweel
++{
++    const u16 *f = trArabForms(c);
++    return c == 0x0640 || (f != NULL && f[3] != 0);
++}
++
++static int trJoinsPrev(u32 c) // joins the letter before it
++{
++    const u16 *f = trArabForms(c);
++    return c == 0x0640 || (f != NULL && f[2] != 0);
++}
++
++int ripps2RtlChar(u32 c)
++{
++    if ((c >= 0x0660 && c <= 0x0669) || (c >= 0x06F0 && c <= 0x06F9)) // the Arabic and Persian digits read as numbers
++        return 0;
++    return (c >= 0x0590 && c <= 0x08FF) || (c >= 0xFB1D && c <= 0xFDFF) || (c >= 0xFE70 && c <= 0xFEFF);
++}
++
++// Takes its direction from the letters round it: spaces, punctuation and symbols
++static int trNeutral(u32 c)
++{
++    if (c < 0x80)
++        return !((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'));
++    return (c >= 0xA0 && c <= 0xBF) || c == 0xD7 || c == 0xF7 || (c >= 0x2000 && c <= 0x206F);
++}
++
++static int trDigit(u32 c)
++{
++    return (c >= '0' && c <= '9') || (c >= 0x0660 && c <= 0x0669) || (c >= 0x06F0 && c <= 0x06F9);
++}
++
++static u32 trMirror(u32 c)
++{
++    static const u32 pairs[] = {'(', ')', '[', ']', '{', '}', '<', '>', 0xAB, 0xBB, 0};
++    int i;
++    for (i = 0; pairs[i]; i += 2) {
++        if (c == pairs[i])
++            return pairs[i + 1];
++        if (c == pairs[i + 1])
++            return pairs[i];
++    }
++    return c;
++}
++
++static void trRtlReverse(int a, int b) // trRtlOut and trRtlDir [a, b) backwards
++{
++    for (b--; a < b; a++, b--) {
++        u32 c = trRtlOut[a];
++        u8 d = trRtlDir[a];
++        trRtlOut[a] = trRtlOut[b];
++        trRtlDir[a] = trRtlDir[b];
++        trRtlOut[b] = c;
++        trRtlDir[b] = d;
++    }
++}
++
++// One line [s, e) of trRtlOut, laid out right to left: the line reads from the right, a run of Latin letters and
++// numbers keeps its own order inside it, a neutral between two of those goes with them (else with the line), and a
++// bracket on the right-to-left side turns round
++static void trRtlLine(int s, int e)
++{
++    int i, j;
++    u8 d;
++    for (i = s; i < e; i++)
++        trRtlDir[i] = ripps2RtlChar(trRtlOut[i]) ? 1 : (trNeutral(trRtlOut[i]) ? 2 : 0);
++    for (i = s; i < e; i++) { // a number keeps its signs: 50%, 1.5, 12:00, 3/4
++        u32 c = trRtlOut[i];
++        if (trRtlDir[i] == 2 && (c == '%' || c == '.' || c == ',' || c == ':' || c == '/' || c == '+' || c == '-') &&
++            ((i > s && trDigit(trRtlOut[i - 1])) || (i + 1 < e && trDigit(trRtlOut[i + 1]))))
++            trRtlDir[i] = 0;
++    }
++    for (i = s; i < e;) {
++        if (trRtlDir[i] != 2) {
++            i++;
++            continue;
++        }
++        for (j = i; j < e && trRtlDir[j] == 2; j++)
++            ;
++        d = (i > s && trRtlDir[i - 1] == 0 && j < e && trRtlDir[j] == 0) ? 0 : 1;
++        for (; i < j; i++)
++            trRtlDir[i] = d;
++    }
++    for (i = s; i < e; i++)
++        if (trRtlDir[i] == 1)
++            trRtlOut[i] = trMirror(trRtlOut[i]);
++    // a letter keeps its marks after it, where they are drawn back over it: turned here, put right by the turn below
++    for (i = s; i < e; i++) {
++        for (j = i + 1; j < e && trArabMark(trRtlOut[j]); j++)
++            ;
++        if (j > i + 1)
++            trRtlReverse(i, j);
++        i = j - 1;
++    }
++    trRtlReverse(s, e);
++    for (i = s; i < e;) { // each left-to-right run forwards again
++        if (trRtlDir[i] != 0) {
++            i++;
++            continue;
++        }
++        for (j = i; j < e && trRtlDir[j] == 0; j++)
++            ;
++        trRtlReverse(i, j);
++        i = j;
++    }
++}
++
++const char *ripps2Rtl(const char *in, char *out, int size, int reorder)
++{
++    int n = 0, m = 0, i, j, k, a, at = 0, any = 0, prev, next;
++    u32 c, form;
++    const u16 *f;
++    const char *s;
++
++    if (in == NULL)
++        return NULL;
++    for (s = in; *s;) {
++        int b = ripps2Utf8Next(s, &c);
++        if (b <= 0)
++            break;
++        if (n == TR_RTL_MAX)
++            return NULL;
++        any |= ripps2RtlChar(c);
++        trRtlIn[n++] = c;
++        s += b;
++    }
++    if (!any)
++        return NULL;
++
++    // 1. joined, in reading order. ZWNJ (Persian) stops a join and goes; ZWJ goes too.
++    for (i = 0; i < n; i++) {
++        c = trRtlIn[i];
++        if (c == 0x200C || c == 0x200D)
++            continue;
++        f = trArabForms(c);
++        if (f == NULL) {
++            trRtlOut[m++] = c;
++            continue;
++        }
++        for (j = i - 1; j >= 0 && trArabMark(trRtlIn[j]); j--)
++            ;
++        prev = j >= 0 && f[2] != 0 && trJoinsNext(trRtlIn[j]);
++        for (k = i + 1; k < n && trArabMark(trRtlIn[k]); k++)
++            ;
++        if (c == 0x0644 && k == i + 1 && k < n) {
++            for (a = 0; a < 4; a++)
++                if (trRtlIn[k] == trLamAlef[a][0])
++                    break;
++            if (a < 4) {
++                trRtlOut[m++] = prev ? trLamAlef[a][2] : trLamAlef[a][1];
++                i = k; // the alef is in it
++                continue;
++            }
++        }
++        next = k < n && f[3] != 0 && trJoinsPrev(trRtlIn[k]);
++        form = prev && next ? f[4] : (prev ? f[2] : (next ? f[3] : f[1]));
++        trRtlOut[m++] = form ? form : c;
++    }
++
++    // 2. each line right to left
++    if (reorder) {
++        for (i = 0; i < m;) {
++            int e, rtl = 0;
++            for (e = i; e < m && trRtlOut[e] != '\n'; e++)
++                rtl |= ripps2RtlChar(trRtlOut[e]);
++            if (rtl)
++                trRtlLine(i, e);
++            i = e + 1;
++        }
++    }
++
++    for (i = 0; i < m; i++) {
++        at = ripps2Utf8Put(out, at, size, trRtlOut[i]);
++        if (at < 0)
++            return NULL;
++    }
++    out[at] = '\0';
++    return out;
 +}
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
 index 88e8159..4c43dd2 100644

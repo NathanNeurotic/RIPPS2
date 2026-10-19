@@ -60,6 +60,15 @@ static char *slurp(const char *path, int *n)
     fclose(f);
     return b;
 }
+static void rtlCheck(const char *in, int reorder, const char *want)
+{
+    char out[256];
+    const char *got = ripps2Rtl(in, out, sizeof(out), reorder);
+    if (got == NULL || strcmp(got, want) != 0) {
+        printf("rtl: %s -> %s\n", in, got ? got : "(null)");
+        exit(1);
+    }
+}
 int main(int argc, char **argv)
 {
     int n;
@@ -108,6 +117,23 @@ int main(int argc, char **argv)
     unsigned int cp;
     assert(ripps2Utf8Next("\xc3\xa9x", &cp) == 2 && cp == 0xE9);
     assert(ripps2Utf8Next("\xc3", &cp) == 1);
+    // Arabic and Persian joined and right to left (expected bytes from the Python twin, 10/19)
+    rtlCheck("\xd8\xa7" "\xd9\x84" "\xd8\xa5" "\xd8\xb9" "\xd8\xaf" "\xd8\xa7" "\xd8\xaf" "\xd8\xa7" "\xd8\xaa" "", 1, "\xef\xba\x95" "\xef\xba\x8d" "\xef\xba\xa9" "\xef\xba\x8d" "\xef\xba\xaa" "\xef\xbb\x8b" "\xef\xbb\xb9" "\xef\xba\x8d" "");
+    rtlCheck("\xd9\x84" "\xd8\xa7" " \xd9\x8a" "\xd8\xb3" "\xd8\xaa" "\xd8\xb7" "\xd9\x8a" "\xd8\xb9" " RIPPS2 \xd9\x85" "\xd8\xb9" "\xd8\xb1" "\xd9\x81" "\xd8\xa9" "", 1, "\xef\xba\x94" "\xef\xbb\x93" "\xef\xba\xae" "\xef\xbb\x8c" "\xef\xbb\xa3" " RIPPS2 \xef\xbb\x8a" "\xef\xbb\xb4" "\xef\xbb\x84" "\xef\xba\x98" "\xef\xba\xb4" "\xef\xbb\xb3" " \xef\xbb\xbb" "");
+    rtlCheck("\xd8\xa8" "\xd8\xb1" "\xd9\x86" "\xd8\xa7" "\xd9\x85" "\xd9\x87" "\xe2\x80\x8c" "\xd9\x87" "\xd8\xa7" "", 1, "\xef\xba\x8e" "\xef\xbb\xab" "\xef\xbb\xaa" "\xef\xbb\xa3" "\xef\xba\x8e" "\xef\xbb\xa7" "\xef\xba\xae" "\xef\xba\x91" "");
+    rtlCheck("\xd8\xb3" "\xd9\x84" "\xd8\xa7" "\xd9\x85" "\nRIPPS2 (1)", 1, "\xef\xbb\xa1" "\xef\xbb\xbc" "\xef\xba\xb3" "\nRIPPS2 (1)");
+    rtlCheck("50% \xd8\xad" "\xd8\xb1" "\xd8\xa9" "", 1, "\xef\xba\x93" "\xef\xba\xae" "\xef\xba\xa3" " 50%");
+    rtlCheck("\xd8\xaa" "\xd8\xb9" "\xd8\xb0" "\xd9\x91" "\xd8\xb1" "", 1, "\xef\xba\xad" "\xef\xba\xac" "\xd9\x91" "\xef\xbb\x8c" "\xef\xba\x97" "");
+    rtlCheck("\xd8\xaa" "\xd8\xb9" "\xd8\xb0" "\xd9\x91" "\xd8\xb1" "", 0, "\xef\xba\x97" "\xef\xbb\x8c" "\xef\xba\xac" "\xd9\x91" "\xef\xba\xad" "");
+    rtlCheck("\xd9\x86" "\xd8\xb3" "\xd8\xae" " 3 \xd9\x85" "\xd9\x86" " 7", 1, "7 \xef\xbb\xa6" "\xef\xbb\xa3" " 3 \xef\xba\xa6" "\xef\xba\xb4" "\xef\xbb\xa7" "");
+    rtlCheck("(\xd8\xa8" ")", 1, "(\xef\xba\x8f" ")");
+    assert(ripps2Rtl("abc def", out, sizeof(out), 1) == NULL); // no right-to-left letter: drawn as it is
+    assert(ripps2Rtl("\xd8\xa7\xd9\x84", out, 3, 1) == NULL); // does not fit
+    assert(ripps2RtlChar(0x0627) && ripps2RtlChar(0xFEFB) && !ripps2RtlChar(0x0661) && !ripps2RtlChar('A'));
+    // Lao: between letters, never before a vowel or tone mark of the letter before, nor after a leading vowel
+    const char *lao = "\xe0\xba\x81\xe0\xba\xb1\xe0\xba\x99\xe0\xbb\x80\xe0\xba\x81"; // kan, e + ko
+    assert(!ripps2Utf8BreakAt(lao, lao + 3) && ripps2Utf8BreakAt(lao, lao + 6) && ripps2Utf8BreakAt(lao, lao + 9) &&
+           !ripps2Utf8BreakAt(lao, lao + 12));
     puts("ok");
     return 0;
 }
