@@ -81,6 +81,9 @@ How it maps onto the code (read 10/19):
       decorator_all, decorator_ps2/_ps1/_app; RIPPS2-themes has them (THEME_KEYS.md, glossary, checker, Adapt).
 
 ## RIPSHOT (screenshots in game): moved to its own build, not started
+**The full plan, decided with the user 10/20: [ripshot.md](ripshot.md)** (6 shots a game on per-game rolls, Manual
+developing by default, ART 250x188 and MEDIA full size as 8-bit PNG, the SCRn theme key, every word on screen).
+The notes below are the first findings, kept for the record.
 Findings 10/19 (why it did not fit in 106 under the usage limit): nothing in-game can create a file unless the
 IOP has a file system driver live for that drive (OPL's GPL IGS writes with fioOpen after the pause); the frame
 must be read back from GS memory (a GS-to-EE transfer the menu does not do yet) and ee_core has about 11 KB
