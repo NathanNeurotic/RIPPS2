@@ -1,6 +1,6 @@
-"""Fill the v1.1.1 psx-place bump (notes/psxplace111.txt) with the sounds Short's YouTube link.
+"""Fill the v1.1.2 psx-place bump (notes/psxplace112.txt) with the sounds Short's YouTube link.
 
-    python psxplace_bump.py <short url>      writes notes/psxplace111-ready.txt (the BBCode body to paste)
+    python psxplace_bump.py <short url>      writes notes/psxplace112-ready.txt (the BBCode body to paste)
 """
 import re
 import sys
@@ -15,10 +15,10 @@ def main():
     m = re.search(r'(?:shorts/|youtu\.be/|[?&]v=)([A-Za-z0-9_-]{11})', sys.argv[1])
     if not m:
         sys.exit('not a YouTube link: %s' % sys.argv[1])
-    t = (NOTES / 'psxplace111.txt').read_text(encoding='utf-8')
+    t = (NOTES / 'psxplace112.txt').read_text(encoding='utf-8')
     body = t[t.index('[CENTER][SIZE=5]'):].replace('SHORT_ID', m.group(1))
-    (NOTES / 'psxplace111-ready.txt').write_text(body, encoding='utf-8')
-    print('notes/psxplace111-ready.txt: paste it as a reply in BBCode mode')
+    (NOTES / 'psxplace112-ready.txt').write_text(body, encoding='utf-8')
+    print('notes/psxplace112-ready.txt: paste it as a reply in BBCode mode')
 
 
 if __name__ == '__main__':

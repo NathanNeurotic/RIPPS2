@@ -149,6 +149,30 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
 - [x] lukeatmynose on the About page and in the README.
 - [x] The sounds lesson (media/b111/ripps2-v111-sounds.mp4): takes111.ps1 + short111.py in the reel kit.
 
+## Build 112 (the user, 10/21: "the error red screen menu instead of the standard osdsys menu theme"): done 10/21, released in v1.1.2-beta
+- [x] BIOS Music's piece: SNDWARNS (build 100's) is the red screen's (its tonal 8 s opening, then waves); the main menu
+      plays SNDCLOKS, the clock's (5:04). Timing correlation could not match either to the "02 Menu" recording; the
+      PS2's own screens decided it (the main menu's orbs are the clock).
+- [x] rbsMusicOpen(seq); ripps2BiosMusicSamplesOf/FromImageOf(piece) with per-piece hall and gain (the clock's
+      0.0781 / 1.5812 by ripps2BiosMusicMeasure; the red screen's reproduce build 100's 0.0807 / 1.3875 exactly).
+- [x] rbsPickMusic: THE MENU MUSIC (THE CLOCK) first and chosen, THE RED SCREEN MUSIC (DISC WARNING), BOTH; then
+      the folder question; bgm_00 Menu.wav and bgm_01 Red Screen.wav. Lab: menu only 14,592,044 bytes, both, the
+      capture plays the clock (0.85 against the WAV).
+- [x] 9 new sentences in all 32 translations.
+- [x] The sounds walkthrough, one take (media/b112): takes111.ps1 tut_c2 + short112.py.
+
+## Build 113 (planned, the user 10/21)
+- [ ] Fast Cache: a Game Sources > Cache submenu showing each source's list (RIPPS2.LST, APA games.bin) and its
+      state, the old BDM/HDD/SMB/APA cache rows moved in with tooltips saying what still matters; outdated rows go.
+- [ ] All Games from the sources' saved lists before the drives answer (a master list), if Fast Cache is on.
+- [ ] Legacy theme key: a theme without it shows Storage only, Launch Disc and Memory Files in the START menu
+      (backing out returns to its Storage); the built-ins and the Adapt pack set it and keep the three categories.
+- [ ] Adapt sidebar: vertical icon glyphs for the categories (Left from the list, RIPGRID-style highlight, select to
+      switch), an overlay on Launch Disc and Memory Files, the freed top space showing the full name as a header,
+      Circle's sources in the same style; theme keys; in the Adapt pack. Header font: the user picks from
+      docs/plans/mockups/b113-header-fonts.png.
+- [ ] Mother font: one master font with per-element bold / case / tracking keys (FreeType emboldening).
+
 ## Skipped
 - **RIPCON** (format conversion, as OrbitOPL Toolbox does on a PC): not done on PS2 hardware yet, likely failure
   prone, and a smaller format can be less supported by the loaders. Skipped by the user (2026-10-18).

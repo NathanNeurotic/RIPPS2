@@ -1,5 +1,18 @@
 # RIPPS2 changelog
 
+## Build 112 (beta, v1.1.2-beta), changes since build 111
+
+The user (10/21): "i think were using the error red screen menu instead of the standard osdsys menu theme ... make it so you can select one other or both ripped ... make the osdsys one the default".
+
+### BIOS Music
+- **The menu music is the menu's own now.** Since build 100, BIOS Music ripped SNDWARNS: the music of the red screen, "Please insert a PlayStation or PlayStation 2 format disc", with that screen's tense opening and then waves. The browser's main menu plays the clock's piece, SNDCLOKS (5:04): the main menu's orbs are the clock (they stop when the clock battery is flat). Build 100 matched the two by their sound spectrum against a recording, and both pieces use one set of instruments, so the match could not tell them apart.
+- **Choose which.** Audio Settings > BIOS Music asks: **THE MENU MUSIC (THE CLOCK)**, first and chosen, **THE RED SCREEN MUSIC (DISC WARNING)**, or **BOTH**, each with its length. The menu's goes in AUDIO as `bgm_00 Menu.wav`, the track RIPPS2 plays when no other is picked; the red screen's as `bgm_01 Red Screen.wav`, listed as Red Screen in Audio Settings > Music.
+- **Ripped before?** Your `bgm_00 Menu.wav` is the red screen's piece. Rip again with THE MENU MUSIC to replace it, or BOTH to keep the red screen's as a track of its own.
+- The clock's levels were measured the way build 100's were, on the PC (its hall and gain; the red screen's numbers came out exactly as before).
+
+### Underneath
+- The new words in all 33 languages.
+
 ## Build 111 (beta, v1.1.1-beta), changes since build 110
 
 The user's notes of 10/21 and lukeatmynose's first report from a console (build 110).
