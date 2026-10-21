@@ -49,8 +49,9 @@ if 'RIPPS2_MEDIA_SOUND' not in media or 'sfxPreviewStart(path)' not in media or 
     fail.append('Memory Files must play an .adp (and load the sounds again after)')
 if 'ACT_SOUNDS_RIP' not in st or 'sfxLoadedSounds' not in st:
     fail.append('STATUS must say where the sounds come from')
-if 'Experimental' not in rd('lng_tmpl/_base.yml').split('HINT_RIPPS2_IGR_MENU')[1][:200]:
-    fail.append("the In-Game Menu's tooltip must call it experimental")
+# build 108 retired "experimental": the menu is on by default (the user, 10/20) and its hint says what On and Off do
+if 'On: L1+L2+R1+R2+SELECT+START' not in rd('lng_tmpl/_base.yml').split('HINT_RIPPS2_IGR_MENU')[1][:200]:
+    fail.append("the In-Game Menu's tooltip must say what On and Off do")
 
 # ---- pictures
 if 'jpeg_stdio_src' in media or 'static jmp_buf' in media:

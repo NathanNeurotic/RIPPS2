@@ -39,7 +39,7 @@ if 'free(all)' not in ra or 'free(lockedAt)' not in ra:
 # the launch
 if 'sbLoadRaHunt(path, file)' not in sb or 'raHuntBlob(list, n, sbRaHunt' not in sb:
     fail.append('a launch must read RA/<serial>.ach and pack it for the menu')
-m = re.search(r'gRipps2IgrMenu && \(huntSrc = sbGetRaHunt.*?\n.*?\n', sysc)
+m = re.search(r'igrStack != NULL && \(huntSrc = sbGetRaHunt.*?\n.*?\n', sysc)  # build 108: the menu on = its stack fitted
 if not m or 'OPL_MOD_STORAGE' not in m.group(0) or '0xD0000' not in m.group(0):
     fail.append('the hunt list goes into module storage only with the menu on, at the default address, below 0xD0000')
 if 'config->RaHunt = raHunt' not in sysc:
@@ -141,7 +141,7 @@ int main(void)
 #include <string.h>
 #include "igrmenu.c"
 #include "include/rahunt.h"
-static u8 buf[320 * 232 * 3];
+static u8 buf[320 * 252 * 3]; /* build 108: the panel is 126 units tall */
 static u8 blob[RA_HUNT_BLOB];
 static ra_hunt_t list[3] = {
     {0, 10, "First Crash", "Cause a takedown in any race"},
@@ -156,7 +156,7 @@ static void save(const char *dir, const char *name)
     if (!dir[0]) return;
     snprintf(path, sizeof(path), "%s/%s.ppm", dir, name);
     if ((f = fopen(path, "wb")) == NULL) return;
-    fprintf(f, "P6 320 232 255\n");
+    fprintf(f, "P6 320 252 255\n");
     fwrite(buf, 1, sizeof(buf), f);
     fclose(f);
 }
@@ -167,12 +167,12 @@ int main(int argc, char **argv)
     int k, count;
     raHuntBlob(list, 3, blob, sizeof(blob), &count); /* packed as a launch packs it */
     igrm_info_t a = {0, "SLUS_204.82", "mc0:/BOOT/RIPPS2.ELF", 1, 1, 40, 12, 1, 2, blob, count};
-    igrmTestRender(&a, 1, 0, 2, 2, buf);
+    igrmTestRender(&a, 2, 0, 2, 2, buf); /* build 108: ACHIEVEMENTS is third */
     save(dir, "achievements");
     if (count != 3 || igrmLine[igrmLines - 1].glyph[0] != G_CROSS) return 1; /* ok SEE THEM */
     for (k = 0; k < 3; k++) {
         char name[16];
-        if (igrmTestRender(&a, 4 + k, 0, 2, 2, buf) != 232) return 2;
+        if (igrmTestRender(&a, 4 + k, 0, 2, 2, buf) != 252) return 2;
         sprintf(name, "hunt%d", k);
         save(dir, name);
         if (igrmLines > IGRM_LINES || longest() > TEXT_CHARS) return 10 + k;
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
     /* without a list: the old page */
     a.hunt = NULL;
     a.huntCount = 0;
-    igrmTestRender(&a, 1, 0, 2, 2, buf);
+    igrmTestRender(&a, 2, 0, 2, 2, buf);
     if (igrmLine[igrmLines - 1].glyph[0] != G_CIRCLE) return 50;
     printf("rendered\n");
     return 0;

@@ -113,7 +113,7 @@ if not grid or grid[0].get('x') != '320' or grid[0].get('title_font') != '7':
     fail.append('RIPGRID: centred (x=320), its name in font7')
 if 'font7=builtin:ripps2sleekbold' not in rd('misc/theme_ripgrid.cfg'):
     fail.append("RIPGRID's font7 must be RIPPS2 Sleek Bold")
-shots = [v for k, v in elems(rd('misc/theme_coverflow.cfg')).items() if k.startswith('info') and v.get('pattern') in ('SCR', 'SCR2')]
+shots = [v for k, v in elems(rd('misc/theme_coverflow.cfg')).items() if k.startswith('info') and v.get('pattern') in ('SCR', 'SCR2', 'SCRn')]  # SCRn from build 108
 if len(shots) != 2 or any(v.get('tilt') != '1' for v in shots):
     fail.append("RIPFLOW's info page screenshots must tilt")
 

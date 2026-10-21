@@ -927,6 +927,34 @@ strings:
   COPY AND START: نسخ وتشغيل
   Copying %s: جارٍ نسخ %s
   LAUNCH ANYWAY: التشغيل على أي حال
+  '%d NOT SAVED: DRIVE FULL': 'لم تُحفظ %d: المحرك ممتلئ'
+  '%d OF 6': '%d من 6'
+  '%d ROLLS': '%d بكرات'
+  '%d SHOTS': '%d لقطات'
+  '%d SHOTS ON THE ROLL': '%d لقطات على البكرة'
+  '%d SHOTS SAVED': حُفظت %d لقطات
+  1 ROLL: بكرة واحدة
+  1 SHOT: لقطة واحدة
+  1 SHOT ON THE ROLL: لقطة واحدة على البكرة
+  1 SHOT SAVED: حُفظت لقطة واحدة
+  Auto: تلقائي
+  BOTH: كلاهما
+  DEVELOP: تحميض
+  DEVELOP ALL: تحميض الكل
+  DEVELOPING %d OF %d: جارٍ التحميض %d من %d
+  Delete this shot?: حذف هذه اللقطة؟
+  'L1+L2+R1+R2+SELECT+START pauses the game: resume, exit, take a screenshot, check achievements or power off.': 'L1+L2+R1+R2+SELECT+START يوقف اللعبة مؤقتًا: متابعة أو خروج أو التقاط صورة للشاشة أو عرض الإنجازات أو إيقاف التشغيل.'
+  Manual: يدوي
+  NO SHOTS WAITING: لا لقطات في الانتظار
+  No SCREENSHOT in the in-game menu, and no space kept for it.: لا SCREENSHOT في القائمة داخل اللعبة، ولا مساحة محجوزة لها.
+  'On': تشغيل
+  SHOT %d: اللقطة %d
+  ? Screenshots from the in-game menu, to ART for your themes or to MEDIA. 6 per game; each game with shots waiting holds 4 MB.
+  : صور للشاشة من القائمة داخل اللعبة، إلى ART لسماتك أو إلى MEDIA. 6 لكل لعبة؛ كل لعبة لديها لقطات في الانتظار تشغل 4 MB.
+  Shots turn into PNGs by themselves once you are back in RIPPS2, in the background while you browse.: تتحول اللقطات إلى PNG وحدها عند عودتك إلى RIPPS2، في الخلفية أثناء تصفحك.
+  Shots wait on each game's roll in Memory Files (MEDIA/RIPSHOT) until you develop them. Nothing runs on its own.: تنتظر اللقطات على بكرة كل لعبة في ملفات الذاكرة (MEDIA/RIPSHOT) حتى تحمّضها. لا شيء يعمل وحده.
+  The combo leaves the game at once, as before.: تخرج التركيبة من اللعبة فورًا، كما كان من قبل.
+  VIEW: عرض
 labels:
   SETTINGS_SAVED: حُفظت الإعدادات في %s
   CONFIRMATION_EXIT: الخروج إلى المتصفح؟
@@ -1121,7 +1149,7 @@ labels:
   RIPPS2_PAGE_BUTTONS: أزرار الصفحات
   HINT_RIPPS2_PAGE_BUTTONS: 'أي أزرار الكتف تقلب صفحات قائمة الألعاب. L2 / R2: تقلب الصفحات وL1 / R1 تبدّل الفئات. L1 / R1: تقلب الصفحات وL2 / R2 تبدّل الفئات. السمة: تقرر السمة؛ وبدونها يذهب L2 إلى الأعلى وR2 إلى النهاية. الضغط على L2 + R2 معاً يختار دائماً لعبة عشوائية.'
   RIPPS2_IGR_MENU: قائمة داخل اللعبة
-  HINT_RIPPS2_IGR_MENU: 'تجريبي. تشغيل: L1+L2+R1+R2+SELECT+START يوقف اللعبة مؤقتاً تحت متابعة والإنجازات والخروج من اللعبة؛ في بعض الألعاب يتقطع الصوت أو تتوقف اللعبة إذا أُوقفت أثناء مشهد سينمائي. إيقاف (الافتراضي): يترك المزيج اللعبة فوراً، وهو IGR الموثوق في OPL.'
+  HINT_RIPPS2_IGR_MENU: 'تشغيل: L1+L2+R1+R2+SELECT+START يوقف اللعبة مؤقتًا: متابعة أو خروج أو التقاط صورة للشاشة أو عرض الإنجازات أو إيقاف التشغيل. إيقاف: تخرج التركيبة من اللعبة فورًا، كما كان من قبل.'
   RIPPS2_BOOT_LOADER: محمّل الإقلاع
   HINT_RIPPS2_BOOT_LOADER: يعرض ما تشغّله كل بطاقة ذاكرة عند التشغيل، ويثبّت BIBLE (PS2BBL مضبوط لـ RIPPS2). تُحفظ ملفات الإقلاع القديمة للبطاقة.
   RIPPS2_MANAGE: إدارة
@@ -1393,3 +1421,8 @@ labels:
   PCCF_UNAVAILABLE: 'CF غير متاح: يتطلب جهاز PS2 ياباني مبكراً بمنفذ PC CARD، وبطاقة متوافقة، وعدم وجود برنامج تشغيل DEV9/HDD/شبكة نشط.'
   PCCF_UNSUPPORTED_GAME: يدعم CF حالياً ألعاب PS2 الأصلية فقط. VMC على CF وتحميل PS1 وإنجازات الشبكة غير متاحة.
   HINT_ENABLE_DVR: اكتشاف تجريبي لملفات DESR DVR ISO. يتطلب تفعيل مصدر القرص الصلب؛ ويحتاج تشغيل اللعبة إلى Neutrino خارجي يدعم DVR.
+  HINT_RIPPS2_IGR_PAGE: القائمة داخل اللعبة وRIPSHOT وطريقة تحميض اللقطات.
+  RIPPS2_RIPSHOT: RIPSHOT
+  HINT_RIPPS2_RIPSHOT: صور للشاشة من القائمة داخل اللعبة، إلى ART لسماتك أو إلى MEDIA.
+  RIPPS2_DEVELOP_SHOTS: تحميض اللقطات
+  HINT_RIPPS2_DEVELOP_SHOTS: كيف تصبح اللقطات المنتظرة على بكرة كل لعبة ملفات PNG.

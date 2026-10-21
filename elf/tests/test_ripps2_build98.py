@@ -186,7 +186,7 @@ if '"MEMORY CARD %c", dev[2]' not in fb or '"MEMORY CARD 2' in rd('src/ripps2sta
 
 th, menu = rd('src/themes.c'), rd('src/menusys.c')
 # --- the info page: the group waits for its background, late art fades, the show opens on slide 1
-if '#define INFO_GROUP_WAIT_S 1.6f' not in th or 'SLIDE_FIRST_WAIT_S' not in th or 'artFadeIn(drawElem, item, texture) : 1.0f;' not in th:
+if '#define INFO_GROUP_WAIT_S 1.6f' not in th or 'SLIDE_FIRST_WAIT_S' not in th or 'artFadeIn(drawElem, item, gameImage->shots ? (const void *)gameImage->shots : texture) : 1.0f;' not in th:
     fail.append('the info page\'s background must come in with its disc and cover, late art fading on its own')
 # --- the Grid's page buttons turn a page
 if 'static int menuGridPage(int dir)' not in menu or 'if (menuGridPage(1))' not in menu or 'if (menuGridPage(-1))' not in menu:

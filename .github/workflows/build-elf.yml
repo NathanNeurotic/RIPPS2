@@ -68,14 +68,17 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      # the link map and the unstripped ELF of exactly this build: a lab save state's PC and stack read against them
+      # the link map and the unstripped ELF of exactly this build: a lab save state's PC and stack read against them.
+      # Build 108: ee_core's map too, and even when the link fails (ee_core's room is checked at link time)
       - name: Upload symbols
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
         with:
           name: RIPPS2-symbols${{ inputs.debug && '-debug' || '' }}${{ inputs.flags && '-test' || '' }}
           path: |
             riptopl/opl.map
             riptopl/opl.elf
+            riptopl/ee_core/ee_core.map
           if-no-files-found: warn
           retention-days: 30
 

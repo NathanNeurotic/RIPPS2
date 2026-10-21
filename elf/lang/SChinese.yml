@@ -927,6 +927,34 @@ strings:
   COPY AND START: 复制并启动
   Copying %s: 正在复制 %s
   LAUNCH ANYWAY: 仍然启动
+  '%d NOT SAVED: DRIVE FULL': '%d 张未保存：驱动器已满'
+  '%d OF 6': '%d / 6'
+  '%d ROLLS': '%d 卷胶卷'
+  '%d SHOTS': '%d 张'
+  '%d SHOTS ON THE ROLL': 胶卷上有 %d 张
+  '%d SHOTS SAVED': 已保存 %d 张
+  1 ROLL: 1 卷胶卷
+  1 SHOT: 1 张
+  1 SHOT ON THE ROLL: 胶卷上有 1 张
+  1 SHOT SAVED: 已保存 1 张
+  Auto: 自动
+  BOTH: 两者
+  DEVELOP: 冲洗
+  DEVELOP ALL: 全部冲洗
+  DEVELOPING %d OF %d: 正在冲洗 %d / %d
+  Delete this shot?: 删除这张照片？
+  'L1+L2+R1+R2+SELECT+START pauses the game: resume, exit, take a screenshot, check achievements or power off.': L1+L2+R1+R2+SELECT+START 暂停游戏：继续、退出、截图、查看成就或关机。
+  Manual: 手动
+  NO SHOTS WAITING: 没有等待的照片
+  No SCREENSHOT in the in-game menu, and no space kept for it.: 游戏内菜单中没有 SCREENSHOT，也不为它预留空间。
+  'On': 开
+  SHOT %d: 照片 %d
+  ? Screenshots from the in-game menu, to ART for your themes or to MEDIA. 6 per game; each game with shots waiting holds 4 MB.
+  : 从游戏内菜单截图，存到供主题使用的 ART 或 MEDIA。每个游戏 6 张；每个有等待照片的游戏占用 4 MB。
+  Shots turn into PNGs by themselves once you are back in RIPPS2, in the background while you browse.: 回到 RIPPS2 后，照片会在你浏览时于后台自动变成 PNG。
+  Shots wait on each game's roll in Memory Files (MEDIA/RIPSHOT) until you develop them. Nothing runs on its own.: 照片在记忆文件 (MEDIA/RIPSHOT) 中各游戏的胶卷上等待，直到你冲洗它们。不会自动运行任何操作。
+  The combo leaves the game at once, as before.: 组合键像以前一样立即退出游戏。
+  VIEW: 查看
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
@@ -1066,7 +1094,7 @@ labels:
   RIPPS2_PAGE_BUTTONS: 翻页按键
   HINT_RIPPS2_PAGE_BUTTONS: 用哪对肩键翻游戏列表的页。L2 / R2：它们翻页，L1 / R1 切换分类。L1 / R1：它们翻页，L2 / R2 切换分类。主题：由主题决定；没有主题时 L2 到开头，R2 到结尾。同时按 L2 + R2 始终选择随机游戏。
   RIPPS2_IGR_MENU: 游戏内菜单
-  HINT_RIPPS2_IGR_MENU: 实验性。开启：L1+L2+R1+R2+SELECT+START 暂停游戏并显示 继续、成就 和 退出游戏；某些游戏在过场动画中暂停会出现声音跳跃或游戏停止。关闭（默认）：组合键立即退出游戏，即 OPL 可靠的 IGR。
+  HINT_RIPPS2_IGR_MENU: 开：L1+L2+R1+R2+SELECT+START 暂停游戏：继续、退出、截图、查看成就或关机。关：组合键像以前一样立即退出游戏。
   RIPPS2_BOOT_LOADER: 引导程序
   HINT_RIPPS2_BOOT_LOADER: 显示每张记忆卡开机时启动的内容，并安装 BIBLE（为 RIPPS2 设置的 PS2BBL）。记忆卡原有的启动文件会保留。
   RIPPS2_MANAGE: 管理
@@ -1336,3 +1364,8 @@ labels:
   PCCF_UNAVAILABLE: CF 不可用：需要带 PC CARD 的早期日版 PS2、兼容的卡，并且没有已启用的 DEV9/硬盘/网络驱动。
   PCCF_UNSUPPORTED_GAME: CF 目前只支持原生 PS2 游戏。CF 上的 VMC、PS1 加载和网络成就不可用。
   HINT_ENABLE_DVR: 实验性的 DESR DVR ISO 发现。需要开启硬盘来源；启动游戏需要外部支持 DVR 的 Neutrino。
+  HINT_RIPPS2_IGR_PAGE: 游戏内菜单、RIPSHOT 以及照片如何冲洗。
+  RIPPS2_RIPSHOT: RIPSHOT
+  HINT_RIPPS2_RIPSHOT: 从游戏内菜单截图，存到供主题使用的 ART 或 MEDIA。
+  RIPPS2_DEVELOP_SHOTS: 冲洗照片
+  HINT_RIPPS2_DEVELOP_SHOTS: 各游戏胶卷上等待的照片如何变成 PNG。

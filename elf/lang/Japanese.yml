@@ -927,6 +927,34 @@ strings:
   COPY AND START: コピーして起動
   Copying %s: '%s をコピー中'
   LAUNCH ANYWAY: それでも起動
+  '%d NOT SAVED: DRIVE FULL': '%d 枚を保存できません：ドライブがいっぱい'
+  '%d OF 6': '%d / 6'
+  '%d ROLLS': フィルム %d 本
+  '%d SHOTS': '%d 枚'
+  '%d SHOTS ON THE ROLL': フィルムに %d 枚
+  '%d SHOTS SAVED': '%d 枚を保存しました'
+  1 ROLL: フィルム 1 本
+  1 SHOT: 1 枚
+  1 SHOT ON THE ROLL: フィルムに 1 枚
+  1 SHOT SAVED: 1 枚を保存しました
+  Auto: 自動
+  BOTH: 両方
+  DEVELOP: 現像
+  DEVELOP ALL: すべて現像
+  DEVELOPING %d OF %d: 現像中 %d / %d
+  Delete this shot?: この写真を削除しますか？
+  'L1+L2+R1+R2+SELECT+START pauses the game: resume, exit, take a screenshot, check achievements or power off.': L1+L2+R1+R2+SELECT+START でゲームを一時停止：再開、終了、スクリーンショット、実績の確認、電源オフ。
+  Manual: 手動
+  NO SHOTS WAITING: 待っている写真はありません
+  No SCREENSHOT in the in-game menu, and no space kept for it.: ゲーム内メニューに SCREENSHOT はなく、そのための容量も確保しません。
+  'On': オン
+  SHOT %d: 写真 %d
+  ? Screenshots from the in-game menu, to ART for your themes or to MEDIA. 6 per game; each game with shots waiting holds 4 MB.
+  : ゲーム内メニューからのスクリーンショットを、テーマ用の ART か MEDIA へ。1 ゲーム 6 枚まで。写真が待っているゲームはそれぞれ 4 MB を使います。
+  Shots turn into PNGs by themselves once you are back in RIPPS2, in the background while you browse.: RIPPS2 に戻ると、写真はブラウズ中にバックグラウンドで自動的に PNG になります。
+  Shots wait on each game's roll in Memory Files (MEDIA/RIPSHOT) until you develop them. Nothing runs on its own.: 写真は現像するまで、メモリーファイル (MEDIA/RIPSHOT) の各ゲームのフィルムで待ちます。自動では何も動きません。
+  The combo leaves the game at once, as before.: コンボで以前どおりすぐにゲームを終了します。
+  VIEW: 表示
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。
@@ -1065,7 +1093,7 @@ labels:
   RIPPS2_PAGE_BUTTONS: ページボタン
   HINT_RIPPS2_PAGE_BUTTONS: どのショルダーボタンでゲームリストのページを送るか。L2 / R2：ページを送り、L1 / R1 でカテゴリーを切り替え。L1 / R1：ページを送り、L2 / R2 でカテゴリーを切り替え。テーマ：テーマが決め、テーマがなければ L2 で先頭、R2 で末尾へ。L2 + R2 を同時に押すと常にランダムなゲームを選びます。
   RIPPS2_IGR_MENU: ゲーム内メニュー
-  HINT_RIPPS2_IGR_MENU: 実験的。オン：L1+L2+R1+R2+SELECT+START でゲームを一時停止し、再開、実績、ゲーム終了 を表示します。ムービー中に一時停止すると、ゲームによっては音が飛んだりゲームが止まったりします。オフ（既定）：コンボですぐにゲームを抜けます。OPL の信頼できる IGR です。
+  HINT_RIPPS2_IGR_MENU: オン：L1+L2+R1+R2+SELECT+START でゲームを一時停止：再開、終了、スクリーンショット、実績の確認、電源オフ。オフ：コンボで以前どおりすぐにゲームを終了します。
   RIPPS2_BOOT_LOADER: ブートローダー
   HINT_RIPPS2_BOOT_LOADER: 各メモリーカードが電源投入時に何を起動するかを表示し、BIBLE（RIPPS2 用に設定した PS2BBL）をインストールします。カードの元の起動ファイルは保存されます。
   RIPPS2_MANAGE: 管理
@@ -1335,3 +1363,8 @@ labels:
   PCCF_UNAVAILABLE: CF は使えません：PC CARD 付きの初期の日本版 PS2、互換性のあるカード、そして DEV9/HDD/ネットワークのドライバーが動いていないことが必要です。
   PCCF_UNSUPPORTED_GAME: CF は今のところ PS2 ネイティブのゲームのみに対応しています。CF の VMC、PS1 の読み込み、ネットワークの実績は使えません。
   HINT_ENABLE_DVR: 実験的な DESR DVR ISO の検出。HDD ソースをオンにする必要があります。ゲームの起動には外部の DVR 対応 Neutrino が必要です。
+  HINT_RIPPS2_IGR_PAGE: ゲーム内メニュー、RIPSHOT、写真の現像方法。
+  RIPPS2_RIPSHOT: RIPSHOT
+  HINT_RIPPS2_RIPSHOT: ゲーム内メニューからのスクリーンショットを、テーマ用の ART か MEDIA へ。
+  RIPPS2_DEVELOP_SHOTS: 写真の現像
+  HINT_RIPPS2_DEVELOP_SHOTS: 各ゲームのフィルムで待っている写真を PNG にする方法。

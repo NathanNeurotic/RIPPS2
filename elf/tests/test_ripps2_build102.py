@@ -112,7 +112,7 @@ for f in ('src/ripps2about.c', 'src/ripps2status.c'):
         fail.append('%s must draw in the page faces, opened and closed with the page' % f)
 
 # 10. an app's case: PS1 square by default, PS2 or the theme's from its menu, on every cover path
-for name in ('static void drawGameImage(', 'static void drawCoverFlow(', 'static void drawGridCover('):
+for name in ('static void drawGameImageArt(', 'static void drawCoverFlow(', 'static void drawGridCover('):  # build 108: drawGameImage draws through drawGameImageArt
     i = thm.find(name)
     j = thm.find('\n}\n', i)
     if i < 0 or 'thmAppShapeBox(' not in thm[i:j]:

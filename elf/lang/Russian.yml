@@ -927,6 +927,34 @@ strings:
   COPY AND START: КОПИРОВАТЬ И ЗАПУСТИТЬ
   Copying %s: Копирование %s
   LAUNCH ANYWAY: ВСЁ РАВНО ЗАПУСТИТЬ
+  '%d NOT SAVED: DRIVE FULL': 'НЕ СОХРАНЕНО: %d, ДИСК ЗАПОЛНЕН'
+  '%d OF 6': '%d ИЗ 6'
+  '%d ROLLS': 'ПЛЁНОК: %d'
+  '%d SHOTS': 'КАДРОВ: %d'
+  '%d SHOTS ON THE ROLL': 'КАДРОВ НА ПЛЁНКЕ: %d'
+  '%d SHOTS SAVED': 'СОХРАНЕНО КАДРОВ: %d'
+  1 ROLL: 1 ПЛЁНКА
+  1 SHOT: 1 КАДР
+  1 SHOT ON THE ROLL: 1 КАДР НА ПЛЁНКЕ
+  1 SHOT SAVED: СОХРАНЁН 1 КАДР
+  Auto: Авто
+  BOTH: ОБА
+  DEVELOP: ПРОЯВИТЬ
+  DEVELOP ALL: ПРОЯВИТЬ ВСЕ
+  DEVELOPING %d OF %d: ПРОЯВКА %d ИЗ %d
+  Delete this shot?: Удалить этот кадр?
+  'L1+L2+R1+R2+SELECT+START pauses the game: resume, exit, take a screenshot, check achievements or power off.': 'L1+L2+R1+R2+SELECT+START ставит игру на паузу: продолжить, выйти, сделать снимок экрана, посмотреть достижения или выключить.'
+  Manual: Вручную
+  NO SHOTS WAITING: НЕТ КАДРОВ В ОЖИДАНИИ
+  No SCREENSHOT in the in-game menu, and no space kept for it.: Нет SCREENSHOT в игровом меню, и место не резервируется.
+  'On': Вкл.
+  SHOT %d: КАДР %d
+  ? Screenshots from the in-game menu, to ART for your themes or to MEDIA. 6 per game; each game with shots waiting holds 4 MB.
+  : Снимки экрана из игрового меню, в ART для ваших тем или в MEDIA. 6 на игру; каждая игра с ожидающими кадрами занимает 4 МБ.
+  Shots turn into PNGs by themselves once you are back in RIPPS2, in the background while you browse.: Кадры сами превращаются в PNG, когда вы возвращаетесь в RIPPS2, в фоне, пока вы листаете.
+  Shots wait on each game's roll in Memory Files (MEDIA/RIPSHOT) until you develop them. Nothing runs on its own.: Кадры ждут на плёнке каждой игры в Файлах памяти (MEDIA/RIPSHOT), пока вы их не проявите. Ничего не запускается само.
+  The combo leaves the game at once, as before.: Комбинация сразу выходит из игры, как раньше.
+  VIEW: ПОКАЗАТЬ
 labels:
   DS34BT_MODE: DualShock3/4 по Bluetooth
   HINT_NEUTRINO_AUTO_ELF: Передаёт загрузочный ELF игры в Neutrino, чтобы найти настройки для этой игры. Включено по умолчанию; заданный вручную параметр Boot ELF важнее.
@@ -1065,7 +1093,7 @@ labels:
   RIPPS2_PAGE_BUTTONS: Кнопки страниц
   HINT_RIPPS2_PAGE_BUTTONS: 'Какие шифты листают страницы списка игр. L2 / R2: они листают страницы, а L1 / R1 меняют категорию. L1 / R1: они листают страницы, а L2 / R2 меняют категорию. Тема: решает тема; без неё L2 ведёт в начало, а R2 в конец. L2 + R2 вместе всегда выбирают случайную игру.'
   RIPPS2_IGR_MENU: Игровое меню
-  HINT_RIPPS2_IGR_MENU: 'Экспериментально. Вкл.: L1+L2+R1+R2+SELECT+START ставит игру на паузу с пунктами «Продолжить», «Достижения» и «Выйти из игры»; в некоторых играх звук прерывается или игра останавливается, если поставить паузу во время ролика. Выкл. (по умолчанию): сочетание сразу выходит из игры, проверенный IGR OPL.'
+  HINT_RIPPS2_IGR_MENU: 'Вкл.: L1+L2+R1+R2+SELECT+START ставит игру на паузу: продолжить, выйти, сделать снимок экрана, посмотреть достижения или выключить. Выкл.: комбинация сразу выходит из игры, как раньше.'
   RIPPS2_BOOT_LOADER: Загрузчик
   HINT_RIPPS2_BOOT_LOADER: Показывает, что каждая карта памяти запускает при включении, и устанавливает BIBLE (PS2BBL, настроенный для RIPPS2). Старые загрузочные файлы карты сохраняются.
   RIPPS2_MANAGE: Управление
@@ -1335,3 +1363,8 @@ labels:
   PCCF_UNAVAILABLE: 'CF недоступна: нужна ранняя японская PS2 с PC CARD, совместимая карта и ни одного активного драйвера DEV9/HDD/сети.'
   PCCF_UNSUPPORTED_GAME: CF пока поддерживает только родные игры PS2. VMC на CF, загрузка PS1 и сетевые достижения недоступны.
   HINT_ENABLE_DVR: Экспериментальный поиск ISO DESR DVR. Нужен включённый источник HDD; для запуска игр нужен внешний Neutrino с поддержкой DVR.
+  HINT_RIPPS2_IGR_PAGE: Игровое меню, RIPSHOT и проявка кадров.
+  RIPPS2_RIPSHOT: RIPSHOT
+  HINT_RIPPS2_RIPSHOT: Снимки экрана из игрового меню, в ART для ваших тем или в MEDIA.
+  RIPPS2_DEVELOP_SHOTS: Проявка кадров
+  HINT_RIPPS2_DEVELOP_SHOTS: Как кадры, ждущие на плёнке каждой игры, становятся PNG.

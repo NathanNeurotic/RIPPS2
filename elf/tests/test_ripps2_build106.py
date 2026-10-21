@@ -29,16 +29,17 @@ opl = rd('src/opl.c')
 base = rd('lng_tmpl/_base.yml')
 
 # 1. POWER OFF: the last choice, confirmed like EXIT GAME, not for a disc game
-check(re.search(r'#define IGRM_ITEMS 4', igr) is not None, 'the in-game menu has four items')
-check('{"RESUME", "ACHIEVEMENTS", "EXIT GAME", "POWER OFF"}' in igr, 'POWER OFF is the last item')
+# build 108 put SCREENSHOT in (RESUME, EXIT GAME, SCREENSHOT, ACHIEVEMENTS, POWER OFF) and the items became ids
+check(re.search(r'#define IGRM_ITEMS_MAX 5', igr) is not None, 'the in-game menu has up to five items')
+check('{"RESUME", "EXIT GAME", "SCREENSHOT", "ACHIEVEMENTS", "POWER OFF"}' in igr, 'POWER OFF is the last item')
 run = fn(igr, 'int IGR_MenuRun(u16 (*buttons)(void))')
-check('sel == 3 && info.canPowerOff' in run and 'result = sel == 2 ? IGR_MENU_EXIT : IGR_MENU_POWEROFF;' in run,
+check('id == IT_POWER && info.canPowerOff' in run and 'result = id == IT_EXIT ? IGR_MENU_EXIT : IGR_MENU_POWEROFF;' in run,
       'POWER OFF takes a second press, then powers off as the power button does')
 check('if (armed) {' in run, 'the first press arms it')
 check('info.canPowerOff = config->GameMode != DISC_MODE;' in run, 'a disc game keeps the ROM power button')
-check('sel == 1 && info.huntCount > 0' in run, 'only ACHIEVEMENTS opens LEFT TO HUNT')
-check(re.search(r'#define PH\s+116', igr) is not None and re.search(r'#define ROW_HINT\s+105', igr) is not None,
-      'the panel grew a row for the fourth item')
+check('id == IT_ACH && info.huntCount > 0' in run, 'only ACHIEVEMENTS opens LEFT TO HUNT')
+check(re.search(r'#define PH\s+126', igr) is not None and re.search(r'#define ROW_HINT\s+115', igr) is not None,
+      'the panel has a row for each of five items (build 108)')
 
 # 2. the star: left by default, the user's setting first, the row icon moved out of its way
 init = fn(themes, 'static void initItemsList(')

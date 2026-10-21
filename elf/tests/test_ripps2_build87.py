@@ -20,7 +20,8 @@ if 'igrmenu.o' not in emk:
 # the config fields are appended after the RA block, never inserted
 if cfg.index('int IgrMenu;') < cfg.index('char raHost[16];'):  # build 103: upstream's RA block now ends here
     fail.append('the in-game menu fields must come after the RetroAchievements block')
-if 'config->IgrMenu = gRipps2IgrMenu;' not in sysc or 'sbGetRaInfo(&config->RaTotal, &config->RaUnlocked)' not in sysc:
+# build 108: the menu is on only when its stack fitted after the modules
+if 'config->IgrMenu = gRipps2IgrMenu && igrStack != NULL;' not in sysc or 'sbGetRaInfo(&config->RaTotal, &config->RaUnlocked)' not in sysc:
     fail.append('the launch must hand ee_core the menu switch and the RA numbers')
 
 # the pause: the combo opens the menu, the power button still leaves at once; RESUME goes back to sleep
@@ -69,17 +70,17 @@ if cc and not fail:
         (td / 't.c').write_text(r'''
 #include <stdio.h>
 #include "igrmenu.c"
-static u8 buf[320 * 232 * 3];
-static int text(void) { int i, n = 0; for (i = 0; i < 320 * 232 * 3; i += 3) n += buf[i] == 255 && buf[i + 1] == 255; return n; }
+static u8 buf[320 * 252 * 3]; /* build 108: the panel is 126 units tall */
+static int text(void) { int i, n = 0; for (i = 0; i < 320 * 252 * 3; i += 3) n += buf[i] == 255 && buf[i + 1] == 255; return n; }
 int main(void)
 {
     igrm_info_t a = {0, "SLUS_209.46", "mc0:/BOOT/RIPPS2.ELF", 1, 1, 40, 12, 1, 2};
     int sel, h;
     for (sel = 0; sel < 4; sel++) /* build 106: POWER OFF is the fourth */ {
         h = igrmTestRender(&a, sel, 0, 2, 2, buf);
-        if (h != 232 || text() == 0) return 10 + sel;
+        if (h != 252 || text() == 0) return 10 + sel;
     }
-    igrmTestRender(&a, 1, 0, 2, 2, buf);
+    igrmTestRender(&a, 2, 0, 2, 2, buf); /* build 108: ACHIEVEMENTS is third (RESUME, EXIT GAME, ACHIEVEMENTS, POWER OFF) */
     if (igrmLine[igrmLines - 1].glyph[0] != G_CIRCLE) return 20;
     if (igrmLine[3].y != ROW_ITEM0 + ITEM_STEP) return 21;
     a.confirmCircle = 1;
