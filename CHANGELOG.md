@@ -1,5 +1,27 @@
 # RIPPS2 changelog
 
+## Build 111 (beta, v1.1.1-beta), changes since build 110
+
+The user's notes of 10/21 and lukeatmynose's first report from a console (build 110).
+
+### Music
+- **The menu music you rip plays.** BIOS Music writes this console's menu music as a 24 kHz mono WAV, and the PS2's audio driver plays neither that rate nor one channel, so the rip was there (15 MB) and the menu stayed silent (lukeatmynose: "it generated a 15 MB .wav file, but the music does not play in the menu"). RIPPS2 now turns any 16-bit WAV in your AUDIO folder into 48 kHz stereo as it plays it: mono goes to both sides, another rate is filled in between its samples, and a 48 kHz file plays as it is.
+- **Your music plays on every theme.** A theme from the pack (Adapt, Adapt Rx) without a `bgm.ogg` of its own played nothing; now it plays the track you picked in Audio settings > Music, or the one called Menu. A theme's own `bgm.ogg` and a Default Theme Music file still come first.
+
+### Sounds
+- **The same sounds are not loaded again.** Every theme change, the SELECT hold included, silenced every voice and wrote all 15 sounds back to the sound chip one by one: seconds from a memory card, with sounds cut off or late around it. RIPPS2 now checks which file each sound would come from (its path, size and date) and loads the set only when one of them changed. Stepping through RIPPS2, RIPGRID, RIPFLOW, Adapt and Adapt Rx with your AUDIO folder's sounds no longer touches them.
+
+### Save Settings To
+- **A drive you chose stays chosen with a memory card in** (lukeatmynose: "whenever a memory card is inserted, the system prioritizes saving to it, ignoring the specified save location"). At boot RIPPS2 looks for its save on a memory card first unless `config.path` beside the ELF points elsewhere, and that file can be out of reach at that moment (an HDD boot before its partition is up, a drive still starting), so the card's old settings won and the next save went back to the card. A save to a drive now leaves the same pointer in the card's RIPPS2 save, where the card check always sees it.
+- **Choosing Memory Card again sticks.** The pointer to the drive was never removed, so the next boot followed it back there; Save Settings To > Memory Card now removes it.
+
+### Look
+- **The favourites star sits on its title's centreline**, on every theme (it sat with the icons, a few pixels low).
+- **The highlight in Settings is centred on the choice's word** (it hung low, below the letters).
+
+### Underneath
+- lukeatmynose joins the testers on the About page.
+
 ## Build 110 (beta, v1.1.0-beta), changes since build 109
 
 The user (10/21): speed every source up, and save the settings on any drive.

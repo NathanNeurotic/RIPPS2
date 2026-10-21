@@ -135,6 +135,20 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
 - [x] Settings pages run their own dialog loop, which draws neither guiShowToast nor the RA notice line (favourites'
       toasts on Storage did not show in the lab either): a missing drive is said in a message box. Lab: shown, OK.
 
+## Build 111 (the user's notes and lukeatmynose's build 110 report, 10/21): done 10/21, released in v1.1.1-beta
+- [x] The BIOS Music rip (24 kHz mono) played nothing: audsrv_set_format refuses it ("BGM: audsrv cannot play 24000
+      Hz, 1 ch"). wavRead converts any 16-bit WAV to 48 kHz stereo (mono to both sides, linear between frames). Lab:
+      the capture correlates 0.69 with the WAV's start (build 110: 0.31, silence).
+- [x] bgmLoad: RIPPS2's music pick on every theme (Adapt and Adapt Rx played nothing without a bgm.ogg). Lab: both.
+- [x] sfxInit skips a load when every event's file (path, size, date, chosen as the load chooses) and audsrv's start
+      are the same. Lab: a SELECT cycle Adapt > Adapt Rx > RIPPS2 > RIPGRID > RIPFLOW > Adapt reloads nothing.
+- [x] Save Settings To with a memory card in: an explicit save leaves mcN:/RIPPS2/config.path, read when config.path
+      beside the ELF is out of reach; Memory Card chosen again removes both. Lab: four boots (HDD kept with the
+      ELF's config.path hidden; Memory Card stuck after).
+- [x] The star at its row's centre (themes.c), the Settings highlight centred on the font's centreline (dia.c).
+- [x] lukeatmynose on the About page and in the README.
+- [x] The sounds lesson (media/b111/ripps2-v111-sounds.mp4): takes111.ps1 + short111.py in the reel kit.
+
 ## Skipped
 - **RIPCON** (format conversion, as OrbitOPL Toolbox does on a PC): not done on PS2 hardware yet, likely failure
   prone, and a smaller format can be less supported by the loaders. Skipped by the user (2026-10-18).
