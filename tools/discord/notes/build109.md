@@ -26,6 +26,7 @@
 - **MMCE, a big library (100+ games):** boot twice. On the second boot, do the games show at once? How long until the list stops changing?
 - **MMCE while it reads:** on a first boot (or after adding games), can you move, open the START menu and change pages while the list fills?
 - **MMCE changes:** add and remove a game on your PC, then boot. Does the list catch up by itself? Does a different card or a card switch show the right games?
+- **Boot to the game list:** from your loader to a list you can move in, with your usual drives. Faster than build 107? Tell us the seconds.
 - **Save Settings To > Internal HDD on the exFAT HDD:** change a setting, Save Changes, power off, take your memory cards out, boot. Are your settings still there?
 - **Internal HDD on an APA HDD:** same test. Does it say SETTINGS SAVED, and do they come back after a power cycle?
 - **Settings pages on your TV:** is every page title clear of its line, in 480i and in 480p/720p/1080i?
