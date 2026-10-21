@@ -2819,10 +2819,10 @@ index 39e41c1..4f97c40 100644
          case FB_KIND_ELF:
 diff --git a/src/ripps2shot.c b/src/ripps2shot.c
 new file mode 100644
-index 0000000..a568f75
+index 0000000..7871f00
 --- /dev/null
 +++ b/src/ripps2shot.c
-@@ -0,0 +1,1300 @@
+@@ -0,0 +1,1329 @@
 +/*
 +  ripps2shot.c RIPSHOT, screenshots from the in-game menu (build 108): RIPPS2's half
 +
@@ -3103,6 +3103,7 @@ index 0000000..a568f75
 +#include "include/fntsys.h"
 +#include "include/themes.h"
 +#include "include/textures.h"
++#include "include/texcache.h" // cacheInvalidateFailMemo
 +#include "include/pad.h"
 +#include "include/sound.h"
 +#include "include/ripps2tr.h" // _t, RIPPS2's words in the chosen language
@@ -3124,6 +3125,23 @@ index 0000000..a568f75
 +        return 0;
 +    close(fd);
 +    return 1;
++}
++
++// A file's size on the drive, -1 when it is not there
++static int rsSize(const char *path)
++{
++    int fd = open(path, O_RDONLY), size;
++    if (fd < 0)
++        return -1;
++    size = lseek(fd, 0, SEEK_END);
++    close(fd);
++    return size;
++}
++
++// A developed shot's name is taken by a file with something in it; an empty one (a write that failed) is written over
++static int rsTaken(const char *path)
++{
++    return rsSize(path) > 0;
 +}
 +
 +// The roll's header piece at 0: magic, size, and whose it is (an empty id on BLANK.ROLL)
@@ -3211,7 +3229,7 @@ index 0000000..a568f75
 +            snprintf(path, sizeof(path), "%sART/%s_SCR.png", prefix, id);
 +        else
 +            snprintf(path, sizeof(path), "%sART/%s_SCR%d.png", prefix, id, n);
-+        if (!rsExists(path))
++        if (!rsTaken(path))
 +            break;
 +    }
 +    return n;
@@ -3223,7 +3241,7 @@ index 0000000..a568f75
 +    int n;
 +    for (n = 1; n < 100; n++) {
 +        snprintf(path, sizeof(path), "%sMEDIA/%s/SHOT %02d.png", root, folder, n);
-+        if (!rsExists(path))
++        if (!rsTaken(path))
 +            break;
 +    }
 +    return n;
@@ -3331,6 +3349,7 @@ index 0000000..a568f75
 +    png_infop info;
 +    png_color pc[256];
 +    int y, k;
++    long want;
 +
 +    if (f == NULL)
 +        return 0;
@@ -3356,11 +3375,19 @@ index 0000000..a568f75
 +        png_write_row(png, (png_bytep)(idx + (y / twice) * w));
 +    png_write_end(png, info);
 +    png_destroy_write_struct(&png, &info);
-+    if (fclose(f) != 0) { // the drive filled up under the last bytes
-+        remove(path);
++    fflush(f);
++    want = ftell(f);
++    if (fclose(f) != 0 || want <= 0 || rsSize(path) != want) { // the drive filled up under the last bytes, or the file
++        remove(path);                                          // did not keep them (seen once: an empty file)
 +        return 0;
 +    }
 +    return 1;
++}
++
++// A developed shot, written once more when the first try did not hold
++static int rsPngSure(const char *path, const u8 *idx, int w, int h, int twice, const u8 *pal, int n)
++{
++    return rsPng(path, idx, w, h, twice, pal, n) || rsPng(path, idx, w, h, twice, pal, n);
 +}
 +
 +static int rsSlotHeader(int fd, int slot, rs_slot_hdr_t *h)
@@ -3434,12 +3461,12 @@ index 0000000..a568f75
 +        mkdir(dir, 0777);
 +        n = rsShownNumber(h.media, sizeof(h.media), "SHOT ");
 +        snprintf(file, sizeof(file), "%s/SHOT %02d.png", dir, n);
-+        if (n <= 0 || rsExists(file)) {
++        if (n <= 0 || rsTaken(file)) {
 +            n = rsFirstShot(root, folder);
 +            snprintf(file, sizeof(file), "%s/SHOT %02d.png", dir, n);
 +        }
 +        nc = ripps2ShotQuantize(px, h.w * h.h, idx, pal);
-+        ok = nc > 0 && rsPng(file, idx, h.w, h.h, h.field ? 2 : 1, pal, nc);
++        ok = nc > 0 && rsPngSure(file, idx, h.w, h.h, h.field ? 2 : 1, pal, nc);
 +    }
 +    if (ok && (h.path & RS_PATH_ART)) {
 +        ok = (small = malloc(250 * 188 * 2)) != NULL;
@@ -3452,18 +3479,20 @@ index 0000000..a568f75
 +                snprintf(file, sizeof(file), "%sART/%s_SCR.png", prefix, id);
 +            else
 +                snprintf(file, sizeof(file), "%sART/%s_SCR%d.png", prefix, id, n);
-+            if (n <= 0 || rsExists(file))
++            if (n <= 0 || rsTaken(file))
 +                n = rsFirstScr(prefix, id);
 +            if (n == 1)
 +                snprintf(file, sizeof(file), "%sART/%s_SCR.png", prefix, id);
 +            else
 +                snprintf(file, sizeof(file), "%sART/%s_SCR%d.png", prefix, id, n);
 +            nc = ripps2ShotQuantize(small, 250 * 188, idx, pal);
-+            ok = nc > 0 && rsPng(file, idx, 250, 188, 1, pal, nc);
++            ok = nc > 0 && rsPngSure(file, idx, 250, 188, 1, pal, nc);
 +        }
 +    }
 +    if (ok)
 +        ok = rsEmptySlot(fd, slot);
++    if (ok && (h.path & RS_PATH_ART))
++        cacheInvalidateFailMemo(); // new ART: a theme that asked for this _SCR before (answered absent) asks again
 +out:
 +    close(fd);
 +    free(px);
@@ -4223,10 +4252,16 @@ index 5c01575..f77d08e 100644
  #ifdef RETROACHIEVEMENTS
      config->RaKnown = sbGetRaInfo(&config->RaTotal, &config->RaUnlocked);
 diff --git a/src/themes.c b/src/themes.c
-index 8dc296a..7a6f443 100644
+index 8dc296a..cd7d3cb 100644
 --- a/src/themes.c
 +++ b/src/themes.c
-@@ -944,6 +944,53 @@ static image_texture_t *initImageInternalTexture(config_set_t *themeConfig, cons
+@@ -1,4 +1,5 @@
+ #include "include/opl.h"
++#include <stdint.h> // uintptr_t (thmItemKey)
+ #include "include/themes.h"
+ #include "include/util.h"
+ #include "include/gui.h"
+@@ -944,6 +945,53 @@ static image_texture_t *initImageInternalTexture(config_set_t *themeConfig, cons
      return texture;
  }
  
@@ -4280,7 +4315,7 @@ index 8dc296a..7a6f443 100644
  static void endMutableImage(struct theme_element *elem)
  {
      mutable_image_t *mutableImage = (mutable_image_t *)elem->extended;
-@@ -960,6 +1007,12 @@ static void endMutableImage(struct theme_element *elem)
+@@ -960,6 +1008,12 @@ static void endMutableImage(struct theme_element *elem)
          if (mutableImage->overlayTexture2 && !mutableImage->overlayTexture2Linked)
              freeImageTexture(mutableImage->overlayTexture2);
  
@@ -4293,7 +4328,7 @@ index 8dc296a..7a6f443 100644
          free(mutableImage);
      }
  
-@@ -984,6 +1037,8 @@ static mutable_image_t *initMutableImage(const char *themePath, config_set_t *th
+@@ -984,6 +1038,8 @@ static mutable_image_t *initMutableImage(const char *themePath, config_set_t *th
  #ifdef RETROACHIEVEMENTS
      mutableImage->raIsCover = 0; // set in initGameImage, which knows the pattern
  #endif
@@ -4302,7 +4337,7 @@ index 8dc296a..7a6f443 100644
  
      char elemProp[64];
  
-@@ -1009,6 +1064,15 @@ static mutable_image_t *initMutableImage(const char *themePath, config_set_t *th
+@@ -1009,6 +1065,15 @@ static mutable_image_t *initMutableImage(const char *themePath, config_set_t *th
          if (cachePattern != NULL && cacheCount < 2)
              cacheCount = 2;
          LOG("THEMES MutableImage %s: type: %s using cache pattern: %s count: %d\n", name, elementsType[type], cachePattern, cacheCount);
@@ -4318,7 +4353,7 @@ index 8dc296a..7a6f443 100644
      }
  
      snprintf(elemProp, sizeof(elemProp), "%s_default", name);
-@@ -1126,7 +1190,7 @@ static GSTEXTURE *getGameImageCached(image_cache_t *cache, struct submenu_item *
+@@ -1126,9 +1191,25 @@ static GSTEXTURE *getGameImageCached(image_cache_t *cache, struct submenu_item *
  // RIPPS2 build 78: the frosted copy of what is behind a blur panel -- its family's Background, the
  // game's own background art once it is loaded, else the theme's default -- made again only when that
  // texture or the game changes
@@ -4326,8 +4361,35 @@ index 8dc296a..7a6f443 100644
 +static float artFadeIn(void *elem, void *item, const void *art);
  
  // fade: how far in the art under the glass is (it eases in as it arrives), so the frost eases with it
++// RIPPS2 build 108: a game as the info page, the slideshow and the art fades know it. A device rescan rebuilds the list
++// under an open page (new rows for the same games), so a row's address is not the game: its id and title are. Without
++// this every rescan faded the whole info page in again and started its slideshow over.
++static void *thmItemKey(struct submenu_list *item)
++{
++    unsigned int h = 2166136261u;
++    const char *s;
++
++    if (item == NULL)
++        return NULL;
++    h = (h ^ (unsigned int)item->item.id) * 16777619u;
++    for (s = item->item.text; s != NULL && *s; s++)
++        h = (h ^ (unsigned char)*s) * 16777619u;
++    return (void *)(uintptr_t)(h | 1);
++}
++
  static GSTEXTURE *thmFrostFor(struct submenu_list *item, struct theme_element *glass, float *fade)
-@@ -1512,6 +1576,7 @@ static struct
+ {
+     int slot = glass->family == &gTheme->mainElems ? 0 : 1;
+@@ -1143,7 +1224,7 @@ static GSTEXTURE *thmFrostFor(struct submenu_list *item, struct theme_element *g
+         mutable_image_t *mi = (mutable_image_t *)e->extended;
+         src = (mi->cache != NULL && item != NULL && !item->item.isFolder) ? getGameImageCached(mi->cache, &item->item) : NULL;
+         if (src != NULL && src->Mem != NULL)
+-            *fade = artFadeIn(e, item, src);
++            *fade = artFadeIn(e, thmItemKey(item), src);
+         else if (mi->defaultTexture != NULL)
+             src = &mi->defaultTexture->source;
+         gTheme->frostCrop[slot] = e->wideCrop;
+@@ -1512,6 +1593,7 @@ static struct
      int cur;                       // the slide on show (0 = none)
      clock_t start;                 // when it began showing
      int first;                     // the slide on show is the show's first: it fades in from nothing
@@ -4335,7 +4397,7 @@ index 8dc296a..7a6f443 100644
      int bgPending;                 // RIPPS2: slide 1 (the background) is still loading this frame
  } slideShow;
  
-@@ -1588,7 +1653,7 @@ static int infoArtPending(image_cache_t *cache, struct submenu_item *item)
+@@ -1588,7 +1670,7 @@ static int infoArtPending(image_cache_t *cache, struct submenu_item *item)
  static struct
  {
      void *elem, *item;
@@ -4344,7 +4406,7 @@ index 8dc296a..7a6f443 100644
      clock_t since;
      int frame;
  } artFades[ART_FADES];
-@@ -1602,7 +1667,7 @@ static float artEase(float f)
+@@ -1602,7 +1684,7 @@ static float artEase(float f)
      return f * f * (3.0f - 2.0f * f);
  }
  
@@ -4353,7 +4415,7 @@ index 8dc296a..7a6f443 100644
  {
      int i, slot = -1, oldest = 0;
      for (i = 0; i < ART_FADES; i++) {
-@@ -1616,11 +1681,11 @@ static float artFadeIn(void *elem, void *item, GSTEXTURE *tex)
+@@ -1616,11 +1698,11 @@ static float artFadeIn(void *elem, void *item, GSTEXTURE *tex)
      if (slot < 0) {
          slot = oldest;
          artFades[slot].elem = elem;
@@ -4368,7 +4430,7 @@ index 8dc296a..7a6f443 100644
          artFades[slot].item = item;
          artFades[slot].since = clock();
      }
-@@ -1644,16 +1709,152 @@ static float slideElapsed(void)
+@@ -1644,30 +1726,179 @@ static float slideElapsed(void)
      return (float)(clock() - slideShow.start) / (float)CLOCKS_PER_SEC;
  }
  
@@ -4466,9 +4528,9 @@ index 8dc296a..7a6f443 100644
 +    int boxes = 0, o, all, n, moving = 0, ready = 1;
 +    float t;
 +
-+    if (scrShow.updated == guiFrameId && scrShow.item == item && scrShow.family == elem->family)
++    if (scrShow.updated == guiFrameId && scrShow.item == thmItemKey(item) && scrShow.family == elem->family)
 +        return;
-+    scrShowFor(item, elem->family);
++    scrShowFor(thmItemKey(item), elem->family);
 +    scrShow.updated = guiFrameId;
 +    scrShowProbe(menu, item, img);
 +    for (theme_element_t *e = elem->family != NULL ? elem->family->first : elem; e != NULL && boxes < SCRN_BOXES; e = e->next)
@@ -4513,23 +4575,28 @@ index 8dc296a..7a6f443 100644
 -    int have = 0, s;
 +    int have = 0, s, shotSlides = 0, was;
  
-     if (slideShow.frame == guiFrameId && slideShow.item == item && slideShow.family == drawElem->family)
+-    if (slideShow.frame == guiFrameId && slideShow.item == item && slideShow.family == drawElem->family)
++    void *key = thmItemKey(item); // build 108: the game, not its row (a rescan rebuilds the rows)
++
++    if (slideShow.frame == guiFrameId && slideShow.item == key && slideShow.family == drawElem->family)
          return;
      // another game, another page, or the page opened again: the show starts over at the first slide
-     if (slideShow.item != item || slideShow.family != drawElem->family || guiFrameId - slideShow.frame > 2) {
+-    if (slideShow.item != item || slideShow.family != drawElem->family || guiFrameId - slideShow.frame > 2) {
++    if (slideShow.item != key || slideShow.family != drawElem->family || guiFrameId - slideShow.frame > 2) {
          slideShow.cur = 0;
 +        slideShow.pass = 0;
          slideShow.start = clock();
      }
      slideShow.frame = guiFrameId;
-@@ -1661,13 +1862,24 @@ static void slideUpdate(struct menu_list *menu, struct submenu_list *item, struc
+-    slideShow.item = item;
++    slideShow.item = key;
      slideShow.family = drawElem->family;
      slideShow.bgPending = 0;
      memset(slideShow.tex, 0, sizeof(slideShow.tex));
 +    for (e = drawElem->family->first; e != NULL; e = e->next)
 +        if (e->type == ELEM_TYPE_GAME_IMAGE && e->extended != NULL && ((mutable_image_t *)e->extended)->shots != NULL) {
 +            if (!shotSlides++) { // build 108: the SCRn slides' shots, found in order
-+                scrShowFor(item, drawElem->family);
++                scrShowFor(key, drawElem->family);
 +                scrShowProbe(menu, item, (mutable_image_t *)e->extended);
 +            }
 +        }
@@ -4548,7 +4615,7 @@ index 8dc296a..7a6f443 100644
          if (t != NULL && t->Mem != NULL) {
              slideShow.tex[e->slide] = t;
              have++;
-@@ -1689,7 +1901,10 @@ static void slideUpdate(struct menu_list *menu, struct submenu_list *item, struc
+@@ -1689,7 +1920,10 @@ static void slideUpdate(struct menu_list *menu, struct submenu_list *item, struc
          slideShow.cur = s;
          slideShow.start = clock();
      } else if (slideElapsed() >= SLIDE_HOLD_S + SLIDE_FADE_S) {
@@ -4559,7 +4626,7 @@ index 8dc296a..7a6f443 100644
          slideShow.start = clock();
          slideShow.first = 0;
      }
-@@ -1781,6 +1996,50 @@ static int thmArtVisibleBottom(GSTEXTURE *t, const void *item)
+@@ -1781,6 +2015,50 @@ static int thmArtVisibleBottom(GSTEXTURE *t, const void *item)
      return bottom;
  }
  
@@ -4610,7 +4677,16 @@ index 8dc296a..7a6f443 100644
  static void drawGameImage(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
  {
      if (item) {
-@@ -1833,7 +2092,8 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+@@ -1803,7 +2081,7 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+         int isSlide = drawElem->slide > 0 && drawElem->family != NULL;
+         int onInfo = thmElemIsInfo(drawElem) && !item->item.isFolder && drawElem->type != ELEM_TYPE_BACKGROUND; // the info page's art appears as one (the pillars behind it are not art)
+         if (onInfo)
+-            infoGroupFrame(item);
++            infoGroupFrame(thmItemKey(item));
+         if (isSlide) {
+             slideUpdate(menu, item, drawElem);
+             if (onInfo && drawElem->slide == 1 && slideShow.bgPending)
+@@ -1833,7 +2111,8 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
          // cached, which keeps a background that IS loaded on screen instead of flickering to the
          // default. Nothing is lost but the order.
          int isBackground = (drawElem->type == ELEM_TYPE_BACKGROUND);
@@ -4620,7 +4696,7 @@ index 8dc296a..7a6f443 100644
          int coverflowCoverSettled = 1;
  
          if (isSlide) {
-@@ -1887,6 +2147,15 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+@@ -1887,6 +2166,15 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
                  texture = getGameImageTextureEx(gameImage->cache, menu->item->userdata, &item->item, 2);
              else
                  texture = getGameImageCached(gameImage->cache, &item->item);
@@ -4636,25 +4712,25 @@ index 8dc296a..7a6f443 100644
          } else {
              // PRIORITY: the highlighted game's own cover, the one image the user is looking for.
              texture = getGameImageTextureEx(gameImage->cache, menu->item->userdata, &item->item, 1);
-@@ -1910,7 +2179,7 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+@@ -1910,7 +2198,7 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
          // RIPPS2: on the info page every piece, placeholder or art, comes in with the group. Build 98: art that lands
          // after the group came in fades in on its own (it popped in); art that was there fades with the group.
          if (onInfo && !isSlide) {
 -            float in = (gameImage->defaultTexture == NULL || texture != &gameImage->defaultTexture->source) ? artFadeIn(drawElem, item, texture) : 1.0f;
-+            float in = (gameImage->defaultTexture == NULL || texture != &gameImage->defaultTexture->source) ? artFadeIn(drawElem, item, gameImage->shots ? (const void *)gameImage->shots : texture) : 1.0f;
++            float in = (gameImage->defaultTexture == NULL || texture != &gameImage->defaultTexture->source) ? artFadeIn(drawElem, thmItemKey(item), gameImage->shots ? (const void *)gameImage->shots : texture) : 1.0f;
              slideW = infoGroupAlpha();
              if (in < slideW)
                  slideW = in;
-@@ -1919,7 +2188,7 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+@@ -1919,7 +2207,7 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
          }
          // RIPPS2: art fades in as it arrives (the slideshow fades its own); a placeholder never fades
          else if (!isSlide && (gameImage->defaultTexture == NULL || texture != &gameImage->defaultTexture->source)) {
 -            float in = artFadeIn(drawElem, item, texture);
-+            float in = artFadeIn(drawElem, item, gameImage->shots ? (const void *)gameImage->shots : texture);
++            float in = artFadeIn(drawElem, thmItemKey(item), gameImage->shots ? (const void *)gameImage->shots : texture);
              if (in < 1.0f && drawElem->type == ELEM_TYPE_BACKGROUND)
                  thmDrawEmptyBackdrop(); // the pillars show until it is all there
              slideW *= in;
-@@ -1927,45 +2196,9 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
+@@ -1927,45 +2215,9 @@ static void drawGameImage(struct menu_list *menu, struct submenu_list *item, con
                  return;
          }
  

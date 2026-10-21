@@ -533,6 +533,16 @@ if 'item->intvalue.current <= item->intvalue.max' in dia or 'float tipA = diaTip
 if 'static int diaRowDisabled(const struct UIItem *item)' not in dia or 'if (diaRowDisabled(item))' not in dia:
     fail.append('a row that cannot be changed now (RIPSHOT with the menu off) must read dimmed, its label too')
 
+# developing, from the reel takes: a PNG is checked on the drive after it is closed and written once more if it did not
+# hold; an empty file left by a failed write counts as free, so its number is written over
+shotc = rd('src/ripps2shot.c')
+if 'rsSize(path) != want' not in shotc or 'static int rsPngSure(' not in shotc or shotc.count('rsPngSure(file') != 2:
+    fail.append('a developed PNG must be checked on the drive (its size) and written again when it did not hold')
+if 'cacheInvalidateFailMemo(); // new ART' not in shotc:
+    fail.append("developing ART must re-open the art cache's absent answers, or a theme never shows the new shots this session")
+if 'return rsSize(path) > 0;' not in shotc or 'if (!rsTaken(path))' not in shotc:
+    fail.append('an empty PNG left by a failed write must not hold its shot number')
+
 # step 7: the SCRn theme key, every shot in turn, in the engine and the built-in themes
 import re
 themes = rd('src/themes.c')
@@ -548,6 +558,8 @@ for need, why in (('!strcmp(cachePattern, "SCRn")', 'SCRn makes a cache for each
                   ('scrShowShot(turn * shotSlides, scrShowOrder(e))', 'an SCRn slide shows the next shot each time the show comes round'),
                   ('int turn = slideShow.pass + (e->slide < slideShow.cur);', 'a slide shown this round fades in on its next shot, never pops to it'),
                   ('scrShowTex(menu, item, img, k, 0);', 'the shots are found in order, the first unknown one asked for'),
+                  ('infoGroupFrame(thmItemKey(item));', 'a rescan rebuilding the list under the info page must not fade it in again (the game, not its row)'),
+                  ('slideShow.item = key;', "a rescan must not start the slideshow over"),
                   ('if (slideShow.cur <= was) // round again', 'the show counts its rounds')):
     if need not in themes:
         fail.append('themes.c: ' + why)
