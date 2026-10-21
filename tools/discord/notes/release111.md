@@ -6,9 +6,9 @@
 
 ### The sounds lesson
 <!-- ripps2-sounds-video -->
-<p align="center"><a href="https://github.com/akilluminati47/RIPPS2/blob/v1.1.1-beta/media/b111/ripps2-v111-sounds.mp4"><img src="https://raw.githubusercontent.com/akilluminati47/RIPPS2/v1.1.1-beta/media/b111/03-sounds-video.jpg" width="40%" alt="The v1.1.1 sounds lesson: a fresh RIPPS2, BIOS Sounds and BIOS Music ripped, then every sound in the order you meet it"></a></p>
+<p align="center"><a href="https://akilluminati47.github.io/RIPPS2/media/b111/ripps2-v111-sounds.mp4"><img src="https://raw.githubusercontent.com/akilluminati47/RIPPS2/v1.1.1-beta/media/b111/03-sounds-video.jpg" width="40%" alt="The v1.1.1 sounds lesson: a fresh RIPPS2, BIOS Sounds and BIOS Music ripped, then every sound in the order you meet it"></a></p>
 
-Both BIOS rips on a fresh RIPPS2, then every sound in the order you meet it (2:29, the lab's own audio, no music bed): **Settings > Audio Settings > BIOS Sounds**, START to rip, and **BIOS Music** beside it for the menu music.
+**[Play it](https://akilluminati47.github.io/RIPPS2/media/b111/ripps2-v111-sounds.mp4)** (it opens in your browser). Both BIOS rips on a fresh RIPPS2, then every sound in the order you meet it (2:29, the lab's own audio, no music bed): **Settings > Audio Settings > BIOS Sounds**, START to rip, and **BIOS Music** beside it for the menu music.
 
 ### Music
 - **The menu music you rip plays.** BIOS Music writes this console's menu music as a 24 kHz mono WAV, and the PS2's audio driver plays neither that rate nor one channel, so the rip was there (15 MB) and the menu stayed silent. RIPPS2 now turns any 16-bit WAV in your AUDIO folder into 48 kHz stereo as it plays it.
