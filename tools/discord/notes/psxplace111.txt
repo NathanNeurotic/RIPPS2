@@ -1,0 +1,38 @@
+DRAFT, NOT POSTED: a reply (bump) in the RIPPS2 thread for v1.1.0 and v1.1.1
+https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/
+
+BEFORE POSTING: replace SHORT_ID below with the YouTube Short's id (the part after /shorts/ or youtu.be/), or run
+    python tools/discord/psxplace_bump.py <short url>
+which writes psxplace111-ready.txt with it filled in. Also edit the first post's "Current release" line to:
+    Current release: v1.1.1 beta (build 111)
+
+BODY (XenForo BBCode, paste into the editor's BBCode mode, the [ ] toggle):
+
+[CENTER][SIZE=5][B]RIPPS2 v1.1.0 and v1.1.1 beta[/B][/SIZE]
+[URL=https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf][B]Download the latest RIPPS2.elf[/B][/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2/releases/latest]What's new[/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2/blob/main/CHANGELOG.md]Changelog[/URL][/CENTER]
+
+Two releases since the last update here. First the v1.1.0 reel: every theme with full game info (badges, five stars, genre, developer, release, size), the lists that now show at once on every drive, and Save Settings To on any drive.
+
+[CENTER][MEDIA=youtube]Q8ZLd6ArV8s[/MEDIA][/CENTER]
+
+And a short lesson for v1.1.1: RIPPS2 rips your own console's sounds and menu music from its BIOS (Settings > Audio Settings > BIOS Sounds, then BIOS Music). The video starts from a fresh RIPPS2 with no sounds, rips both, and goes through every sound in the order you meet it, so you know what to expect. No music bed, just the console.
+
+[CENTER][MEDIA=youtube]SHORT_ID[/MEDIA][/CENTER]
+
+[SIZE=4][B]v1.1.1 (build 111)[/B][/SIZE]
+[LIST]
+[*][B]The ripped menu music plays.[/B] BIOS Music writes a 24 kHz mono WAV, which the PS2's audio driver does not play, so the menu stayed silent. Any 16-bit WAV in your AUDIO folder now plays as 48 kHz stereo.
+[*][B]Your music on every theme:[/B] Adapt and Adapt Rx play your pick (or the track called Menu) when the theme has no music of its own.
+[*][B]Sounds no longer reload on every theme change[/B] (the SELECT hold included): only a changed file reloads them.
+[*][B]Save Settings To keeps a drive with a memory card in[/B], and choosing Memory Card again sticks.
+[*]The favourites star on its title's centreline, the Settings highlight centred on its word.
+[/LIST]
+
+[SIZE=4][B]v1.1.0 (build 110)[/B][/SIZE]
+[LIST]
+[*][B]Every drive lists at once:[/B] MMCE, USB, the exFAT HDD, MX4SIO, iLink and SMB keep their last list and show it the moment they answer, then check the drive again while you are idle. The APA HDD's own cache is on.
+[*][B]Save Settings To[/B] on a memory card, the internal HDD, a USB drive, MX4SIO, iLink, MMCE or a folder you type.
+[*]The info page shows the size of every game you reach with the d-pad.
+[/LIST]
+
+Thanks to lukeatmynose for testing on a real console: the music and settings fixes in v1.1.1 come from those reports. If you try it, tell us your console model, your drives and where RIPPS2 starts from, and whether the ripped menu music plays and loops on your PS2.
