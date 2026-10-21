@@ -1,5 +1,23 @@
 # RIPPS2 changelog
 
+## Build 110 (beta, v1.1.0-beta), changes since build 109
+
+The user (10/21): speed every source up, and save the settings on any drive.
+
+### Every source lists at once
+- **Every source shows its last list the moment it answers.** Build 109 kept an MMCE card's game list on the card; now every source does. MMCE, USB, the internal exFAT HDD, MX4SIO, iLink and SMB keep `RIPPS2.LST` beside their CD and DVD folders, and the source is read again the next time you are idle on Storage, the list following whatever changed. With Write Operations Off no list is written.
+- **The APA HDD's own list cache is on** (Settings > General & System > Cache Game List (HDD APA), switched on once for older settings), and the APA table is read again the next time you are idle, so a game installed from a PC still appears without a refresh.
+- **MX4SIO pauses for the pads while it is read**, as MMCE does: both share the controllers' bus.
+
+### Save Settings To, every drive
+- **Settings > General > Save Settings To** offers USB Drive, MX4SIO, iLink and MMCE as well as Memory Card, Internal HDD and Custom Path, each with its own hint. A drive is saved by its type (`usb0:/RIPPS2`, `mx4sio0:/RIPPS2`, `ilink0:/RIPPS2`, `mmce0:/RIPPS2`) with its RIPPS2 folder made for it, so at boot only that drive's driver loads. A drive that is not connected says so and nothing changes. SMB and UDPBD cannot hold the settings: reaching them needs the settings.
+
+### Info page
+- **A game reached with the d-pad on the info page shows its size.** Square asked for it on the way in, so every game after the first read 0 MiB.
+
+### Languages
+- The new words in all 33 languages.
+
 ## Build 109 (beta, v1.0.9-beta), changes since build 108
 
 From testers' reports (10/19-10/20).

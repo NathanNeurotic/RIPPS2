@@ -121,6 +121,20 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
       waiting on reports with steps (the build 109 test list asks for them).
 - [ ] Open: FifthFox's folders suggestion (Browse Folders in Game List already exists; ask what is missing).
 
+## Build 110 (the user, 10/21: "speed them all up", "add them or any other source"): done 10/21, released in v1.1.0-beta
+- [x] supportbase.c sbSnapShow / sbSnapScanned / sbSnapForget: build 109's MMCE list for every source (MMCE, every BDM
+      drive, SMB): RIPPS2.LST beside CD and DVD, shown when the source answers, read again on the next idle poll (BDM and
+      MMCE are polled every 10 s idle on Storage; SMB joins that poll until read, its timed rescans need Automatic
+      Refresh). Lab: the reel HDD wrote RIPPS2.LST (6 games, 1160 bytes) and the second boot listed from it, unchanged.
+- [x] MX4SIO scans pause for the pads (sbSetPadBreath around the BDM scan of an SDC drive). Lab has no MX4SIO.
+- [x] APA HDD: games.bin cache on by default (ripps2_hddcache_v 110, once for older configs) and the APA table read once
+      more on the next idle poll (updateDelay GENREFRESH until then). Lab has no APA image: testers.
+- [x] Save Settings To: USB Drive, MX4SIO, iLink, MMCE (typed usb0:/mx4sio0:/ilink0:, mmceN:/RIPPS2; MMCE loads its
+      driver at boot through prepareMmceSettingsPath). Lab: the choices and hints; USB with no USB drive keeps the card.
+- [x] The info page asks for the size of a game the d-pad reaches (it read 0 MiB). Lab: Burnout 3 2734 MiB.
+- [x] Settings pages run their own dialog loop, which draws neither guiShowToast nor the RA notice line (favourites'
+      toasts on Storage did not show in the lab either): a missing drive is said in a message box. Lab: shown, OK.
+
 ## Skipped
 - **RIPCON** (format conversion, as OrbitOPL Toolbox does on a PC): not done on PS2 hardware yet, likely failure
   prone, and a smaller format can be less supported by the loaders. Skipped by the user (2026-10-18).
