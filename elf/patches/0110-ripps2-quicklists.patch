@@ -1,0 +1,797 @@
+diff --git a/.github/scripts/test_bdm_private_allocation.py b/.github/scripts/test_bdm_private_allocation.py
+index a09a6b5..4d363a1 100644
+--- a/.github/scripts/test_bdm_private_allocation.py
++++ b/.github/scripts/test_bdm_private_allocation.py
+@@ -54,7 +54,10 @@ typedef struct {
+ typedef struct {
+     menu_item_t menuItem;
+ } opl_io_module_t;
++typedef struct { unsigned char tried, shown; unsigned int sum; } sb_snap_t; /* RIPPS2 build 110: a drive's last list */
++static void sbSnapForget(sb_snap_t *s) { s->tried = s->shown = 0; s->sum = 0; }
+ typedef struct {
++    sb_snap_t bdmSnap;
+     int bdmULSizePrev, bdmModifiedCDPrev, bdmModifiedDVDPrev;
+     int bdmGameCount, bdmPs1GameCount, FoldersCreated, bdmDeviceType;
+     int bdmHddIsLBA48, ataHighestUDMAMode, bdmDeviceTick;
+diff --git a/.github/scripts/test_bdm_scan_retry.py b/.github/scripts/test_bdm_scan_retry.py
+index 81626f4..ec32183 100644
+--- a/.github/scripts/test_bdm_scan_retry.py
++++ b/.github/scripts/test_bdm_scan_retry.py
+@@ -68,6 +68,7 @@ HARNESS = r'''
+ #define SFX_BD_CONNECT 1
+ #define SFX_BD_DISCONNECT 2
+ #define BDM_TYPE_USB 1
++#define BDM_TYPE_SDC 2 /* RIPPS2 build 110: MX4SIO, whose scan pauses for the pads */
+ #define BDM_TYPE_ATA 3
+ #define BDM_TYPE_UDPBD 5
+ #define BDM_TYPE_PCCF 6
+@@ -91,6 +92,13 @@ typedef struct
+     } menuItem;
+ } opl_io_module_t;
+ 
++/* RIPPS2 build 110: every source's last list (supportbase.c); no list is ever found here, so the scans are as before */
++typedef struct { unsigned char tried, shown; unsigned int sum; } sb_snap_t;
++static int sbSnapShow(sb_snap_t *s, const char *p, base_game_info_t **l, int *c, int *f) { (void)p; (void)l; (void)c; (void)f; s->tried = 1; return 0; }
++static void sbSnapScanned(sb_snap_t *s, const char *p, const base_game_info_t *l, int c, int f, int ok) { (void)p; (void)l; (void)c; (void)f; (void)ok; s->tried = 1; s->shown = 0; }
++static void sbSnapForget(sb_snap_t *s) { s->tried = s->shown = 0; s->sum = 0; }
++static void sbSetPadBreath(int on) { (void)on; }
++
+ typedef struct
+ {
+     int ForceRefresh;
+@@ -110,6 +118,7 @@ typedef struct
+     base_game_info_t *bdmPs1Games;
+     int bdmPs1GameCount;
+     unsigned char bdmPs1RetryCount, bdmPs1RetryPending;
++    sb_snap_t bdmSnap; /* RIPPS2 build 110: the drive's last list (none here: every pass scans) */
+ } bdm_device_data_t;
+ 
+ static int bdmDeviceModeStarted;
+diff --git a/include/bdmsupport.h b/include/bdmsupport.h
+index 1948878..40f6197 100644
+--- a/include/bdmsupport.h
++++ b/include/bdmsupport.h
+@@ -6,6 +6,7 @@
+ #define BDM_MODE_UPDATE_DELAY MENU_UPD_DELAY_GENREFRESH
+ 
+ #include "include/mcemu.h"
++#include "include/supportbase.h" // RIPPS2 build 110: sb_snap_t
+ 
+ #define BDM_DEVICE_ROOT_MAX 32
+ #define BDM_PREFIX_MAX      96
+@@ -70,6 +71,7 @@ typedef struct
+     // identity succeeds, so a mounted-but-unidentified slot would read as "never connected" and be
+     // demoted to the slow empty-slot probe rotation -- exactly the slot that needs the full cadence.
+     unsigned char bdmSeenMounted;
++    sb_snap_t bdmSnap; // RIPPS2 build 110: the drive's last list (RIPPS2.LST), shown the moment the drive answers
+ } bdm_device_data_t;
+ 
+ void bdmLoadModules(void);
+diff --git a/include/supportbase.h b/include/supportbase.h
+index f767956..2574003 100644
+--- a/include/supportbase.h
++++ b/include/supportbase.h
+@@ -51,6 +51,20 @@ int sbCreateSemaphore(void);
+ // inside subfolders. Pass fsize=NULL for ISO-only scanning: never probe ul.cfg and
+ // do not write a UL-size cache value (used by UDPFS, whose Neutrino backend cannot launch UL).
+ int sbReadList(base_game_info_t **list, const char *prefix, const char *sub, int *fsize, int *gamecount);
++// RIPPS2 build 110: a source's last game list, kept on the source (RIPPS2.LST beside its CD and DVD folders), so a
++// big library shows the moment the source answers and is read again on the source's next pass.
++typedef struct
++{
++    unsigned char tried; // this source's list was looked for
++    unsigned char shown; // the games on screen came from it; the source is still to be read again
++    unsigned int sum;    // what the list on the source holds (FNV-1a), so an unchanged list is not written
++} sb_snap_t;
++// The source's last list into *list (once a source): 1 when it was there and whole, 0 to scan as before
++int sbSnapShow(sb_snap_t *snap, const char *prefix, base_game_info_t **list, int *gamecount, int *fsize);
++// After a root scan: the list kept for next time (only when it changed); readOk 0 keeps the last one
++void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *list, int gamecount, int fsize, int readOk);
++void sbSnapForget(sb_snap_t *snap); // a source gone or changed: its list is looked for again
++void sbSetPadBreath(int on);        // build 110: pause every scan (an MX4SIO drive shares SIO2 with the pads, as MMCE does)
+ // errno of the last CD/DVD folder the latest sbReadList could not open (0 = both opened).
+ int sbGetReadListError(void);
+ // Folder browsing: set the active subpath the path composers inject (see sbBrowseSub in supportbase.c).
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index d1e72ef..d8a1ed9 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1078,7 +1078,7 @@ gui_strings:
+ - label: RIPPS2_SETTINGS_HOME
+   string: Save Settings To
+ - label: HINT_RIPPS2_SETTINGS_HOME
+-  string: "Where RIPPS2 keeps its settings: RIPPS2's own save on a memory card, a RIPPS2 folder on the internal HDD, or a folder you type."
++  string: "Where RIPPS2 keeps its settings: RIPPS2's own save on a memory card, a RIPPS2 folder on a drive (the internal HDD, USB, MX4SIO, iLink or MMCE), or a folder you type."
+ - label: HINT_CUSTOM_SETTINGS_PATH
+   string: "Save settings to a folder you choose, e.g. mass0:/OPL. Leave blank to use the folder OPL booted from. The device is loaded on demand, so it need not be mounted when you type it."
+ - label: PERGAME_MIXED_SETTINGS
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index 1039df2..9a2174b 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -1535,6 +1535,7 @@ static void bdmInit(item_list_t *itemList)
+     pDeviceData->bdmModifiedDVDPrev = 0;
+     pDeviceData->bdmGameCount = 0;
+     pDeviceData->bdmGames = NULL;
++    sbSnapForget(&pDeviceData->bdmSnap); // RIPPS2 build 110
+     pDeviceData->bdmPs1GameCount = 0; // #120: separate VCD store (see bdm_device_data_t)
+     pDeviceData->bdmPs1Games = NULL;
+     pDeviceData->FoldersCreated = 0;
+@@ -1618,6 +1619,7 @@ static int bdmRefreshGamePrefix(item_list_t *itemList)
+     // detaches them. Publish zero games now; sbReadList releases it after detachment.
+     device->bdmGameCount = 0;
+     device->bdmULSizePrev = -2;
++    sbSnapForget(&device->bdmSnap); // RIPPS2 build 110: another folder, another list
+     device->bdmModifiedCDPrev = device->bdmModifiedDVDPrev = 0;
+     device->FoldersCreated = device->ThemesLoaded = device->LanguagesLoaded = 0;
+     folderReset(itemList->mode);
+@@ -1652,6 +1654,13 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+         return 1;
+     }
+ 
++    // RIPPS2 build 110: the games on screen came from the drive's last list: read the drive once (this pass comes on the
++    // next idle poll, which every connected drive gets)
++    if (pDeviceData->bdmSnap.shown) {
++        pDeviceData->bdmSnap.shown = 0;
++        return 1;
++    }
++
+     // If the device menu is visible double check the device type and if support for this device type is enabled. If the user switches device support
+     // to off for a bdm device we want to hide the menu even though the drivers are still loaded and the device is being detected by bdm.
+     opl_io_module_t *pOwner = (opl_io_module_t *)itemList->owner;
+@@ -1748,6 +1757,7 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+     // If a device was added or removed play the appropriate UI sound.
+     if (result == -1) {
+         sfxPlay(SFX_BD_DISCONNECT);
++        sbSnapForget(&pDeviceData->bdmSnap); // RIPPS2 build 110: the next drive here shows its own list
+         return result;
+     } else if (result == 1)
+         sfxPlay(SFX_BD_CONNECT);
+@@ -1836,7 +1846,16 @@ static int bdmUpdateGameList(item_list_t *itemList)
+     }
+     if (view == LIB_VIEW_ISO || view == LIB_VIEW_MIXED) {
+         const char *sub = folderGetSub(itemList->mode);
++        // RIPPS2 build 110: the drive's last list, at once; the drive is read on its next pass
++        if (sub[0] == '\0' && sbSnapShow(&pDeviceData->bdmSnap, pDeviceData->bdmPrefix, &pDeviceData->bdmGames, &pDeviceData->bdmGameCount,
++                                          &pDeviceData->bdmULSizePrev))
++            return result + pDeviceData->bdmGameCount;
++        sbSetPadBreath(pDeviceData->bdmDeviceType == BDM_TYPE_SDC); // build 110: MX4SIO shares SIO2 with the pads
+         sbReadList(&pDeviceData->bdmGames, pDeviceData->bdmPrefix, sub, &pDeviceData->bdmULSizePrev, &pDeviceData->bdmGameCount);
++        sbSetPadBreath(0);
++        if (sub[0] == '\0')
++            sbSnapScanned(&pDeviceData->bdmSnap, pDeviceData->bdmPrefix, pDeviceData->bdmGames, pDeviceData->bdmGameCount,
++                          pDeviceData->bdmULSizePrev, sbGetReadListError() == 0 || pDeviceData->bdmGameCount > 0);
+         // Still -2 after a root scan = neither CD nor DVD would open and there is no ul.cfg. Say where
+         // it looked rather than leave a silently empty page. Only a connect, SELECT, L3 or
+         // delete/rename pass scans, so this cannot repeat on its own.
+diff --git a/src/ethsupport.c b/src/ethsupport.c
+index 6fc7a59..a1d3d0a 100644
+--- a/src/ethsupport.c
++++ b/src/ethsupport.c
+@@ -34,6 +34,7 @@
+ static char ethPrefix[40]; // Contains the full path to the folder where all the games are.
+ static char *ethBase;
+ static int ethULSizePrev = -2;
++static sb_snap_t ethSnap; // RIPPS2 build 110: the share's last list (RIPPS2.LST)
+ static time_t ethModifiedCDPrev;
+ static time_t ethModifiedDVDPrev;
+ static int ethGameCount = 0;
+@@ -329,6 +330,7 @@ static void ethReconnectSMB(void)
+ 
+     thmReinit(ethBase);
+     ethULSizePrev = -2;
++    sbSnapForget(&ethSnap); // RIPPS2 build 110
+     ethModifiedCDPrev = 0;
+     ethModifiedDVDPrev = 0;
+     ethGameCount = 0;
+@@ -418,6 +420,7 @@ void ethInit(item_list_t *itemList)
+         LOG("ETHSUPPORT Init\n");
+         ethBase = "smb0:";
+         ethULSizePrev = -2;
++        sbSnapForget(&ethSnap); // RIPPS2 build 110
+         ethModifiedCDPrev = 0;
+         ethModifiedDVDPrev = 0;
+         ethGameCount = 0;
+@@ -451,6 +454,12 @@ static int ethNeedsUpdate(item_list_t *itemList)
+     if (gPCShareName[0] && (libListViewActive(itemList) == LIB_VIEW_PS1))
+         return 0;
+ 
++    // RIPPS2 build 110: the games on screen came from the share's last list: read the share once
++    if (ethSnap.shown) {
++        ethSnap.shown = 0;
++        return 1;
++    }
++
+     if (ethULSizePrev == -2)
+         result = 1;
+ 
+@@ -510,10 +519,19 @@ static int ethUpdateGameList(item_list_t *itemList)
+             // NULL sub opts SMB/ETH out of folder-row collection: it uses a "\\" separator and does not
+             // participate in folder browsing (see the folderlist gate in sbReadList).
+         }
+-        if ((view == LIB_VIEW_ISO || view == LIB_VIEW_MIXED) &&
+-            (sbReadList(&ethGames, ethPrefix, /* sub: */ NULL, &ethULSizePrev, &ethGameCount)) < 0) {
+-            gNetworkStartup = ERROR_ETH_SMB_LISTGAMES;
+-            ethDisplayErrorStatus();
++        if (view == LIB_VIEW_ISO || view == LIB_VIEW_MIXED) {
++            // RIPPS2 build 110: the share's last list, at once. Its timed rescans need Automatic Refresh, so the share
++            // joins the idle poll every connected drive gets until it has been read once.
++            if (sbSnapShow(&ethSnap, ethPrefix, &ethGames, &ethGameCount, &ethULSizePrev)) {
++                ethGameList.updateDelay = MENU_UPD_DELAY_GENREFRESH;
++            } else {
++                if ((sbReadList(&ethGames, ethPrefix, /* sub: */ NULL, &ethULSizePrev, &ethGameCount)) < 0) {
++                    gNetworkStartup = ERROR_ETH_SMB_LISTGAMES;
++                    ethDisplayErrorStatus();
++                } else
++                    sbSnapScanned(&ethSnap, ethPrefix, ethGames, ethGameCount, ethULSizePrev, sbGetReadListError() == 0 || ethGameCount > 0);
++                ethGameList.updateDelay = ETH_MODE_UPDATE_DELAY;
++            }
+         }
+     } else {
+         int i, count;
+@@ -803,6 +821,7 @@ static void ethLaunchGame(item_list_t *itemList, int id, config_set_t *configSet
+     if (!gPCShareName[0]) {
+         memcpy(gPCShareName, game->name, sizeof(gPCShareName));
+         ethULSizePrev = -2;
++        sbSnapForget(&ethSnap); // RIPPS2 build 110: another share, another list
+         ethGameCount = 0;
+         ethPs1GameCount = 0;
+         ioPutRequest(IO_MENU_UPDATE_DEFFERED, &ethGameList.mode); // clear the share list
+diff --git a/src/hddsupport.c b/src/hddsupport.c
+index 0f4db16..6aff006 100644
+--- a/src/hddsupport.c
++++ b/src/hddsupport.c
+@@ -466,6 +466,7 @@ static char (*hddVcdParts)[APA_IDMAX + 1] = NULL;
+ 
+ // forward declaration
+ static item_list_t hddGameList;
++static unsigned char hddCacheVerify; // RIPPS2 build 110: the list on screen came from games.bin; the APA table is still to be read
+ 
+ static int hddLoadGameListCache(hdl_games_list_t *cache);
+ static int hddUpdateGameListCache(hdl_games_list_t *cache, hdl_games_list_t *game_list);
+@@ -1641,6 +1642,10 @@ static int hddUpdateGameList(item_list_t *itemList)
+     // cache is empty. Otherwise the initial boot may use the valid games.bin exactly as before.
+     if (cacheRet == 0 && !hddForceUpdate && cachedGames.count > 0) {
+         hddPublishHdlGameList(&cachedGames);
++        // RIPPS2 build 110: the cache shows at once and the APA table is read once more on the next idle pass, so a game
++        // installed from a PC still appears without a manual refresh
++        hddCacheVerify = 1;
++        hddGameList.updateDelay = MENU_UPD_DELAY_GENREFRESH;
+     } else {
+         scanRet = hddGetHDLGamelist(&hddGamesNew);
+         if (scanRet == 0) {
+@@ -1653,6 +1658,10 @@ static int hddUpdateGameList(item_list_t *itemList)
+                 hddPublishHdlGameList(&cachedGames);
+             LOG("HDDSUPPORT HDL refresh failed (%d); preserving %u last-good game(s)\n", scanRet, hddGames.count);
+         }
++        if (hddCacheVerify) { // build 110: read once; back to refreshing on request only
++            hddCacheVerify = 0;
++            hddGameList.updateDelay = HDD_MODE_UPDATE_DELAY;
++        }
+     }
+ 
+     hddFreeHDLGamelist(&cachedGames);
+diff --git a/src/menusys.c b/src/menusys.c
+index 7766422..1f3b7e5 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -465,6 +465,16 @@ void menuRequestInfoSize(void)
+     }
+ }
+ 
++static int menuSelectedRowView(item_list_t *list);
++// RIPPS2 build 110: the game a d-pad press reaches on the info page gets its size too (Square asks for it on the way
++// in, so every game after the first read "0 MiB"). Not for a PS1 row or the APA HDD, as on the way in.
++static void menuInfoSizeAfterMove(void)
++{
++    item_list_t *support = selected_item != NULL && selected_item->item != NULL ? selected_item->item->userdata : NULL;
++    if (support != NULL && support->mode != HDD_MODE && menuSelectedRowView(support) != LIB_VIEW_PS1)
++        menuRequestInfoSize();
++}
++
+ static void _menuSaveConfig()
+ {
+     int result;
+@@ -2393,16 +2403,20 @@ void menuHandleInputInfo()
+             selected_item->item->execCross(selected_item->item);
+     } else if (getKey(KEY_UP)) {
+         menuPrevV();
++        menuInfoSizeAfterMove();
+     } else if (getKey(KEY_DOWN)) {
+         menuNextV();
++        menuInfoSizeAfterMove();
+     } else if (getKey(KEY_LEFT)) {
+         // RIPPS2 build 101 gave RIPFLOW's info page its games on Left / Right; build 102 (user: "don't let any of
+         // the themes change the source on the info pages, so they can just cycle games with left right up down")
+         // does it on every theme: the info page never switches drives (build 69 to 101 did, and left the page).
+         // Held, they repeat like Up / Down.
+         menuPrevV();
++        menuInfoSizeAfterMove();
+     } else if (getKey(KEY_RIGHT)) {
+         menuNextV();
++        menuInfoSizeAfterMove();
+     } else if (getKeyOn(KEY_L1)) {
+         ripps2StepCategory(-1); // RIPPS2 build 69: L1/R1 switch categories, from the info page as well
+     } else if (getKeyOn(KEY_R1)) {
+diff --git a/src/mmcesupport.c b/src/mmcesupport.c
+index cbd5a09..0838e86 100644
+--- a/src/mmcesupport.c
++++ b/src/mmcesupport.c
+@@ -107,85 +107,9 @@ static void mmceGetDeviceRoot(char *root, size_t size);
+ // RIPPS2 build 109: a fast MMCE boot. The card's game list is kept on the card (RIPPS2.LST beside its CD and DVD
+ // folders): at boot the games show from it at once, then the card is read again in the background (sbReadList, which
+ // now pauses between games for the pads) and the list follows whatever changed. A tester's 180 games took about 5
+-// minutes to list on every boot, with nothing to press until then.
+-#define MMCE_LIST_FILE  "RIPPS2.LST"
+-#define MMCE_LIST_MAGIC "RIPLST01"
+-#define MMCE_LIST_MAX   4096
+-typedef struct
+-{
+-    char magic[8];
+-    int count, ulsize, itemSize, reserved[3];
+-} mmce_list_hdr_t;
+-static unsigned char mmceListTried; // this card's list was looked for
+-static unsigned char mmceListShown; // the games on screen came from it; the card is still to be read again
+-static unsigned int mmceListSum;    // what the list on the card holds (FNV-1a), so an unchanged list is not written
+-
+-static unsigned int mmceListHash(const base_game_info_t *games, int count, int ulsize)
+-{
+-    const unsigned char *b = (const unsigned char *)games;
+-    unsigned int h = 2166136261u ^ (unsigned int)ulsize;
+-    size_t i, n = (size_t)count * sizeof(base_game_info_t);
+-    for (i = 0; i < n; i++)
+-        h = (h ^ b[i]) * 16777619u;
+-    return h;
+-}
+-
+-// The card's last list, into mmceGames: 1 when it was there and whole
+-static int mmceListLoad(void)
+-{
+-    char path[sizeof(mmcePrefix) + 16];
+-    mmce_list_hdr_t h;
+-    base_game_info_t *games;
+-    int fd, bytes, ok = 0;
+-
+-    snprintf(path, sizeof(path), "%s%s", mmcePrefix, MMCE_LIST_FILE);
+-    if ((fd = open(path, O_RDONLY)) < 0)
+-        return 0;
+-    if (read(fd, &h, sizeof(h)) == (int)sizeof(h) && !memcmp(h.magic, MMCE_LIST_MAGIC, 8) && h.itemSize == (int)sizeof(base_game_info_t) &&
+-        h.count > 0 && h.count <= MMCE_LIST_MAX) {
+-        bytes = h.count * (int)sizeof(base_game_info_t);
+-        if ((games = malloc(bytes)) != NULL) {
+-            if (read(fd, games, bytes) == bytes) {
+-                free(mmceGames);
+-                mmceGames = games;
+-                mmceGameCount = h.count;
+-                mmceULSizePrev = h.ulsize;
+-                mmceListSum = mmceListHash(games, h.count, h.ulsize);
+-                ok = 1;
+-            } else
+-                free(games);
+-        }
+-    }
+-    close(fd);
+-    return ok;
+-}
++// minutes to list on every boot, with nothing to press until then. Build 110: every source does it (supportbase.c).
++static sb_snap_t mmceSnap;
+ 
+-// The list just read from the card, kept there for the next boot (only when it changed)
+-static void mmceListSave(void)
+-{
+-    char path[sizeof(mmcePrefix) + 16];
+-    mmce_list_hdr_t h;
+-    unsigned int sum;
+-    int fd, bytes;
+-
+-    if (mmceGames == NULL || mmceGameCount <= 0 || mmceGameCount > MMCE_LIST_MAX)
+-        return;
+-    sum = mmceListHash(mmceGames, mmceGameCount, mmceULSizePrev);
+-    if (sum == mmceListSum)
+-        return;
+-    snprintf(path, sizeof(path), "%s%s", mmcePrefix, MMCE_LIST_FILE);
+-    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
+-        return;
+-    memset(&h, 0, sizeof(h));
+-    memcpy(h.magic, MMCE_LIST_MAGIC, 8);
+-    h.count = mmceGameCount;
+-    h.ulsize = mmceULSizePrev;
+-    h.itemSize = (int)sizeof(base_game_info_t);
+-    bytes = mmceGameCount * (int)sizeof(base_game_info_t);
+-    if (write(fd, &h, sizeof(h)) == (int)sizeof(h) && write(fd, mmceGames, bytes) == bytes)
+-        mmceListSum = sum;
+-    close(fd);
+-}
+ // The card ROOT ("mmceN:/") is where the PS1 library folders live -- POPS/ and EMBER/ alike, exactly
+ // as on every other device. mmcePrefix is NOT the root: it carries the user's configurable games
+ // prefix (gMMCEPrefix), which is right for OPL's own data (CD/ DVD/ ART/ CFG/ VMC/) and wrong for a
+@@ -688,7 +612,8 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+             return result;
+     }
+ 
+-    if (mmceListShown) { // build 109: the games on screen came from the card's list: read the card once, in the background
++    if (mmceSnap.shown) { // build 109: the games on screen came from the card's list: read the card once, in the background
++        mmceSnap.shown = 0;
+         mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
+         result = 1;
+     }
+@@ -791,8 +716,7 @@ static int mmceUpdateGameList(item_list_t *itemList)
+         mmceGameCount = 0;
+         mmcePs1GameCount = 0;
+         mmceULSizePrev = -2; // force a fresh scan when a card returns
+-        mmceListTried = mmceListShown = 0; // build 109: and its list is looked for again
+-        mmceListSum = 0;
++        sbSnapForget(&mmceSnap); // build 109: and its list is looked for again
+         mmcePs1Scanned = 0;
+         mmcePs1ScanFailed = 0;
+         mmcePs1ScanRetries = 0;
+@@ -820,19 +744,14 @@ static int mmceUpdateGameList(item_list_t *itemList)
+     if (view == LIB_VIEW_ISO || view == LIB_VIEW_MIXED) {
+         const char *sub = folderGetSub(itemList->mode);
+         int atRoot = sub == NULL || sub[0] == '\0';
+-        if (atRoot && !mmceListTried) { // build 109: the card's last list, at once; the card is read on the next pass
+-            mmceListTried = 1;
+-            if (mmceListLoad()) {
+-                mmceListShown = 1;
+-                mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
+-                return result + mmceGameCount;
+-            }
++        // build 109: the card's last list, at once; the card is read on the next pass
++        if (atRoot && sbSnapShow(&mmceSnap, mmcePrefix, &mmceGames, &mmceGameCount, &mmceULSizePrev)) {
++            mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
++            return result + mmceGameCount;
+         }
+         sbReadList(&mmceGames, mmcePrefix, sub, &mmceULSizePrev, &mmceGameCount);
+-        if (atRoot && (sbGetReadListError() == 0 || mmceGameCount > 0)) { // the card was read: keep its list for next time
+-            mmceListShown = 0;
+-            mmceListSave();
+-        }
++        if (atRoot) // the card was read: keep its list for next time
++            sbSnapScanned(&mmceSnap, mmcePrefix, mmceGames, mmceGameCount, mmceULSizePrev, sbGetReadListError() == 0 || mmceGameCount > 0);
+         result += mmceGameCount;
+     }
+     return result;
+diff --git a/src/opl.c b/src/opl.c
+index 57d7082..c2fadcb 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -2588,6 +2588,31 @@ static int isTypedBdmSettingsPath(const char *path)
+            !strncmp(path, "ilink", 5);
+ }
+ 
++// RIPPS2 build 110: an MMCE card as the settings home (Save Settings To > MMCE). Its driver is not loaded at boot unless
++// RIPPS2 started from the card, so load it and give the card the short wait an MMCE boot gets.
++static int prepareMmceSettingsPath(const char *path)
++{
++    char root[8];
++    const char *colon = strchr(path, ':');
++    size_t n = colon ? (size_t)(colon - path) + 1 : 0;
++    int tries;
++
++    if (n == 0 || n >= sizeof(root))
++        return -1;
++    memcpy(root, path, n);
++    root[n] = '\0';
++    mmceLoadModules();
++    for (tries = 0; tries < 10; tries++) { // ~2 s, as an MMCE boot waits
++        DIR *dir = opendir(root);
++        if (dir != NULL) {
++            closedir(dir);
++            return 1;
++        }
++        delay(1);
++    }
++    return -1;
++}
++
+ static int prepareCustomSettingsPath(char *path, int pathLen)
+ {
+     int bdmType = BDM_TYPE_UNKNOWN;
+@@ -2599,6 +2624,8 @@ static int prepareCustomSettingsPath(char *path, int pathLen)
+ 
+     if (isApaSettingsPath(path))
+         return prepareCustomApaSettingsPath(path, pathLen);
++    if (!strncmp(path, "mmce", 4))
++        return prepareMmceSettingsPath(path); // RIPPS2 build 110
+ 
+     if (strncmp(path, "mass", 4) && strncmp(path, "usb", 3) && strncmp(path, "ata", 3) &&
+         strncmp(path, "mx4sio", 6) && strncmp(path, "sd", 2) && strncmp(path, "ilink", 5))
+@@ -3708,6 +3735,8 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
+             configGetInt(configOPL, CONFIG_OPL_AUTO_CREATE_VMC, &gAutoCreateVmc);
+             configGetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, &gHDDGameListCache);
++            if (!configGetInt(configOPL, "ripps2_hddcache_v", &value) || value < 110)
++                gHDDGameListCache = 1; // build 110: on by default (checked in the background now); once for older configs
+             configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath));
+             configGetStrCopy(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
+             configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
+@@ -4378,6 +4407,7 @@ static void _saveConfig()
+         configSetInt(configOPL, CONFIG_OPL_PS2LOGO, gPS2Logo);
+         configSetInt(configOPL, CONFIG_OPL_AUTO_CREATE_VMC, gAutoCreateVmc);
+         configSetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, gHDDGameListCache);
++        configSetInt(configOPL, "ripps2_hddcache_v", 110); // build 110: the one-time switch to on has run
+         configSetStr(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath);
+         configSetStr(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath);
+         configSetInt(configOPL, CONFIG_OPL_AUTO_SORT, gAutosort);
+@@ -5465,7 +5495,7 @@ static void setDefaults(void)
+     gEnableDebug = 0;
+     gPS2Logo = 1;       // opinionated defaults: the fork ships ready-to-use
+     gAutoCreateVmc = 0; // off: never move someone's saves from their physical card unasked
+-    gHDDGameListCache = 0;
++    gHDDGameListCache = 1; // RIPPS2 build 110: on, and checked against the APA table on the next idle pass
+     gEnableWrite = 1;
+     gRememberLastPlayed = 0;
+     gAutoStartLastPlayed = 9;
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index b1cbf97..8ca4348 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -1268,27 +1268,39 @@ void ripps2DiscWatch(void)
+ // Testers asked for the settings on the internal HDD before the memory cards. Internal HDD fills the Custom Settings
+ // Path (config.path, which the load reads first and the save honours) with a RIPPS2 folder on that drive: the exFAT
+ // HDD on BDM ATA, else the APA HDD's OPL partition (pfs:, OPL's own mounted home there).
+-enum { RIPPS2_HOME_CARD = 0, RIPPS2_HOME_HDD, RIPPS2_HOME_CUSTOM };
+-static const char *ripps2HomeNames[] = {N_("Memory Card"), N_("Internal HDD"), N_("Custom Path"), NULL};
++enum { RIPPS2_HOME_CARD = 0, RIPPS2_HOME_HDD, RIPPS2_HOME_USB, RIPPS2_HOME_MX4SIO, RIPPS2_HOME_ILINK, RIPPS2_HOME_MMCE, RIPPS2_HOME_CUSTOM };
++// build 110: every drive RiptOPL can read settings from at boot (SMB and UDPBD cannot: reaching them needs the settings)
++static const char *ripps2HomeNames[] = {N_("Memory Card"), N_("Internal HDD"), N_("USB Drive"), "MX4SIO", "iLink", "MMCE", N_("Custom Path"), NULL};
+ static const char *ripps2HomeHints[] = {N_("Settings go in RIPPS2's own save on a memory card (the one RIPPS2 started from first), as before."),
+                                         N_("Settings go in a RIPPS2 folder on the internal HDD (exFAT, or the APA HDD's OPL partition) and are read from there first."),
++                                        N_("Settings go in a RIPPS2 folder on the USB drive and are read from there first."),
++                                        N_("Settings go in a RIPPS2 folder on the MX4SIO card and are read from there first."),
++                                        N_("Settings go in a RIPPS2 folder on the iLink drive and are read from there first."),
++                                        N_("Settings go in a RIPPS2 folder on the MMCE card and are read from there first."),
+                                         N_("Settings go in the folder typed below, e.g. mass0:/OPL."), NULL};
+ 
+-// The exFAT HDD is named by its TYPE, ata0:/RIPPS2, never by its mass slot: a slot number is only the order the drives
+-// came up in (a USB stick can take mass0), and an untyped massN: at boot walks every transport (USB, MX4SIO, then iLink
+-// and ATA) before the HDD answers. ata0: loads the ATA stack alone and is found by its RIPPS2 folder, so the folder is
+-// made here, before Save Changes looks for it.
+-int ripps2SettingsHddHome(char *out, int size)
++// A BDM drive is named by its TYPE (ata0:/RIPPS2, usb0:/RIPPS2, ...), never by its mass slot: a slot number is only the
++// order the drives came up in (a USB stick can take mass0), and an untyped massN: at boot walks every transport (USB,
++// MX4SIO, then iLink and ATA) before the drive answers. A typed path loads its one transport and is found by its RIPPS2
++// folder, so the folder is made here, before Save Changes looks for it.
++static int ripps2SettingsBdmHome(int type, const char *typed, char *out, int size)
+ {
+     char dir[24];
+     int i;
+     for (i = 0; i < 8; i++)
+-        if (bdmSlotDeviceType(i) == BDM_TYPE_ATA) { // the internal exFAT HDD
++        if (bdmSlotDeviceType(i) == type) {
+             snprintf(dir, sizeof(dir), "mass%d:/RIPPS2", i);
+             mkdir(dir, 0777); // there already after the first save
+-            snprintf(out, size, "ata0:/RIPPS2");
++            snprintf(out, size, "%s:/RIPPS2", typed);
+             return 1;
+         }
++    return 0;
++}
++
++int ripps2SettingsHddHome(char *out, int size)
++{
++    if (ripps2SettingsBdmHome(BDM_TYPE_ATA, "ata0", out, size)) // the internal exFAT HDD
++        return 1;
+     if (gHDDPrefix != NULL && gHDDPrefix[0] != '\0') { // the APA HDD, OPL's partition mounted
+         snprintf(out, size, "pfs:/RIPPS2");
+         return 1;
+@@ -1296,6 +1308,42 @@ int ripps2SettingsHddHome(char *out, int size)
+     return 0;
+ }
+ 
++// build 110: the MMCE card in either slot
++static int ripps2SettingsMmceHome(char *out, int size)
++{
++    char root[8], dir[16];
++    int slot;
++    for (slot = 0; slot < 2; slot++) {
++        DIR *d;
++        snprintf(root, sizeof(root), "mmce%d:", slot);
++        if ((d = opendir(root)) == NULL)
++            continue;
++        closedir(d);
++        snprintf(dir, sizeof(dir), "mmce%d:/RIPPS2", slot);
++        mkdir(dir, 0777);
++        snprintf(out, size, "%s", dir);
++        return 1;
++    }
++    return 0;
++}
++
++static int ripps2SettingsDriveHome(int mode, char *out, int size)
++{
++    switch (mode) {
++        case RIPPS2_HOME_HDD:
++            return ripps2SettingsHddHome(out, size);
++        case RIPPS2_HOME_USB:
++            return ripps2SettingsBdmHome(BDM_TYPE_USB, "usb0", out, size);
++        case RIPPS2_HOME_MX4SIO:
++            return ripps2SettingsBdmHome(BDM_TYPE_SDC, "mx4sio0", out, size);
++        case RIPPS2_HOME_ILINK:
++            return ripps2SettingsBdmHome(BDM_TYPE_ILINK, "ilink0", out, size);
++        case RIPPS2_HOME_MMCE:
++            return ripps2SettingsMmceHome(out, size);
++    }
++    return 0;
++}
++
+ // Which choice a Custom Settings Path amounts to
+ static int ripps2SettingsHomeOf(const char *path)
+ {
+@@ -1306,6 +1354,14 @@ static int ripps2SettingsHomeOf(const char *path)
+     // build 109's first spelling: still the internal HDD, written as ata0: on the next save
+     if (!strncmp(path, "mass", 4) && path[4] >= '0' && path[4] <= '9' && !strcmp(path + 5, ":/RIPPS2"))
+         return RIPPS2_HOME_HDD;
++    if (!strcmp(path, "usb0:/RIPPS2"))
++        return RIPPS2_HOME_USB;
++    if (!strcmp(path, "mx4sio0:/RIPPS2"))
++        return RIPPS2_HOME_MX4SIO;
++    if (!strcmp(path, "ilink0:/RIPPS2"))
++        return RIPPS2_HOME_ILINK;
++    if (!strcmp(path, "mmce0:/RIPPS2") || !strcmp(path, "mmce1:/RIPPS2"))
++        return RIPPS2_HOME_MMCE;
+     return RIPPS2_HOME_CUSTOM;
+ }
+ 
+@@ -1325,20 +1381,28 @@ void ripps2SettingsHomeBegin(struct UIItem *ui)
+     ripps2SettingsHomeShow(ui);
+ }
+ 
++// build 110: a message box. Settings pages run their own dialog loop, which draws neither toasts nor notices (neither
++// showed in the lab), so the message is a dialog, as SETTINGS SAVED is.
++static void ripps2HomeNotice(const char *text)
++{
++    guiMsgBox(text, 0, NULL);
++}
++
+ // After the dialog read CFG_CUSTOMCFGPATH into gCustomSettingsPath: the choice decides what it holds
+ void ripps2SettingsHomeEnd(struct UIItem *ui)
+ {
+-    char hdd[sizeof(gCustomSettingsPath)];
++    char drive[sizeof(gCustomSettingsPath)];
+     int mode = RIPPS2_HOME_CUSTOM;
+ 
+     diaGetInt(ui, UICFG_RIPPS2_SETTINGS_HOME, &mode);
+     if (mode == RIPPS2_HOME_CARD)
+         gCustomSettingsPath[0] = '\0';
+-    else if (mode == RIPPS2_HOME_HDD) {
+-        if (ripps2SettingsHddHome(hdd, sizeof(hdd)))
+-            snprintf(gCustomSettingsPath, sizeof(gCustomSettingsPath), "%s", hdd);
+-        else if (ripps2SettingsHomeOf(gCustomSettingsPath) != RIPPS2_HOME_HDD)
+-            guiShowToast(_t("NO INTERNAL HDD FOUND: SETTINGS STAY WHERE THEY ARE"));
++    else if (mode != RIPPS2_HOME_CUSTOM) {
++        if (ripps2SettingsDriveHome(mode, drive, sizeof(drive)))
++            snprintf(gCustomSettingsPath, sizeof(gCustomSettingsPath), "%s", drive);
++        else if (ripps2SettingsHomeOf(gCustomSettingsPath) != mode)
++            ripps2HomeNotice(mode == RIPPS2_HOME_HDD ? _t("NO INTERNAL HDD FOUND: SETTINGS STAY WHERE THEY ARE") :
++                                                       _t("THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE"));
+     } else if (ripps2SettingsHomeOf(gCustomSettingsPath) == RIPPS2_HOME_CARD) // Custom Path left blank: as before
+         diaSetInt(ui, UICFG_RIPPS2_SETTINGS_HOME, RIPPS2_HOME_CARD);
+ }
+diff --git a/src/supportbase.c b/src/supportbase.c
+index 1179eb5..5751e75 100644
+--- a/src/supportbase.c
++++ b/src/supportbase.c
+@@ -337,12 +337,18 @@ static int sbReadListErrno; // see sbGetReadListError
+ // RIPPS2 build 109: an MMCE card shares SIO2 with the pads. Its list scan kept the bus busy from the first game to the
+ // last, so on a big library nothing could be pressed until it ended (a tester: 180 games, about 5 minutes). A short
+ // pause after each entry, and a frame after each game whose disc had to be read, hands the bus back to the pads.
++static int sbBreathAll; // build 110: set while an MX4SIO drive is read (sbSetPadBreath)
+ static void sbPadBreath(const char *path, int us)
+ {
+-    if (!strncmp(path, "mmce", 4))
++    if (sbBreathAll || !strncmp(path, "mmce", 4))
+         DelayThread(us);
+ }
+ 
++void sbSetPadBreath(int on)
++{
++    sbBreathAll = on;
++}
++
+ int sbGetReadListError(void)
+ {
+     return sbReadListErrno;
+@@ -706,6 +712,102 @@ int sbReadList(base_game_info_t **list, const char *prefix, const char *sub, int
+     return published;
+ }
+ 
++// ---- RIPPS2 build 110: every source's last list ----
++// Build 109 kept an MMCE card's game list on the card, so a 180-game library listed at once instead of after about 5
++// minutes. Every source does it now: the list read last time is kept on the source, shown the moment the source
++// answers, and the source is read again on its next pass, the list following whatever changed.
++#define SB_SNAP_FILE  "RIPPS2.LST"
++#define SB_SNAP_MAGIC "RIPLST01"
++#define SB_SNAP_MAX   4096
++typedef struct
++{
++    char magic[8];
++    int count, fsize, itemSize, reserved[3];
++} sb_snap_hdr_t;
++
++static unsigned int sbSnapHash(const base_game_info_t *games, int count, int fsize)
++{
++    const unsigned char *b = (const unsigned char *)games;
++    unsigned int h = 2166136261u ^ (unsigned int)fsize;
++    size_t i, n = (size_t)count * sizeof(base_game_info_t);
++    for (i = 0; i < n; i++)
++        h = (h ^ b[i]) * 16777619u;
++    return h;
++}
++
++int sbSnapShow(sb_snap_t *snap, const char *prefix, base_game_info_t **list, int *gamecount, int *fsize)
++{
++    char path[256];
++    sb_snap_hdr_t h;
++    base_game_info_t *games;
++    int fd, bytes, ok = 0;
++
++    if (snap->tried)
++        return 0;
++    snap->tried = 1;
++    snprintf(path, sizeof(path), "%s%s", prefix, SB_SNAP_FILE);
++    if ((fd = open(path, O_RDONLY)) < 0)
++        return 0;
++    if (read(fd, &h, sizeof(h)) == (int)sizeof(h) && !memcmp(h.magic, SB_SNAP_MAGIC, 8) && h.itemSize == (int)sizeof(base_game_info_t) &&
++        h.count > 0 && h.count <= SB_SNAP_MAX) {
++        bytes = h.count * (int)sizeof(base_game_info_t);
++        if ((games = malloc(bytes)) != NULL) {
++            if (read(fd, games, bytes) == bytes) {
++                free(*list); // as sbReadList publishes a new list
++                *list = games;
++                *gamecount = h.count;
++                if (fsize != NULL)
++                    *fsize = h.fsize;
++                snap->sum = sbSnapHash(games, h.count, h.fsize);
++                snap->shown = ok = 1;
++            } else
++                free(games);
++        }
++    }
++    close(fd);
++    return ok;
++}
++
++void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *list, int gamecount, int fsize, int readOk)
++{
++    char path[256];
++    sb_snap_hdr_t h;
++    unsigned int sum;
++    int fd, bytes;
++
++    snap->tried = 1;
++    snap->shown = 0;
++    if (!readOk || !gEnableWrite || gamecount > SB_SNAP_MAX)
++        return;
++    snprintf(path, sizeof(path), "%s%s", prefix, SB_SNAP_FILE);
++    if (gamecount <= 0 || list == NULL) { // nothing there now: no list to show next time
++        if (snap->sum != 0)
++            remove(path);
++        snap->sum = 0;
++        return;
++    }
++    sum = sbSnapHash(list, gamecount, fsize);
++    if (sum == snap->sum)
++        return;
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
++        return;
++    memset(&h, 0, sizeof(h));
++    memcpy(h.magic, SB_SNAP_MAGIC, 8);
++    h.count = gamecount;
++    h.fsize = fsize;
++    h.itemSize = (int)sizeof(base_game_info_t);
++    bytes = gamecount * (int)sizeof(base_game_info_t);
++    if (write(fd, &h, sizeof(h)) == (int)sizeof(h) && write(fd, list, bytes) == bytes)
++        snap->sum = sum;
++    close(fd);
++}
++
++void sbSnapForget(sb_snap_t *snap)
++{
++    snap->tried = snap->shown = 0;
++    snap->sum = 0;
++}
++
+ extern int probed_fd;
+ extern u32 probed_lba;
+ extern u8 IOBuffer[2048];
