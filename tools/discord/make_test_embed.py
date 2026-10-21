@@ -74,7 +74,7 @@ def mark(box):
 def banner(build, w=1280, h=480, words=None, halo=False):
     """Dark PS2 night, the pillars field low in the frame, and the words: (left, right, under), the Test me
     words by default (make_showcase.py passes its own). halo puts a soft blue light behind the title."""
-    left, right, under = words or ('Test me', 'Build %d' % build, 'RIPPS2 %s  /  real PS2 hardware wanted' % stage(build))
+    left, right, under = words or (slogan(build), 'Build %d' % build, 'RIPPS2 %s  /  real PS2 hardware wanted' % stage(build))
     im = Image.new('RGB', (w, h), (2, 6, 20))
     px = im.load()
     for y in range(h):  # the sky: deep at the top, a blue haze at the horizon
@@ -148,6 +148,11 @@ def banner(build, w=1280, h=480, words=None, halo=False):
     return im.convert('RGB')
 
 
+def slogan(build):
+    """The banner's word: Rip it from the beta on (build 100), Test me before it."""
+    return 'Rip it' if build >= 100 else 'Test me'
+
+
 def stage(build):
     """Alpha up to build 99; build 100 (v1.0.0) is the first beta."""
     return 'beta' if build >= 100 else 'alpha'
@@ -180,7 +185,7 @@ def payload(build, notes, release, videos=()):
     head = {
         'color': BLUE,
         'author': {'name': 'RIPPS2', 'icon_url': 'attachment://ripps2-icon.png'},
-        'title': 'Test me | Build %d' % build,
+        'title': '%s | Build %d' % (slogan(build), build),
         'description': pitch + ('\n\n**Kill it:** %s\nThe ELF killer, but ELF-sufficient, never ELF-destructive: your other ELFs stay safe on the [shelf](https://akilluminati47.github.io/RIPPS2/).' % release
                                 if release else ''),
         'image': {'url': 'attachment://test-me-%d.png' % build},

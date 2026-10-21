@@ -76,11 +76,12 @@ How it maps onto the code (read 10/19):
 ## Build 106 (as built): POWER OFF in the in-game menu, the star on the left, list keys: done 10/19
 - [x] POWER OFF, the in-game menu's last item, second press (not for a disc game). The panel is drawn on the host
       by test_ripps2_build87.py; the lab could not reach a game (its known launch hang), so consoles confirm it.
+      10/20: the hang is fixed (ripshot.md step 0) and POWER OFF was seen in the lab (IGR test build).
 - [x] Star left by default (own column), Settings > Game Sources > Starred Games Star (Theme/Left/Right/Hidden); a
       left star sends the decorator to the row end. ItemsList keys star, star_image, highlight (bar/line/none),
       decorator_all, decorator_ps2/_ps1/_app; RIPPS2-themes has them (THEME_KEYS.md, glossary, checker, Adapt).
 
-## RIPSHOT (screenshots in game): moved to its own build, not started
+## RIPSHOT (screenshots in game): built as build 108, released in v1.0.9-beta
 **The full plan, decided with the user 10/20: [ripshot.md](ripshot.md)** (6 shots a game on per-game rolls, Manual
 developing by default, ART 250x188 and MEDIA full size as 8-bit PNG, the SCRn theme key, every word on screen).
 The notes below are the first findings, kept for the record.
@@ -105,6 +106,17 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
       folder open at a time, 10 deep, 150 results; a result opens the tree with the cursor on it. Lab: the tile.
 - The Memory Files settings tiles: **MC EXPLOIT INSTALLER becomes SEARCH**, with a new icon. It finds any file
   (media, saves, games, ELFs) by name on the started drives and opens the file tree where it is.
+
+## Build 109 (testers' reports, 10/19-10/20): done 10/21, released in v1.0.9-beta
+- [x] MMCE boots fast: the card's last list (`RIPPS2.LST`) shows at once, the card is read again in the background.
+      The lab has no MMCE: testers time it.
+- [x] The MMCE scan pauses after each entry (1 ms) and a frame after each disc read, so the pads keep working.
+- [x] Settings > General > Save Settings To: Memory Card, Internal HDD (`mass<n>:/RIPPS2` on BDM ATA, else
+      `pfs:/RIPPS2`), Custom Path. Lab: saved to mass0:/RIPPS2. Load after a power cycle and the APA HDD: testers.
+- [x] A settings page's title clear of its line (DIA_HEADER_GAP 8). Lab: every page.
+- [ ] Open: "simplify the audio approach for 0 bugs on real hardware" and the menu music missing after a rip:
+      waiting on reports with steps (the build 109 test list asks for them).
+- [ ] Open: FifthFox's folders suggestion (Browse Folders in Game List already exists; ask what is missing).
 
 ## Skipped
 - **RIPCON** (format conversion, as OrbitOPL Toolbox does on a PC): not done on PS2 hardware yet, likely failure

@@ -1,7 +1,7 @@
 # RIPSHOT: screenshots from the in-game menu (handoff plan)
 
-Planned with the user 2026-10-19 and 10-20. Not started. It is the next build after 107 (so 108, or whatever
-number is next when it starts: build N = patch N). Everything the player reads is written out below, word for word;
+Planned with the user 2026-10-19 and 10-20; built as build 108 (10/20, branch b108, patch 0108; steps 0-8 below).
+Build N = patch N. Everything the player reads is written out below, word for word;
 change wording here first, then in code. No em dashes anywhere (house rule).
 
 ## The user's decisions
@@ -22,6 +22,10 @@ change wording here first, then in code. No em dashes anywhere (house rule).
 - **Short words everywhere.**
 - Developing never slows the boot (the user's worry): Manual does nothing on its own, Auto works in the background
   after the game list is up.
+- **The in-game menu is silent, and RESUME gives back the exact frame** (the user, 10/20: "eliminate skipping or loop
+  bugs or desync"). The SPU2 is hushed when the menu opens (both cores' master volumes 0, every voice's pitch 0 so it
+  holds its place) and woken on RESUME; the pixels under the panel are written back before the game goes on (from
+  the roll's hold, so only for games with a roll; without one the game's next frame draws over the panel).
 - **Roll limit: 2000 rolls a drive**, the year the PS2 came out (the user: "the number/year PS2 released"). It is one
   constant, `RIPSHOT_ROLLS_MAX`; if 2000 was not what was meant, change it there. The drive's free space usually
   decides first (each waiting roll holds about 4 MB).
@@ -163,10 +167,16 @@ no roll, the item says `NOT FOR THIS GAME`. (UDPBD rides the BDM path: check it.
    the next slot (converted to RGB555; a half-height field frame is stored as it is, with its flag), then its header.
 4. The KEEP strip's pixels go to the hold area, the strip draws; KEEP marks the slot kept, DELETE marks it empty;
    the strip's pixels go back and the menu returns.
-5. The write path: a new call on CDVDMAN's IGR RPC (`ee_core/src/cd_igr_rpc.c` beside oplIGRShutdown): "write /
-   read n bytes at an offset of the roll", served in `modules/iopcore/cdvdman` by the device that launched the game:
-   `device-bdm.c` bdm_writeSector over the fragments, `device-hdd.c` the ATA write over the block map, `device-mmce.c`
-   mmce_write_offset / read_offset, `device-smb.c` WriteAndX. Each already exists for the VMC or the game.
+5. The write path (changed 10/20, step 2): NOT an IGR RPC call. While the game is only paused ee_core cannot use
+   SIF RPC (the game owns the SIF command table, so the reply lands in the game's handlers; ee_core's RPC only
+   works at an IOP reset and on the way out). So, as RetroAchievements already does, plain SIF DMA
+   (`modules/iopcore/common/ripshot_io.h`): at every IOP reset, while ee_core still drives the SIF, one IGR RPC
+   call (fno 2) gives CDVDMAN the EE address of ee_core's ack and gets back the IOP address of CDVDMAN's request
+   box (`ripshot_iop.c`, a thread that looks every 100 ms, every 2 ms between BEGIN and END). In the menu ee_core
+   DMAs requests (BEGIN: an 8 KB IOP buffer for the session, WRITE, READ, END) and the thread answers by DMA.
+   Each device serves `DeviceRollBytes` / `DeviceRollIo`: `device-bdm.c` walks the roll's fragments
+   (`fragfile[1]`, handed over like the ISO's), `device-hdd.c` the ATA write over the block map, `device-mmce.c`
+   mmce_write_offset / read_offset, `device-smb.c` WriteAndX (HDD, MMCE, SMB still stubs).
 6. Room: ee_core has about 11 KB of stack room (build 103). The transfer buffer lives on the IGR thread's stack
    (4 to 8 KB) and is reused; keep the new code small (gc-sections is on).
 
@@ -202,18 +212,71 @@ no roll, the item says `NOT FOR THIS GAME`. (UDPBD rides the BDM path: check it.
 
 ## Build order
 
-0. **Fix the PCSX2 lab's game-launch hang.** Nothing in game can be checked without it (build 106's POWER OFF was not
-   seen in the lab for this reason). Launch a reel game from Storage, find where it stops (EE SIO debug build).
-1. GS readback in ee_core, with a host test of the pixel paths (16, 24, 32-bit frames to RGB555; field frames).
-2. The IGR RPC read / write for BDM first (USB in the lab's exFAT HDD image is BDM too), then APA HDD, MMCE, SMB.
-3. Rolls: blank roll, rename at launch, the handover per device, the ee_core config fields, the 2000 cap.
-4. The in-game screens: the item, the path step, hold / restore, the fade, KEEP / DELETE, the counts, the full and
-   drive-full states.
-5. Developing: quantizer, PNG writer, names; the Memory Files roll pages and viewer; Auto in the background; toasts.
-6. Settings page with per-choice hints, defaults and the one-time switch; translations.
-7. `SCRn` in the engine and the themes.
-8. Lab: a shot from a PCSX2 game to the exFAT HDD image, developed by hand and by Auto, its PNGs read back
-   (scratchpad `exfat_get.py`); then the console test list below for testers.
+0. [x] **Fix the PCSX2 lab's game-launch hang** (10/20, patch 108). The cause: ee_core reboots the IOP with UDNL
+   reading the IOPRP image from imgdrv's device, named `host`, and PCSX2 serves every `host*:` open from its own
+   host file system (IopBios.cpp `is_host`, HostFs on or off), so the log ended on `file 'host0:' can't open`. The
+   device is `iprp` now (same length, the reset command is unchanged). Lab: Aqua Teen Hunger Force from the reel
+   HDD reaches its title screen. The in-game menu needs the `RIPPS2_IGR_TEST=1` build in PCSX2 (no data
+   breakpoints, so GSM never sees DISPFB and the menu leaves at once); with it the menu opens over the game and
+   POWER OFF's second press turns the console off. Its first frame drew the panel's text garbled once (later frames
+   clean): look again in step 4.
+1. [x] GS readback in ee_core, with a host test of the pixel paths (16, 24, 32-bit frames to RGB555; field frames).
+   10/20: `ee_core/src/ripshot.c`: rsFrame (the shown frame, now also the menu's igrmFindFrame), rsRead (local ->
+   host after ps2sdk's AFL ee/debug screenshot.c: FINISH masked in IMR and the game's flag kept, FDR + BUSDIR, D1 to
+   memory, bounded waits), rsToRgb555 (roll pixels = GS CT16 layout, A set), RS_READ_W (16-pixel widths keep
+   every transfer whole quadwords). Host test test_ripps2_build108.py. rsRead has no caller yet: first proof is
+   step 4's hold / restore. Room: a 640 CT32 line is 2.5 KB and the IGR stack is 4 KB (read half lines into the
+   menu's packet buffer, or grow IGR_STACK_SIZE).
+2. [ ] The roll read / write for BDM first (USB in the lab's exFAT HDD image is BDM too), then APA HDD, MMCE, SMB.
+   10/20: BDM done (mailbox design in "How it works" 5; host test walks a three-fragment roll on a fake drive; CI
+   green; ee_core stack room now 0x2940). First lab proof needs step 3's BDM handover. HDD, MMCE, SMB: stubs.
+3. [ ] Rolls: blank roll, rename at launch, the handover per device, the ee_core config fields, the 2000 cap.
+   10/20, BDM done (`src/ripps2shot.c`, layout `modules/iopcore/common/ripshot_roll.h`: 4 KB pieces, 4,321,280
+   bytes): the background job makes MEDIA/RIPSHOT/BLANK.ROLL on each started drive (seek past the end and one
+   byte) and turns rolls with nothing kept back into the blank; the launch finds the game's roll, else renames the
+   blank, else makes one (DRIVE FULL when it cannot or at RS_ROLLS_MAX), hands its fragments over as fragfile[1]
+   and fills ee_core's Ripshot, RipshotKept, RipshotScrNext, RipshotShotNext, RipshotFreeMB (-1 on BDM),
+   RipshotDrive, RipshotTitle. Lab (IGR test build, ripps2-rip.raw, SCPS_150.13): the menu said ROLL OK; on the PC
+   the roll reads RIPROLL1 / SCPS_150.13, six zero slots, and its hold is the frame under the panel. The reel HDD
+   has 4.25 MB free (under a roll): DRIVE FULL there is expected. APA HDD, MMCE, SMB: with their step 2.
+   Also done early (step 4): the hold is saved for every RIPSHOT game and written back on RESUME, and the menu is
+   silent (see the user's decisions). ee_core stack room after it: 0x1FC0 (the IGR stack is 4 KB of it).
+4. [x] The in-game screens: the item, the path step, hold / restore, the fade, KEEP / DELETE, the counts, the full and
+   drive-full states. 10/20, lab-checked on a REAL frame (RIPPCSX2 2's data breakpoint, normal build, POINIES POIN on
+   ripps2-rip.raw): SCREENSHOT third, SAVE THIS FRAME / n OF 6 LEFT, the path pages (names, sizes, place, left), SAVE
+   fades the panel off in three passes (two blends, then the hold exactly), the frame goes to the first free slot,
+   KEEP writes the slot header, the menu returns, RESUME gives the frame back; on the PC the slot reads as the frame
+   the menu opened on with no menu in it. Found and fixed on the way:
+   - GSM's data breakpoint trapped the menu's own GS stores (the readback's CSR and BUSDIR): the menu saves BPC,
+     switches it off (BED) for its whole run and puts it back on the way out. A console would trap the same way.
+   - A game may write DISPLAY DH past the TV's raster (POINIES POIN: 959 in NTSC FRAME mode): the shown height stops
+     at 480 (NTSC) or 576 (PAL, DY >= 64) lines, or the panel sat off screen and the shot read below the picture.
+   - ee_core ran out of room: the menu's 4 KB thread stack and its font (igrmfont.h) now sit after the modules
+     (config->IgrStack / IgrFont, src/system.c), below 0xD0000 like LEFT TO HUNT; without that room the menu is off
+     for the game. rsLinkIop's RPC buffers are static (the first IOP reset runs on ee_core's main stack, 3 KB floor).
+     ee_core stack room after it: 0xC80. CI now uploads ee_core.map with the symbols, also when the link fails.
+   - The panel is 126 units tall (five items); the hold holds 320 x 256, the strip 320 x 32 (roll 4,329,472 bytes; a
+     shorter roll with nothing kept is made again at launch).
+   - Not done: the SAVING strip (the clean frame stays up while it writes, about a second).
+5. [x] Developing: quantizer, PNG writer, names; the Memory Files roll pages and viewer; Auto in the background; toasts.
+   10/20, lab: Manual (the toast, the roll pages, VIEW, ACTIONS, DEVELOP to an 8-bit PNG) and Auto (DEVELOPING 1 OF 2,
+   2 SHOTS SAVED, the roll back to the blank). Developed names are the ones the menu showed while still free.
+6. [x] Settings page with per-choice hints, defaults and the one-time switch; translations (27 strings and 5 labels in
+   the 32 language files). 10/20, lab: the General page's In-Game Menu button and hint, the page's three rows. Found
+   there: a choice past the first never showed its hint (an enum row leaves intvalue.max at 0: the choices are counted
+   now) and the hint comes in again when the choice changes; disabled rows looked like the rest (dialogs drew them in
+   the same colour): a row that cannot be changed now reads at half strength, its label too, on every settings page.
+7. [x] `SCRn` in the engine and the themes. Boxes (RIPGRID, RIPFLOW, Adapt): each shows its own shot, all crossfade
+   every 6 s. Slides (RIPPS2's info page, which is `elf/theme/conf_theme.cfg`: build.sh writes it over RiptOPL's
+   conf_theme_OPL.cfg): an SCRn slide shows the next shot each round, a slide shown this round asking for its next one
+   early so the show fades into it. Lab: RIPGRID's boxes swap (pixel diffs 0 / 12), RIPPS2's slideshow runs _SCR,
+   _SCR2, _SCR3, _SCR... Found there: _SCR2 can load before _SCR; the shots are now found strictly in order (a probe
+   asks for the first unknown one) and only a shot known to be there is shown, else the show probed past the last.
+   RIPPS2-themes edition 108: THEME_KEYS.md, the glossary, the checker, Adapt and Adapt Rx.
+8. [x] Lab: shots from POINIES POIN to ripps2-rip.raw (ART, three of them), developed by Auto (and by hand in step 5),
+   read back: ART 250 x 188 and MEDIA 640 x 480, 8-bit palette PNGs. MEDIA's README.txt explains RIPSHOT (written on
+   every drive RIPSHOT uses). Then the console test list below for testers (tools/discord/notes/build108.md).
+   Still open: the SAVING strip; APA HDD, MMCE and SMB rolls (NOT FOR THIS GAME there).
 
 ## Console test list (for the release post)
 

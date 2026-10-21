@@ -1,20 +1,22 @@
-<p align="center"><img src="media/ripps2-test-me.png" alt="RIPPS2: Test me, build 107, the beta, the dead elf in its blue hat over the towers"></p>
+<p align="center"><sub><b>RIPPS2</b> &nbsp;&middot;&nbsp; <a href="https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf">Download</a> &nbsp;&middot;&nbsp; <a href="https://github.com/akilluminati47/RIPPS2-themes">Themes</a> &nbsp;&middot;&nbsp; <a href="https://github.com/akilluminati47/RIPPCSX2">RIPPCSX2</a> &nbsp;&middot;&nbsp; <a href="https://github.com/akilluminati47/RIPPS2-fonts">Fonts</a> &nbsp;&middot;&nbsp; <a href="https://akilluminati47.github.io/RIPPS2/">Website</a> &nbsp;&middot;&nbsp; <a href="https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/">psx-place</a> &nbsp;&middot;&nbsp; <a href="https://discord.gg/ggkCDWqhE">Discord</a></sub></p> <!-- ripps2-nav -->
+
+<p align="center"><img src="media/ripps2-test-me.png" alt="RIPPS2: Rip it, build 109, the beta, the dead elf in its blue hat over the towers"></p>
 
 # RIPPS2
 
-> ### Rip it: RIPPS2 build 107, v1.0.7 beta
+> ### Rip it: RIPPS2 build 109, v1.0.9 beta
 > **RIP PS2, the ELF killer.** ELF-sufficient, never ELF-destructive: your other ELFs stay safe on the [shelf](https://akilluminati47.github.io/RIPPS2/) (nothing is deleted unless you ask), they just get a well-earned rest.
-> 1. **[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf)** (always the newest release) (one file, about 3 MB), and the **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** if you like (Adapt, Adapt Rx, edition 107; RIPGRID and RIPFLOW are built in), and **[RIPPS2-languages.zip](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip)** for RIPPS2 in your language (33 of them).
+> 1. **[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf)** (always the newest release) (one file, about 3 MB), and the **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** if you like (Adapt, Adapt Rx, edition 108; RIPGRID and RIPFLOW are built in), and **[RIPPS2-languages.zip](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip)** for RIPPS2 in your language (33 of them).
 > 2. Copy it to a USB stick or memory card, and launch it from FreeMcBoot, PS2BBL, wLaunchELF or whatever you already use to start homebrew. In PCSX2: **System > Start File** and pick `RIPPS2.elf`.
 > 3. Tell us how it went: [the psx-place thread](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/), [an issue](https://github.com/akilluminati47/RIPPS2/issues), or **#RIPPS2** on the developers' Discord, [discord.gg/ggkCDWqhE](https://discord.gg/ggkCDWqhE) (invite good for October 2026).
 >
-> [What's new in build 107](https://github.com/akilluminati47/RIPPS2/releases/tag/v1.0.7-beta) | [Changelog](CHANGELOG.md) | **[Watch the beta reel](https://youtu.be/LPjdK_E1jjM)** (9:45, every chapter in its description; earlier: [the build 99 Short](https://www.youtube.com/shorts/Ov5iA-tMcI8), [build 88's](https://www.youtube.com/shorts/Sqprz22tdtg), [the build 83 reel](https://youtu.be/A27N9s6tumk) and [its Short](https://youtube.com/shorts/4QBe5UO2KxM)) | [Every release](https://github.com/akilluminati47/RIPPS2/releases) | [Talk about it on psx-place](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/)<br>
+> [What's new in builds 108 and 109](https://github.com/akilluminati47/RIPPS2/releases/tag/v1.0.9-beta) | [Changelog](CHANGELOG.md) | **[Watch the beta reel](https://youtu.be/LPjdK_E1jjM)** (9:45, every chapter in its description; earlier: [the build 99 Short](https://www.youtube.com/shorts/Ov5iA-tMcI8), [build 88's](https://www.youtube.com/shorts/Sqprz22tdtg), [the build 83 reel](https://youtu.be/A27N9s6tumk) and [its Short](https://youtube.com/shorts/4QBe5UO2KxM)) | [Every release](https://github.com/akilluminati47/RIPPS2/releases) | [Talk about it on psx-place](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/)<br>
 > [Theme RIPPS2](https://github.com/akilluminati47/RIPPS2-themes) (no rebuild, agent friendly) | [Fill your AUDIO folder](#the-sound-ripps2-was-made-with) with RIPPS2 Audio Studio | [See a theme in true 720p and 1080i: RIPPCSX2](https://github.com/akilluminati47/RIPPCSX2/releases/latest) (PCSX2 with HDTV output)
 
 RIPPS2 is a PS2 front end in a single `.elf`: a teardown and rebuild of [RiptOPL](https://github.com/NathanNeurotic/Open-PS2-Loader) (the Open PS2 Loader fork) with its own look, launchers, file browser and save tools. Glass towers stand behind your games and orbit formations behind your files, all drawn live by the PS2.
 
 - **LAUNCH DISC** boots PS2, PS1 and DVD video discs, says which game is in the drive before you start it, and plays audio CDs with the towers turned into a spectrum analyzer. **RIPDISC** (build 105) rips the disc in the drive: a game to your storage, a CD or DVD video to your files.
-- **STORAGE** is your game library: every drive in one list, with art, an info page whose art crossfades with the screenshots, per-game settings, and R3 to star a game into Starred Games (the star sits at the start of the row; Settings > Game Sources > Starred Games Star moves or hides it).
+- **STORAGE** is your game library: every drive in one list, with art, an info page whose art crossfades with the screenshots, per-game settings, and R3 to star a game into Starred Games (the star sits at the start of the row; Settings > Game Sources > Starred Games Star moves or hides it). An MMCE card's games show at once from the card's last list (build 109).
 - **MEMORY FILES** is a built-in file browser: copy, move and delete across memory cards, USB and HDD; open OPL's VMC card images like folders; export and import PSU saves; edit text files; open pictures and play AVI video full screen; Start opens its settings, where **SEARCH FILES** finds any file or folder by name on every started drive and opens the tree where it is. Square on a memory card opens the **CARD MANAGER**: back a card up to a VMC, write a VMC's saves back, erase the game saves, format.
 
 It is **beta** from build 100: a hundred builds of alpha, tested on consoles and in PCSX2 by ripto, nuno6573, zackcage6, eliminator1403, FifthFox and Mr.sus.60. Keep your usual loader close by, and tell us what breaks: feedback is what makes RIPPS2.
@@ -24,8 +26,9 @@ It is **beta** from build 100: a hundred builds of alpha, tested on consoles and
 - **Themes you can make your own.** Frosted glass panels over each game's art, a cover **Grid** element, right-stick tilt that moves a whole page as one sheet, and the first pack, **[RIPPS2-themes](https://github.com/akilluminati47/RIPPS2-themes)**: Adapt and Adapt Rx, each config opening with a glossary of every key, with a checker and a key reference for anyone (or any agent) making more. RIPGRID and RIPFLOW are built in. Hold **SELECT** for 4.2 seconds to step through your themes. On RIPGRID and RIPFLOW, hold the right stick to one side for 0.42 s and the chosen case turns over to its back cover, and the grid turns its pages with a slide.
 - **RIPFLOW**, the built-in cover carousel (and RIPGRID, built in too), a launch disc that pops in or spins as a game starts, **Hints and Glyphs** (your own button hints, badges and four glyph sets), and **Colors and More**: six color themes (RIPPS2, Ember, Blood, Ectoplasm, Amethyst, Bone), D-pad glyphs, fading hints and category bar, the source name as a toast in the middle of the page; themes can pick all of it for themselves, and your own settings always win.
 - **Everything it needs, on board.** Neutrino 1.8.0, POPSTARTER and Ember ride inside the one `.elf` and install themselves where your games are; **STATUS** on the START menu shows where each one is and installs or sets it up.
+- **Your settings where you want them** (build 109): Settings > General > Save Settings To keeps them in RIPPS2's save on a memory card, in a RIPPS2 folder on the internal HDD (exFAT, or the APA HDD's OPL partition, read first at boot) or in a folder you type.
 - **BIBLE**: PS2BBL 1.2.0 set up for RIPPS2, on a memory card or the internal HDD, so the console boots straight into it. Boot Loader > Manage shows what each card starts.
-- **An in-game menu** (Settings > General > In-Game Menu, off until consoles have shown it safe): L1+L2+R1+R2+SELECT+START pauses a game under Resume, Achievements, Exit Game and Power Off (build 106: turns the PS2 off right there, on a second press), drawn over the game's own picture; Achievements lists what you have left to hunt and how to earn it.
+- **An in-game menu**, on from build 108 (Settings > General > In-Game Menu): L1+L2+R1+R2+SELECT+START pauses a game, silent, over its own picture, under Resume, Exit Game, **Screenshot** (RIPSHOT, [below](#screenshots-in-game-ripshot)), Achievements and Power Off (a second press turns the PS2 off right there); RESUME gives back the exact frame, and Achievements lists what you have left to hunt and how to earn it.
 - **Achievements** (SpiritofRA): RetroAchievements telemetry through the [xeRAbora](https://github.com/hacan359/xerabora) client on your PC (pinned to [v0.1.0-alpha.18](https://github.com/hacan359/xerabora/releases/tag/v0.1.0-alpha.18)), badges on tracked games, the disc in the tray, and **YOUR ACCOUNT**, every game you have checked with what you have unlocked and, with xeRAbora open to the network, **LEFT TO HUNT**: every locked achievement and how to earn it.
 - **Cover Art** fetched by the PS2 itself over HTTPS, **720p and 1080i** drawn in one pass at full detail (text the right size since build 82), your **AUDIO** folder found on any drive, and towers and orbs that run all night at a steady 60 fps.
 - **Guard rails**: every build runs RiptOPL's host checks and RIPPS2's own, and a new warning in a RIPPS2 file fails it.
@@ -56,6 +59,23 @@ The PS2's USB is slow (USB 1.1, about 1 MB a second): a full DVD to a stick take
 <img src="media/b107/02-ripdisc-confirm.jpg" width="32%" alt="RIPDISC's confirm step: the game, its size and the ISO it becomes">
 <img src="media/b107/03-ripdisc-progress.jpg" width="32%" alt="RIPDISC ripping: how much is done and the minutes left">
 <img src="media/b107/05-search.jpg" width="32%" alt="Memory Files settings: SEARCH FILES in place of the MC exploit installer">
+</p>
+
+## Screenshots in game (RIPSHOT)
+
+In a game, L1+L2+R1+R2+SELECT+START, then **SCREENSHOT**: the frame that was on screen when the menu opened, with no menu in it. Pick **ART** (the game's screenshot art, 250 x 188, `_SCR`, `_SCR2`...), **MEDIA** (full size, in a folder named for the game) or **BOTH**; each shows the file it becomes, its size and the shots left. **SAVE** fades the menu off, **KEEP** or **DELETE** decides.
+
+Shots wait on the game's roll in `MEDIA/RIPSHOT` (6 a game) until they are developed into 8-bit PNGs: by hand from Memory Files (open `MEDIA/RIPSHOT`: VIEW a shot, ACTIONS to develop it), or by themselves in the background with **Develop Shots: Auto** (Settings > General > In-Game Menu). Themes show every shot a game has with the `SCRn` key: RIPPS2's info page slideshow, RIPGRID, RIPFLOW and Adapt do. For now RIPSHOT works for games on USB, the internal exFAT HDD, MX4SIO and iLink.
+
+<p align="center">
+<img src="media/b108/02-where.jpg" width="32%" alt="In the game: SCREENSHOT's choices, ART, MEDIA or BOTH, with the file names, the size and the shots left">
+<img src="media/b108/03-keep.jpg" width="32%" alt="The menu faded off over the frame, KEEP or DELETE at the bottom">
+<img src="media/b108/06-info-shots.jpg" width="32%" alt="The info page slideshow showing the game's third shot">
+</p>
+<p align="center">
+<img src="media/b108/04-rolls.jpg" width="32%" alt="Memory Files: MEDIA/RIPSHOT lists each game's roll and its shots">
+<img src="media/b108/05-view.jpg" width="32%" alt="VIEW: a shot full screen, straight from the roll">
+<img src="media/b108/07-settings.jpg" width="32%" alt="Settings > General > In-Game Menu: In-Game Menu, RIPSHOT and Develop Shots, each choice with its own hint">
 </p>
 
 ## Your own sounds and music
@@ -144,3 +164,5 @@ RIPPS2 is designed and directed by akilluminati47 and built with Claude (Anthrop
 Unofficial fan project. PlayStation, PS1, PS2, the PlayStation logo and the PS2 logo are trademarks of Sony Interactive Entertainment. This project is not affiliated with or endorsed by Sony.
 
 <p align="center"><img src="media/deadelf/ripps2-deadelf-top.png" width="140" alt="The dead elf, from above"></p>
+
+<p align="center"><sub><b>RIPPS2</b> &nbsp;&middot;&nbsp; <a href="https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf">Download</a> &nbsp;&middot;&nbsp; <a href="https://github.com/akilluminati47/RIPPS2-themes">Themes</a> &nbsp;&middot;&nbsp; <a href="https://github.com/akilluminati47/RIPPCSX2">RIPPCSX2</a> &nbsp;&middot;&nbsp; <a href="https://github.com/akilluminati47/RIPPS2-fonts">Fonts</a> &nbsp;&middot;&nbsp; <a href="https://akilluminati47.github.io/RIPPS2/">Website</a> &nbsp;&middot;&nbsp; <a href="https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/">psx-place</a> &nbsp;&middot;&nbsp; <a href="https://discord.gg/ggkCDWqhE">Discord</a></sub></p> <!-- ripps2-nav -->

@@ -1,5 +1,59 @@
 # RIPPS2 changelog
 
+## Build 109 (beta, v1.0.9-beta), changes since build 108
+
+From testers' reports (10/19-10/20).
+
+### MMCE boots fast
+- **A big MMCE library lists at once.** RIPPS2 keeps the card's game list on the card (`RIPPS2.LST`, beside its CD and DVD folders): at boot the games show from it straight away, then the card is read again in the background and the list follows whatever changed. A tester's 180 games took about 5 minutes to list on every boot, with nothing to press until then.
+- **The pads keep working while a card is read.** An MMCE card shares its bus (SIO2) with the controllers; the list scan used to hold it from the first game to the last. It now pauses after each entry, and a frame after each game whose disc has to be read, so you can move around while it works.
+
+### Save Settings To
+- **Settings > General > Save Settings To:** Memory Card (RIPPS2's own save, as before), **Internal HDD** (a RIPPS2 folder on the internal exFAT HDD, else the APA HDD's OPL partition; the settings are read from there first) or Custom Path (the Custom Settings Path row, which now shows only for this choice). Every choice has its own hint. With no internal HDD it says so and changes nothing.
+
+### Settings pages
+- **A page's title stands clear of the line under it.** It sat on the line, which cut its descenders.
+
+### Languages
+- The new words read in all 33 languages.
+
+## Build 108 (beta, in v1.0.9-beta), changes since build 107
+
+### RIPSHOT: screenshots from the in-game menu
+- **SCREENSHOT is the in-game menu's third choice** (L1+L2+R1+R2+SELECT+START: RESUME, EXIT GAME, SCREENSHOT, ACHIEVEMENTS, POWER OFF). It takes **the exact frame that was on screen when the menu opened**, never a frame after it, and never the menu itself.
+- **Pick where it goes:** ART (the game's screenshot art for your themes, at OPL Manager's 250 x 188), MEDIA (full size, in a folder named for the game) or BOTH. Each choice shows the file it will become (`SLUS_209.46_SCR3.PNG`, `SHOT 03.PNG`), its size, the drive and how many shots are left.
+- **SAVE fades the menu off over the frame** and writes it then and there; **X KEEP / O DELETE** at the bottom decides, and the menu comes back with the count: `KEPT  4 LEFT`.
+- **6 shots a game, on the game's roll.** Shots wait in `MEDIA/RIPSHOT` on the drive the game is on (each game with shots waiting holds about 4 MB; a blank roll is kept ready so a game starts at once) until they are developed. Developing frees the roll, so you can shoot, leave, come back and shoot again. A full roll says `ROLL FULL / DEVELOP IN MEMORY FILES`; a drive without room for a roll says `DRIVE FULL`.
+- **Developing** turns a shot into an 8-bit palette PNG: `ART/<ID>_SCR.png`, then `_SCR2`, `_SCR3`... (the next free number, the one the menu showed), or `MEDIA/<game>/SHOT 01.png` at full size.
+  - **Manual** (the default): open `MEDIA/RIPSHOT` in Memory Files. Each game's roll lists its shots; **VIEW** shows one full screen straight from the roll, **ACTIONS** develops it, develops them all or deletes it ("Delete this shot?" asks first). At startup a toast says `3 SHOTS ON THE ROLL` when any are waiting.
+  - **Auto:** back in RIPPS2, once the game list is up, they develop in the background while you browse (`DEVELOPING 1 OF 2`, then `2 SHOTS SAVED`). Launching a game stops it; the rest go next time.
+- **Where it works:** games on USB, the internal exFAT HDD, MX4SIO and iLink. A game on the APA HDD, an MMCE card or SMB, or from a disc, says `NOT FOR THIS GAME` for now.
+- MEDIA's README.txt explains RIPSHOT (an older RIPPS2 README there is brought up to date).
+
+### The in-game menu
+- **It is silent now, and RESUME gives back the exact frame.** The game's sound stops while the menu is open (every voice held where it was) and starts again on RESUME, so nothing skips, loops or drifts out of sync; for a game with a roll the picture under the panel is put back before the game goes on.
+- **On by default.** Build 87 kept it off "until consoles have shown it safe": it is no longer experimental, and a config saved by an older build gets it switched on once.
+- **Settings > General > In-Game Menu** is a page of its own: **In-Game Menu** (On, Off), **RIPSHOT** (On, Off: no SCREENSHOT and no roll kept) and **Develop Shots** (Manual, Auto). Every choice has its own hint, which changes as you change the choice; RIPSHOT and Develop Shots grey out when they cannot apply.
+- **Every settings page:** a row that cannot be changed now (a setting another one switches off) reads at half strength, its label too. It used to look like the rest and the cursor simply skipped it.
+- **Found and fixed in the lab:** a game that sets its picture taller than the TV shows (POINIES POIN) put the panel off screen and the shot below the picture; the menu now stops at the raster's 480 (NTSC) or 576 (PAL) lines. GSM's data breakpoint caught the menu's own GS reads and froze it: the menu switches it off while it is open and back on as it closes.
+
+### The `SCRn` theme key (RIPPS2-themes edition 108)
+- **`pattern=SCRn` shows every screenshot a game has**, `_SCR` to `_SCR9`, each for 5 s with a 1 s crossfade. A second `SCRn` box on the page starts one shot later, so two boxes never show the same one; as a slide it shows the next shot each time the show comes round.
+- **RIPPS2's info page slideshow, RIPGRID's and RIPFLOW's screenshot boxes, and Adapt and Adapt Rx use it**, so your RIPSHOT ART shows up as soon as it is developed. THEME_KEYS.md, the key glossary and the checker know it.
+
+### Underneath
+- **Games launch in PCSX2 with its host filesystem on.** PCSX2 answers every `host` device itself, so the image the game's IOP reboots from could not be found and the launch hung; RIPPS2 names that device `iprp` now.
+- The in-game menu's stack and font sit after the game's modules (below 0xD0000, as LEFT TO HUNT's list does), which keeps ee_core inside its room.
+
+### Found while making the reel
+- **The info page no longer blinks** when a device rescan rebuilds the game list under it (all its art faded in again and the slideshow started over): it knows a game by its id and title, not by its row.
+- **Shots developed while RIPPS2 runs show at once** in a theme's `SCRn` boxes and slides (an earlier "no such art" answer is asked again).
+- **A developed PNG is checked on the drive** (its size must be what was written) and written once more if not. Once, an ART PNG came out empty and held its number; an empty file now counts as free and is written over.
+- **`SCRn` finds the shots in order**, `_SCR` first, whatever order the reads come back in, and a slide or box shows only a shot known to be there.
+
+### Languages
+- RIPSHOT's words, the In-Game Menu page and its hints read in all 33 languages (ART and MEDIA stay as the folders are named). The in-game menu itself stays English.
+
 ## Build 107 (beta, v1.0.7-beta), changes since build 106
 
 ### Search in Memory Files
