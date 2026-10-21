@@ -56,7 +56,7 @@ if len(sys.argv) > 2:  # mcls.py card.ps2 FOLDER/FILE: the file's bytes to stdou
     for mode, length, cl, name in entries(root, count):
         if name == want[0] and mode & 0x20:
             for m2, l2, c2, n2 in entries(cl, length):
-                if n2 == want[1] and m2 & 0x10:
+                if n2 == want[1] and m2 & 0x10 and m2 & 0x8000:  # 0x8000 clear: a deleted entry
                     sys.stdout.buffer.write(chain(c2, l2))
                     sys.exit(0)
     sys.exit('not found')

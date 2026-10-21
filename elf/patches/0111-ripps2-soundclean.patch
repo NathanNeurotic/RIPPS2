@@ -1,0 +1,488 @@
+diff --git a/include/opl.h b/include/opl.h
+index b2a7500..8a54897 100644
+--- a/include/opl.h
++++ b/include/opl.h
+@@ -405,6 +405,7 @@ extern char gExitPath[256];
+ // Opt-in "Custom Settings Path" (General Settings). Empty = unset. Typed by the user, so it may name
+ // a device that is not mounted yet -- the load/save paths lazy-load it via bdmResolveBootDir().
+ extern char gCustomSettingsPath[64];
++extern int gRipps2HomeBackToCard; // RIPPS2 build 111: Save Settings To went from a drive back to Memory Card
+ // Enable Debug Colors
+ extern int gEnableDebug;
+ 
+diff --git a/src/dia.c b/src/dia.c
+index 0c7bbc9..681481c 100644
+--- a/src/dia.c
++++ b/src/dia.c
+@@ -64,8 +64,11 @@ static void diaDrawBoundingBox(int x, int y, int w, int h, int focus)
+     color |= GS_SETREG_RGBA(0, 0, 0, 0xFF);
+     color &= gColFocus;
+ 
+-    // RIPPS2: 3 up, so the text sits in the middle of the box instead of along its top edge
+-    rmDrawRect(x - 5, y - 3, w + 10, h + 10, color);
++    // RIPPS2 build 111 (user: "the shadow over the option in the settings menus needs to be aligned with the current
++    // choice's word"): the box is centred on the letters' own centreline, as the game list centres its titles. A fixed
++    // 3 up put its middle well above the word in RIPPS2's faces: its top floated over the letters and its foot cut them.
++    int cy = y + fntCenterOffset(RIPPS2_DIA_FONT, ALIGN_NONE), bh = h + 6;
++    rmDrawRect(x - 5, cy - bh / 2, w + 10, bh, color);
+ }
+ 
+ // Rendered width of text[from..to), in the same 640-wide units the caret has always been placed in.
+diff --git a/src/opl.c b/src/opl.c
+index c2fadcb..82fcb72 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -284,6 +284,7 @@ int gPadMacroSettings;
+ int gScrollSpeed;
+ char gExitPath[256];
+ char gCustomSettingsPath[64];
++int gRipps2HomeBackToCard;
+ int gEnableDebug;
+ int gPS2Logo;
+ int gAutoCreateVmc; // default-off: create + assign a per-game VMC on a PS2 game's first launch
+@@ -2194,6 +2195,47 @@ static int mcConfigPathRedirect(char *out, int outLen)
+     return 1;
+ }
+ 
++/* RIPPS2 build 111 (tester lukeatmynose on build 110: "whenever a memory card is inserted, the system prioritizes saving
++   to it, ignoring the specified save location"). Build 100 loads RIPPS2's own save on a card first unless config.path
++   says otherwise, and config.path sits beside the ELF, where at that moment it can be out of reach (an APA boot before
++   its partition is mounted, a drive still coming up): the card's old settings won, Save Settings To read Memory Card
++   again, and the next save went to the card. A save to another home now leaves the same pointer in each card's RIPPS2
++   folder, which the card check is sure to see; choosing Memory Card again takes every pointer away at its save, so it
++   sticks (config.path was never removed, so a later boot followed it back to the drive). */
++static int ripps2CardRedirectOpen(void)
++{
++    int k, boot = !strncmp(gBootDir, "mc1:", 4) ? 1 : 0, fd;
++    char path[40];
++
++    for (k = 0; k < 2; k++) {
++        snprintf(path, sizeof(path), "mc%d:/RIPPS2/%s", k ? 1 - boot : boot, configPathRedirectFile);
++        if ((fd = open(path, O_RDONLY)) >= 0)
++            return fd;
++    }
++    return -1;
++}
++
++static void ripps2CardRedirectWrite(const char *path)
++{
++    int slot, fd, ok;
++    char dir[16], file[40];
++    DIR *d;
++
++    for (slot = 0; slot < 2; slot++) {
++        snprintf(dir, sizeof(dir), "mc%d:/RIPPS2", slot);
++        if ((d = opendir(dir)) == NULL)
++            continue; // no RIPPS2 save on this card: nothing there to win over the chosen home
++        closedir(d);
++        snprintf(file, sizeof(file), "%s/%s", dir, configPathRedirectFile);
++        ok = 0;
++        if ((fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0) {
++            ok = write(fd, path, strlen(path)) == (int)strlen(path) && write(fd, "\n", 1) == 1;
++            close(fd);
++        }
++        LOG("CONFIG %s settings pointer %s -> %s\n", ok ? "left" : "could not leave", file, path);
++    }
++}
++
+ static int configPathRedirectLocation(char *out, int outLen)
+ {
+     const char *home = gBootDir;
+@@ -2226,6 +2268,22 @@ static int configPathRedirectLocation(char *out, int outLen)
+     return 1;
+ }
+ 
++// RIPPS2 build 111: Save Settings To is Memory Card again; config.path and the cards' pointers go
++static void ripps2ForgetRedirect(void)
++{
++    char file[sizeof(gBootDir) + 32];
++    int slot;
++
++    if (gBootDir[0] != '\0' && configPathRedirectLocation(file, sizeof(file)) && remove(file) == 0)
++        LOG("CONFIG settings back on the card: %s removed\n", file);
++    if (gBootHomeDeferred && mcConfigPathRedirect(file, sizeof(file)))
++        remove(file);
++    for (slot = 0; slot < 2; slot++) {
++        snprintf(file, sizeof(file), "mc%d:/RIPPS2/%s", slot, configPathRedirectFile);
++        remove(file);
++    }
++}
++
+ static int readConfigPathRedirect(char *outPath, int outPathLen)
+ {
+     int fd;
+@@ -2235,19 +2293,17 @@ static int readConfigPathRedirect(char *outPath, int outPathLen)
+     // APA launchers can leave the process CWD in raw hdd0: space. Once the data partition
+     // is mounted, anchor the bootstrap pointer to the resolved PFS config home instead of
+     // sending an ordinary file open through the raw APA namespace.
+-    if (!configPathRedirectLocation(redirectFile, sizeof(redirectFile)))
+-        return 0;
+-    fd = open(redirectFile, O_RDONLY);
+-    if (fd < 0) {
++    fd = configPathRedirectLocation(redirectFile, sizeof(redirectFile)) ? open(redirectFile, O_RDONLY) : -1;
++    if (fd < 0 && gBootHomeDeferred) {
+         char mcPath[64];
+ 
+-        if (!gBootHomeDeferred || !mcConfigPathRedirect(mcPath, sizeof(mcPath)))
+-            return 0;
+-
+-        fd = open(mcPath, O_RDONLY);
+-        if (fd < 0)
+-            return 0;
++        if (mcConfigPathRedirect(mcPath, sizeof(mcPath)))
++            fd = open(mcPath, O_RDONLY);
+     }
++    if (fd < 0)
++        fd = ripps2CardRedirectOpen(); // RIPPS2 build 111: the pointer a card's RIPPS2 save holds
++    if (fd < 0)
++        return 0;
+ 
+     len = read(fd, outPath, outPathLen - 1);
+     close(fd);
+@@ -2285,6 +2341,7 @@ static int writeConfigPathRedirect(const char *path)
+         close(fd);
+         primaryOk = (n1 == (int)strlen(path) && n2 == 1);
+     }
++    ripps2CardRedirectWrite(path); // RIPPS2 build 111
+ 
+     if (gBootHomeDeferred) {
+         char mcPath[64];
+@@ -4647,9 +4704,10 @@ static void _saveConfig()
+     // RIPPS2 build 100: with a memory card in, the settings go to RIPPS2's own save there (ripps2CardSettingsHome); a
+     // card that will not take them (full, gone) leaves them where they were
+     char cardHome[16], prevHome[256];
+-    int toCard = 0;
++    int toCard = 0, onCard = 0;
+     if (!customSettingsExplicit && ripps2CardSettingsHome(cardHome, sizeof(cardHome), 0)) {
+         snprintf(prevHome, sizeof(prevHome), "%s", configGetHomePath());
++        onCard = 1;
+         if (strcmp(prevHome, cardHome)) {
+             configSetMove(cardHome);
+             toCard = 1;
+@@ -4661,6 +4719,14 @@ static void _saveConfig()
+         LOG("CONFIG %s would not take the settings; they stay in %s\n", cardHome, prevHome);
+         configSetMove(prevHome);
+         lscret = configWriteChecked(lscstatus);
++        onCard = 0;
++    }
++    // build 111: Save Settings To went back to Memory Card, so no pointer may send the next boot to the old home. Only
++    // then: an ordinary save that lands on the card (a boot whose chosen drive was missing, the last game played) keeps
++    // the pointers, so the drive's settings come back with the drive.
++    if (onCard && lscret > 0 && gRipps2HomeBackToCard) {
++        ripps2ForgetRedirect();
++        gRipps2HomeBackToCard = 0;
+     }
+ 
+     // Save icons for EVERY memory-card save home, not just the legacy mc?:OPL/ one. The block above
+diff --git a/src/ripps2about.c b/src/ripps2about.c
+index e4da9e2..c39ed89 100644
+--- a/src/ripps2about.c
++++ b/src/ripps2about.c
+@@ -63,6 +63,7 @@ static const ab_row_t abRows[] = {
+     {'H', N_("TESTERS")},
+     {'T', "ripto - nuno6573 - zackcage6"},
+     {'T', "eliminator1403 - FifthFox - Mr.sus.60"},
++    {'T', "lukeatmynose"},
+     {'S', N_("Feedback makes RIPPS2. Thank you.")},
+     {'G', NULL},
+     {'H', N_("LAUNCH DISC")},
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 8ca4348..bf8f75b 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -1395,9 +1395,11 @@ void ripps2SettingsHomeEnd(struct UIItem *ui)
+     int mode = RIPPS2_HOME_CUSTOM;
+ 
+     diaGetInt(ui, UICFG_RIPPS2_SETTINGS_HOME, &mode);
+-    if (mode == RIPPS2_HOME_CARD)
++    if (mode == RIPPS2_HOME_CARD) {
++        if (gCustomSettingsPath[0] != '\0')
++            gRipps2HomeBackToCard = 1; // build 111: the save to the card takes the pointers to the old home away
+         gCustomSettingsPath[0] = '\0';
+-    else if (mode != RIPPS2_HOME_CUSTOM) {
++    } else if (mode != RIPPS2_HOME_CUSTOM) {
+         if (ripps2SettingsDriveHome(mode, drive, sizeof(drive)))
+             snprintf(gCustomSettingsPath, sizeof(gCustomSettingsPath), "%s", drive);
+         else if (ripps2SettingsHomeOf(gCustomSettingsPath) != mode)
+diff --git a/src/sound.c b/src/sound.c
+index fba1776..43ed8bd 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -92,6 +92,7 @@ static volatile int sfxPreviewing = 0;      // build 95: Memory Files is playing
+ 
+ static struct audsrv_adpcm_t sfx[SFX_COUNT];
+ static int audio_initialized = 0;
++static unsigned int audioGen = 0; // RIPPS2 build 111: audsrv starts (an IOP reboot loses the sounds in SPU memory)
+ 
+ /*
+   RIPPS2 build 95: voices. audsrv plays a sound only on a voice that has finished: asked to play on one that
+@@ -476,6 +477,46 @@ static void sfxBootPlay(void)
+ }
+ 
+ // Returns the number of sounds loaded, < 0 if audio is not up. The IO worker only (sfxReload queues it)
++// RIPPS2 build 111 (user: "simplify the audio approach for 0 bugs on real hardware"): what a load would read, as one
++// number: the theme's sound folder and the AUDIO folder, and each event's file in them (its size and date). The
++// same set again (a theme change between themes that use the AUDIO folder, the SELECT-hold cycle, leaving
++// Interface) is not loaded again: every load keys every voice off and writes the sounds back one by one, which on
++// a memory card takes seconds and is where the glitches lived. A rip rewrites the files, so it still loads.
++static unsigned int sfxSetSig = 0, sfxSetGen = (unsigned int)-1;
++// Per event, the file sfxInit's choice below would load (the theme's own, else the AUDIO folder's unless a theme sound
++// covers it), its path, size and date: Adapt and Adapt Rx, which both play the AUDIO folder's, are the same set.
++static unsigned int sfxSetSignature(const char *themeDir, const char *audioDir)
++{
++    char path[256];
++    struct stat st;
++    unsigned char fromTheme[SFX_COUNT];
++    unsigned int h = 2166136261u;
++    const char *s;
++    int i, f, found, covered;
++
++    memset(fromTheme, 0, sizeof(fromTheme));
++    for (i = 1; i < SFX_COUNT; i++) { // the boot sound loads only at boot, which always loads
++        found = 0;
++        if (themeDir != NULL) {
++            snprintf(path, sizeof(path), "%s/%s", themeDir, sfx_files[i].name);
++            found = fromTheme[i] = stat(path, &st) == 0;
++        }
++        for (covered = 0, f = sfxFallback[i]; f >= 0 && f < SFX_COUNT && !covered; f = sfxFallback[f])
++            covered = fromTheme[f];
++        if (!found && audioDir != NULL && !covered) {
++            snprintf(path, sizeof(path), "%s/%s", audioDir, sfx_files[i].name);
++            found = stat(path, &st) == 0;
++        }
++        if (found) {
++            for (s = path; *s; s++)
++                h = (h ^ (unsigned char)*s) * 16777619u;
++            h = (h ^ ((unsigned int)st.st_size ^ ((unsigned int)st.st_mtime * 2654435761u))) * 16777619u;
++        }
++        h = (h ^ 0xffu) * 16777619u;
++    }
++    return h;
++}
++
+ int sfxInit(int bootSnd)
+ {
+     char sound_path[256];
+@@ -492,15 +533,6 @@ int sfxInit(int bootSnd)
+     if (sfxPreviewing)
+         return 0; // Memory Files' preview has the voices; its close loads the set again
+ 
+-    sfxLoading = 1;     // build 101: the GUI touches no voice until the set is in
+-    sfxForgetPresses(); // build 101: no memory of a voice from before the load survives it
+-    voicesSilence();    // build 101: a tail still ringing is quiet before init turns every voice up
+-    audsrv_adpcm_init();
+-    voicesReset();
+-    voicesSilence(); // build 100: init turned every voice up
+-    sfxInitDefaults();
+-    audioSetVolume();
+-
+     // Build 98: per event, the disk theme's own sound first, then the AUDIO folder's (the user's rips). Up to
+     // build 97 a disk theme with a sound folder played only its own and one without played nothing: Adapt
+     // ships six of the fifteen, so a ripped launch, disc or save sound went silent on it.
+@@ -531,6 +563,22 @@ int sfxInit(int bootSnd)
+         }
+     }
+ 
++    // build 111: the same set as the last load, and audsrv has not started again since: nothing to load
++    unsigned int sig = sfxSetSignature(themeSfx ? sound_path : NULL, audioSfx ? audio_path : NULL);
++    if (!bootSnd && sfxSetGen == audioGen && sig == sfxSetSig) {
++        LOG("SFX: the same set, not loaded again\n");
++        return sfxLoadedCount;
++    }
++
++    sfxLoading = 1;     // build 101: the GUI touches no voice until the set is in
++    sfxForgetPresses(); // build 101: no memory of a voice from before the load survives it
++    voicesSilence();    // build 101: a tail still ringing is quiet before init turns every voice up
++    audsrv_adpcm_init();
++    voicesReset();
++    voicesSilence(); // build 100: init turned every voice up
++    sfxInitDefaults();
++    audioSetVolume();
++
+     loaded = 0;
+     memset(sfxReady, 0, sizeof(sfxReady));
+     memset(sfxSkipped, 0, sizeof(sfxSkipped));
+@@ -575,6 +623,8 @@ int sfxInit(int bootSnd)
+             sfxBootPending = 1;                                // (sfxBootPlay, from the GUI's frame tick)
+     }
+     sfxLoadedCount = loaded;
++    sfxSetSig = sig; // build 111
++    sfxSetGen = audioGen;
+     sfxLoading = 0;
+     if (!sfxReloadBusy) // the late AUDIO find and the boot: a press caught by the load (sfxReloadWork does its own)
+         sfxPlayHeld();
+@@ -705,6 +755,7 @@ int sfxPreviewStart(const char *path)
+         }
+     }
+     audsrv_adpcm_init(); // every voice off and every sound dropped: the menu's set, and an earlier preview
++    sfxSetGen = (unsigned int)-1; // build 111: the set is gone, the next sfxInit loads it
+     voicesReset();
+     voicesSilence(); // build 100: init turned every voice up; nothing still ringing plays the memory about to change
+     memset(sfxReady, 0, sizeof(sfxReady));
+@@ -734,6 +785,7 @@ void sfxPreviewStop(void)
+     audsrv_adpcm_init();
+     voicesReset();
+     voicesSilence(); // build 100: init turned every voice up
++    sfxSetGen = (unsigned int)-1; // build 111: the set is gone, the next sfxInit loads it
+     if (prevFile.buffer != NULL) {
+         free(prevFile.buffer);
+         prevFile.buffer = NULL;
+@@ -988,6 +1040,7 @@ void sfxBootStart(void)
+     audsrv_adpcm_init();
+     voicesReset();
+     voicesSilence(); // build 100: init turned every voice up
++    sfxSetGen = (unsigned int)-1; // build 111: the set is gone, the next sfxInit loads it
+     audioSetVolume();
+ }
+ 
+@@ -1309,27 +1362,74 @@ unsigned int bgmPlayedBytes(void)
+     return bgmPlayed;
+ }
+ 
+-// A MUSIC .wav track (16-bit PCM, mono or stereo): read straight off the file, round and round
++// A MUSIC .wav track (16-bit PCM, mono or stereo), round and round. RIPPS2 build 111: it reaches audsrv as 48 kHz
++// stereo whatever the file is. audsrv has no upsampler for some formats, the BIOS Music rip's own among them (24 kHz
++// mono: "BGM: audsrv cannot play 24000 Hz, 1 ch -- no music", so the ripped Menu music never played: testers' "missing
++// menu bgm after its rip"). The reader converts as it reads: a mono frame goes to both sides, another rate is
++// interpolated between its two nearest frames; a 48 kHz file passes through unchanged.
+ static FILE *wavFile = NULL;
+ static long wavData = 0, wavSize = 0, wavPos = 0;
++static int wavSrcRate = 48000, wavSrcCh = 2;
++static unsigned char wavIn[4096]; // the file read in blocks, not a frame at a time
++static int wavInLen = 0, wavInPos = 0;
++static unsigned int wavPhase = 0; // where the next 48 kHz frame falls between wavPrev and wavCur, 16.16
++static short wavPrev[2], wavCur[2];
++static int wavPrimed = 0;
++
++static int wavNextFrame(short *out) // the next frame of the file (from the top again at its end); 0 on a read error
++{
++    int frame = 2 * wavSrcCh, want, n;
++    unsigned char *b;
++
++    if (wavInLen - wavInPos < frame) {
++        if (wavSize - wavPos < frame) {
++            if (fseek(wavFile, wavData, SEEK_SET) != 0)
++                return 0;
++            wavPos = 0;
++        }
++        want = (int)sizeof(wavIn);
++        if (want > wavSize - wavPos)
++            want = (int)(wavSize - wavPos);
++        want -= want % frame;
++        n = (int)fread(wavIn, 1, want, wavFile);
++        n -= n % frame;
++        if (n <= 0)
++            return 0;
++        wavPos += n;
++        wavInLen = n;
++        wavInPos = 0;
++    }
++    b = wavIn + wavInPos;
++    wavInPos += frame;
++    out[0] = (short)(b[0] | (b[1] << 8));
++    out[1] = wavSrcCh == 2 ? (short)(b[2] | (b[3] << 8)) : out[0];
++    return 1;
++}
+ 
+ static int wavRead(char *buf, int size)
+ {
+-    int frame = 2 * bgmPcmChannels, n;
+-    if (wavSize - wavPos < frame) { // the end: from the top again
+-        if (fseek(wavFile, wavData, SEEK_SET) != 0)
++    short *o = (short *)buf;
++    int frames = size / 4, k;
++    unsigned int step = (unsigned int)(((unsigned long long)wavSrcRate << 16) / 48000);
++
++    if (!wavPrimed) {
++        if (!wavNextFrame(wavPrev) || !wavNextFrame(wavCur))
+             return -1;
+-        wavPos = 0;
+-    }
+-    if (size > wavSize - wavPos)
+-        size = (int)(wavSize - wavPos);
+-    size -= size % frame;
+-    n = (int)fread(buf, 1, size, wavFile);
+-    n -= n % frame;
+-    if (n <= 0)
+-        return -1;
+-    wavPos += n;
+-    return n;
++        wavPhase = 0;
++        wavPrimed = 1;
++    }
++    for (k = 0; k < frames; k++) {
++        int f = (int)(wavPhase & 0xffff);
++        o[2 * k] = (short)(wavPrev[0] + (int)(((long long)(wavCur[0] - wavPrev[0]) * f) >> 16));
++        o[2 * k + 1] = (short)(wavPrev[1] + (int)(((long long)(wavCur[1] - wavPrev[1]) * f) >> 16));
++        for (wavPhase += step; wavPhase >= 0x10000; wavPhase -= 0x10000) {
++            wavPrev[0] = wavCur[0];
++            wavPrev[1] = wavCur[1];
++            if (!wavNextFrame(wavCur))
++                return k > 0 ? (k + 1) * 4 : -1;
++        }
++    }
++    return frames * 4;
+ }
+ 
+ static void wavClose(void)
+@@ -1357,7 +1457,7 @@ static int wavOpen(const char *path)
+             int tag = fmt[0] | (fmt[1] << 8), bits = fmt[14] | (fmt[15] << 8);
+             bgmPcmChannels = fmt[2] | (fmt[3] << 8);
+             bgmPcmRate = fmt[4] | (fmt[5] << 8) | (fmt[6] << 16) | (fmt[7] << 24);
+-            if (tag != 1 || bits != 16 || bgmPcmChannels < 1 || bgmPcmChannels > 2)
++            if (tag != 1 || bits != 16 || bgmPcmChannels < 1 || bgmPcmChannels > 2 || bgmPcmRate < 4000 || bgmPcmRate > 96000)
+                 goto bad;
+             haveFmt = 1;
+             if (len > 16 && fseek(wavFile, len - 16 + (len & 1), SEEK_CUR) != 0)
+@@ -1366,6 +1466,12 @@ static int wavOpen(const char *path)
+             wavData = ftell(wavFile);
+             wavSize = len;
+             wavPos = 0;
++            wavSrcRate = bgmPcmRate; // build 111: what the file holds; audsrv is given 48 kHz stereo
++            wavSrcCh = bgmPcmChannels;
++            bgmPcmRate = 48000;
++            bgmPcmChannels = 2;
++            wavInLen = wavInPos = 0;
++            wavPrimed = 0;
+             bgmPcmRead = wavRead;
+             return 1;
+         } else if (fseek(wavFile, len + (len & 1), SEEK_CUR) != 0)
+@@ -2259,7 +2365,10 @@ static int bgmLoad(void)
+             return 0;
+     }
+ 
+-    if (thmPath == NULL && bgmMusicPath(bgmPath, sizeof(bgmPath))) { // RIPPS2: the MUSIC folder's pick
++    // RIPPS2: the AUDIO / MUSIC folder's pick. Build 111: on every theme, after a disk theme's own bgm.ogg and the
++    // configured file. Up to build 110 only the built-in themes got here, so on Adapt or Adapt Rx (no bgm.ogg since
++    // edition 100) no music played at all, the ripped Menu music included (testers: "missing menu bgm after its rip").
++    if (bgmMusicPath(bgmPath, sizeof(bgmPath))) {
+         size_t n = strlen(bgmPath);
+         if (n > 4 && !strcasecmp(bgmPath + n - 4, ".wav")) {
+             if (wavOpen(bgmPath)) { // the vorbis state is not needed for it
+@@ -2615,6 +2724,7 @@ void audioInit(void)
+             return;
+         }
+         audio_initialized = 1;
++        audioGen++; // build 111: every sound has to be loaded again
+     }
+ }
+ 
+diff --git a/src/themes.c b/src/themes.c
+index cd7d3cb..cf382cc 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -4199,9 +4199,11 @@ static void drawItemsList(struct menu_list *menu, struct submenu_list *item, con
+             else
+                 textEndX = fntRenderString(elem->font, textX, posY + textDy, elem->aligned, elem->width, elem->height, dispText, color);
+ 
+-            if (ps->item.favourited && starSide != THM_STAR_HIDDEN && starTex != NULL && starTex->Mem != NULL) // RIPPS2: the star
+-                rmDrawPixmap(starTex, starSide == THM_STAR_LEFT ? posX : textEndX + 4, posY, elem->aligned, MENU_ITEM_HEIGHT, MENU_ITEM_HEIGHT,
+-                             elem->scaled, gDefaultCol, 0);
++            // RIPPS2: the star. Build 111 (user: "the favourites star wasn't on the centreline of the title next to it"): centred
++            // on the row, where the title's centreline is (textDy), not at posY, which keeps the row icons' old 3 px drop
++            if (ps->item.favourited && starSide != THM_STAR_HIDDEN && starTex != NULL && starTex->Mem != NULL)
++                rmDrawPixmap(starTex, starSide == THM_STAR_LEFT ? posX : textEndX + 4, rowTop + (rowStep - MENU_ITEM_HEIGHT) / 2, elem->aligned,
++                             MENU_ITEM_HEIGHT, MENU_ITEM_HEIGHT, elem->scaled, gDefaultCol, 0);
+ 
+             posY += rowStep;
+             rowTop += rowStep;
