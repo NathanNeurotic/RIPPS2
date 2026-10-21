@@ -114,6 +114,9 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
 - [x] Settings > General > Save Settings To: Memory Card, Internal HDD (`mass<n>:/RIPPS2` on BDM ATA, else
       `pfs:/RIPPS2`), Custom Path. Lab: saved to mass0:/RIPPS2. Load after a power cycle and the APA HDD: testers.
 - [x] A settings page's title clear of its line (DIA_HEADER_GAP 8). Lab: every page.
+- [x] Hotfix 10/21: Internal HDD saved as `ata0:/RIPPS2` (typed), config.path keeps a typed path's spelling. The
+      untyped `mass0:/RIPPS2` made the boot walk USB, MX4SIO (froze PCSX2: debug log ends at MX4SIO start), iLink,
+      ATA. Lab: saved on a drive with no RIPPS2 folder, restart read the HDD settings (theme from the HDD, not the card).
 - [ ] Open: "simplify the audio approach for 0 bugs on real hardware" and the menu music missing after a rip:
       waiting on reports with steps (the build 109 test list asks for them).
 - [ ] Open: FifthFox's folders suggestion (Browse Folders in Game List already exists; ask what is missing).

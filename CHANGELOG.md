@@ -17,6 +17,9 @@ From testers' reports (10/19-10/20).
 ### Languages
 - The new words read in all 33 languages.
 
+### Hotfix (10/21/2026, still build 109)
+- **Internal HDD is saved by the drive's type** (`ata0:/RIPPS2`), not by its mass slot (`mass0:/RIPPS2`). A slot number is only the order the drives came up in, so a USB stick could take it, and at boot an untyped slot made RIPPS2 try USB, MX4SIO, iLink and the HDD in turn (in PCSX2 the MX4SIO step froze the boot). Now only the HDD's own driver loads. If you chose Internal HDD on the first v1.0.9 ELF, choose it once more and Save Changes.
+
 ## Build 108 (beta, in v1.0.9-beta), changes since build 107
 
 ### RIPSHOT: screenshots from the in-game menu

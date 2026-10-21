@@ -15,6 +15,7 @@
 - **The pads keep working while an MMCE card is read.** The card shares its bus with the controllers; the scan now pauses after each game, and a frame after each disc it has to open.
 - **Settings > General > Save Settings To:** Memory Card (RIPPS2's own save, as before), **Internal HDD** (a RIPPS2 folder on the internal exFAT HDD, else the APA HDD's OPL partition; settings are read from there first) or Custom Path (the Custom Settings Path row shows only for this one). Every choice has its own hint; with no internal HDD it says so and changes nothing.
 - **A settings page's title stands clear of the line under it** (it sat on the line, which cut its descenders).
+- **Hotfix (10/21, still build 109):** Internal HDD is saved by the drive's type (`ata0:/RIPPS2`), not its mass slot, so a USB stick can't take its place and the boot loads only the HDD's driver. If you chose Internal HDD on the first v1.0.9 ELF, choose it again and Save Changes.
 
 ### Build 108: RIPSHOT, screenshots from the in-game menu
 - **SCREENSHOT is the in-game menu's third choice** (L1+L2+R1+R2+SELECT+START). It takes **the exact frame that was up when the menu opened**, with no menu in it.
