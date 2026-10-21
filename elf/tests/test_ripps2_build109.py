@@ -55,7 +55,9 @@ if dialogs.index('UICFG_RIPPS2_SETTINGS_HOME') > dialogs.index('CFG_LBL_CUSTOMCF
 for label in ('RIPPS2_SETTINGS_HOME', 'HINT_RIPPS2_SETTINGS_HOME'):
     if '- label: %s\n' % label not in base:
         fail.append('lng_tmpl/_base.yml needs %s' % label)
-for need, why in (('snprintf(out, size, "mass%d:/RIPPS2", i);', 'the internal exFAT HDD (BDM ATA) is the first choice for Internal HDD'),
+for need, why in (('snprintf(out, size, "ata0:/RIPPS2");', 'the internal exFAT HDD is named by its type (ata0:), never a mass slot'),
+                  ('mkdir(dir, 0777);', "the HDD's RIPPS2 folder is made before Save Changes looks for it"),
+                  ('!strcmp(path, "ata0:/RIPPS2")', 'ata0:/RIPPS2 reads as Internal HDD'),
                   ('snprintf(out, size, "pfs:/RIPPS2");', "else the APA HDD's OPL partition"),
                   ('diaSetEnumHints(ui, UICFG_RIPPS2_SETTINGS_HOME, ripps2HomeHints);', 'every choice has its hint'),
                   ('gCustomSettingsPath[0] = \'\\0\';', 'Memory Card clears the Custom Settings Path (the card first, as before)'),
@@ -64,6 +66,11 @@ for need, why in (('snprintf(out, size, "mass%d:/RIPPS2", i);', 'the internal ex
         fail.append('ripps2ui.c: ' + why)
 if gui.count('ripps2SettingsHomeBegin(') != 2 or gui.count('ripps2SettingsHomeEnd(') != 2 or gui.count('ripps2SettingsHomeShow(') != 2:
     fail.append('both General editors (and their updaters) must run Save Settings To')
+# config.path keeps a typed BDM path's spelling: an untyped massN: walks every transport at boot (USB, MX4SIO, then
+# iLink and ATA; iLinkman hangs PCSX2) and a USB stick can take the HDD's slot number
+oplc = rd('src/opl.c')
+if 'static int isTypedBdmSettingsPath(const char *path)' not in oplc or         'const char *redirect = isTypedBdmSettingsPath(gCustomSettingsPath) ? gCustomSettingsPath : customSettingsTarget;' not in oplc or         'writeConfigPathRedirect(redirect)' not in oplc:
+    fail.append("config.path must keep a typed BDM settings path's own spelling")
 for ed in ('diaConfig', 'ui'):
     a = gui.index('diaGetString(%s, CFG_CUSTOMCFGPATH, gCustomSettingsPath' % ed)
     if gui.index('ripps2SettingsHomeEnd(%s)' % ed, a) - a > 200:

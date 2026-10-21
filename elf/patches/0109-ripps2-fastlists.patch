@@ -304,21 +304,53 @@ index 15b0cdb..cbd5a09 100644
          result += mmceGameCount;
      }
      return result;
+diff --git a/src/opl.c b/src/opl.c
+index db164cb..57d7082 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -2581,6 +2581,13 @@ static int createMcSettingsFolder(const char *path)
+     return 0;
+ }
+ 
++// RIPPS2 build 109: a BDM settings path that names its device's type (ata0:/RIPPS2) rather than a mass slot
++static int isTypedBdmSettingsPath(const char *path)
++{
++    return !strncmp(path, "ata", 3) || !strncmp(path, "usb", 3) || !strncmp(path, "mx4sio", 6) || !strncmp(path, "sd", 2) ||
++           !strncmp(path, "ilink", 5);
++}
++
+ static int prepareCustomSettingsPath(char *path, int pathLen)
+ {
+     int bdmType = BDM_TYPE_UNKNOWN;
+@@ -4642,7 +4649,11 @@ static void _saveConfig()
+     // target owns the whole save attempt: whether it succeeds or fails, do not retry onto the boot
+     // device or an alternate device behind the user's back.
+     if (customSettingsExplicit) {
+-        if (lscret > 0 && !writeConfigPathRedirect(customSettingsTarget)) {
++        // RIPPS2 build 109: a typed BDM path (ata0:, usb0:, mx4sio0:, ...) keeps its own spelling in config.path. The
++        // massN: it resolved to is only the order the drives came up in this time; the next boot resolves the type
++        // again and loads that one transport, where an untyped massN: walks every transport first.
++        const char *redirect = isTypedBdmSettingsPath(gCustomSettingsPath) ? gCustomSettingsPath : customSettingsTarget;
++        if (lscret > 0 && !writeConfigPathRedirect(redirect)) {
+             LOG("CONFIG could not persist settings redirect for %s\n", customSettingsTarget);
+             gLastSaveErrno = EIO;
+             lscret = 0;
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 8462384..840f317 100644
+index 8462384..b1cbf97 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
-@@ -35,6 +35,9 @@
+@@ -35,6 +35,10 @@
  #include "include/metadb.h"
  #include "include/iosupport.h" // build 91: the launch disc reads a game's ICO through its source
  #include "include/texcache.h"
 +#include "include/bdmsupport.h" // build 109: bdmSlotDeviceType, BDM_TYPE_ATA
 +#include "include/dia.h"
 +#include "include/dialogs.h"    // build 109: Save Settings To
++#include <sys/stat.h>              // build 109: mkdir, the internal HDD's RIPPS2 folder
  #include <libcdvd.h>
  #include <fcntl.h>
  #include <unistd.h>
-@@ -1260,6 +1263,75 @@ void ripps2DiscWatch(void)
+@@ -1260,6 +1264,85 @@ void ripps2DiscWatch(void)
  }
  
  // The disc watcher's job is all the IO worker has: not worth the loading breath
@@ -332,12 +364,19 @@ index 8462384..840f317 100644
 +                                        N_("Settings go in a RIPPS2 folder on the internal HDD (exFAT, or the APA HDD's OPL partition) and are read from there first."),
 +                                        N_("Settings go in the folder typed below, e.g. mass0:/OPL."), NULL};
 +
++// The exFAT HDD is named by its TYPE, ata0:/RIPPS2, never by its mass slot: a slot number is only the order the drives
++// came up in (a USB stick can take mass0), and an untyped massN: at boot walks every transport (USB, MX4SIO, then iLink
++// and ATA) before the HDD answers. ata0: loads the ATA stack alone and is found by its RIPPS2 folder, so the folder is
++// made here, before Save Changes looks for it.
 +int ripps2SettingsHddHome(char *out, int size)
 +{
++    char dir[24];
 +    int i;
 +    for (i = 0; i < 8; i++)
 +        if (bdmSlotDeviceType(i) == BDM_TYPE_ATA) { // the internal exFAT HDD
-+            snprintf(out, size, "mass%d:/RIPPS2", i);
++            snprintf(dir, sizeof(dir), "mass%d:/RIPPS2", i);
++            mkdir(dir, 0777); // there already after the first save
++            snprintf(out, size, "ata0:/RIPPS2");
 +            return 1;
 +        }
 +    if (gHDDPrefix != NULL && gHDDPrefix[0] != '\0') { // the APA HDD, OPL's partition mounted
@@ -352,7 +391,10 @@ index 8462384..840f317 100644
 +{
 +    if (path == NULL || path[0] == '\0')
 +        return RIPPS2_HOME_CARD;
-+    if (!strcmp(path, "pfs:/RIPPS2") || (!strncmp(path, "mass", 4) && path[4] >= '0' && path[4] <= '9' && !strcmp(path + 5, ":/RIPPS2")))
++    if (!strcmp(path, "pfs:/RIPPS2") || !strcmp(path, "ata0:/RIPPS2"))
++        return RIPPS2_HOME_HDD;
++    // build 109's first spelling: still the internal HDD, written as ata0: on the next save
++    if (!strncmp(path, "mass", 4) && path[4] >= '0' && path[4] <= '9' && !strcmp(path + 5, ":/RIPPS2"))
 +        return RIPPS2_HOME_HDD;
 +    return RIPPS2_HOME_CUSTOM;
 +}
