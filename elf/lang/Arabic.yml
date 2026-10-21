@@ -217,7 +217,6 @@ strings:
   : 'يقرأ RIPPS2 الأصوات من BIOS هذا الجهاز نفسه ويكتبها في %s كأصوات له: المؤشر، والتأكيد، والإلغاء، والصفحات، والفئة، والرسائل، والقرص، والخطأ، والحفظ، والمحركات، والعشوائي، وموسيقى الإقلاع وتشغيل الألعاب، معزوفة من نغمات BIOS نفسه. ستُستبدل الملفات التي تحمل هذه الأسماء الموجودة هناك.'
   Reading this console's menu music: جارٍ قراءة موسيقى قائمة هذا الجهاز
   'Ripping this console''s menu music: %d%%': 'جارٍ استخراج موسيقى قائمة هذا الجهاز: %d%%'
-  'Ripping this console''s menu music: 0%': 'جارٍ استخراج موسيقى قائمة هذا الجهاز: 0%'
   Ripping this console's sounds: جارٍ استخراج أصوات هذا الجهاز
   'Ripping this console''s sounds: %s': 'جارٍ استخراج أصوات هذا الجهاز: %s'
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: موسيقى القائمة (%s) موجودة في %s باسم %s. تظهر في إعدادات الصوت > الموسيقى باسم Menu؛ وتُعزف عندما لا يُختار أي مقطع آخر.
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: تُحفظ الإعدادات في مجلد RIPPS2 على وحدة iLink وتُقرأ من هناك أولاً.
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: تُحفظ الإعدادات في مجلد RIPPS2 على بطاقة MMCE وتُقرأ من هناك أولاً.
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': 'تلك الوحدة غير متصلة: تبقى الإعدادات حيث هي'
+  WHICH MUSIC?: أي موسيقى؟
+  THE MENU MUSIC (THE CLOCK): موسيقى القائمة (الساعة)
+  THE RED SCREEN MUSIC (DISC WARNING): موسيقى الشاشة الحمراء (تحذير القرص)
+  'Ripping this console''s red screen music: %d%%': 'جارٍ استخراج موسيقى الشاشة الحمراء لهذا الجهاز: %d%%'
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: موسيقى الشاشة الحمراء (%s) موجودة في %s باسم %s. تظهر في إعدادات الصوت > الموسيقى باسم Red Screen.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : يعزف RIPPS2 موسيقى الشاشة الحمراء لهذا الجهاز، المقطوعة المحيطية لتحذير القرص (%d:%02d)، من نغمات BIOS نفسه ويكتبها كملف WAV بحجم %s؛ لا توجد بطاقة ذاكرة تتسع لها. القبول يكتبها في %s، بجانب RIPPS2. START يكتبها في %s، موارد OPL على ذلك المحرك. سيُستبدل %s الموجود هناك. يستغرق ذلك دقيقة أو دقيقتين.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : يعزف RIPPS2 موسيقى الشاشة الحمراء لهذا الجهاز، المقطوعة المحيطية لتحذير القرص (%d:%02d)، من نغمات BIOS نفسه ويكتبها كملف WAV بحجم %s في %s؛ لا توجد بطاقة ذاكرة تتسع لها. سيُستبدل %s الموجود هناك. يستغرق ذلك دقيقة أو دقيقتين.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : يعزف RIPPS2 موسيقى قائمة هذا الجهاز (%d:%02d) وموسيقى شاشته الحمراء (%d:%02d) من نغمات BIOS نفسه ويكتبهما كملفي WAV بحجم %s إجمالًا؛ لا توجد بطاقة ذاكرة تتسع لهما. القبول يكتبهما في %s، بجانب RIPPS2. START يكتبهما في %s، موارد OPL على ذلك المحرك. ستُستبدل الملفات التي تحمل هذين الاسمين هناك. يستغرق كل منهما دقيقة أو دقيقتين.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : يعزف RIPPS2 موسيقى قائمة هذا الجهاز (%d:%02d) وموسيقى شاشته الحمراء (%d:%02d) من نغمات BIOS نفسه ويكتبهما كملفي WAV بحجم %s إجمالًا في %s؛ لا توجد بطاقة ذاكرة تتسع لهما. ستُستبدل الملفات التي تحمل هذين الاسمين هناك. يستغرق كل منهما دقيقة أو دقيقتين.
 labels:
   SETTINGS_SAVED: حُفظت الإعدادات في %s
   CONFIRMATION_EXIT: الخروج إلى المتصفح؟

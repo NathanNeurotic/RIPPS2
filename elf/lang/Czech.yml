@@ -217,7 +217,6 @@ strings:
   : 'RIPPS2 přečte zvuky z vlastního BIOSu této konzole a zapíše je do %s jako své zvuky: kurzor, potvrzení, zrušení, stránky, kategorie, zprávy, disk, chyba, uložení, disky a náhodný, plus hudbu startu a spuštění hry, přehranou z vlastních not BIOSu. Soubory s těmito názvy, které tam už jsou, budou nahrazeny.'
   Reading this console's menu music: Čtení hudby menu této konzole
   'Ripping this console''s menu music: %d%%': 'Vyjímání hudby menu této konzole: %d%%'
-  'Ripping this console''s menu music: 0%': 'Vyjímání hudby menu této konzole: 0%'
   Ripping this console's sounds: Vyjímání zvuků této konzole
   'Ripping this console''s sounds: %s': 'Vyjímání zvuků této konzole: %s'
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: Hudba menu (%s) je v %s jako %s. Nastavení zvuku > Hudba ji uvádí jako Menu; hraje, když není vybrána jiná skladba.
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: Nastavení jde do složky RIPPS2 na disku iLink a čte se odtud nejdřív.
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: Nastavení jde do složky RIPPS2 na kartě MMCE a čte se odtud nejdřív.
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': 'TEN DISK NENÍ PŘIPOJEN: NASTAVENÍ ZŮSTÁVÁ, KDE JE'
+  WHICH MUSIC?: KTEROU HUDBU?
+  THE MENU MUSIC (THE CLOCK): HUDBA MENU (HODINY)
+  THE RED SCREEN MUSIC (DISC WARNING): HUDBA ČERVENÉ OBRAZOVKY (VAROVÁNÍ DISKU)
+  'Ripping this console''s red screen music: %d%%': 'Vyjímání hudby červené obrazovky této konzole: %d%%'
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: Hudba červené obrazovky (%s) je v %s jako %s. Nastavení zvuku > Hudba ji uvádí jako Red Screen.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 přehraje hudbu červené obrazovky této konzole, ambientní skladbu varování disku (%d:%02d), z vlastních not BIOSu a zapíše ji jako WAV o velikosti %s; žádná paměťová karta ji nepojme. Potvrdit ji zapíše do %s, vedle RIPPS2. START ji zapíše do %s, do prostředků OPL na tom disku. %s, který tam už je, bude nahrazen. Trvá to minutu nebo dvě.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 přehraje hudbu červené obrazovky této konzole, ambientní skladbu varování disku (%d:%02d), z vlastních not BIOSu a zapíše ji jako WAV o velikosti %s do %s; žádná paměťová karta ji nepojme. %s, který tam už je, bude nahrazen. Trvá to minutu nebo dvě.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 přehraje hudbu menu této konzole (%d:%02d) a hudbu její červené obrazovky (%d:%02d) z vlastních not BIOSu a zapíše je jako dva soubory WAV, celkem %s; žádná paměťová karta je nepojme. Potvrdit je zapíše do %s, vedle RIPPS2. START je zapíše do %s, do prostředků OPL na tom disku. Soubory těchto jmen, které tam už jsou, budou nahrazeny. Každý trvá minutu nebo dvě.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 přehraje hudbu menu této konzole (%d:%02d) a hudbu její červené obrazovky (%d:%02d) z vlastních not BIOSu a zapíše je jako dva soubory WAV, celkem %s, do %s; žádná paměťová karta je nepojme. Soubory těchto jmen, které tam už jsou, budou nahrazeny. Každý trvá minutu nebo dvě.
 labels:
   HINT_NEUTRINO_AUTO_ELF: Předá zaváděcí ELF hry Neutrinu, aby vyhledalo nastavení pro daný titul. Ve výchozím stavu zapnuto; ručně nastavená volba Boot ELF má přednost.
   HINT_POPSTARTER_PATH: Kde je POPSTARTER.ELF. Když zůstane prázdné, RIPPS2 doplní ten, který najde na disku; přepište, chcete-li jiný, např. usb:/POPS/POPSTARTER.ELF

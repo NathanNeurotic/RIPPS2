@@ -1,0 +1,461 @@
+diff --git a/include/ripps2biossnd.h b/include/ripps2biossnd.h
+index 55e738d..63ef708 100644
+--- a/include/ripps2biossnd.h
++++ b/include/ripps2biossnd.h
+@@ -21,6 +21,11 @@ void ripps2RipBiosSoundsDialog(void);
+ typedef int (*ripps2_biosmusic_put_t)(const short *pcm, int n, int done, int total, void *ctx);
+ int ripps2BiosMusicSamples(const unsigned char *img, int size); // its length in samples, < 0: not in this image
+ int ripps2BiosMusicFromImage(const unsigned char *img, int size, ripps2_biosmusic_put_t put, void *ctx); // samples made, < 0
++// build 112: the pieces BIOS Music offers. Build 100's (the two calls above) is the red screen's, the disc warning;
++// the menu's own is the clock's ambient piece, the one the browser's main menu plays.
++enum { RIPPS2_BIOSMUSIC_MENU = 0, RIPPS2_BIOSMUSIC_RED, RIPPS2_BIOSMUSIC_COUNT };
++int ripps2BiosMusicSamplesOf(const unsigned char *img, int size, int piece);
++int ripps2BiosMusicFromImageOf(const unsigned char *img, int size, int piece, ripps2_biosmusic_put_t put, void *ctx);
+ // Audio settings > BIOS Music > RIP
+ void ripps2RipBiosMusicDialog(void);
+ 
+diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
+index 2a536f2..20679e6 100644
+--- a/src/ripps2biossnd.c
++++ b/src/ripps2biossnd.c
+@@ -45,6 +45,11 @@
+ #include "include/gui.h"
+ #include "include/sound.h"
+ #include "include/ripps2.h"
++#include "include/renderman.h" // build 112: the music chooser
++#include "include/fntsys.h"
++#include "include/themes.h"
++#include "include/textures.h"
++#include "include/pad.h"
+ #endif
+ #include "include/ripps2biossnd.h"
+ #include "include/ripps2tr.h" // build 104: _t, RIPPS2's words in the chosen language
+@@ -901,11 +906,26 @@ done:
+   as a safety on a BIOS that would differ.
+ */
+ #define RBS_MUSIC_SEQ     "SNDWARNS"
++/* RIPPS2 build 112 (user: "i think were using the error red screen menu instead of the standard osdsys menu theme").
++   SNDWARNS is the red screen's piece: "Please insert a PlayStation or PlayStation 2 format disc", its tense opening
++   chord (8 s) and then waves. The browser's main menu plays the clock's, SNDCLOKS (5 min 7 s):
++   the main menu's orbs ARE the clock (they stop with a flat clock battery), and System Configuration's Square brings
++   it into focus. Build 100 chose by spectrum against a recording, which cannot tell two pieces on one instrument bank
++   apart. BIOS Music now rips the menu's (the default), the red screen's, or both. */
++#define RBS_MENU_SEQ      "SNDCLOKS"
+ #define RBS_MUSIC_RATE    24000
+ #define RBS_MUSIC_SLICE   4800 // 24 kHz samples rendered at a time
+ #define RBS_MUSIC_FADE    1.0f // seconds faded out at the end, so the loop starts again from silence
+ #define RBS_MUSIC_WET     0.0807f // the hall at 0.4 of the dry piece's peak (dry 0.5335, raw hall 2.6455)
+ #define RBS_MUSIC_GAIN    1.3875f // the result's peak (0.5766) to 0.8, as the sounds
++#define RBS_MENU_WET      0.0781f // build 112, the clock's the same way: the hall at 0.4 of dry 0.4304 (raw hall 2.2044)
++#define RBS_MENU_GAIN     1.5812f // its peak (0.5060) to 0.8 (ripps2BiosMusicMeasure on SCPH-30004 R, 1.60)
++
++static const struct
++{
++    const char *seq;
++    float wet, gain;
++} rbsPiece[RIPPS2_BIOSMUSIC_COUNT] = {{RBS_MENU_SEQ, RBS_MENU_WET, RBS_MENU_GAIN}, {RBS_MUSIC_SEQ, RBS_MUSIC_WET, RBS_MUSIC_GAIN}};
+ 
+ typedef struct
+ {
+@@ -921,7 +941,7 @@ static void rbsMusicClose(rbs_music_t *m)
+     free(m);
+ }
+ 
+-static rbs_music_t *rbsMusicOpen(const unsigned char *img, int size)
++static rbs_music_t *rbsMusicOpen(const unsigned char *img, int size, const char *seq)
+ {
+     rbs_music_t *m = calloc(1, sizeof(rbs_music_t));
+     rbs_u8 *hd = NULL, *bd = NULL, *sq = NULL;
+@@ -930,7 +950,7 @@ static rbs_music_t *rbsMusicOpen(const unsigned char *img, int size)
+     if (m == NULL)
+         return NULL;
+     if (!ripps2RomdirFind(img, size, "SNDBOOTH", &ho, &hl) && !ripps2RomdirFind(img, size, "SNDBOOTB", &bo, &bl) &&
+-        !ripps2RomdirFind(img, size, RBS_MUSIC_SEQ, &so, &sl) && (hd = rbsUnlz(img + ho, hl, &hdLen)) != NULL &&
++        !ripps2RomdirFind(img, size, seq, &so, &sl) && (hd = rbsUnlz(img + ho, hl, &hdLen)) != NULL &&
+         (bd = rbsUnlz(img + bo, bl, &bdLen)) != NULL && (sq = rbsUnlz(img + so, sl, &sqLen)) != NULL &&
+         !rbsSeqOpen(&m->q, sq, sqLen, hd, hdLen, bd, bdLen, 600) && !rbsHallInit(&m->hall, RBS_MUSIC_RATE, 3.0f))
+         ok = 1;
+@@ -967,32 +987,32 @@ static int rbsMusicNext(rbs_music_t *m, float *out, float wetScale)
+     return n;
+ }
+ 
+-int ripps2BiosMusicSamples(const unsigned char *img, int size)
++int ripps2BiosMusicSamplesOf(const unsigned char *img, int size, int piece)
+ {
+-    rbs_music_t *m = rbsMusicOpen(img, size);
++    rbs_music_t *m;
+     int n;
+ 
+-    if (m == NULL)
++    if (piece < 0 || piece >= RIPPS2_BIOSMUSIC_COUNT || (m = rbsMusicOpen(img, size, rbsPiece[piece].seq)) == NULL)
+         return -1;
+     n = m->outTotal;
+     rbsMusicClose(m);
+     return n;
+ }
+ 
+-int ripps2BiosMusicFromImage(const unsigned char *img, int size, ripps2_biosmusic_put_t put, void *ctx)
++int ripps2BiosMusicFromImageOf(const unsigned char *img, int size, int piece, ripps2_biosmusic_put_t put, void *ctx)
+ {
+-    rbs_music_t *m = rbsMusicOpen(img, size);
++    rbs_music_t *m;
+     static short pcm[RBS_MUSIC_SLICE];
+     static float out[RBS_MUSIC_SLICE]; // static: 19 KB is too much for the GUI thread's stack
+     int n, k, fade0, r = 0;
+ 
+-    if (m == NULL)
++    if (piece < 0 || piece >= RIPPS2_BIOSMUSIC_COUNT || (m = rbsMusicOpen(img, size, rbsPiece[piece].seq)) == NULL)
+         return -1;
+     fade0 = m->outTotal - (int)(RBS_MUSIC_FADE * RBS_MUSIC_RATE);
+-    while ((n = rbsMusicNext(m, out, RBS_MUSIC_WET)) > 0) {
++    while ((n = rbsMusicNext(m, out, rbsPiece[piece].wet)) > 0) {
+         for (k = 0; k < n; k++) {
+             int at = m->out - n + k;
+-            float v = out[k] * RBS_MUSIC_GAIN;
++            float v = out[k] * rbsPiece[piece].gain;
+             if (at >= fade0)
+                 v *= 0.5f * (1.0f + cosf(3.14159265f * (float)(at - fade0) / (RBS_MUSIC_FADE * RBS_MUSIC_RATE)));
+             if (v > 0.9f || v < -0.9f) // a soft limit, only on a BIOS whose piece is louder than the one measured
+@@ -1007,11 +1027,24 @@ int ripps2BiosMusicFromImage(const unsigned char *img, int size, ripps2_biosmusi
+     return r != 0 ? -2 : n;
+ }
+ 
++// build 100's two, the red screen's piece (build 112 names it)
++int ripps2BiosMusicSamples(const unsigned char *img, int size)
++{
++    return ripps2BiosMusicSamplesOf(img, size, RIPPS2_BIOSMUSIC_RED);
++}
++
++int ripps2BiosMusicFromImage(const unsigned char *img, int size, ripps2_biosmusic_put_t put, void *ctx)
++{
++    return ripps2BiosMusicFromImageOf(img, size, RIPPS2_BIOSMUSIC_RED, put, ctx);
++}
++
+ #ifdef RIPPS2_BIOSSND_HOST_TEST
+ // The PC's measure of the two fixed levels: the dry piece's peak, the raw hall's, and the result's at those levels
+-int ripps2BiosMusicMeasure(const unsigned char *img, int size, float *dryPeak, float *wetPeak, float *outPeak, float wetScale)
++int ripps2BiosMusicMeasure(const unsigned char *img, int size, int piece, float *dryPeak, float *wetPeak, float *outPeak,
++                           float wetScale)
+ {
+-    rbs_music_t *m = rbsMusicOpen(img, size), *w;
++    const char *seq = rbsPiece[piece].seq;
++    rbs_music_t *m = rbsMusicOpen(img, size, seq), *w;
+     static float out[RBS_MUSIC_SLICE], dry[RBS_MUSIC_SLICE];
+     int n, k;
+ 
+@@ -1023,7 +1056,7 @@ int ripps2BiosMusicMeasure(const unsigned char *img, int size, float *dryPeak, f
+             if (fabsf(out[k]) > *dryPeak)
+                 *dryPeak = fabsf(out[k]);
+     rbsMusicClose(m);
+-    if ((m = rbsMusicOpen(img, size)) == NULL || (w = rbsMusicOpen(img, size)) == NULL)
++    if ((m = rbsMusicOpen(img, size, seq)) == NULL || (w = rbsMusicOpen(img, size, seq)) == NULL)
+         return -1;
+     while ((n = rbsMusicNext(m, out, wetScale)) > 0) {
+         rbsMusicNext(w, dry, 0);
+@@ -1188,6 +1221,7 @@ typedef struct
+ {
+     FILE *f;
+     int pct;
++    const char *fmt; // build 112: the progress line ("...: %d%%"), the piece's own
+ } rbs_wav_t;
+ 
+ static void rbsPut32(unsigned char *p, unsigned int v)
+@@ -1202,30 +1236,145 @@ static int rbsWavPut(const short *pcm, int n, int done, int total, void *ctx)
+ {
+     rbs_wav_t *w = (rbs_wav_t *)ctx;
+     int pct = total > 0 ? (int)((long long)done * 100 / total) : 0;
+-    char msg[80];
++    char msg[96];
+ 
+     if ((int)fwrite(pcm, 2, n, w->f) != n) // the EE is little-endian, as a WAV is
+         return -1;
+     if (pct != w->pct) {
+         w->pct = pct;
+-        snprintf(msg, sizeof(msg), _t("Ripping this console's menu music: %d%%"), pct);
++        snprintf(msg, sizeof(msg), w->fmt, pct);
+         guiRenderTextScreen(msg);
+     }
+     return 0;
+ }
+ 
+ #define RBS_MUSIC_FILE "bgm_00 Menu.wav" // "Menu": the track the music list plays when none is picked
++#define RBS_RED_FILE   "bgm_01 Red Screen.wav" // build 112: the red screen's, listed as Red Screen
++
++#define RBS_PICK_PRIM(r, g, b, a) GS_SETREG_RGBAQ((r), (g), (b), (a), 0x00)
++#define RBS_PICK_LIT  GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80)
++#define RBS_PICK_SOFT GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)
++
++static void rbsPickHint(int icon, const char *text, int *x, int y)
++{
++    GSTEXTURE *t = thmGetTexture(icon);
++
++    if (t != NULL) {
++        rmDrawPixmap(t, *x, y - 10, ALIGN_NONE, 20, 20, SCALING_RATIO, RBS_PICK_LIT, 0);
++        *x += 24;
++    }
++    *x = ripps2HintText(*x, y, text, RBS_PICK_SOFT) + 18; // sentence case, as every hint row
++}
++
++/* Build 112: which piece BIOS Music rips (user: "make it so you can select one other or both ripped ... make the
++   osdsys one the default"). THE MENU (the clock's, first and chosen), THE RED SCREEN, BOTH, drawn as Memory Files'
++   replace question is. A bit per piece (1 << RIPPS2_BIOSMUSIC_*), 0 when backed out. */
++static int rbsPickMusic(const int *len)
++{
++    static const char *const opts[3] = {N_("THE MENU MUSIC (THE CLOCK)"), N_("THE RED SCREEN MUSIC (DISC WARNING)"), N_("BOTH")};
++    static const int bits[3] = {1 << RIPPS2_BIOSMUSIC_MENU, 1 << RIPPS2_BIOSMUSIC_RED,
++                                (1 << RIPPS2_BIOSMUSIC_MENU) | (1 << RIPPS2_BIOSMUSIC_RED)};
++    int sel = 0, i, smallFont = gTheme->fonts[5], uiFont = gTheme->fonts[4];
++    int selIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
++    char line[64];
++
++    sfxPlay(SFX_MESSAGE);
++    while (1) {
++        readPads();
++        rmStartFrame();
++        ripps2DrawBackground();
++        ripps2DrawPagePanel();
++        int w = 460, h = 70 + 3 * 26, x = (640 - w) / 2, y = 150;
++        rmDrawRect(x, y, w, h, RBS_PICK_PRIM(0x03, 0x08, 0x22, 0x78));
++        rmDrawLine(x, y, x + w, y, RBS_PICK_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        rmDrawLine(x, y + h, x + w, y + h, RBS_PICK_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        rmDrawLine(x, y, x, y + h, RBS_PICK_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        rmDrawLine(x + w, y, x + w, y + h, RBS_PICK_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        fntRenderString(uiFont, x + 16, y + 20, ALIGN_VCENTER, 0, 0, _t("WHICH MUSIC?"), RBS_PICK_LIT);
++        for (i = 0; i < 3; i++) {
++            int ry = y + 40 + i * 26, k = i == 2 ? -1 : (i == 0 ? RIPPS2_BIOSMUSIC_MENU : RIPPS2_BIOSMUSIC_RED);
++            if (i == sel) {
++                rmDrawRect(x + 8, ry, w - 16, 24, RBS_PICK_PRIM(0x1E, 0x3C, 0x96, 0x60));
++                rmDrawRect(x + 8, ry, 3, 24, RBS_PICK_PRIM(0x6A, 0x9A, 0xFF, 0x80));
++            }
++            fntRenderStringFit(uiFont, x + 22, ry + 12, ALIGN_VCENTER, w - 100, _t(opts[i]), i == sel ? RBS_PICK_LIT : RBS_PICK_SOFT, 0);
++            if (k >= 0 && len[k] > 0) { // its length, at the right
++                snprintf(line, sizeof(line), "%d:%02d", len[k] / RBS_MUSIC_RATE / 60, len[k] / RBS_MUSIC_RATE % 60);
++                fntRenderString(smallFont, x + w - 16, ry + 12, ALIGN_VCENTER | ALIGN_RIGHT, 0, 0, line, RBS_PICK_SOFT);
++            }
++        }
++        int hx = x + 16;
++        rbsPickHint(selIcon, _t("CHOOSE"), &hx, y + h + 22);
++        rbsPickHint(backIcon, _t("BACK"), &hx, y + h + 22);
++        rmEndFrame();
++        if (getKey(KEY_UP) && sel > 0) {
++            sel--;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKey(KEY_DOWN) && sel < 2) {
++            sel++;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKeyOn(gSelectButton)) {
++            sfxPlay(SFX_CONFIRM);
++            return bits[sel];
++        } else if (getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
++            sfxPlay(SFX_CANCEL);
++            return 0;
++        }
++    }
++}
++
++// One piece into dir (with its trailing slash): 1 written, 0 not (msg says why)
++static int rbsRipPiece(const unsigned char *img, int imgSize, int piece, int samples, const char *dir, char *msg, int msgSize)
++{
++    unsigned char h[44] = {'R', 'I', 'F', 'F', 0, 0, 0, 0, 'W', 'A', 'V', 'E', 'f', 'm', 't', ' ', 16, 0, 0, 0, 1, 0, 1, 0};
++    const char *file = piece == RIPPS2_BIOSMUSIC_MENU ? RBS_MUSIC_FILE : RBS_RED_FILE;
++    unsigned int bytes = 44 + (unsigned int)samples * 2;
++    char path[320], mb[16], start[64];
++    rbs_wav_t w;
++    int r, ok;
++
++    snprintf(mb, sizeof(mb), _t("%u.%u MB"), bytes / 1048576, bytes % 1048576 * 10 / 1048576);
++    snprintf(path, sizeof(path), "%s%s", dir, file);
++    if ((w.f = fopen(path, "wb")) == NULL) {
++        snprintf(msg, msgSize, _t("%s could not be made. Is the drive write-protected?"), path);
++        return 0;
++    }
++    rbsPut32(h + 4, bytes - 8);
++    rbsPut32(h + 24, RBS_MUSIC_RATE);
++    rbsPut32(h + 28, RBS_MUSIC_RATE * 2);
++    h[32] = 2;
++    h[34] = 16;
++    memcpy(h + 36, "data", 4);
++    rbsPut32(h + 40, (unsigned int)samples * 2);
++    w.pct = -1;
++    w.fmt = piece == RIPPS2_BIOSMUSIC_MENU ? _t("Ripping this console's menu music: %d%%") : _t("Ripping this console's red screen music: %d%%");
++    snprintf(start, sizeof(start), w.fmt, 0);
++    guiRenderTextScreen(start);
++    ok = fwrite(h, 1, sizeof(h), w.f) == sizeof(h);
++    r = ok ? ripps2BiosMusicFromImageOf(img, imgSize, piece, rbsWavPut, &w) : -2;
++    ok = fclose(w.f) == 0 && r == samples;
++    if (!ok) {
++        remove(path); // never a short WAV left behind
++        snprintf(msg, msgSize, _t("The menu music could not be written to %s (%s). Is the drive full?"), dir, mb);
++        return 0;
++    }
++    if (piece == RIPPS2_BIOSMUSIC_MENU)
++        snprintf(msg, msgSize, _t("The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked."),
++                 mb, dir, file);
++    else
++        snprintf(msg, msgSize, _t("The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen."), mb, dir, file);
++    return 1;
++}
+ 
+ // Audio settings > BIOS Music > RIP (build 100; user: the music apart from the sounds, its size said before it is
+ // ripped, and the user picks where it goes: beside RIPPS2, or OPL's resources AUDIO on a drive). No memory card
+-// has room for it, so a memory card is never offered.
++// has room for it, so a memory card is never offered. Build 112: the menu's piece, the red screen's, or both.
+ void ripps2RipBiosMusicDialog(void)
+ {
+-    char own[256], home[64], dirs[2][288], path[320], msg[768], mb[16];
+-    unsigned char *img, h[44] = {'R', 'I', 'F', 'F', 0, 0, 0, 0, 'W', 'A', 'V', 'E', 'f', 'm', 't', ' ', 16, 0, 0, 0, 1, 0, 1, 0};
+-    int imgSize = 0, samples, nd = 0, pick, r, ok, wasPlaying;
+-    unsigned int bytes;
+-    rbs_wav_t w;
++    char own[256], home[64], dirs[2][288], path[320], msg[768], done[2][320], mb[16];
++    unsigned char *img;
++    int imgSize = 0, len[RIPPS2_BIOSMUSIC_COUNT], nd = 0, pick, want, k, wasPlaying;
++    unsigned int bytes = 0;
+ 
+     if ((img = rbsReadSndImage(&imgSize)) == NULL) {
+         guiMsgBox(_t("This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their "
+@@ -1234,12 +1383,27 @@ void ripps2RipBiosMusicDialog(void)
+         return;
+     }
+     guiRenderTextScreen(_t("Reading this console's menu music"));
+-    if ((samples = ripps2BiosMusicSamples(img, imgSize)) <= 0) {
++    for (k = 0; k < RIPPS2_BIOSMUSIC_COUNT; k++)
++        len[k] = ripps2BiosMusicSamplesOf(img, imgSize, k);
++    if (len[RIPPS2_BIOSMUSIC_MENU] <= 0 && len[RIPPS2_BIOSMUSIC_RED] <= 0) {
++        free(img);
++        guiMsgBox(_t("This BIOS's menu music is not the one RIPPS2 knows. Nothing was written."), 0, NULL);
++        return;
++    }
++    if ((want = rbsPickMusic(len)) == 0) {
++        free(img);
++        return;
++    }
++    for (k = 0; k < RIPPS2_BIOSMUSIC_COUNT; k++)
++        if ((want & (1 << k)) && len[k] <= 0)
++            want &= ~(1 << k); // a BIOS without it (none known): the other one alone
++        else if (want & (1 << k))
++            bytes += 44 + (unsigned int)len[k] * 2;
++    if (want == 0) {
+         free(img);
+         guiMsgBox(_t("This BIOS's menu music is not the one RIPPS2 knows. Nothing was written."), 0, NULL);
+         return;
+     }
+-    bytes = 44 + (unsigned int)samples * 2;
+     snprintf(mb, sizeof(mb), _t("%u.%u MB"), bytes / 1048576, bytes % 1048576 * 10 / 1048576);
+     if (ripps2AudioBase(own, sizeof(own) - 8, 0) && strncmp(own, "mc", 2))
+         snprintf(dirs[nd++], sizeof(dirs[0]), "%sAUDIO/", own);
+@@ -1254,20 +1418,55 @@ void ripps2RipBiosMusicDialog(void)
+         guiMsgBox(msg, 0, NULL);
+         return;
+     }
++    if (want == (1 << RIPPS2_BIOSMUSIC_MENU)) { // build 100's words, which were the menu's all along
++        int s = len[RIPPS2_BIOSMUSIC_MENU];
++        if (nd == 2)
++            snprintf(msg, sizeof(msg),
++                     _t("RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and "
++                     "writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes "
++                     "it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two."),
++                     s / RBS_MUSIC_RATE / 60, s / RBS_MUSIC_RATE % 60, mb, dirs[0], dirs[1], RBS_MUSIC_FILE);
++        else
++            snprintf(msg, sizeof(msg),
++                     _t("RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and "
++                     "writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a "
++                     "minute or two."),
++                     s / RBS_MUSIC_RATE / 60, s / RBS_MUSIC_RATE % 60, mb, dirs[0], RBS_MUSIC_FILE);
++    } else if (want == (1 << RIPPS2_BIOSMUSIC_RED)) {
++        int s = len[RIPPS2_BIOSMUSIC_RED];
++        if (nd == 2)
++            snprintf(msg, sizeof(msg),
++                     _t("RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own "
++                     "notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START "
++                     "writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two."),
++                     s / RBS_MUSIC_RATE / 60, s / RBS_MUSIC_RATE % 60, mb, dirs[0], dirs[1], RBS_RED_FILE);
++        else
++            snprintf(msg, sizeof(msg),
++                     _t("RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own "
++                     "notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It "
++                     "takes a minute or two."),
++                     s / RBS_MUSIC_RATE / 60, s / RBS_MUSIC_RATE % 60, mb, dirs[0], RBS_RED_FILE);
++    } else {
++        int m = len[RIPPS2_BIOSMUSIC_MENU], r = len[RIPPS2_BIOSMUSIC_RED];
++        if (nd == 2)
++            snprintf(msg, sizeof(msg),
++                     _t("RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes "
++                     "and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside "
++                     "RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are "
++                     "replaced. Each takes a minute or two."),
++                     m / RBS_MUSIC_RATE / 60, m / RBS_MUSIC_RATE % 60, r / RBS_MUSIC_RATE / 60, r / RBS_MUSIC_RATE % 60, mb, dirs[0],
++                     dirs[1]);
++        else
++            snprintf(msg, sizeof(msg),
++                     _t("RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes "
++                     "and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already "
++                     "there are replaced. Each takes a minute or two."),
++                     m / RBS_MUSIC_RATE / 60, m / RBS_MUSIC_RATE % 60, r / RBS_MUSIC_RATE / 60, r / RBS_MUSIC_RATE % 60, mb, dirs[0]);
++    }
+     if (nd == 2) {
+-        snprintf(msg, sizeof(msg),
+-                 _t("RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and "
+-                 "writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes "
+-                 "it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two."),
+-                 samples / RBS_MUSIC_RATE / 60, samples / RBS_MUSIC_RATE % 60, mb, dirs[0], dirs[1], RBS_MUSIC_FILE);
+         guiMsgBoxStartOption(_t("RIP TO OPL'S AUDIO"));
+         pick = guiMsgBox(msg, 1, NULL); // 1: beside RIPPS2, 2: OPL's resources
+     } else {
+-        snprintf(msg, sizeof(msg),
+-                 _t("RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and "
+-                 "writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a "
+-                 "minute or two."),
+-                 samples / RBS_MUSIC_RATE / 60, samples / RBS_MUSIC_RATE % 60, mb, dirs[0], RBS_MUSIC_FILE);
+         guiMsgBoxStartOption(_t("RIP"));
+         pick = guiMsgBox(msg, 0, NULL) == 2 ? 1 : 0;
+     }
+@@ -1280,41 +1479,20 @@ void ripps2RipBiosMusicDialog(void)
+     mkdir(path, 0777);
+     path[strlen(path) - 5] = '\0'; // build 105: "<base>AUDIO" -> "<base>", for AUDIO's README.txt
+     ripps2WriteReadme(path, 0);
+-    snprintf(path, sizeof(path), "%s%s", dirs[pick - 1], RBS_MUSIC_FILE);
+     wasPlaying = isBgmPlaying();
+     if (wasPlaying)
+         bgmStop(); // the music may be playing this very file: it lets go while it is rewritten
+-    if ((w.f = fopen(path, "wb")) == NULL) {
+-        free(img);
+-        snprintf(msg, sizeof(msg), _t("%s could not be made. Is the drive write-protected?"), path);
+-        guiMsgBox(msg, 0, NULL);
+-        if (wasPlaying)
+-            bgmStart();
+-        return;
++    done[0][0] = done[1][0] = '\0';
++    for (k = 0; k < RIPPS2_BIOSMUSIC_COUNT; k++) {
++        if (!(want & (1 << k)))
++            continue;
++        rbsRipPiece(img, imgSize, k, len[k], dirs[pick - 1], done[k], sizeof(done[k]));
+     }
+-    rbsPut32(h + 4, bytes - 8);
+-    rbsPut32(h + 24, RBS_MUSIC_RATE);
+-    rbsPut32(h + 28, RBS_MUSIC_RATE * 2);
+-    h[32] = 2;
+-    h[34] = 16;
+-    memcpy(h + 36, "data", 4);
+-    rbsPut32(h + 40, (unsigned int)samples * 2);
+-    w.pct = -1;
+-    guiRenderTextScreen(_t("Ripping this console's menu music: 0%"));
+-    ok = fwrite(h, 1, sizeof(h), w.f) == sizeof(h);
+-    r = ok ? ripps2BiosMusicFromImage(img, imgSize, rbsWavPut, &w) : -2;
+     free(img);
+-    ok = fclose(w.f) == 0 && r == samples;
+-    if (!ok) {
+-        remove(path); // never a short WAV left behind
+-        snprintf(msg, sizeof(msg), _t("The menu music could not be written to %s (%s). Is the drive full?"), dirs[pick - 1], mb);
+-    } else
+-        snprintf(msg, sizeof(msg),
+-                 _t("The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is "
+-                 "picked."),
+-                 mb, dirs[pick - 1], RBS_MUSIC_FILE);
++    snprintf(msg, sizeof(msg), "%s%s%s", done[0], done[0][0] && done[1][0] ? " " : "", done[1]);
+     if (gEnableBGM && !isBgmPlaying())
+         bgmStart();
+     guiMsgBox(msg, 0, NULL);
+ }
++
+ #endif

@@ -217,7 +217,6 @@ strings:
   : RIPPS2 从这台主机自己的 BIOS 读取音效，并把它们作为自己的音效写入 %s：光标、确认、取消、翻页、分类、消息、光盘、错误、保存、驱动器和随机，以及开机和游戏启动音乐，按 BIOS 自身的音符演奏。该处已有的同名文件会被替换。
   Reading this console's menu music: 正在读取这台主机的菜单音乐
   'Ripping this console''s menu music: %d%%': 正在提取这台主机的菜单音乐：%d%%
-  'Ripping this console''s menu music: 0%': 正在提取这台主机的菜单音乐：0%
   Ripping this console's sounds: 正在提取这台主机的音效
   'Ripping this console''s sounds: %s': 正在提取这台主机的音效：%s
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: 菜单音乐（%s）位于 %s，名为 %s。音频设置 > 音乐中会显示为 Menu；没有选择其他曲目时播放它。
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: 设置存入 iLink 驱动器上的 RIPPS2 文件夹，并优先从那里读取。
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: 设置存入 MMCE 卡上的 RIPPS2 文件夹，并优先从那里读取。
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': 该驱动器未连接：设置保持原位
+  WHICH MUSIC?: 哪段音乐？
+  THE MENU MUSIC (THE CLOCK): 菜单音乐（时钟）
+  THE RED SCREEN MUSIC (DISC WARNING): 红屏音乐（光盘警告）
+  'Ripping this console''s red screen music: %d%%': 正在提取这台主机的红屏音乐：%d%%
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: 红屏音乐（%s）位于 %s，名为 %s。音频设置 > 音乐中会显示为 Red Screen。
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 按 BIOS 自身的音符演奏这台主机的红屏音乐（光盘警告的环境乐曲，%d:%02d），并以 %s 的 WAV 写入；没有任何记忆卡放得下它。确认会写入 %s，与 RIPPS2 放在一起。START 会写入 %s，即该驱动器上 OPL 的资源目录。该处已有的 %s 会被替换。需要一两分钟。
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 按 BIOS 自身的音符演奏这台主机的红屏音乐（光盘警告的环境乐曲，%d:%02d），并以 %s 的 WAV 写入 %s；没有任何记忆卡放得下它。该处已有的 %s 会被替换。需要一两分钟。
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 按 BIOS 自身的音符演奏这台主机的菜单音乐（%d:%02d）和红屏音乐（%d:%02d），并写成两个 WAV，共 %s；没有任何记忆卡放得下它们。确认会写入 %s，与 RIPPS2 放在一起。START 会写入 %s，即该驱动器上 OPL 的资源目录。该处已有的同名文件会被替换。每段需要一两分钟。
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 按 BIOS 自身的音符演奏这台主机的菜单音乐（%d:%02d）和红屏音乐（%d:%02d），并写成两个 WAV，共 %s，写入 %s；没有任何记忆卡放得下它们。该处已有的同名文件会被替换。每段需要一两分钟。
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。

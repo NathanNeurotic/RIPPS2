@@ -217,7 +217,6 @@ strings:
   : 'RIPPS2는 이 본체의 BIOS에서 사운드를 읽어 자신의 사운드로 %s에 씁니다: 커서, 확인, 취소, 페이지, 카테고리, 메시지, 디스크, 오류, 저장, 드라이브, 무작위, 그리고 BIOS 자체의 음표로 연주한 부팅 음악과 게임 실행 음악입니다. 이미 있는 같은 이름의 파일은 교체됩니다.'
   Reading this console's menu music: 이 본체의 메뉴 음악을 읽는 중
   'Ripping this console''s menu music: %d%%': '이 본체의 메뉴 음악을 추출하는 중: %d%%'
-  'Ripping this console''s menu music: 0%': '이 본체의 메뉴 음악을 추출하는 중: 0%'
   Ripping this console's sounds: 이 본체의 사운드를 추출하는 중
   'Ripping this console''s sounds: %s': '이 본체의 사운드를 추출하는 중: %s'
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: 메뉴 음악(%s)은 %s에 %s(으)로 있습니다. 오디오 설정 > 음악에 Menu로 표시되며, 다른 곡을 고르지 않았을 때 재생됩니다.
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: 설정은 iLink 드라이브의 RIPPS2 폴더에 들어가고, 먼저 거기서 읽습니다.
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: 설정은 MMCE 카드의 RIPPS2 폴더에 들어가고, 먼저 거기서 읽습니다.
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': '그 드라이브가 연결되어 있지 않음: 설정은 지금 위치에 그대로 둡니다'
+  WHICH MUSIC?: 어떤 음악?
+  THE MENU MUSIC (THE CLOCK): 메뉴 음악(시계)
+  THE RED SCREEN MUSIC (DISC WARNING): 빨간 화면 음악(디스크 경고)
+  'Ripping this console''s red screen music: %d%%': '이 본체의 빨간 화면 음악을 추출하는 중: %d%%'
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: 빨간 화면 음악(%s)은 %s에 %s(으)로 있습니다. 오디오 설정 > 음악에 Red Screen으로 표시됩니다.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2는 이 본체의 빨간 화면 음악(디스크 경고의 배경 음악, %d:%02d)을 BIOS 자체의 음표로 연주해 %s 크기의 WAV로 씁니다. 메모리 카드에는 들어가지 않습니다. 확인을 누르면 RIPPS2 옆의 %s에, START를 누르면 그 드라이브의 OPL 리소스인 %s에 씁니다. 이미 있는 %s은(는) 교체됩니다. 1~2분 걸립니다.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2는 이 본체의 빨간 화면 음악(디스크 경고의 배경 음악, %d:%02d)을 BIOS 자체의 음표로 연주해 %s 크기의 WAV로 %s에 씁니다. 메모리 카드에는 들어가지 않습니다. 이미 있는 %s은(는) 교체됩니다. 1~2분 걸립니다.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2는 이 본체의 메뉴 음악(%d:%02d)과 빨간 화면 음악(%d:%02d)을 BIOS 자체의 음표로 연주해 WAV 두 개(합계 %s)로 씁니다. 메모리 카드에는 들어가지 않습니다. 확인을 누르면 RIPPS2 옆의 %s에, START를 누르면 그 드라이브의 OPL 리소스인 %s에 씁니다. 이미 있는 같은 이름의 파일은 교체됩니다. 각각 1~2분 걸립니다.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2는 이 본체의 메뉴 음악(%d:%02d)과 빨간 화면 음악(%d:%02d)을 BIOS 자체의 음표로 연주해 WAV 두 개(합계 %s)로 %s에 씁니다. 메모리 카드에는 들어가지 않습니다. 이미 있는 같은 이름의 파일은 교체됩니다. 각각 1~2분 걸립니다.
 labels:
   IP_ADDRESS_TYPE_STATIC: 고정
   HINT_NEUTRINO_AUTO_ELF: 게임의 부트 ELF를 Neutrino에 넘겨 타이틀별 설정을 찾게 합니다. 기본으로 켜져 있으며, 직접 설정한 Boot ELF 옵션이 우선합니다.

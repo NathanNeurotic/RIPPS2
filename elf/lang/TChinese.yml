@@ -217,7 +217,6 @@ strings:
   : RIPPS2 從這台主機自己的 BIOS 讀取音效，並把它們當作自己的音效寫入 %s：游標、確認、取消、翻頁、分類、訊息、光碟、錯誤、儲存、磁碟機與隨機，以及開機與遊戲啟動音樂，依 BIOS 自己的音符演奏。該處已有的同名檔案會被取代。
   Reading this console's menu music: 正在讀取這台主機的選單音樂
   'Ripping this console''s menu music: %d%%': 正在擷取這台主機的選單音樂：%d%%
-  'Ripping this console''s menu music: 0%': 正在擷取這台主機的選單音樂：0%
   Ripping this console's sounds: 正在擷取這台主機的音效
   'Ripping this console''s sounds: %s': 正在擷取這台主機的音效：%s
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: 選單音樂（%s）位於 %s，名稱為 %s。音訊設定 > 音樂中會顯示為 Menu；沒有選擇其他曲目時就播放它。
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: 設定存入 iLink 磁碟機上的 RIPPS2 資料夾，並優先從那裡讀取。
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: 設定存入 MMCE 卡上的 RIPPS2 資料夾，並優先從那裡讀取。
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': 該磁碟機未連接：設定維持原位
+  WHICH MUSIC?: 哪段音樂？
+  THE MENU MUSIC (THE CLOCK): 選單音樂（時鐘）
+  THE RED SCREEN MUSIC (DISC WARNING): 紅色畫面音樂（光碟警告）
+  'Ripping this console''s red screen music: %d%%': 正在擷取這台主機的紅色畫面音樂：%d%%
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: 紅色畫面音樂（%s）位於 %s，名稱為 %s。音訊設定 > 音樂中會顯示為 Red Screen。
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 依 BIOS 自己的音符演奏這台主機的紅色畫面音樂（光碟警告的環境樂曲，%d:%02d），並以 %s 的 WAV 寫入；沒有任何記憶卡放得下它。確認會寫入 %s，與 RIPPS2 放在一起。START 會寫入 %s，即該磁碟機上 OPL 的資源資料夾。該處已有的 %s 會被取代。需要一兩分鐘。
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 依 BIOS 自己的音符演奏這台主機的紅色畫面音樂（光碟警告的環境樂曲，%d:%02d），並以 %s 的 WAV 寫入 %s；沒有任何記憶卡放得下它。該處已有的 %s 會被取代。需要一兩分鐘。
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 依 BIOS 自己的音符演奏這台主機的選單音樂（%d:%02d）和紅色畫面音樂（%d:%02d），並寫成兩個 WAV，共 %s；沒有任何記憶卡放得下它們。確認會寫入 %s，與 RIPPS2 放在一起。START 會寫入 %s，即該磁碟機上 OPL 的資源資料夾。該處已有的同名檔案會被取代。每段需要一兩分鐘。
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 依 BIOS 自己的音符演奏這台主機的選單音樂（%d:%02d）和紅色畫面音樂（%d:%02d），並寫成兩個 WAV，共 %s，寫入 %s；沒有任何記憶卡放得下它們。該處已有的同名檔案會被取代。每段需要一兩分鐘。
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色

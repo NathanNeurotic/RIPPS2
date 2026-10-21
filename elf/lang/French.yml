@@ -217,7 +217,6 @@ strings:
   : 'RIPPS2 lit les sons du BIOS de cette console et les écrit dans %s comme ses propres sons : curseur, validation, annulation, pages, catégorie, messages, disque, erreur, sauvegarde, périphériques et aléatoire, ainsi que les musiques de démarrage et de lancement de jeu, jouées à partir des notes du BIOS lui-même. Les fichiers de ces noms déjà présents sont remplacés.'
   Reading this console's menu music: Lecture de la musique du menu de cette console
   'Ripping this console''s menu music: %d%%': 'Extraction de la musique du menu de cette console : %d%%'
-  'Ripping this console''s menu music: 0%': 'Extraction de la musique du menu de cette console : 0%'
   Ripping this console's sounds: Extraction des sons de cette console
   'Ripping this console''s sounds: %s': 'Extraction des sons de cette console : %s'
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: La musique du menu (%s) est dans %s sous le nom %s. Paramètres audio > Musique la liste comme Menu ; elle est jouée quand aucune autre piste n'est choisie.
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: Les paramètres vont dans un dossier RIPPS2 du disque iLink et y sont lus en premier.
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: Les paramètres vont dans un dossier RIPPS2 de la carte MMCE et y sont lus en premier.
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': 'CE LECTEUR N''EST PAS BRANCHÉ : LES PARAMÈTRES RESTENT OÙ ILS SONT'
+  WHICH MUSIC?: QUELLE MUSIQUE ?
+  THE MENU MUSIC (THE CLOCK): LA MUSIQUE DU MENU (L'HORLOGE)
+  THE RED SCREEN MUSIC (DISC WARNING): LA MUSIQUE DE L'ÉCRAN ROUGE (AVERTISSEMENT DISQUE)
+  'Ripping this console''s red screen music: %d%%': 'Extraction de la musique de l''écran rouge de cette console : %d%%'
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: La musique de l'écran rouge (%s) est dans %s sous le nom %s. Paramètres audio > Musique la liste comme Red Screen.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 joue la musique de l'écran rouge de cette console, la pièce d'ambiance de l'avertissement disque (%d:%02d), à partir des notes du BIOS lui-même, et l'écrit en WAV de %s ; aucune carte mémoire n'a la place. Valider l'écrit dans %s, à côté de RIPPS2. START l'écrit dans %s, les ressources d'OPL sur ce périphérique. Un %s déjà présent est remplacé. Cela prend une minute ou deux.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 joue la musique de l'écran rouge de cette console, la pièce d'ambiance de l'avertissement disque (%d:%02d), à partir des notes du BIOS lui-même, et l'écrit en WAV de %s dans %s ; aucune carte mémoire n'a la place. Un %s déjà présent est remplacé. Cela prend une minute ou deux.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 joue la musique du menu de cette console (%d:%02d) et celle de son écran rouge (%d:%02d) à partir des notes du BIOS lui-même, et les écrit en deux WAV, %s en tout ; aucune carte mémoire n'a la place. Valider les écrit dans %s, à côté de RIPPS2. START les écrit dans %s, les ressources d'OPL sur ce périphérique. Les fichiers de ces noms déjà présents sont remplacés. Chacun prend une minute ou deux.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 joue la musique du menu de cette console (%d:%02d) et celle de son écran rouge (%d:%02d) à partir des notes du BIOS lui-même, et les écrit en deux WAV, %s en tout, dans %s ; aucune carte mémoire n'a la place. Les fichiers de ces noms déjà présents sont remplacés. Chacun prend une minute ou deux.
 labels:
   HINT_NEUTRINO_AUTO_ELF: Transmet l'ELF de démarrage du jeu à Neutrino pour chercher sa configuration par titre. Activé par défaut ; une option Boot ELF réglée à la main a la priorité.
   HINT_POPSTARTER_PATH: Emplacement de POPSTARTER.ELF. Laissé vide, RIPPS2 en renseigne un qu'il trouve sur un périphérique ; écrivez par-dessus pour en utiliser un autre, comme usb:/POPS/POPSTARTER.ELF

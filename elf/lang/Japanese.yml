@@ -217,7 +217,6 @@ strings:
   : RIPPS2 はこの本体の BIOS からサウンドを読み取り、自分のサウンドとして %s に書き込みます：カーソル、決定、キャンセル、ページ、カテゴリー、メッセージ、ディスク、エラー、保存、ドライブ、ランダム、そして起動とゲーム起動の音楽を BIOS 自身の音符で演奏したものです。同じ名前のファイルがあれば置き換えられます。
   Reading this console's menu music: この本体のメニュー音楽を読み込み中
   'Ripping this console''s menu music: %d%%': この本体のメニュー音楽を抽出中：%d%%
-  'Ripping this console''s menu music: 0%': この本体のメニュー音楽を抽出中：0%
   Ripping this console's sounds: この本体のサウンドを抽出中
   'Ripping this console''s sounds: %s': この本体のサウンドを抽出中：%s
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: メニュー音楽（%s）は %s に %s として入っています。オーディオ設定 > 音楽 に Menu として表示され、ほかの曲を選んでいないときに再生されます。
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: 設定は iLink ドライブの RIPPS2 フォルダに入り、まずそこから読み込まれます。
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: 設定は MMCE カードの RIPPS2 フォルダに入り、まずそこから読み込まれます。
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': そのドライブは接続されていません：設定は今の場所のままです
+  WHICH MUSIC?: どの音楽？
+  THE MENU MUSIC (THE CLOCK): メニュー音楽（時計）
+  THE RED SCREEN MUSIC (DISC WARNING): 赤い画面の音楽（ディスク警告）
+  'Ripping this console''s red screen music: %d%%': この本体の赤い画面の音楽を抽出中：%d%%
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: 赤い画面の音楽（%s）は %s に %s として入っています。オーディオ設定 > 音楽 に Red Screen として表示されます。
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 はこの本体の赤い画面の音楽（ディスク警告の環境曲、%d:%02d）を BIOS 自身の音符で演奏し、%s の WAV として書き込みます。メモリーカードには入りきりません。決定で RIPPS2 の隣の %s に、START でそのドライブの OPL のリソースである %s に書き込みます。そこにある %s は置き換えられます。1、2 分かかります。
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 はこの本体の赤い画面の音楽（ディスク警告の環境曲、%d:%02d）を BIOS 自身の音符で演奏し、%s の WAV として %s に書き込みます。メモリーカードには入りきりません。そこにある %s は置き換えられます。1、2 分かかります。
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 はこの本体のメニュー音楽（%d:%02d）と赤い画面の音楽（%d:%02d）を BIOS 自身の音符で演奏し、2 つの WAV（合計 %s）として書き込みます。メモリーカードには入りきりません。決定で RIPPS2 の隣の %s に、START でそのドライブの OPL のリソースである %s に書き込みます。そこにある同じ名前のファイルは置き換えられます。それぞれ 1、2 分かかります。
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 はこの本体のメニュー音楽（%d:%02d）と赤い画面の音楽（%d:%02d）を BIOS 自身の音符で演奏し、2 つの WAV（合計 %s）として %s に書き込みます。メモリーカードには入りきりません。そこにある同じ名前のファイルは置き換えられます。それぞれ 1、2 分かかります。
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。

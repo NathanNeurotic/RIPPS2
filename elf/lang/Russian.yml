@@ -217,7 +217,6 @@ strings:
   : 'RIPPS2 читает звуки из BIOS этой консоли и записывает их в %s как свои звуки: курсор, подтверждение, отмена, страницы, категория, сообщения, диск, ошибка, сохранение, накопители и случайный выбор, а также музыку запуска и старта игры, сыгранную по нотам самого BIOS. Уже лежащие там файлы с этими именами заменяются.'
   Reading this console's menu music: Чтение музыки меню этой консоли
   'Ripping this console''s menu music: %d%%': 'Извлечение музыки меню этой консоли: %d%%'
-  'Ripping this console''s menu music: 0%': 'Извлечение музыки меню этой консоли: 0%'
   Ripping this console's sounds: Извлечение звуков этой консоли
   'Ripping this console''s sounds: %s': 'Извлечение звуков этой консоли: %s'
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: Музыка меню (%s) лежит в %s как %s. Настройки звука > Музыка показывает её как Menu; она играет, когда не выбрана другая дорожка.
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: Настройки хранятся в папке RIPPS2 на диске iLink и читаются оттуда в первую очередь.
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: Настройки хранятся в папке RIPPS2 на карте MMCE и читаются оттуда в первую очередь.
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': 'ЭТОТ НАКОПИТЕЛЬ НЕ ПОДКЛЮЧЁН: НАСТРОЙКИ ОСТАЮТСЯ НА МЕСТЕ'
+  WHICH MUSIC?: КАКУЮ МУЗЫКУ?
+  THE MENU MUSIC (THE CLOCK): МУЗЫКА МЕНЮ (ЧАСЫ)
+  THE RED SCREEN MUSIC (DISC WARNING): МУЗЫКА КРАСНОГО ЭКРАНА (ПРЕДУПРЕЖДЕНИЕ О ДИСКЕ)
+  'Ripping this console''s red screen music: %d%%': 'Извлечение музыки красного экрана этой консоли: %d%%'
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: Музыка красного экрана (%s) лежит в %s как %s. Настройки звука > Музыка показывает её как Red Screen.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 играет музыку красного экрана этой консоли, фоновую пьесу предупреждения о диске (%d:%02d), по нотам самого BIOS и записывает её как WAV размером %s; ни на одной карте памяти нет для неё места. Подтверждение записывает её в %s, рядом с RIPPS2. START записывает её в %s, ресурсы OPL на этом накопителе. Уже лежащий там %s заменяется. Это займёт минуту-другую.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : RIPPS2 играет музыку красного экрана этой консоли, фоновую пьесу предупреждения о диске (%d:%02d), по нотам самого BIOS и записывает её как WAV размером %s в %s; ни на одной карте памяти нет для неё места. Уже лежащий там %s заменяется. Это займёт минуту-другую.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 играет музыку меню этой консоли (%d:%02d) и музыку её красного экрана (%d:%02d) по нотам самого BIOS и записывает их как два WAV, всего %s; ни на одной карте памяти нет для них места. Подтверждение записывает их в %s, рядом с RIPPS2. START записывает их в %s, ресурсы OPL на этом накопителе. Уже лежащие там файлы с этими именами заменяются. Каждый займёт минуту-другую.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : RIPPS2 играет музыку меню этой консоли (%d:%02d) и музыку её красного экрана (%d:%02d) по нотам самого BIOS и записывает их как два WAV, всего %s, в %s; ни на одной карте памяти нет для них места. Уже лежащие там файлы с этими именами заменяются. Каждый займёт минуту-другую.
 labels:
   DS34BT_MODE: DualShock3/4 по Bluetooth
   HINT_NEUTRINO_AUTO_ELF: Передаёт загрузочный ELF игры в Neutrino, чтобы найти настройки для этой игры. Включено по умолчанию; заданный вручную параметр Boot ELF важнее.

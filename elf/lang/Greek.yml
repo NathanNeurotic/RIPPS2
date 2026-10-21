@@ -217,7 +217,6 @@ strings:
   : 'Το RIPPS2 διαβάζει τους ήχους από το ίδιο το BIOS αυτής της κονσόλας και τους γράφει στο %s ως δικούς του ήχους: δρομέας, επιβεβαίωση, ακύρωση, σελίδες, κατηγορία, μηνύματα, δίσκος, σφάλμα, αποθήκευση, δίσκοι και τυχαίο, μαζί με τη μουσική εκκίνησης και έναρξης παιχνιδιού, παιγμένη από τις νότες του ίδιου του BIOS. Αρχεία με αυτά τα ονόματα που υπάρχουν ήδη εκεί αντικαθίστανται.'
   Reading this console's menu music: Ανάγνωση της μουσικής μενού αυτής της κονσόλας
   'Ripping this console''s menu music: %d%%': 'Εξαγωγή της μουσικής μενού αυτής της κονσόλας: %d%%'
-  'Ripping this console''s menu music: 0%': 'Εξαγωγή της μουσικής μενού αυτής της κονσόλας: 0%'
   Ripping this console's sounds: Εξαγωγή των ήχων αυτής της κονσόλας
   'Ripping this console''s sounds: %s': 'Εξαγωγή των ήχων αυτής της κονσόλας: %s'
   The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.: Η μουσική μενού (%s) είναι στο %s ως %s. Οι Ρυθμίσεις ήχου > Μουσική τη δείχνουν ως Menu· παίζει όταν δεν έχει επιλεγεί άλλο κομμάτι.
@@ -968,6 +967,19 @@ strings:
   Settings go in a RIPPS2 folder on the iLink drive and are read from there first.: Οι ρυθμίσεις μπαίνουν σε έναν φάκελο RIPPS2 στη μονάδα iLink και διαβάζονται πρώτα από εκεί.
   Settings go in a RIPPS2 folder on the MMCE card and are read from there first.: Οι ρυθμίσεις μπαίνουν σε έναν φάκελο RIPPS2 στην κάρτα MMCE και διαβάζονται πρώτα από εκεί.
   'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE': 'Η ΜΟΝΑΔΑ ΑΥΤΗ ΔΕΝ ΕΙΝΑΙ ΣΥΝΔΕΔΕΜΕΝΗ: ΟΙ ΡΥΘΜΙΣΕΙΣ ΜΕΝΟΥΝ ΕΚΕΙ ΠΟΥ ΕΙΝΑΙ'
+  WHICH MUSIC?: ΠΟΙΑ ΜΟΥΣΙΚΗ;
+  THE MENU MUSIC (THE CLOCK): Η ΜΟΥΣΙΚΗ ΜΕΝΟΥ (ΤΟ ΡΟΛΟΪ)
+  THE RED SCREEN MUSIC (DISC WARNING): Η ΜΟΥΣΙΚΗ ΤΗΣ ΚΟΚΚΙΝΗΣ ΟΘΟΝΗΣ (ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΔΙΣΚΟΥ)
+  'Ripping this console''s red screen music: %d%%': 'Εξαγωγή της μουσικής της κόκκινης οθόνης αυτής της κονσόλας: %d%%'
+  The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: Η μουσική της κόκκινης οθόνης (%s) είναι στο %s ως %s. Οι Ρυθμίσεις ήχου > Μουσική τη δείχνουν ως Red Screen.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
+  : Το RIPPS2 παίζει τη μουσική της κόκκινης οθόνης αυτής της κονσόλας, το ατμοσφαιρικό κομμάτι της προειδοποίησης δίσκου (%d:%02d), από τις νότες του ίδιου του BIOS και τη γράφει ως WAV %s· καμία κάρτα μνήμης δεν τη χωράει. Η Επιβεβαίωση τη γράφει στο %s, δίπλα στο RIPPS2. Το START τη γράφει στο %s, στους πόρους του OPL σε εκείνο τον δίσκο. Ένα %s που υπάρχει ήδη εκεί αντικαθίσταται. Χρειάζεται ένα με δύο λεπτά.
+  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
+  : Το RIPPS2 παίζει τη μουσική της κόκκινης οθόνης αυτής της κονσόλας, το ατμοσφαιρικό κομμάτι της προειδοποίησης δίσκου (%d:%02d), από τις νότες του ίδιου του BIOS και τη γράφει ως WAV %s στο %s· καμία κάρτα μνήμης δεν τη χωράει. Ένα %s που υπάρχει ήδη εκεί αντικαθίσταται. Χρειάζεται ένα με δύο λεπτά.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
+  : Το RIPPS2 παίζει τη μουσική μενού αυτής της κονσόλας (%d:%02d) και τη μουσική της κόκκινης οθόνης της (%d:%02d) από τις νότες του ίδιου του BIOS και τις γράφει ως δύο WAV, συνολικά %s· καμία κάρτα μνήμης δεν τις χωράει. Η Επιβεβαίωση τις γράφει στο %s, δίπλα στο RIPPS2. Το START τις γράφει στο %s, στους πόρους του OPL σε εκείνο τον δίσκο. Αρχεία με αυτά τα ονόματα που υπάρχουν ήδη εκεί αντικαθίστανται. Το καθένα χρειάζεται ένα με δύο λεπτά.
+  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
+  : Το RIPPS2 παίζει τη μουσική μενού αυτής της κονσόλας (%d:%02d) και τη μουσική της κόκκινης οθόνης της (%d:%02d) από τις νότες του ίδιου του BIOS και τις γράφει ως δύο WAV, συνολικά %s, στο %s· καμία κάρτα μνήμης δεν τις χωράει. Αρχεία με αυτά τα ονόματα που υπάρχουν ήδη εκεί αντικαθίστανται. Το καθένα χρειάζεται ένα με δύο λεπτά.
 labels:
   OK: OK
   WIDE_SCREEN: Ευρεία οθόνη
