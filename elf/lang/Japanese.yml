@@ -955,6 +955,13 @@ strings:
   Shots wait on each game's roll in Memory Files (MEDIA/RIPSHOT) until you develop them. Nothing runs on its own.: 写真は現像するまで、メモリーファイル (MEDIA/RIPSHOT) の各ゲームのフィルムで待ちます。自動では何も動きません。
   The combo leaves the game at once, as before.: コンボで以前どおりすぐにゲームを終了します。
   VIEW: 表示
+  Memory Card: メモリーカード
+  Internal HDD: 内蔵 HDD
+  Custom Path: 任意のパス
+  Settings go in RIPPS2's own save on a memory card (the one RIPPS2 started from first), as before.: 設定はメモリーカード上の RIPPS2 自身のセーブに入ります（まず RIPPS2 を起動したカード）。これまでどおりです。
+  Settings go in a RIPPS2 folder on the internal HDD (exFAT, or the APA HDD's OPL partition) and are read from there first.: 設定は内蔵 HDD（exFAT、または APA HDD の OPL パーティション）の RIPPS2 フォルダに入り、まずそこから読み込まれます。
+  Settings go in the folder typed below, e.g. mass0:/OPL.: 設定は下に入力したフォルダに入ります（例：mass0:/OPL）。
+  'NO INTERNAL HDD FOUND: SETTINGS STAY WHERE THEY ARE': 内蔵 HDD が見つかりません：設定は今の場所のままです
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。
@@ -1368,3 +1375,5 @@ labels:
   HINT_RIPPS2_RIPSHOT: ゲーム内メニューからのスクリーンショットを、テーマ用の ART か MEDIA へ。
   RIPPS2_DEVELOP_SHOTS: 写真の現像
   HINT_RIPPS2_DEVELOP_SHOTS: 各ゲームのフィルムで待っている写真を PNG にする方法。
+  RIPPS2_SETTINGS_HOME: 設定の保存先
+  HINT_RIPPS2_SETTINGS_HOME: RIPPS2 が設定を置く場所：メモリーカード上の自身のセーブ、内蔵 HDD の RIPPS2 フォルダ、または入力したフォルダ。

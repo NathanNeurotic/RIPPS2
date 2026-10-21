@@ -955,6 +955,13 @@ strings:
   Shots wait on each game's roll in Memory Files (MEDIA/RIPSHOT) until you develop them. Nothing runs on its own.: 照片在记忆文件 (MEDIA/RIPSHOT) 中各游戏的胶卷上等待，直到你冲洗它们。不会自动运行任何操作。
   The combo leaves the game at once, as before.: 组合键像以前一样立即退出游戏。
   VIEW: 查看
+  Memory Card: 记忆卡
+  Internal HDD: 内置硬盘
+  Custom Path: 自定义路径
+  Settings go in RIPPS2's own save on a memory card (the one RIPPS2 started from first), as before.: 设置存入记忆卡上 RIPPS2 自己的存档（先存到启动 RIPPS2 的那张卡），和以前一样。
+  Settings go in a RIPPS2 folder on the internal HDD (exFAT, or the APA HDD's OPL partition) and are read from there first.: 设置存入内置硬盘（exFAT，或 APA 硬盘的 OPL 分区）上的 RIPPS2 文件夹，并优先从那里读取。
+  Settings go in the folder typed below, e.g. mass0:/OPL.: 设置存入下面输入的文件夹，例如 mass0:/OPL。
+  'NO INTERNAL HDD FOUND: SETTINGS STAY WHERE THEY ARE': 未找到内置硬盘：设置保持原位
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
@@ -1369,3 +1376,5 @@ labels:
   HINT_RIPPS2_RIPSHOT: 从游戏内菜单截图，存到供主题使用的 ART 或 MEDIA。
   RIPPS2_DEVELOP_SHOTS: 冲洗照片
   HINT_RIPPS2_DEVELOP_SHOTS: 各游戏胶卷上等待的照片如何变成 PNG。
+  RIPPS2_SETTINGS_HOME: 设置保存到
+  HINT_RIPPS2_SETTINGS_HOME: RIPPS2 存放设置的位置：记忆卡上它自己的存档、内置硬盘上的 RIPPS2 文件夹，或你输入的文件夹。

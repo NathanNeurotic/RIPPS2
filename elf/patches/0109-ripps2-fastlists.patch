@@ -1,0 +1,441 @@
+diff --git a/.github/scripts/test_bdm_scan_retry.py b/.github/scripts/test_bdm_scan_retry.py
+index 0eea0f0..81626f4 100644
+--- a/.github/scripts/test_bdm_scan_retry.py
++++ b/.github/scripts/test_bdm_scan_retry.py
+@@ -406,6 +406,7 @@ SCAN_HARNESS = r'''
+ #include <strings.h>
+ 
+ #define LOG(...) ((void)0)
++#define DelayThread(us) ((void)(us)) /* RIPPS2 build 109: sbPadBreath's pause */
+ #define O_RDONLY 0
+ #define FOLDER_SUB_MAX 128
+ #define ISO_GAME_NAME_MAX 160
+diff --git a/include/dialogs.h b/include/dialogs.h
+index e551546..d4213a7 100644
+--- a/include/dialogs.h
++++ b/include/dialogs.h
+@@ -41,6 +41,8 @@ enum UI_ITEMS {
+     CFG_RIPPS2_IGRMENU,  // RIPPS2 build 87: In-Game Menu (build 108: a row of Settings > General > In-Game Menu)
+     UICFG_RIPPS2_RIPSHOT, // RIPPS2 build 108: RIPSHOT and Develop Shots, on the same page
+     UICFG_RIPPS2_DEVELOP,
++    UICFG_RIPPS2_SETTINGS_HOME, // RIPPS2 build 109: Save Settings To (Memory Card, Internal HDD, Custom Path)
++    CFG_LBL_CUSTOMCFGPATH,      // and the Custom Settings Path row's label, shown with Custom Path
+     UICFG_RIPPS2_MUSIC,  // RIPPS2: Music (a track from MUSIC/ beside RIPPS2)
+     UICFG_RIPPS2_GLYPHS,  // RIPPS2 build 70: Colors and More's RIPPS2 rows
+     UICFG_RIPPS2_PALETTE,
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 06ed9f3..35ac388 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -138,7 +138,12 @@ void ripps2StepCategory(int dir);   // -1 / +1, clamped at the ends
+ void ripps2RenderCategoryBar(void); // the three labels plus the mark
+ void ripps2DrawBusy(int alpha);     // loading: the mark breathes (in place, or small in the corner)
+ void ripps2DiscWatch(void);         // every frame: the drive read after boot and after the tray closes
+-int ripps2DiscQuiet(void);          // 1 while the disc watcher is all the IO worker is doing
++int ripps2DiscQuiet(void);
++struct UIItem;
++int ripps2SettingsHddHome(char *out, int size);       // build 109: a RIPPS2 folder on the internal HDD, 0 when none
++void ripps2SettingsHomeBegin(struct UIItem *ui);      // Save Settings To: set from the Custom Settings Path
++void ripps2SettingsHomeShow(struct UIItem *ui);       // the Custom Settings Path row with Custom Path only
++void ripps2SettingsHomeEnd(struct UIItem *ui);        // after the path was read back: the choice decides it          // 1 while the disc watcher is all the IO worker is doing
+ void ripps2UiEnter(void);           // the menu's first frame: the bar fades in, the mark pops in
+ void ripps2ShowViewWord(const char *word, int logo, const char *caption); // L3: name the new list, large (a word, or a texture id)
+ void ripps2DrawViewWord(void);      // drawn over the Storage page while it plays
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index c41e86c..d1e72ef 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1075,6 +1075,10 @@ gui_strings:
+   string: Are you sure? This applies forced-progressive 1080p to this game.
+ - label: CUSTOM_SETTINGS_PATH
+   string: Custom Settings Path
++- label: RIPPS2_SETTINGS_HOME
++  string: Save Settings To
++- label: HINT_RIPPS2_SETTINGS_HOME
++  string: "Where RIPPS2 keeps its settings: RIPPS2's own save on a memory card, a RIPPS2 folder on the internal HDD, or a folder you type."
+ - label: HINT_CUSTOM_SETTINGS_PATH
+   string: "Save settings to a folder you choose, e.g. mass0:/OPL. Leave blank to use the folder OPL booted from. The device is loaded on demand, so it need not be mounted when you type it."
+ - label: PERGAME_MIXED_SETTINGS
+diff --git a/src/dia.c b/src/dia.c
+index 63f4271..0c7bbc9 100644
+--- a/src/dia.c
++++ b/src/dia.c
+@@ -1058,6 +1058,9 @@ static void diaDrawHint(const struct UIItem *item)
+ // any non-zero fixedHeight overrides upward (negative = percent of screenHeight). *h never depends on
+ // x/y or the text, so this is exact -- used to advance layout past a row the viewport clip skips (#195
+ // scroll-bleed fix) so the on-screen rows below it keep their true positions.
++// RIPPS2 build 109: room between a page's title and the line under it (the title stood on the line, its descenders cut)
++#define DIA_HEADER_GAP 8
++
+ static int diaItemHeight(struct UIItem *item, int spacingH)
+ {
+     int h;
+@@ -1071,6 +1074,8 @@ static int diaItemHeight(struct UIItem *item, int spacingH)
+         h = 17;
+     else
+         h = spacingH;
++    if (item->type == UI_HEADER)
++        h += DIA_HEADER_GAP;
+ 
+     if (item->fixedHeight != 0) {
+         int newSize = (item->fixedHeight < 0) ? item->fixedHeight * screenHeight / -100 : item->fixedHeight;
+@@ -1132,6 +1137,7 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+         case UI_HEADER:
+             // header: same layout as a label, just rendered in the accent (selected-text) colour
+             txtcol = gTheme->selTextColor;
++            *h = spacingH + DIA_HEADER_GAP; // build 109: the line under it moves down clear of the letters
+         case UI_BUTTON:
+         case UI_LABEL: {
+             // width is text length in pixels...
+diff --git a/src/dialogs.c b/src/dialogs.c
+index 37a6161..f15b8f9 100644
+--- a/src/dialogs.c
++++ b/src/dialogs.c
+@@ -409,7 +409,12 @@ struct UIItem diaConfig[] = {
+     {UI_BUTTON, RIPPS2_IGR_BUTTON, 1, 1, _STR_HINT_RIPPS2_IGR_PAGE, 0, 0, {.label = {NULL, _STR_RIPPS2_IGR_MENU}}}, // build 108
+     {UI_BREAK},
+ 
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_CUSTOM_SETTINGS_PATH}}},
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_SETTINGS_HOME}}}, // build 109
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_SETTINGS_HOME, 1, 1, _STR_HINT_RIPPS2_SETTINGS_HOME, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
++    {UI_LABEL, CFG_LBL_CUSTOMCFGPATH, 1, 1, -1, -40, 0, {.label = {NULL, _STR_CUSTOM_SETTINGS_PATH}}},
+     {UI_SPACER},
+     {UI_STRING, CFG_CUSTOMCFGPATH, 1, 1, _STR_HINT_CUSTOM_SETTINGS_PATH, 0, 0, {.stringvalue = {"", "", NULL}}},
+     {UI_BREAK},
+diff --git a/src/gui.c b/src/gui.c
+index dde4821..c6fb44f 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -600,6 +600,7 @@ static int guiUpdater(int modified)
+         diaSetVisible(diaConfig, CFG_LBL_AUTOSTARTLAST, showAutoStartLast);
+         diaSetVisible(diaConfig, CFG_AUTOSTARTLAST, showAutoStartLast);
+         guiBootLockAutofill(diaConfig); // RIPPS2
++        ripps2SettingsHomeShow(diaConfig); // RIPPS2 build 109
+     }
+     return 0;
+ }
+@@ -714,6 +715,7 @@ void guiShowConfig()
+     // "Default" placeholder treatment rather than "<not set>".
+     diaSetShowDefaultWhenEmpty(diaConfig, CFG_CUSTOMCFGPATH, 1);
+     diaSetString(diaConfig, CFG_CUSTOMCFGPATH, gCustomSettingsPath);
++    ripps2SettingsHomeBegin(diaConfig); // RIPPS2 build 109: Save Settings To
+ 
+     diaSetInt(diaConfig, CFG_LASTPLAYED, gRememberLastPlayed);
+     diaSetInt(diaConfig, CFG_FOLDERNAV, gEnableFolderNav);
+@@ -747,6 +749,7 @@ reshow_config:
+         diaGetInt(diaConfig, UICFG_LANG, &langID);
+         snprintf(gExitPath, sizeof(gExitPath), "%s", exitPathEdit);
+         diaGetString(diaConfig, CFG_CUSTOMCFGPATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
++        ripps2SettingsHomeEnd(diaConfig); // RIPPS2 build 109
+         diaGetInt(diaConfig, CFG_LASTPLAYED, &gRememberLastPlayed);
+         diaGetInt(diaConfig, CFG_FOLDERNAV, &gEnableFolderNav);
+         diaGetInt(diaConfig, CFG_AUTOSTARTLAST, &gAutoStartLastPlayed);
+@@ -3232,6 +3235,7 @@ static int guiSettingsGeneralUpdater(int modified)
+         diaSetVisible(guiSettingsActiveDialog, CFG_LBL_AUTOSTARTLAST, showAutoStartLast);
+         diaSetVisible(guiSettingsActiveDialog, CFG_AUTOSTARTLAST, showAutoStartLast);
+         guiBootLockAutofill(guiSettingsActiveDialog);
++        ripps2SettingsHomeShow(guiSettingsActiveDialog); // RIPPS2 build 109
+     }
+     return 0;
+ }
+@@ -3260,6 +3264,7 @@ static int guiSettingsShowGeneral(void)
+     guiBootLockBegin(ui); // RIPPS2
+     diaSetShowDefaultWhenEmpty(ui, CFG_CUSTOMCFGPATH, 1);
+     diaSetString(ui, CFG_CUSTOMCFGPATH, gCustomSettingsPath);
++    ripps2SettingsHomeBegin(ui); // RIPPS2 build 109: Save Settings To
+     diaSetInt(ui, CFG_LASTPLAYED, gRememberLastPlayed);
+     diaSetInt(ui, CFG_FOLDERNAV, gEnableFolderNav);
+     diaSetInt(ui, CFG_AUTOSTARTLAST, gAutoStartLastPlayed);
+@@ -3293,6 +3298,7 @@ reshow_general:
+         diaGetInt(ui, UICFG_LANG, &langID);
+         snprintf(gExitPath, sizeof(gExitPath), "%s", exitPathEdit);
+         diaGetString(ui, CFG_CUSTOMCFGPATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
++        ripps2SettingsHomeEnd(ui); // RIPPS2 build 109
+         diaGetInt(ui, CFG_LASTPLAYED, &gRememberLastPlayed);
+         diaGetInt(ui, CFG_FOLDERNAV, &gEnableFolderNav);
+         diaGetInt(ui, CFG_AUTOSTARTLAST, &gAutoStartLastPlayed);
+diff --git a/src/mmcesupport.c b/src/mmcesupport.c
+index 15b0cdb..cbd5a09 100644
+--- a/src/mmcesupport.c
++++ b/src/mmcesupport.c
+@@ -29,6 +29,8 @@
+ #define NEWLIB_PORT_AWARE
+ #include <fileXio_rpc.h> // fileXioIoctl, fileXioDevctl
+ #include <delaythread.h> // DelayThread() -- real-sleep gap in the MMCE card-switch wait
++#include <unistd.h>
++#include <fcntl.h>
+ 
+ static char mmcePrefix[40]; // Contains the full path to the folder where all the games are.
+ static char mmceArtPrimary[40];
+@@ -101,6 +103,89 @@ static unsigned char mmceEverResolved = 0;
+ // forward declaration
+ static item_list_t mmceGameList;
+ static void mmceGetDeviceRoot(char *root, size_t size);
++
++// RIPPS2 build 109: a fast MMCE boot. The card's game list is kept on the card (RIPPS2.LST beside its CD and DVD
++// folders): at boot the games show from it at once, then the card is read again in the background (sbReadList, which
++// now pauses between games for the pads) and the list follows whatever changed. A tester's 180 games took about 5
++// minutes to list on every boot, with nothing to press until then.
++#define MMCE_LIST_FILE  "RIPPS2.LST"
++#define MMCE_LIST_MAGIC "RIPLST01"
++#define MMCE_LIST_MAX   4096
++typedef struct
++{
++    char magic[8];
++    int count, ulsize, itemSize, reserved[3];
++} mmce_list_hdr_t;
++static unsigned char mmceListTried; // this card's list was looked for
++static unsigned char mmceListShown; // the games on screen came from it; the card is still to be read again
++static unsigned int mmceListSum;    // what the list on the card holds (FNV-1a), so an unchanged list is not written
++
++static unsigned int mmceListHash(const base_game_info_t *games, int count, int ulsize)
++{
++    const unsigned char *b = (const unsigned char *)games;
++    unsigned int h = 2166136261u ^ (unsigned int)ulsize;
++    size_t i, n = (size_t)count * sizeof(base_game_info_t);
++    for (i = 0; i < n; i++)
++        h = (h ^ b[i]) * 16777619u;
++    return h;
++}
++
++// The card's last list, into mmceGames: 1 when it was there and whole
++static int mmceListLoad(void)
++{
++    char path[sizeof(mmcePrefix) + 16];
++    mmce_list_hdr_t h;
++    base_game_info_t *games;
++    int fd, bytes, ok = 0;
++
++    snprintf(path, sizeof(path), "%s%s", mmcePrefix, MMCE_LIST_FILE);
++    if ((fd = open(path, O_RDONLY)) < 0)
++        return 0;
++    if (read(fd, &h, sizeof(h)) == (int)sizeof(h) && !memcmp(h.magic, MMCE_LIST_MAGIC, 8) && h.itemSize == (int)sizeof(base_game_info_t) &&
++        h.count > 0 && h.count <= MMCE_LIST_MAX) {
++        bytes = h.count * (int)sizeof(base_game_info_t);
++        if ((games = malloc(bytes)) != NULL) {
++            if (read(fd, games, bytes) == bytes) {
++                free(mmceGames);
++                mmceGames = games;
++                mmceGameCount = h.count;
++                mmceULSizePrev = h.ulsize;
++                mmceListSum = mmceListHash(games, h.count, h.ulsize);
++                ok = 1;
++            } else
++                free(games);
++        }
++    }
++    close(fd);
++    return ok;
++}
++
++// The list just read from the card, kept there for the next boot (only when it changed)
++static void mmceListSave(void)
++{
++    char path[sizeof(mmcePrefix) + 16];
++    mmce_list_hdr_t h;
++    unsigned int sum;
++    int fd, bytes;
++
++    if (mmceGames == NULL || mmceGameCount <= 0 || mmceGameCount > MMCE_LIST_MAX)
++        return;
++    sum = mmceListHash(mmceGames, mmceGameCount, mmceULSizePrev);
++    if (sum == mmceListSum)
++        return;
++    snprintf(path, sizeof(path), "%s%s", mmcePrefix, MMCE_LIST_FILE);
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
++        return;
++    memset(&h, 0, sizeof(h));
++    memcpy(h.magic, MMCE_LIST_MAGIC, 8);
++    h.count = mmceGameCount;
++    h.ulsize = mmceULSizePrev;
++    h.itemSize = (int)sizeof(base_game_info_t);
++    bytes = mmceGameCount * (int)sizeof(base_game_info_t);
++    if (write(fd, &h, sizeof(h)) == (int)sizeof(h) && write(fd, mmceGames, bytes) == bytes)
++        mmceListSum = sum;
++    close(fd);
++}
+ // The card ROOT ("mmceN:/") is where the PS1 library folders live -- POPS/ and EMBER/ alike, exactly
+ // as on every other device. mmcePrefix is NOT the root: it carries the user's configurable games
+ // prefix (gMMCEPrefix), which is right for OPL's own data (CD/ DVD/ ART/ CFG/ VMC/) and wrong for a
+@@ -603,6 +688,11 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+             return result;
+     }
+ 
++    if (mmceListShown) { // build 109: the games on screen came from the card's list: read the card once, in the background
++        mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
++        result = 1;
++    }
++
+     if (mmceULSizePrev == -2) {
+         // First scan not yet successful. If it wedges on a contended SIO2 bus, sbReadList leaves
+         // mmceULSizePrev at its -2 sentinel and the tab stays empty; the NOUPDATE latch above would
+@@ -701,6 +791,8 @@ static int mmceUpdateGameList(item_list_t *itemList)
+         mmceGameCount = 0;
+         mmcePs1GameCount = 0;
+         mmceULSizePrev = -2; // force a fresh scan when a card returns
++        mmceListTried = mmceListShown = 0; // build 109: and its list is looked for again
++        mmceListSum = 0;
+         mmcePs1Scanned = 0;
+         mmcePs1ScanFailed = 0;
+         mmcePs1ScanRetries = 0;
+@@ -726,7 +818,21 @@ static int mmceUpdateGameList(item_list_t *itemList)
+         result += mmcePs1GameCount;
+     }
+     if (view == LIB_VIEW_ISO || view == LIB_VIEW_MIXED) {
+-        sbReadList(&mmceGames, mmcePrefix, folderGetSub(itemList->mode), &mmceULSizePrev, &mmceGameCount);
++        const char *sub = folderGetSub(itemList->mode);
++        int atRoot = sub == NULL || sub[0] == '\0';
++        if (atRoot && !mmceListTried) { // build 109: the card's last list, at once; the card is read on the next pass
++            mmceListTried = 1;
++            if (mmceListLoad()) {
++                mmceListShown = 1;
++                mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
++                return result + mmceGameCount;
++            }
++        }
++        sbReadList(&mmceGames, mmcePrefix, sub, &mmceULSizePrev, &mmceGameCount);
++        if (atRoot && (sbGetReadListError() == 0 || mmceGameCount > 0)) { // the card was read: keep its list for next time
++            mmceListShown = 0;
++            mmceListSave();
++        }
+         result += mmceGameCount;
+     }
+     return result;
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 8462384..840f317 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -35,6 +35,9 @@
+ #include "include/metadb.h"
+ #include "include/iosupport.h" // build 91: the launch disc reads a game's ICO through its source
+ #include "include/texcache.h"
++#include "include/bdmsupport.h" // build 109: bdmSlotDeviceType, BDM_TYPE_ATA
++#include "include/dia.h"
++#include "include/dialogs.h"    // build 109: Save Settings To
+ #include <libcdvd.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+@@ -1260,6 +1263,75 @@ void ripps2DiscWatch(void)
+ }
+ 
+ // The disc watcher's job is all the IO worker has: not worth the loading breath
++// ---- build 109: Settings > General > Save Settings To ----
++// Testers asked for the settings on the internal HDD before the memory cards. Internal HDD fills the Custom Settings
++// Path (config.path, which the load reads first and the save honours) with a RIPPS2 folder on that drive: the exFAT
++// HDD on BDM ATA, else the APA HDD's OPL partition (pfs:, OPL's own mounted home there).
++enum { RIPPS2_HOME_CARD = 0, RIPPS2_HOME_HDD, RIPPS2_HOME_CUSTOM };
++static const char *ripps2HomeNames[] = {N_("Memory Card"), N_("Internal HDD"), N_("Custom Path"), NULL};
++static const char *ripps2HomeHints[] = {N_("Settings go in RIPPS2's own save on a memory card (the one RIPPS2 started from first), as before."),
++                                        N_("Settings go in a RIPPS2 folder on the internal HDD (exFAT, or the APA HDD's OPL partition) and are read from there first."),
++                                        N_("Settings go in the folder typed below, e.g. mass0:/OPL."), NULL};
++
++int ripps2SettingsHddHome(char *out, int size)
++{
++    int i;
++    for (i = 0; i < 8; i++)
++        if (bdmSlotDeviceType(i) == BDM_TYPE_ATA) { // the internal exFAT HDD
++            snprintf(out, size, "mass%d:/RIPPS2", i);
++            return 1;
++        }
++    if (gHDDPrefix != NULL && gHDDPrefix[0] != '\0') { // the APA HDD, OPL's partition mounted
++        snprintf(out, size, "pfs:/RIPPS2");
++        return 1;
++    }
++    return 0;
++}
++
++// Which choice a Custom Settings Path amounts to
++static int ripps2SettingsHomeOf(const char *path)
++{
++    if (path == NULL || path[0] == '\0')
++        return RIPPS2_HOME_CARD;
++    if (!strcmp(path, "pfs:/RIPPS2") || (!strncmp(path, "mass", 4) && path[4] >= '0' && path[4] <= '9' && !strcmp(path + 5, ":/RIPPS2")))
++        return RIPPS2_HOME_HDD;
++    return RIPPS2_HOME_CUSTOM;
++}
++
++void ripps2SettingsHomeShow(struct UIItem *ui)
++{
++    int mode;
++    diaGetInt(ui, UICFG_RIPPS2_SETTINGS_HOME, &mode);
++    diaSetVisible(ui, CFG_LBL_CUSTOMCFGPATH, mode == RIPPS2_HOME_CUSTOM);
++    diaSetVisible(ui, CFG_CUSTOMCFGPATH, mode == RIPPS2_HOME_CUSTOM);
++}
++
++void ripps2SettingsHomeBegin(struct UIItem *ui)
++{
++    diaSetEnum(ui, UICFG_RIPPS2_SETTINGS_HOME, ripps2HomeNames);
++    diaSetEnumHints(ui, UICFG_RIPPS2_SETTINGS_HOME, ripps2HomeHints);
++    diaSetInt(ui, UICFG_RIPPS2_SETTINGS_HOME, ripps2SettingsHomeOf(gCustomSettingsPath));
++    ripps2SettingsHomeShow(ui);
++}
++
++// After the dialog read CFG_CUSTOMCFGPATH into gCustomSettingsPath: the choice decides what it holds
++void ripps2SettingsHomeEnd(struct UIItem *ui)
++{
++    char hdd[sizeof(gCustomSettingsPath)];
++    int mode = RIPPS2_HOME_CUSTOM;
++
++    diaGetInt(ui, UICFG_RIPPS2_SETTINGS_HOME, &mode);
++    if (mode == RIPPS2_HOME_CARD)
++        gCustomSettingsPath[0] = '\0';
++    else if (mode == RIPPS2_HOME_HDD) {
++        if (ripps2SettingsHddHome(hdd, sizeof(hdd)))
++            snprintf(gCustomSettingsPath, sizeof(gCustomSettingsPath), "%s", hdd);
++        else if (ripps2SettingsHomeOf(gCustomSettingsPath) != RIPPS2_HOME_HDD)
++            guiShowToast(_t("NO INTERNAL HDD FOUND: SETTINGS STAY WHERE THEY ARE"));
++    } else if (ripps2SettingsHomeOf(gCustomSettingsPath) == RIPPS2_HOME_CARD) // Custom Path left blank: as before
++        diaSetInt(ui, UICFG_RIPPS2_SETTINGS_HOME, RIPPS2_HOME_CARD);
++}
++
+ int ripps2DiscQuiet(void)
+ {
+     int t, n = 0, mine = discPollBusy + ripps2ShotBusy(); // build 108: RIPSHOT's blank roll is quiet work too
+diff --git a/src/supportbase.c b/src/supportbase.c
+index f1bfc8d..1179eb5 100644
+--- a/src/supportbase.c
++++ b/src/supportbase.c
+@@ -30,6 +30,7 @@
+ #include "include/hddsupport.h"
+ #include "include/mmcesupport.h"
+ #include "include/metadb.h" // RIPPS2: the metadata database
++#include <delaythread.h>    // RIPPS2 build 109: sbPadBreath
+ #include "include/ripps2.h" // RIPPS2 build 77: ripps2NeutrinoOffer
+ 
+ #define NEWLIB_PORT_AWARE
+@@ -333,6 +334,15 @@ static int queryISOGameListCache(const struct game_cache_list *cache, base_game_
+ 
+ static int sbReadListErrno; // see sbGetReadListError
+ 
++// RIPPS2 build 109: an MMCE card shares SIO2 with the pads. Its list scan kept the bus busy from the first game to the
++// last, so on a big library nothing could be pressed until it ended (a tester: 180 games, about 5 minutes). A short
++// pause after each entry, and a frame after each game whose disc had to be read, hands the bus back to the pads.
++static void sbPadBreath(const char *path, int us)
++{
++    if (!strncmp(path, "mmce", 4))
++        DelayThread(us);
++}
++
+ int sbGetReadListError(void)
+ {
+     return sbReadListErrno;
+@@ -367,6 +377,8 @@ static int scanForISO(char *path, char type, struct game_list_t **glist, struct
+             int NameLen;
+             int format = isValidIsoName(dirent->d_name, &NameLen);
+ 
++            sbPadBreath(path, 1000); // build 109
++
+             if (format <= 0 || NameLen > ISO_GAME_NAME_MAX) {
+                 // Not a launchable ISO. With folder browsing on, a subdirectory here becomes a
+                 // GAME_FORMAT_FOLDER row. d_type is untrustworthy on MMCE clone firmware (mmceman
+@@ -445,6 +457,7 @@ static int scanForISO(char *path, char type, struct game_list_t **glist, struct
+                 game->extension[sizeof(game->extension) - 1] = '\0';
+ 
+                 fileXioUmount("iso:");
++                sbPadBreath(path, 17000); // build 109: a frame for the pads after a disc read
+             }
+ 
+             game->parts = 1;

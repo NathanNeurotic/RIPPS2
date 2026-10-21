@@ -955,6 +955,13 @@ strings:
   Shots wait on each game's roll in Memory Files (MEDIA/RIPSHOT) until you develop them. Nothing runs on its own.: 사진은 현상할 때까지 메모리 파일(MEDIA/RIPSHOT)의 각 게임 필름에서 기다립니다. 저절로 실행되는 것은 없습니다.
   The combo leaves the game at once, as before.: 조합키로 예전처럼 바로 게임을 나갑니다.
   VIEW: 보기
+  Memory Card: 메모리 카드
+  Internal HDD: 내장 HDD
+  Custom Path: 사용자 경로
+  Settings go in RIPPS2's own save on a memory card (the one RIPPS2 started from first), as before.: 설정은 메모리 카드의 RIPPS2 자체 저장 데이터에 들어갑니다(먼저 RIPPS2를 시작한 카드). 예전과 같습니다.
+  Settings go in a RIPPS2 folder on the internal HDD (exFAT, or the APA HDD's OPL partition) and are read from there first.: 설정은 내장 HDD(exFAT 또는 APA HDD의 OPL 파티션)의 RIPPS2 폴더에 들어가고, 먼저 거기서 읽습니다.
+  Settings go in the folder typed below, e.g. mass0:/OPL.: '설정은 아래에 입력한 폴더에 들어갑니다(예: mass0:/OPL).'
+  'NO INTERNAL HDD FOUND: SETTINGS STAY WHERE THEY ARE': '내장 HDD를 찾지 못함: 설정은 지금 위치에 그대로 둡니다'
 labels:
   IP_ADDRESS_TYPE_STATIC: 고정
   HINT_NEUTRINO_AUTO_ELF: 게임의 부트 ELF를 Neutrino에 넘겨 타이틀별 설정을 찾게 합니다. 기본으로 켜져 있으며, 직접 설정한 Boot ELF 옵션이 우선합니다.
@@ -1368,3 +1375,5 @@ labels:
   HINT_RIPPS2_RIPSHOT: 게임 내 메뉴에서 찍은 스크린샷을 테마용 ART 또는 MEDIA로.
   RIPPS2_DEVELOP_SHOTS: 사진 현상
   HINT_RIPPS2_DEVELOP_SHOTS: 각 게임 필름에서 기다리는 사진이 PNG가 되는 방법.
+  RIPPS2_SETTINGS_HOME: 설정 저장 위치
+  HINT_RIPPS2_SETTINGS_HOME: 'RIPPS2가 설정을 두는 곳: 메모리 카드의 자체 저장 데이터, 내장 HDD의 RIPPS2 폴더, 또는 직접 입력한 폴더.'
