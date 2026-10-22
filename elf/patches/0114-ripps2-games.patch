@@ -82917,10 +82917,10 @@ index 2600747..12722ca 100644
 -    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &favGetRowView, NULL, &favSaveCueSettings, &favGetPs1SaveDir};
 +    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &favGetRowView, NULL, &favSaveCueSettings, &favGetPs1SaveDir, &favCreateVMC};
 diff --git a/src/fntsys.c b/src/fntsys.c
-index d59e71c..48c5779 100644
+index d59e71c..6000fae 100644
 --- a/src/fntsys.c
 +++ b/src/fntsys.c
-@@ -19,6 +19,46 @@
+@@ -19,6 +19,48 @@
  #include <ft2build.h>
  
  #include FT_FREETYPE_H
@@ -82939,7 +82939,9 @@ index d59e71c..48c5779 100644
 +extern const FT_Module_Class psnames_module_class;
 +extern const FT_Module_Class pshinter_module_class;
 +#endif
-+FT_Memory FT_New_Memory(void); // ftsystem.c, as FT_Init_FreeType uses it
++FT_Memory FT_New_Memory(void);        // ftsystem.c, as FT_Init_FreeType uses it
++void FT_Done_Memory(FT_Memory memory); // and FT_Done_FreeType
++static FT_Memory font_memory;          // fntEnd gives it back
 +
 +static FT_Error fntNewLibrary(FT_Library *library)
 +{
@@ -82949,7 +82951,7 @@ index d59e71c..48c5779 100644
 +        &cff_driver_class, &psaux_module_class, &psnames_module_class, &pshinter_module_class,
 +#endif
 +        &sfnt_module_class, &ft_smooth_renderer_class};
-+    FT_Memory memory = FT_New_Memory();
++    FT_Memory memory = font_memory = FT_New_Memory();
 +    FT_Error error;
 +    unsigned i;
 +
@@ -82967,7 +82969,7 @@ index d59e71c..48c5779 100644
  
  extern void *poeveticanew_raw;
  extern int size_poeveticanew_raw;
-@@ -421,7 +461,7 @@ static int fntLoadSlotLocked(font_t *font, void *buffer, int bufferSize, int own
+@@ -421,7 +463,7 @@ static int fntLoadSlotLocked(font_t *font, void *buffer, int bufferSize, int own
  void fntInit()
  {
      LOG("FNTSYS Init\n");
@@ -82976,6 +82978,19 @@ index d59e71c..48c5779 100644
      if (error) {
          // just report over the ps2link
          LOG("FNTSYS Freetype init failed with %x!\n", error);
+@@ -528,7 +570,11 @@ void fntEnd()
+     fntUnlock();
+ 
+     // deinit freetype system
+-    FT_Done_FreeType(font_library);
++    // build 114: FT_Done_FreeType sits in ftinit.c with every module's table (it would link them all back)
++    FT_Done_Library(font_library);
++    if (font_memory != NULL)
++        FT_Done_Memory(font_memory);
++    font_memory = NULL;
+ 
+     DeleteSema(gFontSemaId);
+ 
 diff --git a/src/gui.c b/src/gui.c
 index 2b110ad..df8a522 100644
 --- a/src/gui.c
