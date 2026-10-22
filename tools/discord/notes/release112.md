@@ -20,6 +20,8 @@
 <img src="https://raw.githubusercontent.com/akilluminati47/RIPPS2/v1.1.2-beta/media/b112/02-both-ripped.jpg" width="48%" alt="Both ripped: bgm_00 Menu.wav (13.9 MB) and bgm_01 Red Screen.wav (15.1 MB)">
 </p>
 
+**Hotfix (10/22):** the lengths in the BIOS Music chooser ran out of its box; they sit inside it now (RIPPS2.elf replaced, still build 112).
+
 Build 111 is in this release too: the ripped menu music plays at all (any 16-bit WAV, as 48 kHz stereo), music on every theme, sounds that no longer reload on every theme change, Save Settings To that keeps a drive with a memory card in, and the star and Settings highlight on their words. Thanks to **lukeatmynose** for the reports from a real console.
 
 **[Full changelog](https://github.com/akilluminati47/RIPPS2/blob/main/CHANGELOG.md)** | **[Watch the v1.1.0 reel](https://youtu.be/Q8ZLd6ArV8s)** | **[Talk about it on psx-place](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/)** | [RIPPCSX2](https://github.com/akilluminati47/RIPPCSX2/releases/latest) for seeing a theme in true 720p and 1080i

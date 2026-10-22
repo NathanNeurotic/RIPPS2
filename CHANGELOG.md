@@ -13,6 +13,9 @@ The user (10/21): "i think were using the error red screen menu instead of the s
 ### Underneath
 - The new words in all 33 languages.
 
+### Hotfix (10/22/2026, still build 112)
+- **The lengths in BIOS Music's chooser stay inside its box.** They began at the box's right edge and ran out of it (5:04 and 5:31 over the frame); they end inside it now.
+
 ## Build 111 (beta, v1.1.1-beta), changes since build 110
 
 The user's notes of 10/21 and lukeatmynose's first report from a console (build 110).

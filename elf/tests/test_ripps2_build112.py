@@ -45,6 +45,9 @@ if '#define RBS_MUSIC_FILE "bgm_00 Menu.wav"' not in rip or '#define RBS_RED_FIL
 pick = rip[rip.index('static int rbsPickMusic('):rip.index('static int rbsRipPiece(')]
 if 'N_("THE MENU MUSIC (THE CLOCK)"), N_("THE RED SCREEN MUSIC (DISC WARNING)"), N_("BOTH")' not in pick or 'int sel = 0,' not in pick:
     fail.append('rbsPickMusic: THE MENU MUSIC first and highlighted, THE RED SCREEN MUSIC, BOTH')
+# hotfix (10/22, still build 112): the lengths ran out of the chooser's box (fntRenderString reads no ALIGN_RIGHT)
+if 'ALIGN_VCENTER | ALIGN_RIGHT' in pick or 'x + w - 16 - rmUnScaleX(fntCalcDimensions(smallFont, line))' not in pick:
+    fail.append('rbsPickMusic: each length measured and ended 16 px inside the box (no ALIGN_RIGHT: it is not read)')
 dlg = rip[rip.index('void ripps2RipBiosMusicDialog(void)'):]
 if 'if ((want = rbsPickMusic(len)) == 0) {' not in dlg:
     fail.append('ripps2RipBiosMusicDialog: the chooser comes before the folder question, and backing out rips nothing')

@@ -15,7 +15,7 @@ index 55e738d..63ef708 100644
  void ripps2RipBiosMusicDialog(void);
  
 diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
-index 2a536f2..20679e6 100644
+index 2a536f2..688c06a 100644
 --- a/src/ripps2biossnd.c
 +++ b/src/ripps2biossnd.c
 @@ -45,6 +45,11 @@
@@ -160,7 +160,7 @@ index 2a536f2..20679e6 100644
  } rbs_wav_t;
  
  static void rbsPut32(unsigned char *p, unsigned int v)
-@@ -1202,30 +1236,145 @@ static int rbsWavPut(const short *pcm, int n, int done, int total, void *ctx)
+@@ -1202,30 +1236,148 @@ static int rbsWavPut(const short *pcm, int n, int done, int total, void *ctx)
  {
      rbs_wav_t *w = (rbs_wav_t *)ctx;
      int pct = total > 0 ? (int)((long long)done * 100 / total) : 0;
@@ -230,7 +230,10 @@ index 2a536f2..20679e6 100644
 +            fntRenderStringFit(uiFont, x + 22, ry + 12, ALIGN_VCENTER, w - 100, _t(opts[i]), i == sel ? RBS_PICK_LIT : RBS_PICK_SOFT, 0);
 +            if (k >= 0 && len[k] > 0) { // its length, at the right
 +                snprintf(line, sizeof(line), "%d:%02d", len[k] / RBS_MUSIC_RATE / 60, len[k] / RBS_MUSIC_RATE % 60);
-+                fntRenderString(smallFont, x + w - 16, ry + 12, ALIGN_VCENTER | ALIGN_RIGHT, 0, 0, line, RBS_PICK_SOFT);
++                // hotfix (still build 112): fntRenderString has no right alignment (ALIGN_RIGHT is not read), so
++                // the length began at the box's edge and ran out of it; it ends 16 px inside now, measured
++                fntRenderString(smallFont, x + w - 16 - rmUnScaleX(fntCalcDimensions(smallFont, line)), ry + 12, ALIGN_VCENTER, 0, 0,
++                                line, RBS_PICK_SOFT);
 +            }
 +        }
 +        int hx = x + 16;
@@ -314,7 +317,7 @@ index 2a536f2..20679e6 100644
  
      if ((img = rbsReadSndImage(&imgSize)) == NULL) {
          guiMsgBox(_t("This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their "
-@@ -1234,12 +1383,27 @@ void ripps2RipBiosMusicDialog(void)
+@@ -1234,12 +1386,27 @@ void ripps2RipBiosMusicDialog(void)
          return;
      }
      guiRenderTextScreen(_t("Reading this console's menu music"));
@@ -344,7 +347,7 @@ index 2a536f2..20679e6 100644
      snprintf(mb, sizeof(mb), _t("%u.%u MB"), bytes / 1048576, bytes % 1048576 * 10 / 1048576);
      if (ripps2AudioBase(own, sizeof(own) - 8, 0) && strncmp(own, "mc", 2))
          snprintf(dirs[nd++], sizeof(dirs[0]), "%sAUDIO/", own);
-@@ -1254,20 +1418,55 @@ void ripps2RipBiosMusicDialog(void)
+@@ -1254,20 +1421,55 @@ void ripps2RipBiosMusicDialog(void)
          guiMsgBox(msg, 0, NULL);
          return;
      }
@@ -410,7 +413,7 @@ index 2a536f2..20679e6 100644
          guiMsgBoxStartOption(_t("RIP"));
          pick = guiMsgBox(msg, 0, NULL) == 2 ? 1 : 0;
      }
-@@ -1280,41 +1479,20 @@ void ripps2RipBiosMusicDialog(void)
+@@ -1280,41 +1482,20 @@ void ripps2RipBiosMusicDialog(void)
      mkdir(path, 0777);
      path[strlen(path) - 5] = '\0'; // build 105: "<base>AUDIO" -> "<base>", for AUDIO's README.txt
      ripps2WriteReadme(path, 0);
