@@ -161,7 +161,7 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
 - [x] 9 new sentences in all 32 translations.
 - [x] The sounds walkthrough, one take (media/b112): takes111.ps1 tut_c2 + short112.py.
 
-## Build 113 (the user 10/21-10/22): in progress on branch b113
+## Build 113 (the user 10/21-10/22): done 10/22, released in v1.1.3-beta
 - [x] Fast Cache: Game Sources > Cache holds Fast Cache (each source's RIPPS2.LST: on by default, off reads every list
       from its source first, as before 110), Cache Game List (HDD APA) and Automatic Refresh, each with a tooltip;
       the BDM/HDD/SMB read-ahead caches went to Game Launching (they act in game, not on lists). Not done: a line per
@@ -170,7 +170,7 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
       build 114 (10/22): every All Games row hands launch, config and art to its source's own list, so rows shown
       before the sources start need a saved master list, a wait for their source at launch, and a hand-over when the
       sources come up, inside mixsupport.c's rebuild locking (a rebuild race crashed the console in build 66).
-- [x] Legacy theme key (code in, lab pass pending): `categories=three|storage`. Unset, a theme using any RIPPS2 key
+- [x] Legacy theme key (lab pass on the release ELF, 10/22: Adapt Rx with categories=storage, takes113.ps1 legacy): `categories=three|storage`. Unset, a theme using any RIPPS2 key
       (towers, bg_blur, source_name, glyph_set, sounds, color_theme, category_*, page_buttons, launch_disc) keeps
       the three, so an older Adapt pack is not cut down; one made for OPL is legacy: no bar, no sidebar, LAUNCH DISC
       and MEMORY FILES first in the START menu, the cancel button (or L1 / R1) back to Storage, L1 / R1 turn the
