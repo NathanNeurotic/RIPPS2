@@ -82917,10 +82917,10 @@ index 2600747..12722ca 100644
 -    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &favGetRowView, NULL, &favSaveCueSettings, &favGetPs1SaveDir};
 +    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &favGetRowView, NULL, &favSaveCueSettings, &favGetPs1SaveDir, &favCreateVMC};
 diff --git a/src/fntsys.c b/src/fntsys.c
-index d59e71c..4b4e05d 100644
+index d59e71c..48c5779 100644
 --- a/src/fntsys.c
 +++ b/src/fntsys.c
-@@ -19,6 +19,45 @@
+@@ -19,6 +19,46 @@
  #include <ft2build.h>
  
  #include FT_FREETYPE_H
@@ -82960,13 +82960,14 @@ index d59e71c..4b4e05d 100644
 +    for (i = 0; i < sizeof(modules) / sizeof(modules[0]); i++)
 +        if ((error = FT_Add_Module(*library, modules[i])) != 0)
 +            return error;
-+    FT_Set_Default_Properties(*library);
++    // no FT_Set_Default_Properties: it sits in ftinit.c with the table of every module, and links them all back in;
++    // it only reads a FREETYPE_PROPERTIES environment variable, which a PS2 never has
 +    return 0;
 +}
  
  extern void *poeveticanew_raw;
  extern int size_poeveticanew_raw;
-@@ -421,7 +460,7 @@ static int fntLoadSlotLocked(font_t *font, void *buffer, int bufferSize, int own
+@@ -421,7 +461,7 @@ static int fntLoadSlotLocked(font_t *font, void *buffer, int bufferSize, int own
  void fntInit()
  {
      LOG("FNTSYS Init\n");
