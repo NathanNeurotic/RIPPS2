@@ -393,6 +393,7 @@ strings:
   - ripps2disc.c
   - ripps2edit.c
   - ripps2files.c
+  - ripps2games.c
   - ripps2hdd.c
   - ripps2media.c
   - ripps2ra.c
@@ -1158,6 +1159,7 @@ strings:
   in:
   - ripps2card.c
   - ripps2files.c
+  - ripps2games.c
 - en: Delete the save %s from %s? It cannot be brought back.
   in:
   - ripps2card.c
@@ -2048,6 +2050,166 @@ strings:
 - en: onto this memory card
   in:
   - ripps2files.c
+- en: ' and '
+  in:
+  - ripps2games.c
+  - vcdsupport.c
+- en: '%d games, on the started drives'
+  in:
+  - ripps2games.c
+- en: '%s: SOME FILES COULD NOT BE DELETED'
+  in:
+  - ripps2games.c
+- en: '%u partitions, all in order'
+  in:
+  - ripps2games.c
+- en: ', %d art images'
+  in:
+  - ripps2games.c
+- en: ', and '
+  in:
+  - ripps2games.c
+- en: ', its cheats'
+  in:
+  - ripps2games.c
+- en: ', its settings'
+  in:
+  - ripps2games.c
+- en: 1 game, on the started drives
+  in:
+  - ripps2games.c
+- en: A PS1 game here is deleted in Memory Files, where it is a file of its own.
+  in:
+  - ripps2games.c
+- en: A network catalogue's games are deleted on the PC that serves them.
+  in:
+  - ripps2games.c
+- en: DELETE FOR GOOD
+  in:
+  - ripps2games.c
+- en: DELETE IT
+  in:
+  - ripps2games.c
+- en: 'DELETED %s: %s FREED'
+  in:
+  - ripps2games.c
+- en: 'Delete %s from %s? Goes: %s.'
+  in:
+  - ripps2games.c
+- en: 'Delete %s from %s? Goes: %s. Kept: %s.'
+  in:
+  - ripps2games.c
+- en: Delete its saves and RIPSHOT pictures too? No keeps them.
+  in:
+  - ripps2games.c
+- en: HIDDEN GAMES
+  in:
+  - ripps2games.c
+- en: 'HIDDEN: %s'
+  in:
+  - ripps2games.c
+- en: Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.
+  in:
+  - ripps2games.c
+- en: Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.
+  in:
+  - ripps2games.c
+- en: None. Hide Game, in a game's options, puts one here.
+  in:
+  - ripps2games.c
+- en: 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  in:
+  - ripps2games.c
+- en: RIPPS2 cannot delete a game from this page.
+  in:
+  - ripps2games.c
+- en: RIPPS2 could not find this game's files on its drive.
+  in:
+  - ripps2games.c
+- en: Reading the hidden lists
+  in:
+  - ripps2games.c
+- en: SHOW AGAIN OR DELETE
+  in:
+  - ripps2games.c
+- en: SHOW IT AGAIN
+  in:
+  - ripps2games.c
+- en: That game is not on its drive any more.
+  in:
+  - ripps2games.c
+- en: The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?
+  in:
+  - ripps2games.c
+- en: The partition could not be removed (%d). Nothing was deleted.
+  in:
+  - ripps2games.c
+- en: This drive cannot keep a hidden list (a network catalogue).
+  in:
+  - ripps2games.c
+- en: This game's drive has not answered yet. Wait for it, then try again.
+  in:
+  - ripps2games.c
+- en: This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).
+  in:
+  - ripps2games.c
+- en: 'a partition is larger than this disk allows: the table was made for a disk of another size'
+  in:
+  - ripps2games.c
+- en: 'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk'
+  in:
+  - ripps2games.c
+- en: its RIPSHOT pictures
+  in:
+  - ripps2games.c
+- en: its drive
+  in:
+  - ripps2games.c
+- en: its saves
+  in:
+  - ripps2games.c
+- en: sector %u holds no partition header
+  in:
+  - ripps2games.c
+- en: the SMB share
+  in:
+  - ripps2games.c
+- en: the chain does not close at __mbr
+  in:
+  - ripps2games.c
+- en: the chain skips from sector %u
+  in:
+  - ripps2games.c
+- en: the chain's links disagree at sector %u
+  in:
+  - ripps2games.c
+- en: the drive
+  in:
+  - ripps2games.c
+- en: the drive's size could not be read
+  in:
+  - ripps2games.c
+- en: the game (%s)
+  in:
+  - ripps2games.c
+- en: the game's folder and everything in it (%s)
+  in:
+  - ripps2games.c
+- en: the header at sector %u could not be read
+  in:
+  - ripps2games.c
+- en: the header at sector %u fails its checksum
+  in:
+  - ripps2games.c
+- en: the internal HDD (APA)
+  in:
+  - ripps2games.c
+- en: the partition at sector %u is not where or as large as APA puts one
+  in:
+  - ripps2games.c
+- en: the settings and art another copy of it uses
+  in:
+  - ripps2games.c
 - en: '%d PARTITIONS   %s FREE OF %s'
   in:
   - ripps2hdd.c
@@ -2592,13 +2754,10 @@ strings:
 - en: DRIVES
   in:
   - ripps2status.c
-- en: Ember (Gageformer)
+- en: Each launch uses yours from where it is found. RIPPS2's own Neutrino is offered only when you have none.
   in:
   - ripps2status.c
-- en: Ember's BIOS (bios.bin)
-  in:
-  - ripps2status.c
-- en: 'Found: %s'
+- en: Ember's BIOS
   in:
   - ripps2status.c
 - en: INSTALL RIPPS2'S NEUTRINO
@@ -2646,28 +2805,10 @@ strings:
 - en: NEUTRINO SETTINGS
   in:
   - ripps2status.c
-- en: Neutrino 1.8.0 (rickgaiser)
-  in:
-  - ripps2status.c
 - en: 'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.'
   in:
   - ripps2status.c
-- en: Not found on the started drives. A game that needs it looks for yours first; RIPPS2's own copy is offered, once, only when there is none.
-  in:
-  - ripps2status.c
-- en: Not found. Put ember.elf in a drive's EMBER folder; a launch on another drive offers to copy it there.
-  in:
-  - ripps2status.c
-- en: Not found. Put your own POPSTARTER.ELF on a drive, then LOOK FOR THEM.
-  in:
-  - ripps2status.c
-- en: Not found. They come from your own console; a launch copies them beside the games from where they are found.
-  in:
-  - ripps2status.c
-- en: Not found. Your own PS1 BIOS, as bios.bin beside ember.elf.
-  in:
-  - ripps2status.c
-- en: POPSTARTER (krHACKen)
+- en: POPS files
   in:
   - ripps2status.c
 - en: POPSTARTER NETWORK
@@ -2700,9 +2841,6 @@ strings:
 - en: Start every drive first, so the search reaches all of them? (No searches the drives already started.)
   in:
   - ripps2status.c
-- en: The POPS files (POPS.ELF, POPS_IOX.PAK)
-  in:
-  - ripps2status.c
 - en: USB, HDD, MMCE and the rest
   in:
   - ripps2status.c
@@ -2725,6 +2863,12 @@ strings:
   in:
   - ripps2status.c
 - en: its own IP and SMB files
+  in:
+  - ripps2status.c
+- en: not found yet
+  in:
+  - ripps2status.c
+- en: not on a started drive
   in:
   - ripps2status.c
 - en: only if you have none
@@ -2856,9 +3000,6 @@ strings:
 - en: USB Drive
   in:
   - ripps2ui.c
-- en: ' and '
-  in:
-  - vcdsupport.c
 - en: '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
   in:
   - vcdsupport.c

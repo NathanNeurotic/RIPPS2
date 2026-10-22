@@ -10419,7 +10419,7 @@ z1|)Oi{SJpAnfX78HAufmQ)Io!Mv-BWEslJQT162N85L=XY!}%fvP)#Q$R3fsA~P&i
 Hspb7&p}~h#
 
 diff --git a/Makefile b/Makefile
-index 31e61cd..00d5371 100644
+index 31e61cd..c2d5f05 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -138,9 +138,9 @@ ifneq ($(GIT_TAG),latest)
@@ -10427,7 +10427,7 @@ index 31e61cd..00d5371 100644
  endif
  
 -FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2side.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2disc.o ripps2shot.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
-+FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2side.o ripps2seance.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2disc.o ripps2shot.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
++FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2side.o ripps2seance.o ripps2games.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2disc.o ripps2shot.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
  		dia.o ioman.o texcache.o themes.o supportbase.o bdmsupport.o netsupport.o ethsupport.o httpcatalog.o httpsupport.o udpfssupport.o hddsupport.o zso.o lz4.o launchdiag.o \
 -		appsupport.o mmcesupport.o artindex.o vcdsupport.o cuesupport.o libview.o retrogem.o folderbrowse.o gui.o guigame.o vmc_groups.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o cheatconfig.o sound.o ps2cnf.o tar.o saveicon.o cfgtitle.o
 +		appsupport.o mmcesupport.o artindex.o vcdsupport.o cuesupport.o libview.o retrogem.o folderbrowse.o gui.o guigame.o vmcrebuild.o vmc_groups.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o cheatconfig.o sound.o ps2cnf.o tar.o saveicon.o cfgtitle.o
@@ -13974,7 +13974,7 @@ index 726c128..2cf6604 100644
  
  // Scan "<devPrefix><EmberFolder>/games/" for game SUBDIRECTORIES -- and a subdirectory only counts
 diff --git a/include/dialogs.h b/include/dialogs.h
-index f70771d..20a840b 100644
+index f70771d..86d3a42 100644
 --- a/include/dialogs.h
 +++ b/include/dialogs.h
 @@ -326,6 +326,7 @@ enum UI_ITEMS {
@@ -13985,7 +13985,7 @@ index f70771d..20a840b 100644
  
      OSD_LANGUAGE_SOURCE,
      OSD_LANGUAGE_ENABLE,
-@@ -369,6 +370,12 @@ enum UI_ITEMS {
+@@ -369,6 +370,13 @@ enum UI_ITEMS {
      RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
      CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
      LAUNCH_GSM_DEFAULTS_BUTTON,
@@ -13995,6 +13995,7 @@ index f70771d..20a840b 100644
 +    RIPPS2_SEANCE_ROW3,
 +    RIPPS2_SEANCE_ROW4,
 +    RIPPS2_SEANCE_BUTTON, // and Look now
++    RIPPS2_HIDDEN_BUTTON, // RIPPS2 build 114: Game Sources > Hidden Games
  
  #ifdef PADEMU
      PADEMU_GLOBAL_BUTTON,
@@ -14350,6 +14351,30 @@ index a10c426..54ecd88 100644
  // ---- build 113: the category sidebar (ripps2side.c) ----
  extern int gRipps2FastCache; // build 113: Game Sources > Cache > Fast Cache, each source's saved list (1, the default)
  extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar
+diff --git a/include/ripps2games.h b/include/ripps2games.h
+new file mode 100644
+index 0000000..e5e00d4
+--- /dev/null
++++ b/include/ripps2games.h
+@@ -0,0 +1,18 @@
++#ifndef __RIPPS2_GAMES_H
++#define __RIPPS2_GAMES_H
++
++#include "include/iosupport.h"
++
++// RIPPS2 build 114 (ripps2games.c): SHROUD, a game hidden from every list until Settings shows it again, kept on its
++// own drive (RIPPS2.HID beside RIPPS2.LST); LAST RITES, a game deleted with everything of its; and the APA table check
++// that runs before any partition goes (Berion's warning: a table written from an image of another size breaks).
++
++int ripps2ShroudHas(int mode, int ps1, const char *name);   // a source's hidden list names this game (loads it once)
++int ripps2ShroudRow(item_list_t *support, int id);          // opl.c, as a page's rows are made: 1 = leave this one out
++void ripps2ShroudReload(int mode);                          // a source's list was read again: its hidden list too
++void ripps2ShroudHide(item_list_t *support, int id);        // the game options' Hide Game
++void ripps2HiddenGames(void);                               // Settings > Game Sources > Hidden Games
++void ripps2LastRites(item_list_t *support, int id);         // the game options' Delete, every source but Apps
++int ripps2ApaCheck(char *why, int whySize);                 // 1: the APA table fits this disk (why: what does not)
++
++#endif
 diff --git a/include/ripps2seance.h b/include/ripps2seance.h
 new file mode 100644
 index 0000000..e451104
@@ -26535,10 +26560,10 @@ index 10e6306..c65f5be 100644
 +  PCCF_UNSUPPORTED_GAME: Hiện CF chỉ hỗ trợ trò chơi PS2 gốc. VMC trên CF, nạp PS1 và thành tích qua mạng không dùng được.
 +  HINT_ENABLE_DVR: Tìm ISO DESR DVR thử nghiệm. Cần bật nguồn HDD; chạy trò chơi cần Neutrino bên ngoài có hỗ trợ DVR.
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index e2e218a..0f60542 100644
+index e2e218a..b14dac5 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
-@@ -2076,3 +2076,80 @@ gui_strings:
+@@ -2076,3 +2076,89 @@ gui_strings:
  
  - label: HINT_ENABLE_DVR
    string: "Experimental DESR DVR ISO discovery. Requires HDD source enabled; game launch needs external DVR-capable Neutrino."
@@ -26619,6 +26644,15 @@ index e2e218a..0f60542 100644
 +
 +- label: HINT_RIPPS2_LOOK_NOW
 +  string: "SEANCE searches the started drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is. Every launch reads them from there."
++
++- label: RIPPS2_HIDE_GAME
++  string: "Hide Game"
++
++- label: RIPPS2_HIDDEN_GAMES
++  string: "Hidden Games"
++
++- label: HINT_RIPPS2_HIDDEN_GAMES
++  string: "The games hidden with Hide Game, on the started drives. Show one again, or delete it. Each drive keeps its own list."
 diff --git a/misc/theme_psbbn_flow.cfg b/misc/theme_psbbn_flow.cfg
 index 5bac71b..285e460 100644
 --- a/misc/theme_psbbn_flow.cfg
@@ -82714,10 +82748,23 @@ index 72b562e..2639ae1 100644
          return -1;
      }
 diff --git a/src/dialogs.c b/src/dialogs.c
-index 238686c..341940d 100644
+index 238686c..518ece8 100644
 --- a/src/dialogs.c
 +++ b/src/dialogs.c
-@@ -1303,6 +1303,10 @@ struct UIItem diaCompatConfig[] = {
+@@ -529,6 +529,12 @@ struct UIItem diaDeviceConfig[] = {
+     {UI_BUTTON, RIPPS2_CACHE_BUTTON, 1, 1, _STR_HINT_RIPPS2_CACHE, 0, 0, {.label = {NULL, _STR_MODIFY}}},
+     {UI_BREAK},
+ 
++    // RIPPS2 build 114: the games hidden with Hide Game, shown again or deleted from here only
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_HIDDEN_GAMES}}},
++    {UI_SPACER},
++    {UI_BUTTON, RIPPS2_HIDDEN_BUTTON, 1, 1, _STR_HINT_RIPPS2_HIDDEN_GAMES, 0, 0, {.label = {NULL, _STR_MODIFY}}},
++    {UI_BREAK},
++
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+     {UI_BREAK},
+@@ -1303,6 +1309,10 @@ struct UIItem diaCompatConfig[] = {
      {UI_LABEL, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_MODE7}}},
      {UI_SPACER},
      {UI_BOOL, COMPAT_MODE_BASE + 6, 1, 1, _STR_HINT_MODE7, -10, 0, {.intvalue = {0, 0}}},
@@ -82728,7 +82775,7 @@ index 238686c..341940d 100644
      {UI_BREAK},
  
      {UI_SPACER},
-@@ -1398,6 +1402,8 @@ struct UIItem diaVMC[] = {
+@@ -1398,6 +1408,8 @@ struct UIItem diaVMC[] = {
      {UI_BUTTON, VMC_BUTTON_CREATE, 1, 1, _STR_HINT_VMC_CREATE, 0, 0, {.label = {NULL, -1}}},
      {UI_SPACER},
      {UI_BUTTON, VMC_BUTTON_DELETE, 1, 1, _STR_HINT_VMC_DELETE, 0, 0, {.label = {NULL, _STR_DELETE}}},
@@ -82737,7 +82784,7 @@ index 238686c..341940d 100644
      {UI_BREAK},
  
      // end of dialog
-@@ -2030,6 +2036,24 @@ struct UIItem diaCacheConfig[] = {
+@@ -2030,6 +2042,24 @@ struct UIItem diaCacheConfig[] = {
      {UI_BOOL, UICFG_AUTOREFRESH, 1, 1, _STR_HINT_AUTOREFRESH, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -82835,10 +82882,10 @@ index 2600747..12722ca 100644
 -    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &favGetRowView, NULL, &favSaveCueSettings, &favGetPs1SaveDir};
 +    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &favGetRowView, NULL, &favSaveCueSettings, &favGetPs1SaveDir, &favCreateVMC};
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..7785488 100644
+index 2b110ad..df8a522 100644
 --- a/src/gui.c
 +++ b/src/gui.c
-@@ -12,10 +12,12 @@
+@@ -12,10 +12,13 @@
  #endif
  #include "include/gui.h"
  #include "include/ripps2_build.h" // build 103: RIPPS2_VERSION, RIPPS2_BUILD for the version line
@@ -82848,10 +82895,11 @@ index 2b110ad..7785488 100644
  #include "include/menusys.h"
  #include "include/ripps2.h" // RIPPS2 category screens
 +#include "include/ripps2seance.h" // RIPPS2 build 114: Cache > Launchers
++#include "include/ripps2games.h"  // RIPPS2 build 114: Game Sources > Hidden Games
  #include "include/ripps2shot.h" // build 108: ripps2ShotTick
  #include "include/ripps2biossnd.h" // RIPPS2 build 88: Audio settings > BIOS Sounds
  #include "include/fntsys.h"
-@@ -938,12 +940,32 @@ static void guiSaveAdvancedSettings(struct UIItem *ui);
+@@ -938,12 +941,32 @@ static void guiSaveAdvancedSettings(struct UIItem *ui);
  // what it does now): Fast Cache (each source's saved list), Cache Game List (HDD APA) and Automatic Refresh
  static void guiShowCacheConfig(void)
  {
@@ -82886,7 +82934,18 @@ index 2b110ad..7785488 100644
          return;
      diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, &gRipps2FastCache);
      diaGetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, &gHDDGameListCache);
-@@ -1908,6 +1930,79 @@ int guiShowVcdUsbMode(void)
+@@ -1015,6 +1038,10 @@ reshow_device:
+         guiShowCacheConfig();
+         goto reshow_device;
+     }
++    if (ret == RIPPS2_HIDDEN_BUTTON) { // build 114: Game Sources > Hidden Games
++        ripps2HiddenGames();
++        goto reshow_device;
++    }
+     if (ret == MMCE_SETTINGS_BUTTON) {
+         guiShowMmceConfig();
+         goto reshow_device;
+@@ -1908,6 +1935,79 @@ int guiShowVcdUsbMode(void)
      return diaExecuteDialog(diaVcdUsbMode, -1, 1, NULL);
  }
  
@@ -82966,7 +83025,18 @@ index 2b110ad..7785488 100644
  static void guiSetBdmaSettings(struct UIItem *ui)
  {
      static const char *bdmaSourceStrs[] = {NULL, NULL, NULL, NULL, NULL, NULL};
-@@ -5428,13 +5523,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -3404,6 +3504,10 @@ reshow_sources:
+         guiShowCacheConfig();
+         goto reshow_sources;
+     }
++    if (result == RIPPS2_HIDDEN_BUTTON) { // build 114: Game Sources > Hidden Games
++        ripps2HiddenGames();
++        goto reshow_sources;
++    }
+     if (result == MMCE_SETTINGS_BUTTON) {
+         // MMCE uses a separate composition buffer. Confirming the child editor finishes the
+         // Settings page and returns to the hub; Circle resumes Game Sources as the parent page.
+@@ -5428,13 +5532,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
  
          if (ui)
              diaRenderUI(ui, screenHandler->inMenu, NULL, 0);
@@ -83913,10 +83983,95 @@ index 6bb34ce..2b0a704 100644
                      thmSetGuiValue(thmGetGuiValue(), 1);
                      bgmUnMute();
 diff --git a/src/menusys.c b/src/menusys.c
-index 879e0d7..fba8d5b 100644
+index 879e0d7..3c15d07 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
-@@ -1377,7 +1377,10 @@ static void menuFolderResetLeaving(struct menu_list *leaving)
+@@ -33,6 +33,7 @@
+ #include "include/cfgtitle.h"     // cfgTitleDisplayName: optional CFG Title shown for a row (#918)
+ #include "include/bdmsupport.h"   // bdmSupportIsUDPBD() -- UDPBD games are Neutrino-only
+ #include "include/ripps2.h"       // RIPPS2: bundled Memory Files launcher
++#include "include/ripps2games.h" // RIPPS2 build 114: Hide Game, Delete (LAST RITES)
+ #include "include/ripps2tr.h" // RIPPS2 build 104: _t
+ #include <assert.h>
+ #include <stdlib.h> // RIPPS2: rand() for the random game
+@@ -77,6 +78,7 @@ enum GAME_MENU_IDs {
+     GAME_REMOVE_CHANGES,
+     GAME_RENAME_GAME,
+     GAME_DELETE_GAME,
++    GAME_HIDE_GAME, // RIPPS2 build 114
+ #ifdef RETROACHIEVEMENTS
+     // Appended last, and only in the RA flavour: menuRenderGameMenu's extra-spacing arithmetic keys
+     // on these enum positions, so RA entries must not shift the existing ones.
+@@ -92,6 +94,7 @@ enum APP_MENU_IDs {
+     APP_GLOBAL_PS_SETTINGS,
+     APP_EMBER_GAME_SETTINGS,
+     APP_CASE_SHAPE, // RIPPS2 build 102
++    APP_HIDE,       // RIPPS2 build 114: a PS1 game's Hide Game
+ };
+ 
+ // global menu variables
+@@ -246,6 +249,18 @@ static void menuRenameGame(submenu_list_t **submenu)
+         guiMsgBox("NULL Support object. Please report", 0, NULL);
+ }
+ 
++// RIPPS2 build 114: SHROUD, Hide Game (ripps2games.c)
++static void menuHideGame(submenu_list_t **submenu)
++{
++    item_list_t *support = selected_item->item->userdata;
++    if (!selected_item->item->current || !gEnableWrite || support == NULL)
++        return;
++    int id = selected_item->item->current->item.id;
++    guiSwitchScreen(GUI_SCREEN_MAIN);
++    submenuDestroy(submenu);
++    ripps2ShroudHide(support, id);
++}
++
+ static void menuDeleteGame(submenu_list_t **submenu)
+ {
+     if (!selected_item->item->current)
+@@ -256,6 +271,17 @@ static void menuDeleteGame(submenu_list_t **submenu)
+ 
+     item_list_t *support = selected_item->item->userdata;
+ 
++    // RIPPS2 build 114: LAST RITES, the game and everything of its (its star goes with it), on every source but Apps
++    if (support != NULL && support->mode != APP_MODE) {
++        if (menuCheckParentalLock() == 0) {
++            int id = selected_item->item->current->item.id;
++            guiSwitchScreen(GUI_SCREEN_MAIN);
++            submenuDestroy(submenu);
++            ripps2LastRites(support, id);
++        }
++        return;
++    }
++
+     if (support && support->mode == FAV_MODE) {
+         char text[128];
+         snprintf(text, sizeof(text), _l(_STR_FAV_MSG), _l(_STR_DELETE));
+@@ -800,8 +826,11 @@ void menuInitGameMenu(item_list_t *support)
+         int fav = support != NULL && support->mode == FAV_MODE;
+         if (fav || (support != NULL && support->itemRename != NULL && support->mode != HDD_MODE))
+             submenuAppendItem(&gameMenu, -1, NULL, GAME_RENAME_GAME, _STR_RENAME);
+-        if (fav || (support != NULL && support->itemDelete != NULL))
++        // RIPPS2 build 114: LAST RITES deletes on every source but Apps (the APA HDD by its partition), and Hide Game
++        if (support != NULL && support->mode != APP_MODE) {
+             submenuAppendItem(&gameMenu, -1, NULL, GAME_DELETE_GAME, _STR_DELETE);
++            submenuAppendItem(&gameMenu, -1, NULL, GAME_HIDE_GAME, _STR_RIPPS2_HIDE_GAME);
++        }
+     }
+ #ifdef RETROACHIEVEMENTS
+     submenuAppendItem(&gameMenu, -1, NULL, GAME_RA_CHECK, _STR_RA_CHECK_GAME);
+@@ -842,6 +871,10 @@ void menuInitVcdMenu(int isEmber)
+     if (isEmber)
+         submenuAppendItem(&appMenu, -1, NULL, APP_EMBER_GAME_SETTINGS, _STR_EMBER_GAME_SETTINGS);
+     submenuAppendItem(&appMenu, -1, NULL, APP_RENAME, _STR_RENAME);
++    if (gEnableWrite) { // RIPPS2 build 114
++        submenuAppendItem(&appMenu, -1, NULL, APP_DELETE, _STR_DELETE);
++        submenuAppendItem(&appMenu, -1, NULL, APP_HIDE, _STR_RIPPS2_HIDE_GAME);
++    }
+ #ifdef RETROACHIEVEMENTS
+     if (!isEmber) {
+         submenuAppendItem(&appMenu, -1, NULL, GAME_RA_CHECK, _STR_RA_CHECK_GAME);
+@@ -1377,7 +1410,10 @@ static void menuFolderResetLeaving(struct menu_list *leaving)
  
  static void menuNextH()
  {
@@ -83928,7 +84083,7 @@ index 879e0d7..fba8d5b 100644
      while (next != NULL && next->item->visible == 0)
          next = next->next;
  
-@@ -1386,13 +1389,19 @@ static void menuNextH()
+@@ -1386,13 +1422,19 @@ static void menuNextH()
          menuFolderResetLeaving(selected_item);
          selected_item = next;
          itemConfigId = -1;
@@ -83950,7 +84105,7 @@ index 879e0d7..fba8d5b 100644
      while (prev != NULL && prev->item->visible == 0)
          prev = prev->prev;
  
-@@ -1400,8 +1409,12 @@ static void menuPrevH()
+@@ -1400,8 +1442,12 @@ static void menuPrevH()
          menuFolderResetLeaving(selected_item);
          selected_item = prev;
          itemConfigId = -1;
@@ -83964,8 +84119,26 @@ index 879e0d7..fba8d5b 100644
  }
  
  static void menuFirstPage()
+@@ -2815,6 +2861,8 @@ void menuHandleInputGameMenu()
+             menuRenameGame(&gameMenu);
+         } else if (menuID == GAME_DELETE_GAME) {
+             menuDeleteGame(&gameMenu);
++        } else if (menuID == GAME_HIDE_GAME) { // RIPPS2 build 114
++            menuHideGame(&gameMenu);
+         }
+         // so the exit press wont propagate twice
+         readPads();
+@@ -2966,6 +3014,8 @@ void menuHandleInputAppMenu()
+             menuRenameGame(&appMenu);
+         } else if (menuID == APP_DELETE) {
+             menuDeleteGame(&appMenu);
++        } else if (menuID == APP_HIDE) { // RIPPS2 build 114
++            menuHideGame(&appMenu);
+         } else if (menuID == APP_GLOBAL_PS_SETTINGS) {
+             guiShowPsEmulationSettings();
+         } else if (menuID == APP_EMBER_GAME_SETTINGS) {
 diff --git a/src/mixsupport.c b/src/mixsupport.c
-index 116a919..87a3b2e 100644
+index 116a919..0e67685 100644
 --- a/src/mixsupport.c
 +++ b/src/mixsupport.c
 @@ -18,6 +18,16 @@
@@ -83985,7 +84158,7 @@ index 116a919..87a3b2e 100644
  */
  
  #include <stdio.h>
-@@ -42,6 +52,18 @@
+@@ -42,6 +52,19 @@
  #include "include/mixsupport.h"
  
  #include <kernel.h>
@@ -83999,12 +84172,13 @@ index 116a919..87a3b2e 100644
 +#include "include/pad.h"
 +#include "include/sound.h"
 +#include "include/ripps2.h"
++#include "include/ripps2games.h" // build 114: hidden games stay out
 +#include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
 +#include "include/ripps2tr.h"   // _t, RIPPS2's words in the chosen language
  
  typedef struct
  {
-@@ -52,6 +74,7 @@ typedef struct
+@@ -52,6 +75,7 @@ typedef struct
      int rank;           // source order: the lower one keeps a title found on two sources
      char *text;         // heap copies, owned here; the submenu aliases text
      char *startup;      // the art and last-played key (a PS1 row's is its name)
@@ -84012,7 +84186,7 @@ index 116a919..87a3b2e 100644
  } mix_rec_t;
  
  static mix_rec_t *mixArray = NULL;
-@@ -86,6 +109,248 @@ static const int mixSourceModes[] = {HDD_MODE, BDM_MODE, BDM_MODE1, BDM_MODE2, B
+@@ -86,6 +110,248 @@ static const int mixSourceModes[] = {HDD_MODE, BDM_MODE, BDM_MODE1, BDM_MODE2, B
                                       BDM_MODE6, BDM_MODE7, MMCE_MODE, ETH_MODE, UDPFS_MODE, HTTP_MODE};
  #define MIX_SOURCE_COUNT ((int)(sizeof(mixSourceModes) / sizeof(mixSourceModes[0])))
  
@@ -84261,7 +84435,7 @@ index 116a919..87a3b2e 100644
  static char *mixStrdup(const char *s)
  {
      int n = (int)strlen(s) + 1;
-@@ -133,7 +398,7 @@ typedef struct
+@@ -133,7 +399,7 @@ typedef struct
      int count, cap;
  } mix_build_t;
  
@@ -84270,7 +84444,7 @@ index 116a919..87a3b2e 100644
  {
      if (b->count == b->cap) {
          int cap = b->cap ? b->cap * 2 : 256;
-@@ -157,6 +422,7 @@ static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int
+@@ -157,6 +423,7 @@ static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int
      r->rank = rank;
      r->text = text;
      r->startup = st;
@@ -84278,25 +84452,29 @@ index 116a919..87a3b2e 100644
  }
  
  // One source's games: its PS2 list, then its PS1 list when it can launch PS1 titles
-@@ -190,7 +456,7 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+@@ -190,7 +457,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
              LOG("mixCollect: mode %d row %d has no name\n", mode, i);
              continue;
          }
 -        mixAppend(b, src, mode, i, FAV_KIND_ISO, rank, name, view.itemGetStartup != NULL ? view.itemGetStartup(&view, i) : NULL);
++        if (ripps2ShroudHas(mode, 0, name)) // build 114: hidden
++            continue;
 +        mixAppend(b, src, mode, i, FAV_KIND_ISO, rank, name, view.itemGetStartup != NULL ? view.itemGetStartup(&view, i) : NULL, mixModeFamily(mode));
      }
  
      if (!libViewSupported(mode, LIB_VIEW_PS1) || (src->itemLaunchVcd == NULL && src->itemLaunchCue == NULL))
-@@ -215,7 +481,7 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+@@ -215,7 +484,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
              continue;
          if (kind == FAV_KIND_CUE && src->itemLaunchCue == NULL)
              continue;
 -        mixAppend(b, src, mode, i, kind, rank, name, name);
++        if (ripps2ShroudHas(mode, 1, name)) // build 114: hidden
++            continue;
 +        mixAppend(b, src, mode, i, kind, rank, name, name, mixModeFamily(mode));
      }
  }
  
-@@ -244,11 +510,15 @@ static void mixInit(item_list_t *itemList)
+@@ -244,11 +515,15 @@ static void mixInit(item_list_t *itemList)
  static int mixNeedsUpdate(item_list_t *itemList)
  {
      // the L3 dirty flag is consumed first and always, so a forced rebuild clears it too (as favNeedsUpdate)
@@ -84313,7 +84491,7 @@ index 116a919..87a3b2e 100644
      return viewToggled;
  }
  
-@@ -257,38 +527,59 @@ static int mixNeedsUpdate(item_list_t *itemList)
+@@ -257,38 +532,59 @@ static int mixNeedsUpdate(item_list_t *itemList)
  static int mixUpdateItemList(item_list_t *itemList)
  {
      mix_build_t b = {NULL, 0, 0};
@@ -84384,7 +84562,7 @@ index 116a919..87a3b2e 100644
  }
  
  static int mixGetItemCount(item_list_t *itemList) { return mixCount; }
-@@ -497,6 +788,8 @@ int mixGetArtMode(const char *value)
+@@ -497,6 +793,8 @@ int mixGetArtMode(const char *value)
          return -1;
      mixLock();
      for (i = 0; i < mixCount && mode < 0; i++) {
@@ -84393,7 +84571,7 @@ index 116a919..87a3b2e 100644
          if (mixKindIsPs1(mixArray[i].kind)) {
              if (strcmp(mixArray[i].text, value) != 0) {
                  char key[VCD_ID_MAX];
-@@ -573,6 +866,108 @@ int mixGetItemKind(int id)
+@@ -573,6 +871,108 @@ int mixGetItemKind(int id)
      return kind;
  }
  
@@ -84542,18 +84720,19 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..45beeff 100644
+index 13c78db..b10df55 100644
 --- a/src/opl.c
 +++ b/src/opl.c
-@@ -50,6 +50,7 @@
+@@ -50,6 +50,8 @@
  #include "include/cuesupport.h" // cueIsCueEntry -- a PS1 row names its own core   // VCD display naming + POPSTARTER launch helpers
  #include "include/libview.h"    // libViewActive / libListViewActive -- which list this page shows
  #include "include/ripps2.h"     // RIPPS2: launch light-up
 +#include "include/ripps2seance.h" // RIPPS2 build 114: SEANCE, during a launch
++#include "include/ripps2games.h"  // RIPPS2 build 114: SHROUD (hidden games)
  #include "include/ripps2shot.h" // RIPPS2 build 108: RIPSHOT's settings
  #ifdef RETROACHIEVEMENTS
  #include "include/rabadge.h" // RA: "tracked game" badge in the list
-@@ -464,6 +465,10 @@ static void itemExecSelect(struct menu_item *curMenu)
+@@ -464,6 +466,10 @@ static void itemExecSelect(struct menu_item *curMenu)
                          ioPutRequest(IO_MENU_UPDATE_DEFFERED, &support->mode);
                      return;
                  }
@@ -84564,7 +84743,7 @@ index 13c78db..45beeff 100644
                  config_set_t *configSet = menuLoadConfig();
                  if (configSet == NULL)
                      return;
-@@ -523,7 +528,10 @@ static void itemExecSelect(struct menu_item *curMenu)
+@@ -523,7 +529,10 @@ static void itemExecSelect(struct menu_item *curMenu)
                  int launchView = support->itemGetView != NULL ? support->itemGetView(support, launchId) : libListViewActive(support);
                  if (launchView != LIB_VIEW_PS1)
                      guiShowGameID(gameIdStartup);
@@ -84575,7 +84754,7 @@ index 13c78db..45beeff 100644
                  ripps2LaunchAborted();
              }
          } else {
-@@ -1021,6 +1029,12 @@ static int modeStartMode(int mode)
+@@ -1021,6 +1030,12 @@ static int modeStartMode(int mode)
      return startMode;
  }
  
@@ -84588,7 +84767,25 @@ index 13c78db..45beeff 100644
  // RIPPS2: All Games starts with its sources: Auto when any game source is Auto, Manual when any is
  // Manual (its Start then starts them all), hidden when every one is off
  static int mixStartMode(void)
-@@ -1660,9 +1674,10 @@ void menuDeferredUpdate(void *data)
+@@ -1457,6 +1472,7 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+     }
+ 
+     clearMenuGameList(mdl);
++    ripps2ShroudReload(mdl->support->mode); // RIPPS2 build 114: the drive's hidden list, read with its games
+     // An L3 transition is staged while the old submenu is still live. Commit only after that submenu
+     // is gone, then every array read below and every newly queued row belongs to the same new view.
+     viewTransition = libViewPending(mdl->support->mode);
+@@ -1530,6 +1546,9 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+                 // Pass 0 emits folders, pass 1 emits games (single-pass mode emits every row).
+                 if (passes == 2 && ((pass == 0) != (isFolderRow != 0)))
+                     continue;
++                // RIPPS2 build 114: SHROUD, a game the user hid is on no list (Settings > Game Sources > Hidden Games)
++                if (!isFolderRow && ripps2ShroudRow(mdl->support, i))
++                    continue;
+ 
+                 gup = guiOpCreate(GUI_OP_APPEND_MENU);
+                 if (!gup) // OOM: skip this entry rather than deref NULL
+@@ -1660,9 +1679,10 @@ void menuDeferredUpdate(void *data)
          if (gFAVStartMode && mod->support->mode != FAV_MODE)
              loadFavourites();
  
@@ -84601,7 +84798,7 @@ index 13c78db..45beeff 100644
      } else if (libViewPending(mod->support->mode)) {
          // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
          // no card inserted). Still retire the old rows and commit the retained destination so input
-@@ -3649,7 +3664,10 @@ static void _loadConfig()
+@@ -3649,7 +3669,10 @@ static void _loadConfig()
      const char *temp;
      char cardHome[16], prevHome[256], redirect[256];
      int fromCard = 0;
@@ -84613,7 +84810,7 @@ index 13c78db..45beeff 100644
      // RIPPS2 build 100: RIPPS2's own save on a memory card first, unless a Custom Settings Path points elsewhere
      if ((lscstatus & CONFIG_OPL) && !readConfigPathRedirect(redirect, sizeof(redirect)) &&
          ripps2CardSettingsHome(cardHome, sizeof(cardHome), 1)) {
-@@ -5730,6 +5748,7 @@ static void init(void)
+@@ -5730,6 +5753,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
      ioNameAction((void *)&deferredAudioInit, "SOUND LOAD");
@@ -84621,7 +84818,7 @@ index 13c78db..45beeff 100644
      menuInit();
  
      startPads();
-@@ -5885,6 +5904,9 @@ static void miniInit(int mode)
+@@ -5885,6 +5909,9 @@ static void miniInit(int mode)
      configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd)
  
      ioInit();
@@ -84761,6 +84958,974 @@ index 4bedb0c..f89b2af 100644
  static void fbOpen(void)
  {
      if (fbCount == 0)
+diff --git a/src/ripps2games.c b/src/ripps2games.c
+new file mode 100644
+index 0000000..aebcd1b
+--- /dev/null
++++ b/src/ripps2games.c
+@@ -0,0 +1,962 @@
++/*
++  Copyright 2026, RIPPS2 contributors
++  Licenced under Academic Free License version 3.0
++  Review OpenUsbLd README & LICENSE files for further details.
++
++  RIPPS2 build 114: game management, the user's 10/22 plan.
++
++  SHROUD (Hide Game, in a game's options): the game leaves every list (its drive's page, All Games, Starred Games,
++  RIPFLOW and RIPGRID, Random Game) until Settings > Game Sources > Hidden Games shows it again. The hidden list is
++  kept on the game's own drive, RIPPS2.HID beside RIPPS2.LST, one line a game ("0" PS2 or "1" PS1, a tab, its name),
++  so it goes where the drive goes. A star is kept, so a game shown again comes back starred.
++
++  LAST RITES (Delete, in a game's options, on every source but Apps): the game and everything of its, after two
++  screens and START, as the HDD MANAGER asks. The image (every part; a UL game's ul.cfg made again by the source's
++  own delete), its CFG, its art (COV, COV2, ICO, LAB, LGO, BG, SCR to SCR9), its cheats. Kept unless the user says
++  so: its VMC (saves) and RIPSHOT's full-size shots. A CFG or art another copy of the same game on that drive still
++  uses stays. On the APA HDD the game's partition goes through the driver's own remove (never a __ name, never the
++  partition RIPPS2 runs from or keeps its settings on), and its files in the OPL home after it; the home partition
++  itself is not touched. A PS1 game: its VCD (POPSTARTER) or its game folder (Ember), on a USB, MX4SIO, iLink or
++  exFAT drive. What went is written to mc0:/RIPPS2/REMOVED.TXT.
++
++  The APA check (psx-place's Berion: "APA structure is bond to disk size. By writing disk image, you makes it wrong
++  for your disk if size is different. This leads to APA chain corruption in future."): before a partition goes, the
++  whole chain is read, never written: every header's magic and checksum, each start where the last one's next
++  said, each prev pointing back, every partition a power of two in size and on its own alignment (APA splits free
++  space in halves), none past the disk's end or larger than this disk allows, and the chain closing at __mbr. Any
++  of that wrong and nothing is removed. It runs again after the remove, and the result goes in the receipt.
++*/
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <strings.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <dirent.h>
++#include <sys/stat.h>
++#include <kernel.h>
++#define NEWLIB_PORT_AWARE
++#include <fileXio_rpc.h> // fileXioRemove on hdd0: (the partition)
++
++#include "include/opl.h"
++#include "include/gui.h"
++#include "include/renderman.h"
++#include "include/fntsys.h"
++#include "include/themes.h"
++#include "include/textures.h"
++#include "include/pad.h"
++#include "include/sound.h"
++#include "include/config.h"
++#include "include/ioman.h"
++#include "include/iosupport.h"
++#include "include/supportbase.h"
++#include "include/bdmsupport.h"
++#include "include/hdd.h"
++#include "include/hddsupport.h"
++#include "include/libview.h"
++#include "include/favsupport.h"
++#include "include/mixsupport.h"
++#include "include/menusys.h"
++#include "include/ripps2.h"
++#include "include/ripps2games.h"
++#include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
++#include "include/ripps2tr.h"   // _t, RIPPS2's words in the chosen language
++
++// ---- SHROUD ----
++
++#define SH_FILE "RIPPS2.HID"
++#define SH_MAX  512
++
++typedef struct
++{
++    char prefix[160]; // the drive's prefix the list was read from
++    int loaded, count;
++    char (*names)[164];
++    unsigned char *ps1;
++} shroud_t;
++
++static shroud_t shList[MODE_COUNT];
++static int shSema = -1;
++
++static void shLock(void)
++{
++    if (shSema < 0) {
++        ee_sema_t s;
++        s.init_count = 1;
++        s.max_count = 1;
++        s.option = 0;
++        s.attr = 0;
++        shSema = CreateSema(&s);
++    }
++    if (shSema >= 0)
++        WaitSema(shSema);
++}
++
++static void shUnlock(void)
++{
++    if (shSema >= 0)
++        SignalSema(shSema);
++}
++
++// The prefix of a source's page (RIPPS2.LST's folder); NULL when it has none to keep a list in
++static const char *shPrefix(int mode, char *out, int size)
++{
++    opl_io_module_t *mod = mode >= 0 && mode < MODE_COUNT ? oplGetModule(mode) : NULL;
++    char *p;
++    if (mod == NULL || mod->support == NULL || mod->support->itemGetPrefix == NULL || mode == HTTP_MODE)
++        return NULL;
++    p = mod->support->itemGetPrefix(mod->support);
++    if (p == NULL || p[0] == '\0')
++        return NULL;
++    snprintf(out, size, "%s", p);
++    return out;
++}
++
++static void shFree(shroud_t *s)
++{
++    free(s->names);
++    free(s->ps1);
++    s->names = NULL;
++    s->ps1 = NULL;
++    s->count = 0;
++}
++
++// (with shLock held)
++static void shLoad(int mode, int force)
++{
++    char prefix[160], path[200], line[200];
++    shroud_t *s = &shList[mode];
++    FILE *f;
++
++    if (shPrefix(mode, prefix, sizeof(prefix)) == NULL) {
++        shFree(s);
++        s->loaded = 0;
++        return;
++    }
++    if (s->loaded && !force && !strcmp(s->prefix, prefix))
++        return;
++    shFree(s);
++    snprintf(s->prefix, sizeof(s->prefix), "%s", prefix);
++    s->loaded = 1;
++    snprintf(path, sizeof(path), "%s%s", prefix, SH_FILE);
++    if ((f = fopen(path, "r")) == NULL)
++        return;
++    s->names = malloc(SH_MAX * sizeof(*s->names));
++    s->ps1 = malloc(SH_MAX);
++    if (s->names == NULL || s->ps1 == NULL) {
++        shFree(s);
++        fclose(f);
++        return;
++    }
++    while (s->count < SH_MAX && fgets(line, sizeof(line), f) != NULL) {
++        char *end = line + strlen(line);
++        while (end > line && (end[-1] == '\n' || end[-1] == '\r'))
++            *--end = '\0';
++        if ((line[0] != '0' && line[0] != '1') || line[1] != '\t' || line[2] == '\0')
++            continue;
++        s->ps1[s->count] = line[0] == '1';
++        snprintf(s->names[s->count++], sizeof(s->names[0]), "%s", line + 2);
++    }
++    fclose(f);
++}
++
++static int shSave(int mode)
++{
++    char path[200];
++    shroud_t *s = &shList[mode];
++    FILE *f;
++    int i;
++
++    if (!gEnableWrite || !s->loaded || s->prefix[0] == '\0')
++        return 0;
++    snprintf(path, sizeof(path), "%s%s", s->prefix, SH_FILE);
++    if (s->count == 0) {
++        remove(path);
++        return 1;
++    }
++    if ((f = fopen(path, "w")) == NULL)
++        return 0;
++    for (i = 0; i < s->count; i++)
++        fprintf(f, "%d\t%s\n", s->ps1[i], s->names[i]);
++    return fclose(f) == 0;
++}
++
++void ripps2ShroudReload(int mode)
++{
++    if (mode < 0 || mode >= MODE_COUNT || mode == APP_MODE || mode == FAV_MODE || mode == MIX_MODE)
++        return;
++    shLock();
++    shLoad(mode, 1);
++    shUnlock();
++}
++
++int ripps2ShroudHas(int mode, int ps1, const char *name)
++{
++    int i, has = 0;
++    if (mode < 0 || mode >= MODE_COUNT || name == NULL)
++        return 0;
++    shLock();
++    shLoad(mode, 0);
++    for (i = 0; i < shList[mode].count && !has; i++)
++        has = shList[mode].ps1[i] == (ps1 != 0) && !strcmp(shList[mode].names[i], name);
++    shUnlock();
++    return has;
++}
++
++static int shKindIsPs1(int kind)
++{
++    return kind == FAV_KIND_VCD || kind == FAV_KIND_CUE;
++}
++
++int ripps2ShroudRow(item_list_t *support, int id)
++{
++    int mode, ps1;
++    const char *name;
++
++    if (support == NULL || support->mode == APP_MODE || support->mode == MIX_MODE) // All Games leaves them out as it gathers
++        return 0;
++    name = support->itemGetName != NULL ? support->itemGetName(support, id) : NULL;
++    if (support->mode == FAV_MODE) {
++        mode = favGetItemSourceMode(id);
++        ps1 = shKindIsPs1(favGetItemKind(id));
++    } else {
++        mode = support->mode;
++        ps1 = (support->itemGetView != NULL ? support->itemGetView(support, id) : libListViewActive(support)) == LIB_VIEW_PS1;
++    }
++    return mode >= 0 && ripps2ShroudHas(mode, ps1, name);
++}
++
++// Every page that could list it is read again: its drive's, All Games, Starred Games
++static void shRefresh(int mode)
++{
++    opl_io_module_t *mod = oplGetModule(mode);
++    if (mod != NULL && mod->support != NULL && mod->support->enabled) {
++        libViewMarkDirty(mode);
++        ioPutRequest(IO_MENU_UPDATE_DEFFERED, &mod->support->mode);
++    }
++    mixRequestUpdate();
++    loadFavourites();
++}
++
++// The source row behind a row of any page: its mode, its id in the source's own (forced) list, its kind, its name
++typedef struct
++{
++    int mode, id, kind;
++    char name[256];
++} sh_row_t;
++
++static int shResolve(item_list_t *support, int id, sh_row_t *r)
++{
++    const char *n;
++    if (support == NULL)
++        return 0;
++    if (support->mode == MIX_MODE) {
++        if (mixIsWaiting(id)) {
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(_t("This game's drive has not answered yet. Wait for it, then try again."), 0, NULL);
++            return 0;
++        }
++        r->mode = mixGetItemSourceMode(id);
++        r->id = mixGetItemSourceId(id);
++        r->kind = mixGetItemKind(id);
++    } else if (support->mode == FAV_MODE) {
++        r->mode = favGetItemSourceMode(id);
++        r->id = favGetItemSourceId(id);
++        r->kind = favGetItemKind(id);
++    } else {
++        int view = support->itemGetView != NULL ? support->itemGetView(support, id) : libListViewActive(support);
++        r->mode = support->mode;
++        r->id = id;
++        r->kind = FAV_KIND_ISO;
++        if (view == LIB_VIEW_PS1) {
++            const base_game_info_t *g = support->itemGet != NULL ? (const base_game_info_t *)support->itemGet(support, id) : NULL;
++            r->kind = (support->mode != HDD_MODE && g != NULL && cueIsCueEntry(g)) ? FAV_KIND_CUE : FAV_KIND_VCD;
++        }
++    }
++    n = support->itemGetName != NULL ? support->itemGetName(support, id) : NULL;
++    if (r->mode < 0 || r->id < 0 || n == NULL || n[0] == '\0')
++        return 0;
++    snprintf(r->name, sizeof(r->name), "%s", n);
++    return 1;
++}
++
++void ripps2ShroudHide(item_list_t *support, int id)
++{
++    char msg[400];
++    sh_row_t r;
++    shroud_t *s;
++    int ok;
++
++    if (!shResolve(support, id, &r))
++        return;
++    snprintf(msg, sizeof(msg), _t("Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again."), r.name);
++    guiMsgBoxSound(SFX_MESSAGE);
++    if (guiMsgBox(msg, 1, NULL) != 1)
++        return;
++    shLock();
++    shLoad(r.mode, 1);
++    s = &shList[r.mode];
++    if (!s->loaded) {
++        shUnlock();
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("This drive cannot keep a hidden list (a network catalogue)."), 0, NULL);
++        return;
++    }
++    if (s->names == NULL) {
++        s->names = malloc(SH_MAX * sizeof(*s->names));
++        s->ps1 = malloc(SH_MAX);
++    }
++    ok = s->names != NULL && s->ps1 != NULL && s->count < SH_MAX;
++    if (ok) {
++        s->ps1[s->count] = shKindIsPs1(r.kind);
++        snprintf(s->names[s->count++], sizeof(s->names[0]), "%s", r.name);
++        ok = shSave(r.mode);
++        if (!ok)
++            s->count--;
++    }
++    shUnlock();
++    if (!ok) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?"), 0, NULL);
++        return;
++    }
++    shRefresh(r.mode);
++    snprintf(msg, sizeof(msg), _t("HIDDEN: %s"), r.name);
++    guiShowToast(msg);
++}
++
++// ---- LAST RITES ----
++
++enum { LR_IMAGE = 0, LR_PARTITION, LR_CFG, LR_ART, LR_CHT, LR_VMC, LR_SHOTS, LR_FOLDER, LR_POPSAVE };
++#define LR_MAX 48
++
++typedef struct
++{
++    char path[256];
++    int what, keep, shared;
++    long long bytes;
++} lr_item_t;
++
++static lr_item_t lrItems[LR_MAX];
++static int lrCount;
++
++static long long lrFileSize(const char *path)
++{
++    struct stat st;
++    return stat(path, &st) == 0 ? (long long)st.st_size : -1;
++}
++
++static long long lrTreeSize(const char *dir)
++{
++    char path[320];
++    long long total = 0;
++    DIR *d = opendir(dir);
++    struct dirent *e;
++    if (d == NULL)
++        return -1;
++    while ((e = readdir(d)) != NULL) {
++        struct stat st;
++        if (e->d_name[0] == '.')
++            continue;
++        snprintf(path, sizeof(path), "%s/%s", dir, e->d_name);
++        if (stat(path, &st) != 0)
++            continue;
++        if (S_ISDIR(st.st_mode)) {
++            long long sub = lrTreeSize(path);
++            total += sub > 0 ? sub : 0;
++        } else
++            total += st.st_size;
++    }
++    closedir(d);
++    return total;
++}
++
++static int lrRemoveTree(const char *dir)
++{
++    char path[320];
++    int ok = 1;
++    DIR *d = opendir(dir);
++    struct dirent *e;
++    if (d == NULL)
++        return 0;
++    while ((e = readdir(d)) != NULL) {
++        struct stat st;
++        if (e->d_name[0] == '.')
++            continue;
++        snprintf(path, sizeof(path), "%s/%s", dir, e->d_name);
++        if (stat(path, &st) == 0 && S_ISDIR(st.st_mode))
++            ok &= lrRemoveTree(path);
++        else
++            ok &= unlink(path) == 0;
++    }
++    closedir(d);
++    return ok && rmdir(dir) == 0;
++}
++
++static void lrAdd(int what, const char *path, long long bytes, int keep)
++{
++    if (lrCount >= LR_MAX || bytes < 0)
++        return;
++    snprintf(lrItems[lrCount].path, sizeof(lrItems[lrCount].path), "%s", path);
++    lrItems[lrCount].what = what;
++    lrItems[lrCount].keep = keep;
++    lrItems[lrCount].shared = 0;
++    lrItems[lrCount++].bytes = bytes;
++}
++
++static void lrAddFile(int what, const char *path, int keep)
++{
++    lrAdd(what, path, lrFileSize(path), keep);
++}
++
++// "3.1 GB" / "640 MB" / "12 KB"
++static void lrSize(long long bytes, char *out, int size)
++{
++    if (bytes >= 1024LL * 1024 * 1024)
++        snprintf(out, size, "%d.%d GB", (int)(bytes / (1024LL * 1024 * 1024)), (int)(bytes % (1024LL * 1024 * 1024) * 10 / (1024LL * 1024 * 1024)));
++    else if (bytes >= 1024 * 1024)
++        snprintf(out, size, "%d MB", (int)(bytes / (1024 * 1024)));
++    else
++        snprintf(out, size, "%d KB", (int)((bytes + 1023) / 1024));
++}
++
++// A game's extras in its drive's folders: CFG, art, cheats, then its VMCs and full-size shots (kept unless asked).
++// shared: another copy of the game on this drive keeps the CFG, art and cheats.
++static void lrPlanExtras(item_list_t *view, int id, const char *prefix, char sep, const char *startup, const char *name, int shared)
++{
++    static const char *const art[] = {"COV", "COV2", "ICO", "LAB", "LGO", "BG", "SCR", "SCR2", "SCR3", "SCR4", "SCR5", "SCR6", "SCR7", "SCR8", "SCR9"};
++    char path[256];
++    const char *vmc = NULL;
++    int i, k;
++    config_set_t *cfg;
++
++    snprintf(path, sizeof(path), "%sCFG%c%s.cfg", prefix, sep, startup);
++    lrAddFile(LR_CFG, path, shared);
++    for (i = 0; i < (int)(sizeof(art) / sizeof(art[0])); i++)
++        for (k = 0; k < 2; k++) {
++            snprintf(path, sizeof(path), "%sART%c%s_%s.%s", prefix, sep, startup, art[i], k ? "jpg" : "png");
++            lrAddFile(LR_ART, path, shared);
++        }
++    snprintf(path, sizeof(path), "%sCHT%c%s.cht", prefix, sep, startup);
++    lrAddFile(LR_CHT, path, shared);
++    for (i = 0; i < lrCount; i++)
++        if (lrItems[i].what == LR_CFG || lrItems[i].what == LR_ART || lrItems[i].what == LR_CHT)
++            lrItems[i].shared = shared;
++    cfg = view->itemGetConfig != NULL ? view->itemGetConfig(view, id) : NULL;
++    for (i = 0; cfg != NULL && i < 2; i++) {
++        char key[16];
++        snprintf(key, sizeof(key), CONFIG_ITEM_VMC "_%d", i);
++        if (configGetStr(cfg, key, &vmc) && vmc != NULL && vmc[0]) {
++            snprintf(path, sizeof(path), "%sVMC%c%s.bin", prefix, sep, vmc);
++            lrAddFile(LR_VMC, path, 1);
++        }
++    }
++    if (cfg != NULL)
++        configFree(cfg);
++    snprintf(path, sizeof(path), "%sMEDIA%c%s", prefix, sep, name);
++    lrAdd(LR_SHOTS, path, lrTreeSize(path), 1);
++}
++
++// ---- the APA check ----
++
++#define LR_APA_MAGIC 0x00415041 // 'APA\0'
++
++static u32 lrLe32(const u8 *p)
++{
++    return p[0] | p[1] << 8 | p[2] << 16 | (u32)p[3] << 24;
++}
++
++// The largest partition this disk takes, as the driver works it out (apaGetPartitionMax, with its under-40 GB rule)
++static u32 lrApaMax(u32 total)
++{
++    u32 size;
++    int i;
++    if (total < 0x04ffffff)
++        total = 0x04ffffff;
++    total >>= 6;
++    for (i = 31; i != 0; i--) {
++        size = (u32)1 << i;
++        if (size & total)
++            break;
++    }
++    if (((u32)1 << i) < total)
++        i++;
++    return (u32)1 << i;
++}
++
++int ripps2ApaCheck(char *why, int whySize)
++{
++    static u8 hdr[1024] __attribute__((aligned(64)));
++    u32 total = hddGetTotalSectors(), max, lba = 0, lastStart = 0, n = 0;
++
++    if (total == 0) {
++        snprintf(why, whySize, _t("the drive's size could not be read"));
++        return 0;
++    }
++    max = lrApaMax(total);
++    do {
++        u32 sum = 0, sum1 = 0, start, length, next, prev, i;
++        if (hddReadSectors(lba, 2, hdr) != 0) {
++            snprintf(why, whySize, _t("the header at sector %u could not be read"), (unsigned)lba);
++            return 0;
++        }
++        for (i = 1; i < 256; i++) {
++            sum += lrLe32(hdr + i * 4);
++            if (i < 128)
++                sum1 += lrLe32(hdr + i * 4);
++        }
++        start = lrLe32(hdr + 64);
++        length = lrLe32(hdr + 68);
++        next = lrLe32(hdr + 8);
++        prev = lrLe32(hdr + 12);
++        if (lrLe32(hdr + 4) != LR_APA_MAGIC) {
++            snprintf(why, whySize, _t("sector %u holds no partition header"), (unsigned)lba);
++            return 0;
++        }
++        if (lrLe32(hdr) != sum && lrLe32(hdr) != sum1) {
++            snprintf(why, whySize, _t("the header at sector %u fails its checksum"), (unsigned)lba);
++            return 0;
++        }
++        if (start != lba || length == 0 || (length & (length - 1)) || (lba != 0 && start % length)) {
++            snprintf(why, whySize, _t("the partition at sector %u is not where or as large as APA puts one"), (unsigned)lba);
++            return 0;
++        }
++        if ((unsigned long long)start + length > total) {
++            snprintf(why, whySize, _t("a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk"), (unsigned)(start + length), (unsigned)total);
++            return 0;
++        }
++        if (lba != 0 && length > max) {
++            snprintf(why, whySize, _t("a partition is larger than this disk allows: the table was made for a disk of another size"));
++            return 0;
++        }
++        if (n > 0 && prev != lastStart) {
++            snprintf(why, whySize, _t("the chain's links disagree at sector %u"), (unsigned)lba);
++            return 0;
++        }
++        if (next != 0 && next != start + length) {
++            snprintf(why, whySize, _t("the chain skips from sector %u"), (unsigned)lba);
++            return 0;
++        }
++        lastStart = start;
++        lba = next;
++        n++;
++    } while (lba != 0 && n < 65536);
++    if (n >= 65536 || hddReadSectors(0, 2, hdr) != 0 || lrLe32(hdr + 12) != lastStart) {
++        snprintf(why, whySize, _t("the chain does not close at __mbr"));
++        return 0;
++    }
++    snprintf(why, whySize, _t("%u partitions, all in order"), (unsigned)n);
++    return 1;
++}
++
++// ---- the receipt ----
++
++static void lrReceipt(const char *name, const char *where, long long freed, const char *apa)
++{
++    char line[400], size[24];
++    FILE *f;
++    int i;
++    DIR *d = opendir("mc0:/RIPPS2");
++
++    if (d == NULL)
++        return; // no RIPPS2 save on the first card: nothing is made for this
++    closedir(d);
++    if ((f = fopen("mc0:/RIPPS2/REMOVED.TXT", "a")) == NULL)
++        return;
++    lrSize(freed, size, sizeof(size));
++    snprintf(line, sizeof(line), "RIPPS2 deleted %s from %s (%s freed)%s%s\r\n", name, where, size, apa[0] ? ". APA: " : "", apa);
++    fputs(line, f);
++    for (i = 0; i < lrCount; i++)
++        if (!lrItems[i].keep)
++            fprintf(f, "  %s\r\n", lrItems[i].path);
++    fputs("\r\n", f);
++    fclose(f);
++}
++
++// ---- the screens and the work ----
++
++static int lrAsk(const char *name, const char *where, int hasSaves)
++{
++    char msg[600], goes[260], kept[160], size[24];
++    long long image = 0;
++    int cfg = 0, art = 0, cht = 0, saves = 0, shots = 0, shared = 0, i, folder = 0;
++
++    for (i = 0; i < lrCount; i++) {
++        lr_item_t *it = &lrItems[i];
++        if (it->what == LR_IMAGE || it->what == LR_PARTITION || it->what == LR_FOLDER) {
++            image += it->bytes;
++            folder |= it->what == LR_FOLDER;
++        } else if (it->shared)
++            shared = 1;
++        else if (it->what == LR_CFG)
++            cfg++;
++        else if (it->what == LR_ART)
++            art++;
++        else if (it->what == LR_CHT)
++            cht++;
++        else if (it->what == LR_VMC || it->what == LR_POPSAVE)
++            saves++;
++        else if (it->what == LR_SHOTS)
++            shots++;
++    }
++    lrSize(image, size, sizeof(size));
++    snprintf(goes, sizeof(goes), folder ? _t("the game's folder and everything in it (%s)") : _t("the game (%s)"), size);
++    if (cfg)
++        snprintf(goes + strlen(goes), sizeof(goes) - strlen(goes), "%s", _t(", its settings"));
++    if (art)
++        snprintf(goes + strlen(goes), sizeof(goes) - strlen(goes), _t(", %d art images"), art);
++    if (cht)
++        snprintf(goes + strlen(goes), sizeof(goes) - strlen(goes), "%s", _t(", its cheats"));
++    kept[0] = '\0';
++    if (saves)
++        snprintf(kept, sizeof(kept), "%s", _t("its saves"));
++    if (shots)
++        snprintf(kept + strlen(kept), sizeof(kept) - strlen(kept), "%s%s", kept[0] ? _t(" and ") : "", _t("its RIPSHOT pictures"));
++    if (shared)
++        snprintf(kept + strlen(kept), sizeof(kept) - strlen(kept), "%s%s", kept[0] ? _t(", and ") : "", _t("the settings and art another copy of it uses"));
++    snprintf(msg, sizeof(msg), kept[0] ? _t("Delete %s from %s? Goes: %s. Kept: %s.") : _t("Delete %s from %s? Goes: %s."), name, where, goes, kept);
++    guiMsgBoxSound(SFX_MESSAGE);
++    if (guiMsgBox(msg, 1, NULL) != 1)
++        return 0;
++    if (hasSaves) {
++        guiMsgBoxSound(SFX_MESSAGE);
++        if (guiMsgBox(_t("Delete its saves and RIPSHOT pictures too? No keeps them."), 1, NULL) == 1)
++            for (i = 0; i < lrCount; i++)
++                if (lrItems[i].what == LR_VMC || lrItems[i].what == LR_SHOTS || lrItems[i].what == LR_POPSAVE)
++                    lrItems[i].keep = 0;
++    }
++    snprintf(msg, sizeof(msg), _t("Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it."), name);
++    guiMsgBoxSound(SFX_ERROR);
++    guiMsgBoxStartOption(_t("DELETE FOR GOOD"));
++    return guiMsgBox(msg, 0, NULL) == 2;
++}
++
++static const char *lrWhere(int mode)
++{
++    if (mode == HDD_MODE)
++        return _t("the internal HDD (APA)");
++    if (mode >= BDM_MODE && mode <= BDM_MODE_LAST) {
++        const char *n = bdmSlotDriveName(mode - BDM_MODE);
++        return n != NULL ? n : _t("the drive");
++    }
++    if (mode == MMCE_MODE)
++        return "MMCE";
++    if (mode == ETH_MODE)
++        return _t("the SMB share");
++    return _t("its drive");
++}
++
++void ripps2LastRites(item_list_t *support, int id)
++{
++    char prefix[160], path[256], apaWhy[200] = "", toast[160], size[24];
++    const char *where, *pfx;
++    opl_io_module_t *mod;
++    item_list_t view;
++    sh_row_t r;
++    long long freed = 0;
++    int i, hasSaves = 0, shared = 0, ok = 1;
++    char sep;
++
++    if (!gEnableWrite || !shResolve(support, id, &r))
++        return;
++    if (r.mode == HTTP_MODE || r.mode == UDPFS_MODE) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("A network catalogue's games are deleted on the PC that serves them."), 0, NULL);
++        return;
++    }
++    mod = oplGetModule(r.mode);
++    if (mod == NULL || mod->support == NULL)
++        return;
++    view = *mod->support;
++    view.viewOverride = shKindIsPs1(r.kind) ? ITEM_VIEW_FORCE_PS1 : ITEM_VIEW_FORCE_ISO;
++    where = lrWhere(r.mode);
++    lrCount = 0;
++
++    if (r.kind == FAV_KIND_ISO && r.mode == HDD_MODE) {
++        // the APA HDD: the game's partition, then its files in the OPL home
++        const hdl_game_info_t *g = view.itemGet != NULL ? (const hdl_game_info_t *)view.itemGet(&view, r.id) : NULL;
++        if (g == NULL || g->partition_name[0] == '\0' || (g->partition_name[0] == '_' && g->partition_name[1] == '_') ||
++            (gOPLPart[0] && !strcmp(gOPLPart + (strncmp(gOPLPart, "hdd0:", 5) ? 0 : 5), g->partition_name))) {
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(_t("This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on)."), 0, NULL);
++            return;
++        }
++        if (!ripps2ApaCheck(apaWhy, sizeof(apaWhy))) {
++            char msg[400];
++            snprintf(msg, sizeof(msg), _t("Nothing was deleted: this drive's partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first."), apaWhy);
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(msg, 0, NULL);
++            return;
++        }
++        snprintf(path, sizeof(path), "hdd0:%s", g->partition_name);
++        lrAdd(LR_PARTITION, path, (long long)g->total_size_in_kb * 1024, 0);
++        if (gHDDPrefix != NULL)
++            lrPlanExtras(&view, r.id, gHDDPrefix, '/', g->startup, r.name, 0);
++    } else if (r.kind == FAV_KIND_ISO) {
++        const base_game_info_t *g = view.itemGet != NULL ? (const base_game_info_t *)view.itemGet(&view, r.id) : NULL;
++        int p, count;
++        pfx = view.itemGetPrefix != NULL ? view.itemGetPrefix(&view) : NULL;
++        if (g == NULL || pfx == NULL) {
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(_t("RIPPS2 cannot delete a game from this page."), 0, NULL);
++            return;
++        }
++        snprintf(prefix, sizeof(prefix), "%s", pfx);
++        sep = prefix[0] && prefix[strlen(prefix) - 1] == '\\' ? '\\' : '/';
++        for (p = 0; p < g->parts; p++) {
++            char sepStr[2] = {sep, '\0'};
++            sbCreatePath(g, path, prefix, sepStr, p);
++            lrAddFile(LR_IMAGE, path, 0);
++        }
++        count = view.itemGetCount != NULL ? view.itemGetCount(&view) : 0;
++        for (i = 0; i < count && !shared; i++) {
++            const char *st = view.itemGetStartup != NULL && i != r.id ? view.itemGetStartup(&view, i) : NULL;
++            shared = st != NULL && !strcmp(st, g->startup);
++        }
++        lrPlanExtras(&view, r.id, prefix, sep, g->startup, r.name, shared);
++    } else if (r.mode >= BDM_MODE && r.mode <= BDM_MODE_LAST) {
++        // PS1 on a BDM drive: its VCD (POPSTARTER, the saves in POPS/<name>/ kept unless asked) or its Ember folder
++        const base_game_info_t *g = view.itemGet != NULL ? (const base_game_info_t *)view.itemGet(&view, r.id) : NULL;
++        if (r.kind == FAV_KIND_CUE) {
++            snprintf(path, sizeof(path), "mass%d:/EMBER/games/%s", r.mode - BDM_MODE, r.name);
++            lrAdd(LR_FOLDER, path, lrTreeSize(path), 0);
++        } else {
++            snprintf(path, sizeof(path), "mass%d:/POPS/%s%s", r.mode - BDM_MODE, r.name, g != NULL && g->extension[0] ? g->extension : ".VCD");
++            lrAddFile(LR_IMAGE, path, 0);
++            snprintf(path, sizeof(path), "mass%d:/POPS/%s", r.mode - BDM_MODE, r.name);
++            lrAdd(LR_POPSAVE, path, lrTreeSize(path), 1);
++        }
++    } else {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("A PS1 game here is deleted in Memory Files, where it is a file of its own."), 0, NULL);
++        return;
++    }
++    if (lrCount == 0 || (lrItems[0].what != LR_PARTITION && lrItems[0].what != LR_IMAGE && lrItems[0].what != LR_FOLDER)) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("RIPPS2 could not find this game's files on its drive."), 0, NULL);
++        return;
++    }
++    for (i = 0; i < lrCount; i++)
++        hasSaves |= (lrItems[i].what == LR_VMC || lrItems[i].what == LR_SHOTS || lrItems[i].what == LR_POPSAVE);
++    if (!lrAsk(r.name, where, hasSaves))
++        return;
++
++    // the image first: a delete cut short leaves stray settings or art, never half a game on the list
++    guiRenderTextScreen(_t("DELETING"));
++    if (lrItems[0].what == LR_PARTITION) {
++        int rv;
++        ioBlockOps(1); // nothing else reads the drive while its table changes
++        rv = fileXioRemove(lrItems[0].path);
++        ioBlockOps(0);
++        if (rv < 0) {
++            char msg[300];
++            snprintf(msg, sizeof(msg), _t("The partition could not be removed (%d). Nothing was deleted."), rv);
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(msg, 0, NULL);
++            return;
++        }
++        hddPartitionsChanged();
++        if (!ripps2ApaCheck(apaWhy, sizeof(apaWhy)))
++            LOG("LAST RITES: the APA table after the remove: %s\n", apaWhy);
++        freed += lrItems[0].bytes;
++    } else if (lrItems[0].what == LR_FOLDER) {
++        ok = lrRemoveTree(lrItems[0].path);
++        freed += lrItems[0].bytes;
++    } else if (r.kind == FAV_KIND_ISO && mod->support->itemDelete != NULL) {
++        mod->support->itemDelete(&view, r.id); // the source's own: every part, and a UL game's ul.cfg made again
++        for (i = 0; i < lrCount; i++)
++            if (lrItems[i].what == LR_IMAGE)
++                freed += lrItems[i].bytes;
++    } else
++        for (i = 0; i < lrCount; i++)
++            if (lrItems[i].what == LR_IMAGE) {
++                ok &= unlink(lrItems[i].path) == 0;
++                freed += lrItems[i].bytes;
++            }
++    for (i = 1; i < lrCount; i++) {
++        lr_item_t *it = &lrItems[i];
++        if (it->keep || it->shared || it->what == LR_IMAGE)
++            continue;
++        if (it->what == LR_SHOTS || it->what == LR_POPSAVE)
++            lrRemoveTree(it->path);
++        else
++            unlink(it->path);
++        freed += it->bytes;
++    }
++    // its star and its place on the hidden list go with it
++    removeFavouriteByIdAndText(r.mode, r.id, r.name, r.kind);
++    shLock();
++    shLoad(r.mode, 1);
++    for (i = 0; i < shList[r.mode].count; i++)
++        if (shList[r.mode].ps1[i] == shKindIsPs1(r.kind) && !strcmp(shList[r.mode].names[i], r.name)) {
++            memmove(&shList[r.mode].names[i], &shList[r.mode].names[i + 1], (shList[r.mode].count - i - 1) * sizeof(shList[r.mode].names[0]));
++            memmove(&shList[r.mode].ps1[i], &shList[r.mode].ps1[i + 1], shList[r.mode].count - i - 1);
++            shList[r.mode].count--;
++            shSave(r.mode);
++            break;
++        }
++    shUnlock();
++    lrReceipt(r.name, where, freed, apaWhy);
++    shRefresh(r.mode);
++    lrSize(freed, size, sizeof(size));
++    snprintf(toast, sizeof(toast), ok ? _t("DELETED %s: %s FREED") : _t("%s: SOME FILES COULD NOT BE DELETED"), r.name, size);
++    guiShowToast(toast);
++}
++
++// ---- Settings > Game Sources > Hidden Games ----
++
++typedef struct
++{
++    int mode, ps1;
++    char name[164];
++} hg_row_t;
++
++#define HG_ROWS 256
++static hg_row_t hgRows[HG_ROWS];
++static int hgCount;
++
++static void hgGather(void)
++{
++    int mode, i;
++    hgCount = 0;
++    shLock();
++    for (mode = 0; mode < MODE_COUNT; mode++) {
++        opl_io_module_t *mod = oplGetModule(mode);
++        if (mode == APP_MODE || mode == FAV_MODE || mode == MIX_MODE || mod == NULL || mod->support == NULL || !mod->support->enabled)
++            continue;
++        shLoad(mode, 1);
++        for (i = 0; i < shList[mode].count && hgCount < HG_ROWS; i++) {
++            hgRows[hgCount].mode = mode;
++            hgRows[hgCount].ps1 = shList[mode].ps1[i];
++            snprintf(hgRows[hgCount++].name, sizeof(hgRows[0].name), "%s", shList[mode].names[i]);
++        }
++    }
++    shUnlock();
++}
++
++// The game's id in its source's own list (forced view), by name; -1 when it is not there
++static int hgFind(int mode, int ps1, const char *name)
++{
++    opl_io_module_t *mod = oplGetModule(mode);
++    item_list_t view;
++    int i, count;
++    if (mod == NULL || mod->support == NULL)
++        return -1;
++    view = *mod->support;
++    view.viewOverride = ps1 ? ITEM_VIEW_FORCE_PS1 : ITEM_VIEW_FORCE_ISO;
++    count = view.itemGetCount != NULL ? view.itemGetCount(&view) : 0;
++    for (i = 0; i < count; i++) {
++        const char *n = view.itemGetName(&view, i);
++        if (n != NULL && !strcmp(n, name))
++            return i;
++    }
++    return -1;
++}
++
++static void hgShow(int k)
++{
++    hg_row_t *h = &hgRows[k];
++    int i;
++    shLock();
++    shLoad(h->mode, 1);
++    for (i = 0; i < shList[h->mode].count; i++)
++        if (shList[h->mode].ps1[i] == h->ps1 && !strcmp(shList[h->mode].names[i], h->name)) {
++            memmove(&shList[h->mode].names[i], &shList[h->mode].names[i + 1], (shList[h->mode].count - i - 1) * sizeof(shList[h->mode].names[0]));
++            memmove(&shList[h->mode].ps1[i], &shList[h->mode].ps1[i + 1], shList[h->mode].count - i - 1);
++            shList[h->mode].count--;
++            shSave(h->mode);
++            break;
++        }
++    shUnlock();
++    shRefresh(h->mode);
++}
++
++void ripps2HiddenGames(void)
++{
++    int sel = 0, top = 0, rows = 9, okKey = gSelectButton, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    char line[220];
++
++    if (menuCheckParentalLock() != 0)
++        return;
++    guiRenderTextScreen(_t("Reading the hidden lists"));
++    hgGather();
++    readPads();
++    while (1) {
++        int i, y = 104, x;
++        rmStartFrame();
++        ripps2DrawBackground();
++        ripps2DrawPagePanel();
++        fntRenderString(gTheme->fonts[4], 60, 44, ALIGN_VCENTER, 0, 0, _t("HIDDEN GAMES"), GS_SETREG_RGBA(0x7A, 0x66, 0x30, 0x80));
++        snprintf(line, sizeof(line), hgCount == 1 ? _t("1 game, on the started drives") : _t("%d games, on the started drives"), hgCount);
++        fntRenderString(gTheme->fonts[5], 60, 70, ALIGN_VCENTER, 0, 0, line, GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
++        rmDrawLine(60, 84, 580, 84, GS_SETREG_RGBAQ(0x4A, 0x72, 0xDC, 0x60, 0x00));
++        if (hgCount == 0)
++            fntRenderStringFit(gTheme->fonts[5], 320, 220, ALIGN_CENTER, 500, _t("None. Hide Game, in a game's options, puts one here."), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80), 0);
++        for (i = top; i < hgCount && i < top + rows; i++, y += 34) {
++            if (i == sel) {
++                rmDrawRect(52, y - 4, 536, 32, GS_SETREG_RGBAQ(0x1E, 0x3C, 0x96, 0x58, 0x00));
++                rmDrawRect(52, y - 4, 3, 32, GS_SETREG_RGBAQ(0x6A, 0x9A, 0xFF, 0x80, 0x00));
++            }
++            fntRenderStringFit(gTheme->fonts[8], 64, y + 8, ALIGN_VCENTER, 360, hgRows[i].name, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), i == sel);
++            snprintf(line, sizeof(line), "%s  %s", hgRows[i].ps1 ? "PS1" : "PS2", lrWhere(hgRows[i].mode));
++            fntRenderStringFit(gTheme->fonts[5], 430, y + 8, ALIGN_VCENTER, 150, line, GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80), 0);
++        }
++        x = 60;
++        if (hgCount > 0) {
++            GSTEXTURE *t = thmGetTexture(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON);
++            if (t != NULL)
++                rmDrawPixmap(t, x, 438, ALIGN_NONE, 20, 20, SCALING_RATIO, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
++            x = ripps2HintText(x + 24, 448, _t("SHOW AGAIN OR DELETE"), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)) + 18;
++        }
++        {
++            GSTEXTURE *t = thmGetTexture(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON);
++            if (t != NULL)
++                rmDrawPixmap(t, x, 438, ALIGN_NONE, 20, 20, SCALING_RATIO, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
++            ripps2HintText(x + 24, 448, _t("BACK"), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
++        }
++        rmEndFrame();
++
++        readPads();
++        if (getKey(KEY_UP) && sel > 0) {
++            sel--;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKey(KEY_DOWN) && sel < hgCount - 1) {
++            sel++;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKeyOn(okKey) && hgCount > 0) {
++            const char *choices[2] = {_t("SHOW IT AGAIN"), _t("DELETE IT")};
++            int pick;
++            sfxPlay(SFX_CONFIRM);
++            pick = ripps2PickList(choices, gEnableWrite ? 2 : 1);
++            if (pick == 0)
++                hgShow(sel);
++            else if (pick == 1) {
++                opl_io_module_t *mod = oplGetModule(hgRows[sel].mode);
++                int id = hgFind(hgRows[sel].mode, hgRows[sel].ps1, hgRows[sel].name);
++                if (mod == NULL || mod->support == NULL || id < 0) {
++                    guiMsgBoxSound(SFX_ERROR);
++                    guiMsgBox(_t("That game is not on its drive any more."), 0, NULL);
++                } else {
++                    item_list_t view = *mod->support;
++                    view.viewOverride = hgRows[sel].ps1 ? ITEM_VIEW_FORCE_PS1 : ITEM_VIEW_FORCE_ISO;
++                    ripps2LastRites(&view, id);
++                }
++            }
++            if (pick >= 0) {
++                hgGather();
++                if (sel >= hgCount)
++                    sel = hgCount > 0 ? hgCount - 1 : 0;
++            }
++            readPads();
++        } else if (getKeyOn(backKey)) {
++            sfxPlay(SFX_CANCEL);
++            break;
++        }
++        if (sel < top)
++            top = sel;
++        if (sel >= top + rows)
++            top = sel - rows + 1;
++    }
++    readPads();
++}
 diff --git a/src/ripps2hdd.c b/src/ripps2hdd.c
 index ce09083..bdab331 100644
 --- a/src/ripps2hdd.c
@@ -85422,7 +86587,7 @@ index 0000000..bc1d513
 +    return 0;
 +}
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index f2c48c4..84dadb5 100644
+index f2c48c4..514cc8d 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -3,6 +3,11 @@
@@ -85466,7 +86631,7 @@ index f2c48c4..84dadb5 100644
  static st_row_t stRows[ST_ROWS];
  static int stCount;
  
-@@ -109,95 +118,51 @@ static int stDriveThere(const char *root) // "mass0:/", "mc0:/"
+@@ -109,95 +118,49 @@ static int stDriveThere(const char *root) // "mass0:/", "mc0:/"
      return 1;
  }
  
@@ -85492,8 +86657,9 @@ index f2c48c4..84dadb5 100644
 +        snprintf(out, size, "%u MB", (unsigned)mb);
 +}
 +
-+// A launcher's line: where SEANCE knows it is, else a place a launch already looks (then SEANCE remembers it)
-+static void stLauncher(int what, const char *const *probe, int nProbe, const char *none)
++// A launcher's line, its name first: where SEANCE knows it is, else a place a launch already looks (then SEANCE
++// remembers it), else not found
++static void stLauncher(int what, const char *name, const char *const *probe, int nProbe)
 +{
 +    char where[160], line[224];
 +    int i, state = seanceState(what, where, sizeof(where));
@@ -85502,10 +86668,7 @@ index f2c48c4..84dadb5 100644
 +            seanceNote(what, probe[i]);
 +            state = seanceState(what, where, sizeof(where));
 +        }
-+    if (state > 0)
-+        snprintf(line, sizeof(line), _t("Found: %s"), where);
-+    else
-+        snprintf(line, sizeof(line), "%s", none);
++    snprintf(line, sizeof(line), "%s: %s", name, state > 0 ? where : state == 0 ? _t("not on a started drive") : _t("not found yet"));
 +    st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
 +    r->ok = state > 0;
  }
@@ -85596,7 +86759,7 @@ index f2c48c4..84dadb5 100644
          for (i = 0; i < 8; i++) {
              int t = bdmSlotDeviceType(i);
              if (t < -1)
-@@ -206,6 +171,30 @@ static void stScan(void)
+@@ -206,6 +169,30 @@ static void stScan(void)
              st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
              r->ok = 1;
          }
@@ -85627,7 +86790,7 @@ index f2c48c4..84dadb5 100644
          m = bdmMx4sioReport(&err, root, sizeof(root));
          if (m == 1)
              snprintf(line, sizeof(line), _t("MX4SIO: the SD card is %s"), root);
-@@ -220,6 +209,55 @@ static void stScan(void)
+@@ -220,6 +207,52 @@ static void stScan(void)
          st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
          r->ok = m == 1;
      }
@@ -85636,35 +86799,32 @@ index f2c48c4..84dadb5 100644
 +
 +    // LAUNCHERS (build 114): where SEANCE found each, the one RIPPS2 carries (Neutrino) offered only when there is none
 +    stAdd(ROW_HEAD, ACT_NONE, _t("LAUNCHERS"), _t("found where you keep them"));
-+    stAdd(ROW_STATUS, ACT_NONE, _t("Neutrino 1.8.0 (rickgaiser)"), NULL)->ok = 1;
 +    {
 +        const char *p[4] = {NULL, "mass0:/neutrino/neutrino.elf", "mc0:/neutrino/neutrino.elf", "mc1:/neutrino/neutrino.elf"};
 +        if (gNeutrinoPath[0]) {
 +            snprintf(custom, sizeof(custom), "%s", gNeutrinoPath);
 +            p[0] = custom;
 +        }
-+        stLauncher(SEANCE_NEUTRINO, p, 4, _t("Not found on the started drives. A game that needs it looks for yours first; RIPPS2's own copy is offered, once, only when there is none."));
++        stLauncher(SEANCE_NEUTRINO, "Neutrino 1.8.0", p, 4);
 +    }
-+    stAdd(ROW_STATUS, ACT_NONE, _t("POPSTARTER (krHACKen)"), NULL)->ok = 1;
 +    {
 +        const char *p[4] = {gPopstarterPath, "mass0:/POPS/POPSTARTER.ELF", "mc0:/POPS/POPSTARTER.ELF", "mc1:/POPS/POPSTARTER.ELF"};
-+        stLauncher(SEANCE_POPSTARTER, p, 4, _t("Not found. Put your own POPSTARTER.ELF on a drive, then LOOK FOR THEM."));
++        stLauncher(SEANCE_POPSTARTER, "POPSTARTER", p, 4);
 +    }
-+    stAdd(ROW_STATUS, ACT_NONE, _t("The POPS files (POPS.ELF, POPS_IOX.PAK)"), NULL)->ok = 1;
 +    {
 +        const char *p[1] = {"mass0:/POPS/POPS.ELF"};
-+        stLauncher(SEANCE_POPS, p, 1, _t("Not found. They come from your own console; a launch copies them beside the games from where they are found."));
++        stLauncher(SEANCE_POPS, _t("POPS files"), p, 1);
 +    }
-+    stAdd(ROW_STATUS, ACT_NONE, _t("Ember (Gageformer)"), NULL)->ok = 1;
 +    {
 +        const char *p[1] = {"mass0:/EMBER/ember.elf"};
-+        stLauncher(SEANCE_EMBER, p, 1, _t("Not found. Put ember.elf in a drive's EMBER folder; a launch on another drive offers to copy it there."));
++        stLauncher(SEANCE_EMBER, "Ember", p, 1);
 +    }
-+    stAdd(ROW_STATUS, ACT_NONE, _t("Ember's BIOS (bios.bin)"), NULL)->ok = 1;
 +    {
 +        const char *p[1] = {"mass0:/EMBER/bios.bin"};
-+        stLauncher(SEANCE_EMBER_BIOS, p, 1, _t("Not found. Your own PS1 BIOS, as bios.bin beside ember.elf."));
++        stLauncher(SEANCE_EMBER_BIOS, _t("Ember's BIOS"), p, 1);
 +    }
++    // what the lines mean, once: yours are used where you keep them; RIPPS2's Neutrino only when there is none
++    stAdd(ROW_STATUS, ACT_NONE, _t("Each launch uses yours from where it is found. RIPPS2's own Neutrino is offered only when you have none."), NULL);
 +    stAdd(ROW_ACTION, ACT_SEANCE_SEARCH, _t("LOOK FOR THEM"), ripps2DrivesStarted() ? _t("every started drive") : _t("starts every drive first"));
 +    stAdd(ROW_ACTION, ACT_NT_INSTALL, _t("INSTALL RIPPS2'S NEUTRINO"), _t("only if you have none"));
 +    stAdd(ROW_ACTION, ACT_NT_SETTINGS, _t("NEUTRINO SETTINGS"), _t("path, video, arguments"));
@@ -85683,7 +86843,7 @@ index f2c48c4..84dadb5 100644
  
      // SOUNDS (build 95): none are built in any more, so say where they come from
      stAdd(ROW_HEAD, ACT_NONE, _t("SOUNDS"), _t("AUDIO folder"));
-@@ -236,6 +274,22 @@ static void stScan(void)
+@@ -236,6 +269,22 @@ static void stScan(void)
      stAdd(ROW_ACTION, ACT_SOUNDS_RIP, _t("RIP THIS CONSOLE'S SOUNDS"), _t("from its BIOS, into AUDIO"));
  }
  
@@ -85706,7 +86866,7 @@ index f2c48c4..84dadb5 100644
  static int stRowH(const st_row_t *r)
  {
      return r->kind == ROW_HEAD ? ST_HEAD_H : r->kind == ROW_STATUS ? ST_LINE_H : ST_ROW_H;
-@@ -445,6 +499,14 @@ void ripps2Status(void)
+@@ -445,6 +494,14 @@ void ripps2Status(void)
                      ripps2RipBiosSoundsDialog();
                      rescan = 1;
                      break;
