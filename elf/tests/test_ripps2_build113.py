@@ -159,7 +159,10 @@ for gone, where, text in (('ember_elf.o', 'Makefile', mk), ('popstarter_elf.o', 
     if gone in text:
         fail.append('%s: %s is still there (the trim)' % (where, gone))
 need(mk, (('neutrino_tgz.o', 'Neutrino stays carried'), ('bible_xlf.o', 'BIBLE stays carried')), 'Makefile')
-need(rd('src/cuesupport.c'), (('    return cueResolveEmber(devPrefix, out, outSize);\n}', 'a launch uses the drive\'s own Ember'),), 'cuesupport.c')
+# build 114: the launch legs call RiptOPL's cueResolveEmber themselves (113's cueEnsureEmber was only its alias)
+need(rd('src/bdmsupport.c'), (('if (!cueResolveEmber(ps1Prefix, emberElf, sizeof(emberElf)))', 'a launch uses the drive\'s own Ember'),), 'bdmsupport.c')
+if 'cueEnsureEmber' in rd('src/cuesupport.c') + rd('include/cuesupport.h'):
+    fail.append('cuesupport: the cueEnsureEmber alias is back')
 need(rd('src/ripps2about.c'), (('N_("Ember by Gageformer")', 'Ember stays credited'), ('github.com/Gageformer/Ember/releases', 'with its release page'),
                                ('N_("POPSTARTER by krHACKen")', 'POPSTARTER stays credited')), 'ripps2about.c')
 readme = (repo / 'README.md').read_text(encoding='utf-8')
