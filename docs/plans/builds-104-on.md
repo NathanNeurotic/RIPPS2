@@ -218,6 +218,35 @@ One patch, `elf/patches/0114-ripps2-games.patch`, on branch `b114`; test `elf/te
 built in this order: A (the riskiest: All Games crashed a console in build 66 when its records were freed under a
 cover lookup), then C (delete, which B's page uses), then B. Part D is a decision, not work yet.
 
+### Field reports that shape 114 (10/22)
+- **FifthFox, build 112** (SCPH-39001; iLink: Mobile Disk HD-338 enclosure, Prolific chipset, Seagate IDE drive, 6 to 4
+  pin FireWire; MMCE; MX4SIO; APA on an SSD through a GameStar SATA network adapter). MMCE and its games show fast;
+  USB, MX4SIO and iLink take a while to appear. Ember works from every device; iLink plays PS2 games with modes and
+  logo; **Neutrino and POPSTARTER do not work from iLink** (ripto is on the drivers: with the right ones all of them
+  have worked on this hardware). **Size**: 2 MB at most suggested; RIPPS2 runs from USB here, with LaunchStation,
+  Neutrino and POPSTARTER on the memory card; several larger (over 8 MB, less reliable) card images crashed;
+  3 MB and up is a tight squeeze.
+  - The slow USB / MX4SIO / iLink lists: part A shows every game before they answer. RiptOPL upstream also skips
+    the menu's USB and MX4SIO discovery settles (dde966b) and an unrelated iLink settle (a03b313).
+  - Neutrino and POPSTARTER from iLink: upstream #1018 is exactly this (i.LINK logs back in after an IOP reset,
+    e8b859c; RiptOPL's i.LINK driver in the Neutrino bundle, d954948; POPSTARTER's iLink after its IOP reset,
+    4aa6c4a; the rebuilt usbhdfsd.irx.ilink, 7b07ff6). So the upstream merge is wanted sooner (decision 4).
+  - **Size, measured on the v1.1.3 map** (RIPPS2.elf 2,714,228 bytes packed, 6.8 MB loaded): already-compressed
+    blobs pack no smaller, so each saves its full size: Neutrino's tar 247 KB, BIBLE's three KELFs 342 KB (card
+    83 KB, MX4SIO 133 KB, HDD 125 KB), OPL's incebtion.png 77 KB. Without all three: about 2.05 MB. FreeType's
+    Type 1 modules (psaux, psnames: about 120 KB loaded) can go too if no face RIPPS2 reads is Type 1.
+    Plan: CI builds **RIPPS2-lite.elf** beside RIPPS2.elf from the same code (no BIBLE install, Neutrino used
+    where it is already installed on a card or drive, no OPL default background), under 2 MB, for memory card
+    users; the full ELF stays as the user decided (decision 5).
+- **Berion** (psx-place, on APA and PFS): "APA structure is bond to disk size. By writing disk image, you makes it
+  wrong for your disk if size is different. This leads to APA chain corruption in future. The more partitions be
+  created, the more mess is creating." What it means for RIPPS2: the driver's free-space merge on a delete
+  (apaDeleteFixPrev / Next) joins neighbours by power-of-two size and alignment, capped at 1 GB, and the largest
+  partition a disk takes comes from its own size (apaGetPartitionMax). The header does not record the size the
+  table was made for (the formatter writes mbr.nsector = 0), so a cloned table cannot be read off one field.
+  RIPPS2 never creates partitions (its driver refuses creates), so only part C's delete and the HDD MANAGER's
+  remove touch the chain; both get the check in part C.
+
 ### Credits (the user 10/22, first: small and independent)
 - [ ] **Neutrino beside RiptOPL** on the About page: its own section sits mid-page while BUILT ON RIPTOPL closes it,
       so RiptOPL overshadows it. The opening lines name rickgaiser's Neutrino as the second game core with its
@@ -296,6 +325,13 @@ name, -EBUSY when open, every header write through the table fence).
 - [ ] **Order**: the image first (a cut-off delete leaves stray CFG or art, never a half game listed), then the rest;
       APA under ioBlockOps, then hddPartitionsChanged so games.bin is rebuilt. The star and the Recents entry go,
       RIPPS2.HID drops it, the source rescans (RIPPS2.LST follows), All Games and allgames.bin follow.
+- [ ] **The APA table checked before any partition goes** (Berion's warning; the HDD MANAGER's remove too): a
+      read-only walk of the whole chain from __mbr: every header's magic and checksum, each start equal to the
+      last one's next and each prev pointing back, every partition inside the disk (start + length within
+      HDIOC_TOTALSECTOR), no length above what this disk allows (apaGetPartitionMax of its own size) or off its
+      power-of-two alignment, and the chain closing at 0. Anything off: no delete, and the screen says the table
+      does not fit this disk (written from an image of another size?) and to repair it on a PC first. The walk
+      runs again after the delete, and the result goes into REMOVED.TXT.
 - [ ] **Delete on All Games and Starred Games** proxies to the source row found by name at that moment
       (mixOwnerId), never the stored id; refused on a waiting row.
 - [ ] **A receipt**: mc0:/RIPPS2/REMOVED.TXT gets what was removed, from where, and the bytes freed (as LAUNCH.TXT
@@ -336,9 +372,13 @@ the time it will take shown before it starts and the game's core checked first.
 2. The hidden list on each drive (travels with it; recommended) or one list in the settings.
 3. Delete keeps saves (VMC, POPS saves) and RIPSHOT shots unless ticked (recommended), or removes everything.
 4. RiptOPL upstream: 192 commits since 3cd7f89 (i.LINK fixes #1018, IGR #984, Ember's starting disc from
-   discs.txt, a ZSO probe fix, VMC fixes, the newest menu sound cutting the last #504, the language registry
-   locked). The language and sound changes touch what builds 104 and 111 rewrote, so it is its own merge build
-   (as 72, 84 and 103 were): 115 after 114 (recommended), or before.
+   discs.txt, a ZSO probe fix, VMC fixes, USB / MX4SIO / iLink settles skipped, the newest menu sound cutting the
+   last #504, the language registry locked). The language and sound changes touch what builds 104 and 111
+   rewrote, so it is its own merge patch (as 72, 84 and 103 were). FifthFox's iLink report changes the
+   recommendation: merge first, so testers get the iLink fixes a build sooner, and the games work follows; or
+   keep 114 for the games and merge as 115.
+5. Size: RIPPS2-lite.elf beside the full ELF (recommended: keeps Neutrino and BIBLE in the full one, as decided),
+   or Neutrino and BIBLE found rather than carried in the one ELF.
 
 ## Skipped
 - **RIPCON** (format conversion, as OrbitOPL Toolbox does on a PC): not done on PS2 hardware yet, likely failure
