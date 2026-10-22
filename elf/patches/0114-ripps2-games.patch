@@ -13911,7 +13911,7 @@ index 40f6197..844270a 100644
  // Re-evaluate every BDM device's presence + page visibility on the next refresh (bumps the latch
  // generation). Call after a device-enable toggle so a latched-hidden tab re-shows without a replug.
 diff --git a/include/cuesupport.h b/include/cuesupport.h
-index 726c128..9ab22e6 100644
+index 726c128..2cf6604 100644
 --- a/include/cuesupport.h
 +++ b/include/cuesupport.h
 @@ -64,11 +64,9 @@
@@ -13950,7 +13950,15 @@ index 726c128..9ab22e6 100644
  
  // Per-device folder holding ember.elf + bios.bin + games/, the peer of POPS_FOLDER. The NAME is the
  // only knob Ember's argument contract leaves us (the library must be the ember.elf's own
-@@ -123,9 +135,8 @@ int cueResolveEmberBios(const char *devPrefix, char *out, int outSize);
+@@ -114,7 +126,6 @@ const char *cueEmberFolder(void);
+ // devPrefix is a device ROOT ending in its separator ("mass0:/", "mmce0:/", an SMB prefix ending
+ // "\\"), NOT gBDMPrefix -- Ember reads its own directory and nothing else.
+ int cueResolveEmber(const char *devPrefix, char *out, int outSize);
+-int cueEnsureEmber(const char *devPrefix, char *out, int outSize); // RIPPS2 build 71: resolve, or install the bundled Ember
+ 
+ // As cueResolveEmber, for the user-supplied bios.bin Ember needs at launch. A missing BIOS drops
+ // Ember to the PS1 shell with no explanation, so callers check this BEFORE deinit and say so.
+@@ -123,9 +134,8 @@ int cueResolveEmberBios(const char *devPrefix, char *out, int outSize);
  // Build "<devPrefix><EmberFolder><sep>games" into out (no trailing separator, ready for opendir).
  void cueBuildGamesDir(const char *devPrefix, char *out, int outSize);
  
@@ -14309,15 +14317,13 @@ index fdfdf8e..1e8421d 100644
  #ifdef RETROACHIEVEMENTS
  /* Prepare ORBIT's external-runtime handoff before argv preflight and teardown. */
 diff --git a/include/textures.h b/include/textures.h
-index f23a62f..b56d70a 100644
+index f23a62f..be2df16 100644
 --- a/include/textures.h
 +++ b/include/textures.h
-@@ -133,6 +133,9 @@ enum INTERNAL_TEXTURE {
+@@ -133,6 +133,7 @@ enum INTERNAL_TEXTURE {
      RIPPS2_LAUNCH_DISC, // RIPPS2 build 91: the disc a launch pops in when the game has no ICO art (image launch_disc)
      RIPPS2_PIXFONT,     // RIPPS2 build 92: the in-game menu's 5x7 font, ASCII 32..95 in 6 x 8 cells (image ripps2_pixfont)
      RIPPS2_SIDEBAR_ICONS, // RIPPS2 build 113: the category sidebar's glyphs and their glows, one atlas (image ripps2_sidebar_icons)
-+    L1_ICON,          // Settings peer-page navigation hint
-+    R1_ICON,          // Settings peer-page navigation hint
 +    PSBBN_BACKGROUND, // <PSBBN Flow> nebula stage (theme override "psbbn_bg")
  #ifdef RETROACHIEVEMENTS
      // RA mark over a tracked game's cover (theme override "ra_mark"). Appended last:
@@ -82100,7 +82106,7 @@ index 0000000..2887304
 +C:/Users/natha/Github/Open-PS2-Loader/build/psbbn-flow|codex/psbbn-flow-theme
 +C:/Users/natha/Github/Open-PS2-Loader/build/vmc-sdk-guard-integration-986|codex/vmc-sdk-guard-integration-986
 diff --git a/src/bdmsupport.c b/src/bdmsupport.c
-index ecfafb2..16195d7 100644
+index ecfafb2..cd8832a 100644
 --- a/src/bdmsupport.c
 +++ b/src/bdmsupport.c
 @@ -21,6 +21,8 @@
@@ -82175,6 +82181,15 @@ index ecfafb2..16195d7 100644
  void bdmLoadModules(void)
  {
      bdmLoadCoreModules(0); // normal enumeration: USB residency follows gEnableUSB
+@@ -2013,7 +2028,7 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+     bdmBuildPs1Prefix(ps1Prefix, sizeof(ps1Prefix), itemList->mode); // device ROOT: EMBER/ lives there
+ 
+     // The resolvers leave the path they tried in their buffer, so the message can name it.
+-    if (!cueEnsureEmber(ps1Prefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
++    if (!cueResolveEmber(ps1Prefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
+         return;
+     }
 @@ -2023,6 +2038,8 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
          guiMsgBoxMissing(_l(_STR_EMBER_BIOS_MISSING), biosPath);
          return;
@@ -82380,7 +82395,7 @@ index ecfafb2..16195d7 100644
  // RIPPS2 build 98: what became of MX4SIO, for STATUS: -3 off in Game Sources, -2 its driver not asked for yet, -1 the
  // driver would not load (*err: its code), 0 loaded with no SD card answering, 1 mounted (root: where)
 diff --git a/src/cuesupport.c b/src/cuesupport.c
-index 72b562e..eb1d9d7 100644
+index 72b562e..2639ae1 100644
 --- a/src/cuesupport.c
 +++ b/src/cuesupport.c
 @@ -17,6 +17,7 @@
@@ -82391,7 +82406,20 @@ index 72b562e..eb1d9d7 100644
  
  #include "include/opl.h"        // pulls <dirent.h> (opendir/readdir/DIR) + strcasecmp, like vcdsupport.c
  #include "include/ioman.h"      // LOG
-@@ -102,9 +103,8 @@ int cueNameLaunchable(const char *name)
+@@ -65,12 +66,6 @@ int cueResolveEmber(const char *devPrefix, char *out, int outSize)
+     return cueResolveEmberFile(devPrefix, EMBER_ELF_NAME, out, outSize);
+ }
+ 
+-// RIPPS2: the launch paths' Ember, the drive's own (build 113: RIPPS2 no longer carries one to write there)
+-int cueEnsureEmber(const char *devPrefix, char *out, int outSize)
+-{
+-    return cueResolveEmber(devPrefix, out, outSize);
+-}
+-
+ int cueResolveEmberBios(const char *devPrefix, char *out, int outSize)
+ {
+     return cueResolveEmberFile(devPrefix, EMBER_BIOS_NAME, out, outSize);
+@@ -102,9 +97,8 @@ int cueNameLaunchable(const char *name)
      if (!strcmp(name, "."))
          return 0;
  
@@ -82403,7 +82431,7 @@ index 72b562e..eb1d9d7 100644
      if (strpbrk(name, "/:\\") != NULL)
          return 0;
  
-@@ -121,6 +121,158 @@ int cueNameLaunchable(const char *name)
+@@ -121,6 +115,158 @@ int cueNameLaunchable(const char *name)
  // strcasecmp is.
  static const char *const cueDiscExts[] = {".cue", ".exe", ".bin"};
  
@@ -82562,7 +82590,7 @@ index 72b562e..eb1d9d7 100644
  // 1 when d_name (length len) carries one of Ember's launchable image extensions.
  static int cueNameIsDiscImage(const char *name, int len)
  {
-@@ -163,6 +315,16 @@ static int cueEntryIsGame(const char *devPrefix, const char *gamesDir, const str
+@@ -163,6 +309,16 @@ static int cueEntryIsGame(const char *devPrefix, const char *gamesDir, const str
      if (d == NULL) {
          if (errno == 0 || errno == ENOENT || errno == ENOTDIR || errno == EPERM)
              return 0;
@@ -82604,7 +82632,7 @@ index 238686c..7ca03ad 100644
  
      // end of dialog
 diff --git a/src/ethsupport.c b/src/ethsupport.c
-index 4a1af74..03e65f7 100644
+index 4a1af74..642b1ff 100644
 --- a/src/ethsupport.c
 +++ b/src/ethsupport.c
 @@ -746,6 +746,7 @@ static void ethLaunchVcd(item_list_t *itemList, const char *vcdName, config_set_
@@ -82615,6 +82643,15 @@ index 4a1af74..03e65f7 100644
  
      if (!gPCShareName[0] || cueName == NULL || cueName[0] == '\0')
          return;
+@@ -756,7 +757,7 @@ static void ethLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+         return;
+     }
+     // The resolvers leave the path they tried in their buffer, so the message can name it.
+-    if (!cueEnsureEmber(ethPrefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
++    if (!cueResolveEmber(ethPrefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
+         return;
+     }
 @@ -764,6 +765,8 @@ static void ethLaunchCue(item_list_t *itemList, const char *cueName, config_set_
          guiMsgBoxMissing(_l(_STR_EMBER_BIOS_MISSING), biosPath);
          return;
@@ -83006,7 +83043,7 @@ index 3bae90c..59bde89 100644
                  result = inode->number_data;
              } else
 diff --git a/src/hddsupport.c b/src/hddsupport.c
-index a1027e5..6540e74 100644
+index a1027e5..eb92416 100644
 --- a/src/hddsupport.c
 +++ b/src/hddsupport.c
 @@ -18,12 +18,14 @@
@@ -83032,6 +83069,15 @@ index a1027e5..6540e74 100644
  
      if (name == NULL || name[0] == '\0' || part == NULL || part[0] == '\0')
          return;
+@@ -2249,7 +2252,7 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
+ 
+     // Verify against the partition as it is mounted RIGHT NOW, not against what the scan saw: the
+     // scan read this partition read-only through pfs1: and may be minutes old.
+-    if (!cueEnsureEmber("pfs0:/", emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
++    if (!cueResolveEmber("pfs0:/", emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         hddRestoreDataHome();
+         ioBlockOps(0);
+         hddShowEmberMissing(_STR_EMBER_NOT_FOUND, mountSrc, emberElf);
 @@ -2261,6 +2264,11 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
          hddShowEmberMissing(_STR_EMBER_BIOS_MISSING, mountSrc, biosPath);
          return;
@@ -83748,7 +83794,7 @@ index 879e0d7..fba8d5b 100644
  
  static void menuFirstPage()
 diff --git a/src/mmcesupport.c b/src/mmcesupport.c
-index 4c28157..9f7378d 100644
+index 4c28157..ba683b0 100644
 --- a/src/mmcesupport.c
 +++ b/src/mmcesupport.c
 @@ -866,6 +866,7 @@ static void mmceRenameGame(item_list_t *itemList, int id, char *newName)
@@ -83759,6 +83805,15 @@ index 4c28157..9f7378d 100644
      char ps1Root[sizeof(mmcePrefix)];
  
      if (cueName == NULL || cueName[0] == '\0')
+@@ -887,7 +888,7 @@ static void mmceLaunchCue(item_list_t *itemList, const char *cueName, config_set
+     mmceGetDeviceRoot(ps1Root, sizeof(ps1Root));
+ 
+     // The resolvers leave the path they tried in their buffer, so the message can name it.
+-    if (!cueEnsureEmber(ps1Root, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
++    if (!cueResolveEmber(ps1Root, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
+         return;
+     }
 @@ -895,6 +896,8 @@ static void mmceLaunchCue(item_list_t *itemList, const char *cueName, config_set
          guiMsgBoxMissing(_l(_STR_EMBER_BIOS_MISSING), biosPath);
          return;
@@ -84531,7 +84586,7 @@ index 33227c7..9e1c978 100644
                  if (elem->drawElem) {
                      elem->drawElem = &drawPsbbnFlow;
 diff --git a/src/udpfssupport.c b/src/udpfssupport.c
-index 4962b8e..43610b2 100644
+index 4962b8e..2145824 100644
 --- a/src/udpfssupport.c
 +++ b/src/udpfssupport.c
 @@ -45,6 +45,7 @@ static int udpfsIomanModLoaded = 0;
@@ -84632,6 +84687,15 @@ index 4962b8e..43610b2 100644
  
      if (view == LIB_VIEW_PS1 || view == LIB_VIEW_MIXED) {
          // POPSTARTER uses the UDPFS BDMA pair after reset; Ember inherits this mount.
+@@ -702,7 +748,7 @@ static void udpfsLaunchCue(item_list_t *itemList, const char *cueName, config_se
+         return;
+     }
+     // The resolvers leave the path they tried in their buffer, so the message can name it.
+-    if (!cueEnsureEmber(udpfsPrefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
++    if (!cueResolveEmber(udpfsPrefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
+         return;
+     }
 @@ -710,6 +756,8 @@ static void udpfsLaunchCue(item_list_t *itemList, const char *cueName, config_se
          guiMsgBoxMissing(_l(_STR_EMBER_BIOS_MISSING), biosPath);
          return;
