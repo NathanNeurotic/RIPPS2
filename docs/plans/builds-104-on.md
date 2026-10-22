@@ -218,6 +218,14 @@ One patch, `elf/patches/0114-ripps2-games.patch`, on branch `b114`; test `elf/te
 built in this order: A (the riskiest: All Games crashed a console in build 66 when its records were freed under a
 cover lookup), then C (delete, which B's page uses), then B. Part D is a decision, not work yet.
 
+### Credits (the user 10/22, first: small and independent)
+- [ ] **Neutrino beside RiptOPL** on the About page: its own section sits mid-page while BUILT ON RIPTOPL closes it,
+      so RiptOPL overshadows it. The opening lines name rickgaiser's Neutrino as the second game core with its
+      link (github.com/rickgaiser/neutrino), and its section moves up beside BUILT ON RIPTOPL. (README done on main
+      10/22: the intro, the on-board line and a credits entry right after RiptOPL's.)
+- [ ] **TESTERS** ends with "Special thanks to all the YouTube love as well: glad to help however you reach me."
+      (the user's words), in all 33 languages; every tester list from now on carries it (README done 10/22).
+
 ### A. All Games from a master list
 What is there now: each source keeps its own last list on itself (RIPPS2.LST, build 110), so a source's page fills
 the moment that source answers. All Games (mixsupport.c) is built only from sources that answered, so at boot it
