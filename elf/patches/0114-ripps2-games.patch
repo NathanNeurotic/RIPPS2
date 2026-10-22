@@ -84138,7 +84138,7 @@ index 879e0d7..3c15d07 100644
              guiShowPsEmulationSettings();
          } else if (menuID == APP_EMBER_GAME_SETTINGS) {
 diff --git a/src/mixsupport.c b/src/mixsupport.c
-index 116a919..0e67685 100644
+index 116a919..aadcd3e 100644
 --- a/src/mixsupport.c
 +++ b/src/mixsupport.c
 @@ -18,6 +18,16 @@
@@ -84194,8 +84194,8 @@ index 116a919..0e67685 100644
 +
 +// The kind of source a saved row came from, kept across boots
 +enum { MIX_FAM_APA = 0, MIX_FAM_ATA, MIX_FAM_USB, MIX_FAM_MX4SIO, MIX_FAM_ILINK, MIX_FAM_BDM, MIX_FAM_MMCE, MIX_FAM_SMB, MIX_FAM_UDPFS, MIX_FAM_HTTP, MIX_FAM_COUNT };
-+static const char *const mixFamName[MIX_FAM_COUNT] = {"HDD Games (APA)", "the internal HDD (exFAT)", "the USB drive", "MX4SIO", "iLink", "the drive",
-+                                                      "MMCE", "the SMB share", "UDPFS", "HTTP"};
++static const char *const mixFamName[MIX_FAM_COUNT] = {N_("the internal HDD (APA)"), N_("the internal HDD (exFAT)"), N_("the USB drive"), "MX4SIO", "iLink", N_("the drive"),
++                                                      "MMCE", N_("the SMB share"), "UDPFS", "HTTP"};
 +#define MIX_WAIT_S       40.0 // a started source that has not answered by then drops its saved games
 +#define MIX_MASTER_FILE  "allgames.bin"
 +#define MIX_MASTER_MAGIC "RIPALL01"
@@ -84880,6 +84880,54 @@ index be7699f..8a94c86 100644
  }
  
  void rmDrawTriGouraud(float x1, float y1, u64 c1, float x2, float y2, u64 c2, float x3, float y3, u64 c3)
+diff --git a/src/ripps2about.c b/src/ripps2about.c
+index 0ec24b6..05d46fb 100644
+--- a/src/ripps2about.c
++++ b/src/ripps2about.c
+@@ -53,7 +53,8 @@ static const ab_row_t abRows[] = {
+     {'H', "RIPPS2"},
+     {'T', abRelease},
+     {'S', N_("A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,")},
+-    {'S', N_("with its own look, launchers, file browser and save tools.")},
++    {'S', N_("with rickgaiser's Neutrino inside as its second game core,")},
++    {'S', N_("and its own look, launchers, file browser and save tools.")},
+     {'T', abVersion},
+     {'G', NULL},
+     {'H', N_("MADE BY")},
+@@ -65,6 +66,8 @@ static const ab_row_t abRows[] = {
+     {'T', "eliminator1403 - FifthFox - Mr.sus.60"},
+     {'T', "lukeatmynose"},
+     {'S', N_("Feedback makes RIPPS2. Thank you.")},
++    {'S', N_("Special thanks to all the YouTube love as well:")},
++    {'S', N_("glad to help however you reach me.")},
+     {'G', NULL},
+     {'H', N_("LAUNCH DISC")},
+     {'T', N_("ESR by ffgriever")},
+@@ -82,10 +85,6 @@ static const ab_row_t abRows[] = {
+     {'T', N_("ps2-covers by xlenore")},
+     {'S', N_("the covers it fetches, as ORBIT's launcher does")},
+     {'G', NULL},
+-    {'H', "NEUTRINO"},
+-    {'T', N_("Neutrino by rickgaiser")},
+-    {'S', N_("1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino")},
+-    {'G', NULL},
+     {'H', N_("PS1 GAMES")},
+     {'T', N_("Ember by Gageformer")},
+     {'S', N_("your own, found and launched: github.com/Gageformer/Ember/releases")}, // build 113: no longer carried
+@@ -148,9 +147,12 @@ static const ab_row_t abRows[] = {
+     {'S', N_("PS1 and PS2 marks drawn from public SVGs; trademarks of Sony")},
+     {'G', NULL},
+     {'G', NULL},
+-    {'H', N_("BUILT ON RIPTOPL")},
++    {'H', N_("BUILT ON RIPTOPL, WITH NEUTRINO")},
+     {'T', N_("RiptOPL by NathanNeurotic")},
+     {'S', N_("and the Open PS2 Loader team, whose credits follow")},
++    {'T', N_("Neutrino by rickgaiser")},
++    {'S', N_("the second game core, 1.8.0 carried unmodified (AFL-3.0)")},
++    {'S', N_("github.com/rickgaiser/neutrino")},
+     {'G', NULL},
+     {'H', N_("OPEN PS2 LOADER DEVELOPERS")},
+     {'T', "BatRastard - bbsan2k - belek666 - crazyc"},
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
 index 459b24e..5651a19 100644
 --- a/src/ripps2ember.c
@@ -84960,10 +85008,10 @@ index 4bedb0c..f89b2af 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..aebcd1b
+index 0000000..fbc2898
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,962 @@
+@@ -0,0 +1,963 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -85023,6 +85071,7 @@ index 0000000..aebcd1b
 +#include "include/libview.h"
 +#include "include/favsupport.h"
 +#include "include/mixsupport.h"
++#include "include/cuesupport.h"
 +#include "include/menusys.h"
 +#include "include/ripps2.h"
 +#include "include/ripps2games.h"
@@ -85950,7 +85999,7 @@ index ce09083..bdab331 100644
  {
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
 new file mode 100644
-index 0000000..bc1d513
+index 0000000..dee0a44
 --- /dev/null
 +++ b/src/ripps2seance.c
 @@ -0,0 +1,632 @@
@@ -86026,7 +86075,7 @@ index 0000000..bc1d513
 +int gSeanceLaunching = 0;
 +
 +static const char *const seKey[SEANCE_COUNT] = {"POPSTARTER", "POPS", "EMBER", "EMBER_BIOS", "NEUTRINO"};
-+static const char *const seNames[SEANCE_COUNT] = {"POPSTARTER", "The POPS files", "Ember", "Ember's BIOS", "Neutrino"};
++static const char *const seNames[SEANCE_COUNT] = {"POPSTARTER", N_("The POPS files"), "Ember", N_("Ember's BIOS"), "Neutrino"};
 +static char seWhere[SEANCE_COUNT][160]; // as remembered: "usb:/POPS/POPSTARTER.ELF"; the POPS folder ends in '/'
 +static int seLoaded = 0, seLooked = 0;
 +

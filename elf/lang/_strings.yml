@@ -337,6 +337,25 @@ strings:
 - en: STARTING %s
   in:
   - mixsupport.c
+- en: the SMB share
+  in:
+  - mixsupport.c
+  - ripps2games.c
+- en: the USB drive
+  in:
+  - mixsupport.c
+  - ripps2boot.c
+- en: the drive
+  in:
+  - mixsupport.c
+  - ripps2games.c
+- en: the internal HDD (APA)
+  in:
+  - mixsupport.c
+  - ripps2games.c
+- en: the internal HDD (exFAT)
+  in:
+  - mixsupport.c
 - en: ALL
   in:
   - opl.c
@@ -365,9 +384,6 @@ strings:
   in:
   - ripps2about.c
 - en: '... and the anonymous ...'
-  in:
-  - ripps2about.c
-- en: '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino'
   in:
   - ripps2about.c
 - en: A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,
@@ -414,7 +430,7 @@ strings:
 - en: BUILD DETAILS
   in:
   - ripps2about.c
-- en: BUILT ON RIPTOPL
+- en: BUILT ON RIPTOPL, WITH NEUTRINO
   in:
   - ripps2about.c
 - en: BearSSL by Thomas Pornin
@@ -531,6 +547,9 @@ strings:
 - en: SUPPORT
   in:
   - ripps2about.c
+- en: 'Special thanks to all the YouTube love as well:'
+  in:
+  - ripps2about.c
 - en: TESTERS
   in:
   - ripps2about.c
@@ -538,6 +557,9 @@ strings:
   in:
   - ripps2about.c
 - en: 'an MC annihilator: Square on a memory card'
+  in:
+  - ripps2about.c
+- en: and its own look, launchers, file browser and save tools.
   in:
   - ripps2about.c
 - en: and the Open PS2 Loader team, whose credits follow
@@ -553,6 +575,12 @@ strings:
   in:
   - ripps2about.c
 - en: game hashes and memory telemetry, made solid on hardware by oMrRexD
+  in:
+  - ripps2about.c
+- en: github.com/rickgaiser/neutrino
+  in:
+  - ripps2about.c
+- en: glad to help however you reach me.
   in:
   - ripps2about.c
 - en: 'its MPEG-4 and MP3 decoders: ffmpeg, mpg123 (LGPL 2.1)'
@@ -618,6 +646,9 @@ strings:
 - en: 'the save tool reference: PSU export and import, card images'
   in:
   - ripps2about.c
+- en: the second game core, 1.8.0 carried unmodified (AFL-3.0)
+  in:
+  - ripps2about.c
 - en: wLaunchELF R3Z by NathanNeurotic
   in:
   - ripps2about.c
@@ -627,7 +658,7 @@ strings:
 - en: what RIPPS2's card image writes are checked against
   in:
   - ripps2about.c
-- en: with its own look, launchers, file browser and save tools.
+- en: with rickgaiser's Neutrino inside as its second game core,
   in:
   - ripps2about.c
 - en: xeRAbora by hacan359, rcheevos by RetroAchievements
@@ -1086,9 +1117,6 @@ strings:
   in:
   - ripps2boot.c
 - en: the HDD
-  in:
-  - ripps2boot.c
-- en: the USB drive
   in:
   - ripps2boot.c
 - en: '%d OF %d COPIED TO %s'
@@ -2171,9 +2199,6 @@ strings:
 - en: sector %u holds no partition header
   in:
   - ripps2games.c
-- en: the SMB share
-  in:
-  - ripps2games.c
 - en: the chain does not close at __mbr
   in:
   - ripps2games.c
@@ -2181,9 +2206,6 @@ strings:
   in:
   - ripps2games.c
 - en: the chain's links disagree at sector %u
-  in:
-  - ripps2games.c
-- en: the drive
   in:
   - ripps2games.c
 - en: the drive's size could not be read
@@ -2199,9 +2221,6 @@ strings:
   in:
   - ripps2games.c
 - en: the header at sector %u fails its checksum
-  in:
-  - ripps2games.c
-- en: the internal HDD (APA)
   in:
   - ripps2games.c
 - en: the partition at sector %u is not where or as large as APA puts one
@@ -2636,10 +2655,17 @@ strings:
 - en: 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
   in:
   - ripps2seance.c
+- en: Ember's BIOS
+  in:
+  - ripps2seance.c
+  - ripps2status.c
 - en: 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
   in:
   - ripps2seance.c
 - en: LOOKING FOR YOUR LAUNCHERS
+  in:
+  - ripps2seance.c
+- en: The POPS files
   in:
   - ripps2seance.c
 - en: '%d NOT SAVED: DRIVE FULL'
@@ -2755,9 +2781,6 @@ strings:
   in:
   - ripps2status.c
 - en: Each launch uses yours from where it is found. RIPPS2's own Neutrino is offered only when you have none.
-  in:
-  - ripps2status.c
-- en: Ember's BIOS
   in:
   - ripps2status.c
 - en: INSTALL RIPPS2'S NEUTRINO
