@@ -191,6 +191,9 @@ strings:
 - en: 8 x 3 Compact
   in:
   - gui.c
+- en: Across the Top
+  in:
+  - gui.c
 - en: All
   in:
   - gui.c
@@ -275,6 +278,9 @@ strings:
   in:
   - gui.c
   - ripps2hints.c
+- en: Sidebar
+  in:
+  - gui.c
 - en: Spin
   in:
   - gui.c
@@ -293,6 +299,12 @@ strings:
   in:
   - gui.c
 - en: 'Case Shape: %s'
+  in:
+  - menusys.c
+- en: Launch Disc
+  in:
+  - menusys.c
+- en: Memory Files
   in:
   - menusys.c
 - en: PS1 (square)
@@ -410,6 +422,7 @@ strings:
 - en: LAUNCH DISC
   in:
   - ripps2about.c
+  - ripps2side.c
   - ripps2ui.c
 - en: LEFT TO HUNT pinned to v0.1.0-alpha.18 (github.com/hacan359/xerabora)
   in:
@@ -427,6 +440,7 @@ strings:
   in:
   - ripps2about.c
   - ripps2files.c
+  - ripps2side.c
   - ripps2ui.c
 - en: NETWORK UPDATE
   in:
@@ -508,9 +522,6 @@ strings:
   in:
   - ripps2about.c
 - en: binds BIBLE to your card; the console does the crypto, no keys
-  in:
-  - ripps2about.c
-- en: 'carried unmodified: github.com/Gageformer/Ember/releases'
   in:
   - ripps2about.c
 - en: from your memory card's DVD player update folder
@@ -600,7 +611,10 @@ strings:
 - en: your console's own, ripped from its BIOS
   in:
   - ripps2about.c
-- en: your own copy first; else the one RIPPS2 carries, unchanged
+- en: your own copy, found on your drives and memory cards
+  in:
+  - ripps2about.c
+- en: 'your own, found and launched: github.com/Gageformer/Ember/releases'
   in:
   - ripps2about.c
 - en: ' (no DNS answer)'
@@ -2500,13 +2514,11 @@ strings:
 - en: VIEW
   in:
   - ripps2shot.c
+- en: STORAGE
+  in:
+  - ripps2side.c
+  - ripps2ui.c
 - en: '%d sounds from %sAUDIO%s'
-  in:
-  - ripps2status.c
-- en: '%s EMBER folder'
-  in:
-  - ripps2status.c
-- en: '%s POPS folder'
   in:
   - ripps2status.c
 - en: '%s could not be written to %s. Check its free space and that it is not write protected.'
@@ -2524,16 +2536,7 @@ strings:
 - en: AUDIO folder
   in:
   - ripps2status.c
-- en: Connect the drive your Ember games are on (a USB drive, or the internal exFAT HDD), then try again.
-  in:
-  - ripps2status.c
-- en: Connect the drive your PS1 games are on (a USB drive, or the internal exFAT HDD), then try again.
-  in:
-  - ripps2status.c
 - en: DRIVES
-  in:
-  - ripps2status.c
-- en: 'EMBER: writing'
   in:
   - ripps2status.c
 - en: INSTALL RIPPS2'S COPY
@@ -2575,7 +2578,10 @@ strings:
 - en: 'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.'
   in:
   - ripps2status.c
-- en: Not found yet. The first PS1 game started writes RIPPS2's copy to its drive's POPS folder.
+- en: 'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.'
+  in:
+  - ripps2status.c
+- en: Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.
   in:
   - ripps2status.c
 - en: Not installed. A game that needs it offers RIPPS2's copy, or install it here.
@@ -2585,9 +2591,6 @@ strings:
   in:
   - ripps2status.c
 - en: POPSTARTER and Ember
-  in:
-  - ripps2status.c
-- en: 'POPSTARTER: writing'
   in:
   - ripps2status.c
 - en: PS1 SETTINGS
@@ -2708,9 +2711,6 @@ strings:
   in:
   - ripps2ui.c
 - en: START LASER
-  in:
-  - ripps2ui.c
-- en: STORAGE
   in:
   - ripps2ui.c
 - en: STRANGE ATTRACTOR

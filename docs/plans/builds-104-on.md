@@ -161,17 +161,57 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
 - [x] 9 new sentences in all 32 translations.
 - [x] The sounds walkthrough, one take (media/b112): takes111.ps1 tut_c2 + short112.py.
 
-## Build 113 (planned, the user 10/21)
-- [ ] Fast Cache: a Game Sources > Cache submenu showing each source's list (RIPPS2.LST, APA games.bin) and its
-      state, the old BDM/HDD/SMB/APA cache rows moved in with tooltips saying what still matters; outdated rows go.
-- [ ] All Games from the sources' saved lists before the drives answer (a master list), if Fast Cache is on.
-- [ ] Legacy theme key: a theme without it shows Storage only, Launch Disc and Memory Files in the START menu
-      (backing out returns to its Storage); the built-ins and the Adapt pack set it and keep the three categories.
-- [ ] Adapt sidebar: vertical icon glyphs for the categories (Left from the list, RIPGRID-style highlight, select to
-      switch), an overlay on Launch Disc and Memory Files, the freed top space showing the full name as a header,
-      Circle's sources in the same style; theme keys; in the Adapt pack. Header font: the user picks from
-      docs/plans/mockups/b113-header-fonts.png.
-- [ ] Mother font: one master font with per-element bold / case / tracking keys (FreeType emboldening).
+## Build 113 (the user 10/21-10/22): in progress on branch b113
+- [x] Fast Cache: Game Sources > Cache holds Fast Cache (each source's RIPPS2.LST: on by default, off reads every list
+      from its source first, as before 110), Cache Game List (HDD APA) and Automatic Refresh, each with a tooltip;
+      the BDM/HDD/SMB read-ahead caches went to Game Launching (they act in game, not on lists). Not done: a line per
+      source showing its saved list's state (each support module keeps its own sb_snap_t; needs an accessor each).
+- [ ] All Games from the sources' saved lists before the drives answer (a master list), if Fast Cache is on. Moved to
+      build 114 (10/22): every All Games row hands launch, config and art to its source's own list, so rows shown
+      before the sources start need a saved master list, a wait for their source at launch, and a hand-over when the
+      sources come up, inside mixsupport.c's rebuild locking (a rebuild race crashed the console in build 66).
+- [x] Legacy theme key (code in, lab pass pending): `categories=three|storage`. Unset, a theme using any RIPPS2 key
+      (towers, bg_blur, source_name, glyph_set, sounds, color_theme, category_*, page_buttons, launch_disc) keeps
+      the three, so an older Adapt pack is not cut down; one made for OPL is legacy: no bar, no sidebar, LAUNCH DISC
+      and MEMORY FILES first in the START menu, the cancel button (or L1 / R1) back to Storage, L1 / R1 turn the
+      list's pages as in OPL. The built-ins always have the three; the Adapt pack (edition 113) sets three.
+- [x] Adapt sidebar (two lab passes, 10/22): glyphs (elf/theme/make_sidebar_icons.py atlas) in Adapt's frosted bar,
+      the bar a full strip on Launch Disc and Memory Files (sidebar_bar=pages), no page titles. Keys category_layout=
+      sidebar (column means it too), sidebar_x/_width/_drawer/_bar/_color/_tint/_accent_color/_accent_tint; Colors and
+      More > Category Layout (Theme, Across the Top, Sidebar) in every language. Drawer names in Roboto Condensed Bold.
+- [x] Trim (the user 10/22: no stale bundled launchers; done: RIPPS2.elf 3,197,444 -> 2,738,756 bytes): RIPPS2.elf v1.1.2 is 3.1 MB packed, 5.1 MB stored before
+      packing. Already-compressed blobs pack no smaller, so cutting one saves about its stored size: Ember 281 KB
+      (gzip of the 1.6 MB Beta-2), POPSTARTER 164 KB, Neutrino 241 KB (1.8.0 tar.gz), BIBLE's PS2BBL KELFs 334 KB;
+      OPL's default-theme background incebtion.png 76 KB; fonts 215 KB in all. Plan: POPSTARTER and Ember become
+      finders only (the user's own copy, found where RIPPS2 already looks: Settings path, POPS / EMBER / APPS, the
+      memory cards), the file type tied to its launcher (VCD to POPSTARTER, CUE/BIN to Ember), and a missing one
+      says where to get it and where it goes, with no install from a bundled copy. Neutrino and BIBLE stay (the
+      user). Done: the blobs, installs and STATUS install rows gone; a missing launcher names the path it looked at;
+      elf/ember and elf/popstarter keep the credits and where to get each; About and the README credit both.
+      incebtion.png stays for now: the built-in look's conf_theme_OPL.cfg still draws it (check before cutting).
+- [x] Settings moves (the user agreed 10/22; done in two parts, both checked in the lab: docs/plans/lab/b113-settings-lab.png): Language kept on Interface (not General), Video Mode on Display (not
+      Interface), GSM Defaults on Game Launching only, In-Game Menu on its page only (IGR Path joins it; the page goes
+      under Game Launching); Game Sources > Cache (saved lists + their status, Cache Game List (HDD APA), Automatic
+      Refresh with a tooltip); BDM/HDD/SMB Cache to Game Launching with a tooltip (in-game read-ahead, not lists);
+      BDM/ETH Prefix Path and HDD Spindown to Game Sources; Show Recents beside the Starred Games rows; a Categories
+      group in Colors and More (Category Bar, Category Layout = Theme / Across the Top / Sidebar, Category Order, Page
+      Transition, Source Name); Hints and Glyphs moves under Interface with D-pad Glyphs and Button Hints.
+- [x] Sidebar interaction (the user 10/22): Left on the list focuses the glyphs (the game let go, the hints Select /
+      Back), Up/Down shows each glyph's drawer beside it (its name the first item, its list under it), Cross enters
+      the list (the glyph keeps a dimmer frame), Cross on an item goes there; Circle on Storage opens the Storage
+      drawer on the current source; the cancel button opens it on Launch Disc and Memory Files. The two HDD pages read
+      HDD Games (exFAT) and (APA); the drawer widens to its longest name. Lab: tools takes113.ps1 sb_adapt.
+- [x] RIPDISC's SELECT hold: 12 soft notches that fill clockwise (the one filling fades in), the ring given its own
+      room so HOLD starts clear of it. Lab: takes113.ps1 rd_ring (a DVD video image).
+- [ ] Game management (the user 10/22, maybe 114): hide games to a hidden list reachable only from Settings;
+      delete a game completely and cleanly (on APA, the partition removed through the HDD's own calls, the PFS left
+      whole).
+      Hide can also compress (ISO to ZSO) into that hidden list; un-hide and un-compress when the drive has room.
+- [ ] Fonts: no change to any face in 113 (the user, 10/22: weigh it first, keep every style). The weighing and
+      the plan are in docs/plans/fonts-plan.md (recommended: the drawn faces stay, role keys reuse them, runtime
+      bold only opt-in). The sidebar header reads a `header_font` key over the existing faces.
+- [x] Mockup: docs/plans/mockups/b113-sidebar-sheet.png (make_b113_sidebar.py: the three glyphs drawn as vectors,
+      the sidebar on real Adapt captures of Storage, Launch Disc, Memory Files, the Left focus and Circle's sources).
 
 ## Skipped
 - **RIPCON** (format conversion, as OrbitOPL Toolbox does on a PC): not done on PS2 hardware yet, likely failure

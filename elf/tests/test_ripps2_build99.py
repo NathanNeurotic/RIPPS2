@@ -38,7 +38,8 @@ if 'const char *bdmSlotDriveName(int slot)' not in bdm or 'case BDM_TYPE_ATA:\n 
     fail.append('bdmSlotDriveName must name a drive by its driver (an exFAT HDD is HDD)')
 if 'if ((drive = bdmSlotDriveName(d)) != NULL)' not in ra or '"MMCE 0", "MMCE 1"' not in ra:
     fail.append('YOUR ACCOUNT must say where a game is by the drive\'s driver, and MMCE 0 / 1')
-for needle in ('"%s POPS folder", mass0Name', '"%s EMBER folder", mass0Name', '"%s  (mass0:/neutrino)"', 'LR_ADD("drive      mass%c: is %s\\r\\n"'):
+# build 113: the POPS and EMBER install rows went with the copies RIPPS2 carried; Ember's line names the drive instead
+for needle in ('"Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.", mass0Name', '"%s  (mass0:/neutrino)"', 'LR_ADD("drive      mass%c: is %s\\r\\n"'):
     if needle not in st:
         fail.append('STATUS / the launch report must name mass0: by its driver (%s missing)' % needle)
 for gone in ('"USB POPS folder"', '"USB EMBER folder"', '"USB  (mass0:/neutrino)"', 'Not found on USB.'):

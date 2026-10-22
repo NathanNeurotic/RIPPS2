@@ -1,0 +1,2401 @@
+diff --git a/Makefile b/Makefile
+index 576fd65..31e61cd 100644
+--- a/Makefile
++++ b/Makefile
+@@ -138,7 +138,7 @@ ifneq ($(GIT_TAG),latest)
+ endif
+ endif
+ 
+-FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2disc.o ripps2shot.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
++FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2side.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2disc.o ripps2shot.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
+ 		dia.o ioman.o texcache.o themes.o supportbase.o bdmsupport.o netsupport.o ethsupport.o httpcatalog.o httpsupport.o udpfssupport.o hddsupport.o zso.o lz4.o launchdiag.o \
+ 		appsupport.o mmcesupport.o artindex.o vcdsupport.o cuesupport.o libview.o retrogem.o folderbrowse.o gui.o guigame.o vmc_groups.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o cheatconfig.o sound.o ps2cnf.o tar.o saveicon.o cfgtitle.o
+ 
+@@ -172,6 +172,8 @@ PNG_ASSETS = load0 load1 load2 load3 load4 load5 load6 load7 usb usb_bd ilk_bd \
+ 
+ # RIPPS2: glass info panel and PS2 selector mark (gfx/ripps2_*.png, copied in by RIPPS2's build.sh)
+ PNG_ASSETS += ripps2_glass ripps2_mark ripps2_mark_glow L2R2 ripps2_ps1logo ripps2_ps2logo ripps2_grid_icons ripps2_up ripps2_down hint_badge ripps2_disc ripps2_pixfont
++# RIPPS2 build 113: the category sidebar's glyphs (ps2-pillars elf/theme/make_sidebar_icons.py)
++PNG_ASSETS += ripps2_sidebar_icons
+ # RIPPS2 build 90: the Standard and White glyph sets (glyph_set=, Controller Settings > Hints and Glyphs)
+ PNG_ASSETS += glyph_standard_cross glyph_standard_circle glyph_standard_square glyph_standard_triangle glyph_standard_start glyph_standard_select glyph_standard_L1 glyph_standard_R1 glyph_standard_L2R2 glyph_standard_L3 glyph_standard_R3 glyph_standard_up glyph_standard_down glyph_standard_left glyph_standard_right glyph_standard_badge \
+ 	glyph_white_cross glyph_white_circle glyph_white_square glyph_white_triangle glyph_white_start glyph_white_select glyph_white_L1 glyph_white_R1 glyph_white_L2R2 glyph_white_L3 glyph_white_R3 glyph_white_up glyph_white_down glyph_white_left glyph_white_right glyph_white_badge
+@@ -198,7 +200,7 @@ AUDIO_OBJS =
+ # icon_sys.o + save_icn.o are the memory-card browser save icon for the settings folder.
+ # icon.sys names list.icn, copy.icn and del.icn; all three are the same artwork, so ONE blob is
+ # embedded and util.c writes it out under all three names (see saveIconName in src/util.c).
+-MISC_OBJS =	icon_sys.o save_icn.o ripps2_icn.o icon_sys_A.o icon_sys_J.o icon_sys_C.o bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o conf_theme_OPL.o theme_coverflow.o theme_ripgrid.o ripps2_font.o ripps2_sleek.o ripps2_sleekbold.o ripps2_sleekcase.o ripps2_one.o ripflow.o ripflowbold.o ember_elf.o ember_licence.o popstarter_elf.o neutrino_tgz.o
++MISC_OBJS =	icon_sys.o save_icn.o ripps2_icn.o icon_sys_A.o icon_sys_J.o icon_sys_C.o bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o conf_theme_OPL.o theme_coverflow.o theme_ripgrid.o ripps2_font.o ripps2_sleek.o ripps2_sleekbold.o ripps2_sleekcase.o ripps2_one.o ripflow.o ripflowbold.o neutrino_tgz.o
+ 
+ TRANSLATIONS = Albanian Arabic Bulgarian Cebuano Croatian Czech Danish Dutch Filipino French \
+ 	Galician German Greek Hungarian Indonesian Italian Japanese Korean Laotian Persian Polish Portuguese \
+@@ -1270,17 +1272,6 @@ $(EE_ASM_DIR)ripps2_sleekbold.c: misc/ripps2_sleekbold.ttf | $(EE_ASM_DIR)
+ $(EE_ASM_DIR)ripps2_sleekcase.c: misc/ripps2_sleekcase.ttf | $(EE_ASM_DIR)
+ 	$(BIN2C) $< $@ $(*F)_raw
+ 
+-# RIPPS2 build 71: Ember (gzip -9 of elf/ember/ember.elf) and its licence, copied in by RIPPS2's build.sh
+-$(EE_ASM_DIR)ember_elf.c: misc/ember_elf.gz | $(EE_ASM_DIR)
+-	$(BIN2C) $< $@ $(*F)_gz
+-
+-$(EE_ASM_DIR)ember_licence.c: misc/ember_licence.txt | $(EE_ASM_DIR)
+-	$(BIN2C) $< $@ $(*F)_txt
+-
+-# RIPPS2 build 73: POPSTARTER (krHACKen), carried as released (it is packed already), copied in by build.sh
+-$(EE_ASM_DIR)popstarter_elf.c: misc/popstarter_elf.bin | $(EE_ASM_DIR)
+-	$(BIN2C) $< $@ $(*F)_bin
+-
+ # RIPPS2 build 77: Neutrino 1.8.0 (rickgaiser, AFL-3.0) as a gzip'd tar, copied in by build.sh
+ $(EE_ASM_DIR)neutrino_tgz.c: misc/neutrino.tar.gz | $(EE_ASM_DIR)
+ 	$(BIN2C) $< $@ neutrino_tgz
+diff --git a/include/dialogs.h b/include/dialogs.h
+index d4213a7..f70771d 100644
+--- a/include/dialogs.h
++++ b/include/dialogs.h
+@@ -68,6 +68,7 @@ enum UI_ITEMS {
+     UICFG_RIPPS2_HINT_SLOT6,
+     UICFG_RIPPS2_HINT_SLOT7,
+     UICFG_RIPPS2_TRANSITION, // build 92: Colors and More > Page Transition
++    UICFG_RIPPS2_CATLAYOUT,  // build 113: Colors and More > Category Layout
+ 
+     CFG_DEBUG,
+     CFG_PS2LOGO,
+@@ -361,7 +362,9 @@ enum UI_ITEMS {
+     RIPPS2_BIBLE_BUTTON, // RIPPS2: BOOT LOADER > MANAGE (BIBLE)
+     RIPPS2_RIP_BIOS_BUTTON, // RIPPS2 build 88: Audio settings > BIOS Sounds > RIP
+     RIPPS2_RIP_MUSIC_BUTTON, // RIPPS2 build 100: Audio settings > BIOS Music > RIP
+-    RIPPS2_HINTS_BUTTON,      // RIPPS2 build 90: Controller Settings > Hints and Glyphs
++    RIPPS2_HINTS_BUTTON,      // RIPPS2 build 90: Hints and Glyphs (Interface from build 113)
++    RIPPS2_CACHE_BUTTON,      // RIPPS2 build 113: Game Sources > Cache
++    CFG_RIPPS2_FASTCACHE,     // RIPPS2 build 113: Cache > Fast Cache (each source's saved list)
+     RIPPS2_HINT_ORDER_BUTTON, // and its Hint Order
+     RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
+     CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
+@@ -434,6 +437,7 @@ extern struct UIItem diaUIConfig[];
+ extern struct UIItem diaAudioConfig[];
+ extern struct UIItem diaControllerConfig[];
+ extern struct UIItem diaHintsConfig[]; // RIPPS2 build 90
++extern struct UIItem diaCacheConfig[]; // RIPPS2 build 113
+ extern struct UIItem diaIgrConfig[];   // RIPPS2 build 108: In-Game Menu, RIPSHOT, Develop Shots
+ extern struct UIItem diaHintOrder[];
+ extern struct UIItem diaCompatConfig[];
+diff --git a/include/gui.h b/include/gui.h
+index e86a72a..ad18867 100644
+--- a/include/gui.h
++++ b/include/gui.h
+@@ -163,6 +163,11 @@ int guiShowMmceConfig(void);
+ void guiShowArtworkConfig(void);
+ void guiShowCoverflowConfig(void);
+ void guiShowColorsConfig(void);
++struct UIItem;
++void guiRipps2HintRowsSet(struct UIItem *dia);  // RIPPS2 build 113: D-pad Glyphs and Button Hints on Hints and Glyphs
++void guiRipps2HintRowsRead(struct UIItem *dia);
++void guiExitPathBegin(struct UIItem *ui); // RIPPS2 build 113: IGR Path on the In-Game Menu page (ripps2shot.c)
++void guiExitPathEnd(void);
+ int guiDrawBGSettings(void);
+ int guiDeviceTypeToIoMode(int deviceType);
+ int guiIoModeToDeviceType(int ioMode);
+diff --git a/include/menusys.h b/include/menusys.h
+index e5a5a34..92c8d66 100644
+--- a/include/menusys.h
++++ b/include/menusys.h
+@@ -112,6 +112,13 @@ void menuEnd();
+ // case to spot "user enabled the FIRST tab from the start menu" (#254).
+ int menuHasRegisteredItems(void);
+ void menuReinitMainMenu(void);
++// RIPPS2 build 113: the visible source pages, for the category sidebar's Storage drawer
++int menuSourceCount(void);
++const char *menuSourceName(int i);
++int menuSourceIcon(int i); // the page's theme icon id (USB_ICON, HDD_ICON, ...)
++int menuSourceMode(int i); // its item_list_t mode (MIX_MODE for All Games), -1 for none
++int menuSourceCurrent(void);
++void menuSourceSelect(int i);
+ struct _item_list_t;
+ void menuInitGameMenu(struct _item_list_t *support);
+ void menuInitAppMenu(void);
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 35ac388..a10c426 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -135,7 +135,18 @@ int ripps2ShowHintsConfig(void);                          // the page; 1 when an
+ 
+ void ripps2SetCategory(int cat);    // switch screens and fly the PS2 mark
+ void ripps2StepCategory(int dir);   // -1 / +1, clamped at the ends
++int ripps2Legacy(void); // build 113: a theme without categories=three: Storage alone, the others in the START menu
+ void ripps2RenderCategoryBar(void); // the three labels plus the mark
++int ripps2CatSlot(int cat);         // build 113: a category's place on the bar (Category Order), and the category at a place
++
++// ---- build 113: the category sidebar (ripps2side.c) ----
++extern int gRipps2FastCache; // build 113: Game Sources > Cache > Fast Cache, each source's saved list (1, the default)
++extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar
++int ripps2SidebarOn(void);   // the categories drawn as the sidebar on this theme with this setting
++void ripps2SidebarRender(void);
++int ripps2SidebarFocused(void); // 0 not, 1 its glyphs, 2 a drawer's list
++void ripps2SidebarOpen(int list); // 0: the glyphs (Left); 1: straight into the page's drawer list (Circle)
++void ripps2SidebarInput(void);
+ void ripps2DrawBusy(int alpha);     // loading: the mark breathes (in place, or small in the corner)
+ void ripps2DiscWatch(void);         // every frame: the drive read after boot and after the tray closes
+ int ripps2DiscQuiet(void);
+@@ -206,11 +217,9 @@ int ripps2EditFile(const char *path);                              // 1 when it
+ int ripps2EditMetadata(config_set_t *config, const char *gameName); // 1 when SAVE was chosen (values set, not written)
+ 
+ void ripps2HddManager(void); // ripps2hdd.c
+-int ripps2EmberInstall(const char *elfPath); // ripps2ember.c (build 71): write the Ember RIPPS2 carries
+-int ripps2PopstarterInstall(const char *elfPath);
+ int ripps2NeutrinoInstallTo(const char *dir); // build 80: the carried Neutrino into dir ("mc0:/neutrino"...); 1 when complete
+ void ripps2Status(void);                    // ripps2status.c (build 80): the main menu's STATUS page, RIPPS2's homebrew
+-int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize); // ripps2ember.c (build 77): install the Neutrino RIPPS2 carries, where the user picks // ripps2ember.c (build 73): write the POPSTARTER RIPPS2 carries, when none is there
++int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize); // ripps2ember.c (build 77): install the Neutrino RIPPS2 carries, where the user picks
+ void ripps2ArtDownload(void); // ripps2art.c (build 73): covers for the games without one, over HTTPS
+ void ripps2Achievements(void); // ripps2ra.c: SpiritofRA, the main menu's ACHIEVEMENTS page
+ void ripps2ShowAbout(const char *version, const char *build); // ripps2about.c: the scrolling credits
+diff --git a/include/textures.h b/include/textures.h
+index e8db4dd..f23a62f 100644
+--- a/include/textures.h
++++ b/include/textures.h
+@@ -132,6 +132,7 @@ enum INTERNAL_TEXTURE {
+     RIPPS2_HINT_BADGE, // RIPPS2 build 90: the pill a hint badge is drawn on, stretched across its middle (image hint_badge)
+     RIPPS2_LAUNCH_DISC, // RIPPS2 build 91: the disc a launch pops in when the game has no ICO art (image launch_disc)
+     RIPPS2_PIXFONT,     // RIPPS2 build 92: the in-game menu's 5x7 font, ASCII 32..95 in 6 x 8 cells (image ripps2_pixfont)
++    RIPPS2_SIDEBAR_ICONS, // RIPPS2 build 113: the category sidebar's glyphs and their glows, one atlas (image ripps2_sidebar_icons)
+ #ifdef RETROACHIEVEMENTS
+     // RA mark over a tracked game's cover (theme override "ra_mark"). Appended last:
+     // texId is positional.
+diff --git a/include/themes.h b/include/themes.h
+index 3ef2510..e300e61 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -272,6 +272,14 @@ typedef struct theme
+     int catColumn, catX, catY, catSpacing; // category_layout=column, category_x/_y/_spacing (-1: RIPPS2's)
+     char catLabel[3][24];               // category_label_launch / _storage / _files ("" keeps RIPPS2's words)
+     int catTransitionDef;               // category_transition: -1 not set, 0 none, 1 fade, 2 flash
++    // build 113: category_layout=sidebar (or column): the categories as glyphs down a bar on the left, not words
++    int catSidebar;
++    int catLegacy; // build 113: a theme made for OPL (no categories=three, none of RIPPS2's keys), or categories=storage:
++                   // Storage alone, the other two in the START menu
++    int sbX, sbW, sbDrawer;             // sidebar_x, sidebar_width, sidebar_drawer (the drawer's right edge)
++    int sbBar;                          // sidebar_bar: 2 always (default), 1 on the pages without one of the theme's, 0 never
++    unsigned char sbColor[3], sbAccent[3]; // sidebar_color, sidebar_accent_color
++    int sbTint, sbAccentTint;           // sidebar_tint, sidebar_accent_tint (0..128)
+     // RIPPS2 build 92: the Grid's coverless cases and the name under it (<grid>_coverless, <grid>_title...)
+     int gridCoverless;                  // 1: a case with no art shows the game's serial in the pixel font
+     int gridTitle, gridTitleY, gridTitleFont; // the chosen game's name under the grid, its line and its face
+@@ -363,6 +371,7 @@ int thmAppCaseShape(const char *title);
+ void thmAppCaseShapeSet(const char *title, int shape);
+ int thmGetGuiValue(void);
+ int thmFindGuiID(const char *theme);
++int thmDrawMainFrost(int x, int y, int w, int h); // RIPPS2 build 113: the frosted backdrop under the sidebar's drawer
+ int thmGetPanelRect(int infoPage, int *x, int *y, int *w, int *h); // RIPPS2: the page's glass panel
+ const char **thmGetGuiList(void);
+ char *thmGetFilePath(int themeID);
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index d8a1ed9..e2e218a 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1575,6 +1575,18 @@ gui_strings:
+   string: Page Transition
+ - label: HINT_RIPPS2_TRANSITION
+   string: "How a new page comes in as you go to another category: from the theme's background colour, or out of a flash. Theme keeps the theme's choice."
++- label: RIPPS2_CACHE
++  string: Cache
++- label: HINT_RIPPS2_CACHE
++  string: "How each source's game list is kept so its page opens at once: Fast Cache, the internal HDD's list and Automatic Refresh."
++- label: RIPPS2_FAST_CACHE
++  string: Fast Cache
++- label: HINT_RIPPS2_FAST_CACHE
++  string: "Each source keeps its last game list (RIPPS2.LST beside its CD and DVD folders) and shows it the moment the source answers, then reads the source again in the background. Off reads every list from its source first, as before."
++- label: RIPPS2_CATEGORY_LAYOUT
++  string: Category Layout
++- label: HINT_RIPPS2_CATEGORY_LAYOUT
++  string: "Where the three categories sit: their names across the top, or icons down the side bar, each with a drawer of its pages (Left on a list goes there). Theme keeps the theme's own."
+ - label: HINT_RIPPS2_VIGNETTE
+   string: "Darkens the edges of every cover but the chosen one, so the chosen one stands out. Weak is half of Full."
+ - label: RIPPS2_GRID_WIDE
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index 9a2174b..ecfafb2 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -2013,7 +2013,7 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+     bdmBuildPs1Prefix(ps1Prefix, sizeof(ps1Prefix), itemList->mode); // device ROOT: EMBER/ lives there
+ 
+     // The resolvers leave the path they tried in their buffer, so the message can name it.
+-    if (!cueEnsureEmber(ps1Prefix, emberElf, sizeof(emberElf))) { // RIPPS2 build 71: or the bundled one
++    if (!cueEnsureEmber(ps1Prefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
+         return;
+     }
+diff --git a/src/cuesupport.c b/src/cuesupport.c
+index 2c1077d..72b562e 100644
+--- a/src/cuesupport.c
++++ b/src/cuesupport.c
+@@ -24,7 +24,6 @@
+ #include "include/vcdsupport.h" // vcdFillGameList + vcdSortKey -- the POPSTARTER half of the union
+ #include "include/cuesupport.h"
+ #include "include/retrogem.h"
+-#include "include/ripps2.h" // RIPPS2 build 71: ripps2EmberInstall
+ 
+ // Path separator for a device prefix: '\\' for SMB (its prefix ends in a backslash), else '/'.
+ // Auto-detected from the trailing character so one code path serves mass/mmce/pfs and SMB alike.
+@@ -66,13 +65,10 @@ int cueResolveEmber(const char *devPrefix, char *out, int outSize)
+     return cueResolveEmberFile(devPrefix, EMBER_ELF_NAME, out, outSize);
+ }
+ 
+-// RIPPS2 build 71: the launch paths' Ember: the drive's own, or the one RIPPS2 carries, written into
+-// the drive's EMBER folder the first time (never from a list scan: it writes 1.6 MB)
++// RIPPS2: the launch paths' Ember, the drive's own (build 113: RIPPS2 no longer carries one to write there)
+ int cueEnsureEmber(const char *devPrefix, char *out, int outSize)
+ {
+-    if (cueResolveEmber(devPrefix, out, outSize))
+-        return 1;
+-    return out != NULL && outSize > 0 && out[0] != '\0' && ripps2EmberInstall(out);
++    return cueResolveEmber(devPrefix, out, outSize);
+ }
+ 
+ int cueResolveEmberBios(const char *devPrefix, char *out, int outSize)
+@@ -231,8 +227,8 @@ int cueScanDir(const char *devPrefix, cue_entry_t **outList)
+     // gamesDir is scratch for the probe here -- cueResolveEmber writes the ELF path into it and we
+     // discard that, then rebuild it as the games directory below. One buffer, not two, on a stack
+     // this platform keeps small.
+-    // RIPPS2 build 71: RIPPS2 carries Ember and installs it at a game's first launch (cueEnsureEmber),
+-    // so a drive's EMBER/games folder lists without a core of its own (upstream now does the same).
++    // RIPPS2: a drive's EMBER/games folder lists without a core of its own (upstream does the same), and
++    // launching one names the ember.elf path it looked for.
+     int coreReadable = cueResolveEmber(devPrefix, gamesDir, sizeof(gamesDir));
+     if (!coreReadable)
+         LOG("[CUE] no readable ember.elf at '%s' -- listing games anyway, launch will say so\n", gamesDir);
+diff --git a/src/dialogs.c b/src/dialogs.c
+index f15b8f9..238686c 100644
+--- a/src/dialogs.c
++++ b/src/dialogs.c
+@@ -386,11 +386,6 @@ struct UIItem diaConfig[] = {
+     {UI_BOOL, CFG_FOLDERNAV, 1, 1, _STR_HINT_FOLDER_NAV, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_LANGUAGE}}},
+-    {UI_SPACER},
+-    {UI_ENUM, UICFG_LANG, 1, 1, _STR_HINT_LANGUAGE, 0, 0, {.intvalue = {0, 0}}},
+-    {UI_BREAK},
+-
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_BOOT_LOCK}}},
+     {UI_SPACER},
+     {UI_BOOL, CFG_RIPPS2_BOOTLOCK, 1, 1, _STR_HINT_RIPPS2_BOOT_LOCK, 0, 0, {.intvalue = {0, 0}}},
+@@ -401,14 +396,6 @@ struct UIItem diaConfig[] = {
+     {UI_BUTTON, RIPPS2_BIBLE_BUTTON, 1, 1, _STR_HINT_RIPPS2_BOOT_LOADER, 0, 0, {.label = {NULL, _STR_RIPPS2_MANAGE}}},
+     {UI_BREAK},
+ 
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_EXITTO}}},
+-    {UI_SPACER},
+-    {UI_STRING, CFG_EXITTO, 1, 1, _STR_HINT_EXITPATH, 0, 0, {.stringvalue = {"", "", &guiExitPathHandler}}},
+-    {UI_BREAK},
+-
+-    {UI_BUTTON, RIPPS2_IGR_BUTTON, 1, 1, _STR_HINT_RIPPS2_IGR_PAGE, 0, 0, {.label = {NULL, _STR_RIPPS2_IGR_MENU}}}, // build 108
+-    {UI_BREAK},
+-
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_SETTINGS_HOME}}}, // build 109
+     {UI_SPACER},
+     {UI_ENUM, UICFG_RIPPS2_SETTINGS_HOME, 1, 1, _STR_HINT_RIPPS2_SETTINGS_HOME, 0, 0, {.intvalue = {0, 0}}},
+@@ -419,11 +406,6 @@ struct UIItem diaConfig[] = {
+     {UI_STRING, CFG_CUSTOMCFGPATH, 1, 1, _STR_HINT_CUSTOM_SETTINGS_PATH, 0, 0, {.stringvalue = {"", "", NULL}}},
+     {UI_BREAK},
+ 
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_GSM_DEFAULTS}}},
+-    {UI_SPACER},
+-    {UI_BUTTON, GENERAL_GSM_DEFAULTS_BUTTON, 1, 1, _STR_HINT_GSM_DEFAULTS_BUTTON, 0, 0, {.label = {NULL, _STR_MODIFY}}},
+-    {UI_BREAK},
+-
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+     {UI_BREAK},
+@@ -521,6 +503,32 @@ struct UIItem diaDeviceConfig[] = {
+     {UI_ENUM, CFG_RIPPS2_STARSIDE, 1, 1, _STR_HINT_RIPPS2_STARSIDE, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
++    // build 113: Show Recents, the recently launched games on Starred Games, from Colors and More
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_RECENTS}}},
++    {UI_SPACER},
++    {UI_INT, UICFG_RIPPS2_RECENTS, 1, 1, _STR_HINT_RIPPS2_RECENTS, 0, 0, {.intvalue = {0, 0, 0, 9}}},
++    {UI_BREAK},
++
++    // build 113: where the games are on the drives, from Advanced, and the Cache page (how the lists are kept)
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"BDM Prefix Path", -1}}},
++    {UI_SPACER},
++    {UI_STRING, CFG_BDMPREFIX, 1, 1, _STR_HINT_BDMPREFIX, 0, 0, {.stringvalue = {"", "", NULL}}},
++    {UI_BREAK},
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"ETH Prefix Path", -1}}},
++    {UI_SPACER},
++    {UI_STRING, CFG_ETHPREFIX, 1, 1, _STR_HINT_ETHPREFIX, 0, 0, {.stringvalue = {"", "", NULL}}},
++    {UI_BREAK},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"HDD Spindown", -1}}},
++    {UI_SPACER},
++    {UI_INT, CFG_HDDSPINDOWN, 1, 1, _STR_HINT_SPINDOWN, 0, 0, {.intvalue = {20, 20, 0, 20}}},
++    {UI_BREAK},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_CACHE}}},
++    {UI_SPACER},
++    {UI_BUTTON, RIPPS2_CACHE_BUTTON, 1, 1, _STR_HINT_RIPPS2_CACHE, 0, 0, {.label = {NULL, _STR_MODIFY}}},
++    {UI_BREAK},
++
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+     {UI_BREAK},
+@@ -847,11 +855,6 @@ struct UIItem diaUIConfig[] = {
+     {UI_BOOL, UICFG_CFG_TITLES, 1, 1, _STR_HINT_CFG_TITLES, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_VMODE}}},
+-    {UI_SPACER},
+-    {UI_ENUM, UICFG_VMODE, 1, 1, _STR_HINT_MENU_VMODE, 0, 0, {.intvalue = {0, 0}}},
+-    {UI_BREAK},
+-
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_THEME}}},
+     {UI_SPACER},
+     {UI_ENUM, UICFG_THEME, 1, 1, _STR_HINT_RIPPS2_THEME, 0, 0, {.intvalue = {0, 0}}},
+@@ -870,6 +873,11 @@ struct UIItem diaUIConfig[] = {
+     {UI_SPACER},
+     {UI_BUTTON, UICFG_COLORS_BUTTON, 1, 1, _STR_HINT_COLORS_BUTTON, 0, 0, {.label = {NULL, _STR_MODIFY}}},
+     {UI_BREAK},
++    // build 113: Hints and Glyphs, from Controller Settings (the user's settings moves)
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_HINTS_GLYPHS}}},
++    {UI_SPACER},
++    {UI_BUTTON, RIPPS2_HINTS_BUTTON, 1, 1, _STR_HINT_RIPPS2_HINTS_GLYPHS, 0, 0, {.label = {NULL, _STR_MODIFY}}},
++    {UI_BREAK},
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"VCD Games List Settings", -1}}},
+     {UI_SPACER},
+     {UI_BUTTON, UICFG_GAME_LIST_BUTTON, 1, 1, _STR_HINT_VCD_LIST_BUTTON, 0, 0, {.label = {NULL, _STR_MODIFY}}},
+@@ -890,10 +898,6 @@ struct UIItem diaUIConfig[] = {
+     {UI_BOOL, UICFG_AUTOSORT, 1, 1, _STR_HINT_AUTOSORT, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_AUTOREFRESH}}},
+-    {UI_SPACER},
+-    {UI_BOOL, UICFG_AUTOREFRESH, 1, 1, _STR_HINT_AUTOREFRESH, 0, 0, {.intvalue = {0, 0}}},
+-    {UI_BREAK},
+ 
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+@@ -960,21 +964,13 @@ struct UIItem diaColorsConfig[] = {
+     {UI_HEADER, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_COLORS_SETTINGS}}},
+     {UI_SPLITTER},
+ 
+-    // RIPPS2 build 70: Colors and More: RIPPS2's own look first (the old RIPPSettings page)
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_GLYPHS}}},
++    // RIPPS2 build 70: Colors and More: RIPPS2's own look first (the old RIPPSettings page). Build 113 (the user's
++    // settings moves): the categories together, D-pad Glyphs and Button Hints on Hints and Glyphs (Interface),
++    // Show Recents beside the Starred Games rows (Game Sources)
++    // build 113: the names across the top, or the sidebar
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_CATEGORY_LAYOUT}}},
+     {UI_SPACER},
+-    {UI_ENUM, UICFG_RIPPS2_GLYPHS, 1, 1, _STR_HINT_RIPPS2_GLYPHS, 0, 0, {.intvalue = {0, 0}}},
+-    {UI_BREAK},
+-
+-    // build 71; build 80 moved it under the glyphs it sits beside
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_SOURCE_NAME}}},
+-    {UI_SPACER},
+-    {UI_ENUM, UICFG_RIPPS2_SRCNAME, 1, 1, _STR_HINT_RIPPS2_SOURCE_NAME, 0, 0, {.intvalue = {0, 0}}},
+-    {UI_BREAK},
+-
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_HINTS}}},
+-    {UI_SPACER},
+-    {UI_ENUM, UICFG_RIPPS2_HINTS, 1, 1, _STR_HINT_RIPPS2_HINTS, 0, 0, {.intvalue = {0, 0}}},
++    {UI_ENUM, UICFG_RIPPS2_CATLAYOUT, 1, 1, _STR_HINT_RIPPS2_CATEGORY_LAYOUT, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_CATEGORY_BAR}}},
+@@ -987,16 +983,17 @@ struct UIItem diaColorsConfig[] = {
+     {UI_ENUM, UICFG_RIPPS2_CATSWAP, 1, 1, _STR_HINT_RIPPS2_CATEGORY_ORDER, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_RECENTS}}},
+-    {UI_SPACER},
+-    {UI_INT, UICFG_RIPPS2_RECENTS, 1, 1, _STR_HINT_RIPPS2_RECENTS, 0, 0, {.intvalue = {0, 0, 0, 9}}},
+-    {UI_BREAK},
+-
+     // build 92: how a new category's page comes in
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_TRANSITION}}},
+     {UI_SPACER},
+     {UI_ENUM, UICFG_RIPPS2_TRANSITION, 1, 1, _STR_HINT_RIPPS2_TRANSITION, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
++
++    // build 71: the source's name over the game list
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_SOURCE_NAME}}},
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_SRCNAME, 1, 1, _STR_HINT_RIPPS2_SOURCE_NAME, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
+     {UI_SPLITTER},
+ 
+     // build 80: the Color Theme heads the colour pickers
+@@ -1082,14 +1079,7 @@ struct UIItem diaDisplayConfig[] = {
+     {UI_ENUM, CFG_APPLYGAMEID, 1, 1, _STR_HINT_APPLYGAMEID, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    // The GLOBAL half of GSM: the $EnableGSM/$GSMVMode/... block in the global config, which every
+-    // game inherits unless it sets its own. Distinct from UICFG_VMODE above -- that is the video
+-    // mode of the OPL MENU, this is the video mode games are launched in.
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_GSM_DEFAULTS}}},
+-    {UI_SPACER},
+-    {UI_BUTTON, DISPLAY_GSM_DEFAULTS_BUTTON, 1, 1, _STR_HINT_GSM_DEFAULTS_BUTTON, 0, 0, {.label = {NULL, _STR_MODIFY}}},
+-    {UI_BREAK},
+-
++    // build 113: GSM Defaults (the video mode games launch in) lives on Game Launching alone
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+     {UI_BREAK},
+@@ -1127,11 +1117,33 @@ struct UIItem diaLaunchConfig[] = {
+     {UI_BUTTON, LAUNCH_OSD_DEFAULTS_BUTTON, 1, 1, _STR_HINT_OSD_DEFAULTS_BUTTON, 0, 0, {.label = {NULL, _STR_MODIFY}}},
+     {UI_BREAK},
+ 
++    // build 113: In-Game Menu (IGR Path, RIPSHOT and Develop Shots with it), from General
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_IGR_MENU}}},
++    {UI_SPACER},
++    {UI_BUTTON, RIPPS2_IGR_BUTTON, 1, 1, _STR_HINT_RIPPS2_IGR_PAGE, 0, 0, {.label = {NULL, _STR_MODIFY}}},
++    {UI_BREAK},
++
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_GSM_DEFAULTS}}},
+     {UI_SPACER},
+     {UI_BUTTON, LAUNCH_GSM_DEFAULTS_BUTTON, 1, 1, _STR_HINT_GSM_DEFAULTS_BUTTON, 0, 0, {.label = {NULL, _STR_MODIFY}}},
+     {UI_BREAK},
+ 
++    // build 113: the read-ahead caches, from Advanced: they act while a game runs, not on the game lists
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"BDM Cache", -1}}},
++    {UI_SPACER},
++    {UI_INT, CFG_BDMCACHE, 1, 1, _STR_HINT_BDMCACHE, 0, 0, {.intvalue = {16, 8, 0, 32, NULL}}},
++    {UI_BREAK},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"HDD Cache", -1}}},
++    {UI_SPACER},
++    {UI_INT, CFG_HDDCACHE, 1, 1, _STR_HINT_HDDCACHE, 0, 0, {.intvalue = {8, 0, 0, 32, NULL}}},
++    {UI_BREAK},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"SMB Cache", -1}}},
++    {UI_SPACER},
++    {UI_INT, CFG_SMBCACHE, 1, 1, _STR_HINT_SMBCACHE, 0, 0, {.intvalue = {16, 4, 0, 32, NULL}}},
++    {UI_BREAK},
++
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+     {UI_BREAK},
+@@ -1220,43 +1232,8 @@ struct UIItem diaAdvancedConfig[] = {
+     {UI_BOOL, CFG_DEBUG, 1, 1, _STR_HINT_DEBUG, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    {UI_BREAK},
+-
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"BDM Prefix Path", -1}}},
+-    {UI_SPACER},
+-    {UI_STRING, CFG_BDMPREFIX, 1, 1, _STR_HINT_BDMPREFIX, 0, 0, {.stringvalue = {"", "", NULL}}},
+-    {UI_BREAK},
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"ETH Prefix Path", -1}}},
+-    {UI_SPACER},
+-    {UI_STRING, CFG_ETHPREFIX, 1, 1, _STR_HINT_ETHPREFIX, 0, 0, {.stringvalue = {"", "", NULL}}},
+-    {UI_BREAK},
+-
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"HDD Spindown", -1}}},
+-    {UI_SPACER},
+-    {UI_INT, CFG_HDDSPINDOWN, 1, 1, _STR_HINT_SPINDOWN, 0, 0, {.intvalue = {20, 20, 0, 20}}},
+-    {UI_BREAK},
+-
+-    {UI_BREAK},
+-
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_CACHE_HDD_GAME_LIST}}},
+-    {UI_SPACER},
+-    {UI_BOOL, CFG_HDDGAMELISTCACHE, 1, 1, _STR_HINT_HDDGAMELISTCACHE, 0, 0, {.intvalue = {0, 0}}},
+-    {UI_BREAK},
+-
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"BDM Cache", -1}}},
+-    {UI_SPACER},
+-    {UI_INT, CFG_BDMCACHE, 1, 1, _STR_HINT_BDMCACHE, 0, 0, {.intvalue = {16, 8, 0, 32, NULL}}},
+-    {UI_BREAK},
+-
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"HDD Cache", -1}}},
+-    {UI_SPACER},
+-    {UI_INT, CFG_HDDCACHE, 1, 1, _STR_HINT_HDDCACHE, 0, 0, {.intvalue = {8, 0, 0, 32, NULL}}},
+-    {UI_BREAK},
+-
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"SMB Cache", -1}}},
+-    {UI_SPACER},
+-    {UI_INT, CFG_SMBCACHE, 1, 1, _STR_HINT_SMBCACHE, 0, 0, {.intvalue = {16, 4, 0, 32, NULL}}},
+-    {UI_BREAK},
++    // build 113 (the user's settings moves): the prefix paths and HDD Spindown are Game Sources rows, the read-ahead
++    // caches Game Launching's, Cache Game List (HDD APA) on Game Sources > Cache
+ 
+     // buttons
+     {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
+@@ -1993,8 +1970,6 @@ struct UIItem diaControllerConfig[] = {
+     {UI_SPACER},
+     {UI_ENUM, CFG_RIPPS2_PAGE_BUTTONS, 1, 1, _STR_HINT_RIPPS2_PAGE_BUTTONS, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+-    {UI_BUTTON, RIPPS2_HINTS_BUTTON, 1, 1, _STR_HINT_RIPPS2_HINTS_GLYPHS, 0, 0, {.label = {NULL, _STR_RIPPS2_HINTS_GLYPHS}}}, // build 90
+-    {UI_BREAK},
+ #ifdef PADEMU
+     {UI_BUTTON, PADEMU_GLOBAL_BUTTON, 1, 1, _STR_HINT_PADEMU_GLOBAL, 0, 0, {.label = {NULL, _STR_CONTROLLER_EMULATION}}},
+     {UI_BREAK},
+@@ -2015,6 +1990,11 @@ struct UIItem diaIgrConfig[] = {
+     {UI_SPACER},
+     {UI_ENUM, CFG_RIPPS2_IGRMENU, 1, 1, _STR_HINT_RIPPS2_IGR_MENU, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
++    // build 113: where an In-Game Reset goes, from General
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_EXITTO}}},
++    {UI_SPACER},
++    {UI_STRING, CFG_EXITTO, 1, 1, _STR_HINT_EXITPATH, 0, 0, {.stringvalue = {"", "", &guiExitPathHandler}}},
++    {UI_BREAK},
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_RIPSHOT}}},
+     {UI_SPACER},
+     {UI_ENUM, UICFG_RIPPS2_RIPSHOT, 1, 1, _STR_HINT_RIPPS2_RIPSHOT, 0, 0, {.intvalue = {0, 0}}},
+@@ -2030,10 +2010,48 @@ struct UIItem diaIgrConfig[] = {
+     {UI_TERMINATOR}};
+ 
+ // RIPPS2 build 90: Controller Settings > Hints and Glyphs (ripps2hints.c). Every row starts on Theme.
++// RIPPS2 build 113: Game Sources > Cache, how each game list is kept (gui.c guiShowCacheConfig)
++struct UIItem diaCacheConfig[] = {
++    {UI_HEADER, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_RIPPS2_CACHE}}},
++    {UI_SPLITTER},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_FAST_CACHE}}},
++    {UI_SPACER},
++    {UI_BOOL, CFG_RIPPS2_FASTCACHE, 1, 1, _STR_HINT_RIPPS2_FAST_CACHE, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_CACHE_HDD_GAME_LIST}}},
++    {UI_SPACER},
++    {UI_BOOL, CFG_HDDGAMELISTCACHE, 1, 1, _STR_HINT_HDDGAMELISTCACHE, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_AUTOREFRESH}}},
++    {UI_SPACER},
++    {UI_BOOL, UICFG_AUTOREFRESH, 1, 1, _STR_HINT_AUTOREFRESH, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
++    // buttons
++    {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
++    {UI_BREAK},
++
++    // end of dialog
++    {UI_TERMINATOR}};
++
+ struct UIItem diaHintsConfig[] = {
+     {UI_HEADER, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_RIPPS2_HINTS_GLYPHS}}},
+     {UI_SPLITTER},
+ 
++    // build 113: the hint row's and the D-pad glyphs' own rows, from Colors and More (gui.c guiRipps2HintRows*)
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_HINTS}}},
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_HINTS, 1, 1, _STR_HINT_RIPPS2_HINTS, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_GLYPHS}}},
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_GLYPHS, 1, 1, _STR_HINT_RIPPS2_GLYPHS, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_HINT_LAYOUT}}},
+     {UI_SPACER},
+     {UI_ENUM, UICFG_RIPPS2_HINT_LAYOUT, 1, 1, _STR_HINT_RIPPS2_HINT_LAYOUT, 0, 0, {.intvalue = {0, 0}}},
+diff --git a/src/ethsupport.c b/src/ethsupport.c
+index a1d3d0a..4a1af74 100644
+--- a/src/ethsupport.c
++++ b/src/ethsupport.c
+@@ -756,7 +756,7 @@ static void ethLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+         return;
+     }
+     // The resolvers leave the path they tried in their buffer, so the message can name it.
+-    if (!cueEnsureEmber(ethPrefix, emberElf, sizeof(emberElf))) { // RIPPS2 build 71: or the bundled one
++    if (!cueEnsureEmber(ethPrefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
+         return;
+     }
+diff --git a/src/gui.c b/src/gui.c
+index c6fb44f..2b110ad 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -656,7 +656,7 @@ int guiIoModeToDeviceType(int ioMode)
+ // file to 31 characters. Either way the IGR then failed and fell back to the browser (#731).
+ static char exitPathEdit[sizeof(gExitPath)];
+ 
+-static void guiExitPathBegin(struct UIItem *ui)
++void guiExitPathBegin(struct UIItem *ui)
+ {
+     snprintf(exitPathEdit, sizeof(exitPathEdit), "%s", gExitPath);
+     diaSetString(ui, CFG_EXITTO, exitPathEdit);
+@@ -664,6 +664,12 @@ static void guiExitPathBegin(struct UIItem *ui)
+     diaSetShowDefaultWhenEmpty(ui, CFG_EXITTO, 1);
+ }
+ 
++// RIPPS2 build 113: the In-Game Menu page's OK keeps what its IGR Path row holds
++void guiExitPathEnd(void)
++{
++    snprintf(gExitPath, sizeof(gExitPath), "%s", exitPathEdit);
++}
++
+ // RIPPS2: BOOT LOCK (ripps2boot.c). Turning it on fills an empty IGR Path with RIPPS2's own path; a
+ // path typed in is left alone (clear it and turn the lock on again to have RIPPS2's filled in).
+ static int bootLockWas = 0, bootLockShown = 0;
+@@ -687,6 +693,9 @@ static void guiBootLockEnd(struct UIItem *ui)
+ {
+     int lock = 0;
+     diaGetInt(ui, CFG_RIPPS2_BOOTLOCK, &lock);
++    // build 113: IGR Path is on the In-Game Menu page now, so the lock fills the setting itself (an empty one only)
++    if (lock && !bootLockWas && gExitPath[0] == '\0')
++        ripps2BootLockIgrPath(gExitPath, sizeof(gExitPath));
+     if (lock != bootLockWas)
+         ripps2BootLockApply(lock);
+ }
+@@ -703,13 +712,10 @@ int guiExitPathHandler(char *text, int maxLen)
+ // functional for callers outside it and shares the same Language/GSM backends.
+ void guiShowConfig()
+ {
+-    const char **langNamesSnap = NULL;
+-    int langID;
+     int ret;
+ 
+-    // Exit To auto-resolves a built-in default when blank, so show a dim "Default" placeholder
+-    // rather than "<not set>" -- the empty value (and thus the fallback) is kept.
+-    guiExitPathBegin(diaConfig);
++    // RIPPS2 build 113: Language (Interface), GSM Defaults (Game Launching), IGR Path and the In-Game Menu (Game
++    // Launching) moved off this page
+     guiBootLockBegin(diaConfig); // RIPPS2
+     // Custom Settings Path: blank = the normal boot-dir/discovery home, so it gets the same dim
+     // "Default" placeholder treatment rather than "<not set>".
+@@ -723,31 +729,14 @@ void guiShowConfig()
+     diaSetVisible(diaConfig, CFG_AUTOSTARTLAST, gRememberLastPlayed);
+     diaSetVisible(diaConfig, CFG_LBL_AUTOSTARTLAST, gRememberLastPlayed);
+ 
+-    guiLock();
+-    langNamesSnap = guiCopyNameList((const char **)lngGetGuiList());
+-    guiUnlock();
+-    diaSetEnum(diaConfig, UICFG_LANG, langNamesSnap != NULL ? langNamesSnap : (const char **)lngGetGuiList());
+-    diaSetInt(diaConfig, UICFG_LANG, lngGetGuiValue());
+-
+ reshow_config:
+     ret = diaExecuteDialog(diaConfig, -1, 1, &guiUpdater);
+-    if (ret == GENERAL_GSM_DEFAULTS_BUTTON) {
+-        guiGameShowGSConfig(1);
+-        goto reshow_config;
+-    }
+     if (ret == RIPPS2_BIBLE_BUTTON) { // RIPPS2: BIBLE may have turned the lock on
+         ripps2BibleManage();
+         guiBootLockBegin(diaConfig);
+         goto reshow_config;
+     }
+-    if (ret == RIPPS2_IGR_BUTTON) { // RIPPS2 build 108: In-Game Menu, RIPSHOT, Develop Shots
+-        if (ripps2ShowIgrConfig())
+-            saveConfig(CONFIG_OPL, 0);
+-        goto reshow_config;
+-    }
+     if (ret) {
+-        diaGetInt(diaConfig, UICFG_LANG, &langID);
+-        snprintf(gExitPath, sizeof(gExitPath), "%s", exitPathEdit);
+         diaGetString(diaConfig, CFG_CUSTOMCFGPATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
+         ripps2SettingsHomeEnd(diaConfig); // RIPPS2 build 109
+         diaGetInt(diaConfig, CFG_LASTPLAYED, &gRememberLastPlayed);
+@@ -757,11 +746,9 @@ reshow_config:
+ 
+         DisableCron = 1; // Disable Auto Start Last Played counter (we don't want to call it right after enable it on GUI)
+ 
+-        applyConfig(-1, langID, 0);
++        applyConfig(-1, -1, 0);
+         menuReinitMainMenu();
+     }
+-
+-    guiFreeNameList(langNamesSnap);
+ }
+ 
+ // Game Sources page: device start modes, the default device, and the block-device enables
+@@ -944,6 +931,39 @@ static int guiDeviceConfigUpdater(int modified)
+     return 0;
+ }
+ 
++static void guiSetAdvancedSettings(struct UIItem *ui); // build 113: Game Sources and Game Launching carry Advanced's rows
++static void guiSaveAdvancedSettings(struct UIItem *ui);
++
++// RIPPS2 build 113: Game Sources > Cache (the user: the cache settings rolled into one page, each with a tooltip saying
++// what it does now): Fast Cache (each source's saved list), Cache Game List (HDD APA) and Automatic Refresh
++static void guiShowCacheConfig(void)
++{
++    int fast = gRipps2FastCache, list = gHDDGameListCache, refresh = gAutoRefresh;
++
++    diaSetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, gRipps2FastCache);
++    diaSetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, gHDDGameListCache);
++    diaSetInt(diaCacheConfig, UICFG_AUTOREFRESH, gAutoRefresh);
++    if (!diaExecuteDialog(diaCacheConfig, -1, 1, NULL))
++        return;
++    diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, &gRipps2FastCache);
++    diaGetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, &gHDDGameListCache);
++    diaGetInt(diaCacheConfig, UICFG_AUTOREFRESH, &gAutoRefresh);
++    if (gRipps2FastCache != fast || gHDDGameListCache != list || gAutoRefresh != refresh)
++        guiSettingsSavePending = 1; // saved with the rest when Settings closes
++}
++
++// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's);
++// a change fills Starred Games again so it shows at once, and is saved when Settings closes
++static void guiRipps2RecentsRead(struct UIItem *dia)
++{
++    int v;
++    if (diaGetInt(dia, UICFG_RIPPS2_RECENTS, &v) && v >= 0 && v <= 9 && v != gRipps2Recents) {
++        gRipps2Recents = v;
++        guiSettingsSavePending = 1;
++        ioPutRequest(IO_CUSTOM_SIMPLEACTION, &loadFavourites);
++    }
++}
++
+ void guiShowDeviceConfig(void)
+ {
+     const char *deviceNames[] = {_l(_STR_RIPPS2_ALL_GAMES), _l(_STR_BDM_GAMES), _l(_STR_MMCE), _l(_STR_HDD_GAMES), _l(_STR_NET_GAMES), _l(_STR_APPS), _l(_STR_FAV), _l(_STR_RIPPS2_LAST_USED), NULL};
+@@ -958,6 +978,8 @@ void guiShowDeviceConfig(void)
+     diaSetEnum(diaDeviceConfig, CFG_FAVMODE, deviceModes);
+     diaSetEnum(diaDeviceConfig, CFG_RIPPS2_STARSIDE, guiStarSides); // build 106
+     diaSetInt(diaDeviceConfig, CFG_RIPPS2_STARSIDE, gRipps2StarSide);
++    diaSetInt(diaDeviceConfig, UICFG_RIPPS2_RECENTS, gRipps2Recents); // build 113: beside the Starred Games rows
++    guiSetAdvancedSettings(diaDeviceConfig);                         // build 113: the prefix paths, HDD Spindown
+ 
+     int deviceModeIndex = gRipps2StartLast ? RIPPS2_DEFDEVICE_LAST : guiIoModeToDeviceType(gDefaultDevice); // build 96
+     diaSetInt(diaDeviceConfig, CFG_DEFDEVICE, deviceModeIndex);
+@@ -989,6 +1011,10 @@ void guiShowDeviceConfig(void)
+     int ret;
+ reshow_device:
+     ret = diaExecuteDialog(diaDeviceConfig, -1, 1, &guiDeviceConfigUpdater);
++    if (ret == RIPPS2_CACHE_BUTTON) { // build 113: Game Sources > Cache
++        guiShowCacheConfig();
++        goto reshow_device;
++    }
+     if (ret == MMCE_SETTINGS_BUTTON) {
+         guiShowMmceConfig();
+         goto reshow_device;
+@@ -1004,6 +1030,8 @@ reshow_device:
+         diaGetInt(diaDeviceConfig, CFG_MMCEMODE, &gMMCEStartMode);
+         diaGetInt(diaDeviceConfig, CFG_FAVMODE, &gFAVStartMode);
+         diaGetInt(diaDeviceConfig, CFG_RIPPS2_STARSIDE, &gRipps2StarSide); // build 106
++        guiRipps2RecentsRead(diaDeviceConfig);
++        guiSaveAdvancedSettings(diaDeviceConfig);
+ 
+         diaGetInt(diaDeviceConfig, CFG_ENABLEUSB, &gEnableUSB);
+         diaGetInt(diaDeviceConfig, CFG_ENABLEILK, &gEnableILK);
+@@ -1287,6 +1315,11 @@ reshow_ui:
+         guiShowColorsConfig();
+         goto reshow_ui;
+     }
++    if (ret == RIPPS2_HINTS_BUTTON) { // build 113: Hints and Glyphs, here from Controller Settings
++        if (ripps2ShowHintsConfig())
++            guiSettingsSavePending = 1; // saved with the rest when Settings closes
++        goto reshow_ui;
++    }
+     if (ret == UICFG_GAME_LIST_BUTTON) {
+         guiShowVcdListConfig();
+         goto reshow_ui;
+@@ -2594,14 +2627,15 @@ static const char *guiRipps2GlyphNames[] = {N_("Theme"), N_("Hidden"), N_("Shown
+ static const char *guiRipps2ShowNames[] = {N_("Theme"), N_("Shown"), N_("Fade When Idle"), N_("Hidden"), NULL};
+ static const char *guiRipps2SrcNames[] = {N_("Theme"), N_("Shown"), N_("Fade When Idle"), N_("Hidden"), N_("Pop In"), NULL}; // build 80
+ static const char *guiRipps2OrderNames[] = {N_("Theme"), N_("Launch Disc First"), N_("Memory Files First"), NULL};
++static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), NULL}; // build 113
+ static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 2];
+ 
+ // build 81: a row the user picks a value on becomes theirs; build 96: picking Theme (0) gives it back to the
+ // theme, the setting back on its own default so the theme's value shows (ripps2ui.c themeDefault)
+-static void guiRipps2Take(int id, int bit, int count, int *setting, int def)
++static void guiRipps2Take(struct UIItem *dia, int id, int bit, int count, int *setting, int def)
+ {
+     int v;
+-    if (!diaGetInt(diaColorsConfig, id, &v) || v < 0 || v > count)
++    if (!diaGetInt(dia, id, &v) || v < 0 || v > count)
+         return;
+     if (v == 0) {
+         gRipps2UserSet &= ~bit;
+@@ -2621,19 +2655,33 @@ static int guiRipps2Shown(int bit, int setting, int def)
+ static void guiRipps2SettingsRead(void)
+ {
+     int v;
+-    guiRipps2Take(UICFG_RIPPS2_GLYPHS, RIPPS2_SET_GLYPHS, RIPPS2_GLYPHS_COUNT, &gRipps2Glyphs, RIPPS2_GLYPHS_HIDDEN);
+-    guiRipps2Take(UICFG_RIPPS2_PALETTE, RIPPS2_SET_PALETTE, RIPPS2_PALETTE_COUNT, &gRipps2Palette, 0);
+-    guiRipps2Take(UICFG_RIPPS2_HINTS, RIPPS2_SET_HINTS, RIPPS2_SHOW_COUNT, &gRipps2Hints, RIPPS2_SHOW_ON);
+-    guiRipps2Take(UICFG_RIPPS2_CATBAR, RIPPS2_SET_CATBAR, RIPPS2_SHOW_COUNT, &gRipps2CatBar, RIPPS2_SHOW_ON);
+-    guiRipps2Take(UICFG_RIPPS2_CATSWAP, RIPPS2_SET_CATSWAP, 2, &gRipps2CatSwap, 0);
+-    guiRipps2Take(UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
+-    if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_RECENTS, &v) && v >= 0 && v <= 9)
+-        gRipps2Recents = v;
++    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_PALETTE, RIPPS2_SET_PALETTE, RIPPS2_PALETTE_COUNT, &gRipps2Palette, 0);
++    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_CATBAR, RIPPS2_SET_CATBAR, RIPPS2_SHOW_COUNT, &gRipps2CatBar, RIPPS2_SHOW_ON);
++    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_CATSWAP, RIPPS2_SET_CATSWAP, 2, &gRipps2CatSwap, 0);
++    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
+     if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_TRANSITION, &v) && v >= 0 && v <= 3)
+         gRipps2Transition = v; // build 92
++    if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_CATLAYOUT, &v) && v >= 0 && v <= 2)
++        gRipps2CatLayout = v; // build 113: 0 Theme, 1 Across the Top, 2 Sidebar
+     ripps2PaletteSync(); // build 81: the page behind shows the pick at once
+ }
+ 
++// build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
++// read and shown the way Colors and More did
++void guiRipps2HintRowsSet(struct UIItem *dia)
++{
++    diaSetEnum(dia, UICFG_RIPPS2_GLYPHS, guiRipps2GlyphNames);
++    diaSetEnum(dia, UICFG_RIPPS2_HINTS, guiRipps2ShowNames);
++    diaSetInt(dia, UICFG_RIPPS2_GLYPHS, guiRipps2Shown(RIPPS2_SET_GLYPHS, gRipps2Glyphs, RIPPS2_GLYPHS_HIDDEN));
++    diaSetInt(dia, UICFG_RIPPS2_HINTS, guiRipps2Shown(RIPPS2_SET_HINTS, gRipps2Hints, RIPPS2_SHOW_ON));
++}
++
++void guiRipps2HintRowsRead(struct UIItem *dia)
++{
++    guiRipps2Take(dia, UICFG_RIPPS2_GLYPHS, RIPPS2_SET_GLYPHS, RIPPS2_GLYPHS_COUNT, &gRipps2Glyphs, RIPPS2_GLYPHS_HIDDEN);
++    guiRipps2Take(dia, UICFG_RIPPS2_HINTS, RIPPS2_SET_HINTS, RIPPS2_SHOW_COUNT, &gRipps2Hints, RIPPS2_SHOW_ON);
++}
++
+ static int guiRipps2SettingsUpdater(int modified)
+ {
+     if (modified)
+@@ -2648,23 +2696,20 @@ static void guiRipps2SettingsSet(void)
+     for (i = 0; i < RIPPS2_PALETTE_COUNT; i++)
+         guiRipps2PaletteNames[i + 1] = ripps2PaletteName(i);
+     guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1] = NULL;
+-    diaSetEnum(diaColorsConfig, UICFG_RIPPS2_GLYPHS, guiRipps2GlyphNames);
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2PaletteNames);
+-    diaSetEnum(diaColorsConfig, UICFG_RIPPS2_HINTS, guiRipps2ShowNames);
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_CATBAR, guiRipps2ShowNames);
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_CATSWAP, guiRipps2OrderNames);
+     // build 81: each row shows what is in effect, a theme's default included
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_GLYPHS, guiRipps2Shown(RIPPS2_SET_GLYPHS, gRipps2Glyphs, RIPPS2_GLYPHS_HIDDEN));
+     diaSetInt(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2Shown(RIPPS2_SET_PALETTE, gRipps2Palette, 0));
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_HINTS, guiRipps2Shown(RIPPS2_SET_HINTS, gRipps2Hints, RIPPS2_SHOW_ON));
+     diaSetInt(diaColorsConfig, UICFG_RIPPS2_CATBAR, guiRipps2Shown(RIPPS2_SET_CATBAR, gRipps2CatBar, RIPPS2_SHOW_ON));
+     diaSetInt(diaColorsConfig, UICFG_RIPPS2_CATSWAP, guiRipps2Shown(RIPPS2_SET_CATSWAP, gRipps2CatSwap, 0));
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_SRCNAME, guiRipps2SrcNames);
+     diaSetInt(diaColorsConfig, UICFG_RIPPS2_SRCNAME, guiRipps2Shown(RIPPS2_SET_SRCNAME, gRipps2SrcName, RIPPS2_SHOW_ON));
+-    diaSetInt(diaColorsConfig, UICFG_RIPPS2_RECENTS, gRipps2Recents);
+     static const char *transitions[] = {N_("Theme"), N_("None"), N_("Fade"), N_("Flash"), NULL}; // build 92
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_TRANSITION, transitions);
+     diaSetInt(diaColorsConfig, UICFG_RIPPS2_TRANSITION, gRipps2Transition);
++    diaSetEnum(diaColorsConfig, UICFG_RIPPS2_CATLAYOUT, guiRipps2LayoutNames); // build 113
++    diaSetInt(diaColorsConfig, UICFG_RIPPS2_CATLAYOUT, gRipps2CatLayout);
+ }
+ 
+ void guiShowColorsConfig(void)
+@@ -2676,6 +2721,7 @@ void guiShowColorsConfig(void)
+     unsigned char shown[6][3];
+     int keep[8] = {gRipps2Glyphs, gRipps2Palette, gRipps2Hints, gRipps2CatBar, gRipps2CatSwap, gRipps2SrcName, gRipps2Recents, gRipps2UserSet};
+     int keepTransition = gRipps2Transition; // build 92
++    int keepLayout = gRipps2CatLayout;      // build 113
+ 
+     guiRipps2SettingsSet();
+ 
+@@ -2723,9 +2769,10 @@ void guiShowColorsConfig(void)
+         gRipps2Recents = keep[6];
+         gRipps2UserSet = keep[7];
+         gRipps2Transition = keepTransition;
++        gRipps2CatLayout = keepLayout;
+         ripps2PaletteSync();
+     }
+-    if (gRipps2Transition != keepTransition)
++    if (gRipps2Transition != keepTransition || gRipps2CatLayout != keepLayout)
+         guiSettingsSavePending = 1;
+     if (gRipps2Glyphs != keep[0] || gRipps2Palette != keep[1] || gRipps2Hints != keep[2] || gRipps2CatBar != keep[3] ||
+         gRipps2CatSwap != keep[4] || gRipps2SrcName != keep[5] || gRipps2UserSet != keep[7])
+@@ -3032,11 +3079,6 @@ reshow_controller:
+             gSelectButton = value == 0 ? KEY_CIRCLE : KEY_CROSS;
+         else
+             gSelectButton = KEY_CIRCLE;
+-        if (result == RIPPS2_HINTS_BUTTON) { // build 90: Hints and Glyphs
+-            if (ripps2ShowHintsConfig())
+-                guiSettingsSavePending = 1; // saved with the rest when Settings closes
+-            goto reshow_controller;
+-        }
+ #ifdef PADEMU
+         if (result == PADEMU_GLOBAL_BUTTON) {
+             guiGameShowPadEmuConfig(1);
+@@ -3257,10 +3299,7 @@ static int guiSettingsShowGeneral(void)
+     guiLock();
+     langNamesSnap = guiCopyNameList((const char **)lngGetGuiList());
+     guiUnlock();
+-    diaSetEnum(ui, UICFG_LANG, langNamesSnap != NULL ? langNamesSnap : (const char **)lngGetGuiList());
+-    diaSetInt(ui, UICFG_LANG, lngGetGuiValue());
+ 
+-    guiExitPathBegin(ui);
+     guiBootLockBegin(ui); // RIPPS2
+     diaSetShowDefaultWhenEmpty(ui, CFG_CUSTOMCFGPATH, 1);
+     diaSetString(ui, CFG_CUSTOMCFGPATH, gCustomSettingsPath);
+@@ -3278,25 +3317,15 @@ static int guiSettingsShowGeneral(void)
+ 
+ reshow_general:
+     result = diaExecuteDialog(ui, -1, 1, &guiSettingsGeneralUpdater);
+-    if (result == GENERAL_GSM_DEFAULTS_BUTTON) {
+-        if (guiGameShowGSConfig(1))
+-            guiSettingsSavePending = 1;
+-        goto reshow_general;
+-    }
+     if (result == RIPPS2_BIBLE_BUTTON) { // RIPPS2: BIBLE may have turned the lock on
+         ripps2BibleManage();
+         guiBootLockBegin(ui);
+         goto reshow_general;
+     }
+-    if (result == RIPPS2_IGR_BUTTON) { // RIPPS2 build 108: In-Game Menu, RIPSHOT, Develop Shots
+-        if (ripps2ShowIgrConfig())
+-            guiSettingsSavePending = 1; // saved with the rest when Settings closes
+-        goto reshow_general;
+-    }
+ 
+-    if (result != UIID_BTN_CANCEL && result != -1 && !guiSettingsLeftUntouched(ui, result, exitPathEdit, gExitPath)) {
+-        diaGetInt(ui, UICFG_LANG, &langID);
+-        snprintf(gExitPath, sizeof(gExitPath), "%s", exitPathEdit);
++    // build 113: Language, GSM Defaults, IGR Path and the In-Game Menu moved off this page (Interface, Game Launching)
++    if (result != UIID_BTN_CANCEL && result != -1 && !guiSettingsLeftUntouched(ui, result, NULL, NULL)) {
++        langID = -1;
+         diaGetString(ui, CFG_CUSTOMCFGPATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
+         ripps2SettingsHomeEnd(ui); // RIPPS2 build 109
+         diaGetInt(ui, CFG_LASTPLAYED, &gRememberLastPlayed);
+@@ -3353,6 +3382,8 @@ static int guiSettingsShowSources(void)
+     diaSetInt(ui, CFG_FAVMODE, gFAVStartMode);
+     diaSetEnum(ui, CFG_RIPPS2_STARSIDE, guiStarSides); // build 106
+     diaSetInt(ui, CFG_RIPPS2_STARSIDE, gRipps2StarSide);
++    diaSetInt(ui, UICFG_RIPPS2_RECENTS, gRipps2Recents); // build 113: beside the Starred Games rows
++    guiSetAdvancedSettings(ui);                         // build 113: the prefix paths, HDD Spindown
+     diaSetInt(ui, CFG_ENABLEUSB, gEnableUSB);
+     diaSetInt(ui, CFG_ENABLEILK, gEnableILK);
+     diaSetInt(ui, CFG_ENABLEMX4SIO, gEnableMX4SIO);
+@@ -3369,6 +3400,10 @@ static int guiSettingsShowSources(void)
+ 
+ reshow_sources:
+     result = diaExecuteDialog(ui, -1, 1, &guiSettingsSourcesUpdater);
++    if (result == RIPPS2_CACHE_BUTTON) { // build 113: Game Sources > Cache
++        guiShowCacheConfig();
++        goto reshow_sources;
++    }
+     if (result == MMCE_SETTINGS_BUTTON) {
+         // MMCE uses a separate composition buffer. Confirming the child editor finishes the
+         // Settings page and returns to the hub; Circle resumes Game Sources as the parent page.
+@@ -3393,6 +3428,8 @@ reshow_sources:
+         diaGetInt(ui, CFG_MMCEMODE, &gMMCEStartMode);
+         diaGetInt(ui, CFG_FAVMODE, &gFAVStartMode);
+         diaGetInt(ui, CFG_RIPPS2_STARSIDE, &gRipps2StarSide); // build 106
++        guiRipps2RecentsRead(ui);
++        guiSaveAdvancedSettings(ui);
+         diaGetInt(ui, CFG_ENABLEUSB, &gEnableUSB);
+         diaGetInt(ui, CFG_ENABLEILK, &gEnableILK);
+         diaGetInt(ui, CFG_ENABLEMX4SIO, &gEnableMX4SIO);
+@@ -3473,7 +3510,6 @@ static int guiSettingsDisplayUpdater(int modified)
+ static int guiSettingsShowInterface(void)
+ {
+     const struct UIItem *parts[] = {diaUIConfig, diaDisplayConfig};
+-    const int skipIDs[] = {UICFG_VMODE};
+     const char *vmodeNames[] = {_l(_STR_AUTO), "PAL 640x512i @50Hz 24bit", "NTSC 640x448i @60Hz 24bit",
+                                 "EDTV 640x448p @60Hz 24bit", "EDTV 640x512p @50Hz 24bit", "VGA 640x480p @60Hz 24bit",
+                                 "PAL 704x576i @50Hz 16bit", "NTSC 704x480i @60Hz 16bit",
+@@ -3481,9 +3517,9 @@ static int guiSettingsShowInterface(void)
+                                 "HDTV 1280x720p @60Hz 16bit", "HDTV 1920x1080i @60Hz 16bit",
+                                 "PAL 640x256p @50Hz 24bit", "NTSC 640x224p @60Hz 24bit",
+                                 "PAL 640x512i @50Hz 24bit (FLICKER-FREE)", "NTSC 640x448i @60Hz 24bit (FLICKER-FREE)", NULL};
+-    // Video Mode stays in diaDisplayConfig for the legacy standalone Display editor, but the
+-    // composed Interface page supplies its one copy at the top of diaUIConfig.
+-    struct UIItem *ui = guiSettingsCompose(parts, 2, skipIDs, 1, 1, 1);
++    // RIPPS2 build 113 (the user's settings moves): Video Mode is the Display section's, with Widescreen and the offsets
++    // (it was a copy at the top of diaUIConfig)
++    struct UIItem *ui = guiSettingsCompose(parts, 2, NULL, 0, -1, 1);
+     const char **themeNamesSnap = NULL;
+     const char **langNamesSnap = NULL;
+     int themeID, langID, previousTheme, previousVMode, result;
+@@ -3543,13 +3579,13 @@ reshow_interface:
+         guiShowColorsConfig();
+         goto reshow_interface;
+     }
+-    if (result == UICFG_GAME_LIST_BUTTON) {
+-        guiShowVcdListConfig();
++    if (result == RIPPS2_HINTS_BUTTON) { // build 113: Hints and Glyphs, here from Controller Settings
++        if (ripps2ShowHintsConfig())
++            guiSettingsSavePending = 1;
+         goto reshow_interface;
+     }
+-    if (result == DISPLAY_GSM_DEFAULTS_BUTTON) {
+-        if (guiGameShowGSConfig(1))
+-            guiSettingsSavePending = 1;
++    if (result == UICFG_GAME_LIST_BUTTON) {
++        guiShowVcdListConfig();
+         goto reshow_interface;
+     }
+ 
+@@ -3645,6 +3681,7 @@ static int guiSettingsShowLaunch(void)
+     diaSetEnabled(ui, CFG_NEUTRINO_GSMCOMP, gNeutrinoVideoDefault != 0);
+     diaSetInt(ui, CFG_NEUTRINO_ELF_ARG, gNeutrinoElfArg);
+     diaSetInt(ui, CFG_NEUTRINO_SHOW_ARGS, gNeutrinoShowArgs);
++    guiSetAdvancedSettings(ui); // build 113: BDM / HDD / SMB Cache are this page's (read-ahead while a game runs)
+     guiSettingsBeginDialog(ui);
+ 
+ reshow_launch:
+@@ -3663,6 +3700,11 @@ reshow_launch:
+             guiSettingsSavePending = 1;
+         goto reshow_launch;
+     }
++    if (result == RIPPS2_IGR_BUTTON) { // RIPPS2 build 108: In-Game Menu, RIPSHOT, Develop Shots (build 113: IGR Path, here)
++        if (ripps2ShowIgrConfig())
++            guiSettingsSavePending = 1; // saved with the rest when Settings closes
++        goto reshow_launch;
++    }
+ 
+     if (result != UIID_BTN_CANCEL && result != -1 && !guiSettingsLeftUntouched(ui, result, neutrinoPathEdit, gNeutrinoPath)) {
+         diaGetInt(ui, CFG_DEFAULT_CORE, &gDefaultCoreLoader);
+@@ -3675,6 +3717,7 @@ reshow_launch:
+         diaGetInt(ui, CFG_NEUTRINO_GSMCOMP, &gNeutrinoGsmCompDefault);
+         diaGetInt(ui, CFG_NEUTRINO_ELF_ARG, &gNeutrinoElfArg);
+         diaGetInt(ui, CFG_NEUTRINO_SHOW_ARGS, &gNeutrinoShowArgs);
++        guiSaveAdvancedSettings(ui); // build 113: the read-ahead caches
+         applyConfig(-1, -1, 0);
+         menuReinitMainMenu();
+     }
+diff --git a/src/hddsupport.c b/src/hddsupport.c
+index 6aff006..a1027e5 100644
+--- a/src/hddsupport.c
++++ b/src/hddsupport.c
+@@ -17,7 +17,7 @@
+ #include "include/ioman.h"
+ #include "include/texcache.h" // cache quiesce before the POPSTARTER launch remounts pfs0:
+ #include "include/system.h"
+-#include "include/ripps2.h" // RIPPS2 build 73: ripps2PopstarterInstall
++#include "include/ripps2.h"
+ #include "include/extern_irx.h"
+ #include "include/cheatman.h"
+ #include "include/mmcesupport.h" // mmceSendGameID() cross-device game-id (#261)
+@@ -2139,23 +2139,6 @@ static int hddResolveHddPopstarter(char *elfOut, int elfLen)
+     return 0;
+ }
+ 
+-// RIPPS2 build 73: no POPSTARTER of the user's own on __common or the cards, so the one RIPPS2 carries
+-// goes where POPSTARTER's HDD set-up keeps it, __common/POPS. __common is mounted writable for the copy
+-// and stays mounted for the ELF load, as hddResolveHddPopstarter leaves it on a find.
+-static int hddInstallBundledPopstarter(char *elfOut, int elfLen)
+-{
+-    fileXioUmount(hddPrefix);
+-    if (fileXioMount(hddPrefix, "hdd0:__common", FIO_MT_RDWR) == 0) {
+-        if (ripps2PopstarterInstall("pfs0:/POPS/POPSTARTER.ELF")) {
+-            (void)vcdInstallPopstarterMc("pfs0:/");
+-            snprintf(elfOut, elfLen, "pfs0:/POPS/POPSTARTER.ELF");
+-            return 1;
+-        }
+-    }
+-    hddRestoreDataHome();
+-    return 0;
+-}
+-
+ // A custom POPSTARTER.ELF may live somewhere other than the HDD game device, but moving the
+ // executable must not bypass the established POPSTARTER dependency install. Borrow the dedicated
+ // pfs1: scratch slot to copy any missing mc?:/POPSTARTER externals from __common/POPS without
+@@ -2266,7 +2249,7 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
+ 
+     // Verify against the partition as it is mounted RIGHT NOW, not against what the scan saw: the
+     // scan read this partition read-only through pfs1: and may be minutes old.
+-    if (!cueEnsureEmber("pfs0:/", emberElf, sizeof(emberElf))) { // RIPPS2 build 71: or the bundled one
++    if (!cueEnsureEmber("pfs0:/", emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         hddRestoreDataHome();
+         ioBlockOps(0);
+         hddShowEmberMissing(_STR_EMBER_NOT_FOUND, mountSrc, emberElf);
+@@ -2339,7 +2322,7 @@ static void hddDoLaunchVcd(item_list_t *itemList, const char *name, const char *
+             // attempted BEFORE ioBlockOps(1), so go straight to the final MC tier here. Re-entering
+             // the generic custom resolver while IO is blocked can try to start another storage stack
+             // or queue BDM work during teardown preparation.
+-            if (!vcdResolvePopstarterMcElf(vcdElf, sizeof(vcdElf)) && !hddInstallBundledPopstarter(vcdElf, sizeof(vcdElf))) {
++            if (!vcdResolvePopstarterMcElf(vcdElf, sizeof(vcdElf))) {
+                 ioBlockOps(0);
+                 // Name what the user can fix: their own path when set, else the APA home of
+                 // POPSTARTER (hdd0:__common/POPS/POPSTARTER.ELF), not the internal pfs0: mount.
+diff --git a/src/menusys.c b/src/menusys.c
+index 1f3b7e5..879e0d7 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -57,6 +57,8 @@ enum MENU_IDs {
+     MENU_RA_DISC_LAUNCH,
+ #endif
+     MENU_STATUS, // RIPPS2 build 80: takes ACHIEVEMENTS' place (that page moved to Settings)
++    MENU_RIPPS2_LAUNCH, // RIPPS2 build 113: a legacy theme's Launch Disc and Memory Files
++    MENU_RIPPS2_MEMORY,
+ };
+ 
+ enum GAME_MENU_IDs {
+@@ -742,10 +744,18 @@ void menuSaveSettingsAndRestart(void)
+         sysExecExit();
+ }
+ 
++static int mainMenuLegacy = -1; // RIPPS2 build 113: the theme the START menu was built for (1: a legacy theme)
++
+ static void menuInitMainMenu(void)
+ {
+     if (mainMenu)
+         submenuDestroy(&mainMenu);
++    // build 113: a legacy theme (no categories=three) shows Storage alone, so the other two open from here
++    mainMenuLegacy = ripps2Legacy();
++    if (mainMenuLegacy) {
++        submenuAppendItem(&mainMenu, -1, (char *)_t("Launch Disc"), MENU_RIPPS2_LAUNCH, -1); // as the items under it are written
++        submenuAppendItem(&mainMenu, -1, (char *)_t("Memory Files"), MENU_RIPPS2_MEMORY, -1);
++    }
+ 
+     // initialize the menu
+     // RIPPS2: no Launch PS2 Disc here -- LAUNCH DISC is the first category. Build 70: ACHIEVEMENTS
+@@ -1651,6 +1661,8 @@ void menuSetSelectedItem(menu_item_t *item)
+ 
+ void menuRenderMenu()
+ {
++    if (mainMenuLegacy != ripps2Legacy()) // RIPPS2 build 113: the theme changed between a legacy one and not
++        menuInitMainMenu();
+     // Optional themed settings background (use_settings_bg): guiDrawBGSettings draws it and
+     // returns non-zero; 0 means the theme has none, so fall back to the plasma. dia.c already
+     // did this for dialogs -- these three menu screens did not, so a theme that shipped a
+@@ -1793,6 +1805,8 @@ int menuCheckGameParentalLock(config_set_t *configSet)
+ 
+ void menuHandleInputMenu()
+ {
++    if (mainMenuLegacy != ripps2Legacy()) // RIPPS2 build 113: as menuRenderMenu
++        menuInitMainMenu();
+     if (!mainMenu)
+         return;
+ 
+@@ -1853,6 +1867,8 @@ void menuHandleInputMenu()
+             ripps2Achievements();
+         } else if (id == MENU_STATUS) {
+             ripps2Status();
++        } else if (id == MENU_RIPPS2_LAUNCH || id == MENU_RIPPS2_MEMORY) { // build 113: a legacy theme's other pages
++            ripps2SetCategory(id == MENU_RIPPS2_LAUNCH ? RIPPS2_CAT_LAUNCH : RIPPS2_CAT_MEMORY);
+         } else if (id == MENU_ABOUT) {
+             guiShowAbout();
+         } else if (id == MENU_SAVE_CHANGES) {
+@@ -2123,6 +2139,68 @@ static void menuSourceCycle(void)
+     menuDriveStep(1);
+ }
+ 
++// RIPPS2 build 113: the source pages for the category sidebar's Storage drawer (ripps2side.c), the visible ones in
++// the order Left / Right step through them
++static menu_list_t *menuSourceAt(int i)
++{
++    menu_list_t *m;
++    for (m = menu; m != NULL; m = m->next)
++        if (m->item->visible && i-- == 0)
++            return m;
++    return NULL;
++}
++
++int menuSourceCount(void)
++{
++    int n = 0;
++    menu_list_t *m;
++    for (m = menu; m != NULL; m = m->next)
++        n += m->item->visible != 0;
++    return n;
++}
++
++const char *menuSourceName(int i)
++{
++    menu_list_t *m = menuSourceAt(i);
++    return m != NULL ? menuItemGetText(m->item) : "";
++}
++
++int menuSourceIcon(int i)
++{
++    menu_list_t *m = menuSourceAt(i);
++    return m != NULL ? m->item->icon_id : -1;
++}
++
++int menuSourceMode(int i)
++{
++    menu_list_t *m = menuSourceAt(i);
++    item_list_t *list = m != NULL ? m->item->userdata : NULL;
++    return list != NULL ? list->mode : -1;
++}
++
++int menuSourceCurrent(void)
++{
++    int i = 0;
++    menu_list_t *m;
++    for (m = menu; m != NULL; m = m->next) {
++        if (m == selected_item)
++            return i;
++        i += m->item->visible != 0;
++    }
++    return 0;
++}
++
++void menuSourceSelect(int i)
++{
++    menu_list_t *m = menuSourceAt(i);
++    if (m == NULL || m == selected_item)
++        return;
++    menuFolderResetLeaving(selected_item);
++    selected_item = m;
++    itemConfigId = -1;
++    ripps2GlyphsPoke(RIPPS2_GLYPH_DRIVES);
++}
++
+ // RIPPS2 build 78: a Grid theme moves in two dimensions. Left/Right step one cover; Up/Down one row
+ // (a whole row of steps, so the list's own paging still follows); past the top or bottom row they
+ // switch drive, as Up/Down do on Coverflow. A short last row is reached by its last cover.
+@@ -2272,6 +2350,10 @@ void menuHandleInputMain()
+     item_list_t *support = selected_item != NULL && selected_item->item != NULL ? selected_item->item->userdata : NULL;
+     int viewPending = support != NULL && libViewPending(support->mode);
+ 
++    if (ripps2SidebarFocused()) { // RIPPS2 build 113: the category sidebar has the pad while it has the focus
++        ripps2SidebarInput();
++        return;
++    }
+     menuShoulderKeys(viewPending);
+ 
+     // RIPPS2: Random Game "Boot": each game list opens on a random game, once per session, once the
+@@ -2291,15 +2373,17 @@ void menuHandleInputMain()
+     int cf = gTheme->coverflow != NULL;
+     int grid = thmGridColumns() > 0; // build 78: every arrow moves through the grid, and repeats
+     if (getKeyOn(KEY_L1)) {
+-        if (ripps2PageButtons() == 1)
+-            menuPrevPage(); // build 96: Page Buttons L1 / R1
++        if (ripps2PageButtons() == 1 || ripps2Legacy())
++            menuPrevPage(); // build 96: Page Buttons L1 / R1 (build 113: and a legacy theme's, as OPL had them)
+         else
+             ripps2StepCategory(-1); // RIPPS2 build 69: L1/R1 switch categories (Launch Disc / Memory Files)
+     } else if (getKeyOn(KEY_R1)) {
+-        if (ripps2PageButtons() == 1)
++        if (ripps2PageButtons() == 1 || ripps2Legacy())
+             menuNextPage();
+         else
+             ripps2StepCategory(1);
++    } else if (!cf && !grid && ripps2SidebarOn() && getKeyOn(KEY_LEFT)) {
++        ripps2SidebarOpen(0); // RIPPS2 build 113: Left on a list goes to the category sidebar (its drawer has the sources)
+     } else if ((cf || grid) ? getKey(KEY_LEFT) : getKeyOn(KEY_LEFT)) {
+         menuNavigateLeft(); // RIPPS2 build 69: Left/Right switch drives, like the orb formations (FifthFox)
+     } else if ((cf || grid) ? getKey(KEY_RIGHT) : getKeyOn(KEY_RIGHT)) {
+@@ -2308,9 +2392,12 @@ void menuHandleInputMain()
+         menuNavigateUp();
+     } else if ((cf && !grid) ? getKeyOn(KEY_DOWN) : getKey(KEY_DOWN)) {
+         menuNavigateDown();
+-    } else if (menuSourceCycleActive() && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE) &&
++    } else if ((menuSourceCycleActive() || ripps2SidebarOn()) && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE) &&
+                (support == NULL || folderDepth(support->mode) == 0)) {
+-        menuSourceCycle(); // build 80: the cancel button cycles the sources on Coverflow / Grid
++        if (ripps2SidebarOn())
++            ripps2SidebarOpen(1); // build 113: the cancel button opens the Storage drawer, its sources
++        else
++            menuSourceCycle(); // build 80: the cancel button cycles the sources on Coverflow / Grid
+     } else if (getKeyOn(KEY_CROSS)) {
+         if (!viewPending)
+             selected_item->item->execCross(selected_item->item);
+diff --git a/src/mmcesupport.c b/src/mmcesupport.c
+index 0838e86..4c28157 100644
+--- a/src/mmcesupport.c
++++ b/src/mmcesupport.c
+@@ -887,7 +887,7 @@ static void mmceLaunchCue(item_list_t *itemList, const char *cueName, config_set
+     mmceGetDeviceRoot(ps1Root, sizeof(ps1Root));
+ 
+     // The resolvers leave the path they tried in their buffer, so the message can name it.
+-    if (!cueEnsureEmber(ps1Root, emberElf, sizeof(emberElf))) { // RIPPS2 build 71: or the bundled one
++    if (!cueEnsureEmber(ps1Root, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
+         return;
+     }
+@@ -936,7 +936,7 @@ static void mmceLaunchVcd(item_list_t *itemList, const char *vcdName, config_set
+ 
+     mmceGetDeviceRoot(ps1Root, sizeof(ps1Root));
+ 
+-    if (!vcdResolvePopstarterFor(ps1Root, VCD_PREFIX_MASS, vcdName, vcdElf, sizeof(vcdElf))) { // RIPPS2 build 73: + the game's own, + the one RIPPS2 carries
++    if (!vcdResolvePopstarterFor(ps1Root, VCD_PREFIX_MASS, vcdName, vcdElf, sizeof(vcdElf))) { // RIPPS2 build 73: + the game's own
+         vcdDescribePopstarterLookup(ps1Root, vcdElf, sizeof(vcdElf));
+         guiMsgBoxMissing(_l(_STR_POPSTARTER_NOT_FOUND), vcdElf);
+         return;
+diff --git a/src/opl.c b/src/opl.c
+index 82fcb72..13c78db 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -3708,6 +3708,10 @@ static void _loadConfig()
+                 gRipps2Hints = value;
+             if (configGetInt(configOPL, "ripps2_catbar", &value) && value >= 0 && value < RIPPS2_SHOW_COUNT)
+                 gRipps2CatBar = value;
++            if (configGetInt(configOPL, "ripps2_fastcache", &value))
++                gRipps2FastCache = value != 0; // build 113: Fast Cache (on unless turned off)
++            if (configGetInt(configOPL, "ripps2_catlayout", &value) && value >= 0 && value <= 2)
++                gRipps2CatLayout = value; // build 113: Category Layout (0 Theme, 1 Across the Top, 2 Sidebar)
+             if (configGetInt(configOPL, "ripps2_catswap", &value) && (value == 0 || value == 1))
+                 gRipps2CatSwap = value;
+             if (configGetInt(configOPL, "ripps2_srcname", &value) && value >= 0 && value < RIPPS2_SRC_COUNT)
+@@ -4424,6 +4428,8 @@ static void _saveConfig()
+         configSetInt(configOPL, "ripps2_palette", gRipps2Palette);
+         configSetInt(configOPL, "ripps2_hints", gRipps2Hints);
+         configSetInt(configOPL, "ripps2_catbar", gRipps2CatBar);
++        configSetInt(configOPL, "ripps2_catlayout", gRipps2CatLayout); // build 113
++        configSetInt(configOPL, "ripps2_fastcache", gRipps2FastCache);
+         configSetInt(configOPL, "ripps2_catswap", gRipps2CatSwap);
+         configSetInt(configOPL, "ripps2_srcname", gRipps2SrcName); // build 71
+         configSetInt(configOPL, "ripps2_recents", gRipps2Recents);
+diff --git a/src/ripps2about.c b/src/ripps2about.c
+index c39ed89..0ec24b6 100644
+--- a/src/ripps2about.c
++++ b/src/ripps2about.c
+@@ -88,9 +88,9 @@ static const ab_row_t abRows[] = {
+     {'G', NULL},
+     {'H', N_("PS1 GAMES")},
+     {'T', N_("Ember by Gageformer")},
+-    {'S', N_("carried unmodified: github.com/Gageformer/Ember/releases")},
++    {'S', N_("your own, found and launched: github.com/Gageformer/Ember/releases")}, // build 113: no longer carried
+     {'T', N_("POPSTARTER by krHACKen")},
+-    {'S', N_("your own copy first; else the one RIPPS2 carries, unchanged")},
++    {'S', N_("your own copy, found on your drives and memory cards")},
+     {'S', N_("RIPPOPS copies your own POPS files over from another drive")},
+     {'G', NULL},
+     {'H', N_("ACHIEVEMENTS: SPIRIT OF RA")},
+diff --git a/src/ripps2disc.c b/src/ripps2disc.c
+index f3a02b0..fa2ee5d 100644
+--- a/src/ripps2disc.c
++++ b/src/ripps2disc.c
+@@ -520,13 +520,33 @@ static void rdHintPair(int iconA, const char *a, int iconB, const char *b, int y
+     rdHint(iconB, b, &x, y, 0x80);
+ }
+ 
+-static void rdRing(int cx, int cy, float r, float p, int a)
++// build 113 (the user's note): SELECT's hold fills notches around the button, clockwise from the top, the
++// one filling fading in; a soft-edged bar each (a 1 px line is a squiggle on an interlaced picture)
++#define RD_NOTCHES 12
++#define RD_NOTCH_IN  12.0f // the notches' inner and outer radius around the button
++#define RD_NOTCH_OUT 17.0f
++#define RD_RING_W    38    // the room the ring takes in the hold hint, so HOLD starts clear of it
++
++static void rdNotch(float cx, float cy, float ang, u64 c)
+ {
+-    int i, n = 36;
+-    for (i = 0; i < n; i++) {
+-        float a0 = -1.5707963f + 6.2831853f * i / n, a1 = -1.5707963f + 6.2831853f * (i + 1) / n;
+-        u64 c = (float)i < p * n ? RD_PRIM(0x5C, 0x98, 0xFF, a) : RD_PRIM(0x1E, 0x2A, 0x50, a / 2);
+-        rmDrawLine(cx + (int)(r * cosf(a0)), cy + (int)(r * sinf(a0)), cx + (int)(r * cosf(a1)), cy + (int)(r * sinf(a1)), c);
++    float ux = cosf(ang), uy = sinf(ang), nx = -uy, ny = ux, hw = 1.4f, fw = 2.4f;
++    float x0 = cx + ux * RD_NOTCH_IN, y0 = cy + uy * RD_NOTCH_IN, x1 = cx + ux * RD_NOTCH_OUT, y1 = cy + uy * RD_NOTCH_OUT;
++    u64 clear = c & ~(0xFFULL << 24);
++    rmDrawQuadGouraud(x0 + nx * hw, y0 + ny * hw, c, x1 + nx * hw, y1 + ny * hw, c, x0 - nx * hw, y0 - ny * hw, c, x1 - nx * hw, y1 - ny * hw, c);
++    rmDrawQuadGouraud(x0 + nx * fw, y0 + ny * fw, clear, x1 + nx * fw, y1 + ny * fw, clear, x0 + nx * hw, y0 + ny * hw, c, x1 + nx * hw, y1 + ny * hw, c);
++    rmDrawQuadGouraud(x0 - nx * hw, y0 - ny * hw, c, x1 - nx * hw, y1 - ny * hw, c, x0 - nx * fw, y0 - ny * fw, clear, x1 - nx * fw, y1 - ny * fw, clear);
++}
++
++static void rdRing(int cx, int cy, float p, int a)
++{
++    int i;
++    for (i = 0; i < RD_NOTCHES; i++) {
++        float fill = p * RD_NOTCHES - i; // 1: lit, 0..1: filling, below 0: still to come
++        int lit = fill >= 1.0f ? a : fill > 0.0f ? (int)(a * fill) : 0;
++        float ang = -1.5707963f + 6.2831853f * (i + 0.5f) / RD_NOTCHES;
++        rdNotch(cx, cy, ang, RD_PRIM(0x2A, 0x3A, 0x6A, a * 5 / 8));
++        if (lit > 0)
++            rdNotch(cx, cy, ang, RD_PRIM(0x5C, 0x98, 0xFF, lit));
+     }
+ }
+ 
+@@ -566,12 +586,14 @@ void ripps2DiscRipRender(void)
+     fntRenderString(gTheme->fonts[4], 320, y + 26, ALIGN_CENTER, 0, 0, "RIPDISC", rdAlpha(RD_LIT, ia));
+     fntRenderString(gTheme->fonts[5], 320, y + 54, ALIGN_CENTER, 0, 0,
+                     rdIsGame(kind) ? _t("ADD THIS GAME TO YOUR STORAGE") : _t("ADD THIS MEDIA TO YOUR FILES"), rdAlpha(RD_SOFT, ia));
+-    hx = 320 - (24 + ripps2HintWidth(hold)) / 2;
+-    if (rdHolding) {
+-        float p = (float)(now - rdHoldSince) / RD_HOLD_S;
+-        rdRing(hx + 10, y + 88, 15.0f, p > 1.0f ? 1.0f : p, ia);
+-    }
+-    rdHint(SELECT_ICON, hold, &hx, y + 88, ia);
++    // build 113: the ring has its own room, the button at its centre, HOLD after it, the pair centred
++    hx = 320 - (RD_RING_W + 6 + ripps2HintWidth(hold)) / 2;
++    float p = rdHolding ? (float)(now - rdHoldSince) / RD_HOLD_S : 0.0f;
++    rdRing(hx + RD_RING_W / 2, y + 88, p > 1.0f ? 1.0f : p, ia);
++    GSTEXTURE *sel = thmGetTexture(SELECT_ICON);
++    if (sel != NULL)
++        rmDrawPixmap(sel, hx + RD_RING_W / 2 - 10, y + 78, ALIGN_NONE, 20, 20, SCALING_RATIO, rdAlpha(RD_LIT, ia), 0);
++    ripps2HintText(hx + RD_RING_W + 6, y + 88, hold, rdAlpha(RD_SOFT, ia));
+ }
+ 
+ // The rip's screen, a few times a second: what, how far, how long is left; 0 when it is to stop (asked first)
+diff --git a/src/ripps2ember.c b/src/ripps2ember.c
+index 6c6d39d..459b24e 100644
+--- a/src/ripps2ember.c
++++ b/src/ripps2ember.c
+@@ -1,13 +1,10 @@
+ /*
+-  RIPPS2 build 71: Ember on board.
++  RIPPS2 build 77: Neutrino on board (the file's name is build 71's, when Ember rode here too).
+ 
+-  Ember, the PS1 emulator for the PS2 by Gageformer, rides inside RIPPS2.ELF gzip-compressed, with its
+-  licence. Launching an Ember game from a drive whose EMBER folder has no ember.elf writes the build
+-  there, unmodified (the gzip trailer's CRC and the size are checked), with LICENSE-BETA.txt beside
+-  it, and the launch goes on. Only the launch paths do this: a list scan never writes 1.6 MB.
+-
+-  Bundled under the Ember Public Beta Testing Licence (elf/ember/LICENSE-BETA.txt in ps2-pillars):
+-  unmodified and complete, with its licence, credited in About with its release page, and free.
++  build 113: Ember and POPSTARTER are no longer carried. RIPPS2 finds the user's own and launches it: Ember in
++  the drive's EMBER folder, POPSTARTER at the path in Settings, in the drive's POPS, APPS and top folders, as a
++  game's own POPS/XX.<name>.ELF, or on the memory cards; with none, the launch names the path it looked at.
++  Both stay credited in About with where to get them.
+ */
+ 
+ #include <stdio.h>
+@@ -27,139 +24,6 @@
+ #include "include/sound.h" // SFX_MESSAGE, SFX_ERROR
+ #include "include/ripps2tr.h" // build 104: _t, RIPPS2's words in the chosen language
+ 
+-extern void *ember_elf_gz; // misc/ember_elf.gz: elf/ember/ember.elf, gzip -9 by RIPPS2's build.sh
+-extern int size_ember_elf_gz;
+-extern void *ember_licence_txt; // misc/ember_licence.txt: elf/ember/LICENSE-BETA.txt
+-extern int size_ember_licence_txt;
+-
+-#define EMBER_ELF_SIZE 1611956 // the bundled build, Beta-2, as released
+-#define EMBER_CHUNK    (32 * 1024)
+-
+-static unsigned char emberOut[EMBER_CHUNK] __attribute__((aligned(64)));
+-
+-int ripps2EmberInstall(const char *elfPath)
+-{
+-    char dir[256], lic[288];
+-    const char *slash = strrchr(elfPath, '/'), *bslash = strrchr(elfPath, '\\');
+-    const char *sep = slash > bslash ? slash : bslash;
+-    z_stream zs;
+-    int fd, total = 0, ret, ok = 1, writes = 0;
+-
+-    if (sep == NULL || (int)(sep - elfPath) >= (int)sizeof(dir))
+-        return 0;
+-    snprintf(dir, sizeof(dir), "%.*s", (int)(sep - elfPath), elfPath);
+-    mkdir(dir, 0777); // the EMBER folder: there already when the drive has Ember games
+-    snprintf(lic, sizeof(lic), "%.*sLICENSE-BETA.txt", (int)(sep - elfPath + 1), elfPath);
+-
+-    fd = open(elfPath, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+-    if (fd < 0) {
+-        LOG("EMBER: cannot write %s\n", elfPath);
+-        return 0;
+-    }
+-    memset(&zs, 0, sizeof(zs));
+-    zs.next_in = (unsigned char *)&ember_elf_gz;
+-    zs.avail_in = size_ember_elf_gz;
+-    if (inflateInit2(&zs, 15 + 16) != Z_OK) { // 15 + 16: a gzip stream
+-        close(fd);
+-        remove(elfPath);
+-        return 0;
+-    }
+-    do {
+-        zs.next_out = emberOut;
+-        zs.avail_out = EMBER_CHUNK;
+-        ret = inflate(&zs, Z_NO_FLUSH);
+-        if (ret != Z_OK && ret != Z_STREAM_END) {
+-            ok = 0;
+-            break;
+-        }
+-        int n = EMBER_CHUNK - zs.avail_out;
+-        if (n > 0 && write(fd, emberOut, n) != n) {
+-            ok = 0;
+-            break;
+-        }
+-        total += n;
+-        if ((++writes & 3) == 0)
+-            ripps2LaunchPump(); // the towers keep moving while it writes
+-    } while (ret != Z_STREAM_END);
+-    inflateEnd(&zs);
+-    close(fd);
+-
+-    if (!ok || total != EMBER_ELF_SIZE) {
+-        LOG("EMBER: install failed (%d of %d bytes)\n", total, EMBER_ELF_SIZE);
+-        remove(elfPath);
+-        return 0;
+-    }
+-    fd = open(lic, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+-    if (fd < 0 || write(fd, &ember_licence_txt, size_ember_licence_txt) != size_ember_licence_txt) {
+-        if (fd >= 0)
+-            close(fd);
+-        remove(elfPath); // Ember goes with its licence, or not at all
+-        return 0;
+-    }
+-    close(fd);
+-    LOG("EMBER: installed %s\n", elfPath);
+-    return 1;
+-}
+-
+-/*
+-  RIPPS2 build 73: POPSTARTER on board.
+-
+-  POPSTARTER (krHACKen's PS1 launcher) rides inside RIPPS2.ELF as released. A PS1 launch that finds no
+-  POPSTARTER of the user's own (the path set in Settings, the drive's POPS, APPS and top folders, the
+-  game's own XX.<name>.ELF, the memory cards) writes this copy to the drive's POPS folder and goes on.
+-  A copy the user already has always wins: nothing here overwrites a file.
+-*/
+-
+-extern void *popstarter_elf_bin; // misc/popstarter_elf.bin: elf/popstarter/POPSTARTER.ELF
+-extern int size_popstarter_elf_bin;
+-
+-#define POPSTARTER_ELF_SIZE  167700
+-#define POPSTARTER_ELF_CRC32 0x59ebabb9u
+-
+-int ripps2PopstarterInstall(const char *elfPath)
+-{
+-    char dir[256];
+-    const char *slash = strrchr(elfPath, '/'), *bslash = strrchr(elfPath, '\\');
+-    const char *sep = slash > bslash ? slash : bslash;
+-    int fd, done = 0;
+-
+-    if (size_popstarter_elf_bin != POPSTARTER_ELF_SIZE ||
+-        crc32(0L, (const unsigned char *)&popstarter_elf_bin, size_popstarter_elf_bin) != POPSTARTER_ELF_CRC32)
+-        return 0;
+-    if (sep == NULL || (int)(sep - elfPath) >= (int)sizeof(dir))
+-        return 0;
+-    fd = open(elfPath, O_RDONLY);
+-    if (fd >= 0) { // one is there already: it is the user's, and it is used as it is
+-        close(fd);
+-        return 1;
+-    }
+-    snprintf(dir, sizeof(dir), "%.*s", (int)(sep - elfPath), elfPath);
+-    mkdir(dir, 0777); // the POPS folder: there already when the drive has PS1 games
+-
+-    fd = open(elfPath, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+-    if (fd < 0) {
+-        LOG("POPSTARTER: cannot write %s\n", elfPath);
+-        return 0;
+-    }
+-    while (done < size_popstarter_elf_bin) {
+-        int n = size_popstarter_elf_bin - done;
+-        if (n > EMBER_CHUNK)
+-            n = EMBER_CHUNK;
+-        if (write(fd, (const unsigned char *)&popstarter_elf_bin + done, n) != n)
+-            break;
+-        done += n;
+-        ripps2LaunchPump();
+-    }
+-    close(fd);
+-    if (done != size_popstarter_elf_bin) {
+-        LOG("POPSTARTER: install failed (%d of %d bytes)\n", done, size_popstarter_elf_bin);
+-        remove(elfPath);
+-        return 0;
+-    }
+-    LOG("POPSTARTER: installed %s\n", elfPath);
+-    return 1;
+-}
+-
+ /*
+   RIPPS2 build 77: Neutrino on board.
+ 
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index 4f97c40..4bedb0c 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -1420,7 +1420,7 @@ static void fbRunElf(const fb_entry_t *e)
+ static opl_io_module_t *fbGameModuleStarted(void); // build 102: below, with fbGameSourceStarted
+ 
+ // build 73: a PS1 game (.VCD) in a drive's POPS folder starts the way Storage starts it, through
+-// POPSTARTER: the user's own copy where there is one, else the one RIPPS2 carries, written beside it
++// POPSTARTER: the user's own copy (build 113: RIPPS2 carries none to write)
+ static void fbRunVcd(const fb_entry_t *e)
+ {
+     char name[FB_NAME], ask[200];
+diff --git a/src/ripps2hints.c b/src/ripps2hints.c
+index 9f83a46..b6ab16a 100644
+--- a/src/ripps2hints.c
++++ b/src/ripps2hints.c
+@@ -170,7 +170,7 @@ int ripps2HintRank(int token)
+ }
+ 
+ #ifndef RIPPS2_HINTS_HOST_TEST
+-// ---- Controller Settings > Hints and Glyphs ----
++// ---- Interface > Hints and Glyphs (build 113; Controller Settings had it from build 90) ----
+ 
+ // build 104: N_, translated where dia.c draws an enum's value
+ static const char *pickLayout[] = {N_("Theme"), N_("Row"), N_("Column"), NULL};
+@@ -195,6 +195,7 @@ static void hintsRead(void)
+             gRipps2HintPick[pickHints[i]] = v;
+     if (diaGetInt(diaHintsConfig, UICFG_RIPPS2_GLYPH_SET, &v) && v >= 0 && v < RIPPS2_GLYPHSET_COUNT)
+         gRipps2GlyphSet = v; // the next frame loads it (thmGlyphSetRefresh), so the page behind shows it
++    guiRipps2HintRowsRead(diaHintsConfig); // build 113: Button Hints and D-pad Glyphs, from Colors and More
+ }
+ 
+ static int hintsUpdater(int modified)
+@@ -275,6 +276,7 @@ static void showOrder(void)
+ int ripps2ShowHintsConfig(void)
+ {
+     int keepLayout = gRipps2HintLayout, keepLabels = gRipps2HintLabels, keepSet = gRipps2GlyphSet, keepPick[RIPPS2_HINT_COUNT];
++    int keepHints = gRipps2Hints, keepGlyphs = gRipps2Glyphs, keepUserSet = gRipps2UserSet; // build 113
+     char keepOrder[sizeof(gRipps2HintOrder)];
+     int i, ret;
+ 
+@@ -290,6 +292,7 @@ int ripps2ShowHintsConfig(void)
+         diaSetEnum(diaHintsConfig, pickRows[i], pickShow);
+         diaSetInt(diaHintsConfig, pickRows[i], gRipps2HintPick[pickHints[i]]);
+     }
++    guiRipps2HintRowsSet(diaHintsConfig);
+ 
+     int focus = -1;
+     for (;;) {
+@@ -310,8 +313,11 @@ int ripps2ShowHintsConfig(void)
+         gRipps2GlyphSet = keepSet;
+         memcpy(gRipps2HintPick, keepPick, sizeof(keepPick));
+         snprintf(gRipps2HintOrder, sizeof(gRipps2HintOrder), "%s", keepOrder);
++        gRipps2Hints = keepHints;
++        gRipps2Glyphs = keepGlyphs;
++        gRipps2UserSet = keepUserSet;
+     }
+-    return gRipps2HintLayout != keepLayout || gRipps2HintLabels != keepLabels || gRipps2GlyphSet != keepSet ||
++    return gRipps2Hints != keepHints || gRipps2Glyphs != keepGlyphs || gRipps2UserSet != keepUserSet || gRipps2HintLayout != keepLayout || gRipps2HintLabels != keepLabels || gRipps2GlyphSet != keepSet ||
+            memcmp(gRipps2HintPick, keepPick, sizeof(keepPick)) || strcmp(gRipps2HintOrder, keepOrder);
+ }
+ 
+diff --git a/src/ripps2shot.c b/src/ripps2shot.c
+index 7871f00..a883b4b 100644
+--- a/src/ripps2shot.c
++++ b/src/ripps2shot.c
+@@ -1304,6 +1304,10 @@ static int rsIgrUpdater(int modified)
+ int ripps2ShowIgrConfig(void)
+ {
+     int keepIgr = gRipps2IgrMenu, keepShot = gRipps2Ripshot, keepDev = gRipps2RipshotDevelop, v;
++    char keepPath[sizeof(gExitPath)];
++
++    snprintf(keepPath, sizeof(keepPath), "%s", gExitPath);
++    guiExitPathBegin(diaIgrConfig); // build 113: IGR Path joins this page (it was General's)
+ 
+     diaSetEnum(diaIgrConfig, CFG_RIPPS2_IGRMENU, rsOnOff); // the first choice is the default: On, On, Manual
+     diaSetEnum(diaIgrConfig, UICFG_RIPPS2_RIPSHOT, rsOnOff);
+@@ -1322,8 +1326,9 @@ int ripps2ShowIgrConfig(void)
+             gRipps2Ripshot = v == 0;
+         if (diaGetInt(diaIgrConfig, UICFG_RIPPS2_DEVELOP, &v))
+             gRipps2RipshotDevelop = v == 1;
++        guiExitPathEnd();
+     }
+-    return gRipps2IgrMenu != keepIgr || gRipps2Ripshot != keepShot || gRipps2RipshotDevelop != keepDev;
++    return gRipps2IgrMenu != keepIgr || gRipps2Ripshot != keepShot || gRipps2RipshotDevelop != keepDev || strcmp(gExitPath, keepPath);
+ }
+ 
+ #endif
+diff --git a/src/ripps2side.c b/src/ripps2side.c
+new file mode 100644
+index 0000000..1415c7b
+--- /dev/null
++++ b/src/ripps2side.c
+@@ -0,0 +1,308 @@
++/*
++  RIPPS2 build 113: the category sidebar.
++
++  The user (10/22): the three categories as glyphs down the theme's own side bar instead of words across the top;
++  Left from the games list highlights them (RIPGRID's frame), Up / Down opens each one's drawer, the bar sliding
++  open, with the category's name as its first item and its list under it (Storage: the sources); Cross enters the
++  list and Cross on an item goes there. The game is let go while the sidebar has the focus and the hints are the
++  sidebar's. No page titles: the name lives in the drawer. Launch Disc and Memory Files get the bar as a full strip.
++
++  A theme asks for it with category_layout=sidebar (column means the same now); Colors and More > Category Layout
++  overrides. The bar is Adapt's by default (x 0, 26 wide, #01040F at 88, a #28C5F9 accent at 22 beside it), so on
++  Adapt the glyphs land in the bar Adapt already draws; sidebar_bar=pages leaves Storage's bar to the theme.
++
++  The glyphs are one atlas, ps2-pillars elf/theme/make_sidebar_icons.py (row 0 the lines, row 1 their glow).
++  Coordinates are theme space (640 wide, gTheme->usedHeight tall).
++*/
++
++#include <stdio.h>
++#include <string.h>
++#include <time.h>
++
++#include "include/opl.h"
++#include "include/gui.h"
++#include "include/menusys.h"
++#include "include/renderman.h"
++#include "include/fntsys.h"
++#include "include/themes.h"
++#include "include/textures.h"
++#include "include/pad.h"
++#include "include/sound.h"
++#include "include/iosupport.h"
++#include "include/ripps2.h"
++#include "include/ripps2tr.h"
++
++int gRipps2CatLayout = 0;
++
++#define SB_CELL      32.0f
++#define SB_ICON_DISC 0 // atlas cells, make_sidebar_icons.py's order
++#define SB_ICON_ALL  3
++#define SB_ICON_USB  4
++#define SB_ICON_MMCE 5
++#define SB_ICON_HDD  6
++#define SB_ICON_NET  7
++#define SB_ICON_APPS 8
++#define SB_ICON_STAR 9
++#define SB_ROW       26 // a drawer row
++#define SB_PRIM(r, g, b, a) GS_SETREG_RGBAQ((r), (g), (b), (a), 0x00) // untextured: 0x80 = opaque
++#define SB_TEX(v, a)        GS_SETREG_RGBA((v), (v), (v), (a))        // textured: 0x80 = the texel as it is
++
++static int sbFocus = 0, sbGlyph = 0, sbItem = 0, sbDirect = 0; // sbDirect: opened straight into a list (Circle)
++static const char *sbNames[RIPPS2_CAT_COUNT] = {N_("LAUNCH DISC"), N_("STORAGE"), N_("MEMORY FILES")};
++
++int ripps2SidebarOn(void)
++{
++    if (ripps2Legacy())
++        return 0; // a legacy theme has no categories to show
++    if (gRipps2CatLayout == 1)
++        return 0;
++    if (gRipps2CatLayout == 2)
++        return 1;
++    return gTheme != NULL && gTheme->catSidebar;
++}
++
++int ripps2SidebarFocused(void)
++{
++    return ripps2SidebarOn() ? sbFocus : 0;
++}
++
++static int sbFont(int title)
++{
++    static int f[2] = {FNT_ERROR, FNT_ERROR};
++    if (f[title] == FNT_ERROR)
++        f[title] = fntLoadFile("builtin:ripflowbold", title ? 22 : 17); // Roboto Condensed Bold: the user's pick
++    return f[title] != FNT_ERROR ? f[title] : gTheme->fonts[0];
++}
++
++static int sbGlyphSize(void)
++{
++    int s = gTheme->sbW - 8;
++    return s < 14 ? 14 : s > 28 ? 28 : s;
++}
++
++static int sbGlyphY(int slot)
++{
++    return gTheme->usedHeight / 2 + (slot - 1) * (sbGlyphSize() + 22);
++}
++
++static void sbIcon(int cell, int cx, int cy, int size, int lit, int alpha)
++{
++    GSTEXTURE *tex = thmGetTexture(RIPPS2_SIDEBAR_ICONS);
++    float u0 = cell * SB_CELL + 0.5f, u1 = (cell + 1) * SB_CELL - 0.5f;
++    if (tex == NULL || tex->Mem == NULL || alpha <= 0)
++        return;
++    if (lit) { // the glow first, additively, so it adds light under the lines
++        rmSetBlendAdditive(1);
++        rmDrawPixmapPart(tex, cx, cy, ALIGN_CENTER, size * 13 / 10, size * 13 / 10, SCALING_RATIO, GS_SETREG_RGBA(0x24, 0x58, 0x80, alpha / 2),
++                         u0, SB_CELL + 0.5f, u1, 2 * SB_CELL - 0.5f);
++        rmSetBlendAdditive(0);
++    }
++    rmDrawPixmapPart(tex, cx, cy, ALIGN_CENTER, size, size, SCALING_RATIO,
++                     lit ? SB_TEX(0x80, alpha) : GS_SETREG_RGBA(0x55, 0x5E, 0x76, alpha * 7 / 8), u0, 0.5f, u1, SB_CELL - 0.5f);
++}
++
++// a source page's glyph: by its theme icon (the page knows its drive), else by its mode
++static int sbSourceIcon(int i)
++{
++    int icon = menuSourceIcon(i), mode = menuSourceMode(i);
++    if (mode == MIX_MODE)
++        return SB_ICON_ALL;
++    if (icon == HDD_ICON || icon == HDD_BD_ICON)
++        return SB_ICON_HDD;
++    if (icon == MMCE_ICON || icon == MX4SIO_ICON)
++        return SB_ICON_MMCE;
++    if (icon == ETH_ICON || icon == UDP_ICON || mode == ETH_MODE || mode == UDPFS_MODE || mode == HTTP_MODE)
++        return SB_ICON_NET;
++    if (icon == APP_ICON || mode == APP_MODE)
++        return SB_ICON_APPS;
++    if (icon == FAV_ICON || mode == FAV_MODE)
++        return SB_ICON_STAR;
++    return SB_ICON_USB;
++}
++
++// a drawer's rows: its name first, then (Storage) the sources
++static int sbRows(int cat)
++{
++    return 1 + (cat == RIPPS2_CAT_STORAGE ? menuSourceCount() : 0);
++}
++
++static void sbBarAt(int x, int w, int accentX)
++{
++    int h = gTheme->usedHeight;
++    ripps2DrawPanelFlat(x, 0, w, h, gTheme->sbColor, gTheme->sbTint, 0);
++    if (gTheme->sbAccentTint > 0)
++        ripps2DrawPanelFlat(accentX, 0, 12, h, gTheme->sbAccent, gTheme->sbAccentTint, 0);
++}
++
++// a source's name in the drawer: the page's own, with the drive's format when two pages share it (the exFAT HDD
++// and the APA HDD are both HDD Games), else its place among them
++static void sbSourceName(int s, char *out, int size)
++{
++    const char *name = menuSourceName(s);
++    int i, same = 0, nth = 0, icon = menuSourceIcon(s);
++    for (i = 0; i < menuSourceCount(); i++)
++        if (!strcmp(menuSourceName(i), name)) {
++            same++;
++            if (i < s)
++                nth++;
++        }
++    if (same < 2)
++        snprintf(out, size, "%s", name);
++    else if (icon == HDD_BD_ICON || icon == HDD_ICON)
++        snprintf(out, size, "%s (%s)", name, icon == HDD_BD_ICON ? "exFAT" : "APA");
++    else
++        snprintf(out, size, "%s %d", name, nth + 1);
++}
++
++static void sbDrawer(int slot)
++{
++    int cat = ripps2CatSlot(slot), x0 = gTheme->sbX + gTheme->sbW, right = gTheme->sbDrawer, n = sbRows(cat), i;
++    int h = n * SB_ROW + (n > 1 ? 10 : 0), top = sbGlyphY(slot) - SB_ROW / 2, cur = menuSourceCurrent();
++    int floor = gTheme->usedHeight - 56; // clear of the hints
++    char name[96];
++    if (right < x0 + 80)
++        right = x0 + 80;
++    // wide enough for its longest name (HDD Games (exFAT) ran past 216 in the lab), up to half the screen
++    for (i = 0; i < n; i++) {
++        int w;
++        if (i == 0)
++            w = 26 + rmUnScaleX(fntCalcDimensions(sbFont(1), _t(sbNames[cat])));
++        else {
++            sbSourceName(i - 1, name, sizeof(name));
++            w = 52 + rmUnScaleX(fntCalcDimensions(sbFont(0), name));
++        }
++        if (x0 + w > right)
++            right = x0 + w > 320 ? 320 : x0 + w;
++    }
++    // the name beside its glyph, the list running down from it, kept on the page
++    if (top + h > floor)
++        top = floor - h;
++    if (top < 16)
++        top = 16;
++    // the bar opened out to the drawer's edge, as the bar is: on Storage the page's frosted backdrop under a
++    // deeper tint (Adapt's bar is frosted glass), the accent along the new edge
++    if (gRipps2Category == RIPPS2_CAT_STORAGE)
++        thmDrawMainFrost(x0, 0, right - x0, gTheme->usedHeight);
++    ripps2DrawPanelFlat(x0, 0, right - x0, gTheme->usedHeight, gTheme->sbColor, gTheme->sbTint + (0x80 - gTheme->sbTint) / 2, 0);
++    if (gTheme->sbAccentTint > 0)
++        ripps2DrawPanelFlat(right + 2, 0, 12, gTheme->usedHeight, gTheme->sbAccent, gTheme->sbAccentTint, 0);
++    for (i = 0; i < n; i++) {
++        int y = top + i * SB_ROW + (i > 0 ? 10 : 0), lit = sbFocus == 2 && i == sbItem;
++        if (lit) {
++            rmDrawRect(x0 + 6, y + 1, right - x0 - 12, SB_ROW - 2, SB_PRIM(0x1E, 0x3C, 0x96, 0x6C));
++            rmDrawRect(x0 + 6, y + 1, 3, SB_ROW - 2, SB_PRIM(0x6A, 0x9A, 0xFF, 0x80));
++        }
++        if (i == 0) { // the category's name, the drawer's first item
++            fntRenderStringFit(sbFont(1), x0 + 16, y + SB_ROW / 2, ALIGN_VCENTER, right - x0 - 26, _t(sbNames[cat]),
++                               SB_TEX(lit || sbFocus == 1 ? 0x80 : 0x70, 0x80), 0);
++            continue;
++        }
++        int s = i - 1, here = s == cur && gRipps2Category == RIPPS2_CAT_STORAGE;
++        sbIcon(sbSourceIcon(s), x0 + 26, y + SB_ROW / 2, 16, lit, 0x80);
++        sbSourceName(s, name, sizeof(name));
++        fntRenderStringFit(sbFont(0), x0 + 42, y + SB_ROW / 2, ALIGN_VCENTER, right - x0 - 52, name,
++                           lit ? SB_TEX(0x80, 0x80) : here ? GS_SETREG_RGBA(0x6C, 0x7C, 0x80, 0x80) : GS_SETREG_RGBA(0x55, 0x5E, 0x76, 0x80), 0);
++    }
++}
++
++void ripps2SidebarRender(void)
++{
++    int size = sbGlyphSize(), cx = gTheme->sbX + gTheme->sbW / 2, slot;
++    int alpha = (int)(0x80 * ripps2CatBarAlpha());
++    if (sbFocus)
++        alpha = 0x80; // a sidebar in use never fades
++    if (gTheme->sbBar == 2 || (gTheme->sbBar == 1 && gRipps2Category != RIPPS2_CAT_STORAGE))
++        sbBarAt(gTheme->sbX, gTheme->sbW, gTheme->sbX + gTheme->sbW + 2);
++    if (sbFocus)
++        sbDrawer(sbGlyph);
++    for (slot = 0; slot < RIPPS2_CAT_COUNT; slot++) {
++        int cat = ripps2CatSlot(slot), cy = sbGlyphY(slot), lit = cat == gRipps2Category;
++        if (lit) // the page you are on: a lit tile under its glyph
++            rmDrawRect(gTheme->sbX + 3, cy - size / 2 - 5, gTheme->sbW - 6, size + 10, SB_PRIM(0x1E, 0x3C, 0x96, alpha * 0x6C / 0x80));
++        sbIcon(cat, cx, cy, size, lit, alpha);
++        if (sbFocus && slot == sbGlyph) { // Left's focus: RIPGRID's frame, glowing; dimmer while its drawer has the pad
++            int l = gTheme->sbX + 1, t = cy - size / 2 - 7, w = gTheme->sbW - 2, h = size + 14;
++            u64 c = sbFocus == 1 ? SB_PRIM(0x8F, 0xE3, 0xFF, 0x80) : SB_PRIM(0x5A, 0x8C, 0xB4, 0x60);
++            if (sbFocus == 1) {
++                rmSetBlendAdditive(1);
++                rmDrawRect(l - 2, t - 2, w + 4, h + 4, SB_PRIM(0x18, 0x40, 0x60, 0x50));
++                rmSetBlendAdditive(0);
++            }
++            rmDrawRect(l, t, w, 2, c);
++            rmDrawRect(l, t + h - 2, w, 2, c);
++            rmDrawRect(l, t, 2, h, c);
++            rmDrawRect(l + w - 2, t, 2, h, c);
++        }
++    }
++}
++
++void ripps2SidebarOpen(int list)
++{
++    if (!ripps2SidebarOn())
++        return;
++    sbGlyph = ripps2CatSlot(gRipps2Category);
++    sbDirect = list;
++    if (list) {
++        sbFocus = 2;
++        sbItem = gRipps2Category == RIPPS2_CAT_STORAGE ? 1 + menuSourceCurrent() : 0;
++    } else {
++        sbFocus = 1;
++        sbItem = 0;
++    }
++    sfxPlay(SFX_PAGE_IN);
++}
++
++static void sbClose(void)
++{
++    sbFocus = 0;
++    sbDirect = 0;
++}
++
++void ripps2SidebarInput(void)
++{
++    int cancel = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    int cat = ripps2CatSlot(sbGlyph);
++
++    if (sbFocus == 1) {
++        if (getKey(KEY_UP) && sbGlyph > 0) {
++            sbGlyph--;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKey(KEY_DOWN) && sbGlyph < RIPPS2_CAT_COUNT - 1) {
++            sbGlyph++;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKeyOn(gSelectButton)) { // into this drawer's list, on the source in use
++            sbFocus = 2;
++            sbItem = cat == RIPPS2_CAT_STORAGE && gRipps2Category == RIPPS2_CAT_STORAGE ? 1 + menuSourceCurrent() : 0;
++            sfxPlay(SFX_CONFIRM);
++        } else if (getKeyOn(cancel) || getKeyOn(KEY_RIGHT)) {
++            sbClose();
++            sfxPlay(SFX_PAGE_OUT);
++        }
++        return;
++    }
++    if (sbFocus == 2) {
++        int n = sbRows(cat);
++        if (getKey(KEY_UP) && sbItem > 0) {
++            sbItem--;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKey(KEY_DOWN) && sbItem < n - 1) {
++            sbItem++;
++            sfxPlay(SFX_CURSOR);
++        } else if (getKeyOn(gSelectButton)) { // go there: the category, and on Storage the source chosen
++            sfxPlay(SFX_CONFIRM);
++            sbClose();
++            if (cat == RIPPS2_CAT_STORAGE && sbItem > 0)
++                menuSourceSelect(sbItem - 1);
++            ripps2SetCategory(cat);
++        } else if (getKeyOn(cancel)) {
++            if (sbDirect)
++                sbClose();
++            else
++                sbFocus = 1;
++            sfxPlay(SFX_CANCEL);
++        } else if (getKeyOn(KEY_RIGHT)) {
++            sbClose();
++            sfxPlay(SFX_PAGE_OUT);
++        }
++    }
++}
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index 34e4410..f2c48c4 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -4,14 +4,15 @@
+   Review OpenUsbLd README & LICENSE files for further details.
+ 
+   RIPPS2 build 80: STATUS (main menu, where ACHIEVEMENTS was; that page moved to Settings). The homebrew
+-  RIPPS2 carries, each under its own name: where it is installed now, a way to install the copy RIPPS2
+-  carries, and the settings for it that live elsewhere in the menus, gathered here so nobody has to know
++  RIPPS2 launches, each under its own name: where it is installed now, a way to install the copy RIPPS2
++  carries (build 113: Neutrino and BIBLE; Ember and POPSTARTER are the user's own, found where a launch
++  looks), and the settings for it that live elsewhere in the menus, gathered here so nobody has to know
+   which page holds what.
+ 
+-    NEUTRINO 1.8.0      rickgaiser, AFL-3.0 (elf/neutrino)
+-    POPSTARTER          krHACKen (elf/popstarter)
+-    EMBER Beta-2        Gageformer, Ember Public Beta Testing Licence (elf/ember)
+-    BIBLE               PS2BBL 1.2.0 set up for RIPPS2 (elf/bible)
++    NEUTRINO 1.8.0      rickgaiser, AFL-3.0 (elf/neutrino), carried
++    POPSTARTER          krHACKen (elf/popstarter), found
++    EMBER               Gageformer (elf/ember), found
++    BIBLE               PS2BBL 1.2.0 set up for RIPPS2 (elf/bible), carried
+ 
+   The look is the ACHIEVEMENTS page's: gold names, soft status lines, a lit bar on the chosen row.
+ */
+@@ -60,10 +61,8 @@ enum {
+     ACT_NONE = 0,
+     ACT_NT_INSTALL,
+     ACT_NT_SETTINGS,
+-    ACT_POPS_INSTALL,
+     ACT_POPS_SETTINGS,
+     ACT_POPS_NET,
+-    ACT_EMBER_INSTALL,
+     ACT_BIBLE_MANAGE,
+     ACT_SOUNDS_RIP, // build 95
+ };
+@@ -71,7 +70,7 @@ enum {
+ typedef struct
+ {
+     int kind, action, ok;
+-    char text[112], aside[48];
++    char text[224], aside[48]; // build 113: room for a translated line (UTF-8 runs longer)
+ } st_row_t;
+ 
+ #define ST_ROWS 28
+@@ -165,26 +164,23 @@ static void stScan(void)
+     {
+         const char *p[4] = {gPopstarterPath, "mass0:/POPS/POPSTARTER.ELF", "mc0:/POPS/POPSTARTER.ELF", "mc1:/POPS/POPSTARTER.ELF"};
+         n = stFound(line, sizeof(line), p, 4, 1);
+-        st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : _t("Not found yet. The first PS1 game started writes RIPPS2's copy to its drive's POPS folder."), NULL);
++        // build 113: the user's own, never one RIPPS2 writes
++        st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : _t("Not found. Put your own POPSTARTER.ELF in a drive's POPS folder."), NULL);
+         r->ok = n > 0;
+     }
+-    snprintf(line, sizeof(line), _t("%s POPS folder"), mass0Name); // build 99: the drive by its driver
+-    stAdd(ROW_ACTION, ACT_POPS_INSTALL, _t("INSTALL RIPPS2'S COPY"), line);
+     stAdd(ROW_ACTION, ACT_POPS_SETTINGS, _t("PS1 SETTINGS"), _t("POPSTARTER and Ember"));
+     stAdd(ROW_ACTION, ACT_POPS_NET, _t("POPSTARTER NETWORK"), _t("its own IP and SMB files"));
+ 
+     // EMBER: beside the games, in the drive's EMBER folder
+-    stAdd(ROW_HEAD, ACT_NONE, "EMBER", "Beta-2  Gageformer");
++    stAdd(ROW_HEAD, ACT_NONE, "EMBER", "Gageformer");
+     {
+         const char *p[1] = {"mass0:/EMBER/ember.elf"};
+         n = stFound(line, sizeof(line), p, 1, 1);
+-        char none[96];
+-        snprintf(none, sizeof(none), "Not found on mass0: (%s). Starting an Ember game writes it beside the games.", mass0Name);
++        char none[224];
++        snprintf(none, sizeof(none), _t("Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder."), mass0Name);
+         st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : none, NULL);
+         r->ok = n > 0;
+     }
+-    snprintf(line, sizeof(line), _t("%s EMBER folder"), mass0Name);
+-    stAdd(ROW_ACTION, ACT_EMBER_INSTALL, _t("INSTALL RIPPS2'S COPY"), line);
+ 
+     // BIBLE: what starts at power on is MANAGE's to show, card by card
+     stAdd(ROW_HEAD, ACT_NONE, "BIBLE", _t("PS2BBL 1.2.0 for RIPPS2"));
+@@ -304,37 +300,6 @@ static void stInstallNeutrino(void)
+     stTell(ripps2NeutrinoInstallTo(dirs[pick]), "Neutrino 1.8.0", dirs[pick]);
+ }
+ 
+-static void stInstallPopstarter(void)
+-{
+-    const char *path = "mass0:/POPS/POPSTARTER.ELF";
+-    if (!stDriveThere("mass0:/")) {
+-        guiMsgBoxSound(SFX_ERROR);
+-        guiMsgBox(_t("Connect the drive your PS1 games are on (a USB drive, or the internal exFAT HDD), then try again."), 0, NULL);
+-        return;
+-    }
+-    if (stExists(path)) {
+-        guiMsgBoxSound(SFX_MESSAGE);
+-        guiMsgBox("There is a POPSTARTER in mass0:/POPS already. It is yours, and RIPPS2 leaves it as it is.", 0, NULL);
+-        return;
+-    }
+-    guiRenderTextScreen(_t("POPSTARTER: writing"));
+-    stTell(ripps2PopstarterInstall(path), "POPSTARTER", "mass0:/POPS");
+-}
+-
+-static void stInstallEmber(void)
+-{
+-    const char *path = "mass0:/EMBER/ember.elf";
+-    if (!stDriveThere("mass0:/")) {
+-        guiMsgBoxSound(SFX_ERROR);
+-        guiMsgBox(_t("Connect the drive your Ember games are on (a USB drive, or the internal exFAT HDD), then try again."), 0, NULL);
+-        return;
+-    }
+-    if (stExists(path) && guiMsgBox("There is an ember.elf in mass0:/EMBER already. Replace it with RIPPS2's Beta-2?", 1, NULL) != 1)
+-        return;
+-    guiRenderTextScreen(_t("EMBER: writing"));
+-    stTell(ripps2EmberInstall(path), "Ember Beta-2", "mass0:/EMBER");
+-}
+-
+ void ripps2Status(void)
+ {
+     int openKey = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
+@@ -465,10 +430,6 @@ void ripps2Status(void)
+                     guiShowNeutrinoDefaults();
+                     changed = rescan = 1;
+                     break;
+-                case ACT_POPS_INSTALL:
+-                    stInstallPopstarter();
+-                    rescan = 1;
+-                    break;
+                 case ACT_POPS_SETTINGS:
+                     guiShowPsEmulationSettings();
+                     rescan = 1;
+@@ -476,10 +437,6 @@ void ripps2Status(void)
+                 case ACT_POPS_NET:
+                     guiShowPopsNetConfig();
+                     break;
+-                case ACT_EMBER_INSTALL:
+-                    stInstallEmber();
+-                    rescan = 1;
+-                    break;
+                 case ACT_BIBLE_MANAGE:
+                     ripps2BibleManage();
+                     rescan = 1;
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index bf8f75b..02b03e6 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -346,6 +346,11 @@ static int catSlot(int cat)
+     return catSwapMode() ? RIPPS2_CAT_COUNT - 1 - cat : cat; // build 81: a theme's category_order too
+ }
+ 
++int ripps2CatSlot(int cat) // build 113: the sidebar's order (the swap is its own inverse: a place gives its category too)
++{
++    return catSlot(cat);
++}
++
+ // ---- The flying PS2 mark ----
+ //
+ // The mark is a weight on a damped spring pulled toward the selected category. It keeps its own
+@@ -482,12 +487,23 @@ static void catTransitionDraw(void)
+     }
+ }
+ 
++int ripps2Legacy(void)
++{
++    return gTheme != NULL && gTheme->catLegacy;
++}
++
+ void ripps2RenderCategoryBar(void)
+ {
+     int i;
+     int font = catFont(1);
+ 
+     catTransitionDraw(); // build 92: over the page, under the bar
++    if (ripps2Legacy()) // build 113: a legacy theme has no bar; Launch Disc and Memory Files are in the START menu
++        return;
++    if (ripps2SidebarOn()) { // build 113: the glyphs down the side bar instead of the words (ripps2side.c)
++        ripps2SidebarRender();
++        return;
++    }
+ 
+     float enter = 1.0f;
+     if (enterStart != 0) {
+@@ -983,6 +999,13 @@ void ripps2SetCategory(int cat)
+ // L1 / R1 on any category page: the next one along the bar, wrapping end to end with a coin flip
+ void ripps2StepCategory(int dir)
+ {
++    if (ripps2Legacy()) { // build 113: no bar to step along; Launch Disc and Memory Files go back to Storage
++        if (gRipps2Category != RIPPS2_CAT_STORAGE) {
++            sfxPlay(SFX_CANCEL);
++            ripps2SetCategory(RIPPS2_CAT_STORAGE);
++        }
++        return;
++    }
+     int slot = catSlot(gRipps2Category) + (dir < 0 ? -1 : 1);
+     if (slot < 0 || slot >= RIPPS2_CAT_COUNT) {
+         slot = slot < 0 ? RIPPS2_CAT_COUNT - 1 : 0;
+@@ -1461,6 +1484,18 @@ void ripps2HandleInputLaunch(void)
+     }
+     if (ripps2DiscRipInput()) // build 105: SELECT held on the RIPDISC panel
+         return;
++    if (ripps2SidebarFocused()) { // build 113: the category sidebar has the pad while it has the focus
++        ripps2SidebarInput();
++        return;
++    }
++    if (ripps2SidebarOn() && (getKeyOn(KEY_LEFT) || getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE))) {
++        ripps2SidebarOpen(0); // Left or the cancel button: the page has no other use for them
++        return;
++    }
++    if (ripps2Legacy() && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
++        ripps2StepCategory(-1); // build 113: a legacy theme's Launch Disc came from the START menu: back to Storage
++        return;
++    }
+     if (getKeyOn(KEY_R1)) {
+         ripps2StepCategory(1);
+     } else if (getKeyOn(KEY_L1)) {
+@@ -1556,6 +1591,18 @@ void ripps2HandleInputMemory(void)
+     // the triggers play with the orbs: L2 held shows their paths, R2 held speeds them up
+     ripps2SetOrbInput(getKeyPressed(KEY_L2), getKeyPressed(KEY_R2));
+ 
++    if (ripps2SidebarFocused()) { // build 113: the category sidebar has the pad while it has the focus
++        ripps2SidebarInput();
++        return;
++    }
++    if (ripps2SidebarOn() && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
++        ripps2SidebarOpen(0); // the cancel button (Left / Right keep the formations)
++        return;
++    }
++    if (ripps2Legacy() && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
++        ripps2StepCategory(1); // build 113: a legacy theme's Memory Files came from the START menu: back to Storage
++        return;
++    }
+     if (getKeyOn(KEY_L1)) {
+         ripps2StepCategory(-1);
+     } else if (getKeyOn(KEY_R1)) {
+diff --git a/src/supportbase.c b/src/supportbase.c
+index 5751e75..0517e61 100644
+--- a/src/supportbase.c
++++ b/src/supportbase.c
+@@ -716,6 +716,7 @@ int sbReadList(base_game_info_t **list, const char *prefix, const char *sub, int
+ // Build 109 kept an MMCE card's game list on the card, so a 180-game library listed at once instead of after about 5
+ // minutes. Every source does it now: the list read last time is kept on the source, shown the moment the source
+ // answers, and the source is read again on its next pass, the list following whatever changed.
++int gRipps2FastCache = 1; // build 113: Game Sources > Cache > Fast Cache (off: every list read from its source first)
+ #define SB_SNAP_FILE  "RIPPS2.LST"
+ #define SB_SNAP_MAGIC "RIPLST01"
+ #define SB_SNAP_MAX   4096
+@@ -745,6 +746,8 @@ int sbSnapShow(sb_snap_t *snap, const char *prefix, base_game_info_t **list, int
+     if (snap->tried)
+         return 0;
+     snap->tried = 1;
++    if (!gRipps2FastCache)
++        return 0; // Fast Cache off: the list is read from the source, as before build 110
+     snprintf(path, sizeof(path), "%s%s", prefix, SB_SNAP_FILE);
+     if ((fd = open(path, O_RDONLY)) < 0)
+         return 0;
+@@ -777,7 +780,7 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+ 
+     snap->tried = 1;
+     snap->shown = 0;
+-    if (!readOk || !gEnableWrite || gamecount > SB_SNAP_MAX)
++    if (!readOk || !gEnableWrite || !gRipps2FastCache || gamecount > SB_SNAP_MAX)
+         return;
+     snprintf(path, sizeof(path), "%s%s", prefix, SB_SNAP_FILE);
+     if (gamecount <= 0 || list == NULL) { // nothing there now: no list to show next time
+diff --git a/src/textures.c b/src/textures.c
+index 685fdbb..07610ea 100644
+--- a/src/textures.c
++++ b/src/textures.c
+@@ -117,6 +117,7 @@ extern void *L2R2_png;         // RIPPS2: the L2+R2 "Random" hint
+ extern void *ripps2_ps1logo_png; // RIPPS2: the L3 filter splashes
+ extern void *ripps2_ps2logo_png;
+ extern void *ripps2_grid_icons_png; // RIPPS2: made by ps2-pillars elf/theme/make_grid_icons.py
++extern void *ripps2_sidebar_icons_png; // RIPPS2 build 113: made by ps2-pillars elf/theme/make_sidebar_icons.py
+ extern void *ripps2_up_png;   // RIPPS2 build 70: D-pad glyphs, ps2-pillars elf/theme/tools/make_glyphs.py
+ extern void *ripps2_down_png;
+ extern void *hint_badge_png; // RIPPS2 build 90: hint badges (hints_labels=badge)
+@@ -298,6 +299,7 @@ static texture_t internalDefault[TEXTURES_COUNT] = {
+     {RIPPS2_HINT_BADGE, "hint_badge", &hint_badge_png},
+     {RIPPS2_LAUNCH_DISC, "launch_disc", &ripps2_disc_png},
+     {RIPPS2_PIXFONT, "ripps2_pixfont", &ripps2_pixfont_png},
++    {RIPPS2_SIDEBAR_ICONS, "ripps2_sidebar_icons", &ripps2_sidebar_icons_png},
+ #ifdef RETROACHIEVEMENTS
+     // Positional: guarded by the same #ifdef as RA_MARK in enum INTERNAL_TEXTURE. Without
+     // this row TEXTURES_COUNT grows but the initialiser does not, leaving the last slot
+diff --git a/src/themes.c b/src/themes.c
+index cf382cc..33227c7 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -1272,6 +1272,17 @@ static void drawRipps2PanelGlass(struct menu_list *menu, struct submenu_list *it
+     ripps2DrawPanelGlass(x, y, elem->width, elem->height, item != NULL);
+ }
+ 
++// RIPPS2 build 113: the main page's frosted backdrop under x,y,w,h, as a blur panel draws it (the category sidebar's
++// drawer, opened out of Adapt's frosted bar); 0 when the page has none
++int thmDrawMainFrost(int x, int y, int w, int h)
++{
++    int pct = thmBlurPercent();
++    if (gTheme == NULL || pct <= 0 || gTheme->frost[0].Mem == NULL)
++        return 0;
++    ripps2DrawFrost(&gTheme->frost[0], x, y, w, h, gWideScreen && gTheme->frostCrop[0], 0x80 * pct / 100);
++    return 1;
++}
++
+ // RIPPS2: the on-screen rect of the main or info page's glass panel (the art viewport), for the
+ // screen switches that morph one page's panel into the next. 0 when the page has none.
+ int thmGetPanelRect(int infoPage, int *x, int *y, int *w, int *h)
+@@ -4142,7 +4153,7 @@ static void drawItemsList(struct menu_list *menu, struct submenu_list *item, con
+         if (elem->textRoom > 0 && textRoom < 40)
+             textRoom = 40;
+         while (ps && !itemsList->hidden && (others++ < itemsList->displayedItems)) {
+-            if (ps == item) {
++            if (ps == item && !ripps2SidebarFocused()) { // build 113: no chosen game while the sidebar has the focus
+                 color = gTheme->selTextColor;
+                 if (itemsList->highlight == THM_HL_BAR) {
+                     // RIPPS2: the highlighted row fills its whole row: a PS2-blue bar with a light leading edge
+@@ -4461,6 +4472,15 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+     // RIPPS2 build 80: Coverflow and Grid cycle the sources with the cancel button; say so last
+     menu_hint_item_t sourceHint = {guiCancelIcon(), _STR_RIPPS2_SOURCE, NULL};
+     int showSource = (gTheme->coverflow != NULL || gTheme->grid != NULL) && (findMenuNext(menu) || findMenuPrev(menu));
++    // build 113: while the category sidebar has the focus the hints are its own: Select, Back
++    menu_hint_item_t sbBack = {guiCancelIcon(), _STR_BACK, NULL};
++    menu_hint_item_t sbSelect = {gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, _STR_SELECT, &sbBack};
++    int sidebar = ripps2SidebarFocused() != 0;
++    if (sidebar) {
++        hint = &sbSelect;
++        showSource = 0;
++    } else if (ripps2SidebarOn())
++        showSource = 0; // the cancel button opens the sidebar's drawer instead
+     if (hint && showSource) {
+         menu_hint_item_t *last = hint;
+         while (last->next != NULL)
+@@ -4473,9 +4493,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+         menu_hint_item_t *row[16], *h;
+         int n = 0, i, j, labels = ripps2HintLabels();
+         for (h = hint; h != NULL && n < 16; h = h->next)
+-            if (ripps2HintShown(ripps2HintToken(h->text_id, h->icon_id)))
++            if (sidebar || ripps2HintShown(ripps2HintToken(h->text_id, h->icon_id)))
+                 row[n++] = h;
+-        for (i = 1; i < n; i++) {
++        for (i = sidebar ? n : 1; i < n; i++) {
+             menu_hint_item_t *k = row[i];
+             int r = ripps2HintRank(ripps2HintToken(k->text_id, k->icon_id));
+             for (j = i; j > 0 && ripps2HintRank(ripps2HintToken(row[j - 1]->text_id, row[j - 1]->icon_id)) > r; j--)
+@@ -6201,6 +6221,7 @@ static int thmLoad(const char *themePath)
+     thmLoadResource(&newT->textures[RIPPS2_PS1_LOGO], RIPPS2_PS1_LOGO, themePath, GS_PSM_CT32, 1); // RIPPS2: L3 splashes
+     thmLoadResource(&newT->textures[RIPPS2_PS2_LOGO], RIPPS2_PS2_LOGO, themePath, GS_PSM_CT32, 1);
+     thmLoadResource(&newT->textures[RIPPS2_GRID_ICONS], RIPPS2_GRID_ICONS, themePath, GS_PSM_CT32, 1); // RIPPS2: grid icons
++    thmLoadResource(&newT->textures[RIPPS2_SIDEBAR_ICONS], RIPPS2_SIDEBAR_ICONS, themePath, GS_PSM_CT32, 1); // build 113: the sidebar
+     thmLoadResource(&newT->textures[R2_ICON], R2_ICON, themePath, GS_PSM_CT32, newT->useDefault); // RIPPS2: L2+R2 Random
+     // RIPPS2 build 90: the D-pad glyphs (Coverflow's drive glyphs, a glyph set's Up and Down) load like the others
+     thmLoadResource(&newT->textures[RIPPS2_DPAD_UP], RIPPS2_DPAD_UP, themePath, GS_PSM_CT32, newT->useDefault);
+@@ -6316,8 +6337,51 @@ static int thmLoad(const char *themePath)
+         newT->catX = newT->catY = newT->catSpacing = newT->catTransitionDef = -1;
+         if (configGetStr(themeConfig, "category_font", &v) && v != NULL)
+             newT->catFontTheme = !strcasecmp(v, "theme");
+-        if (configGetStr(themeConfig, "category_layout", &v) && v != NULL)
++        // build 113 (the user's legacy key): categories=three is a theme made for RIPPS2's three categories; a theme
++        // without it (one made for Open PS2 Loader) shows Storage alone, with Launch Disc and Memory Files in the
++        // START menu. A theme made for RIPPS2 before the key (any of RIPPS2's own keys) keeps the three, so an older
++        // theme pack is not cut down; categories=storage asks for Storage alone. The built-in looks have the three.
++        if (themePath == NULL)
++            newT->catLegacy = 0;
++        else if (configGetStr(themeConfig, "categories", &v) && v != NULL)
++            newT->catLegacy = !strcasecmp(v, "storage");
++        else {
++            static const char *const ripps2Keys[] = {"towers", "bg_blur", "source_name", "glyph_set", "sounds", "color_theme",
++                                                     "category_order", "category_layout", "category_font", "page_buttons", "launch_disc"};
++            int k;
++            newT->catLegacy = 1;
++            for (k = 0; k < (int)(sizeof(ripps2Keys) / sizeof(ripps2Keys[0])); k++)
++                if (configGetStr(themeConfig, ripps2Keys[k], &v))
++                    newT->catLegacy = 0;
++        }
++        if (configGetStr(themeConfig, "category_layout", &v) && v != NULL) {
+             newT->catColumn = !strcasecmp(v, "column");
++            newT->catSidebar = newT->catColumn || !strcasecmp(v, "sidebar"); // build 113: vertical is the sidebar now
++        }
++        // build 113: the sidebar's bar, by default Adapt's (its main2 at x 0, 26 wide, #01040F at 88, and main3's
++        // #28C5F9 accent at 22 beside it); a theme that draws its own bar on Storage says sidebar_bar=pages
++        newT->sbX = 0;
++        newT->sbW = 26;
++        newT->sbDrawer = 216;
++        newT->sbBar = 2;
++        newT->sbColor[0] = 0x01, newT->sbColor[1] = 0x04, newT->sbColor[2] = 0x0F;
++        newT->sbAccent[0] = 0x28, newT->sbAccent[1] = 0xC5, newT->sbAccent[2] = 0xF9;
++        newT->sbTint = 88;
++        newT->sbAccentTint = 22;
++        if (configGetInt(themeConfig, "sidebar_x", &intValue) && intValue >= 0 && intValue <= 560)
++            newT->sbX = intValue;
++        if (configGetInt(themeConfig, "sidebar_width", &intValue) && intValue >= 16 && intValue <= 80)
++            newT->sbW = intValue;
++        if (configGetInt(themeConfig, "sidebar_drawer", &intValue) && intValue >= 120 && intValue <= 400)
++            newT->sbDrawer = intValue;
++        if (configGetStr(themeConfig, "sidebar_bar", &v) && v != NULL)
++            newT->sbBar = !strcasecmp(v, "never") ? 0 : !strcasecmp(v, "pages") ? 1 : 2;
++        configGetColor(themeConfig, "sidebar_color", newT->sbColor);
++        configGetColor(themeConfig, "sidebar_accent_color", newT->sbAccent);
++        if (configGetInt(themeConfig, "sidebar_tint", &intValue) && intValue >= 0 && intValue <= 128)
++            newT->sbTint = intValue;
++        if (configGetInt(themeConfig, "sidebar_accent_tint", &intValue) && intValue >= 0 && intValue <= 128)
++            newT->sbAccentTint = intValue;
+         if (configGetInt(themeConfig, "category_x", &intValue) && intValue >= 0 && intValue <= 640)
+             newT->catX = intValue;
+         if (configGetInt(themeConfig, "category_y", &intValue) && intValue >= 0 && intValue <= 480)
+diff --git a/src/udpfssupport.c b/src/udpfssupport.c
+index dd9e88b..4962b8e 100644
+--- a/src/udpfssupport.c
++++ b/src/udpfssupport.c
+@@ -702,7 +702,7 @@ static void udpfsLaunchCue(item_list_t *itemList, const char *cueName, config_se
+         return;
+     }
+     // The resolvers leave the path they tried in their buffer, so the message can name it.
+-    if (!cueEnsureEmber(udpfsPrefix, emberElf, sizeof(emberElf))) { // RIPPS2 build 71: or the bundled one
++    if (!cueEnsureEmber(udpfsPrefix, emberElf, sizeof(emberElf))) { // RIPPS2: the drive's own (build 113: none is carried)
+         guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
+         return;
+     }
+diff --git a/src/vcdsupport.c b/src/vcdsupport.c
+index bd34d63..8b00f40 100644
+--- a/src/vcdsupport.c
++++ b/src/vcdsupport.c
+@@ -31,7 +31,7 @@
+ #include "include/lang.h"        // _l + _STR_BDMA_ERR_* (same texts the Settings-screen equip shows)
+ #include "include/textures.h"    // texDiscoverLoad + ERR_BAD_FILE (VCD POPS cover fallback)
+ #include "include/vcdsupport.h"
+-#include "include/ripps2.h" // RIPPS2 build 73: ripps2PopstarterInstall
++#include "include/ripps2.h"
+ #include "include/libview.h" // which list a page is showing (the L3 ring)
+ #include "include/retrogem.h"
+ #include "include/ripps2tr.h" // RIPPS2 build 104: _t
+@@ -913,13 +913,6 @@ int vcdResolvePopstarterFor(const char *devPrefix, const char *prefix, const cha
+         LOG("POPSTARTER: using the game's own launcher %s\n", out);
+         return 1;
+     }
+-    // RIPPS2 build 73: none of the user's own anywhere, so the one RIPPS2 carries goes in this drive's
+-    // POPS folder, beside the games (SMB shares are left alone: nothing is written over the network)
+-    if (strncmp(devPrefix, "smb", 3) != 0) {
+-        snprintf(out, outSize, "%s%s%cPOPSTARTER.ELF", devPrefix, POPS_FOLDER, vcdSep(devPrefix));
+-        if (ripps2PopstarterInstall(out))
+-            return 1;
+-    }
+     out[0] = '\0';
+     return 0;
+ }

@@ -49,10 +49,6 @@ cp -f "$HERE/theme/fonts/ripps2_sleek.ttf" "$SRC/misc/ripps2_sleek.ttf"
 cp -f "$HERE/theme/fonts/ripps2_sleek_bold.ttf" "$SRC/misc/ripps2_sleekbold.ttf"
 cp -f "$HERE/theme/fonts/ripps2_sleek_case.ttf" "$SRC/misc/ripps2_sleekcase.ttf"
 cp -f "$HERE/theme/fonts/ripps2_one.ttf" "$SRC/misc/ripps2_one.ttf"
-# Ember (build 71): Gageformer's PS1 emulator, carried unmodified (gzip here, inflated byte for byte
-# when RIPPS2 installs it) with its licence (elf/ember/LICENSE-BETA.txt)
-gzip -9 -n -c "$HERE/ember/ember.elf" > "$SRC/misc/ember_elf.gz"
-cp -f "$HERE/ember/LICENSE-BETA.txt" "$SRC/misc/ember_licence.txt"
 # RIPFLOW's fonts (build 70): Roboto Condensed and Bold Condensed, Apache-2.0 (theme/fonts/ROBOTO-LICENSE.txt)
 cp -f "$HERE/theme/fonts/ripflow.ttf" "$SRC/misc/ripflow.ttf"
 cp -f "$HERE/theme/fonts/ripflow_bold.ttf" "$SRC/misc/ripflowbold.ttf"
@@ -65,9 +61,7 @@ cp -f "$HERE/bible/SYSTEM.XLF" "$SRC/misc/bible_system.xlf"
 cp -f "$HERE/bible/MX4SIO/SYSTEM.XLF" "$SRC/misc/bible_mx4sio_system.xlf"
 # BIBLE on the HDD (build 73): PS2BBL 1.2.0's HDD build, HSYSTEM.XLF from the same release, unchanged
 cp -f "$HERE/bible/HSYSTEM.XLF" "$SRC/misc/bible_hdd_system.xlf"
-# POPSTARTER (build 73): krHACKen's PS1 launcher, carried as released (elf/popstarter/README.md); RIPPS2
-# writes it to a drive's POPS folder only when the user has no POPSTARTER of their own
-cp -f "$HERE/popstarter/POPSTARTER.ELF" "$SRC/misc/popstarter_elf.bin"
+# Ember and POPSTARTER are the user's own from build 113, found and launched, not carried (elf/ember, elf/popstarter)
 # Neutrino 1.8.0 (build 77): rickgaiser's release folder as a gzip'd tar, AFL-3.0 (elf/neutrino/README.md);
 # RIPPS2 installs it where the user picks when a Neutrino launch finds none
 cp -f "$HERE/neutrino/neutrino-1.8.0.tar.gz" "$SRC/misc/neutrino.tar.gz"

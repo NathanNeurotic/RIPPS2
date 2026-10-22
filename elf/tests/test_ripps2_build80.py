@@ -28,7 +28,8 @@ if '_l(_STR_AUDIO_SETTINGS),\n#ifdef RETROACHIEVEMENTS\n        _l(_STR_RIPPS2_A
     fail.append('Settings must list Achievements right after Audio and open it')
 if 'labels[SETTINGS_PAGE_COUNT + 2]' not in idx:
     fail.append('the Settings index labels must have room for Achievements and Save')
-for act in ('ripps2NeutrinoInstallTo(', 'ripps2PopstarterInstall(', 'ripps2EmberInstall(', 'ripps2BibleManage()',
+# build 113: POPSTARTER and Ember are the user's own (found, not carried), so STATUS installs neither
+for act in ('ripps2NeutrinoInstallTo(', 'ripps2BibleManage()',
             'guiShowNeutrinoDefaults()', 'guiShowPsEmulationSettings()', 'guiShowPopsNetConfig()'):
     if act not in st:
         fail.append('STATUS must reach %s' % act)
@@ -45,12 +46,16 @@ if '{.label = {"RIPPS2", -1}}' in nt or s < 0 or not (nt.index('NETCFG_POPSTARTE
 if not re.search(r'\{\.label = \{" ", -1\}\}\},\s*\{UI_BREAK\},\s*//[^\n]*\n\s*\{UI_BUTTON, NETCFG_OK', nt):
     fail.append('a clear chin row must sit right before the OK button')
 
-# --- Colors and More: Source Name under the glyphs, the Color Theme heading the pickers
+# --- Colors and More: the Color Theme heading the pickers. Build 113 (the user's settings moves): the category rows
+# together with Source Name last, D-pad Glyphs and Button Hints moved to Hints and Glyphs, Show Recents to Game Sources
 cm = table(dia, 'diaColorsConfig')
-order = [cm.index(k) for k in ('UICFG_RIPPS2_GLYPHS', 'UICFG_RIPPS2_SRCNAME', 'UICFG_RIPPS2_HINTS')]
+order = [cm.index(k) for k in ('UICFG_RIPPS2_CATLAYOUT', 'UICFG_RIPPS2_CATBAR', 'UICFG_RIPPS2_CATSWAP', 'UICFG_RIPPS2_TRANSITION', 'UICFG_RIPPS2_SRCNAME')]
 if order != sorted(order):
-    fail.append('Source Name must follow the D-pad glyphs')
-split = cm.index('{UI_SPLITTER}', cm.index('UICFG_RIPPS2_RECENTS'))
+    fail.append('Colors and More: the category rows together, Source Name after them')
+for gone in ('UICFG_RIPPS2_GLYPHS', 'UICFG_RIPPS2_HINTS,', 'UICFG_RIPPS2_RECENTS'):
+    if gone in cm:
+        fail.append('Colors and More still has %s (build 113 moved it)' % gone)
+split = cm.index('{UI_SPLITTER}', cm.index('UICFG_RIPPS2_SRCNAME'))
 if not (split < cm.index('UICFG_RIPPS2_PALETTE') < cm.index('UICFG_TXTCOL')):
     fail.append('the Color Theme must head the colour pickers')
 

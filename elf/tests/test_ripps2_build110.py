@@ -38,7 +38,7 @@ need(sb, (('#define SB_SNAP_FILE  "RIPPS2.LST"', "the list is RIPPS2.LST, beside
           ('#define SB_SNAP_MAGIC "RIPLST01"', "build 109's MMCE lists still read"),
           ('h.itemSize == (int)sizeof(base_game_info_t)', 'a list written by another build (another entry size) is not used'),
           ('if (sum == snap->sum)\n        return;', 'an unchanged list is not written again'),
-          ('if (!readOk || !gEnableWrite || gamecount > SB_SNAP_MAX)', 'a failed read or Write Operations Off writes nothing'),
+          ('if (!readOk || !gEnableWrite || !gRipps2FastCache || gamecount > SB_SNAP_MAX)', 'a failed read, Write Operations Off (or Fast Cache off, build 113) writes nothing'),
           ('remove(path);', 'a source with no games left drops its list')), 'supportbase.c')
 show = body(sb, 'int sbSnapShow(')
 if 'if (snap->tried)\n        return 0;\n    snap->tried = 1;' not in show:

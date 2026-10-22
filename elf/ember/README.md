@@ -1,13 +1,18 @@
-# Ember (bundled)
+# Ember (found, not carried)
 
 **Ember** is a PlayStation 1 emulator for the PlayStation 2 by **Gageformer**.
 Official releases: <https://github.com/Gageformer/Ember/releases>
 
-RIPPS2 carries the Beta-2 build (`ember.elf`, SHA-256
-`94f8b2576010405e2f7b90c4a1adde073ddaebe2d0aec34e0bc2be7951d34295`, as released) unmodified, under
-the Ember Public Beta Testing Licence (`LICENSE-BETA.txt`, beside this file). The build compresses it
-into RIPPS2.ELF; when an Ember game is launched from a drive whose `EMBER` folder has no `ember.elf`,
-RIPPS2 writes the identical file there with `LICENSE-BETA.txt` beside it.
+RIPPS2 launches Ember games with your own copy of Ember: `ember.elf` in the `EMBER` folder at the top of
+the drive the games are on (`EMBER/games/<Title>/` beside it), with your own PS1 BIOS as `EMBER/bios.bin`.
+When a launch finds no `ember.elf` there, RIPPS2 says so and names the path it looked at. STATUS on the
+START menu shows whether the first drive has one.
 
-Ember contains no PlayStation BIOS and no game data. Add your own PS1 BIOS as `EMBER/bios.bin`.
-RIPPS2 is free, and Ember is credited in its About screen with the link above.
+From build 71 to build 112 RIPPS2.ELF carried the Beta-2 build unmodified, under the Ember Public Beta
+Testing Licence, and wrote it into a drive's `EMBER` folder the first time an Ember game was launched
+from there. Build 113 stopped carrying it (the ELF is smaller, and the copy you get from Ember's releases
+is always the current one). The last commit with the bundled build and its licence is in this
+repository's history.
+
+Ember contains no PlayStation BIOS and no game data. RIPPS2 credits Ember in its About screen with the
+link above.

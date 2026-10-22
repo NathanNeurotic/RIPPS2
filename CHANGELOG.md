@@ -1,5 +1,52 @@
 # RIPPS2 changelog
 
+## Build 113 (beta, v1.1.3-beta), changes since build 112
+
+The user's plans of 10/21 and 10/22: the Adapt sidebar, the legacy theme key, cutting the launchers RIPPS2 carried
+but the user already has, the settings moves, and the RIPDISC hold.
+
+### The category sidebar
+- **Category Layout** (Colors and More: Theme, Across the Top, Sidebar; a theme sets `category_layout=sidebar`): the
+  three categories as glyphs down the theme's side bar, in Adapt's frosted bar by default. On Launch Disc and Memory
+  Files the bar runs the full height. No page titles anywhere: each category's name is the first item of its drawer.
+- **Left on a list** (the cancel button on Launch Disc and Memory Files) focuses the glyphs: the game is let go and the
+  hints are the sidebar's (Select, Back). Up and Down open each category's drawer beside its glyph; Cross enters it
+  and Cross on an item goes there. Storage's drawer lists the sources (the two HDD pages read HDD Games (exFAT) and
+  HDD Games (APA)); Circle on Storage opens it on the source you are on. The drawer is frosted like the bar and as
+  wide as its longest name.
+- The Adapt pack (edition 113) turns it on: `categories=three`, `category_layout=sidebar`, `sidebar_bar=pages`.
+
+### Themes made for OPL
+- **`categories=three` or `storage`.** A theme made for Open PS2 Loader (none of RIPPS2's keys) shows Storage alone:
+  no category bar, Launch Disc and Memory Files first in the START menu, the cancel button back to Storage from
+  either, L1 / R1 turning the list's pages as in OPL. A RIPPS2 theme from before the key keeps the three.
+
+### Smaller ELF: the launchers you already have
+- **Ember and POPSTARTER are found, not carried.** RIPPS2.elf no longer carries Ember Beta-2 or POPSTARTER (RIPPS2.elf
+  goes from 3,197,444 to 2,738,756 bytes). A PS1 game starts with your own copy, found where RIPPS2 always looked
+  (Ember in the drive's EMBER folder; POPSTARTER at the Settings path, in POPS, APPS or the top folder, as the game's
+  own XX.<name>.ELF, or on the memory cards), and a missing one names the path it looked at. STATUS lost its two
+  install rows. Neutrino and BIBLE are still carried. Both stay credited in About and the README.
+
+### Settings, moved where they belong
+- **Interface:** Hints and Glyphs (from Controller Settings) with Button Hints and D-pad Glyphs in it; Video Mode in
+  the Display section with Widescreen and the offsets. Language is on Interface only.
+- **Colors and More:** the category rows together (Category Layout, Category Bar, Category Order, Page Transition,
+  Source Name) over the colours.
+- **Game Sources:** Show Recents beside the Starred Games rows; BDM / ETH Prefix Path and HDD Spindown; and **Cache**:
+  Fast Cache (each source's saved list, on by default; off reads every list from its source first, as before build
+  110), Cache Game List (HDD APA) and Automatic Refresh, each saying what it does.
+- **Game Launching:** In-Game Menu (with IGR Path, RIPSHOT and Develop Shots), GSM Defaults (only here now), and the
+  BDM / HDD / SMB read-ahead caches (they act while a game runs, not on the lists). BOOT LOCK still fills an empty IGR
+  Path.
+
+### RIPDISC
+- **The SELECT hold fills notches.** Twelve soft notches around the button fill clockwise as you hold, the one filling
+  fading in, and HOLD sits clear of them (the old one-pixel ring wobbled and ran into the word).
+
+### Underneath
+- The new words in all 33 languages.
+
 ## Build 112 (beta, v1.1.2-beta), changes since build 111
 
 The user (10/21): "i think were using the error red screen menu instead of the standard osdsys menu theme ... make it so you can select one other or both ripped ... make the osdsys one the default".
