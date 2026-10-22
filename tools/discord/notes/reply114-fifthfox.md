@@ -1,0 +1,5 @@
+<@1360021931059056731> thanks for the build 112 rundown (SCPH-39001, the iLink HD-338, MMCE, MX4SIO and APA on the GameStar SSD). Here is what build 114 does with it:
+- **Neutrino and POPSTARTER from iLink:** RiptOPL just fixed exactly this upstream (iLink logs back in after the IOP reset, RiptOPL's own iLink driver inside the Neutrino bundle, POPSTARTER's iLink after its reset). 114 merges that first.
+- **USB, MX4SIO and iLink slow to show:** All Games will list every game from a saved master list before a single drive answers, and the upstream merge also drops the USB, MX4SIO and iLink discovery waits.
+- **Size:** measured on 113: Neutrino, BIBLE and OPL's old background are 666 KB of the 2.7 MB and none of them compress. A **RIPPS2-lite.elf** of about 2 MB will ship beside the full one, using the Neutrino and POPSTARTER you already keep on your card.
+- **Launchers found once, used every time:** RIPPS2 searches your drives for POPSTARTER, the POPS files, Ember and Neutrino, remembers where each one is, and uses that spot on every launch. Settings > Game Sources > Cache shows Found or Not found for each.
