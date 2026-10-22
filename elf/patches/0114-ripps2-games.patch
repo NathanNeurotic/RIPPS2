@@ -14331,10 +14331,10 @@ index a10c426..54ecd88 100644
  extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar
 diff --git a/include/ripps2seance.h b/include/ripps2seance.h
 new file mode 100644
-index 0000000..48ab339
+index 0000000..e451104
 --- /dev/null
 +++ b/include/ripps2seance.h
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,37 @@
 +#ifndef __RIPPS2_SEANCE_H
 +#define __RIPPS2_SEANCE_H
 +
@@ -14368,6 +14368,8 @@ index 0000000..48ab339
 +int seanceSearch(void);                                // walk the started drives for all of them, with its screen; how many are known after
 +int seanceOffer(int what);                             // a launch found none: ask, then search; 1 when it is known now
 +const char *seanceName(int what);
++struct _item_list_t;
++void seancePreLaunch(struct _item_list_t *support, int id); // opl.c, just before itemLaunch: Ember's files beside an Ember game
 +
 +#endif
 diff --git a/include/system.h b/include/system.h
@@ -82478,10 +82480,10 @@ index ecfafb2..cd8832a 100644
  // RIPPS2 build 98: what became of MX4SIO, for STATUS: -3 off in Game Sources, -2 its driver not asked for yet, -1 the
  // driver would not load (*err: its code), 0 loaded with no SD card answering, 1 mounted (root: where)
 diff --git a/src/cuesupport.c b/src/cuesupport.c
-index 72b562e..247b32f 100644
+index 72b562e..2639ae1 100644
 --- a/src/cuesupport.c
 +++ b/src/cuesupport.c
-@@ -17,12 +17,14 @@
+@@ -17,6 +17,7 @@
  #include <unistd.h>
  #include <errno.h>  // errno/ENOENT in the absent-vs-contended split, mirroring vcdScanOpenDir
  #include <malloc.h> // memalign -- the published list matches sbReadList's alignment
@@ -82489,31 +82491,7 @@ index 72b562e..247b32f 100644
  
  #include "include/opl.h"        // pulls <dirent.h> (opendir/readdir/DIR) + strcasecmp, like vcdsupport.c
  #include "include/ioman.h"      // LOG
- #include "include/textures.h"   // texDiscoverLoad + ERR_BAD_FILE (folder cover fallback)
- #include "include/vcdsupport.h" // vcdFillGameList + vcdSortKey -- the POPSTARTER half of the union
- #include "include/cuesupport.h"
-+#include "include/ripps2seance.h" // RIPPS2 build 114: SEANCE (weak: NULL in the host harnesses)
- #include "include/retrogem.h"
- 
- // Path separator for a device prefix: '\\' for SMB (its prefix ends in a backslash), else '/'.
-@@ -53,10 +55,15 @@ static int cueResolveEmberFile(const char *devPrefix, const char *fileName, char
- 
-     snprintf(out, outSize, "%s%s%c%s", devPrefix, cueEmberFolder(), cueSep(devPrefix), fileName);
- 
-+    // RIPPS2 build 114: SEANCE, during a launch only: one found on another drive is offered to be copied here, and
-+    // every find is remembered
-+    int what = !strcmp(fileName, EMBER_ELF_NAME) ? SEANCE_EMBER : SEANCE_EMBER_BIOS;
-     fd = open(out, O_RDONLY);
-     if (fd < 0)
--        return 0;
-+        return seanceHook != NULL && seanceHook(what, SEANCE_MODE_BRING, devPrefix, out, outSize);
-     close(fd);
-+    if (seanceHook != NULL)
-+        seanceHook(what, SEANCE_MODE_NOTE, devPrefix, out, outSize);
-     return 1;
- }
- 
-@@ -65,12 +72,6 @@ int cueResolveEmber(const char *devPrefix, char *out, int outSize)
+@@ -65,12 +66,6 @@ int cueResolveEmber(const char *devPrefix, char *out, int outSize)
      return cueResolveEmberFile(devPrefix, EMBER_ELF_NAME, out, outSize);
  }
  
@@ -82526,7 +82504,7 @@ index 72b562e..247b32f 100644
  int cueResolveEmberBios(const char *devPrefix, char *out, int outSize)
  {
      return cueResolveEmberFile(devPrefix, EMBER_BIOS_NAME, out, outSize);
-@@ -102,9 +103,8 @@ int cueNameLaunchable(const char *name)
+@@ -102,9 +97,8 @@ int cueNameLaunchable(const char *name)
      if (!strcmp(name, "."))
          return 0;
  
@@ -82538,7 +82516,7 @@ index 72b562e..247b32f 100644
      if (strpbrk(name, "/:\\") != NULL)
          return 0;
  
-@@ -121,6 +121,158 @@ int cueNameLaunchable(const char *name)
+@@ -121,6 +115,158 @@ int cueNameLaunchable(const char *name)
  // strcasecmp is.
  static const char *const cueDiscExts[] = {".cue", ".exe", ".bin"};
  
@@ -82697,7 +82675,7 @@ index 72b562e..247b32f 100644
  // 1 when d_name (length len) carries one of Ember's launchable image extensions.
  static int cueNameIsDiscImage(const char *name, int len)
  {
-@@ -163,6 +315,16 @@ static int cueEntryIsGame(const char *devPrefix, const char *gamesDir, const str
+@@ -163,6 +309,16 @@ static int cueEntryIsGame(const char *devPrefix, const char *gamesDir, const str
      if (d == NULL) {
          if (errno == 0 || errno == ENOENT || errno == ENOTDIR || errno == EPERM)
              return 0;
@@ -84005,7 +83983,7 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..460275c 100644
+index 13c78db..82656de 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -50,6 +50,7 @@
@@ -84016,17 +83994,18 @@ index 13c78db..460275c 100644
  #include "include/ripps2shot.h" // RIPPS2 build 108: RIPSHOT's settings
  #ifdef RETROACHIEVEMENTS
  #include "include/rabadge.h" // RA: "tracked game" badge in the list
-@@ -523,7 +524,9 @@ static void itemExecSelect(struct menu_item *curMenu)
+@@ -523,7 +524,10 @@ static void itemExecSelect(struct menu_item *curMenu)
                  int launchView = support->itemGetView != NULL ? support->itemGetView(support, launchId) : libListViewActive(support);
                  if (launchView != LIB_VIEW_PS1)
                      guiShowGameID(gameIdStartup);
 +                gSeanceLaunching = 1; // build 114: SEANCE may look up, search and copy for this launch
++                seancePreLaunch(support, launchId);
                  support->itemLaunch(support, launchId, configSet);
 +                gSeanceLaunching = 0;
                  ripps2LaunchAborted();
              }
          } else {
-@@ -3649,7 +3652,10 @@ static void _loadConfig()
+@@ -3649,7 +3653,10 @@ static void _loadConfig()
      const char *temp;
      char cardHome[16], prevHome[256], redirect[256];
      int fromCard = 0;
@@ -84038,7 +84017,7 @@ index 13c78db..460275c 100644
      // RIPPS2 build 100: RIPPS2's own save on a memory card first, unless a Custom Settings Path points elsewhere
      if ((lscstatus & CONFIG_OPL) && !readConfigPathRedirect(redirect, sizeof(redirect)) &&
          ripps2CardSettingsHome(cardHome, sizeof(cardHome), 1)) {
-@@ -5730,6 +5736,7 @@ static void init(void)
+@@ -5730,6 +5737,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
      ioNameAction((void *)&deferredAudioInit, "SOUND LOAD");
@@ -84046,7 +84025,7 @@ index 13c78db..460275c 100644
      menuInit();
  
      startPads();
-@@ -5885,6 +5892,9 @@ static void miniInit(int mode)
+@@ -5885,6 +5893,9 @@ static void miniInit(int mode)
      configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd)
  
      ioInit();
@@ -84210,10 +84189,10 @@ index ce09083..bdab331 100644
  {
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
 new file mode 100644
-index 0000000..85516f7
+index 0000000..bc1d513
 --- /dev/null
 +++ b/src/ripps2seance.c
-@@ -0,0 +1,589 @@
+@@ -0,0 +1,632 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -84262,6 +84241,11 @@ index 0000000..85516f7
 +#include "include/config.h"
 +#include "include/supportbase.h"
 +#include "include/bdmsupport.h"
++#include "include/iosupport.h"
++#include "include/libview.h"
++#include "include/favsupport.h"
++#include "include/mixsupport.h"
++#include "include/cuesupport.h"
 +#include "include/ripps2.h"
 +#include "include/ripps2seance.h"
 +#include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
@@ -84785,6 +84769,44 @@ index 0000000..85516f7
 +    return 1;
 +}
 +
++// Just before a launch (opl.c): an Ember game on a BDM drive (USB, the exFAT HDD, MX4SIO, iLink) whose EMBER folder lacks
++// ember.elf or bios.bin is offered the ones SEANCE found on another drive, copied there first. RiptOPL's launch legs then
++// find them where they always look; they are not touched (their host harnesses copy them word for word). A no, or none
++// found, and the launch goes on and says what is missing, as it always has.
++void seancePreLaunch(item_list_t *support, int id)
++{
++    static const struct
++    {
++        int what;
++        const char *file;
++    } need[2] = {{SEANCE_EMBER, EMBER_ELF_NAME}, {SEANCE_EMBER_BIOS, EMBER_BIOS_NAME}};
++    char path[64];
++    int mode, kind = -1, i;
++
++    if (support == NULL)
++        return;
++    mode = support->mode;
++    if (mode == MIX_MODE) {
++        kind = mixGetItemKind(id);
++        mode = mixGetItemSourceMode(id);
++    } else if (mode == FAV_MODE) {
++        kind = favGetItemKind(id);
++        mode = favGetItemSourceMode(id);
++    } else if (support->itemGet != NULL) {
++        int view = support->itemGetView != NULL ? support->itemGetView(support, id) : libListViewActive(support);
++        const base_game_info_t *game = view == LIB_VIEW_PS1 ? (const base_game_info_t *)support->itemGet(support, id) : NULL;
++        if (game != NULL && cueIsCueEntry(game))
++            kind = FAV_KIND_CUE;
++    }
++    if (kind != FAV_KIND_CUE || mode < BDM_MODE || mode > BDM_MODE_LAST)
++        return;
++    for (i = 0; i < 2; i++) {
++        snprintf(path, sizeof(path), "mass%d:/%s/%s", mode - BDM_MODE, cueEmberFolder(), need[i].file);
++        if (!seExists(path) && !seBring(need[i].what, path))
++            return;
++    }
++}
++
 +int seanceHook(int what, int mode, const char *devPrefix, char *path, int pathSize)
 +{
 +    (void)devPrefix;
@@ -84804,7 +84826,7 @@ index 0000000..85516f7
 +    return 0;
 +}
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index f2c48c4..481becb 100644
+index f2c48c4..84dadb5 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -3,6 +3,11 @@
@@ -84848,29 +84870,64 @@ index f2c48c4..481becb 100644
  static st_row_t stRows[ST_ROWS];
  static int stCount;
  
-@@ -124,80 +133,51 @@ static int stFound(char *out, int size, const char *const *paths, int n, int fol
-     return found;
+@@ -109,95 +118,51 @@ static int stDriveThere(const char *root) // "mass0:/", "mc0:/"
+     return 1;
  }
  
--// Looks once on the way in and after anything that writes; a frame says so, the cards take a moment
--static void stScan(void)
+-// "Installed: mass0:/neutrino, mc0:/neutrino" from the places that have it; how many found
+-static int stFound(char *out, int size, const char *const *paths, int n, int folderOnly)
 +// "12.3 GB" from 512-byte sectors
 +static void stSize(u32 sectors, char *out, int size)
  {
--    char line[112], custom[300];
--    int n;
--
--    guiRenderTextScreen(_t("STATUS: looking for RIPPS2's homebrew"));
--    const char *mass0Name = bdmSlotDriveName(0); // build 99: mass0: by its driver (the internal exFAT HDD is no USB)
--    if (mass0Name == NULL)
--        mass0Name = "USB";
--    stCount = 0;
+-    int i, found = 0, len = snprintf(out, size, _t("Installed: "));
+-    for (i = 0; i < n && len < size; i++) {
+-        if (paths[i] == NULL || paths[i][0] == '\0' || !stExists(paths[i]))
+-            continue;
+-        const char *slash = folderOnly ? strrchr(paths[i], '/') : NULL;
+-        int show = slash != NULL ? (int)(slash - paths[i]) : (int)strlen(paths[i]);
+-        len += snprintf(out + len, size - len, "%s%.*s", found ? ", " : "", show, paths[i]);
+-        found++;
+-    }
+-    return found;
 +    unsigned long long mb = (unsigned long long)sectors / 2048;
 +    if (mb >= 1024)
 +        snprintf(out, size, "%u.%u GB", (unsigned)(mb / 1024), (unsigned)(mb % 1024 * 10 / 1024));
 +    else
 +        snprintf(out, size, "%u MB", (unsigned)mb);
 +}
++
++// A launcher's line: where SEANCE knows it is, else a place a launch already looks (then SEANCE remembers it)
++static void stLauncher(int what, const char *const *probe, int nProbe, const char *none)
++{
++    char where[160], line[224];
++    int i, state = seanceState(what, where, sizeof(where));
++    for (i = 0; state <= 0 && i < nProbe; i++)
++        if (probe[i] != NULL && probe[i][0] != '\0' && stExists(probe[i])) {
++            seanceNote(what, probe[i]);
++            state = seanceState(what, where, sizeof(where));
++        }
++    if (state > 0)
++        snprintf(line, sizeof(line), _t("Found: %s"), where);
++    else
++        snprintf(line, sizeof(line), "%s", none);
++    st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
++    r->ok = state > 0;
+ }
+ 
+ // Looks once on the way in and after anything that writes; a frame says so, the cards take a moment
+ static void stScan(void)
+ {
+-    char line[112], custom[300];
+-    int n;
++    char line[160], custom[300];
++    int i;
+ 
+-    guiRenderTextScreen(_t("STATUS: looking for RIPPS2's homebrew"));
+-    const char *mass0Name = bdmSlotDriveName(0); // build 99: mass0: by its driver (the internal exFAT HDD is no USB)
+-    if (mass0Name == NULL)
+-        mass0Name = "USB";
++    guiRenderTextScreen(_t("STATUS: looking at the drives and the homebrew"));
+     stCount = 0;
  
 -    // NEUTRINO: the path in Settings, then the places a launch looks (the game's drive, the cards);
 -    // config/system.toml goes in last, so a folder with it is a whole install
@@ -84888,16 +84945,7 @@ index f2c48c4..481becb 100644
 -                memmove(c, c + 19, strlen(c + 19) + 1);
 -            while ((c = strstr(line, "/neutrino.elf")) != NULL)
 -                memmove(c, c + 13, strlen(c + 13) + 1);
-+// A launcher's line: where SEANCE knows it is, else a place a launch already looks (then SEANCE remembers it)
-+static void stLauncher(int what, const char *const *probe, int nProbe, const char *none)
-+{
-+    char where[160], line[224];
-+    int i, state = seanceState(what, where, sizeof(where));
-+    for (i = 0; state <= 0 && i < nProbe; i++)
-+        if (probe[i] != NULL && probe[i][0] != '\0' && stExists(probe[i])) {
-+            seanceNote(what, probe[i]);
-+            state = seanceState(what, where, sizeof(where));
-         }
+-        }
 -        st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : _t("Not installed. A game that needs it offers RIPPS2's copy, or install it here."), NULL);
 -        r->ok = n > 0;
 -    }
@@ -84915,14 +84963,7 @@ index f2c48c4..481becb 100644
 -    }
 -    stAdd(ROW_ACTION, ACT_POPS_SETTINGS, _t("PS1 SETTINGS"), _t("POPSTARTER and Ember"));
 -    stAdd(ROW_ACTION, ACT_POPS_NET, _t("POPSTARTER NETWORK"), _t("its own IP and SMB files"));
-+    if (state > 0)
-+        snprintf(line, sizeof(line), _t("Found: %s"), where);
-+    else
-+        snprintf(line, sizeof(line), "%s", none);
-+    st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
-+    r->ok = state > 0;
-+}
- 
+-
 -    // EMBER: beside the games, in the drive's EMBER folder
 -    stAdd(ROW_HEAD, ACT_NONE, "EMBER", "Gageformer");
 -    {
@@ -84933,12 +84974,7 @@ index f2c48c4..481becb 100644
 -        st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, n ? line : none, NULL);
 -        r->ok = n > 0;
 -    }
-+// Looks once on the way in and after anything that writes; a frame says so, the cards take a moment
-+static void stScan(void)
-+{
-+    char line[160], custom[300];
-+    int i;
- 
+-
 -    // BIBLE: what starts at power on is MANAGE's to show, card by card
 -    stAdd(ROW_HEAD, ACT_NONE, "BIBLE", _t("PS2BBL 1.2.0 for RIPPS2"));
 -    {
@@ -84948,9 +84984,7 @@ index f2c48c4..481becb 100644
 -        r->ok = locked;
 -    }
 -    stAdd(ROW_ACTION, ACT_BIBLE_MANAGE, _t("MANAGE"), _t("boot loader, card by card"));
-+    guiRenderTextScreen(_t("STATUS: looking at the drives and the homebrew"));
-+    stCount = 0;
- 
+-
 -    // DRIVES (build 98): every block device RIPPS2 sees, by its driver, and what became of MX4SIO, so a tester can read
 -    // out what a console found (MX4SIO went missing on hardware, and PCSX2 has none)
 +    // DRIVES (build 98; build 114 first, with the space each says it has): every block device RIPPS2 sees, by its driver,
@@ -84966,7 +85000,7 @@ index f2c48c4..481becb 100644
          for (i = 0; i < 8; i++) {
              int t = bdmSlotDeviceType(i);
              if (t < -1)
-@@ -206,6 +186,30 @@ static void stScan(void)
+@@ -206,6 +171,30 @@ static void stScan(void)
              st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
              r->ok = 1;
          }
@@ -84997,7 +85031,7 @@ index f2c48c4..481becb 100644
          m = bdmMx4sioReport(&err, root, sizeof(root));
          if (m == 1)
              snprintf(line, sizeof(line), _t("MX4SIO: the SD card is %s"), root);
-@@ -220,6 +224,55 @@ static void stScan(void)
+@@ -220,6 +209,55 @@ static void stScan(void)
          st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
          r->ok = m == 1;
      }
@@ -85053,7 +85087,7 @@ index f2c48c4..481becb 100644
  
      // SOUNDS (build 95): none are built in any more, so say where they come from
      stAdd(ROW_HEAD, ACT_NONE, _t("SOUNDS"), _t("AUDIO folder"));
-@@ -236,6 +289,22 @@ static void stScan(void)
+@@ -236,6 +274,22 @@ static void stScan(void)
      stAdd(ROW_ACTION, ACT_SOUNDS_RIP, _t("RIP THIS CONSOLE'S SOUNDS"), _t("from its BIOS, into AUDIO"));
  }
  
@@ -85076,7 +85110,7 @@ index f2c48c4..481becb 100644
  static int stRowH(const st_row_t *r)
  {
      return r->kind == ROW_HEAD ? ST_HEAD_H : r->kind == ROW_STATUS ? ST_LINE_H : ST_ROW_H;
-@@ -445,6 +514,14 @@ void ripps2Status(void)
+@@ -445,6 +499,14 @@ void ripps2Status(void)
                      ripps2RipBiosSoundsDialog();
                      rescan = 1;
                      break;
