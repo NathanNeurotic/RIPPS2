@@ -10419,7 +10419,7 @@ z1|)Oi{SJpAnfX78HAufmQ)Io!Mv-BWEslJQT162N85L=XY!}%fvP)#Q$R3fsA~P&i
 Hspb7&p}~h#
 
 diff --git a/Makefile b/Makefile
-index 31e61cd..c2d5f05 100644
+index 31e61cd..92f0cb4 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -138,9 +138,9 @@ ifneq ($(GIT_TAG),latest)
@@ -10443,7 +10443,42 @@ index 31e61cd..c2d5f05 100644
  	# unused icons - up down l2 r2
  
  # RIPPS2: glass info panel and PS2 selector mark (gfx/ripps2_*.png, copied in by RIPPS2's build.sh)
-@@ -436,7 +436,7 @@ ifeq ($(RETROACHIEVEMENTS),1)
+@@ -185,6 +185,11 @@ PNG_ASSETS += glyph_standard_cross glyph_standard_circle glyph_standard_square g
+ ifeq ($(RETROACHIEVEMENTS),1)
+ PNG_ASSETS += ra_mark
+ endif
++# RIPPS2 build 114: RIPPS2-lite.elf (RIPPS2_LITE=1) leaves out OPL's own theme background, which only the built-in OPL
++# look draws (it is a 77 KB PNG that packs no smaller)
++ifeq ($(RIPPS2_LITE),1)
++PNG_ASSETS := $(filter-out incebtion,$(PNG_ASSETS))
++endif
+ 
+ GFX_OBJS = $(PNG_ASSETS:%=%_png.o) poeveticanew.o
+ 
+@@ -201,6 +206,11 @@ AUDIO_OBJS =
+ # icon.sys names list.icn, copy.icn and del.icn; all three are the same artwork, so ONE blob is
+ # embedded and util.c writes it out under all three names (see saveIconName in src/util.c).
+ MISC_OBJS =	icon_sys.o save_icn.o ripps2_icn.o icon_sys_A.o icon_sys_J.o icon_sys_C.o bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o conf_theme_OPL.o theme_coverflow.o theme_ripgrid.o ripps2_font.o ripps2_sleek.o ripps2_sleekbold.o ripps2_sleekcase.o ripps2_one.o ripflow.o ripflowbold.o neutrino_tgz.o
++# RIPPS2 build 114: RIPPS2-lite.elf carries neither BIBLE's three KELFs (342 KB) nor Neutrino's tar (247 KB): for memory
++# card users, under 2 MB. It uses the Neutrino already installed where it looks; BIBLE installs once from the full ELF.
++ifeq ($(RIPPS2_LITE),1)
++MISC_OBJS := $(filter-out bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o neutrino_tgz.o,$(MISC_OBJS))
++endif
+ 
+ TRANSLATIONS = Albanian Arabic Bulgarian Cebuano Croatian Czech Danish Dutch Filipino French \
+ 	Galician German Greek Hungarian Indonesian Italian Japanese Korean Laotian Persian Polish Portuguese \
+@@ -344,6 +354,10 @@ ifeq ($(RIPPS2_IO_STALL_TEST),1)
+   EE_CFLAGS += -DRIPPS2_IO_STALL_TEST
+ endif
+ 
++ifeq ($(RIPPS2_LITE),1)
++  EE_CFLAGS += -DRIPPS2_LITE=1
++endif
++
+ ifeq ($(INGAMEDIAG),1)
+   ifeq ($(RETROACHIEVEMENTS),1)
+     $(error INGAMEDIAG=1 is not supported with RETROACHIEVEMENTS=1)
+@@ -436,7 +450,7 @@ ifeq ($(RETROACHIEVEMENTS),1)
    RATLS_ROOTS = gtsr1 gtsr2 gtsr3 gtsr4 isrgrootx1 isrgrootx2
    EE_OBJS += $(MBEDTLS_OBJS) $(RATLS_ROOTS:%=$(EE_OBJS_DIR)ratls_root_%.o)
  endif
@@ -10452,7 +10487,7 @@ index 31e61cd..c2d5f05 100644
  
  # To help linking getting rid off unused functions and data
  EE_CFLAGS += -fdata-sections -ffunction-sections
-@@ -544,6 +544,8 @@ clean:	download_lwNBD
+@@ -544,6 +558,8 @@ clean:	download_lwNBD
  	$(MAKE) -C modules/network/httpclient clean
  	echo " -bdm"
  	$(MAKE) -C modules/bdm clean
@@ -10461,7 +10496,7 @@ index 31e61cd..c2d5f05 100644
  	echo " -atad (ata_bd)"
  	$(MAKE) -C modules/hdd/atad clean
  	echo " -xhdd"
-@@ -589,8 +591,9 @@ realclean: clean
+@@ -589,8 +605,9 @@ realclean: clean
  
  rebuild: clean all
  
@@ -10472,7 +10507,7 @@ index 31e61cd..c2d5f05 100644
  
  sim: $(EE_BIN_PACKED)
  	PCSX2 --elf=$(PWD)/$< --nodisc --nogui
-@@ -898,12 +901,25 @@ $(EE_ASM_DIR)bdmfs_fatfs.c: $(PS2SDK)/iop/irx/bdmfs_fatfs.irx | $(EE_ASM_DIR)
+@@ -898,12 +915,25 @@ $(EE_ASM_DIR)bdmfs_fatfs.c: $(PS2SDK)/iop/irx/bdmfs_fatfs.irx | $(EE_ASM_DIR)
  $(EE_ASM_DIR)iLinkman.c: $(PS2SDK)/iop/irx/iLinkman.irx | $(EE_ASM_DIR)
  	$(BIN2C) $< $@ $(*F)_irx
  
@@ -10499,7 +10534,7 @@ index 31e61cd..c2d5f05 100644
  	$(BIN2C) $< $@ $(*F)_irx
  
  $(EE_ASM_DIR)mx4sio_bd.c: $(PS2SDK)/iop/irx/mx4sio_bd.irx | $(EE_ASM_DIR)
-@@ -913,7 +929,7 @@ else
+@@ -913,7 +943,7 @@ else
  $(EE_ASM_DIR)usbmass_bd.c: $(PS2SDK)/iop/irx/usbmass_bd_mini.irx | $(EE_ASM_DIR)
  	$(BIN2C) $< $@ $(*F)_irx
  
@@ -10508,7 +10543,7 @@ index 31e61cd..c2d5f05 100644
  	$(BIN2C) $< $@ $(*F)_irx
  
  $(EE_ASM_DIR)mx4sio_bd.c: $(PS2SDK)/iop/irx/mx4sio_bd_mini.irx | $(EE_ASM_DIR)
-@@ -1364,6 +1380,7 @@ INTERNAL_LANGUAGE_H = include/lang_autogen.h
+@@ -1364,6 +1394,7 @@ INTERNAL_LANGUAGE_H = include/lang_autogen.h
  LANG_COMPILER = tools/lang_compiler.py
  
  languages: | download_lng $(ENGLISH_TEMPLATE_YML) $(TRANSLATIONS_YML) $(ENGLISH_LNG) $(TRANSLATIONS_LNG) $(INTERNAL_LANGUAGE_C) $(INTERNAL_LANGUAGE_H)
@@ -82881,6 +82916,65 @@ index 2600747..12722ca 100644
      &favGetConfig, &favGetImage, &favCleanUp, &favShutdown, &favCheckVMC, &favGetIconId,
 -    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &favGetRowView, NULL, &favSaveCueSettings, &favGetPs1SaveDir};
 +    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &favGetRowView, NULL, &favSaveCueSettings, &favGetPs1SaveDir, &favCreateVMC};
+diff --git a/src/fntsys.c b/src/fntsys.c
+index d59e71c..4b4e05d 100644
+--- a/src/fntsys.c
++++ b/src/fntsys.c
+@@ -19,6 +19,45 @@
+ #include <ft2build.h>
+ 
+ #include FT_FREETYPE_H
++#include FT_MODULE_H
++
++// RIPPS2 build 114: FT_Init_FreeType adds every module the library was built with, and so links them all: about 640 KB
++// of the ELF's 6.8 MB. RIPPS2 reads TrueType (its faces, the themes', the language fonts) and, in the full ELF, CFF
++// for an OpenType font_CJK.otf. The classes are the library's own; each begins with its FT_Module_Class.
++extern const FT_Module_Class autofit_module_class;
++extern const FT_Module_Class tt_driver_class;
++extern const FT_Module_Class sfnt_module_class;
++extern const FT_Module_Class ft_smooth_renderer_class;
++#ifndef RIPPS2_LITE
++extern const FT_Module_Class cff_driver_class;
++extern const FT_Module_Class psaux_module_class;
++extern const FT_Module_Class psnames_module_class;
++extern const FT_Module_Class pshinter_module_class;
++#endif
++FT_Memory FT_New_Memory(void); // ftsystem.c, as FT_Init_FreeType uses it
++
++static FT_Error fntNewLibrary(FT_Library *library)
++{
++    static const FT_Module_Class *const modules[] = {
++        &autofit_module_class, &tt_driver_class,
++#ifndef RIPPS2_LITE
++        &cff_driver_class, &psaux_module_class, &psnames_module_class, &pshinter_module_class,
++#endif
++        &sfnt_module_class, &ft_smooth_renderer_class};
++    FT_Memory memory = FT_New_Memory();
++    FT_Error error;
++    unsigned i;
++
++    if (memory == NULL)
++        return FT_Err_Out_Of_Memory;
++    if ((error = FT_New_Library(memory, library)) != 0)
++        return error;
++    for (i = 0; i < sizeof(modules) / sizeof(modules[0]); i++)
++        if ((error = FT_Add_Module(*library, modules[i])) != 0)
++            return error;
++    FT_Set_Default_Properties(*library);
++    return 0;
++}
+ 
+ extern void *poeveticanew_raw;
+ extern int size_poeveticanew_raw;
+@@ -421,7 +460,7 @@ static int fntLoadSlotLocked(font_t *font, void *buffer, int bufferSize, int own
+ void fntInit()
+ {
+     LOG("FNTSYS Init\n");
+-    int error = FT_Init_FreeType(&font_library);
++    int error = fntNewLibrary(&font_library); // build 114: only the modules RIPPS2 reads
+     if (error) {
+         // just report over the ps2link
+         LOG("FNTSYS Freetype init failed with %x!\n", error);
 diff --git a/src/gui.c b/src/gui.c
 index 2b110ad..df8a522 100644
 --- a/src/gui.c
@@ -84928,11 +85022,94 @@ index 0ec24b6..05d46fb 100644
      {'G', NULL},
      {'H', N_("OPEN PS2 LOADER DEVELOPERS")},
      {'T', "BatRastard - bbsan2k - belek666 - crazyc"},
+diff --git a/src/ripps2boot.c b/src/ripps2boot.c
+index a191468..71e9d7a 100644
+--- a/src/ripps2boot.c
++++ b/src/ripps2boot.c
+@@ -69,12 +69,18 @@ extern unsigned char secrman_irx[];
+ extern unsigned int size_secrman_irx;
+ extern unsigned char secrsif_irx[];
+ extern unsigned int size_secrsif_irx;
++#ifndef RIPPS2_LITE
+ extern unsigned char bible_xlf[];
+ extern unsigned int size_bible_xlf;
+ extern unsigned char bible_mx4sio_xlf[];
+ extern unsigned int size_bible_mx4sio_xlf;
+ extern unsigned char bible_hdd_xlf[]; // build 73: PS2BBL 1.2.0's HDD build (HSYSTEM.XLF), as released
+ extern unsigned int size_bible_hdd_xlf;
++#else
++// build 114: RIPPS2-lite.elf carries no KELFs; MANAGE says so before anything reads these
++static unsigned char bible_xlf[1], bible_mx4sio_xlf[1], bible_hdd_xlf[1];
++static unsigned int size_bible_xlf, size_bible_mx4sio_xlf, size_bible_hdd_xlf;
++#endif
+ // the browser icon RIPPS2 gives its settings folder (util.c): BIBLE's folders wear it too
+ extern unsigned char icon_sys[];
+ extern unsigned int size_icon_sys;
+@@ -1565,6 +1571,14 @@ static void blInstall(void)
+ // BOOT LOADER > MANAGE: what each card starts, and BIBLE to install or repair
+ void ripps2BibleManage(void)
+ {
++#ifdef RIPPS2_LITE
++    // build 114: the lite ELF carries no PS2BBL; the full one installs BIBLE once, and starts from it the same
++    if (1) {
++        guiMsgBoxSound(SFX_MESSAGE);
++        guiMsgBox(_t("RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same."), 0, NULL);
++        return;
++    }
++#endif
+     char msg[900], what[2][64];
+     int boot, removed, port;
+ 
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
-index 459b24e..5651a19 100644
+index 459b24e..ff0ae66 100644
 --- a/src/ripps2ember.c
 +++ b/src/ripps2ember.c
-@@ -174,8 +174,9 @@ int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize)
+@@ -36,8 +36,13 @@
+ */
+ 
+ 
++#ifndef RIPPS2_LITE
+ extern void *neutrino_tgz; // misc/neutrino.tar.gz: elf/neutrino/neutrino-1.8.0.tar.gz
+ extern int size_neutrino_tgz;
++#else
++static unsigned char neutrino_tgz[1]; // build 114: RIPPS2-lite.elf carries no Neutrino
++static int size_neutrino_tgz;
++#endif
+ 
+ #define NEUTRINO_TAR_SIZE 593920 // the tar the build carries, as packed (elf/neutrino/README.md)
+ #define NEUTRINO_LAST     "config/system.toml"
+@@ -138,7 +143,12 @@ static int ripps2NeutrinoUnpack(const char *dir)
+ // build 80: Status installs it where the user picks, outside a launch
+ int ripps2NeutrinoInstallTo(const char *dir)
+ {
++#ifdef RIPPS2_LITE
++    (void)dir;
++    return 0; // build 114: RIPPS2-lite.elf carries no Neutrino (STATUS offers no install there)
++#else
+     return ripps2NeutrinoUnpack(dir);
++#endif
+ }
+ 
+ // No Neutrino anywhere RIPPS2 looks: offer the one it carries, where the user picks. out gets the
+@@ -152,6 +162,17 @@ int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize)
+ 
+     if (!guiIsActive())
+         return 0;
++#ifdef RIPPS2_LITE
++    // build 114: the lite ELF carries none to install: say where one goes
++    (void)root, (void)labels, (void)dirs, (void)list, (void)n, (void)pick, (void)i, (void)d, (void)activePrefix, (void)out, (void)outSize;
++    snprintf(msg, sizeof(msg),
++             _t("This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no "
++                "Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or "
++                "install it once from the full RIPPS2.elf's STATUS."));
++    guiMsgBoxSound(SFX_ERROR);
++    guiMsgBox(msg, 0, NULL);
++    return 0;
++#endif
+     // the game's drive, when it is one RIPPS2 can write (not a network share)
+     if (activePrefix != NULL) {
+         const char *colon = strchr(activePrefix, ':');
+@@ -174,8 +195,9 @@ int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize)
      if (n == 0)
          return 0;
      snprintf(msg, sizeof(msg),
@@ -86636,7 +86813,7 @@ index 0000000..dee0a44
 +    return 0;
 +}
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index f2c48c4..514cc8d 100644
+index f2c48c4..0a81972 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -3,6 +3,11 @@
@@ -86839,7 +87016,7 @@ index f2c48c4..514cc8d 100644
          m = bdmMx4sioReport(&err, root, sizeof(root));
          if (m == 1)
              snprintf(line, sizeof(line), _t("MX4SIO: the SD card is %s"), root);
-@@ -220,6 +207,52 @@ static void stScan(void)
+@@ -220,6 +207,58 @@ static void stScan(void)
          st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
          r->ok = m == 1;
      }
@@ -86873,9 +87050,15 @@ index f2c48c4..514cc8d 100644
 +        stLauncher(SEANCE_EMBER_BIOS, _t("Ember's BIOS"), p, 1);
 +    }
 +    // what the lines mean, once: yours are used where you keep them; RIPPS2's Neutrino only when there is none
++#ifndef RIPPS2_LITE
 +    stAdd(ROW_STATUS, ACT_NONE, _t("Each launch uses yours from where it is found. RIPPS2's own Neutrino is offered only when you have none."), NULL);
++#else
++    stAdd(ROW_STATUS, ACT_NONE, _t("Each launch uses yours from where it is found. RIPPS2 lite carries no Neutrino or BIBLE."), NULL);
++#endif
 +    stAdd(ROW_ACTION, ACT_SEANCE_SEARCH, _t("LOOK FOR THEM"), ripps2DrivesStarted() ? _t("every started drive") : _t("starts every drive first"));
++#ifndef RIPPS2_LITE // build 114: the lite ELF carries none
 +    stAdd(ROW_ACTION, ACT_NT_INSTALL, _t("INSTALL RIPPS2'S NEUTRINO"), _t("only if you have none"));
++#endif
 +    stAdd(ROW_ACTION, ACT_NT_SETTINGS, _t("NEUTRINO SETTINGS"), _t("path, video, arguments"));
 +    stAdd(ROW_ACTION, ACT_POPS_SETTINGS, _t("PS1 SETTINGS"), _t("POPSTARTER and Ember"));
 +    stAdd(ROW_ACTION, ACT_POPS_NET, _t("POPSTARTER NETWORK"), _t("its own IP and SMB files"));
@@ -86892,7 +87075,7 @@ index f2c48c4..514cc8d 100644
  
      // SOUNDS (build 95): none are built in any more, so say where they come from
      stAdd(ROW_HEAD, ACT_NONE, _t("SOUNDS"), _t("AUDIO folder"));
-@@ -236,6 +269,22 @@ static void stScan(void)
+@@ -236,6 +275,22 @@ static void stScan(void)
      stAdd(ROW_ACTION, ACT_SOUNDS_RIP, _t("RIP THIS CONSOLE'S SOUNDS"), _t("from its BIOS, into AUDIO"));
  }
  
@@ -86915,7 +87098,7 @@ index f2c48c4..514cc8d 100644
  static int stRowH(const st_row_t *r)
  {
      return r->kind == ROW_HEAD ? ST_HEAD_H : r->kind == ROW_STATUS ? ST_LINE_H : ST_ROW_H;
-@@ -445,6 +494,14 @@ void ripps2Status(void)
+@@ -445,6 +500,14 @@ void ripps2Status(void)
                      ripps2RipBiosSoundsDialog();
                      rescan = 1;
                      break;
@@ -87290,7 +87473,7 @@ index f77d08e..992d833 100644
 +    return sysCheckVMCEx(prefix, sep, name, createSize, vmc_superblock, 0);
 +}
 diff --git a/src/textures.c b/src/textures.c
-index 07610ea..2da860e 100644
+index 07610ea..9d3b638 100644
 --- a/src/textures.c
 +++ b/src/textures.c
 @@ -50,6 +50,7 @@ extern void *R2_png; */
@@ -87301,7 +87484,27 @@ index 07610ea..2da860e 100644
  extern void *R3_png;
  extern void *fav_png;
  extern void *fav_mark_png;
-@@ -300,6 +301,7 @@ static texture_t internalDefault[TEXTURES_COUNT] = {
+@@ -57,7 +58,9 @@ extern void *fav_mark_png;
+ extern void *cover_png;
+ extern void *disc_png;
+ extern void *screen_png;
++#ifndef RIPPS2_LITE
+ extern void *incebtion_png;
++#endif
+ extern void *ip_png;
+ extern void *coverapp_png;
+ extern void *missing_png;
+@@ -212,7 +215,9 @@ static texture_t internalDefault[TEXTURES_COUNT] = {
+     {COVER_DEFAULT, "cover", &cover_png},
+     {DISC_DEFAULT, "disc", &disc_png},
+     {SCREEN_DEFAULT, "screen", &screen_png},
++#ifndef RIPPS2_LITE // build 114: the lite ELF leaves OPL's look without its background
+     {INCEBTION_PICTURE, "incebtion", &incebtion_png}, // default theme background (conf_theme_OPL.cfg: default=incebtion)
++#endif
+     {IP_PICTURE, "ip", &ip_png},
+     {COVERAPP_DEFAULT, "coverapp", &coverapp_png},
+     {MISSING_PICTURE, "missing", &missing_png},
+@@ -300,6 +305,7 @@ static texture_t internalDefault[TEXTURES_COUNT] = {
      {RIPPS2_LAUNCH_DISC, "launch_disc", &ripps2_disc_png},
      {RIPPS2_PIXFONT, "ripps2_pixfont", &ripps2_pixfont_png},
      {RIPPS2_SIDEBAR_ICONS, "ripps2_sidebar_icons", &ripps2_sidebar_icons_png},

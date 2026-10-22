@@ -52,6 +52,10 @@ cp -f "$HERE/theme/fonts/ripps2_one.ttf" "$SRC/misc/ripps2_one.ttf"
 # RIPFLOW's fonts (build 70): Roboto Condensed and Bold Condensed, Apache-2.0 (theme/fonts/ROBOTO-LICENSE.txt)
 cp -f "$HERE/theme/fonts/ripflow.ttf" "$SRC/misc/ripflow.ttf"
 cp -f "$HERE/theme/fonts/ripflow_bold.ttf" "$SRC/misc/ripflowbold.ttf"
+# build 114: the compiled-in fonts without what FreeType never reads (glyph names, extra name records, signatures,
+# substitution tables); outlines, hinting and kerning stay, and a font whose outlines would change is left whole
+python3 -c "import fontTools" 2>/dev/null || pip3 install --quiet --break-system-packages fonttools || true
+python3 "$HERE/theme/tools/strip_fonts.py" "$SRC"/misc/ripps2_font.ttf "$SRC"/misc/ripps2_sleek*.ttf "$SRC"/misc/ripps2_one.ttf "$SRC"/misc/ripflow*.ttf || true
 # The Memory Files ELF, compiled in and launched from RAM (patch 0004)
 # Built-in textures: glass info panel and PS2 selector mark (patch 0006)
 cp -f "$HERE"/theme/gfx/*.png "$SRC/gfx/"
@@ -162,4 +166,14 @@ python3 "$HERE/lang/ripps2lang.py" extract "$SRC" --check || echo "::warning::el
 # fontTools cuts the big CJK font down to the letters a language uses (without it the pack carries it whole)
 python3 -c "import fontTools" 2>/dev/null || pip3 install --quiet --break-system-packages fonttools || true
 python3 "$HERE/lang/ripps2lang.py" pack "$SRC" "$OUT"
+
+# build 114: RIPPS2-lite.elf, the same code without BIBLE's KELFs, Neutrino's tar and OPL's background
+# (RIPPS2_LITE=1): for a memory card, under 2 MB. RIPPS2_LITE=0 in the environment skips it.
+if [ "${RIPPS2_LITE:-1}" != 0 ]; then
+  make clean >/dev/null
+  make LOCALVERSION=RIPPS2 DIRTY= REVISION="$UP_REV" GIT_HASH="$UP_HASH" RETROACHIEVEMENTS=1 RIPPS2_LITE=1 ${RIPPS2_MAKE_FLAGS:-} release
+  ELF="$(ls RIPTOPL-*.ELF | head -n1)"
+  cp -f "$ELF" "$OUT/RIPPS2-lite.elf"
+  echo "Built $ELF -> out/RIPPS2-lite.elf"
+fi
 ls -la "$OUT"
