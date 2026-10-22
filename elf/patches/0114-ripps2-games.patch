@@ -14097,6 +14097,27 @@ index 6234389..40c8965 100644
  /** Load the optional Unicode fallback after settings home relocation is resolved. */
  void lngInitFallbackFont(void);
  /** RIPPS2 build 104: languages in the settings home and its LNG folder, once the config has chosen the home. */
+diff --git a/include/mixsupport.h b/include/mixsupport.h
+index b76c96f..837615b 100644
+--- a/include/mixsupport.h
++++ b/include/mixsupport.h
+@@ -10,6 +10,16 @@ item_list_t *mixGetObject(int initOnly);
+ // A game source's list changed: rebuild All Games (one queued pass however many sources change)
+ void mixRequestUpdate(void);
+ 
++// RIPPS2 build 114: the master list (allgames.bin). A source's list came (its saved games are replaced from now on);
++// a row from the saved list whose source has not answered; Cross on one (start, wait, then the usual launch); how
++// many games the kept list holds
++void mixSourceAnswered(int mode);
++int mixIsWaiting(int id);
++struct menu_item;
++int mixWaitForRow(struct menu_item *menu);
++int mixMasterGames(void);
++int ripps2ModeStartMode(int mode); // opl.c: a page's start mode (START_MODE_*)
++
+ // The source of one All Games row: its device mode, the id in that device's PS2 or PS1 list (found
+ // again by name if the device has rescanned since), and its FAV_KIND_*. -1 when id is invalid.
+ int mixGetItemSourceMode(int id);
 diff --git a/include/nativevmc.h b/include/nativevmc.h
 new file mode 100644
 index 0000000..09d83a8
@@ -83943,6 +83964,544 @@ index 879e0d7..fba8d5b 100644
  }
  
  static void menuFirstPage()
+diff --git a/src/mixsupport.c b/src/mixsupport.c
+index 116a919..87a3b2e 100644
+--- a/src/mixsupport.c
++++ b/src/mixsupport.c
+@@ -18,6 +18,16 @@
+   crashed the console when the user moved while All Games loaded (build 66 on hardware). mixSema
+   guards the swap and the art worker's scan; the scan copies what it needs and lets go before it
+   touches a device.
++
++  RIPPS2 build 114: the master list. Every game All Games lists is kept in allgames.bin beside the
++  settings (where favourites.bin is), with the kind of source it came from (a BDM slot follows attach
++  order, its kind does not). At boot the list is whole at once: a game whose source has not answered
++  yet is a waiting row (no owner list, so no reader reaches a device through it), and its source's
++  list replaces it when it comes, in the same locked publish. A waiting row of a source left on Manual
++  stays until it is started; Cross on one starts it, waits for its list and launches the game as
++  usual (opl.c, mixWaitForRow). A source that is off, or started and silent for MIX_WAIT_S, drops its
++  saved games. Only with Fast Cache on; written only when a source's list changed it, never while a
++  started source is still to answer.
+ */
+ 
+ #include <stdio.h>
+@@ -42,6 +52,18 @@
+ #include "include/mixsupport.h"
+ 
+ #include <kernel.h>
++#include <fcntl.h>
++#include <unistd.h>
++
++#include "include/gui.h"
++#include "include/renderman.h"
++#include "include/fntsys.h"
++#include "include/themes.h"
++#include "include/pad.h"
++#include "include/sound.h"
++#include "include/ripps2.h"
++#include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
++#include "include/ripps2tr.h"   // _t, RIPPS2's words in the chosen language
+ 
+ typedef struct
+ {
+@@ -52,6 +74,7 @@ typedef struct
+     int rank;           // source order: the lower one keeps a title found on two sources
+     char *text;         // heap copies, owned here; the submenu aliases text
+     char *startup;      // the art and last-played key (a PS1 row's is its name)
++    int family;         // build 114: MIX_FAM_*, the kind of source (a waiting row has no owner yet)
+ } mix_rec_t;
+ 
+ static mix_rec_t *mixArray = NULL;
+@@ -86,6 +109,248 @@ static const int mixSourceModes[] = {HDD_MODE, BDM_MODE, BDM_MODE1, BDM_MODE2, B
+                                      BDM_MODE6, BDM_MODE7, MMCE_MODE, ETH_MODE, UDPFS_MODE, HTTP_MODE};
+ #define MIX_SOURCE_COUNT ((int)(sizeof(mixSourceModes) / sizeof(mixSourceModes[0])))
+ 
++// ---- build 114: the master list ----
++
++// The kind of source a saved row came from, kept across boots
++enum { MIX_FAM_APA = 0, MIX_FAM_ATA, MIX_FAM_USB, MIX_FAM_MX4SIO, MIX_FAM_ILINK, MIX_FAM_BDM, MIX_FAM_MMCE, MIX_FAM_SMB, MIX_FAM_UDPFS, MIX_FAM_HTTP, MIX_FAM_COUNT };
++static const char *const mixFamName[MIX_FAM_COUNT] = {"HDD Games (APA)", "the internal HDD (exFAT)", "the USB drive", "MX4SIO", "iLink", "the drive",
++                                                      "MMCE", "the SMB share", "UDPFS", "HTTP"};
++#define MIX_WAIT_S       40.0 // a started source that has not answered by then drops its saved games
++#define MIX_MASTER_FILE  "allgames.bin"
++#define MIX_MASTER_MAGIC "RIPALL01"
++#define MIX_MASTER_MAX   8192
++
++typedef struct
++{
++    unsigned char kind, family;
++    char *text, *startup;
++} mix_master_t;
++
++static mix_master_t *mixMaster = NULL;
++static int mixMasterCount = 0, mixMasterLoaded = 0, mixMasterSaved = -1;
++static unsigned int mixMasterSum = 0;
++static unsigned char mixAnswered[MIX_FAM_COUNT]; // its list has come at least once this boot
++static unsigned char mixFamWaiting[MIX_FAM_COUNT]; // the last pass listed saved games of it
++static double mixWaitSince[MIX_FAM_COUNT];        // when it was first seen started without its list
++
++static int mixModeFamily(int mode)
++{
++    if (mode == HDD_MODE)
++        return MIX_FAM_APA;
++    if (mode >= BDM_MODE && mode <= BDM_MODE_LAST) {
++        int t = bdmSlotDeviceType(mode - BDM_MODE);
++        return t == BDM_TYPE_ATA ? MIX_FAM_ATA : t == BDM_TYPE_USB ? MIX_FAM_USB : t == BDM_TYPE_SDC ? MIX_FAM_MX4SIO : t == BDM_TYPE_ILINK ? MIX_FAM_ILINK : MIX_FAM_BDM;
++    }
++    if (mode == MMCE_MODE)
++        return MIX_FAM_MMCE;
++    if (mode == ETH_MODE)
++        return MIX_FAM_SMB;
++    if (mode == UDPFS_MODE)
++        return MIX_FAM_UDPFS;
++    if (mode == HTTP_MODE)
++        return MIX_FAM_HTTP;
++    return -1;
++}
++
++// The page that starts a family's source (BDM's start covers every slot)
++static int mixFamilyMode(int fam)
++{
++    switch (fam) {
++        case MIX_FAM_APA:
++            return HDD_MODE;
++        case MIX_FAM_MMCE:
++            return MMCE_MODE;
++        case MIX_FAM_SMB:
++            return ETH_MODE;
++        case MIX_FAM_UDPFS:
++            return UDPFS_MODE;
++        case MIX_FAM_HTTP:
++            return HTTP_MODE;
++        case MIX_FAM_COUNT:
++            return -1;
++        default:
++            return BDM_MODE;
++    }
++}
++
++// 1 when a family's saved games go: its source is off, or started and silent past MIX_WAIT_S. A source left on Manual
++// keeps them (they are what it holds; Cross on one starts it). *settling: a started source still has time to answer
++static int mixFamilyGone(int fam, int *settling)
++{
++    int mode = mixFamilyMode(fam);
++    opl_io_module_t *mod;
++
++    if (mode < 0 || ripps2ModeStartMode(mode) == START_MODE_DISABLED)
++        return 1;
++    if ((fam == MIX_FAM_USB && !gEnableUSB) || (fam == MIX_FAM_ATA && !gEnableBdmHDD) || (fam == MIX_FAM_MX4SIO && !gEnableMX4SIO) ||
++        (fam == MIX_FAM_ILINK && !gEnableILK))
++        return 1;
++    mod = oplGetModule(mode);
++    if (mod == NULL || mod->support == NULL || !mod->support->enabled)
++        return 0;
++    if (mixWaitSince[fam] <= 0.0)
++        mixWaitSince[fam] = ripps2Seconds();
++    if (ripps2Seconds() - mixWaitSince[fam] > MIX_WAIT_S)
++        return 1;
++    *settling = 1;
++    return 0;
++}
++
++// allgames.bin in the folder the settings are kept in
++static void mixMasterPath(char *out, int size)
++{
++    config_set_t *cfg = configGetByType(CONFIG_OPL);
++    const char *fn = (cfg != NULL && cfg->filename != NULL) ? cfg->filename : NULL;
++    const char *cut = fn != NULL ? strrchr(fn, '/') : NULL;
++
++    if (fn != NULL && cut == NULL)
++        cut = strrchr(fn, ':');
++    if (cut == NULL)
++        snprintf(out, size, "mc0:/RIPPS2/" MIX_MASTER_FILE);
++    else
++        snprintf(out, size, "%.*s" MIX_MASTER_FILE, (int)(cut - fn + 1), fn);
++}
++
++static unsigned int mixLe32(const unsigned char *p)
++{
++    return p[0] | p[1] << 8 | p[2] << 16 | (unsigned int)p[3] << 24;
++}
++
++static void mixPutLe32(unsigned char *p, unsigned int v)
++{
++    p[0] = v;
++    p[1] = v >> 8;
++    p[2] = v >> 16;
++    p[3] = v >> 24;
++}
++
++static unsigned int mixFnv(const unsigned char *p, int n)
++{
++    unsigned int h = 2166136261u;
++    int i;
++    for (i = 0; i < n; i++)
++        h = (h ^ p[i]) * 16777619u;
++    return h;
++}
++
++// Header: magic, count, FNV-1a of the records, a spare word. A record: kind, family, the startup's and the name's
++// lengths, then the startup and the name. A file that does not add up is not read at all.
++static void mixMasterLoad(void)
++{
++    char path[256];
++    unsigned char *buf = NULL;
++    int fd, size, pos, i, count;
++
++    mixMasterLoaded = 1;
++    if (!gRipps2FastCache)
++        return;
++    mixMasterPath(path, sizeof(path));
++    if ((fd = open(path, O_RDONLY)) < 0)
++        return;
++    size = lseek(fd, 0, SEEK_END);
++    lseek(fd, 0, SEEK_SET);
++    if (size >= 16 && size <= 2 * 1024 * 1024 && (buf = malloc(size)) != NULL && read(fd, buf, size) != size) {
++        free(buf);
++        buf = NULL;
++    }
++    close(fd);
++    if (buf == NULL)
++        return;
++    count = (int)mixLe32(buf + 8);
++    if (memcmp(buf, MIX_MASTER_MAGIC, 8) != 0 || count <= 0 || count > MIX_MASTER_MAX || mixLe32(buf + 12) != mixFnv(buf + 16, size - 16) ||
++        (mixMaster = calloc(count, sizeof(mix_master_t))) == NULL) {
++        free(buf);
++        return;
++    }
++    for (i = 0, pos = 16; i < count; i++) {
++        int sl, nl;
++        if (pos + 4 > size)
++            break;
++        sl = buf[pos + 2];
++        nl = buf[pos + 3];
++        if (pos + 4 + sl + nl > size || nl == 0 || buf[pos + 1] >= MIX_FAM_COUNT)
++            break;
++        mixMaster[i].kind = buf[pos];
++        mixMaster[i].family = buf[pos + 1];
++        mixMaster[i].startup = malloc(sl + 1);
++        mixMaster[i].text = malloc(nl + 1);
++        if (mixMaster[i].startup == NULL || mixMaster[i].text == NULL)
++            break;
++        memcpy(mixMaster[i].startup, buf + pos + 4, sl);
++        mixMaster[i].startup[sl] = '\0';
++        memcpy(mixMaster[i].text, buf + pos + 4 + sl, nl);
++        mixMaster[i].text[nl] = '\0';
++        pos += 4 + sl + nl;
++    }
++    if (i < count) { // short or damaged: none of it
++        for (count = i, i = 0; i <= count && i < (int)mixLe32(buf + 8); i++) {
++            free(mixMaster[i].startup);
++            free(mixMaster[i].text);
++        }
++        free(mixMaster);
++        mixMaster = NULL;
++        free(buf);
++        return;
++    }
++    mixMasterCount = count;
++    mixMasterSum = mixLe32(buf + 12);
++    mixMasterSaved = count;
++    free(buf);
++    LOG("mixMasterLoad: %d games from %s" "\n", count, path);
++}
++
++// The list as it stands, when it differs from the one kept: written beside, then put in place
++static void mixMasterSave(const mix_rec_t *arr, int count)
++{
++    char path[256], tmp[268];
++    unsigned char *buf, *p;
++    unsigned int sum;
++    int i, len = 16, fd, ok;
++
++    if (!gRipps2FastCache || !gEnableWrite || count <= 0 || count > MIX_MASTER_MAX)
++        return;
++    for (i = 0; i < count; i++)
++        len += 4 + (strlen(arr[i].startup) < 255 ? strlen(arr[i].startup) : 255) + (strlen(arr[i].text) < 255 ? strlen(arr[i].text) : 255);
++    if ((buf = malloc(len)) == NULL)
++        return;
++    for (i = 0, p = buf + 16; i < count; i++) {
++        int sl = strlen(arr[i].startup) < 255 ? strlen(arr[i].startup) : 255, nl = strlen(arr[i].text) < 255 ? strlen(arr[i].text) : 255;
++        p[0] = arr[i].kind;
++        p[1] = arr[i].family >= 0 ? arr[i].family : MIX_FAM_BDM;
++        p[2] = sl;
++        p[3] = nl;
++        memcpy(p + 4, arr[i].startup, sl);
++        memcpy(p + 4 + sl, arr[i].text, nl);
++        p += 4 + sl + nl;
++    }
++    sum = mixFnv(buf + 16, len - 16);
++    if (mixMasterSaved == count && sum == mixMasterSum) {
++        free(buf);
++        return;
++    }
++    memcpy(buf, MIX_MASTER_MAGIC, 8);
++    mixPutLe32(buf + 8, count);
++    mixPutLe32(buf + 12, sum);
++    mixMasterPath(path, sizeof(path));
++    snprintf(tmp, sizeof(tmp), "%s.new", path);
++    ok = (fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0;
++    if (ok) {
++        ok = write(fd, buf, len) == len;
++        close(fd);
++    }
++    if (ok) {
++        remove(path);
++        ok = rename(tmp, path) == 0;
++    } else
++        remove(tmp);
++    free(buf);
++    if (ok) {
++        mixMasterSum = sum;
++        mixMasterSaved = count;
++        LOG("mixMasterSave: %d games to %s" "\n", count, path);
++    }
++}
++
+ static char *mixStrdup(const char *s)
+ {
+     int n = (int)strlen(s) + 1;
+@@ -133,7 +398,7 @@ typedef struct
+     int count, cap;
+ } mix_build_t;
+ 
+-static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int kind, int rank, const char *name, const char *startup)
++static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int kind, int rank, const char *name, const char *startup, int family)
+ {
+     if (b->count == b->cap) {
+         int cap = b->cap ? b->cap * 2 : 256;
+@@ -157,6 +422,7 @@ static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int
+     r->rank = rank;
+     r->text = text;
+     r->startup = st;
++    r->family = family;
+ }
+ 
+ // One source's games: its PS2 list, then its PS1 list when it can launch PS1 titles
+@@ -190,7 +456,7 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+             LOG("mixCollect: mode %d row %d has no name\n", mode, i);
+             continue;
+         }
+-        mixAppend(b, src, mode, i, FAV_KIND_ISO, rank, name, view.itemGetStartup != NULL ? view.itemGetStartup(&view, i) : NULL);
++        mixAppend(b, src, mode, i, FAV_KIND_ISO, rank, name, view.itemGetStartup != NULL ? view.itemGetStartup(&view, i) : NULL, mixModeFamily(mode));
+     }
+ 
+     if (!libViewSupported(mode, LIB_VIEW_PS1) || (src->itemLaunchVcd == NULL && src->itemLaunchCue == NULL))
+@@ -215,7 +481,7 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+             continue;
+         if (kind == FAV_KIND_CUE && src->itemLaunchCue == NULL)
+             continue;
+-        mixAppend(b, src, mode, i, kind, rank, name, name);
++        mixAppend(b, src, mode, i, kind, rank, name, name, mixModeFamily(mode));
+     }
+ }
+ 
+@@ -244,11 +510,15 @@ static void mixInit(item_list_t *itemList)
+ static int mixNeedsUpdate(item_list_t *itemList)
+ {
+     // the L3 dirty flag is consumed first and always, so a forced rebuild clears it too (as favNeedsUpdate)
+-    int viewToggled = libViewConsumeDirty(MIX_MODE);
++    int viewToggled = libViewConsumeDirty(MIX_MODE), fam;
+     if (mixForceUpdate) {
+         mixForceUpdate = 0;
+         return 1;
+     }
++    // build 114: polled only while saved games wait (updateDelay): a started source silent past MIX_WAIT_S drops them
++    for (fam = 0; fam < MIX_FAM_COUNT; fam++)
++        if (mixFamWaiting[fam] && !mixAnswered[fam] && mixWaitSince[fam] > 0.0 && ripps2Seconds() - mixWaitSince[fam] > MIX_WAIT_S)
++            return 1;
+     return viewToggled;
+ }
+ 
+@@ -257,38 +527,59 @@ static int mixNeedsUpdate(item_list_t *itemList)
+ static int mixUpdateItemList(item_list_t *itemList)
+ {
+     mix_build_t b = {NULL, 0, 0};
+-    int i, kept = 0, view = libViewActive(MIX_MODE);
++    int i, kept = 0, shown = 0, waiting = 0, settling = 0, view = libViewActive(MIX_MODE);
+ 
+     mixFreeArray();
+     for (i = 0; i < MIX_SOURCE_COUNT; i++)
+         mixCollect(&b, mixSourceModes[i], i);
++    // build 114: the saved games of every source still to answer (rank 100 and up, so a live row of the same title wins)
++    if (!mixMasterLoaded)
++        mixMasterLoad();
++    memset(mixFamWaiting, 0, sizeof(mixFamWaiting));
++    for (i = 0; gRipps2FastCache && i < mixMasterCount; i++) {
++        mix_master_t *m = &mixMaster[i];
++        if (mixAnswered[m->family] || mixFamilyGone(m->family, &settling))
++            continue;
++        mixAppend(&b, NULL, -1, -1, m->kind, 100 + m->family, m->text, m->startup, m->family);
++        mixFamWaiting[m->family] = 1;
++        waiting++;
++    }
++    mixItemList.updateDelay = waiting ? MENU_UPD_DELAY_GENREFRESH : MENU_UPD_DELAY_NOUPDATE;
+     if (b.count == 0) {
+         free(b.arr);
+         return 0;
+     }
+     qsort(b.arr, b.count, sizeof(mix_rec_t), &mixCompare);
+ 
++    // one row a title
+     for (i = 0; i < b.count; i++) {
+         mix_rec_t *r = &b.arr[i];
+-        int drop = (kept > 0 && mixKindIsPs1(b.arr[kept - 1].kind) == mixKindIsPs1(r->kind) &&
+-                    strcasecmp(b.arr[kept - 1].text, r->text) == 0);
+-        if (!drop && view == LIB_VIEW_PS1 && !mixKindIsPs1(r->kind))
+-            drop = 1;
+-        if (!drop && view == LIB_VIEW_ISO && mixKindIsPs1(r->kind))
+-            drop = 1;
+-        if (drop) {
++        if (kept > 0 && mixKindIsPs1(b.arr[kept - 1].kind) == mixKindIsPs1(r->kind) && strcasecmp(b.arr[kept - 1].text, r->text) == 0) {
+             free(r->text);
+             free(r->startup);
+             continue;
+         }
+         b.arr[kept++] = *r;
+     }
+-    LOG("mixUpdateItemList: %d gathered, %d kept (view %d)\n", b.count, kept, view);
++    // build 114: kept as the master list (every kind, whatever the view), once no started source is still to answer
++    if (!settling)
++        mixMasterSave(b.arr, kept);
++    // the rows the view shows (ALL, PS1 or PS2)
++    for (i = 0; i < kept; i++) {
++        mix_rec_t *r = &b.arr[i];
++        if ((view == LIB_VIEW_PS1 && !mixKindIsPs1(r->kind)) || (view == LIB_VIEW_ISO && mixKindIsPs1(r->kind))) {
++            free(r->text);
++            free(r->startup);
++            continue;
++        }
++        b.arr[shown++] = *r;
++    }
++    LOG("mixUpdateItemList: %d gathered, %d kept, %d shown, %d saved games waiting (view %d)\n", b.count, kept, shown, waiting, view);
+     mixLock();
+     mixArray = b.arr; // published whole, after it is complete
+-    mixCount = kept;
++    mixCount = shown;
+     mixUnlock();
+-    return kept;
++    return shown;
+ }
+ 
+ static int mixGetItemCount(item_list_t *itemList) { return mixCount; }
+@@ -497,6 +788,8 @@ int mixGetArtMode(const char *value)
+         return -1;
+     mixLock();
+     for (i = 0; i < mixCount && mode < 0; i++) {
++        if (mixArray[i].owner == NULL) // build 114: a waiting row
++            continue;
+         if (mixKindIsPs1(mixArray[i].kind)) {
+             if (strcmp(mixArray[i].text, value) != 0) {
+                 char key[VCD_ID_MAX];
+@@ -573,6 +866,108 @@ int mixGetItemKind(int id)
+     return kind;
+ }
+ 
++// build 114: a source's list came (opl.c, after its rebuild): its saved games are replaced by it from now on
++void mixSourceAnswered(int mode)
++{
++    int fam = mixModeFamily(mode);
++    if (fam >= 0)
++        mixAnswered[fam] = 1;
++    mixRequestUpdate();
++}
++
++int mixIsWaiting(int id)
++{
++    int waiting;
++    mixLock();
++    waiting = mixValidIndex(id) && mixArray[id].owner == NULL;
++    mixUnlock();
++    return waiting;
++}
++
++int mixMasterGames(void)
++{
++    return mixMasterSaved > 0 ? mixMasterSaved : 0;
++}
++
++static int mixLiveHas(const char *text, int kind)
++{
++    int i, found = 0;
++    mixLock();
++    for (i = 0; i < mixCount && !found; i++)
++        found = mixArray[i].owner != NULL && mixArray[i].kind == kind && !strcmp(mixArray[i].text, text);
++    mixUnlock();
++    return found;
++}
++
++// Cross on a waiting row (opl.c, before the config is read): its source started if it waits for a start, its list
++// waited for (the GUI's deferred updates run, so the cursor follows the game by its startup onto the real row), then
++// the launch goes on as usual. 0: the back button, the source did not answer, or the game is no longer on it
++int mixWaitForRow(struct menu_item *menu)
++{
++    char name[256], startup[64], line[300];
++    int kind, fam, id, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    double since;
++
++    if (menu == NULL || menu->current == NULL)
++        return 0;
++    id = menu->current->item.id;
++    mixLock();
++    if (!mixValidIndex(id) || mixArray[id].owner != NULL) {
++        mixUnlock();
++        return 1;
++    }
++    snprintf(name, sizeof(name), "%s", mixArray[id].text);
++    snprintf(startup, sizeof(startup), "%s", mixArray[id].startup);
++    kind = mixArray[id].kind;
++    fam = mixArray[id].family;
++    mixUnlock();
++    if (fam < 0 || fam >= MIX_FAM_COUNT)
++        fam = MIX_FAM_BDM;
++
++    ripps2StartSources(); // a source on Manual starts as All Games' own Start starts it
++    since = ripps2Seconds();
++    readPads();
++    while (1) {
++        guiExecDeferredOps(); // the rebuilt list reaches the menu
++        if (menu->current != NULL && !mixIsWaiting(menu->current->item.id) && mixLiveHas(name, kind)) {
++            const char *now = menu->current->item.text;
++            if (now != NULL && !strcmp(now, name))
++                return 1;
++        }
++        if (mixAnswered[fam] && !mixLiveHas(name, kind)) {
++            snprintf(line, sizeof(line), _t("%s is not on %s any more, so it has left All Games."), name, _t(mixFamName[fam]));
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(line, 0, NULL);
++            return 0;
++        }
++        if (ripps2Seconds() - since > 30.0) {
++            snprintf(line, sizeof(line), _t("%s did not answer, so %s cannot start. Is it connected?"), _t(mixFamName[fam]), name);
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(line, 0, NULL);
++            return 0;
++        }
++        rmStartFrame();
++        ripps2DrawBackground();
++        ripps2DrawPagePanel();
++        snprintf(line, sizeof(line), _t("STARTING %s"), _t(mixFamName[fam]));
++        fntRenderStringFit(gTheme->fonts[4], 320, 200, ALIGN_CENTER, 540, line, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
++        fntRenderStringFit(gTheme->fonts[5], 320, 228, ALIGN_CENTER, 540, name, GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80), 0);
++        {
++            GSTEXTURE *t = thmGetTexture(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON);
++            int x = 320 - (24 + ripps2HintWidth(_t("CANCEL"))) / 2;
++            if (t != NULL)
++                rmDrawPixmap(t, x, 430, ALIGN_NONE, 20, 20, SCALING_RATIO, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
++            ripps2HintText(x + 24, 440, _t("CANCEL"), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
++        }
++        rmEndFrame();
++        readPads();
++        if (getKeyOn(backKey)) {
++            sfxPlay(SFX_CANCEL);
++            return 0;
++        }
++    }
++}
++
+ void mixRequestUpdate(void)
+ {
+     mixForceUpdate = 1;
 diff --git a/src/mmcesupport.c b/src/mmcesupport.c
 index 4c28157..ba683b0 100644
 --- a/src/mmcesupport.c
@@ -83983,7 +84542,7 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..82656de 100644
+index 13c78db..45beeff 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -50,6 +50,7 @@
@@ -83994,7 +84553,18 @@ index 13c78db..82656de 100644
  #include "include/ripps2shot.h" // RIPPS2 build 108: RIPSHOT's settings
  #ifdef RETROACHIEVEMENTS
  #include "include/rabadge.h" // RA: "tracked game" badge in the list
-@@ -523,7 +524,10 @@ static void itemExecSelect(struct menu_item *curMenu)
+@@ -464,6 +465,10 @@ static void itemExecSelect(struct menu_item *curMenu)
+                         ioPutRequest(IO_MENU_UPDATE_DEFFERED, &support->mode);
+                     return;
+                 }
++                // RIPPS2 build 114: an All Games row from the master list whose source has not answered yet: start it, wait
++                // for its list (the cursor follows the game onto its real row), then launch as usual
++                if (support->mode == MIX_MODE && mixIsWaiting(curMenu->current->item.id) && !mixWaitForRow(curMenu))
++                    return;
+                 config_set_t *configSet = menuLoadConfig();
+                 if (configSet == NULL)
+                     return;
+@@ -523,7 +528,10 @@ static void itemExecSelect(struct menu_item *curMenu)
                  int launchView = support->itemGetView != NULL ? support->itemGetView(support, launchId) : libListViewActive(support);
                  if (launchView != LIB_VIEW_PS1)
                      guiShowGameID(gameIdStartup);
@@ -84005,7 +84575,33 @@ index 13c78db..82656de 100644
                  ripps2LaunchAborted();
              }
          } else {
-@@ -3649,7 +3653,10 @@ static void _loadConfig()
+@@ -1021,6 +1029,12 @@ static int modeStartMode(int mode)
+     return startMode;
+ }
+ 
++// RIPPS2 build 114: All Games' master list asks whether a source is off, waits for a start, or starts at boot
++int ripps2ModeStartMode(int mode)
++{
++    return modeStartMode(mode);
++}
++
+ // RIPPS2: All Games starts with its sources: Auto when any game source is Auto, Manual when any is
+ // Manual (its Start then starts them all), hidden when every one is off
+ static int mixStartMode(void)
+@@ -1660,9 +1674,10 @@ void menuDeferredUpdate(void *data)
+         if (gFAVStartMode && mod->support->mode != FAV_MODE)
+             loadFavourites();
+ 
+-        // RIPPS2: a game source changed, or filled a list it never scanned: All Games rebuilds after it
++        // RIPPS2: a game source changed, or filled a list it never scanned: All Games rebuilds after it (build 114: and its
++        // saved games give way to its list)
+         if (mod->support->mode != APP_MODE && mod->support->mode != FAV_MODE && mod->support->mode != MIX_MODE)
+-            mixRequestUpdate();
++            mixSourceAnswered(mod->support->mode);
+     } else if (libViewPending(mod->support->mode)) {
+         // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
+         // no card inserted). Still retire the old rows and commit the retained destination so input
+@@ -3649,7 +3664,10 @@ static void _loadConfig()
      const char *temp;
      char cardHome[16], prevHome[256], redirect[256];
      int fromCard = 0;
@@ -84017,7 +84613,7 @@ index 13c78db..82656de 100644
      // RIPPS2 build 100: RIPPS2's own save on a memory card first, unless a Custom Settings Path points elsewhere
      if ((lscstatus & CONFIG_OPL) && !readConfigPathRedirect(redirect, sizeof(redirect)) &&
          ripps2CardSettingsHome(cardHome, sizeof(cardHome), 1)) {
-@@ -5730,6 +5737,7 @@ static void init(void)
+@@ -5730,6 +5748,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
      ioNameAction((void *)&deferredAudioInit, "SOUND LOAD");
@@ -84025,7 +84621,7 @@ index 13c78db..82656de 100644
      menuInit();
  
      startPads();
-@@ -5885,6 +5893,9 @@ static void miniInit(int mode)
+@@ -5885,6 +5904,9 @@ static void miniInit(int mode)
      configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd)
  
      ioInit();

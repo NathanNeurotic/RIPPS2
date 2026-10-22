@@ -271,6 +271,10 @@ strings:
 - en: Right
   in:
   - gui.c
+- en: SEANCE knows %d of the 5 now. Where each one is, is remembered, and every launch reads it from there.
+  in:
+  - gui.c
+  - ripps2status.c
 - en: Same as Grid Layout
   in:
   - gui.c
@@ -298,6 +302,12 @@ strings:
 - en: 'Yes'
   in:
   - gui.c
+- en: not found on the started drives
+  in:
+  - gui.c
+- en: not looked for yet
+  in:
+  - gui.c
 - en: 'Case Shape: %s'
   in:
   - menusys.c
@@ -313,6 +323,20 @@ strings:
 - en: PS2 (tall)
   in:
   - menusys.c
+- en: '%s did not answer, so %s cannot start. Is it connected?'
+  in:
+  - mixsupport.c
+- en: '%s is not on %s any more, so it has left All Games.'
+  in:
+  - mixsupport.c
+- en: CANCEL
+  in:
+  - mixsupport.c
+  - ripps2cd.c
+  - ripps2disc.c
+- en: STARTING %s
+  in:
+  - mixsupport.c
 - en: ALL
   in:
   - opl.c
@@ -1250,10 +1274,6 @@ strings:
   in:
   - ripps2cd.c
   - ripps2disc.c
-- en: CANCEL
-  in:
-  - ripps2cd.c
-  - ripps2disc.c
 - en: CLOSE
   in:
   - ripps2cd.c
@@ -1304,6 +1324,7 @@ strings:
   in:
   - ripps2cd.c
   - ripps2files.c
+  - ripps2seance.c
 - en: STOPPED
   in:
   - ripps2cd.c
@@ -1589,7 +1610,7 @@ strings:
 - en: THE GAME'S DRIVE  (%s/neutrino)
   in:
   - ripps2ember.c
-- en: This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
+- en: 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
   in:
   - ripps2ember.c
 - en: '%d / %d FILES'
@@ -1956,6 +1977,9 @@ strings:
   in:
   - ripps2files.c
 - en: START DRIVES
+  in:
+  - ripps2files.c
+- en: STARTING THE DRIVES
   in:
   - ripps2files.c
 - en: STARTING...
@@ -2430,6 +2454,32 @@ strings:
 - en: UNKNOWN CARD LAYOUT
   in:
   - ripps2saves.c
+- en: '%d FOLDERS'
+  in:
+  - ripps2seance.c
+- en: '%s could not be copied to %s. Is the drive full or write-protected?'
+  in:
+  - ripps2seance.c
+- en: '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  in:
+  - ripps2seance.c
+- en: COPY AND START
+  in:
+  - ripps2seance.c
+  - vcdsupport.c
+- en: Copying %s
+  in:
+  - ripps2seance.c
+  - vcdsupport.c
+- en: 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  in:
+  - ripps2seance.c
+- en: 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  in:
+  - ripps2seance.c
+- en: LOOKING FOR YOUR LAUNCHERS
+  in:
+  - ripps2seance.c
 - en: '%d NOT SAVED: DRIVE FULL'
   in:
   - ripps2shot.c
@@ -2521,6 +2571,9 @@ strings:
 - en: '%d sounds from %sAUDIO%s'
   in:
   - ripps2status.c
+- en: '%s  MMCE card'
+  in:
+  - ripps2status.c
 - en: '%s could not be written to %s. Check its free space and that it is not write protected.'
   in:
   - ripps2status.c
@@ -2539,10 +2592,25 @@ strings:
 - en: DRIVES
   in:
   - ripps2status.c
-- en: INSTALL RIPPS2'S COPY
+- en: Ember (Gageformer)
   in:
   - ripps2status.c
-- en: 'Installed: '
+- en: Ember's BIOS (bios.bin)
+  in:
+  - ripps2status.c
+- en: 'Found: %s'
+  in:
+  - ripps2status.c
+- en: INSTALL RIPPS2'S NEUTRINO
+  in:
+  - ripps2status.c
+- en: 'Internal HDD (APA): %s free of %s'
+  in:
+  - ripps2status.c
+- en: LAUNCHERS
+  in:
+  - ripps2status.c
+- en: LOOK FOR THEM
   in:
   - ripps2status.c
 - en: MANAGE
@@ -2572,19 +2640,34 @@ strings:
 - en: 'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).'
   in:
   - ripps2status.c
+- en: 'Memory card %d: %d KB free'
+  in:
+  - ripps2status.c
 - en: NEUTRINO SETTINGS
+  in:
+  - ripps2status.c
+- en: Neutrino 1.8.0 (rickgaiser)
   in:
   - ripps2status.c
 - en: 'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.'
   in:
   - ripps2status.c
-- en: 'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.'
+- en: Not found on the started drives. A game that needs it looks for yours first; RIPPS2's own copy is offered, once, only when there is none.
   in:
   - ripps2status.c
-- en: Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.
+- en: Not found. Put ember.elf in a drive's EMBER folder; a launch on another drive offers to copy it there.
   in:
   - ripps2status.c
-- en: Not installed. A game that needs it offers RIPPS2's copy, or install it here.
+- en: Not found. Put your own POPSTARTER.ELF on a drive, then LOOK FOR THEM.
+  in:
+  - ripps2status.c
+- en: Not found. They come from your own console; a launch copies them beside the games from where they are found.
+  in:
+  - ripps2status.c
+- en: Not found. Your own PS1 BIOS, as bios.bin beside ember.elf.
+  in:
+  - ripps2status.c
+- en: POPSTARTER (krHACKen)
   in:
   - ripps2status.c
 - en: POPSTARTER NETWORK
@@ -2605,19 +2688,34 @@ strings:
 - en: RIPPS2's homebrew
   in:
   - ripps2status.c
+- en: START EVERY DRIVE
+  in:
+  - ripps2status.c
 - en: STATUS
   in:
   - ripps2status.c
-- en: 'STATUS: looking for RIPPS2''s homebrew'
+- en: 'STATUS: looking at the drives and the homebrew'
+  in:
+  - ripps2status.c
+- en: Start every drive first, so the search reaches all of them? (No searches the drives already started.)
+  in:
+  - ripps2status.c
+- en: The POPS files (POPS.ELF, POPS_IOX.PAK)
+  in:
+  - ripps2status.c
+- en: USB, HDD, MMCE and the rest
   in:
   - ripps2status.c
 - en: a drive of unknown kind
   in:
   - ripps2status.c
-- en: a drive or a memory card
+- en: boot loader, card by card
   in:
   - ripps2status.c
-- en: boot loader, card by card
+- en: every started drive
+  in:
+  - ripps2status.c
+- en: found where you keep them
   in:
   - ripps2status.c
 - en: from its BIOS, into AUDIO
@@ -2629,7 +2727,13 @@ strings:
 - en: its own IP and SMB files
   in:
   - ripps2status.c
+- en: only if you have none
+  in:
+  - ripps2status.c
 - en: path, video, arguments
+  in:
+  - ripps2status.c
+- en: starts every drive first
   in:
   - ripps2status.c
 - en: what RIPPS2 sees
@@ -2768,12 +2872,6 @@ strings:
   in:
   - vcdsupport.c
 - en: '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  in:
-  - vcdsupport.c
-- en: COPY AND START
-  in:
-  - vcdsupport.c
-- en: Copying %s
   in:
   - vcdsupport.c
 - en: LAUNCH ANYWAY
