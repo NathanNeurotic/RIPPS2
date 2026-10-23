@@ -86832,7 +86832,7 @@ index 0000000..dee0a44
 +    return 0;
 +}
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index f2c48c4..122e348 100644
+index f2c48c4..80508dd 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -3,6 +3,11 @@
@@ -87111,6 +87111,15 @@ index f2c48c4..122e348 100644
  static int stRowH(const st_row_t *r)
  {
      return r->kind == ROW_HEAD ? ST_HEAD_H : r->kind == ROW_STATUS ? ST_LINE_H : ST_ROW_H;
+@@ -317,7 +366,7 @@ void ripps2Status(void)
+         ripps2DrawBackground();
+         ripps2DrawPagePanel();
+         fntRenderString(thmPageFont(5), ST_X, 44, ALIGN_VCENTER, 0, 0, _t("STATUS"), ST_GOLD);
+-        fntRenderString(thmPageFont(9), ST_X, 66, ALIGN_VCENTER, 0, 0, _t("RIPPS2's homebrew"), ST_LIT);
++        fntRenderString(thmPageFont(9), ST_X, 66, ALIGN_VCENTER, 0, 0, _t("Drives, launchers and homebrew"), ST_LIT);
+         rmDrawLine(ST_X, 82, ST_X + ST_W, 82, ST_PRIM(0x4A, 0x72, 0xDC, 0x60));
+ 
+         // keep the chosen row in the viewport, its section's name with it where it fits; build 96: the right
 @@ -445,6 +494,14 @@ void ripps2Status(void)
                      ripps2RipBiosSoundsDialog();
                      rescan = 1;
