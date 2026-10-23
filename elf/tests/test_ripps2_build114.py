@@ -261,7 +261,7 @@ pk_ = rd('src/ripps2games.c')
 need(pk_, (('#define ZP_MAGIC 0x4F53495A', 'the ZISO header'), ('#define ZP_HEAD  24', 'the index right after a 24-byte header'),
            ('raw = n <= 0 || n >= 2048;', 'a block LZ4 cannot shrink stays raw'), ('static int zpLz4(const unsigned char *src, int n, unsigned char *out, int cap)', 'an LZ4 block writer of its own (the EE lz4.c only decodes)'),
            ('mflimit = n - 12, matchlimit = n - 5', 'the end rules of the block format'), ('| (raw ? 0x80000000u : 0)', 'the top bit marks a raw block'),
-           ('LZ4_decompress_fast(', 'read back as OPL reads it'), ('crc32(0L, in, cnt * 2048) == j->crcs[b / ZP_RUN]', 'every piece checked'),
+           ('LZ4_decompress_fast(', 'read back as OPL reads it'), ('crc32(0L, in, cnt * 2048) != j->crcs[b / ZP_RUN]', 'every piece checked'),
            ('snprintf(tmp, sizeof(tmp), "%s.part", dst);', 'the work in a .part file'), ('if (rv == 1 && rename(tmp, dst) != 0)', 'named only once checked'),
            ('if (rv != 1)\n        unlink(tmp);', 'a cancel or failure removes it'), ('if (!zpAsk(', 'the panel: SELECT held'),
            ('if (!guiMsgBox(msg, 1, NULL)) {', 'then a last word'), ('if (guiMsgBox(msg, 1, NULL) && unlink(src) == 0)', 'the original goes only when asked')), 'ripps2games.c compression')
