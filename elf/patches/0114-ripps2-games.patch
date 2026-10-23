@@ -14044,10 +14044,10 @@ index b3e36fb..03234c9 100644
      HDD_LOADMODULES_STATUS_ERROR = -2,
      HDD_LOADMODULES_STATUS_UNK = -1,
 diff --git a/include/ioman.h b/include/ioman.h
-index 8bf8fcf..1d82e03 100644
+index 8bf8fcf..a11a8bc 100644
 --- a/include/ioman.h
 +++ b/include/ioman.h
-@@ -74,6 +74,15 @@ int ioBlockOps(int block);
+@@ -74,6 +74,19 @@ int ioBlockOps(int block);
  */
  int ioBlockOpsTimed(int block, int timeoutTicks);
  
@@ -14059,6 +14059,10 @@ index 8bf8fcf..1d82e03 100644
 +void ioWriteEnd(void);
 +void ioLaunchBegin(void);
 +int ioWaitWrites(int timeoutTicks);
++int ioWritesOpen(void);                                // build 114: writes started and not yet ended
++int ioRunningJob(int *type, void **data, int *seconds); // build 114: the worker's job now (0 when idle)
++const char *ioRunningName(void);                       // its name when it is a named action, else NULL
++void ioCancelScans(void);                              // build 114: a list read gives up at its next entry
 +
  // RIPPS2: name a simple action for ioDescribeRunning; describe what the worker runs now ("" when idle)
  void ioNameAction(void *fn, const char *name);
@@ -14355,7 +14359,7 @@ index ccda44b..3797788 100644
  void rmStartFrame(void);
  
 diff --git a/include/ripps2.h b/include/ripps2.h
-index a10c426..54ecd88 100644
+index a10c426..2d6c657 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -139,6 +139,12 @@ int ripps2Legacy(void); // build 113: a theme without categories=three: Storage
@@ -14371,6 +14375,14 @@ index a10c426..54ecd88 100644
  // ---- build 113: the category sidebar (ripps2side.c) ----
  extern int gRipps2FastCache; // build 113: Game Sources > Cache > Fast Cache, each source's saved list (1, the default)
  extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar
+@@ -265,6 +271,7 @@ void ripps2PlayLaunchSequence(void); // pillars only, light-up and flash; the la
+ int ripps2LaunchScreenHeld(void);    // that frame is up: the teardown must not draw over it
+ void ripps2LaunchPump(void);         // build 70: one more frame of it, with the loading mark, from the teardown's waits
+ void ripps2LaunchAborted(void);      // the launch failed and returned to the menu
++int ripps2LaunchGuard(void);         // build 114: 1 to start; 0 when the user backed out (ripps2games.c)
+ int ripps2LaunchDiscFrame(void);     // build 91: one frame of the field with the launch disc on it; 0 when no disc is armed
+ 
+ // ---- The launch disc (ripps2ui.c, build 91) ----
 diff --git a/include/ripps2games.h b/include/ripps2games.h
 new file mode 100644
 index 0000000..e5e00d4
@@ -83593,10 +83605,67 @@ index a1027e5..eb92416 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..084a79c 100644
+index 3dc8c13..c79f063 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
-@@ -735,6 +735,50 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -223,6 +223,56 @@ int ioDescribeRunning(char *out, int size)
+     return 1;
+ }
+ 
++// RIPPS2 build 114: the launch guard names what the worker is doing, and can ask a list read to give up
++int ioRunningJob(int *type, void **data, int *seconds)
++{
++    int t = gRunType;
++    void *d = gRunData;
++    clock_t since = gRunSince;
++    if (t == 0)
++        return 0;
++    if (type != NULL)
++        *type = t;
++    if (data != NULL)
++        *data = d;
++    if (seconds != NULL)
++        *seconds = (int)((clock() - since) / CLOCKS_PER_SEC);
++    return 1;
++}
++
++const char *ioRunningName(void)
++{
++    void *data = gRunData;
++    int i;
++    for (i = 0; i < gIoNameCount; i++)
++        if (gIoNames[i].fn == data)
++            return gIoNames[i].name;
++    return NULL;
++}
++
++static volatile int gIoCancelScans = 0;
++
++void ioCancelScans(void)
++{
++    gIoCancelScans = 1;
++}
++
++// supportbase.c declares these three weak (RiptOPL's host harnesses compile its scan without ioman.c)
++int ioScanCancelled(void)
++{
++    return gIoCancelScans;
++}
++
++int ioCacheWriteBegin(void)
++{
++    return ioWriteBegin();
++}
++
++void ioCacheWriteEnd(void)
++{
++    ioWriteEnd();
++}
++
+ // RIPPS2: is the worker inside a job right now
+ int ioWorkerBusy(void)
+ {
+@@ -735,6 +785,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
@@ -83628,6 +83697,11 @@ index 3dc8c13..084a79c 100644
 +    DIntr();
 +    gIoLaunching = 1;
 +    EIntr();
++}
++
++int ioWritesOpen(void)
++{
++    return gIoWrites;
 +}
 +
 +int ioWaitWrites(int timeoutTicks)
@@ -84867,7 +84941,7 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..19a8548 100644
+index 13c78db..551e51c 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -50,6 +50,8 @@
@@ -84890,7 +84964,16 @@ index 13c78db..19a8548 100644
                  config_set_t *configSet = menuLoadConfig();
                  if (configSet == NULL)
                      return;
-@@ -523,7 +529,10 @@ static void itemExecSelect(struct menu_item *curMenu)
+@@ -513,6 +519,8 @@ static void itemExecSelect(struct menu_item *curMenu)
+                 }
+                 // Flash the GameID barcode (Pixel FX/RetroGEM HDMI auto-profile) before handoff. Use
+                 // the stack copy: the hold renders/unlocks for many frames while source lists may refresh.
++                if (!ripps2LaunchGuard()) // build 114: RIPPS2's own work named; stop it and start, or back out unchanged
++                    return;
+                 itemPushRecent(curMenu, support); // RIPPS2 build 71: Show Recents
+                 // RIPPS2: the pillars light up (no menu), then the handoff; a launch that returns failed
+                 ripps2LaunchDiscArm(support, gameIdStartup); // build 91: the game's disc, when the theme or the user wants it
+@@ -523,7 +531,10 @@ static void itemExecSelect(struct menu_item *curMenu)
                  int launchView = support->itemGetView != NULL ? support->itemGetView(support, launchId) : libListViewActive(support);
                  if (launchView != LIB_VIEW_PS1)
                      guiShowGameID(gameIdStartup);
@@ -84901,7 +84984,7 @@ index 13c78db..19a8548 100644
                  ripps2LaunchAborted();
              }
          } else {
-@@ -1021,6 +1030,12 @@ static int modeStartMode(int mode)
+@@ -1021,6 +1032,12 @@ static int modeStartMode(int mode)
      return startMode;
  }
  
@@ -84914,7 +84997,7 @@ index 13c78db..19a8548 100644
  // RIPPS2: All Games starts with its sources: Auto when any game source is Auto, Manual when any is
  // Manual (its Start then starts them all), hidden when every one is off
  static int mixStartMode(void)
-@@ -1457,6 +1472,7 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+@@ -1457,6 +1474,7 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
      }
  
      clearMenuGameList(mdl);
@@ -84922,7 +85005,7 @@ index 13c78db..19a8548 100644
      // An L3 transition is staged while the old submenu is still live. Commit only after that submenu
      // is gone, then every array read below and every newly queued row belongs to the same new view.
      viewTransition = libViewPending(mdl->support->mode);
-@@ -1530,6 +1546,9 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+@@ -1530,6 +1548,9 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
                  // Pass 0 emits folders, pass 1 emits games (single-pass mode emits every row).
                  if (passes == 2 && ((pass == 0) != (isFolderRow != 0)))
                      continue;
@@ -84932,7 +85015,7 @@ index 13c78db..19a8548 100644
  
                  gup = guiOpCreate(GUI_OP_APPEND_MENU);
                  if (!gup) // OOM: skip this entry rather than deref NULL
-@@ -1660,9 +1679,10 @@ void menuDeferredUpdate(void *data)
+@@ -1660,9 +1681,10 @@ void menuDeferredUpdate(void *data)
          if (gFAVStartMode && mod->support->mode != FAV_MODE)
              loadFavourites();
  
@@ -84945,7 +85028,7 @@ index 13c78db..19a8548 100644
      } else if (libViewPending(mod->support->mode)) {
          // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
          // no card inserted). Still retire the old rows and commit the retained destination so input
-@@ -3649,7 +3669,10 @@ static void _loadConfig()
+@@ -3649,7 +3671,10 @@ static void _loadConfig()
      const char *temp;
      char cardHome[16], prevHome[256], redirect[256];
      int fromCard = 0;
@@ -84957,7 +85040,7 @@ index 13c78db..19a8548 100644
      // RIPPS2 build 100: RIPPS2's own save on a memory card first, unless a Custom Settings Path points elsewhere
      if ((lscstatus & CONFIG_OPL) && !readConfigPathRedirect(redirect, sizeof(redirect)) &&
          ripps2CardSettingsHome(cardHome, sizeof(cardHome), 1)) {
-@@ -5292,6 +5315,7 @@ int gArtAbandoned = 0;
+@@ -5292,6 +5317,7 @@ int gArtAbandoned = 0;
  
  void deinitEx(int exception, int modeSelected, int modeSelected2)
  {
@@ -84965,7 +85048,7 @@ index 13c78db..19a8548 100644
      gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
  
      // Say something BEFORE the blocking teardown below, because it can hold this thread for the
-@@ -5339,6 +5363,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+@@ -5339,6 +5365,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
  
      // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
      ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
@@ -84975,7 +85058,7 @@ index 13c78db..19a8548 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
-@@ -5384,6 +5411,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+@@ -5384,6 +5413,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
  
  void deinit(int exception, int modeSelected)
  {
@@ -84983,7 +85066,7 @@ index 13c78db..19a8548 100644
      gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
  
      // Say something BEFORE the blocking teardown below, because it can hold this thread for the
-@@ -5431,6 +5459,9 @@ void deinit(int exception, int modeSelected)
+@@ -5431,6 +5461,9 @@ void deinit(int exception, int modeSelected)
  
      // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
      ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
@@ -84993,7 +85076,7 @@ index 13c78db..19a8548 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
-@@ -5730,6 +5761,7 @@ static void init(void)
+@@ -5730,6 +5763,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
      ioNameAction((void *)&deferredAudioInit, "SOUND LOAD");
@@ -85001,7 +85084,7 @@ index 13c78db..19a8548 100644
      menuInit();
  
      startPads();
-@@ -5885,6 +5917,9 @@ static void miniInit(int mode)
+@@ -5885,6 +5919,9 @@ static void miniInit(int mode)
      configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd)
  
      ioInit();
@@ -85063,6 +85146,46 @@ index be7699f..8a94c86 100644
  }
  
  void rmDrawTriGouraud(float x1, float y1, u64 c1, float x2, float y2, u64 c2, float x3, float y3, u64 c3)
+diff --git a/src/ripps2.c b/src/ripps2.c
+index 1526d6e..16334f6 100644
+--- a/src/ripps2.c
++++ b/src/ripps2.c
+@@ -57,6 +57,8 @@ int ripps2LaunchDvdPlayer(void)
+             if (r2FileExists(path)) {
+                 LOG("RIPPS2 DVD: booting the player update %s\n", path);
+                 snprintf(playerArg, sizeof(playerArg), "-x %s", path);
++                if (!ripps2LaunchGuard()) // build 114
++                    return SYS_DISC_CANCELLED;
+                 ripps2LaunchDiscArmGeneric(); // build 91: the launch disc for a disc (RIPPS2's own, no art)
+                 ripps2PlayLaunchSequence();
+                 deinit(NO_EXCEPTION, IO_MODE_SELECTED_ALL);
+@@ -85,6 +87,8 @@ int ripps2LaunchDvdPlayer(void)
+         }
+     }
+     LOG("RIPPS2 DVD: booting the ROM player (%s %s)\n", eromdrvArg, dvdelfArg);
++    if (!ripps2LaunchGuard()) // build 114
++        return SYS_DISC_CANCELLED;
+     ripps2LaunchDiscArmGeneric(); // build 91: the launch disc for a disc (RIPPS2's own, no art)
+     ripps2PlayLaunchSequence();
+     deinit(NO_EXCEPTION, IO_MODE_SELECTED_ALL);
+@@ -201,6 +205,8 @@ int ripps2LaunchDvdVideo(void)
+         }
+         LOG("RIPPS2 ESR: booting %s\n", esrPath);
+         argv[0] = esrPath;
++        if (!ripps2LaunchGuard()) // build 114
++            return SYS_DISC_CANCELLED;
+         ripps2LaunchDiscArmGeneric(); // build 91: the launch disc for a disc (RIPPS2's own, no art)
+         ripps2PlayLaunchSequence();
+         deinit(UNMOUNT_EXCEPTION, IO_MODE_SELECTED_ALL_SPARE); // keep the drive ESR is on
+@@ -285,6 +291,8 @@ int ripps2LaunchPs1Disc(void)
+     }
+ 
+     LOG("RIPPS2 PS1: booting %s (VER %s)\n", bootArg, verArg);
++    if (!ripps2LaunchGuard()) // build 114
++        return SYS_DISC_CANCELLED;
+     ripps2LaunchDiscArmGeneric(); // build 91: the launch disc for a disc (RIPPS2's own, no art)
+     ripps2PlayLaunchSequence();
+     deinit(NO_EXCEPTION, IO_MODE_SELECTED_ALL);
 diff --git a/src/ripps2about.c b/src/ripps2about.c
 index 0ec24b6..05d46fb 100644
 --- a/src/ripps2about.c
@@ -85156,7 +85279,7 @@ index 459b24e..5651a19 100644
      if (guiMsgBox(msg, 1, NULL) != 1)
          return 0;
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 4bedb0c..2ccde25 100644
+index 4bedb0c..f2306fc 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -53,6 +53,7 @@
@@ -85175,7 +85298,43 @@ index 4bedb0c..2ccde25 100644
          if (res >= -2) {
              if (freeKb != NULL)
                  *freeKb = res >= -1 && type == sceMcTypePS2 && format == MC_FORMATTED ? freeC : -1;
-@@ -1616,7 +1618,9 @@ static void fbRunIso(const fb_entry_t *e)
+@@ -1379,6 +1381,8 @@ static void fbRunElf(const fb_entry_t *e)
+     // way the PS1 pages start it, the IOP and its drives kept, its own path as argv[0] (on the HDD
+     // too: it reads its games through the live pfs0: mount)
+     const char *base = strrchr(elfPath, '/');
++    if (!ripps2LaunchGuard()) // build 114: RIPPS2's own work named; stop it and start, or back out unchanged
++        return;
+     if (!strcasecmp(base != NULL ? base + 1 : elfPath, EMBER_ELF_NAME)) {
+         ripps2PlayLaunchSequence();
+         deinit(UNMOUNT_EXCEPTION, IO_MODE_SELECTED_ALL_SPARE);
+@@ -1441,6 +1445,8 @@ static void fbRunVcd(const fb_entry_t *e)
+     snprintf(ask, sizeof(ask), _t("Play %s?"), name);
+     if (!guiMsgBox(ask, 1, NULL))
+         return;
++    if (!ripps2LaunchGuard()) // build 114
++        return;
+     ripps2LaunchDiscArmGeneric(); // build 91: a PS1 disc image
+     ripps2PlayLaunchSequence();
+     mod->support->itemLaunchVcd(mod->support, name, NULL);
+@@ -1555,6 +1561,8 @@ static void fbRunIsoAt(item_list_t *src, const fb_entry_t *e)
+     g.parts = 1;
+     g.media = dvd ? SCECdPS2DVD : SCECdPS2CD;
+     g.format = GAME_FORMAT_ISO;
++    if (!ripps2LaunchGuard()) // build 114
++        return;
+     (void)cacheCancelPendingImageLoadsTimed(0); // the launch owns the drive now
+     config_set_t *cfg = sbPopulateConfig(&g, src->itemGetPrefix(src), "/");
+     ripps2LaunchDiscArm(src, startup);
+@@ -1605,6 +1613,8 @@ static void fbRunIso(const fb_entry_t *e)
+     snprintf(ask, sizeof(ask), _t("Play %s?"), view.itemGetName(&view, found));
+     if (!guiMsgBox(ask, 1, NULL))
+         return;
++    if (!ripps2LaunchGuard()) // build 114
++        return;
+     char *st = view.itemGetStartup(&view, found);
+     snprintf(startup, sizeof(startup), "%s", st != NULL ? st : "");
+     // the launch owns the drive now: queued art reads go first (menuLoadConfig does the same for Storage)
+@@ -1616,7 +1626,9 @@ static void fbRunIso(const fb_entry_t *e)
      ripps2LaunchDiscArm(&view, startup);
      ripps2PlayLaunchSequence();
      guiShowGameID(startup);
@@ -85185,7 +85344,16 @@ index 4bedb0c..2ccde25 100644
      ripps2LaunchAborted();
      if (cfg != NULL)
          configFree(cfg);
-@@ -1735,6 +1739,41 @@ static void fbStartDrivesWork(void)
+@@ -1649,6 +1661,8 @@ static void fbRunCue(const fb_entry_t *e)
+     snprintf(ask, sizeof(ask), _t("Play %s with Ember?"), folder);
+     if (!guiMsgBox(ask, 1, NULL))
+         return;
++    if (!ripps2LaunchGuard()) // build 114
++        return;
+     ripps2LaunchDiscArmGeneric(); // a PS1 disc
+     ripps2PlayLaunchSequence();
+     src->itemLaunchCue(src, folder, NULL);
+@@ -1735,6 +1749,41 @@ static void fbStartDrivesWork(void)
      fbDrivesDone = 1;
  }
  
@@ -85229,10 +85397,10 @@ index 4bedb0c..2ccde25 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..2af37d6
+index 0000000..ba4b00b
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,997 @@
+@@ -0,0 +1,1047 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -85272,6 +85440,7 @@ index 0000000..2af37d6
 +#include <sys/stat.h>
 +#include <kernel.h>
 +#include <delaythread.h> // shResolve waits for a drive rereading its list
++#include <time.h>        // build 114: the launch guard's moment for a short job
 +#define NEWLIB_PORT_AWARE
 +#include <fileXio_rpc.h> // fileXioRemove on hdd0: (the partition)
 +
@@ -85911,6 +86080,55 @@ index 0000000..2af37d6
 +    if (mode == ETH_MODE)
 +        return _t("the SMB share");
 +    return _t("its drive");
++}
++
++// ---- the launch guard (build 114) ----
++// The user (10/23): a launch never runs into RIPPS2's own work. Before the light-up, a job still running on the IO
++// worker (a drive's list read, a save) or a write still open is named, and the user stops it safely and starts, or
++// backs out to the page the launch began on, unchanged. A short job gets a moment to finish first, unseen.
++
++static void lgWhat(char *out, int size)
++{
++    int type = 0, secs = 0;
++    void *data = NULL;
++    const char *name;
++
++    if (!ioRunningJob(&type, &data, &secs))
++        snprintf(out, size, "%s", _t("saving a list"));
++    else if (type == IO_MENU_UPDATE_DEFFERED && data != NULL)
++        snprintf(out, size, _t("reading the game list of %s (%d s)"), lrWhere(*(int *)data), secs);
++    else if ((name = ioRunningName()) != NULL)
++        snprintf(out, size, "%s (%d s)", name, secs);
++    else
++        snprintf(out, size, _t("a task in the background (%d s)"), secs);
++}
++
++int ripps2LaunchGuard(void)
++{
++    char what[160], msg[400];
++    clock_t from = clock();
++
++    while ((ioWorkerBusy() || ioWritesOpen()) && clock() - from < CLOCKS_PER_SEC * 3 / 2)
++        DelayThread(20 * 1000);
++    if (!ioWorkerBusy() && !ioWritesOpen())
++        return 1;
++    lgWhat(what, sizeof(what));
++    snprintf(msg, sizeof(msg), _t("RIPPS2 is still busy: %s. Accept stops it safely and starts; Back returns here, so you can start again in a moment."), what);
++    guiMsgBoxSound(SFX_MESSAGE);
++    if (guiMsgBox(msg, 1, NULL) != 1)
++        return 0;
++    // stop: no write starts from here, a list read gives up at its next entry, queued reads go; an open write ends
++    ioLaunchBegin();
++    ioCancelScans();
++    ioRemoveRequests(IO_MENU_UPDATE_DEFFERED);
++    from = clock();
++    while ((ioWorkerBusy() || ioWritesOpen()) && clock() - from < CLOCKS_PER_SEC * 30) {
++        lgWhat(what, sizeof(what));
++        snprintf(msg, sizeof(msg), _t("STOPPING: %s"), what);
++        guiRenderTextScreen(msg);
++        DelayThread(100 * 1000);
++    }
++    return 1;
 +}
 +
 +void ripps2LastRites(item_list_t *support, int id)
@@ -87273,7 +87491,7 @@ index 43ed8bd..f4d22b4 100644
  /* MENU RUMBLE TIMING -- the RETROLauncher model, which is the reference for feedback that actually
     reads as feedback on hardware. Two shapes, and the split matters more than either value:
 diff --git a/src/supportbase.c b/src/supportbase.c
-index 0517e61..3c59179 100644
+index 0517e61..ed715d5 100644
 --- a/src/supportbase.c
 +++ b/src/supportbase.c
 @@ -4,6 +4,7 @@
@@ -87284,28 +87502,48 @@ index 0517e61..3c59179 100644
  #include "include/folderbrowse.h" // FOLDER_SUB_MAX + folder-browse subpath state
  #include "include/vcdsupport.h"   // vcdExtractGameId + VCD_ID_MAX -- VCD per-game CFG keying
  #include "include/cuesupport.h"   // cueIsCueEntry -- Ember rows key their CFG by folder name too
-@@ -211,7 +212,20 @@ static void freeISOGameListCache(struct game_cache_list *cache)
-     }
- }
- 
-+static int updateISOGameListNow(const char *path, const struct game_cache_list *cache, const struct game_list_t *head, int count);
+@@ -357,6 +358,12 @@ int sbGetReadListError(void)
+ // folderlist (folder-browse only, else NULL) collects subdirectory rows in a list SEPARATE from
+ // glist so they never reach the games.bin cache (updateISOGameList would otherwise cache them as
+ // phantom entries and poison its change-detection). Folder rows are not counted in the return value.
++// RIPPS2 build 114 (ioman.c): the launch guard stopped this read; and the games list cache below is written only
++// through the launch-safe write gate. Weak: RiptOPL's host harnesses compile this span and see NULL.
++int ioScanCancelled(void) __attribute__((weak));
++int ioCacheWriteBegin(void) __attribute__((weak));
++void ioCacheWriteEnd(void) __attribute__((weak));
 +
-+// RIPPS2 build 114: the games list cache is written by the IO worker; never once a launch has begun
- static int updateISOGameList(const char *path, const struct game_cache_list *cache, const struct game_list_t *head, int count)
-+{
-+    int result;
-+    if (!ioWriteBegin())
-+        return 0;
-+    result = updateISOGameListNow(path, cache, head, count);
-+    ioWriteEnd();
-+    return result;
-+}
-+
-+static int updateISOGameListNow(const char *path, const struct game_cache_list *cache, const struct game_list_t *head, int count)
+ static int scanForISO(char *path, char type, struct game_list_t **glist, struct game_list_t **folderlist)
  {
-     char filename[256];
-     FILE *file;
-@@ -784,16 +798,22 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+     int count = 0;
+@@ -380,6 +387,8 @@ static int scanForISO(char *path, char type, struct game_list_t **glist, struct
+         fullpath[base_path_len] = '/';
+ 
+         while ((dirent = readdir(dir)) != NULL) {
++            if (ioScanCancelled != NULL && ioScanCancelled())
++                break; // build 114: a launch asked this read to stop
+             int NameLen;
+             int format = isValidIsoName(dirent->d_name, &NameLen);
+ 
+@@ -488,12 +497,13 @@ static int scanForISO(char *path, char type, struct game_list_t **glist, struct
+     }
+ 
+     LOG("scanForISO: %s %d games (cache %d)\n", path, count, cacheLoaded ? (int)cache.count : -1);
+-    if (cacheLoaded) {
+-        updateISOGameList(path, &cache, *glist, count);
+-        freeISOGameListCache(&cache);
+-    } else {
+-        updateISOGameList(path, NULL, *glist, count);
++    if (ioCacheWriteBegin == NULL || ioCacheWriteBegin()) { // build 114: never once a launch has begun
++        updateISOGameList(path, cacheLoaded ? &cache : NULL, *glist, count);
++        if (ioCacheWriteEnd != NULL)
++            ioCacheWriteEnd();
+     }
++    if (cacheLoaded)
++        freeISOGameListCache(&cache);
+ 
+     return count;
+ }
+@@ -784,16 +794,22 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
          return;
      snprintf(path, sizeof(path), "%s%s", prefix, SB_SNAP_FILE);
      if (gamecount <= 0 || list == NULL) { // nothing there now: no list to show next time
@@ -87322,15 +87560,15 @@ index 0517e61..3c59179 100644
          return;
 -    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
 +    if (!ioWriteBegin()) // build 114: a scan that outlasted a launch's drain writes nothing
-         return;
++        return;
 +    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0) {
 +        ioWriteEnd();
-+        return;
+         return;
 +    }
      memset(&h, 0, sizeof(h));
      memcpy(h.magic, SB_SNAP_MAGIC, 8);
      h.count = gamecount;
-@@ -803,6 +823,7 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+@@ -803,6 +819,7 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
      if (write(fd, &h, sizeof(h)) == (int)sizeof(h) && write(fd, list, bytes) == bytes)
          snap->sum = sum;
      close(fd);
@@ -87338,7 +87576,7 @@ index 0517e61..3c59179 100644
  }
  
  void sbSnapForget(sb_snap_t *snap)
-@@ -924,10 +945,7 @@ static const struct
+@@ -924,10 +941,7 @@ static const struct
      int compatModes;
  } sbTitleCompatDefaults[] = {
      {"SLES_511.14", COMPAT_MODE_1}, // Pro Evolution Soccer 2 (Europe): streamed audio breaks without Accurate Reads (upstream OPL #1686)
@@ -87350,7 +87588,7 @@ index 0517e61..3c59179 100644
  };
  
  int sbTitleCompatDefault(config_set_t *configSet)
-@@ -1081,6 +1099,11 @@ int sbPrepare(base_game_info_t *game, config_set_t *configSet, int size_cdvdman,
+@@ -1081,6 +1095,11 @@ int sbPrepare(base_game_info_t *game, config_set_t *configSet, int size_cdvdman,
          settings->flags |= IOPCORE_COMPAT_ACCU_READS;
      }
  
@@ -87362,7 +87600,7 @@ index 0517e61..3c59179 100644
      if (compatmask & COMPAT_MODE_2) {
          settings->flags |= IOPCORE_COMPAT_ALT_READ;
      }
-@@ -1847,6 +1870,8 @@ static const char *sbNeutrinoResolved(const char *path)
+@@ -1847,6 +1866,8 @@ static const char *sbNeutrinoResolved(const char *path)
  {
      if (path == NULL)
          return NULL;
@@ -87371,7 +87609,7 @@ index 0517e61..3c59179 100644
      const char *slash = sbLastPathSeparator(path);
      if (slash != NULL) {
          char vpath[320], ver[128]; // same headroom rationale as sbNeutrinoInstallComplete's probe
-@@ -2433,6 +2458,18 @@ const char *sbResolveNeutrinoPath(const char *activePrefix)
+@@ -2433,6 +2454,18 @@ const char *sbResolveNeutrinoPath(const char *activePrefix)
              return mcHit;
      }
  
@@ -87391,7 +87629,7 @@ index 0517e61..3c59179 100644
          // RIPPS2 build 77: none anywhere -- offer the Neutrino RIPPS2 carries, where the user picks
          static char installed[96];
 diff --git a/src/system.c b/src/system.c
-index f77d08e..992d833 100644
+index f77d08e..1bea4b2 100644
 --- a/src/system.c
 +++ b/src/system.c
 @@ -65,14 +65,7 @@
@@ -87410,7 +87648,16 @@ index f77d08e..992d833 100644
  
  extern unsigned char eecore_elf[];
  extern unsigned int size_eecore_elf;
-@@ -978,7 +971,12 @@ static unsigned int sendIrxKernelRAM(const char *startup, const char *mode_str,
+@@ -744,6 +737,8 @@ int sysLaunchDisc(int (*progress)(void))
+         return result;
+ 
+     LOG("[DISC] booting %s\n", path);
++    if (!ripps2LaunchGuard()) // build 114: before the MMCE's card is switched, so backing out leaves it as it was
++        return SYS_DISC_CANCELLED;
+ 
+     // Tell the MMCE which game is about to boot (#183). EVERY other launch path already does this --
+     // only Launch Disc was missing it. Without this, physical disc launches on a console with a
+@@ -978,7 +973,12 @@ static unsigned int sendIrxKernelRAM(const char *startup, const char *mode_str,
      }
      // VMC and PADEMU also need an initial SDK SIO2MAN table to hook after reset.
      // Keep one copy and preserve the existing module ID across every transport.
@@ -87424,7 +87671,7 @@ index f77d08e..992d833 100644
          irxptr_tab[modcount].info = size_sio2man_irx | SET_OPL_MOD_ID(OPL_MODULE_ID_SIO2MAN);
          irxptr_tab[modcount++].ptr = (void *)&sio2man_irx;
      }
-@@ -1504,6 +1502,103 @@ static const char *sysLastPathSeparator(const char *path)
+@@ -1504,6 +1504,103 @@ static const char *sysLastPathSeparator(const char *path)
      return slash;
  }
  
@@ -87528,7 +87775,7 @@ index f77d08e..992d833 100644
  static int sysSyncNeutrinoUdpfsToml(const char *neutrinoPath, const char *deviceName)
  {
      static char toml[4096]; // Δ6: raised from 2048 -- an annotated toml no longer gets skipped
-@@ -1533,6 +1628,17 @@ static int sysSyncNeutrinoUdpfsToml(const char *neutrinoPath, const char *device
+@@ -1533,6 +1630,17 @@ static int sysSyncNeutrinoUdpfsToml(const char *neutrinoPath, const char *device
      }
      toml[len] = '\0';
  
@@ -87546,7 +87793,7 @@ index f77d08e..992d833 100644
      char *tok = strstr(toml, "\"ip=");
      if (tok == NULL) {
          LOG("[NEUTRINO] %s has no \"ip= token -- left as-is\n", tomlPath);
-@@ -1544,12 +1650,12 @@ static int sysSyncNeutrinoUdpfsToml(const char *neutrinoPath, const char *device
+@@ -1544,12 +1652,12 @@ static int sysSyncNeutrinoUdpfsToml(const char *neutrinoPath, const char *device
          valEnd++;
  
      snprintf(newIp, sizeof(newIp), "%d.%d.%d.%d", ps2_ip[0], ps2_ip[1], ps2_ip[2], ps2_ip[3]);
@@ -87561,7 +87808,7 @@ index f77d08e..992d833 100644
      if (fd < 0) {
          LOG("[NEUTRINO] cannot rewrite %s (%d) -- ip= left as-is\n", tomlPath, fd);
          return 0; // write-protected media: proceed on the old hand-edit contract
-@@ -1562,14 +1668,14 @@ static int sysSyncNeutrinoUdpfsToml(const char *neutrinoPath, const char *device
+@@ -1562,14 +1670,14 @@ static int sysSyncNeutrinoUdpfsToml(const char *neutrinoPath, const char *device
          // recovery without atomic-rename support across every PS2 filesystem: put the ORIGINAL
          // content back so the user is no worse off than before the sync (old hand-edit contract).
          LOG("[NEUTRINO] short write to %s (%d/%d) -- restoring original toml\n", tomlPath, written, expected);
@@ -87578,7 +87825,7 @@ index f77d08e..992d833 100644
      return 0;
  }
  
-@@ -1951,13 +2057,20 @@ int sysNeutrinoPreflight(const char *driver, const char *neutrinoPath, int neutr
+@@ -1951,13 +2059,20 @@ int sysNeutrinoPreflight(const char *driver, const char *neutrinoPath, int neutr
  
      // The DVR backend is a filesystem (dvr_pfsN:), never a block-device
      // filesystem override. It must use the PSX-mode reset in pcm720's bsd-dvr
@@ -87600,7 +87847,7 @@ index f77d08e..992d833 100644
      }
  
  
-@@ -2497,7 +2610,10 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+@@ -2497,7 +2612,10 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
  #else
      const int discMode = 0;
  #endif
@@ -87612,7 +87859,7 @@ index f77d08e..992d833 100644
          modules |= CORE_IRX_VMC;
  
      LOG("SYSTEM LaunchLoaderElf loading modules\n");
-@@ -2589,7 +2705,9 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+@@ -2589,7 +2707,9 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
      config->magic[1] = EE_CORE_MAGIC_1;
  
      strncpy(config->ExitPath, gExitPath, CORE_EXIT_PATH_MAX_LEN);
@@ -87622,7 +87869,7 @@ index f77d08e..992d833 100644
  
      config->EnableDebug = gEnableDebug;
      config->HDDSpindown = gHDDSpindown;
-@@ -2684,6 +2802,7 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+@@ -2684,6 +2804,7 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
      config->ModStorageEnd = ModuleStorageEnd;
  
      strncpy(config->GameID, filename, CORE_GAME_ID_MAX_LEN);
@@ -87630,7 +87877,7 @@ index f77d08e..992d833 100644
  
      config->_CompatMask = compatflags;
  
-@@ -2826,8 +2945,15 @@ int sysVMCContiguity(void)
+@@ -2826,8 +2947,15 @@ int sysVMCContiguity(void)
      return -1; // anything else is the ioctl itself failing, not a verdict about the file
  }
  
@@ -87647,7 +87894,7 @@ index f77d08e..992d833 100644
  {
      int size = -1;
      char path[256];
-@@ -2930,6 +3056,7 @@ int sysCheckVMC(const char *prefix, const char *sep, char *name, int createSize,
+@@ -2930,6 +3058,7 @@ int sysCheckVMC(const char *prefix, const char *sep, char *name, int createSize,
              createParam.VMC_blocksize = 16;
              createParam.VMC_thread_priority = 0x0f;
              createParam.VMC_card_slot = -1;
@@ -87655,7 +87902,7 @@ index f77d08e..992d833 100644
              if (fileXioDevctl("genvmc:", 0xC0DE0001, (void *)&createParam, sizeof(createParam), NULL, 0) < 0) {
                  gVMCCreatePath[0] = '\0';
                  return SYS_VMC_CREATE_FAILED;
-@@ -2938,3 +3065,8 @@ int sysCheckVMC(const char *prefix, const char *sep, char *name, int createSize,
+@@ -2938,3 +3067,8 @@ int sysCheckVMC(const char *prefix, const char *sep, char *name, int createSize,
      }
      return size;
  }

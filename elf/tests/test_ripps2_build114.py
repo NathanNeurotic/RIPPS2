@@ -7,6 +7,7 @@ Static checks on the patched tree, then two pieces compiled on the PC: the APA c
 table, one written from a bigger disk, a partition too big for the disk, one off its alignment, a broken link, a
 chain that does not close) and the master list's save and load (a round trip; a damaged or short file is not read)."""
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -143,7 +144,7 @@ need(rd('src/ioman.c'), (('int ioWriteBegin(void)', 'the write gate'), ('ok = !g
 snapw = body(rd('src/supportbase.c'), 'void sbSnapScanned(')
 if snapw.find('ioWriteBegin()') < 0 or snapw.find('ioWriteBegin()') > snapw.find('O_WRONLY'):
     fail.append('supportbase.c: RIPPS2.LST is written only through the write gate')
-need(rd('src/supportbase.c'), (('result = updateISOGameListNow(path, cache, head, count);', 'the games list cache through the gate'),), 'supportbase.c')
+need(rd('src/supportbase.c'), (('if (ioCacheWriteBegin == NULL || ioCacheWriteBegin())', 'the games list cache through the gate'),), 'supportbase.c')
 mw = body(mix, 'static void mixMasterSave(')
 if mw.find('ioWriteBegin()') < 0 or mw.find('ioWriteBegin()') > mw.find('O_WRONLY'):
     fail.append('mixsupport.c: allgames.bin is written only through the write gate')
@@ -151,6 +152,22 @@ for f, needle in (('src/ripps2shot.c', 'ok = rsPngNow('), ('src/ripps2art.c', 'i
                   ('src/ripps2games.c', 'if (!ioWriteBegin())')):
     if needle not in rd(f):
         fail.append('%s: its background write goes through the gate' % f)
+
+# ---- the launch guard: every light-up has the guard in front of it (the user 10/23)
+for f in ('src/opl.c', 'src/system.c', 'src/ripps2.c', 'src/ripps2files.c'):
+    src_ = rd(f)
+    for m in re.finditer(r'ripps2PlayLaunchSequence\(\);', src_):
+        start = src_.rfind('\n{', 0, m.start())  # the function holding this light-up
+        if 'ripps2LaunchGuard()' not in src_[start:m.start()]:
+            fail.append('%s: a light-up at offset %d has no launch guard before it' % (f, m.start()))
+sysd = body(rd('src/system.c'), 'int sysLaunchDisc(')
+if sysd.find('ripps2LaunchGuard()') < 0 or sysd.find('ripps2LaunchGuard()') > sysd.find('mmceSendGameID('):
+    fail.append("system.c: Launch Disc's guard comes before the MMCE GameID, so backing out leaves the card as it was")
+need(rd('src/supportbase.c'), (('int ioScanCancelled(void) __attribute__((weak));', "the list read's stop is weak (host harness)"),
+                               ('if (ioScanCancelled != NULL && ioScanCancelled())', 'a list read stops when asked')), 'supportbase.c')
+lg = body(gm, 'int ripps2LaunchGuard(void)')
+if not (lg.find('guiMsgBox(') < lg.find('ioLaunchBegin();') < lg.find('ioCancelScans();')):
+    fail.append('ripps2games.c: the guard asks first, then stops writes and the list read')
 
 # ---- one ELF (the user 10/23: no lite ELF), FreeType, fonts
 mk = rd('Makefile')
@@ -329,4 +346,4 @@ int main(int argc, char **argv)
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build114: the merge, the launcher search, STATUS, the master list, hide and delete with the APA check, credits, launch write safety, one ELF, FreeType OK')
+print('build114: the merge, the launcher search, STATUS, the master list, hide and delete with the APA check, credits, launch write safety, the launch guard, one ELF, FreeType OK')
