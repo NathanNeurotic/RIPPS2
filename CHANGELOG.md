@@ -11,7 +11,8 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
 ### RiptOPL brought up to date
 - **RiptOPL rebuild/main 57c45b4 merged** (192 commits since 3cd7f89): i.LINK logs back in after an IOP reset and
   RiptOPL's i.LINK driver rides with Neutrino and POPSTARTER (#1018, FifthFox's iLink report), the in-game menu
-  from the VBLANK handler (#984), the USB / MX4SIO / iLink discovery waits skipped, VMC and ZSO fixes, Ember's
+  from the VBLANK handler (#984), **compatibility Mode 8, Slow Reads** (#924: Accurate Reads at the CD rate for DVD
+  games, OPL core only, ripto's fix for games that fail on fast reads), the USB / MX4SIO / iLink discovery waits skipped, VMC and ZSO fixes, Ember's
   starting disc from discs.txt, and the translation format checks. RIPPS2's own sound voices, in-game menu and
   keyed language files kept their build 104 to 113 behaviour on top.
 

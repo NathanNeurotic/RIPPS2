@@ -10,6 +10,7 @@
 - **The launch guard.** Pick a game while a drive is still being read and a glass panel says what RIPPS2 is finishing; its notches fill toward when it will be done, and the game starts by itself. **START NOW** stops the work safely and goes; **Back** returns to where you were. Music keeps playing. A short wait shows only the loading icon.
 
 ## Games
+- **Mode 8 (Slow Reads)** from RiptOPL, in a game's Compatibility settings: for DVD games that stutter or fail on the OPL core.
 - **All Games at once** at boot, from a saved list, even before the drives answer; a game on a drive still waking waits for it.
 - **Hide Game** (Triangle options): gone from every list until you show it again from Game Sources > Hidden Games.
 - **Delete, completely**: the image, its settings, art and cheats; its saves only if you say Yes. On the internal HDD (APA) the table is checked first and a damaged one is refused before anything changes.
