@@ -87285,7 +87285,7 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..d704823
+index 0000000..ef983ba
 --- /dev/null
 +++ b/src/ripps2games.c
 @@ -0,0 +1,1135 @@
@@ -88013,7 +88013,7 @@ index 0000000..d704823
 +
 +static void lgDraw(float a, float p, const char *head, const char *line, const char *left, int hints)
 +{
-+    int w = 520, h = 156, x = (640 - w) / 2, y = 134, ia = (int)(0x80 * a), hx; // room for "the internal HDD (exFAT)"
++    int w = 580, h = 156, x = (640 - w) / 2, y = 134, ia = (int)(0x80 * a), hx; // room for "the internal HDD (exFAT)"
 +    int confirmIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON;
 +    int backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
 +
