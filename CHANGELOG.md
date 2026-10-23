@@ -3,7 +3,9 @@
 ## Build 114 (beta, v1.1.4-beta when released), changes since build 113
 
 The user's plans of 10/22: All Games before the drives answer, hide and delete games, the launchers found and
-remembered, a smaller ELF for memory cards, and the field reports from FifthFox (iLink, size) and Berion (APA).
+remembered, a smaller ELF for memory cards, and the field reports from FifthFox (iLink, size) and Berion (APA). And of
+10/23: launches that never run into RIPPS2's own reading and writing, every settings page on one screen, one HDD, new
+Color Themes and the Color Sweep, and one newer Roboto with weights.
 
 ### RiptOPL brought up to date
 - **RiptOPL rebuild/main 57c45b4 merged** (192 commits since 3cd7f89): i.LINK logs back in after an IOP reset and
@@ -63,6 +65,49 @@ remembered, a smaller ELF for memory cards, and the field reports from FifthFox 
   the modules RIPPS2 reads (TrueType, sfnt, the autohinter, the smooth renderer, CFF), so Type 1, CID, PFR, BDF,
   PCF, WinFNT, SDF and SVG leave the link, and the built-in fonts lose glyph names, extra name records and
   substitution tables (render-checked identical at 14 to 32 px).
+
+### Safe launches, and the launch guard
+- **No write runs into a launch.** FifthFox lost two card images and a USB stick, likely to a write cut by a launch's
+  reset. A launch now stops RIPPS2's background writes before anything else (RIPPS2.LST, allgames.bin, the hidden
+  lists, art, RIPSHOT, the games list cache), waits for one already started, and stops a drive's list read at its next
+  entry.
+- **The launch guard.** A game picked while RIPPS2 is still reading a drive or saving a list waits its turn: a glass
+  panel fades in as RIPDISC's does, names what RIPPS2 is finishing, and RIPDISC's notches fill toward when it will be
+  done (each drive's last list read is timed). The game starts by itself when the work is done. **START NOW** stops
+  the work safely and starts at once; **Back** returns to the page the launch began on, unchanged. Music plays on.
+
+### Settings, every page on one screen
+- **Game Sources**: the BDM drives (USB, MX4SIO, PC Card, DESR, iLink) on a **BDM Devices** page of their own; the
+  greyed Protocol row gone (the Network page has it). **Interface**: Video Mode, Widescreen, H-POS, V-POS and Overscan
+  on a **Screen** page; VCD Games List Settings on PS Emulation only. **Flow and Grid** is **Layout**, with the
+  category rows; **Colors and More** is **Colors and Text**, with **Text Weight**. Network keeps its rows and scrolls.
+- The hub's names are shorter (PS Emulation, Controllers, Audio); General & System has its title; the POPSTARTER
+  network page has one name and a notice that fits; the VCD list's label lines up; the Neutrino arguments page has
+  its row's name; MMCE says On and Off; STATUS's BIBLE line fits; Artwork Settings gets **Missing Covers** (the Network
+  page keeps its Cover Art download too); a game's options end with one **Achievements** row that opens the three.
+
+### One HDD
+- A PS2 has one internal HDD, APA or exFAT. **HDD Start Mode** (Off, Manual, Auto) is the drive's, whatever its format,
+  and an exFAT drive no longer has an empty APA page beside it: Storage shows one HDD Games. An APA and exFAT hybrid
+  keeps both pages, named by format.
+
+### Colors
+- **Color Theme** gains **Tangerine**, **Flamingo**, **Turquoise**, **Moonlight** (a ghostly white) and **Custom**:
+  the new **Theme Color** picker shows each theme's color and is yours to pick on Custom, as the text colors are.
+- **Color Sweep**: five colors the theme fades through, each for a few seconds, never fast enough to flash.
+  **Rainbow**, then a sweep made from each Color Theme (an all-pink Flamingo, a ghostly Moonlight). **Sweep Colors**
+  opens its five pickers and its speed (Slow, Normal, Lively), seen live; change one of RIPPS2's and it is kept as
+  your own, under the name you give it (up to four).
+
+### Fonts
+- **One Roboto Condensed 3.015** (SIL OFL), variable from 400 to 700, replaces the 2011 Bold and 2014 Regular for
+  RIPFLOW and Settings; the Settings rows at 700 and 18 px.
+- **A weight for any font**: themes can set `default_font_weight` and `font1_weight` ... `font15_weight` (100 to 900);
+  `builtin:roboto` takes it as designed, any other face is drawn heavier in code.
+- **Text Weight** (Colors and Text): Regular, Medium or Bold for the Settings tooltips, STATUS and About.
+- **The language pack** carries the same Roboto, cut to each language's letters, for every Latin, Greek, Cyrillic and
+  Vietnamese one, so Settings in Russian or Greek draw one typeface. RIPPS2-themes edition 114: Adapt and Adapt Rx
+  use the built-in fonts (b.ttf, c.ttf and d.ttf gone), and the key glossary lists every built-in font.
 
 ### Credits
 - **Neutrino beside RiptOPL** on the About page: rickgaiser's Neutrino named in the opening lines as the second
