@@ -302,4 +302,4 @@ int main(int argc, char **argv)
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build114: the merge, SEANCE, STATUS, the master list, hide and delete with the APA check, credits, lite, FreeType OK')
+print('build114: the merge, the launcher search, STATUS, the master list, hide and delete with the APA check, credits, lite, FreeType OK')

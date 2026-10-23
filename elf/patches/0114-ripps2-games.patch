@@ -26595,7 +26595,7 @@ index 10e6306..c65f5be 100644
 +  PCCF_UNSUPPORTED_GAME: Hiện CF chỉ hỗ trợ trò chơi PS2 gốc. VMC trên CF, nạp PS1 và thành tích qua mạng không dùng được.
 +  HINT_ENABLE_DVR: Tìm ISO DESR DVR thử nghiệm. Cần bật nguồn HDD; chạy trò chơi cần Neutrino bên ngoài có hỗ trợ DVR.
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index e2e218a..b14dac5 100644
+index e2e218a..a8f2069 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -2076,3 +2076,89 @@ gui_strings:
@@ -26678,7 +26678,7 @@ index e2e218a..b14dac5 100644
 +  string: "Look now"
 +
 +- label: HINT_RIPPS2_LOOK_NOW
-+  string: "SEANCE searches the started drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is. Every launch reads them from there."
++  string: "RIPPS2 searches the started drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is. Every launch reads them from there."
 +
 +- label: RIPPS2_HIDE_GAME
 +  string: "Hide Game"
@@ -82992,7 +82992,7 @@ index d59e71c..6000fae 100644
      DeleteSema(gFontSemaId);
  
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..95c7ec2 100644
+index 2b110ad..b288057 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -12,10 +12,13 @@
@@ -83035,7 +83035,7 @@ index 2b110ad..95c7ec2 100644
 +        { // Look now: the started drives (Memory Files' and STATUS's START starts the rest)
 +            char msg[240];
 +            int known = seanceSearch();
-+            snprintf(msg, sizeof(msg), _t("SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there."), known);
++            snprintf(msg, sizeof(msg), _t("RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there."), known);
 +            guiMsgBoxSound(known > 0 ? SFX_MESSAGE : SFX_ERROR);
 +            guiMsgBox(msg, 0, NULL);
 +        }
@@ -85207,10 +85207,10 @@ index 4bedb0c..2ccde25 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..d56d0b2
+index 0000000..1d80dee
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,981 @@
+@@ -0,0 +1,990 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -85521,11 +85521,15 @@ index 0000000..d56d0b2
 +    guiMsgBoxSound(SFX_MESSAGE);
 +    if (guiMsgBox(msg, 1, NULL) != 1)
 +        return;
++    // the lab, 10/22: written while the IO worker was reading the drive again, RIPPS2.HID was made and its data never
++    // landed. Hold the worker off first (before the lock, which the worker's own scan takes), as LAST RITES does.
++    ioBlockOps(1);
 +    shLock();
 +    shLoad(r.mode, 1);
 +    s = &shList[r.mode];
 +    if (!s->loaded) {
 +        shUnlock();
++        ioBlockOps(0);
 +        guiMsgBoxSound(SFX_ERROR);
 +        guiMsgBox(_t("This drive cannot keep a hidden list (a network catalogue)."), 0, NULL);
 +        return;
@@ -85543,6 +85547,7 @@ index 0000000..d56d0b2
 +            s->count--;
 +    }
 +    shUnlock();
++    ioBlockOps(0);
 +    if (!ok) {
 +        guiMsgBoxSound(SFX_ERROR);
 +        guiMsgBox(_t("The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?"), 0, NULL);
@@ -86018,6 +86023,7 @@ index 0000000..d56d0b2
 +    }
 +    // its star and its place on the hidden list go with it
 +    removeFavouriteByIdAndText(r.mode, r.id, r.name, r.kind);
++    ioBlockOps(1); // as Hide Game: nothing else on the drive while its hidden list is written
 +    shLock();
 +    shLoad(r.mode, 1);
 +    for (i = 0; i < shList[r.mode].count; i++)
@@ -86029,6 +86035,7 @@ index 0000000..d56d0b2
 +            break;
 +        }
 +    shUnlock();
++    ioBlockOps(0);
 +    lrReceipt(r.name, where, freed, apaWhy);
 +    shRefresh(r.mode);
 +    lrSize(freed, size, sizeof(size));
@@ -86090,6 +86097,7 @@ index 0000000..d56d0b2
 +{
 +    hg_row_t *h = &hgRows[k];
 +    int i;
++    ioBlockOps(1); // as Hide Game: nothing else on the drive while its hidden list is written
 +    shLock();
 +    shLoad(h->mode, 1);
 +    for (i = 0; i < shList[h->mode].count; i++)
@@ -86101,6 +86109,7 @@ index 0000000..d56d0b2
 +            break;
 +        }
 +    shUnlock();
++    ioBlockOps(0);
 +    shRefresh(h->mode);
 +}
 +
@@ -86242,7 +86251,7 @@ index ce09083..3b36c8e 100644
                  snprintf(name, sizeof(name), "%s", p->name); // the list is read again below: keep the name
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
 new file mode 100644
-index 0000000..dee0a44
+index 0000000..a71c177
 --- /dev/null
 +++ b/src/ripps2seance.c
 @@ -0,0 +1,632 @@
@@ -86384,7 +86393,7 @@ index 0000000..dee0a44
 +    sePath(path, sizeof(path));
 +    if ((f = fopen(path, "w")) == NULL)
 +        return;
-+    fprintf(f, "# RIPPS2 SEANCE (build 114): where each launcher RIPPS2 does not carry was found. RIPPS2 keeps this file.\n"
++    fprintf(f, "# RIPPS2 (build 114): where each launcher RIPPS2 does not carry was found. RIPPS2 keeps this file.\n"
 +               "# A path names its drive by kind (usb:, ata:, mx4sio:, ilink:, mmce:, pfs:, mc:), so any slot finds it.\n");
 +    for (i = 0; i < SEANCE_COUNT; i++)
 +        if (seWhere[i][0])
@@ -86800,8 +86809,8 @@ index 0000000..dee0a44
 +        slash[1] = '\0';
 +    kb = stat(src, &st) == 0 ? (int)(st.st_size / 1024) : 0;
 +    snprintf(msg, sizeof(msg),
-+             what == SEANCE_EMBER ? _t("Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.") :
-+                                    _t("Ember's BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game."),
++             what == SEANCE_EMBER ? _t("Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.") :
++                                    _t("Ember's BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game."),
 +             dir, src, kb);
 +    guiMsgBoxSound(SFX_MESSAGE);
 +    guiMsgBoxStartOption(_t("COPY AND START"));
@@ -86879,7 +86888,7 @@ index 0000000..dee0a44
 +    return 0;
 +}
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index f2c48c4..f280ec2 100644
+index f2c48c4..77c500f 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -3,6 +3,11 @@
@@ -87152,7 +87161,7 @@ index f2c48c4..f280ec2 100644
 +            ripps2StartDrives();
 +    }
 +    known = seanceSearch();
-+    snprintf(msg, sizeof(msg), _t("SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there."), known);
++    snprintf(msg, sizeof(msg), _t("RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there."), known);
 +    guiMsgBoxSound(known > 0 ? SFX_MESSAGE : SFX_ERROR);
 +    guiMsgBox(msg, 0, NULL);
 +}
