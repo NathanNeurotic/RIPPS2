@@ -119,6 +119,9 @@ if "g->partition_name[0] == '_' && g->partition_name[1] == '_'" not in lr or 'gO
 need(rd('src/menusys.c'), (('ripps2LastRites(support, id);', 'Delete is LAST RITES'), ('ripps2ShroudHide(support, id);', 'Hide Game'),
                            ('GAME_HIDE_GAME', 'the game options carry Hide Game'), ('APP_HIDE', 'and a PS1 game\'s')), 'menusys.c')
 need(opl, (('if (!isFolderRow && ripps2ShroudRow(mdl->support, i))', 'a page leaves hidden games out'),), 'opl.c')
+hm = rd('src/ripps2hdd.c')
+if 'ripps2ApaCheck(apaWhy, sizeof(apaWhy))' not in hm or hm.index('ripps2ApaCheck(apaWhy') > hm.index('int r = fileXioRemove(path);'):
+    fail.append('ripps2hdd.c: the HDD MANAGER walks the APA table before a partition goes, as LAST RITES does')
 
 # ---- credits
 ab = rd('src/ripps2about.c')

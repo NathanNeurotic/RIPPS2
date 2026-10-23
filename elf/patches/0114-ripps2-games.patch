@@ -86172,10 +86172,18 @@ index 0000000..261b9df
 +    readPads();
 +}
 diff --git a/src/ripps2hdd.c b/src/ripps2hdd.c
-index ce09083..bdab331 100644
+index ce09083..3b36c8e 100644
 --- a/src/ripps2hdd.c
 +++ b/src/ripps2hdd.c
-@@ -124,6 +124,17 @@ static int hmScan(void)
+@@ -39,6 +39,7 @@
+ #include "include/hddsupport.h"
+ #include "include/ioman.h" // ioBlockOps: nothing reads the drive while a partition goes
+ #include "include/ripps2.h"
++#include "include/ripps2games.h" // build 114: ripps2ApaCheck before a partition goes
+ #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
+ #include "include/ripps2tr.h" // build 104: _t, RIPPS2's words in the chosen language
+ 
+@@ -124,6 +125,17 @@ static int hmScan(void)
      return fd < 0 ? fd : 0;
  }
  
@@ -86193,6 +86201,24 @@ index ce09083..bdab331 100644
  // Why a partition cannot be removed here, or NULL when it can
  static const char *hmKept(const hm_part_t *p)
  {
+@@ -240,9 +252,17 @@ void ripps2HddManager(void)
+         } else if (getKeyOn(KEY_TRIANGLE) && hmCount > 0) {
+             hm_part_t *p = &hmParts[cursor];
+             const char *why = hmKept(p);
++            char apaWhy[200] = "";
+             if (why != NULL) {
+                 sfxPlay(SFX_ERROR);
+                 snprintf(toast, sizeof(toast), "%s", why);
++            } else if (!ripps2ApaCheck(apaWhy, sizeof(apaWhy))) {
++                // build 114: Berion's warning, the walk LAST RITES makes before a game's partition goes: a table
++                // written from an image of another disk size is refused before anything on it changes
++                char msg[400];
++                snprintf(msg, sizeof(msg), _t("Nothing was deleted: this drive's partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first."), apaWhy);
++                guiMsgBoxSound(SFX_ERROR);
++                guiMsgBox(msg, 0, NULL);
+             } else {
+                 char ask[300], size[24], name[33], path[48];
+                 snprintf(name, sizeof(name), "%s", p->name); // the list is read again below: keep the name
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
 new file mode 100644
 index 0000000..dee0a44
