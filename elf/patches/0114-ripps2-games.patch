@@ -82992,7 +82992,7 @@ index d59e71c..6000fae 100644
      DeleteSema(gFontSemaId);
  
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..df8a522 100644
+index 2b110ad..95c7ec2 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -12,10 +12,13 @@
@@ -83035,7 +83035,7 @@ index 2b110ad..df8a522 100644
 +        { // Look now: the started drives (Memory Files' and STATUS's START starts the rest)
 +            char msg[240];
 +            int known = seanceSearch();
-+            snprintf(msg, sizeof(msg), _t("SEANCE knows %d of the 5 now. Where each one is, is remembered, and every launch reads it from there."), known);
++            snprintf(msg, sizeof(msg), _t("SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there."), known);
 +            guiMsgBoxSound(known > 0 ? SFX_MESSAGE : SFX_ERROR);
 +            guiMsgBox(msg, 0, NULL);
 +        }
@@ -85138,7 +85138,7 @@ index 459b24e..ff0ae66 100644
      if (guiMsgBox(msg, 1, NULL) != 1)
          return 0;
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 4bedb0c..f89b2af 100644
+index 4bedb0c..a2e66ed 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -53,6 +53,7 @@
@@ -85159,7 +85159,7 @@ index 4bedb0c..f89b2af 100644
      ripps2LaunchAborted();
      if (cfg != NULL)
          configFree(cfg);
-@@ -1735,6 +1738,39 @@ static void fbStartDrivesWork(void)
+@@ -1735,6 +1738,41 @@ static void fbStartDrivesWork(void)
      fbDrivesDone = 1;
  }
  
@@ -85192,6 +85192,8 @@ index 4bedb0c..f89b2af 100644
 +int ripps2CardFreeKb(int port)
 +{
 +    int freeKb = -1;
++    // asked twice: after START DRIVES' MMCE ping a plain card's first answer is "changed card", with a stale count
++    fbCardType(port, &freeKb);
 +    fbCardType(port, &freeKb);
 +    return freeKb;
 +}
@@ -86829,7 +86831,7 @@ index 0000000..dee0a44
 +    return 0;
 +}
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index f2c48c4..0a81972 100644
+index f2c48c4..122e348 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -3,6 +3,11 @@
@@ -87032,7 +87034,7 @@ index f2c48c4..0a81972 100644
          m = bdmMx4sioReport(&err, root, sizeof(root));
          if (m == 1)
              snprintf(line, sizeof(line), _t("MX4SIO: the SD card is %s"), root);
-@@ -220,6 +207,58 @@ static void stScan(void)
+@@ -220,6 +207,52 @@ static void stScan(void)
          st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
          r->ok = m == 1;
      }
@@ -87065,12 +87067,6 @@ index f2c48c4..0a81972 100644
 +        const char *p[1] = {"mass0:/EMBER/bios.bin"};
 +        stLauncher(SEANCE_EMBER_BIOS, _t("Ember's BIOS"), p, 1);
 +    }
-+    // what the lines mean, once: yours are used where you keep them; RIPPS2's Neutrino only when there is none
-+#ifndef RIPPS2_LITE
-+    stAdd(ROW_STATUS, ACT_NONE, _t("Each launch uses yours from where it is found. RIPPS2's own Neutrino is offered only when you have none."), NULL);
-+#else
-+    stAdd(ROW_STATUS, ACT_NONE, _t("Each launch uses yours from where it is found. RIPPS2 lite carries no Neutrino or BIBLE."), NULL);
-+#endif
 +    stAdd(ROW_ACTION, ACT_SEANCE_SEARCH, _t("LOOK FOR THEM"), ripps2DrivesStarted() ? _t("every started drive") : _t("starts every drive first"));
 +#ifndef RIPPS2_LITE // build 114: the lite ELF carries none
 +    stAdd(ROW_ACTION, ACT_NT_INSTALL, _t("INSTALL RIPPS2'S NEUTRINO"), _t("only if you have none"));
@@ -87091,7 +87087,7 @@ index f2c48c4..0a81972 100644
  
      // SOUNDS (build 95): none are built in any more, so say where they come from
      stAdd(ROW_HEAD, ACT_NONE, _t("SOUNDS"), _t("AUDIO folder"));
-@@ -236,6 +275,22 @@ static void stScan(void)
+@@ -236,6 +269,22 @@ static void stScan(void)
      stAdd(ROW_ACTION, ACT_SOUNDS_RIP, _t("RIP THIS CONSOLE'S SOUNDS"), _t("from its BIOS, into AUDIO"));
  }
  
@@ -87106,7 +87102,7 @@ index f2c48c4..0a81972 100644
 +            ripps2StartDrives();
 +    }
 +    known = seanceSearch();
-+    snprintf(msg, sizeof(msg), _t("SEANCE knows %d of the 5 now. Where each one is, is remembered, and every launch reads it from there."), known);
++    snprintf(msg, sizeof(msg), _t("SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there."), known);
 +    guiMsgBoxSound(known > 0 ? SFX_MESSAGE : SFX_ERROR);
 +    guiMsgBox(msg, 0, NULL);
 +}
@@ -87114,7 +87110,7 @@ index f2c48c4..0a81972 100644
  static int stRowH(const st_row_t *r)
  {
      return r->kind == ROW_HEAD ? ST_HEAD_H : r->kind == ROW_STATUS ? ST_LINE_H : ST_ROW_H;
-@@ -445,6 +500,14 @@ void ripps2Status(void)
+@@ -445,6 +494,14 @@ void ripps2Status(void)
                      ripps2RipBiosSoundsDialog();
                      rescan = 1;
                      break;
