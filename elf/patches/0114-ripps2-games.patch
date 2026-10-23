@@ -5875,6 +5875,27 @@ index 19054fe..823ae8c 100644
  #define CONFIG_GAME 2
  #define CONFIG_ITEM_OSD_SETTINGS_SOURCE "src"
  #define CONFIG_ITEM_OSD_SETTINGS_ENABLE "en"
+diff --git a/.github/scripts/test_pccf.py b/.github/scripts/test_pccf.py
+index 76e40aa..4f2630e 100644
+--- a/.github/scripts/test_pccf.py
++++ b/.github/scripts/test_pccf.py
+@@ -60,7 +60,7 @@ static void bdmForceDeviceRefresh(void) {BdmGeneration++;}
+ #define BDM_TYPE_ATA 3
+ #define BDM_TYPE_UDPBD 4
+ #define BDM_TYPE_PCCF 5
+-static int gBDMStartMode;
++static int gBDMStartMode, gEnableBdmHDD; /* RIPPS2 build 114: the internal HDD follows HDD Start Mode */
+ @PUBLICATION@
+ @REQUEST@
+ static const char *rom;
+@@ -102,6 +102,7 @@ int main(int argc,char **argv) {
+     assert(!bdmStartModeAllowsDevice(BDM_TYPE_USB) && !bdmStartModeAllowsDevice(BDM_TYPE_ATA));
+     gEnablePCCF=0;assert(!bdmStartModeAllowsDevice(BDM_TYPE_PCCF));gEnablePCCF=1;
+     gBDMStartMode=2;assert(bdmStartModeAllowsDevice(BDM_TYPE_USB));gBDMStartMode=0;
++    gEnableBdmHDD=1;assert(bdmStartModeAllowsDevice(BDM_TYPE_ATA) && !bdmStartModeAllowsDevice(BDM_TYPE_USB));gEnableBdmHDD=0;
+     assert(bdmPccfCandidate()==atoi(argv[3]));
+     assert(sysTryClaimPccf() && !locked && sysIsPccfOwned());
+     assert(netLoadModules(1)==-1 && !netModulesLoaded && !loadCalls && shutdownCalls==1);
 diff --git a/.github/scripts/test_pfs_vmc_inode.py b/.github/scripts/test_pfs_vmc_inode.py
 new file mode 100644
 index 0000000..d90eafb
