@@ -229,6 +229,15 @@ need(bdm_, (('(type == BDM_TYPE_ATA && gEnableBdmHDD); // build 114: one HDD', '
 for f_ in ('src/ioman.c', 'src/ripps2games.c'):
     if re.search(r'\*\(int \*\)\s*(req->data|data|da)\b', rd(f_)):
         fail.append('%s: a list request\'s mode is a short' % f_)
+# START NOW froze the panel: ioRemoveRequests takes the lock the worker holds for its whole drain. The worker skips the
+# queued list reads itself; a launch that comes back gives RIPPS2 its writes and list reads again
+guard_ = body(rd('src/ripps2games.c'), 'int ripps2LaunchGuard(void)')
+if 'ioRemoveRequests(' in guard_:
+    fail.append('ripps2games.c: the guard never takes the worker\'s drain lock (ioRemoveRequests)')
+need(rd('src/ioman.c'), (('if (!(gIoCancelScans && req->type == IO_MENU_UPDATE_DEFFERED))', 'the worker skips queued list reads after START NOW'),
+                         ('ioLaunchCancel(); // build 114: the menu again', 'ioInit clears the launch flags')), 'ioman.c')
+if 'ioLaunchCancel();' not in body(rd('src/ripps2bg.c'), 'void ripps2LaunchAborted(void)'):
+    fail.append('ripps2bg.c: a launch that comes back clears the launch flags')
 # and Network Connectivity Off left the SMB page up: Game Sources lost the protocol's re-derive with its Protocol row
 if 'guiNetProtocolApplied(netProtocolWas);' not in body(g, 'static void guiSourcesNetRowsRead('):
     fail.append('gui.c: Network Connectivity on Game Sources turns the network page on and off')

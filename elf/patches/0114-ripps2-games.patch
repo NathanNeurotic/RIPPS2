@@ -14151,10 +14151,10 @@ index b3e36fb..f924a19 100644
  // Pure residency check: unlike hddLoadModulesReady(), never tries to load the ATA
  // stack. Both checks are non-acquiring once the modules are resident (one DEV9 owner).
 diff --git a/include/ioman.h b/include/ioman.h
-index 8bf8fcf..c3f3987 100644
+index 8bf8fcf..21aa548 100644
 --- a/include/ioman.h
 +++ b/include/ioman.h
-@@ -74,6 +74,23 @@ int ioBlockOps(int block);
+@@ -74,6 +74,24 @@ int ioBlockOps(int block);
  */
  int ioBlockOpsTimed(int block, int timeoutTicks);
  
@@ -14165,6 +14165,7 @@ index 8bf8fcf..c3f3987 100644
 +int ioWriteBegin(void);
 +void ioWriteEnd(void);
 +void ioLaunchBegin(void);
++void ioLaunchCancel(void); // build 114: a launch came back: writes and list reads are RIPPS2's again
 +int ioWaitWrites(int timeoutTicks);
 +int ioWritesOpen(void);                                // build 114: writes started and not yet ended
 +int ioQueueEstimateMs(void);
@@ -85215,7 +85216,7 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..b4a9792 100644
+index 3dc8c13..73525ed 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
 @@ -223,6 +223,115 @@ int ioDescribeRunning(char *out, int size)
@@ -85334,13 +85335,14 @@ index 3dc8c13..b4a9792 100644
  // RIPPS2: is the worker inside a job right now
  int ioWorkerBusy(void)
  {
-@@ -322,7 +431,22 @@ static void ioWorkerThread(void *arg)
+@@ -322,7 +431,25 @@ static void ioWorkerThread(void *arg)
              gRunSince = clock();
              gRunData = req->data;
              gRunType = req->type;
+-            ioProcessRequest(req);
 +#ifdef RIPPS2_GUARD_TEST
 +            // a game list (a source's, or All Games put together), not the Apps or Starred pages a rebuild queues
-+            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && *(short *)req->data != APP_MODE &&
++            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && !gIoCancelScans && *(short *)req->data != APP_MODE &&
 +                *(short *)req->data != FAV_MODE && (clock() < gGuardTestUntil || *(short *)req->data == gGuardTestSlow)) {
 +                gGuardTestUntil = 0;
 +                gGuardTestSlow = *(short *)req->data;
@@ -85348,7 +85350,10 @@ index 3dc8c13..b4a9792 100644
 +                DelayThread(8 * 1000 * 1000);
 +            }
 +#endif
-             ioProcessRequest(req);
++            // RIPPS2 build 114: START NOW on the launch guard: a list read still queued is not started (the running one
++            // gives up at its next entry); the launch needs none of them, and the GUI never waits on this lock for it
++            if (!(gIoCancelScans && req->type == IO_MENU_UPDATE_DEFFERED))
++                ioProcessRequest(req);
 +            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && !gIoCancelScans) { // build 114: timed
 +                int m = *(short *)req->data;
 +                if (m >= 0 && m < IO_LIST_MODES)
@@ -85357,7 +85362,15 @@ index 3dc8c13..b4a9792 100644
              gRunType = 0;
  
              // lock the queue tip as well now
-@@ -735,6 +859,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -384,6 +511,7 @@ void ioInit(void)
+     }
+     // The new worker starts with an open queue, whatever the previous session left behind.
+     isIOBlocked = 0;
++    ioLaunchCancel(); // build 114: the menu again after a refused autolaunch
+ 
+     gIOTerminate = 0;
+     gHandlerCount = 0;
+@@ -735,6 +863,65 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
@@ -85389,6 +85402,16 @@ index 3dc8c13..b4a9792 100644
 +    DIntr();
 +    gIoLaunching = 1;
 +    EIntr();
++}
++
++// RIPPS2 build 114: a launch that came back (it failed, or the menu was started again): RIPPS2 writes and reads its
++// lists again (the launch guard's START NOW stops both before the launch)
++void ioLaunchCancel(void)
++{
++    DIntr();
++    gIoLaunching = 0;
++    EIntr();
++    gIoCancelScans = 0;
 +}
 +
 +int ioWritesOpen(void)
@@ -87069,6 +87092,26 @@ index 4846240..68b685e 100644
  }
  
  // ---------------------------------------------------------------- the run
+diff --git a/src/ripps2bg.c b/src/ripps2bg.c
+index 4f99d23..668955a 100644
+--- a/src/ripps2bg.c
++++ b/src/ripps2bg.c
+@@ -25,6 +25,7 @@
+ #include "include/pad.h"
+ #include "include/ripps2.h"
+ #include "include/sound.h"
++#include "include/ioman.h"
+ #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
+ #include "include/ripps2tr.h" // build 104: _t, RIPPS2's words in the chosen language
+ 
+@@ -870,6 +871,7 @@ void ripps2LaunchAborted(void)
+     launchT0 = -1.0f;
+     launchHeld = 0;
+     ripps2LaunchDiscEnd(); // build 91
++    ioLaunchCancel();      // build 114: RIPPS2 writes and reads its lists again
+ }
+ 
+ // ---------------------------------------------------------------- orbs
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
 index fa2ee5d..decefd7 100644
 --- a/src/ripps2disc.c
@@ -87242,7 +87285,7 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..2d87ebd
+index 0000000..d704823
 --- /dev/null
 +++ b/src/ripps2games.c
 @@ -0,0 +1,1135 @@
@@ -88023,14 +88066,14 @@ index 0000000..2d87ebd
 +        readPads();
 +        if (!stopping && done == 0.0) {
 +            if (getKeyOn(gSelectButton)) {
-+                // stop: no write starts from here, a list read gives up at its next entry, queued reads go; an open
-+                // write ends
++                // stop: no write starts from here, a list read gives up at its next entry, the worker skips the queued
++                // ones; an open write ends. (Never ioRemoveRequests here: the worker holds its lock for the whole drain,
++                // so the panel froze until the work was done.)
 +                sfxPlay(SFX_CONFIRM);
 +                stopping = 1;
 +                stopAt = now;
 +                ioLaunchBegin();
 +                ioCancelScans();
-+                ioRemoveRequests(IO_MENU_UPDATE_DEFFERED);
 +            } else if (getKeyOn(backKey)) {
 +                sfxPlay(SFX_CANCEL);
 +                return 0;
