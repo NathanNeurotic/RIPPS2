@@ -87614,10 +87614,10 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..3b61cd5
+index 0000000..2d1c370
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1791 @@
+@@ -0,0 +1,1883 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -89042,29 +89042,88 @@ index 0000000..3b61cd5
 +
 +static int zpReadAll(int fd, void *buf, int n)
 +{
-+    return read(fd, buf, n) == n;
++    unsigned char *p = buf;
++    while (n > 0) { // a read may give back less than asked: carry on
++        int r = read(fd, p, n);
++        if (r <= 0)
++            return 0;
++        p += r;
++        n -= r;
++    }
++    return 1;
 +}
 +
 +static int zpWriteAll(int fd, const void *buf, int n)
 +{
-+    return write(fd, buf, n) == n;
++    const unsigned char *p = buf;
++    while (n > 0) {
++        int r = write(fd, p, n);
++        if (r <= 0)
++            return 0;
++        p += r;
++        n -= r;
++    }
++    return 1;
 +}
 +
-+// the index entries held so far, written back in place; the file then goes on where the data ends
-+static int zpFlushIdx(int fd, u32 *idx, u32 *start, u32 *n, s64 dataEnd)
++// a ZSO read straight through, two handles on it: the index from just after the header, the data from where it starts
++// (no seek after the first: the lab found a read-back that seeked about between them going wrong on exFAT)
++typedef struct
++{
++    int fdI, fdD, align;
++    u32 next; // the entry after the last piece's, carried to the next piece (its first)
++} zp_reader_t;
++
++static int zpOpenRead(zp_reader_t *zr, const char *path, int align)
++{
++    u32 first;
++    s64 start;
++    zr->align = align;
++    zr->fdI = open(path, O_RDONLY);
++    zr->fdD = open(path, O_RDONLY);
++    if (zr->fdI < 0 || zr->fdD < 0 || lseek64(zr->fdI, ZP_HEAD, SEEK_SET) != ZP_HEAD || !zpReadAll(zr->fdI, &first, 4))
++        return 0;
++    zr->next = first;
++    start = (s64)(first & 0x7FFFFFFF) << align;
++    return lseek64(zr->fdD, start, SEEK_SET) == start;
++}
++
++static void zpCloseRead(zp_reader_t *zr)
++{
++    if (zr->fdI >= 0)
++        close(zr->fdI);
++    if (zr->fdD >= 0)
++        close(zr->fdD);
++    zr->fdI = zr->fdD = -1;
++}
++
++// the index entries held so far, onto the side file (<name>.zso.idx), straight on
++static int zpFlushIdx(int fd, u32 *idx, u32 *start, u32 *n)
 +{
 +    if (*n == 0)
 +        return 1;
-+    if (lseek64(fd, ZP_HEAD + (s64)*start * 4, SEEK_SET) < 0 || !zpWriteAll(fd, idx, (int)(*n * 4)) || lseek64(fd, dataEnd, SEEK_SET) != dataEnd)
++    if (!zpWriteAll(fd, idx, (int)(*n * 4)))
 +        return 0;
 +    *start += *n;
 +    *n = 0;
 +    return 1;
 +}
 +
-+// ISO to ZSO: 1 done, 0 failed, -1 stopped
-+static int zpPack(zp_job_t *j, unsigned char *in, unsigned char *out, unsigned char *blk, u32 *idx)
++// the side file's index into the room left for it after the header: one seek back, over clusters the file already has
++static int zpPlaceIdx(int fdOut, const char *idxPath, unsigned char *buf, int bufSize)
 +{
++    int fd = open(idxPath, O_RDONLY), n = 0, ok = fd >= 0 && lseek64(fdOut, ZP_HEAD, SEEK_SET) == ZP_HEAD;
++    while (ok && (n = read(fd, buf, bufSize)) > 0)
++        ok = zpWriteAll(fdOut, buf, n);
++    if (fd >= 0)
++        close(fd);
++    return ok && n == 0;
++}
++
++// ISO to ZSO: 1 done, 0 failed, -1 stopped
++static int zpPack(zp_job_t *j, const char *idxPath, unsigned char *in, unsigned char *out, unsigned char *blk, u32 *idx)
++{
++    int fdIdx;
 +    unsigned char head[ZP_HEAD];
 +    u32 b, k, idxStart = 0, idxN = 0, unit;
 +    s64 pos, fileEnd, worst;
@@ -89101,10 +89160,15 @@ index 0000000..3b61cd5
 +        return 0;
 +    pos += n;
 +    fileEnd = pos;
++    if ((fdIdx = open(idxPath, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0) {
++        zpWhy(j, "making the index file", 0);
++        return 0;
++    }
 +    for (b = 0; b < j->blocks; b += cnt) {
 +        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
 +        if (!zpReadAll(j->fdIn, in, cnt * 2048)) {
 +            zpWhy(j, "reading the ISO", (s64)b * 2048);
++            close(fdIdx);
 +            return 0;
 +        }
 +        j->crcs[b / ZP_RUN] = crc32(0L, in, cnt * 2048);
@@ -89121,40 +89185,50 @@ index 0000000..3b61cd5
 +            memset(out + o, 0, pad);
 +            o += pad;
 +            pos += pad;
-+            if (idxN == ZP_IDX && !zpFlushIdx(j->fdOut, idx, &idxStart, &idxN, fileEnd)) {
++            if (idxN == ZP_IDX && !zpFlushIdx(fdIdx, idx, &idxStart, &idxN)) {
 +                zpWhy(j, "writing the index", (s64)(b + k) * 2048);
++                close(fdIdx);
 +                return 0;
 +            }
 +        }
 +        if (!zpWriteAll(j->fdOut, out, o)) {
 +            zpWhy(j, "writing the ZSO", (s64)b * 2048);
++            close(fdIdx);
 +            return 0;
 +        }
 +        fileEnd += o;
 +        j->done += cnt * 2048;
-+        if (!zpTick(j))
++        if (!zpTick(j)) {
++            close(fdIdx);
 +            return -1;
++        }
 +    }
 +    idx[idxN++] = (u32)(pos >> j->align); // where the last block ends
-+    if (!zpFlushIdx(j->fdOut, idx, &idxStart, &idxN, fileEnd)) {
++    if (!zpFlushIdx(fdIdx, idx, &idxStart, &idxN) || close(fdIdx) < 0) {
 +        zpWhy(j, "writing the last of the index", j->inBytes);
++        return 0;
++    }
++    if (!zpPlaceIdx(j->fdOut, idxPath, out, ZP_RUN * 2048)) {
++        zpWhy(j, "putting the index in place", j->inBytes);
 +        return 0;
 +    }
 +    j->outBytes = fileEnd;
 +    return 1;
 +}
 +
-+// a ZSO's blocks b.. (cnt of them) into out, as OPL's own reader does it (LZ4_decompress_fast, 2048 bytes a block)
-+static int zpUnzip(int fd, int align, u32 b, int cnt, unsigned char *cbuf, int cap, unsigned char *out)
++// the next cnt blocks of a ZSO into out, as OPL's own reader does it (LZ4_decompress_fast, 2048 bytes a block)
++static int zpUnzip(zp_reader_t *zr, int cnt, unsigned char *cbuf, int cap, unsigned char *out)
 +{
 +    u32 ent[ZP_RUN + 1];
 +    s64 o0, o1;
-+    int k;
-+    if (lseek64(fd, ZP_HEAD + (s64)b * 4, SEEK_SET) < 0 || !zpReadAll(fd, ent, (cnt + 1) * 4))
++    int k, align = zr->align;
++    ent[0] = zr->next;
++    if (!zpReadAll(zr->fdI, ent + 1, cnt * 4))
 +        return 0;
++    zr->next = ent[cnt];
 +    o0 = (s64)(ent[0] & 0x7FFFFFFF) << align;
 +    o1 = (s64)(ent[cnt] & 0x7FFFFFFF) << align;
-+    if (o1 < o0 || o1 - o0 > cap || lseek64(fd, o0, SEEK_SET) != o0 || !zpReadAll(fd, cbuf, (int)(o1 - o0)))
++    if (o1 < o0 || o1 - o0 > cap || !zpReadAll(zr->fdD, cbuf, (int)(o1 - o0)))
 +        return 0;
 +    for (k = 0; k < cnt; k++) {
 +        s64 s = ((s64)(ent[k] & 0x7FFFFFFF) << align) - o0, e = ((s64)(ent[k + 1] & 0x7FFFFFFF) << align) - o0;
@@ -89172,27 +89246,36 @@ index 0000000..3b61cd5
 +}
 +
 +// ZSO to ISO: 1 done, 0 failed, -1 stopped
-+static int zpUnpack(zp_job_t *j, unsigned char *in, unsigned char *cbuf, int cap)
++static int zpUnpack(zp_job_t *j, const char *src, unsigned char *in, unsigned char *cbuf, int cap)
 +{
++    zp_reader_t zr;
 +    u32 b;
-+    int cnt;
-+    for (b = 0; b < j->blocks; b += cnt) {
++    int cnt, rv = 1;
++    if (!zpOpenRead(&zr, src, j->align)) {
++        zpCloseRead(&zr);
++        zpWhy(j, "opening the ZSO", 0);
++        return 0;
++    }
++    for (b = 0; rv == 1 && b < j->blocks; b += cnt) {
 +        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
-+        if (!zpUnzip(j->fdIn, j->align, b, cnt, cbuf, cap, in)) {
++        if (!zpUnzip(&zr, cnt, cbuf, cap, in)) {
 +            zpWhy(j, "reading the ZSO", (s64)b * 2048);
-+            return 0;
++            rv = 0;
++            break;
 +        }
 +        j->crcs[b / ZP_RUN] = crc32(0L, in, cnt * 2048);
 +        if (!zpWriteAll(j->fdOut, in, cnt * 2048)) {
 +            zpWhy(j, "writing the ISO", (s64)b * 2048);
-+            return 0;
++            rv = 0;
++            break;
 +        }
 +        j->done += cnt * 2048;
 +        if (!zpTick(j))
-+            return -1;
++            rv = -1;
 +    }
++    zpCloseRead(&zr);
 +    j->outBytes = j->inBytes;
-+    return 1;
++    return rv;
 +}
 +
 +#ifdef RIPPS2_GUARD_TEST
@@ -89222,19 +89305,20 @@ index 0000000..3b61cd5
 +static int zpCheck(zp_job_t *j, const char *path, unsigned char *in, unsigned char *cbuf, int cap)
 +{
 +    unsigned char head[ZP_HEAD];
++    zp_reader_t zr = {-1, -1, 0, 0};
 +    u32 b;
 +    int cnt, fd, ok = 1;
 +    if ((fd = open(path, O_RDONLY)) < 0) {
 +        zpWhy(j, "opening it to check", 0);
 +        return 0;
 +    }
-+    if (j->pack && (!zpReadAll(fd, head, ZP_HEAD) || *(u32 *)head != ZP_MAGIC || head[21] != j->align)) {
++    if (j->pack && (!zpReadAll(fd, head, ZP_HEAD) || *(u32 *)head != ZP_MAGIC || head[21] != j->align || !zpOpenRead(&zr, path, j->align))) {
 +        zpWhy(j, "checking the header", 0);
 +        ok = 0;
 +    }
 +    for (b = 0; ok == 1 && b < j->blocks; b += cnt) {
 +        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
-+        if (!(j->pack ? zpUnzip(fd, j->align, b, cnt, cbuf, cap, in) : zpReadAll(fd, in, cnt * 2048))) {
++        if (!(j->pack ? zpUnzip(&zr, cnt, cbuf, cap, in) : zpReadAll(fd, in, cnt * 2048))) {
 +            zpWhy(j, "reading it back", (s64)b * 2048);
 +            ok = 0;
 +        } else if (crc32(0L, in, cnt * 2048) != j->crcs[b / ZP_RUN]) {
@@ -89248,13 +89332,14 @@ index 0000000..3b61cd5
 +        if (ok == 1 && !zpTick(j))
 +            ok = -1; // stopped: the loop ends here
 +    }
++    zpCloseRead(&zr);
 +    close(fd);
 +    return ok;
 +}
 +
 +void ripps2PackGame(item_list_t *support, int id)
 +{
-+    char prefix[160], src[300], dst[300], tmp[310], info[200], msg[400], a[24], b[64], *dot;
++    char prefix[160], src[300], dst[300], tmp[310], idxPath[310], info[200], msg[400], a[24], b[64], *dot;
 +    sh_row_t r;
 +    item_list_t view;
 +    const base_game_info_t *g;
@@ -89278,6 +89363,7 @@ index 0000000..3b61cd5
 +        return;
 +    strcpy(dot, kind == 1 ? ".zso" : ".iso");
 +    snprintf(tmp, sizeof(tmp), "%s.part", dst);
++    snprintf(idxPath, sizeof(idxPath), "%s.idx", dst);
 +    where = lrWhere(r.mode);
 +#ifdef RIPPS2_GUARD_TEST
 +    snprintf(zpSrcPath, sizeof(zpSrcPath), "%s", src);
@@ -89353,14 +89439,20 @@ index 0000000..3b61cd5
 +    j.fdOut = open(tmp, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 +    j.began = ripps2Seconds();
 +    j.work = j.inBytes * 2; // the work, then the check, each over the game's size
++    if (!j.pack) { // the ZSO is read through two handles of its own (zpOpenRead)
++        close(j.fdIn);
++        j.fdIn = -1;
++    }
 +    if (j.fdOut < 0)
 +        zpWhy(&j, "making the new file", 0);
 +    else
-+        rv = j.pack ? zpPack(&j, in, out, blk, idx) : zpUnpack(&j, in, out, cap);
++        rv = j.pack ? zpPack(&j, idxPath, in, out, blk, idx) : zpUnpack(&j, src, in, out, cap);
++    unlink(idxPath); // the index's side file, made by packing
 +    if (j.fdOut >= 0 && close(j.fdOut) < 0 && rv == 1)
 +        rv = 0;
 +    j.fdOut = -1;
-+    close(j.fdIn);
++    if (j.fdIn >= 0)
++        close(j.fdIn);
 +    j.fdIn = -1;
 +    if (rv == 1) {
 +        j.phase = 1;
@@ -89372,7 +89464,7 @@ index 0000000..3b61cd5
 +        rv = 0;
 +    }
 +#ifdef RIPPS2_GUARD_TEST
-+    if (rv == 0 && strstr(j.why, "did not match") != NULL)
++    if (rv == 0 && j.phase == 1)
 +        printf("RIPPS2 compression test: %s kept to study\n", tmp);
 +    else
 +#endif
