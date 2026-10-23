@@ -86034,7 +86034,7 @@ index 6bb34ce..2b0a704 100644
                      thmSetGuiValue(thmGetGuiValue(), 1);
                      bgmUnMute();
 diff --git a/src/menusys.c b/src/menusys.c
-index 879e0d7..62d4fe6 100644
+index 879e0d7..4dab87e 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -33,6 +33,7 @@
@@ -86220,7 +86220,119 @@ index 879e0d7..62d4fe6 100644
  }
  
  static void menuFirstPage()
-@@ -2423,7 +2489,9 @@ void menuHandleInputMain()
+@@ -2150,29 +2216,84 @@ static menu_list_t *menuSourceAt(int i)
+     return NULL;
+ }
+ 
++#ifdef RIPPS2_GUARD_TEST
++// the reel's test build (build 114; the user, 10/23: every drive a viewer might own, in the side bar): the lab has only the
++// exFAT HDD, so USB, MX4SIO, iLink and PC Card rows join the Storage drawer after the HDD's (their names and glyphs; there
++// is nothing to open) while BDM Devices Start Mode is not Off
++static const struct
++{
++    int text, icon;
++} menuSims[] = {{_STR_USB_GAMES, USB_ICON}, {_STR_MX4SIO_GAMES, MX4SIO_ICON}, {_STR_ILINK_GAMES, ILINK_ICON}, {_STR_PCCF_GAMES, BDM_ICON}};
++#define MENU_SIMS 4
++
++static int menuSimAt(void) // the row the drives come after; -1 while BDM Devices is Off
++{
++    int i = 0;
++    menu_list_t *m;
++    if (gBDMStartMode == START_MODE_DISABLED)
++        return -1;
++    for (m = menu; m != NULL; m = m->next) {
++        if (!m->item->visible)
++            continue;
++        i++;
++        if (m->item->icon_id == HDD_BD_ICON || m->item->icon_id == HDD_ICON)
++            return i;
++    }
++    return 1;
++}
++
++// a drawer row: one of the drives (its index) or a real page (*i made that page's place), -1 for a real one
++static int menuSimRow(int *i)
++{
++    int s = menuSimAt();
++    if (s < 0 || *i < s)
++        return -1;
++    if (*i < s + MENU_SIMS)
++        return *i - s;
++    *i -= MENU_SIMS;
++    return -1;
++}
++#define MENU_SIM_COUNT (menuSimAt() >= 0 ? MENU_SIMS : 0)
++#else
++#define menuSimRow(i)  (-1)
++#define MENU_SIM_COUNT 0
++#endif
++
+ int menuSourceCount(void)
+ {
+     int n = 0;
+     menu_list_t *m;
+     for (m = menu; m != NULL; m = m->next)
+         n += m->item->visible != 0;
+-    return n;
++    return n + MENU_SIM_COUNT;
+ }
+ 
+ const char *menuSourceName(int i)
+ {
+-    menu_list_t *m = menuSourceAt(i);
++    int sim = menuSimRow(&i);
++#ifdef RIPPS2_GUARD_TEST
++    if (sim >= 0)
++        return _l(menuSims[sim].text);
++#endif
++    menu_list_t *m = sim >= 0 ? NULL : menuSourceAt(i);
+     return m != NULL ? menuItemGetText(m->item) : "";
+ }
+ 
+ int menuSourceIcon(int i)
+ {
+-    menu_list_t *m = menuSourceAt(i);
++    int sim = menuSimRow(&i);
++#ifdef RIPPS2_GUARD_TEST
++    if (sim >= 0)
++        return menuSims[sim].icon;
++#endif
++    menu_list_t *m = sim >= 0 ? NULL : menuSourceAt(i);
+     return m != NULL ? m->item->icon_id : -1;
+ }
+ 
+ int menuSourceMode(int i)
+ {
++    if (menuSimRow(&i) >= 0)
++        return BDM_MODE;
+     menu_list_t *m = menuSourceAt(i);
+     item_list_t *list = m != NULL ? m->item->userdata : NULL;
+     return list != NULL ? list->mode : -1;
+@@ -2183,8 +2304,13 @@ int menuSourceCurrent(void)
+     int i = 0;
+     menu_list_t *m;
+     for (m = menu; m != NULL; m = m->next) {
+-        if (m == selected_item)
++        if (m == selected_item) {
++#ifdef RIPPS2_GUARD_TEST
++            if (menuSimAt() >= 0 && i >= menuSimAt())
++                i += MENU_SIMS;
++#endif
+             return i;
++        }
+         i += m->item->visible != 0;
+     }
+     return 0;
+@@ -2192,6 +2318,8 @@ int menuSourceCurrent(void)
+ 
+ void menuSourceSelect(int i)
+ {
++    if (menuSimRow(&i) >= 0)
++        return; // the reel's drives have no page
+     menu_list_t *m = menuSourceAt(i);
+     if (m == NULL || m == selected_item)
+         return;
+@@ -2423,7 +2551,9 @@ void menuHandleInputMain()
      }
  
      // RIPPS2 build 79: SELECT. A press refreshes the list when it is let go (within 4.2 s); held 4.2 s it
@@ -86231,7 +86343,7 @@ index 879e0d7..62d4fe6 100644
      {
          static clock_t selectSince = 0;
          static int selectHeld = 0, selectCycled = 0;
-@@ -2432,9 +2500,12 @@ void menuHandleInputMain()
+@@ -2432,9 +2562,12 @@ void menuHandleInputMain()
              selectCycled = 0;
              selectSince = clock();
          } else if (selectHeld && getKeyPressed(KEY_SELECT)) {
@@ -86246,7 +86358,7 @@ index 879e0d7..62d4fe6 100644
              }
          } else if (selectHeld) {
              selectHeld = 0;
-@@ -2718,6 +2789,10 @@ void menuHandleInputGameMenu()
+@@ -2718,6 +2851,10 @@ void menuHandleInputGameMenu()
          int menuID = gameMenuCurrent->item.id;
  
          sfxPlay(SFX_CONFIRM);
@@ -86257,7 +86369,7 @@ index 879e0d7..62d4fe6 100644
  
  #ifdef RETROACHIEVEMENTS
          if (menuID == GAME_RA_CHECK) {
-@@ -2815,6 +2890,8 @@ void menuHandleInputGameMenu()
+@@ -2815,6 +2952,8 @@ void menuHandleInputGameMenu()
              menuRenameGame(&gameMenu);
          } else if (menuID == GAME_DELETE_GAME) {
              menuDeleteGame(&gameMenu);
@@ -86266,7 +86378,7 @@ index 879e0d7..62d4fe6 100644
          }
          // so the exit press wont propagate twice
          readPads();
-@@ -2957,6 +3034,10 @@ void menuHandleInputAppMenu()
+@@ -2957,6 +3096,10 @@ void menuHandleInputAppMenu()
          int menuID = appMenuCurrent->item.id;
  
          sfxPlay(SFX_CONFIRM);
@@ -86277,7 +86389,7 @@ index 879e0d7..62d4fe6 100644
  
          if (menuID == APP_CASE_SHAPE) { // build 102: PS1, PS2, Theme, round again
              thmAppCaseShapeSet(appCaseTitle(), (thmAppCaseShape(appCaseTitle()) + 1) % THM_APP_CASES_N);
-@@ -2966,6 +3047,8 @@ void menuHandleInputAppMenu()
+@@ -2966,6 +3109,8 @@ void menuHandleInputAppMenu()
              menuRenameGame(&appMenu);
          } else if (menuID == APP_DELETE) {
              menuDeleteGame(&appMenu);
@@ -87487,10 +87599,10 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..8741d2d
+index 0000000..2c44064
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1664 @@
+@@ -0,0 +1,1718 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -88685,6 +88797,60 @@ index 0000000..8741d2d
 +    char name[160];
 +} zp_job_t;
 +
++// one 2 KB block in LZ4's block format (the EE's lz4.c only decodes): greedy, a 12-bit hash of 4 bytes, the format's end
++// rules kept (the last 5 bytes literals, no match starting in the last 12). Its Python twin round-trips through the
++// reference decoder; on the console every piece is read back through OPL's own LZ4_decompress_fast before anything else.
++static int zpLz4Emit(unsigned char *out, int op, int cap, const unsigned char *lit, int litLen, int offset, int ml)
++{
++    int r;
++    if (op + 1 + litLen / 255 + 1 + litLen + 2 + (ml > 0 ? ml / 255 + 1 : 0) > cap)
++        return -1;
++    out[op++] = (unsigned char)(((litLen >= 15 ? 15 : litLen) << 4) | (ml < 0 ? 0 : ml >= 15 ? 15 : ml));
++    if (litLen >= 15) {
++        for (r = litLen - 15; r >= 255; r -= 255)
++            out[op++] = 255;
++        out[op++] = (unsigned char)r;
++    }
++    memcpy(out + op, lit, litLen);
++    op += litLen;
++    if (ml >= 0) {
++        out[op++] = (unsigned char)(offset & 255);
++        out[op++] = (unsigned char)(offset >> 8);
++        if (ml >= 15) {
++            for (r = ml - 15; r >= 255; r -= 255)
++                out[op++] = 255;
++            out[op++] = (unsigned char)r;
++        }
++    }
++    return op;
++}
++
++static int zpLz4(const unsigned char *src, int n, unsigned char *out, int cap)
++{
++    static unsigned short table[4096];
++    int ip = 0, anchor = 0, op = 0, mflimit = n - 12, matchlimit = n - 5;
++    memset(table, 0, sizeof(table));
++    if (n >= 13)
++        while (ip < mflimit) {
++            u32 seq = src[ip] | src[ip + 1] << 8 | src[ip + 2] << 16 | (u32)src[ip + 3] << 24;
++            u32 h = (seq * 2654435761u) >> 20;
++            int ref = (int)table[h] - 1, len = 4;
++            table[h] = (unsigned short)(ip + 1);
++            if (ref < 0 || ip - ref > 65535 || memcmp(src + ref, src + ip, 4)) {
++                ip++;
++                continue;
++            }
++            while (ip + len < matchlimit && src[ref + len] == src[ip + len])
++                len++;
++            if ((op = zpLz4Emit(out, op, cap, src + anchor, ip - anchor, ip - ref, len - 4)) < 0)
++                return 0;
++            ip += len;
++            anchor = ip;
++        }
++    op = zpLz4Emit(out, op, cap, src + anchor, n - anchor, 0, -1);
++    return op < 0 ? 0 : op;
++}
++
 +static int zpRow(item_list_t *support, int id, sh_row_t *r, item_list_t *view, const base_game_info_t **g)
 +{
 +    opl_io_module_t *mod;
@@ -88915,7 +89081,7 @@ index 0000000..8741d2d
 +        j->crcs[b / ZP_RUN] = crc32(0L, in, cnt * 2048);
 +        for (k = 0, o = 0; k < (u32)cnt; k++) {
 +            int raw, sz, pad;
-+            n = LZ4_compress((const char *)in + k * 2048, (char *)blk, 2048);
++            n = zpLz4(in + k * 2048, 2048, blk, 2048 + 64);
 +            raw = n <= 0 || n >= 2048; // a block LZ4 cannot shrink is kept as it is (the top bit says so)
 +            idx[idxN++] = (u32)(pos >> j->align) | (raw ? 0x80000000u : 0);
 +            sz = raw ? 2048 : n;
@@ -89097,7 +89263,7 @@ index 0000000..8741d2d
 +    cap = ZP_RUN * (2048 + (1 << (j.align > 4 ? j.align : 4)));
 +    in = malloc(ZP_RUN * 2048);
 +    out = malloc(cap);
-+    blk = malloc(LZ4_compressBound(2048));
++    blk = malloc(2048 + 64);
 +    idx = malloc(ZP_IDX * 4);
 +    j.crcs = malloc((j.blocks / ZP_RUN + 1) * 4);
 +    if (in == NULL || out == NULL || blk == NULL || idx == NULL || j.crcs == NULL) {
