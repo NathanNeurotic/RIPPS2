@@ -85215,10 +85215,10 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..a38836d 100644
+index 3dc8c13..b4a9792 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
-@@ -223,6 +223,113 @@ int ioDescribeRunning(char *out, int size)
+@@ -223,6 +223,115 @@ int ioDescribeRunning(char *out, int size)
      return 1;
  }
  
@@ -85257,10 +85257,12 @@ index 3dc8c13..a38836d 100644
 +static int gIoListMs[IO_LIST_MODES];
 +
 +#ifdef RIPPS2_GUARD_TEST
-+// a test build (build 114): a refresh (SELECT) makes the list read that follows it 8 s longer, so the launch guard's panel
-+// shows and is filmed; a second refresh gets the notches that read's measured time (All Games' first list comes from its
-+// saved list, not a read, so "slow every read after the first" never slowed the one a refresh starts)
++// a test build (build 114): a refresh (SELECT) makes the game list read that follows it 8 s longer, and that source a slow
++// drive from then on (every read of it 8 s longer, as a real slow drive is), so the launch guard's panel shows and is
++// filmed; a second refresh gets the notches that drive's measured time (All Games' first list comes from its saved list,
++// not a read, so "slow every read after the first" never slowed the one a refresh starts)
 +static volatile clock_t gGuardTestUntil;
++static int gGuardTestSlow = -1;
 +
 +void ioGuardTestArm(void)
 +{
@@ -85332,16 +85334,17 @@ index 3dc8c13..a38836d 100644
  // RIPPS2: is the worker inside a job right now
  int ioWorkerBusy(void)
  {
-@@ -322,7 +429,21 @@ static void ioWorkerThread(void *arg)
+@@ -322,7 +431,22 @@ static void ioWorkerThread(void *arg)
              gRunSince = clock();
              gRunData = req->data;
              gRunType = req->type;
 +#ifdef RIPPS2_GUARD_TEST
 +            // a game list (a source's, or All Games put together), not the Apps or Starred pages a rebuild queues
-+            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && clock() < gGuardTestUntil &&
-+                *(short *)req->data != APP_MODE && *(short *)req->data != FAV_MODE) {
++            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && *(short *)req->data != APP_MODE &&
++                *(short *)req->data != FAV_MODE && (clock() < gGuardTestUntil || *(short *)req->data == gGuardTestSlow)) {
 +                gGuardTestUntil = 0;
-+                printf("RIPPS2_GUARD_TEST: the list read of mode %d held 8 s\n", *(short *)req->data);
++                gGuardTestSlow = *(short *)req->data;
++                printf("RIPPS2_GUARD_TEST: the list read of mode %d held 8 s\n", gGuardTestSlow);
 +                DelayThread(8 * 1000 * 1000);
 +            }
 +#endif
@@ -85354,7 +85357,7 @@ index 3dc8c13..a38836d 100644
              gRunType = 0;
  
              // lock the queue tip as well now
-@@ -735,6 +856,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -735,6 +859,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
