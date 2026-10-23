@@ -89,7 +89,10 @@ Color Themes and the Color Sweep, and one newer Roboto with weights.
 ### One HDD
 - A PS2 has one internal HDD, APA or exFAT. **HDD Start Mode** (Off, Manual, Auto) is the drive's, whatever its format,
   and an exFAT drive no longer has an empty APA page beside it: Storage shows one HDD Games. An APA and exFAT hybrid
-  keeps both pages, named by format.
+  keeps both pages, named by format. **BDM Devices Start Mode** Off turns off the drives on the BDM Devices page
+  only: an exFAT internal HDD on Auto stays listed.
+- **Network Connectivity** Off on Game Sources turns the network page off again (since the Protocol row moved, it
+  had stayed in Storage until a restart).
 
 ### Colors
 - **Color Theme** gains **Tangerine**, **Flamingo**, **Turquoise**, **Moonlight** (a ghostly white) and **Custom**:
@@ -97,7 +100,7 @@ Color Themes and the Color Sweep, and one newer Roboto with weights.
 - **Color Sweep**: five colors the theme fades through, each for a few seconds, never fast enough to flash.
   **Rainbow**, then a sweep made from each Color Theme (an all-pink Flamingo, a ghostly Moonlight). **Sweep Colors**
   opens its five pickers and its speed (Slow, Normal, Lively), seen live; change one of RIPPS2's and it is kept as
-  your own, under the name you give it (up to four).
+  your own, under the name you give it (up to four; left as it is, "Rainbow" becomes "Rainbow 2").
 
 ### Fonts
 - **One Roboto Condensed 3.015** (SIL OFL), variable from 400 to 700, replaces the 2011 Bold and 2014 Regular for
