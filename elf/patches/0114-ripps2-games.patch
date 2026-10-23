@@ -85169,7 +85169,7 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..001531d 100644
+index 3dc8c13..cd3306e 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
 @@ -223,6 +223,102 @@ int ioDescribeRunning(char *out, int size)
@@ -85275,14 +85275,19 @@ index 3dc8c13..001531d 100644
  // RIPPS2: is the worker inside a job right now
  int ioWorkerBusy(void)
  {
-@@ -322,7 +418,17 @@ static void ioWorkerThread(void *arg)
+@@ -322,7 +418,22 @@ static void ioWorkerThread(void *arg)
              gRunSince = clock();
              gRunData = req->data;
              gRunType = req->type;
 +#ifdef RIPPS2_GUARD_TEST
-+            // a test build (build 114): each list read takes 8 s more, so the launch guard's panel shows and is filmed
-+            if (req->type == IO_MENU_UPDATE_DEFFERED)
-+                DelayThread(8 * 1000 * 1000);
++            // a test build (build 114): a source's list read takes 8 s more after its first (boot stays quick), so
++            // the launch guard's panel shows, against a measured time, and is filmed
++            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL) {
++                static unsigned char seen[IO_LIST_MODES];
++                int m = *(int *)req->data;
++                if (m >= 0 && m < IO_LIST_MODES && seen[m]++)
++                    DelayThread(8 * 1000 * 1000);
++            }
 +#endif
              ioProcessRequest(req);
 +            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && !gIoCancelScans) { // build 114: timed
@@ -85293,7 +85298,7 @@ index 3dc8c13..001531d 100644
              gRunType = 0;
  
              // lock the queue tip as well now
-@@ -735,6 +841,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -735,6 +846,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
