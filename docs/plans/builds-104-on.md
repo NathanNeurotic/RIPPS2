@@ -214,7 +214,7 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
       the sidebar on real Adapt captures of Storage, Launch Disc, Memory Files, the Left focus and Circle's sources).
 
 ## Build 114 (the user 10/22: All Games before the drives answer, hide and delete games): built, not released
-Where it stands (10/22 evening): every part below is in patch 0114 on `b114` with the RiptOPL merge, SEANCE, STATUS's
+Where it stands (10/22 evening): every part below is in patch 0114 on `b114` with the RiptOPL merge, the launcher search, STATUS's
 drives, the lite ELF and the new words in all 33 languages; CI green, host tests clean, the hidden lab passes listed
 under Tests and lab done. Not released and not posted: the user decides after the showcase. Decisions 1 to 5 were
 taken as recommended (the user left them to me on 10/22, to recap): see the end of this section.
@@ -293,7 +293,7 @@ fills source by source, and with a Manual source it shows nothing until START is
       of their own yet.: Square shows the info page with what the master list knows (name,
       startup, source) and "starting"; R3 (star), Triangle's rename / hide / delete say to wait for the drive (a
       toast: this is the game list, where toasts draw).
-- [ ] (to 115; the Cache page got SEANCE's launcher lines instead) **Cache page lines** (carried from 113): under Fast Cache, one line per source with its saved list (games,
+- [ ] (to 115; the Cache page got the launcher lines instead) **Cache page lines** (carried from 113): under Fast Cache, one line per source with its saved list (games,
       date) and All Games' (games, where it is kept); each support module gets an accessor for its sb_snap_t.
 - [x] The new words in all 33 languages (94 strings and 6 labels, 10/22).
 
@@ -345,7 +345,8 @@ name, -EBUSY when open, every header write through the table fence).
 - [x] **A receipt**: mc0:/RIPPS2/REMOVED.TXT gets what was removed, from where, and the bytes freed (as LAUNCH.TXT
       reports a launch), and the list shows "REMOVED <title>: 3.1 GB FREED".
 
-### E. SEANCE: the launchers RIPPS2 does not carry, found and remembered (the user 10/22)
+### E. The launchers RIPPS2 does not carry, found and remembered (the user 10/22; plain words on screen since
+10/23: the user found the code name SEANCE off-putting for a small feature, so the screen says RIPPS2)
 - [x] **ripps2seance.c**: POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino searched on the drives RIPPS2
       has started (never loading a driver to look), skipping the game and art folders; kept by drive kind (usb,
       ata, mx4sio, ilink, mmce, hdd, smb) in `launchers.txt` beside the settings, so a stick in another slot still

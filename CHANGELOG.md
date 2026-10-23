@@ -21,14 +21,14 @@ remembered, a smaller ELF for memory cards, and the field reports from FifthFox 
 - Written in place only when the list changed and no started drive is still to answer, never with Write
   Operations or Fast Cache off; a short or damaged file is ignored, never half read.
 
-### SEANCE: the launchers you keep, found once
-- **SEANCE** searches the started drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino and
+### The launchers you keep, found once
+- **RIPPS2 searches the started drives** for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino and
   remembers where each one is, by drive kind (`launchers.txt` beside the settings). Every launch reads them from
   there after the places RIPPS2 always looked, and every launch that finds one notes it.
 - **Settings > Game Sources > Cache** shows each of the five as found (and where) or not found yet, with **Look
   now**. A launch that finds none offers the search, and the place found is kept for every launch after.
-- **Ember** needs its files beside the games: when SEANCE knows a copy elsewhere, START copies Ember (or its BIOS)
-  there and starts the game. **RIPPOPS** copies the POPS files from where SEANCE found them.
+- **Ember** needs its files beside the games: when RIPPS2 knows a copy elsewhere, START copies Ember (or its BIOS)
+  there and starts the game. **RIPPOPS** copies the POPS files from where RIPPS2 found them.
 - **Neutrino** is looked for at Settings' path, on the game's drive, on the memory cards and on every started
   drive before anything is offered; RIPPS2's own 1.8.0 is offered once, only when none is found anywhere.
 
@@ -39,13 +39,13 @@ remembered, a smaller ELF for memory cards, and the field reports from FifthFox 
   THEM** (it can start every drive first). Then the homebrew and BIBLE as before. The page is now titled Drives,
   launchers and homebrew.
 
-### SHROUD: hide a game
+### Hide a game
 - **Hide Game** in a game's Triangle options (on All Games and Starred Games rows too): the game leaves every list,
   All Games, Starred Games, Recents and Random Game included. The hidden list is kept on the game's own drive
   (`RIPPS2.HID` beside RIPPS2.LST), so it travels with the drive.
 - **Settings > Game Sources > Hidden Games** lists every started drive's hidden games: Show Again, or Delete.
 
-### LAST RITES: delete a game completely
+### Delete a game completely
 - **Delete** now takes everything of the game's: every part of the image (ul.cfg rebuilt for a UL game), its CFG,
   its art and its cheats; on the internal HDD (APA) its partition, then its CFG, art and cheats in +OPL. Delete
   works on APA games, All Games and Starred Games rows (found on their drive at that moment), and hidden games.
@@ -59,7 +59,7 @@ remembered, a smaller ELF for memory cards, and the field reports from FifthFox 
 
 ### RIPPS2-lite.elf, for memory cards
 - **A second ELF from the same code**, under 2 MB: no BIBLE install (it starts from a BIBLE the full ELF
-  installed), no Neutrino inside (it uses yours, found by SEANCE), no OPL default background. The full ELF still
+  installed), no Neutrino inside (it uses yours, wherever you keep it), no OPL default background. The full ELF still
   carries Neutrino and BIBLE.
 - **Both are smaller.** FreeType is started with only the modules RIPPS2 reads (TrueType, sfnt, the autohinter,
   the smooth renderer, and CFF in the full ELF), so Type 1, CID, PFR, BDF, PCF, WinFNT, SDF and SVG leave the

@@ -22,8 +22,8 @@ lab's games launch); one theme per section so the eye is not jumping; no em dash
 Built in the v108 reel kit (`plan114.py` on `reel109.py` / `reel_engine108.py`), on RIPPS2's own music: the PS2's menu
 music (ripped by RIPPS2) under the title card and the hat, and **Pillars** (RIPPS2 original, 84 BPM, a bar is 2.857 s)
 for the body, bars 0 to 48 and its outro. Every cut on a bar or a half bar. The story is build 114's naming, which
-already reads as a narrative: the list summoned whole, the launchers found by a SEANCE, a game laid under a SHROUD,
-and one given its LAST RITES.
+reads as four plain promises: the whole list at once, your launchers found once, a game hidden from every list, and
+one deleted completely. (No code names on screen: the user, 10/23.)
 
 | Bars | Section | On screen | Caption (head / body) | Why it is there |
 |---|---|---|---|---|
@@ -32,25 +32,25 @@ and one given its LAST RITES.
 | 2 to 4 | | All Games at the first frame: six games listed, no covers yet | The master list / Every game you have, listed before its drive answers. | the feature in one look |
 | 4 to 6 | | the covers arrive, the cursor has not moved | The handover / Each drive's games swap in as it answers. The cursor stays put. | proves it is the real list, not a picture of one |
 | 6 to 8 | | the same list with the drives on Manual: whole, instant | Drives on Manual / Still instant: their games are listed too. | Manual is RIPPS2's default for BDM |
-| 8 to 10 | II. SEANCE | chapter card: "SEANCE" / "the launchers you keep, found once" | | |
+| 8 to 10 | II. Your launchers | chapter card: "Your launchers" / "found once, wherever you keep them" | | |
 | 10 to 12 | | STATUS opening on DRIVES: the HDD, both cards' free space, MX4SIO off | Drives first / STATUS opens on what RIPPS2 sees, with free space. | the user's ask: drives and space before the homebrew |
 | 12 to 14 | | LAUNCHERS: five lines, not found yet; LOOK FOR THEM | Launchers / POPSTARTER, the POPS files, Ember, its BIOS, Neutrino. | |
 | 14 to 16 | | "Start every drive first?" then LOOKING FOR YOUR LAUNCHERS | LOOK FOR THEM / It starts every drive, then searches them all. | |
-| 16 to 18 | | the summary: SEANCE found 5 of the 5 | Found / Wherever you keep them, remembered for every launch. | |
+| 16 to 18 | | the summary: RIPPS2 found 5 of the 5 | Found / Wherever you keep them, remembered for every launch. | |
 | 18 to 20 | | STATUS's lines now with their paths (BACKUP/PS1, APPS/Ember, TOOLS/neutrino) | Kept / By drive kind, so a stick in another port still matches. | odd paths prove it searched |
 | 20 to 22 | | Settings > Game Sources > Cache: Found / Not found, Look now | On the Cache page / Found or not found. No switch: it only helps. | the user's wording |
-| 22 to 24 | III. SHROUD | chapter card: "SHROUD" / "hide a game from every list" | | |
+| 22 to 24 | III. Hide a game | chapter card: "Hide a game" / "from every list, until you want it back" | | |
 | 24 to 26 | | Triangle options, Hide Game, the question | Hide Game / In a game's options. One question: it can be undone. | |
 | 26 to 28 | | HIDDEN toast, the list without the game | Gone from every list / All Games, Starred Games, Recents, Random Game. | |
 | 28 to 30 | | Settings > Game Sources > Hidden Games, SHOW IT AGAIN | Hidden Games / Kept on the game's own drive. Show it again any time. | |
-| 30 to 32 | IV. LAST RITES | chapter card: "LAST RITES" / "delete a game completely" | | |
+| 30 to 32 | IV. Delete a game | chapter card: "Delete a game" / "completely, and only what is its own" | | |
 | 32 to 34 | | the plan: Goes (the game, its settings, art, cheats) / Kept (its saves) | Everything of its / The game, its settings, its art and its cheats. | was: only the ISO went |
 | 34 to 36 | | "Delete its saves and RIPSHOT pictures too?" | Saves stay / Unless you say so. | |
 | 36 to 38 | | Last check, START, DELETED ...: ... FREED | START, and only START / Then a receipt in REMOVED.TXT. | |
 | 38 to 40 | | the APA disk with a table cloned from a bigger drive: "Nothing was deleted" | Berion's check / A table written from another size of disk is refused. | the forum's own expert, credited |
 | 40 to 42 | V. Lighter | text card over the lite boot: 2.69 MB / 1.97 MB | RIPPS2-lite.elf / Under 2 MB for memory cards: your Neutrino, found. | FifthFox's 2 MB |
 | 42 to 44 | | STATUS in Japanese | Every word, 33 languages / The new pages too. | |
-| 44 to 48 | Montage | half-bar cuts: covers, SEANCE summary, Hidden Games, the plan, STATUS, Adapt | | the energy before the outro |
+| 44 to 48 | Montage | half-bar cuts: covers, the search summary, Hidden Games, the plan, STATUS, Adapt | | the energy before the outro |
 | 60 to 62 | Outro | "Rip it." over the list | | |
 | end | End card | v1.1.4 beta, build 114; github; psx-place; testers with lukeatmynose and the YouTube thanks; built on RiptOPL, Neutrino, POPSTARTER, Ember, PS2BBL; music line | | |
 
@@ -93,14 +93,14 @@ in the spoiler. Order is what a newcomer should see, the newest feature last:
 | 09 | STATUS: drives, launchers | RIPPS2 | what it sees, new in 114 |
 | 10 | Settings > Game Sources with Hidden Games and Cache | RIPPS2 | the settings, plainly worded |
 | 11 | the START menu or STATUS in Japanese | RIPPS2 | 33 languages |
-| 12 | LAST RITES' plan screen | RIPPS2 | the newest, last |
+| 12 | Delete's plan screen | RIPPS2 | the newest, last |
 
 Frames 01 to 07 and 09 to 12 are new grabs; 08 is a still from the v1.0.8 reel's in-game capture (the lab cannot
 start a game for a still, and the in-game menu has not changed since 108). Files: `media/b114/tour-NN-*.jpg`.
 
 ## 4. The bump's pictures (the v1.1.4 reply)
-Five, in the reel's order: All Games before the drive answered (no covers yet), SEANCE's summary, STATUS with the
-launchers found, Hidden Games, LAST RITES' plan. Files: `media/b114/new-NN-*.jpg`.
+Five, in the reel's order: All Games before the drive answered (no covers yet), the launcher search, STATUS with the
+launchers found, Hidden Games, Delete's plan. Files: `media/b114/new-NN-*.jpg`.
 
 ## 5. Order of work
 1. Disks (copy, launchers, APA game, the clone). 2. Takes, then contact sheets of each. 3. The tour grabs. 4.
