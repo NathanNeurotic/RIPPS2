@@ -14092,20 +14092,21 @@ index 7e6c20a..917e3c4 100644
  /** Updates to the native display resolution and aspect ratio
   * @note Invalidates the whole glyph cache for all fonts! */
 diff --git a/include/gui.h b/include/gui.h
-index ad18867..d0835d7 100644
+index ad18867..9751a40 100644
 --- a/include/gui.h
 +++ b/include/gui.h
-@@ -127,6 +127,9 @@ int guiShowKeyboard(char *value, int maxLength);
+@@ -127,6 +127,10 @@ int guiShowKeyboard(char *value, int maxLength);
  int guiMsgBox(const char *text, int addAccept, struct UIItem *ui);
  int guiIsActive(void);
  void guiCycleTheme(void); // build 79: the next theme (SELECT held 4.2 s)
 +enum { RIPPS2_HOLD_LIST = 0, RIPPS2_HOLD_CYCLE, RIPPS2_HOLD_OFF };
 +extern int gRipps2SelectHold; // build 114: Settings > Interface > Hold SELECT (SELECT held 4.2 s on a list)
++void guiRenderPage(void); // build 114: the current page drawn once (under a panel)
 +int guiPickTheme(void);   // build 114: the theme list (SELECT held 4.2 s, Hold SELECT: List); 0: the one in use, refresh
  void guiMsgBoxStartOption(const char *label); // RIPPS2: the next guiMsgBox offers START (returns 2)
  void guiMsgBoxSound(int sfx); // RIPPS2: the next message box plays this sound (SFX_ERROR, SFX_SAVE)
  int guiPromptRebootIop(void);
-@@ -177,6 +180,7 @@ int guiPopstarterPathHandler(char *text, int maxLen);
+@@ -177,6 +181,7 @@ int guiPopstarterPathHandler(char *text, int maxLen);
  int guiExitPathHandler(char *text, int maxLen);
  int guiShowNeutrinoArgsConfig(char *argsBuf, int bufSize); // 1 when the saved args changed
  int guiNeutrinoArgsCwdHandler(char *text, int maxLen);
@@ -14113,7 +14114,7 @@ index ad18867..d0835d7 100644
  int guiNeutrinoArgsCfgHandler(char *text, int maxLen);
  int guiNeutrinoArgsElfHandler(char *text, int maxLen);
  int guiNeutrinoArgsAta0Handler(char *text, int maxLen);
-@@ -203,6 +207,8 @@ int guiNetProtocolNeedsRestart(void);
+@@ -203,6 +208,8 @@ int guiNetProtocolNeedsRestart(void);
  // One-shot POPSTARTER USB driver pick (FAT32 vs exFAT), shown on EVERY USB VCD launch
  // (maintainer directive 2026-08-01: the user picks per launch, never a sticky default).
  int guiShowVcdUsbMode(void);
@@ -83879,7 +83880,7 @@ index d59e71c..7a1b2b6 100644
          LOG("FNTSYS Error loading glyph - %d\n", error);
          return NULL;
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..640994d 100644
+index 2b110ad..4c39e9c 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -12,10 +12,13 @@
@@ -84833,7 +84834,21 @@ index 2b110ad..640994d 100644
  #ifdef RETROACHIEVEMENTS
          _l(_STR_RIPPS2_ACHIEVEMENTS), // build 80: moved here from the main menu, last of the pages
  #endif
-@@ -5428,13 +5737,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5157,6 +5466,13 @@ static void guiShow()
+         screenHandler->renderScreen();
+ }
+ 
++// build 114: the page as it stands (the theme list fades in over it, whatever the theme)
++void guiRenderPage(void)
++{
++    if (screenHandler != NULL)
++        screenHandler->renderScreen();
++}
++
+ void guiIntroLoop(void)
+ {
+     // RIPPS2: no boot splash, no fade and no boot jingle. The pillars play their boot swoop on
+@@ -5428,13 +5744,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
  
          if (ui)
              diaRenderUI(ui, screenHandler->inMenu, NULL, 0);
@@ -87599,10 +87614,10 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..2c44064
+index 0000000..afda882
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1718 @@
+@@ -0,0 +1,1757 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -88794,8 +88809,16 @@ index 0000000..2c44064
 +    u32 blocks, *crcs;
 +    s64 inBytes, outBytes, done, work; // work: every byte read on the way, for the bar
 +    double began, drawnAt;
-+    char name[160];
++    char name[160], why[96]; // why: where it stopped, for the message and a tester's report
 +} zp_job_t;
++
++static void zpWhy(zp_job_t *j, const char *what, s64 at)
++{
++    char sz[24];
++    lrSize(at, sz, sizeof(sz));
++    snprintf(j->why, sizeof(j->why), "%s, %s", what, sz);
++    printf("RIPPS2 compression: %s at %s\n", what, sz);
++}
 +
 +// one 2 KB block in LZ4's block format (the EE's lz4.c only decodes): greedy, a 12-bit hash of 4 bytes, the format's end
 +// rules kept (the last 5 bytes literals, no match starting in the last 12). Its Python twin round-trips through the
@@ -88922,14 +88945,14 @@ index 0000000..2c44064
 +}
 +
 +// the panel: what it will do, SELECT held to go on (1), Circle to back out (0)
-+static int zpAsk(const char *head, const char *name, const char *info)
++static int zpAsk(const char *head, const char *name, const char *info, const char *when)
 +{
 +    double t0 = ripps2Seconds(), heldSince = 0.0, now;
 +    int backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
 +    int backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
 +    const char *hold = _t("HOLD");
 +    for (;;) {
-+        int w = 580, h = 196, x = (640 - w) / 2, y = 134, ia, hx;
++        int w = 580, h = 204, x = (640 - w) / 2, y = 134, ia, hx;
 +        float a, p = 0.0f;
 +        GSTEXTURE *sel = thmGetTexture(SELECT_ICON);
 +        now = ripps2Seconds();
@@ -88962,10 +88985,10 @@ index 0000000..2c44064
 +        if (sel != NULL)
 +            rmDrawPixmap(sel, hx + 9, y + 80, ALIGN_NONE, 20, 20, SCALING_RATIO, lgAlpha(LG_LIT, ia), 0);
 +        ripps2HintText(hx + 44, y + 90, hold, lgAlpha(LG_SOFT, ia));
-+        fntRenderStringFit(gTheme->fonts[5], 320, y + 122, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
-+        fntRenderStringFit(gTheme->fonts[5], 320, y + 144, ALIGN_CENTER, w - 40, _t("Experimental: a ZSO starts with the OPL core only, not Neutrino."),
-+                           lgAlpha(LG_SOFT, ia / 2), 1);
-+        ripps2HintOneA(backIcon, _t("BACK"), y + 176, ia);
++        fntRenderStringFit(gTheme->fonts[5], 320, y + 120, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
++        fntRenderStringFit(gTheme->fonts[5], 320, y + 140, ALIGN_CENTER, w - 40, when, lgAlpha(LG_SOFT, ia), 1);
++        fntRenderStringFit(gTheme->fonts[5], 320, y + 160, ALIGN_CENTER, w - 40, _t("Experimental: OPL core only (not Neutrino)"), lgAlpha(LG_SOFT, ia / 2), 1);
++        ripps2HintOneA(backIcon, _t("BACK"), y + 184, ia);
 +        rmEndFrame();
 +    }
 +}
@@ -89059,14 +89082,18 @@ index 0000000..2c44064
 +    *(u32 *)(head + 16) = 2048;
 +    head[20] = 1;
 +    head[21] = (unsigned char)j->align;
-+    if (!zpWriteAll(j->fdOut, head, ZP_HEAD))
++    if (!zpWriteAll(j->fdOut, head, ZP_HEAD)) {
++        zpWhy(j, "writing the header", 0);
 +        return 0;
++    }
 +    // the index's room, filled in as the blocks are packed, then the data from the next boundary
 +    memset(out, 0, ZP_RUN * 2048);
 +    for (pos = (s64)(j->blocks + 1) * 4; pos > 0; pos -= n) {
 +        n = pos > ZP_RUN * 2048 ? ZP_RUN * 2048 : (int)pos;
-+        if (!zpWriteAll(j->fdOut, out, n))
++        if (!zpWriteAll(j->fdOut, out, n)) {
++            zpWhy(j, "writing the index room", pos);
 +            return 0;
++        }
 +    }
 +    pos = ZP_HEAD + (s64)(j->blocks + 1) * 4;
 +    n = (int)((unit - (pos & (unit - 1))) & (unit - 1));
@@ -89076,8 +89103,10 @@ index 0000000..2c44064
 +    fileEnd = pos;
 +    for (b = 0; b < j->blocks; b += cnt) {
 +        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
-+        if (!zpReadAll(j->fdIn, in, cnt * 2048))
++        if (!zpReadAll(j->fdIn, in, cnt * 2048)) {
++            zpWhy(j, "reading the ISO", (s64)b * 2048);
 +            return 0;
++        }
 +        j->crcs[b / ZP_RUN] = crc32(0L, in, cnt * 2048);
 +        for (k = 0, o = 0; k < (u32)cnt; k++) {
 +            int raw, sz, pad;
@@ -89092,19 +89121,25 @@ index 0000000..2c44064
 +            memset(out + o, 0, pad);
 +            o += pad;
 +            pos += pad;
-+            if (idxN == ZP_IDX && !zpFlushIdx(j->fdOut, idx, &idxStart, &idxN, fileEnd))
++            if (idxN == ZP_IDX && !zpFlushIdx(j->fdOut, idx, &idxStart, &idxN, fileEnd)) {
++                zpWhy(j, "writing the index", (s64)(b + k) * 2048);
 +                return 0;
++            }
 +        }
-+        if (!zpWriteAll(j->fdOut, out, o))
++        if (!zpWriteAll(j->fdOut, out, o)) {
++            zpWhy(j, "writing the ZSO", (s64)b * 2048);
 +            return 0;
++        }
 +        fileEnd += o;
 +        j->done += cnt * 2048;
 +        if (!zpTick(j))
 +            return -1;
 +    }
 +    idx[idxN++] = (u32)(pos >> j->align); // where the last block ends
-+    if (!zpFlushIdx(j->fdOut, idx, &idxStart, &idxN, fileEnd))
++    if (!zpFlushIdx(j->fdOut, idx, &idxStart, &idxN, fileEnd)) {
++        zpWhy(j, "writing the last of the index", j->inBytes);
 +        return 0;
++    }
 +    j->outBytes = fileEnd;
 +    return 1;
 +}
@@ -89143,11 +89178,15 @@ index 0000000..2c44064
 +    int cnt;
 +    for (b = 0; b < j->blocks; b += cnt) {
 +        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
-+        if (!zpUnzip(j->fdIn, j->align, b, cnt, cbuf, cap, in))
++        if (!zpUnzip(j->fdIn, j->align, b, cnt, cbuf, cap, in)) {
++            zpWhy(j, "reading the ZSO", (s64)b * 2048);
 +            return 0;
++        }
 +        j->crcs[b / ZP_RUN] = crc32(0L, in, cnt * 2048);
-+        if (!zpWriteAll(j->fdOut, in, cnt * 2048))
++        if (!zpWriteAll(j->fdOut, in, cnt * 2048)) {
++            zpWhy(j, "writing the ISO", (s64)b * 2048);
 +            return 0;
++        }
 +        j->done += cnt * 2048;
 +        if (!zpTick(j))
 +            return -1;
@@ -89162,17 +89201,26 @@ index 0000000..2c44064
 +    unsigned char head[ZP_HEAD];
 +    u32 b;
 +    int cnt, fd, ok = 1;
-+    if ((fd = open(path, O_RDONLY)) < 0)
++    if ((fd = open(path, O_RDONLY)) < 0) {
++        zpWhy(j, "opening it to check", 0);
 +        return 0;
-+    if (j->pack && (!zpReadAll(fd, head, ZP_HEAD) || *(u32 *)head != ZP_MAGIC || head[21] != j->align))
++    }
++    if (j->pack && (!zpReadAll(fd, head, ZP_HEAD) || *(u32 *)head != ZP_MAGIC || head[21] != j->align)) {
++        zpWhy(j, "checking the header", 0);
 +        ok = 0;
-+    for (b = 0; ok && b < j->blocks; b += cnt) {
++    }
++    for (b = 0; ok == 1 && b < j->blocks; b += cnt) {
 +        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
-+        ok = j->pack ? zpUnzip(fd, j->align, b, cnt, cbuf, cap, in) : zpReadAll(fd, in, cnt * 2048);
-+        ok = ok && crc32(0L, in, cnt * 2048) == j->crcs[b / ZP_RUN];
++        if (!(j->pack ? zpUnzip(fd, j->align, b, cnt, cbuf, cap, in) : zpReadAll(fd, in, cnt * 2048))) {
++            zpWhy(j, "reading it back", (s64)b * 2048);
++            ok = 0;
++        } else if (crc32(0L, in, cnt * 2048) != j->crcs[b / ZP_RUN]) {
++            zpWhy(j, "a piece read back did not match", (s64)b * 2048);
++            ok = 0;
++        }
 +        j->done += cnt * 2048;
-+        if (ok && !zpTick(j))
-+            ok = -1;
++        if (ok == 1 && !zpTick(j))
++            ok = -1; // stopped: the loop ends here
 +    }
 +    close(fd);
 +    return ok;
@@ -89180,7 +89228,7 @@ index 0000000..2c44064
 +
 +void ripps2PackGame(item_list_t *support, int id)
 +{
-+    char prefix[160], src[300], dst[300], tmp[310], info[200], msg[400], a[24], b[24], *dot;
++    char prefix[160], src[300], dst[300], tmp[310], info[200], msg[400], a[24], b[64], *dot;
 +    sh_row_t r;
 +    item_list_t view;
 +    const base_game_info_t *g;
@@ -89243,11 +89291,12 @@ index 0000000..2c44064
 +    // packing reads the ISO and writes about two thirds of it; the check reads that again
 +    mins = (int)((double)j.inBytes * (j.pack ? 2.4 : 2.7) / (zpSpeed(r.mode) * 1048576.0) / 60.0 + 0.5);
 +    lrSize(j.inBytes, a, sizeof(a));
++    snprintf(info, sizeof(info), _t("%s on %s"), a, where);
 +    if (mins < 1)
-+        snprintf(info, sizeof(info), _t("%s on %s: under a minute, every piece checked"), a, where);
++        snprintf(b, sizeof(b), "%s", _t("Under a minute, then checked"));
 +    else
-+        snprintf(info, sizeof(info), _t("%s on %s: about %d min, every piece checked"), a, where, mins);
-+    if (!zpAsk(j.pack ? _t("COMPRESS TO ZSO") : _t("UNCOMPRESS TO ISO"), r.name, info)) {
++        snprintf(b, sizeof(b), _t("About %d min, then checked"), mins);
++    if (!zpAsk(j.pack ? _t("COMPRESS TO ZSO") : _t("UNCOMPRESS TO ISO"), r.name, info, b)) {
 +        close(j.fdIn);
 +        return;
 +    }
@@ -89275,7 +89324,9 @@ index 0000000..2c44064
 +    j.fdOut = open(tmp, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 +    j.began = ripps2Seconds();
 +    j.work = j.inBytes * 2; // the work, then the check, each over the game's size
-+    if (j.fdOut >= 0)
++    if (j.fdOut < 0)
++        zpWhy(&j, "making the new file", 0);
++    else
 +        rv = j.pack ? zpPack(&j, in, out, blk, idx) : zpUnpack(&j, in, out, cap);
 +    if (j.fdOut >= 0 && close(j.fdOut) < 0 && rv == 1)
 +        rv = 0;
@@ -89287,14 +89338,17 @@ index 0000000..2c44064
 +        j.done = j.inBytes;
 +        rv = zpCheck(&j, tmp, in, out, cap);
 +    }
-+    if (rv == 1 && rename(tmp, dst) != 0)
++    if (rv == 1 && rename(tmp, dst) != 0) {
++        zpWhy(&j, "giving it its name", j.outBytes);
 +        rv = 0;
++    }
 +    if (rv != 1)
 +        unlink(tmp);
 +    ioBlockOps(0);
 +    if (rv == 0) {
 +        guiMsgBoxSound(SFX_ERROR);
-+        guiMsgBox(_t("It could not be finished (the drive may be full, or a piece read back did not match). What it wrote was removed; the game is as it was."), 0, NULL);
++        snprintf(msg, sizeof(msg), _t("It could not be finished (%s). What it wrote was removed; the game is as it was."), j.why[0] ? j.why : "?");
++        guiMsgBox(msg, 0, NULL);
 +        goto end;
 +    }
 +    if (rv < 0)
@@ -90343,7 +90397,7 @@ index f2c48c4..6168630 100644
              if (rescan)
                  stScan();
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 02b03e6..916310e 100644
+index 02b03e6..ef865c0 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -143,9 +143,12 @@ static int catSwapMode(void)
@@ -90762,22 +90816,22 @@ index 02b03e6..916310e 100644
 +    int backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
 +
 +    rmStartFrame();
-+    ripps2DrawBackground();
-+    thmDrawBackdrop();
-+    ripps2RenderCategoryBar();
++    guiRenderPage(); // the page as it is, under the glass
 +    ripps2DrawHintBoxA(x, y, w, h, a);
 +    fntRenderString(gTheme->fonts[4], 320, y + 26, ALIGN_CENTER, 0, 0, _t("THEMES"), tpAlpha(TP_LIT, ia));
 +    if (pages > 1) {
 +        snprintf(pg, sizeof(pg), "%d / %d", page + 1, pages);
-+        fntRenderString(RIPPS2_DIA_FONT, x + w - 22, y + 26, ALIGN_VCENTER | ALIGN_RIGHT, 0, 0, pg, tpAlpha(TP_SOFT, ia));
++        fntRenderString(RIPPS2_DIA_FONT, x + w - 22 - rmUnScaleX(fntCalcDimensions(RIPPS2_DIA_FONT, pg)), y + 26, ALIGN_VCENTER, 0, 0, pg,
++                        tpAlpha(TP_SOFT, ia));
 +    }
 +    for (i = 0; i < TP_ROWS && first + i < n; i++) {
 +        int k = first + i, ry = y + 56 + i * 24;
 +        if (k == sel)
 +            rmDrawRect(x + 16, ry - 11, w - 32, 22, GS_SETREG_RGBA(0x4A, 0x8C, 0xF0, ia / 4));
 +        fntRenderString(RIPPS2_DIA_FONT, x + 30, ry, ALIGN_VCENTER | ALIGN_LEFT, 0, 0, names[k], tpAlpha(k == sel ? TP_LIT : TP_SOFT, ia));
-+        if (k == cur)
-+            fntRenderString(RIPPS2_DIA_FONT, x + w - 30, ry, ALIGN_VCENTER | ALIGN_RIGHT, 0, 0, _t("IN USE"), tpAlpha(TP_SOFT, ia));
++        if (k == cur) // measured: the font's own right alignment is not one fntRenderString takes
++            fntRenderString(RIPPS2_DIA_FONT, x + w - 30 - rmUnScaleX(fntCalcDimensions(RIPPS2_DIA_FONT, _t("IN USE"))), ry, ALIGN_VCENTER, 0, 0,
++                            _t("IN USE"), tpAlpha(TP_SOFT, ia));
 +    }
 +    ripps2HintPairA(confirmIcon, _t("CHOOSE"), backIcon, _t("BACK"), y + h - 20, ia);
 +    rmEndFrame();
