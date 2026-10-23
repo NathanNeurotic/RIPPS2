@@ -85214,10 +85214,10 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..c7c60aa 100644
+index 3dc8c13..d3477eb 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
-@@ -223,6 +223,114 @@ int ioDescribeRunning(char *out, int size)
+@@ -223,6 +223,113 @@ int ioDescribeRunning(char *out, int size)
      return 1;
  }
  
@@ -85294,11 +85294,10 @@ index 3dc8c13..c7c60aa 100644
 +        if (r == gReqRunning)
 +            continue;
 +        if (r->type == IO_MENU_UPDATE_DEFFERED) {
-+            if ((known = ioListMs(r->data)) <= 0) {
-+                total = -1;
-+                break;
-+            }
-+            total += known;
++            // one waiting behind that was never timed (a page rebuilt after a source, mostly quick) is a guess, not a
++            // reason to give up the estimate; only the running job's unknown time does that
++            known = ioListMs(r->data);
++            total += known > 0 ? known : 500;
 +        } else
 +            total += r->type == IO_CACHE_LOAD_ART ? 50 : 500;
 +    }
@@ -85332,7 +85331,7 @@ index 3dc8c13..c7c60aa 100644
  // RIPPS2: is the worker inside a job right now
  int ioWorkerBusy(void)
  {
-@@ -322,7 +430,18 @@ static void ioWorkerThread(void *arg)
+@@ -322,7 +429,18 @@ static void ioWorkerThread(void *arg)
              gRunSince = clock();
              gRunData = req->data;
              gRunType = req->type;
@@ -85351,7 +85350,7 @@ index 3dc8c13..c7c60aa 100644
              gRunType = 0;
  
              // lock the queue tip as well now
-@@ -735,6 +854,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -735,6 +853,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
@@ -87236,10 +87235,10 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..7d65462
+index 0000000..be7510f
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1124 @@
+@@ -0,0 +1,1126 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -87918,6 +87917,8 @@ index 0000000..7d65462
 +        return "MMCE";
 +    if (mode == ETH_MODE)
 +        return _t("the SMB share");
++    if (mode == MIX_MODE)
++        return _l(_STR_RIPPS2_ALL_GAMES); // the guard: All Games put together again after a refresh
 +    return _t("its drive");
 +}
 +
