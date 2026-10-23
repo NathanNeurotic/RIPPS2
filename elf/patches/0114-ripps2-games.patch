@@ -87614,10 +87614,10 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..afda882
+index 0000000..3b61cd5
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1757 @@
+@@ -0,0 +1,1791 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -89195,6 +89195,29 @@ index 0000000..afda882
 +    return 1;
 +}
 +
++#ifdef RIPPS2_GUARD_TEST
++// a test build: which block of a piece that did not match, and how it was stored (the .part is kept to study)
++static char zpSrcPath[300];
++static void zpWhichBlock(zp_job_t *j, u32 b, int cnt, const unsigned char *got)
++{
++    unsigned char *want = malloc(cnt * 2048);
++    int fd = open(zpSrcPath, O_RDONLY), k, i;
++    if (want == NULL || fd < 0 || lseek64(fd, (s64)b * 2048, SEEK_SET) < 0 || read(fd, want, cnt * 2048) != cnt * 2048) {
++        printf("RIPPS2 compression test: could not read the original again\n");
++    } else
++        for (k = 0; k < cnt; k++)
++            if (memcmp(want + k * 2048, got + k * 2048, 2048)) {
++                for (i = 0; i < 2048 && want[k * 2048 + i] == got[k * 2048 + i]; i++)
++                    ;
++                printf("RIPPS2 compression test: block %u differs from byte %d (want %02x got %02x)\n", (unsigned)(b + k), i,
++                       want[k * 2048 + i], got[k * 2048 + i]);
++            }
++    if (fd >= 0)
++        close(fd);
++    free(want);
++}
++#endif
++
 +// the check: what was written, read back, piece by piece against the crc taken from the original
 +static int zpCheck(zp_job_t *j, const char *path, unsigned char *in, unsigned char *cbuf, int cap)
 +{
@@ -89217,6 +89240,9 @@ index 0000000..afda882
 +        } else if (crc32(0L, in, cnt * 2048) != j->crcs[b / ZP_RUN]) {
 +            zpWhy(j, "a piece read back did not match", (s64)b * 2048);
 +            ok = 0;
++#ifdef RIPPS2_GUARD_TEST
++            zpWhichBlock(j, b, cnt, in);
++#endif
 +        }
 +        j->done += cnt * 2048;
 +        if (ok == 1 && !zpTick(j))
@@ -89253,6 +89279,9 @@ index 0000000..afda882
 +    strcpy(dot, kind == 1 ? ".zso" : ".iso");
 +    snprintf(tmp, sizeof(tmp), "%s.part", dst);
 +    where = lrWhere(r.mode);
++#ifdef RIPPS2_GUARD_TEST
++    snprintf(zpSrcPath, sizeof(zpSrcPath), "%s", src);
++#endif
 +
 +    memset(&j, 0, sizeof(j));
 +    j.pack = kind == 1;
@@ -89342,7 +89371,12 @@ index 0000000..afda882
 +        zpWhy(&j, "giving it its name", j.outBytes);
 +        rv = 0;
 +    }
-+    if (rv != 1)
++#ifdef RIPPS2_GUARD_TEST
++    if (rv == 0 && strstr(j.why, "did not match") != NULL)
++        printf("RIPPS2 compression test: %s kept to study\n", tmp);
++    else
++#endif
++        if (rv != 1)
 +        unlink(tmp);
 +    ioBlockOps(0);
 +    if (rv == 0) {
