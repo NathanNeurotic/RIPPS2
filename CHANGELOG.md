@@ -31,7 +31,8 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
 - **Settings > Game Sources > Cache** shows each of the five as found (and where) or not found yet, with **Look
   now**. A launch that finds none offers the search, and the place found is kept for every launch after.
 - **Ember** needs its files beside the games: when RIPPS2 knows a copy elsewhere, START copies Ember (or its BIOS)
-  there and starts the game. **RIPPOPS** copies the POPS files from where RIPPS2 found them.
+  there and starts the game. **RIPPOPS** copies the POPS files from where RIPPS2 found them. Both copy with the
+  RIPPS2 progress bar (compression's panel), where they showed one still line for seconds.
 - **Neutrino** is looked for at Settings' path, on the game's drive, on the memory cards and on every started
   drive before anything is offered; RIPPS2's own 1.8.0 is offered once, only when none is found anywhere.
 

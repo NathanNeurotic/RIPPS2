@@ -149,6 +149,18 @@ fw_ = fw_[fw_.index('static void fbWorker(void)'):]
 fw_ = fw_[:fw_.index('\n}\n')]
 if 'ioLaunchBegin();\n    if (fbOp == FB_OP_PASTE)' not in fw_ or 'ioLaunchCancel();\n    if (fbPath[0])' not in fw_:
     fail.append('ripps2files.c: no background write while Memory Files copies, unpacks or deletes (held, then given back)')
+io_ = rd('src/ioman.c')
+if io_.find('static int gIoWriteSema') < 0 or io_.find('static int gIoWriteSema') > io_.find('gIoWriteSema = CreateSema('):
+    fail.append('ioman.c: gIoWriteSema is declared before ioInit makes it')
+# the progress bar wherever a long job has nothing else on screen: compression, and the launchers copied beside games
+gm_ = rd('src/ripps2games.c')
+need(gm_, (('void ripps2DrawProgress(const char *head, const char *name, long long done, long long total, const char *left, int cancel)', 'one progress panel'),
+           ('ripps2DrawPanelGlass(30, 134, 580, 170, 0);', "on the notch panels' frame"), ('int ripps2CopyFile(const char *src, const char *dst, const char *name)', 'a copy with the bar'),
+           ('ripps2DrawProgress("COPYING", name, done, total, NULL, 0);', 'drawn as it copies'), ('j->name, j->done, j->work, left, 1);', 'compression draws the same panel')), 'ripps2games.c progress')
+if 'static int seCopy(' in rd('src/ripps2seance.c') or 'ripps2CopyFile(src, dest, what == SEANCE_EMBER' not in rd('src/ripps2seance.c'):
+    fail.append('ripps2seance.c: Ember and its BIOS are copied with the progress bar')
+if 'ripps2CopyFile != NULL ? ripps2CopyFile(src, path, files[i]) : vcdCopyFile(src, path)' not in rd('src/vcdsupport.c'):
+    fail.append('vcdsupport.c: the POPS files are copied with the progress bar')
 bs_ = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'build.sh'), encoding='utf-8').read()
 if 'python3 .github/scripts/install_safe_bdmfs.py' not in bs_ or bs_.find('install_safe_bdmfs.py') > bs_.find('make clean'):
     fail.append("elf/build.sh: RiptOPL's guarded exFAT/FAT driver (install_safe_bdmfs.py) is installed before the build, as its releases do")
