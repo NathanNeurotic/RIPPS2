@@ -5,10 +5,6 @@ language: French
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTRÉE VALIDE, ÉCHAP ANNULE. UN BOUTON AFFICHE LES TOUCHES.
   USB KEYBOARD: CLAVIER USB
-  '      DESR DVR ISOs (experimental)': '      ISO DESR DVR (expérimental)'
-  '      Internal HDD (exFAT)': '      Disque dur interne (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (expérimental)'
-  '      Protocol': '      Protocole'
   Access: Accès
   Applications Page Start Mode: Démarrage de la page Applications
   Art Delay: Délai des illustrations
@@ -22,7 +18,6 @@ strings:
   Fifth: Cinquième
   First: Premier
   Fourth: Quatrième
-  HDD (APA) Start Mode: Démarrage du disque dur (APA)
   HDD Cache: Cache du disque dur
   HDD Spindown: Mise en veille du disque dur
   MMCE Settings: Paramètres MMCE
@@ -134,7 +129,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek et Sleek Bold, dessinées pour RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements sur la console par hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL par NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed par Google (Apache-2.0)
   SOUNDS: SONS
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: l'installateur FMCB de SP193 et l'OSDMenu de pcm720, suivis pas à pas
   SUPPORT: ASSISTANCE
@@ -843,7 +837,6 @@ strings:
   AUDIO folder: dossier AUDIO
   DRIVES: PÉRIPHÉRIQUES
   MANAGE: GÉRER
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: GÉRER montre ce que lance chaque carte mémoire, et installe ou répare BIBLE.
   MEMORY CARD 0  (about 600 KB): CARTE MÉMOIRE 0  (environ 600 Ko)
   MEMORY CARD 1  (about 600 KB): CARTE MÉMOIRE 1  (environ 600 Ko)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO : son pilote n''a pas pu se charger (code %d).'
@@ -1064,6 +1057,49 @@ strings:
   only if you have none: seulement si vous n'en avez pas
   starts every drive first: démarre d'abord tous les périphériques
   Drives, launchers and homebrew: Périphériques, lanceurs et homebrews
+  BDM Devices: Périphériques BDM
+  Color Sweep: Fondu de couleurs
+  Colors and Text: Couleurs et texte
+  HDD POPS partitions: Partitions POPS du disque dur
+  Layout: Disposition
+  Missing Covers: Jaquettes manquantes
+  Name: Nom
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Aucune configuration SMB de POPSTARTER trouvée. Remplissez les lignes ci-dessous.
+  POPSTARTER Network: Réseau POPSTARTER
+  POPSTARTER SMB Network: Réseau SMB de POPSTARTER
+  POPSTARTER UDPFS Network: Réseau UDPFS de POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 ajoute lui-même le périphérique, l'ISO, les VMC et le mode vidéo.
+  Screen: Écran
+  Speed: Vitesse
+  Sweep Colors: Couleurs du fondu
+  Text Weight: Graisse du texte
+  Theme Color: Couleur principale
+  Bold: Gras
+  Controllers: Manettes
+  Lively: Vif
+  Medium: Moyen
+  PS Emulation: Émulation PS
+  Regular: Normal
+  Slow: Lent
+  A MOMENT: UN INSTANT
+  A TASK IN THE BACKGROUND: UNE TÂCHE EN ARRIÈRE-PLAN
+  ABOUT %d S: ENVIRON %d S
+  ANY MOMENT: D'UN INSTANT À L'AUTRE
+  READING THE GAME LIST OF %s: LECTURE DE LA LISTE DES JEUX DE %s
+  SAVING A LIST: ENREGISTREMENT D'UNE LISTE
+  START NOW: DÉMARRER MAINTENANT
+  STARTING: DÉMARRAGE
+  STARTS NEXT: DÉMARRE ENSUITE
+  STOPPING IT SAFELY: ARRÊT EN SÉCURITÉ
+  THE LAST OF THE QUEUE: LA FIN DE LA FILE
+  WHEN IT FINISHES: QUAND CE SERA FINI
+  What each card starts; install or repair BIBLE.: Ce que lance chaque carte ; installer ou réparer BIBLE.
+  Rainbow: Arc-en-ciel
+  Custom: Personnalisée
+  DESR DVR ISOs (experimental): ISO DESR DVR (expérimental)
+  PC CARD CF (experimental): PC CARD CF (expérimental)
+  HDD Start Mode: Démarrage du disque dur
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed par The Roboto Project Authors (SIL OFL 1.1)
 labels:
   HINT_NEUTRINO_AUTO_ELF: Transmet l'ELF de démarrage du jeu à Neutrino pour chercher sa configuration par titre. Activé par défaut ; une option Boot ELF réglée à la main a la priorité.
   HINT_POPSTARTER_PATH: Emplacement de POPSTARTER.ELF. Laissé vide, RIPPS2 en renseigne un qu'il trouve sur un périphérique ; écrivez par-dessus pour en utiliser un autre, comme usb:/POPS/POPSTARTER.ELF
@@ -1490,3 +1526,15 @@ labels:
   RIPPS2_HIDE_GAME: Masquer le jeu
   RIPPS2_HIDDEN_GAMES: Jeux masqués
   HINT_RIPPS2_HIDDEN_GAMES: Les jeux masqués avec Masquer le jeu, sur les périphériques démarrés. Affichez-en un à nouveau, ou supprimez-le. Chaque périphérique garde sa propre liste.
+  HINT_RIPPS2_BDM_DEVICES: 'Les périphériques où BDM lit les jeux : USB, MX4SIO, une carte PC Card CF, le disque DVR d''un DESR et iLink. Le disque dur interne suit le démarrage du disque dur.'
+  HINT_RIPPS2_SCREEN: 'L''image du menu : mode vidéo, écran large, sa place sur le téléviseur (H-POS, V-POS) et overscan.'
+  HINT_RIPPS2_LAYOUT: Où se placent les catégories et comment une page arrive, puis les jaquettes de RIPFLOW et la grille de RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Graisse du texte, la couleur du thème, le fondu de couleurs et chaque couleur.
+  HINT_RIPPS2_TEXT_WEIGHT: 'L''épaisseur du texte de RIPPS2 lui-même : les infobulles des paramètres, ÉTAT et À propos. Normal est comme avant ; Moyen et Gras se lisent mieux sur une image douce.'
+  HINT_RIPPS2_HDD_START: 'Le disque dur interne, APA ou exFAT : RIPPS2 le lit quel qu''il soit et l''affiche une seule fois, comme Jeux du disque dur. Désactivé le laisse tranquille.'
+  HINT_RIPPS2_THEME_COLOR: La couleur propre au thème. Choisissez Personnalisée comme couleur du thème pour la choisir vous-même, comme les couleurs du texte.
+  HINT_RIPPS2_SWEEP: Cinq couleurs que le thème traverse, lentement et en douceur. Arc-en-ciel, un fondu tiré de chaque couleur de thème, ou le vôtre. Désactivé garde le thème immobile.
+  HINT_RIPPS2_SWEEP_COLORS: Les cinq couleurs du fondu et sa vitesse. Modifiez-en un de RIPPS2 et il est gardé comme le vôtre, sous le nom que vous lui donnez.
+  HINT_RIPPS2_SWEEP_NAME: Le nom de votre fondu dans la liste Fondu de couleurs.
+  HINT_RIPPS2_SWEEP_COLOR: L'une des cinq couleurs que traverse le fondu, dans l'ordre.
+  HINT_RIPPS2_SWEEP_SPEED: 'La durée de chaque couleur avant que la suivante n''apparaisse. Même Vif reste doux : les couleurs ne clignotent jamais.'

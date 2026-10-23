@@ -5,10 +5,6 @@ language: German
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER BESTÄTIGT, ESC BRICHT AB. JEDE TASTE ZEIGT DIE TASTATUR.
   USB KEYBOARD: USB-TASTATUR
-  '      DESR DVR ISOs (experimental)': '      DESR-DVR-ISOs (experimentell)'
-  '      Internal HDD (exFAT)': '      Interne Festplatte (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (experimentell)'
-  '      Protocol': '      Protokoll'
   Access: Zugriff
   Applications Page Start Mode: Start der Seite Anwendungen
   Art Delay: Verzögerung der Bilder
@@ -22,7 +18,6 @@ strings:
   Fifth: Fünfter
   First: Erster
   Fourth: Vierter
-  HDD (APA) Start Mode: Start der Festplatte (APA)
   HDD Cache: Festplatten-Cache
   HDD Spindown: Festplatten-Ruhezustand
   MMCE Settings: MMCE-Einstellungen
@@ -134,7 +129,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek und Sleek Bold, gezeichnet für RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements auf der Konsole von hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL von NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed von Google (Apache-2.0)
   SOUNDS: SOUNDS
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: SP193s FMCB-Installer und pcm720s OSDMenu, Schritt für Schritt befolgt
   SUPPORT: SUPPORT
@@ -843,7 +837,6 @@ strings:
   AUDIO folder: AUDIO-Ordner
   DRIVES: LAUFWERKE
   MANAGE: VERWALTEN
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: VERWALTEN zeigt, was jede Speicherkarte startet, und installiert oder repariert BIBLE.
   MEMORY CARD 0  (about 600 KB): SPEICHERKARTE 0  (etwa 600 KB)
   MEMORY CARD 1  (about 600 KB): SPEICHERKARTE 1  (etwa 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: Sein Treiber ließ sich nicht laden (Code %d).'
@@ -1064,6 +1057,47 @@ strings:
   only if you have none: nur wenn du keins hast
   starts every drive first: startet zuerst alle Laufwerke
   Drives, launchers and homebrew: Laufwerke, Starter und Homebrew
+  BDM Devices: BDM-Geräte
+  Color Sweep: Farbwechsel
+  Colors and Text: Farben und Text
+  HDD POPS partitions: POPS-Partitionen der Festplatte
+  Missing Covers: Fehlende Cover
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Noch keine SMB-Einrichtung für POPSTARTER gefunden. Fülle die Zeilen unten aus.
+  POPSTARTER Network: POPSTARTER-Netzwerk
+  POPSTARTER SMB Network: POPSTARTER-SMB-Netzwerk
+  POPSTARTER UDPFS Network: POPSTARTER-UDPFS-Netzwerk
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 ergänzt Laufwerk, ISO, VMCs und Videomodus selbst.
+  Screen: Bildschirm
+  Speed: Tempo
+  Sweep Colors: Farben des Wechsels
+  Text Weight: Schriftstärke
+  Theme Color: Hauptfarbe
+  Bold: Fett
+  Controllers: Controller
+  Lively: Lebhaft
+  Medium: Mittel
+  PS Emulation: PS-Emulation
+  Regular: Normal
+  Slow: Langsam
+  A MOMENT: EINEN MOMENT
+  A TASK IN THE BACKGROUND: EINE AUFGABE IM HINTERGRUND
+  ABOUT %d S: ETWA %d S
+  ANY MOMENT: JEDEN MOMENT
+  READING THE GAME LIST OF %s: LIEST DIE SPIELELISTE VON %s
+  SAVING A LIST: SPEICHERT EINE LISTE
+  START NOW: JETZT STARTEN
+  STARTING: STARTET
+  STARTS NEXT: STARTET ALS NÄCHSTES
+  STOPPING IT SAFELY: HÄLT SICHER AN
+  THE LAST OF THE QUEUE: DAS ENDE DER WARTESCHLANGE
+  WHEN IT FINISHES: SOBALD ES FERTIG IST
+  What each card starts; install or repair BIBLE.: Was jede Karte startet; BIBLE installieren oder reparieren.
+  Rainbow: Regenbogen
+  Custom: Eigene
+  DESR DVR ISOs (experimental): DESR-DVR-ISOs (experimentell)
+  PC CARD CF (experimental): PC CARD CF (experimentell)
+  HDD Start Mode: Start der Festplatte
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed von The Roboto Project Authors (SIL OFL 1.1)
 labels:
   CFG_NOTIFICATION: Konfiguration geladen von %s
   THM_NOTIFICATION: Design geladen von %s
@@ -1494,3 +1528,15 @@ labels:
   RIPPS2_HIDE_GAME: Spiel verstecken
   RIPPS2_HIDDEN_GAMES: Versteckte Spiele
   HINT_RIPPS2_HIDDEN_GAMES: Die mit Spiel verstecken versteckten Spiele auf den gestarteten Laufwerken. Zeige eins wieder oder lösche es. Jedes Laufwerk führt seine eigene Liste.
+  HINT_RIPPS2_BDM_DEVICES: 'Die Laufwerke, von denen BDM Spiele liest: USB, MX4SIO, eine PC-Card-CF, das DVR-Laufwerk eines DESR und iLink. Die interne Festplatte folgt dem Start der Festplatte.'
+  HINT_RIPPS2_SCREEN: 'Das Bild des Menüs: Videomodus, Breitbild, seine Lage auf dem Fernseher (H-POS, V-POS) und Overscan.'
+  HINT_RIPPS2_LAYOUT: Wo die Kategorien sitzen und wie eine Seite hereinkommt, dann die Cover von RIPFLOW und das Raster von RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Schriftstärke, das Farbschema, der Farbwechsel und jede Farbe.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Wie kräftig RIPPS2s eigener Text ist: die Tipps in den Einstellungen, STATUS und Über. Normal ist wie bisher; Mittel und Fett lesen sich auf einem weichen Bild besser.'
+  HINT_RIPPS2_HDD_START: 'Die interne Festplatte, APA oder exFAT: RIPPS2 liest sie, was sie auch ist, und zeigt sie einmal, als Festplattenspiele. Aus lässt sie in Ruhe.'
+  HINT_RIPPS2_THEME_COLOR: Die eigene Farbe des Farbschemas. Wähle Eigene als Farbschema, um sie selbst zu wählen, wie die Textfarben.
+  HINT_RIPPS2_SWEEP: Fünf Farben, durch die das Schema langsam und sanft wechselt. Regenbogen, ein Wechsel aus jedem Farbschema oder dein eigener. Aus hält das Farbschema still.
+  HINT_RIPPS2_SWEEP_COLORS: Die fünf Farben des Wechsels und sein Tempo. Änderst du einen von RIPPS2, wird er als deiner gespeichert, unter dem Namen, den du ihm gibst.
+  HINT_RIPPS2_SWEEP_NAME: Wie dein Wechsel in der Liste Farbwechsel heißt.
+  HINT_RIPPS2_SWEEP_COLOR: Eine der fünf Farben, durch die der Wechsel der Reihe nach geht.
+  HINT_RIPPS2_SWEEP_SPEED: 'Wie lange jede Farbe bleibt, bevor die nächste einblendet. Auch Lebhaft bleibt sanft: die Farben blitzen nie.'

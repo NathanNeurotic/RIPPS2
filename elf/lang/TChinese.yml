@@ -5,10 +5,6 @@ language: TChinese
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER 確認，ESC 取消。按任意按鈕顯示按鍵。
   USB KEYBOARD: USB 鍵盤
-  '      DESR DVR ISOs (experimental)': '      DESR DVR ISO（實驗性）'
-  '      Internal HDD (exFAT)': '      內建硬碟（exFAT）'
-  '      PC CARD CF (experimental)': '      PC CARD CF（實驗性）'
-  '      Protocol': '      協定'
   Access: 存取方式
   Applications Page Start Mode: 應用程式頁面啟動模式
   Art Delay: 圖片延遲
@@ -22,7 +18,6 @@ strings:
   Fifth: 第五
   First: 第一
   Fourth: 第四
-  HDD (APA) Start Mode: 硬碟（APA）啟動模式
   HDD Cache: 硬碟快取
   HDD Spindown: 硬碟休眠
   MMCE Settings: MMCE 設定
@@ -134,7 +129,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek 與 Sleek Bold，為 RIPPS2 繪製
   RetroAchievements on the console by hacan359 (yoba): hacan359（yoba）的主機端 RetroAchievements
   RiptOPL by NathanNeurotic: NathanNeurotic 的 RiptOPL
-  Roboto Condensed by Google (Apache-2.0): Google 的 Roboto Condensed（Apache-2.0）
   SOUNDS: 音效
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: SP193 的 FMCB 安裝程式與 pcm720 的 OSDMenu，逐步遵循
   SUPPORT: 支援
@@ -843,7 +837,6 @@ strings:
   AUDIO folder: AUDIO 資料夾
   DRIVES: 磁碟機
   MANAGE: 管理
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: 「管理」會顯示每張記憶卡啟動的內容，並安裝或修復 BIBLE。
   MEMORY CARD 0  (about 600 KB): 記憶卡 0  （約 600 KB）
   MEMORY CARD 1  (about 600 KB): 記憶卡 1  （約 600 KB）
   'MX4SIO: its driver would not load (code %d).': MX4SIO：驅動程式無法載入（代碼 %d）。
@@ -1064,6 +1057,50 @@ strings:
   only if you have none: 僅在你沒有時
   starts every drive first: 先啟動所有磁碟機
   Drives, launchers and homebrew: 磁碟機、啟動器和自製程式
+  BDM Devices: BDM 裝置
+  Color Sweep: 顏色漸變
+  Colors and Text: 顏色與文字
+  HDD POPS partitions: 硬碟的 POPS 分割區
+  Layout: 版面
+  Missing Covers: 缺少的封面
+  Name: 名稱
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: 尚未找到 POPSTARTER 的 SMB 設定。請填寫下方各列。
+  POPSTARTER Network: POPSTARTER 網路
+  POPSTARTER SMB Network: POPSTARTER SMB 網路
+  POPSTARTER UDPFS Network: POPSTARTER UDPFS 網路
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: 磁碟機、ISO、VMC 與影像模式由 RIPPS2 自行加上。
+  Screen: 畫面
+  Speed: 速度
+  Sweep Colors: 漸變顏色
+  Text Weight: 文字粗細
+  Theme Color: 主色
+  Audio: 音訊
+  Bold: 粗體
+  Controllers: 控制器
+  Lively: 活潑
+  Medium: 中等
+  PS Emulation: PS 模擬
+  Regular: 一般
+  Slow: 緩慢
+  A MOMENT: 稍等
+  A TASK IN THE BACKGROUND: 背景工作
+  ABOUT %d S: 約 %d 秒
+  ANY MOMENT: 馬上
+  READING THE GAME LIST OF %s: 正在讀取 %s 的遊戲清單
+  SAVING A LIST: 正在儲存清單
+  START NOW: 立即開始
+  STARTING: 正在開始
+  STARTS NEXT: 接著開始
+  STOPPING IT SAFELY: 正在安全停止
+  THE LAST OF THE QUEUE: 佇列末尾
+  WHEN IT FINISHES: 完成之後
+  What each card starts; install or repair BIBLE.: 每張卡啟動什麼；安裝或修復 BIBLE。
+  Rainbow: 彩虹
+  Custom: 自訂
+  DESR DVR ISOs (experimental): DESR DVR ISO（實驗性）
+  PC CARD CF (experimental): PC CARD CF（實驗性）
+  HDD Start Mode: 硬碟 啟動模式
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): The Roboto Project Authors 的 Roboto Condensed（SIL OFL 1.1）
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色
@@ -1501,3 +1538,15 @@ labels:
   RIPPS2_HIDE_GAME: 隱藏遊戲
   RIPPS2_HIDDEN_GAMES: 隱藏的遊戲
   HINT_RIPPS2_HIDDEN_GAMES: 用「隱藏遊戲」隱藏的遊戲，在已啟動的磁碟機上。可以重新顯示其中一個，或刪除它。每個磁碟機各有自己的清單。
+  HINT_RIPPS2_BDM_DEVICES: BDM 讀取遊戲的磁碟機：USB、MX4SIO、PC Card CF、DESR 的 DVR 磁碟機與 iLink。內建硬碟跟隨硬碟啟動模式。
+  HINT_RIPPS2_SCREEN: 選單的畫面：影像模式、寬螢幕、在電視上的位置（H-POS、V-POS）與過掃描。
+  HINT_RIPPS2_LAYOUT: 分類所在的位置與頁面進入的方式，接著是 RIPFLOW 的封面與 RIPGRID 的格線。
+  HINT_RIPPS2_COLORS_TEXT: 文字粗細、配色、顏色漸變與每種顏色。
+  HINT_RIPPS2_TEXT_WEIGHT: RIPPS2 自己文字的粗細：設定的提示、狀態與關於。一般和以前一樣；中等與粗體在柔和的畫面上更好讀。
+  HINT_RIPPS2_HDD_START: 內建硬碟，無論 APA 或 exFAT，RIPPS2 都會讀取並只顯示一次，作為硬碟遊戲。關閉則不碰它。
+  HINT_RIPPS2_THEME_COLOR: 配色本身的顏色。把配色選為自訂，就能像文字顏色一樣自己挑選。
+  HINT_RIPPS2_SWEEP: 主題緩慢平順地經過的五種顏色。彩虹、由每種配色做成的漸變，或你自己的。關閉讓配色保持不動。
+  HINT_RIPPS2_SWEEP_COLORS: 漸變的五種顏色與速度。改動 RIPPS2 的某個漸變，它會以你取的名字作為你自己的保存下來。
+  HINT_RIPPS2_SWEEP_NAME: 你的漸變在顏色漸變清單中的名字。
+  HINT_RIPPS2_SWEEP_COLOR: 漸變依序經過的五種顏色之一。
+  HINT_RIPPS2_SWEEP_SPEED: 每種顏色停留多久後下一種淡入。即使活潑也很平順：顏色從不閃爍。

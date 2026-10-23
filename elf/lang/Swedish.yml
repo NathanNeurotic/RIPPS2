@@ -5,10 +5,6 @@ language: Swedish
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER BEKRÄFTAR, ESC AVBRYTER. VALFRI KNAPP VISAR TANGENTERNA.
   USB KEYBOARD: USB-TANGENTBORD
-  '      DESR DVR ISOs (experimental)': '      DESR DVR-ISO:er (experimentellt)'
-  '      Internal HDD (exFAT)': '      Intern HDD (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (experimentellt)'
-  '      Protocol': '      Protokoll'
   Access: Åtkomst
   Applications Page Start Mode: Startläge för appsidan
   Art Delay: Bildfördröjning
@@ -22,7 +18,6 @@ strings:
   Fifth: Femte
   First: Första
   Fourth: Fjärde
-  HDD (APA) Start Mode: Startläge för HDD (APA)
   HDD Cache: HDD-cache
   HDD Spindown: HDD-viloläge
   MMCE Settings: MMCE-inställningar
@@ -134,7 +129,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek och Sleek Bold, ritade för RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements på konsolen av hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL av NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed av Google (Apache-2.0)
   SOUNDS: LJUD
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: SP193:s FMCB-installerare och pcm720:s OSDMenu, följda steg för steg
   SUPPORT: SUPPORT
@@ -843,7 +837,6 @@ strings:
   AUDIO folder: AUDIO-mappen
   DRIVES: ENHETER
   MANAGE: HANTERA
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: HANTERA visar vad varje minneskort startar, och installerar eller reparerar BIBLE.
   MEMORY CARD 0  (about 600 KB): MINNESKORT 0  (cirka 600 KB)
   MEMORY CARD 1  (about 600 KB): MINNESKORT 1  (cirka 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: dess drivrutin ville inte laddas (kod %d).'
@@ -1064,6 +1057,49 @@ strings:
   only if you have none: bara om du inte har någon
   starts every drive first: startar varje enhet först
   Drives, launchers and homebrew: Enheter, startare och homebrew
+  BDM Devices: BDM-enheter
+  Color Sweep: Färgskifte
+  Colors and Text: Färger och text
+  HDD POPS partitions: POPS-partitioner på HDD
+  Missing Covers: Saknade omslag
+  Name: Namn
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Ingen SMB-inställning för POPSTARTER hittades än. Fyll i raderna nedan.
+  POPSTARTER Network: POPSTARTER-nätverk
+  POPSTARTER SMB Network: POPSTARTER SMB-nätverk
+  POPSTARTER UDPFS Network: POPSTARTER UDPFS-nätverk
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 lägger själv till enheten, ISO, VMC:er och videoläget.
+  Screen: Skärm
+  Speed: Hastighet
+  Sweep Colors: Skiftets färger
+  Text Weight: Textvikt
+  Theme Color: Huvudfärg
+  Audio: Ljud
+  Bold: Fet
+  Controllers: Handkontroller
+  Lively: Livlig
+  Medium: Mellan
+  PS Emulation: PS-emulering
+  Regular: Normal
+  Slow: Långsam
+  A MOMENT: ETT ÖGONBLICK
+  A TASK IN THE BACKGROUND: EN UPPGIFT I BAKGRUNDEN
+  ABOUT %d S: CIRKA %d S
+  ANY MOMENT: NÄR SOM HELST
+  READING THE GAME LIST OF %s: LÄSER SPELLISTAN PÅ %s
+  SAVING A LIST: SPARAR EN LISTA
+  START NOW: STARTA NU
+  STARTING: STARTAR
+  STARTS NEXT: STARTAR HÄRNÄST
+  STOPPING IT SAFELY: STOPPAR SÄKERT
+  THE LAST OF THE QUEUE: SLUTET PÅ KÖN
+  WHEN IT FINISHES: NÄR DET ÄR KLART
+  What each card starts; install or repair BIBLE.: Vad varje kort startar; installera eller reparera BIBLE.
+  Rainbow: Regnbåge
+  Custom: Egen
+  DESR DVR ISOs (experimental): DESR DVR-ISO:er (experimentellt)
+  PC CARD CF (experimental): PC CARD CF (experimentellt)
+  HDD Start Mode: Startläge för HDD
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed av The Roboto Project Authors (SIL OFL 1.1)
 labels:
   OK: OK
   BDMMODE: Startläge för BDM
@@ -1512,3 +1548,15 @@ labels:
   RIPPS2_HIDE_GAME: Dölj spel
   RIPPS2_HIDDEN_GAMES: Dolda spel
   HINT_RIPPS2_HIDDEN_GAMES: Spelen som dolts med Dölj spel, på de startade enheterna. Visa ett igen, eller radera det. Varje enhet har sin egen lista.
+  HINT_RIPPS2_BDM_DEVICES: 'Enheterna BDM läser spel från: USB, MX4SIO, ett PC Card CF, en DESR:s DVR-enhet och iLink. Den inbyggda HDD:n följer startläget för HDD.'
+  HINT_RIPPS2_SCREEN: 'Menyns bild: videoläge, bredbild, var den sitter på tv:n (H-POS, V-POS) och overscan.'
+  HINT_RIPPS2_LAYOUT: Var kategorierna sitter och hur en sida kommer in, sedan RIPFLOWs omslag och RIPGRIDs rutnät.
+  HINT_RIPPS2_COLORS_TEXT: Textvikt, färgtemat, färgskiftet och varje färg.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Hur kraftig RIPPS2:s egen text är: tipsen i inställningarna, STATUS och Om. Normal är som förut; Mellan och Fet läses bättre på en mjuk bild.'
+  HINT_RIPPS2_HDD_START: 'Den inbyggda HDD:n, APA eller exFAT: RIPPS2 läser den vad den än är och visar den en gång, som HDD-spel. Av låter den vara.'
+  HINT_RIPPS2_THEME_COLOR: Färgtemats egen färg. Välj Egen som färgtema för att välja den själv, som textfärgerna.
+  HINT_RIPPS2_SWEEP: Fem färger som temat glider genom, långsamt och mjukt. Regnbåge, ett skifte gjort av varje färgtema eller ditt eget. Av håller färgtemat stilla.
+  HINT_RIPPS2_SWEEP_COLORS: Skiftets fem färger och dess hastighet. Ändra ett av RIPPS2:s så sparas det som ditt eget, under namnet du ger det.
+  HINT_RIPPS2_SWEEP_NAME: Vad ditt skifte heter i listan Färgskifte.
+  HINT_RIPPS2_SWEEP_COLOR: En av de fem färgerna skiftet glider genom, i tur och ordning.
+  HINT_RIPPS2_SWEEP_SPEED: 'Hur länge varje färg varar innan nästa tonar in. Även Livlig förblir mjuk: färgerna blinkar aldrig.'

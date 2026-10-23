@@ -5,10 +5,6 @@ language: Japanese
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER で確定、ESC で取消。いずれかのボタンでキーを表示。
   USB KEYBOARD: USB キーボード
-  '      DESR DVR ISOs (experimental)': '      DESR DVR ISO（実験的）'
-  '      Internal HDD (exFAT)': '      内蔵 HDD（exFAT）'
-  '      PC CARD CF (experimental)': '      PC CARD CF（実験的）'
-  '      Protocol': '      プロトコル'
   Access: アクセス方式
   Applications Page Start Mode: アプリページの起動モード
   Art Delay: アートの遅延
@@ -22,7 +18,6 @@ strings:
   Fifth: 5 番目
   First: 1 番目
   Fourth: 4 番目
-  HDD (APA) Start Mode: HDD（APA）の起動モード
   HDD Cache: HDD キャッシュ
   HDD Spindown: HDD スピンダウン
   MMCE Settings: MMCE 設定
@@ -134,7 +129,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek と Sleek Bold、RIPPS2 のために描いたもの
   RetroAchievements on the console by hacan359 (yoba): hacan359（yoba）による本体上の RetroAchievements
   RiptOPL by NathanNeurotic: NathanNeurotic による RiptOPL
-  Roboto Condensed by Google (Apache-2.0): Google による Roboto Condensed（Apache-2.0）
   SOUNDS: サウンド
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: SP193 の FMCB インストーラーと pcm720 の OSDMenu に一歩ずつ従ったもの
   SUPPORT: サポート
@@ -843,7 +837,6 @@ strings:
   AUDIO folder: AUDIO フォルダ
   DRIVES: ドライブ
   MANAGE: 管理
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: 「管理」では各メモリーカードが何を起動するかを表示し、BIBLE をインストールまたは修復します。
   MEMORY CARD 0  (about 600 KB): メモリーカード 0  （約 600 KB）
   MEMORY CARD 1  (about 600 KB): メモリーカード 1  （約 600 KB）
   'MX4SIO: its driver would not load (code %d).': MX4SIO：ドライバーを読み込めませんでした（コード %d）。
@@ -1064,6 +1057,50 @@ strings:
   only if you have none: 持っていない場合のみ
   starts every drive first: 先にすべてのドライブを開始します
   Drives, launchers and homebrew: ドライブ、ランチャー、自作ソフト
+  BDM Devices: BDM デバイス
+  Color Sweep: カラースイープ
+  Colors and Text: 色とテキスト
+  HDD POPS partitions: HDD の POPS パーティション
+  Layout: レイアウト
+  Missing Covers: 足りないカバー
+  Name: 名前
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: POPSTARTER の SMB 設定はまだありません。下の行を入力してください。
+  POPSTARTER Network: POPSTARTER ネットワーク
+  POPSTARTER SMB Network: POPSTARTER SMB ネットワーク
+  POPSTARTER UDPFS Network: POPSTARTER UDPFS ネットワーク
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: ドライブ、ISO、VMC、ビデオモードは RIPPS2 が自分で加えます。
+  Screen: 画面
+  Speed: 速さ
+  Sweep Colors: スイープの色
+  Text Weight: 文字の太さ
+  Theme Color: テーマの色
+  Audio: オーディオ
+  Bold: 太字
+  Controllers: コントローラー
+  Lively: 軽快
+  Medium: 中くらい
+  PS Emulation: PS エミュレーション
+  Regular: 標準
+  Slow: ゆっくり
+  A MOMENT: 少々お待ちください
+  A TASK IN THE BACKGROUND: バックグラウンドの作業
+  ABOUT %d S: あと約 %d 秒
+  ANY MOMENT: まもなく
+  READING THE GAME LIST OF %s: '%s のゲームリストを読み込み中'
+  SAVING A LIST: リストを保存中
+  START NOW: 今すぐ開始
+  STARTING: 開始中
+  STARTS NEXT: 次に開始
+  STOPPING IT SAFELY: 安全に停止中
+  THE LAST OF THE QUEUE: キューの最後
+  WHEN IT FINISHES: 終わりしだい
+  What each card starts; install or repair BIBLE.: 各カードが起動するもの。BIBLE をインストールまたは修復。
+  Rainbow: レインボー
+  Custom: カスタム
+  DESR DVR ISOs (experimental): DESR DVR ISO（実験的）
+  PC CARD CF (experimental): PC CARD CF（実験的）
+  HDD Start Mode: HDD の起動モード
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): The Roboto Project Authors による Roboto Condensed（SIL OFL 1.1）
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。
@@ -1491,3 +1528,15 @@ labels:
   RIPPS2_HIDE_GAME: ゲームを非表示
   RIPPS2_HIDDEN_GAMES: 非表示のゲーム
   HINT_RIPPS2_HIDDEN_GAMES: 「ゲームを非表示」で隠した、開始済みのドライブのゲームです。再表示するか、削除できます。ドライブごとに自分のリストを持っています。
+  HINT_RIPPS2_BDM_DEVICES: 'BDM がゲームを読むドライブ: USB、MX4SIO、PC Card CF、DESR の DVR ドライブ、iLink。内蔵 HDD は HDD の起動モードに従います。'
+  HINT_RIPPS2_SCREEN: 'メニューの映像: ビデオモード、ワイド画面、テレビ上の位置（H-POS、V-POS）とオーバースキャン。'
+  HINT_RIPPS2_LAYOUT: カテゴリーの位置とページの入り方、そして RIPFLOW のカバーと RIPGRID のグリッド。
+  HINT_RIPPS2_COLORS_TEXT: 文字の太さ、カラーテーマ、カラースイープ、そしてすべての色。
+  HINT_RIPPS2_TEXT_WEIGHT: 'RIPPS2 自身の文字の太さ: 設定のヒント、ステータス、情報。標準はこれまでどおり。中くらいと太字はやわらかい映像で読みやすくなります。'
+  HINT_RIPPS2_HDD_START: 内蔵 HDD は APA でも exFAT でも、RIPPS2 がどちらか読み取り、HDD ゲームとして一度だけ表示します。オフにすると触れません。
+  HINT_RIPPS2_THEME_COLOR: カラーテーマそのものの色。カラーテーマでカスタムを選ぶと、文字の色と同じように自分で選べます。
+  HINT_RIPPS2_SWEEP: テーマがゆっくりなめらかに移り変わる 5 色。レインボー、各カラーテーマから作ったスイープ、または自分のもの。オフならカラーテーマは動きません。
+  HINT_RIPPS2_SWEEP_COLORS: スイープの 5 色と速さ。RIPPS2 のものを変えると、付けた名前で自分のものとして残ります。
+  HINT_RIPPS2_SWEEP_NAME: カラースイープの一覧でのスイープの名前。
+  HINT_RIPPS2_SWEEP_COLOR: スイープが順に移り変わる 5 色のひとつ。
+  HINT_RIPPS2_SWEEP_SPEED: 次の色に移るまで各色が続く長さ。軽快でもなめらかで、色が点滅することはありません。

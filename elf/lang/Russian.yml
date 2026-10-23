@@ -5,10 +5,6 @@ language: Russian
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER ПРИНИМАЕТ, ESC ОТМЕНЯЕТ. ЛЮБАЯ КНОПКА ПОКАЗЫВАЕТ КЛАВИШИ.
   USB KEYBOARD: USB-КЛАВИАТУРА
-  '      DESR DVR ISOs (experimental)': '      ISO DESR DVR (экспериментально)'
-  '      Internal HDD (exFAT)': '      Внутренний HDD (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (экспериментально)'
-  '      Protocol': '      Протокол'
   Access: Доступ
   Applications Page Start Mode: Запуск страницы приложений
   Art Delay: Задержка изображений
@@ -22,7 +18,6 @@ strings:
   Fifth: Пятый
   First: Первый
   Fourth: Четвёртый
-  HDD (APA) Start Mode: Запуск HDD (APA)
   HDD Cache: Кэш HDD
   HDD Spindown: Засыпание HDD
   MMCE Settings: Настройки MMCE
@@ -134,7 +129,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek и Sleek Bold, нарисованы для RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements на консоли от hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL от NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed от Google (Apache-2.0)
   SOUNDS: ЗВУКИ
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: установщик FMCB от SP193 и OSDMenu от pcm720, шаг за шагом
   SUPPORT: ПОДДЕРЖКА
@@ -843,7 +837,6 @@ strings:
   AUDIO folder: папка AUDIO
   DRIVES: НАКОПИТЕЛИ
   MANAGE: УПРАВЛЕНИЕ
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: УПРАВЛЕНИЕ показывает, что запускает каждая карта памяти, и устанавливает или исправляет BIBLE.
   MEMORY CARD 0  (about 600 KB): КАРТА ПАМЯТИ 0  (около 600 КБ)
   MEMORY CARD 1  (about 600 KB): КАРТА ПАМЯТИ 1  (около 600 КБ)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: его драйвер не загрузился (код %d).'
@@ -1064,6 +1057,50 @@ strings:
   only if you have none: только если у вас его нет
   starts every drive first: сначала запускает все накопители
   Drives, launchers and homebrew: Накопители, загрузчики и homebrew
+  BDM Devices: Устройства BDM
+  Color Sweep: Смена цветов
+  Colors and Text: Цвета и текст
+  HDD POPS partitions: Разделы POPS на HDD
+  Layout: Расположение
+  Missing Covers: Недостающие обложки
+  Name: Имя
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Настройка SMB для POPSTARTER ещё не найдена. Заполните строки ниже.
+  POPSTARTER Network: Сеть POPSTARTER
+  POPSTARTER SMB Network: Сеть SMB для POPSTARTER
+  POPSTARTER UDPFS Network: Сеть UDPFS для POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 сам добавит накопитель, ISO, VMC и видеорежим.
+  Screen: Экран
+  Speed: Скорость
+  Sweep Colors: Цвета смены
+  Text Weight: Толщина текста
+  Theme Color: Основной цвет
+  Audio: Звук
+  Bold: Жирный
+  Controllers: Контроллеры
+  Lively: Живо
+  Medium: Средний
+  PS Emulation: Эмуляция PS
+  Regular: Обычный
+  Slow: Медленно
+  A MOMENT: МИНУТКУ
+  A TASK IN THE BACKGROUND: ЗАДАЧА В ФОНЕ
+  ABOUT %d S: ОКОЛО %d С
+  ANY MOMENT: ВОТ-ВОТ
+  READING THE GAME LIST OF %s: ЧИТАЕТ СПИСОК ИГР С %s
+  SAVING A LIST: СОХРАНЯЕТ СПИСОК
+  START NOW: ЗАПУСТИТЬ СЕЙЧАС
+  STARTING: ЗАПУСК
+  STARTS NEXT: ЗАПУСТИТСЯ СЛЕДОМ
+  STOPPING IT SAFELY: ОСТАНАВЛИВАЕТ БЕЗОПАСНО
+  THE LAST OF THE QUEUE: КОНЕЦ ОЧЕРЕДИ
+  WHEN IT FINISHES: КОГДА ЗАКОНЧИТ
+  What each card starts; install or repair BIBLE.: Что запускает каждая карта; установить или починить BIBLE.
+  Rainbow: Радуга
+  Custom: Свой
+  DESR DVR ISOs (experimental): ISO DESR DVR (экспериментально)
+  PC CARD CF (experimental): PC CARD CF (экспериментально)
+  HDD Start Mode: Запуск HDD
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed от The Roboto Project Authors (SIL OFL 1.1)
 labels:
   DS34BT_MODE: DualShock3/4 по Bluetooth
   HINT_NEUTRINO_AUTO_ELF: Передаёт загрузочный ELF игры в Neutrino, чтобы найти настройки для этой игры. Включено по умолчанию; заданный вручную параметр Boot ELF важнее.
@@ -1491,3 +1528,15 @@ labels:
   RIPPS2_HIDE_GAME: Скрыть игру
   RIPPS2_HIDDEN_GAMES: Скрытые игры
   HINT_RIPPS2_HIDDEN_GAMES: Игры, скрытые через «Скрыть игру», на запущенных накопителях. Покажите одну снова или удалите её. У каждого накопителя свой список.
+  HINT_RIPPS2_BDM_DEVICES: 'Накопители, с которых BDM читает игры: USB, MX4SIO, PC Card CF, DVR-накопитель DESR и iLink. Встроенный HDD следует запуску HDD.'
+  HINT_RIPPS2_SCREEN: 'Картинка меню: видеорежим, широкий экран, её место на телевизоре (H-POS, V-POS) и overscan.'
+  HINT_RIPPS2_LAYOUT: Где стоят категории и как входит страница, затем обложки RIPFLOW и сетка RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Толщина текста, цветовая тема, смена цветов и каждый цвет.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Насколько плотный собственный текст RIPPS2: подсказки настроек, СОСТОЯНИЕ и О программе. Обычный как раньше; Средний и Жирный лучше читаются на мягкой картинке.'
+  HINT_RIPPS2_HDD_START: 'Встроенный HDD, APA или exFAT: RIPPS2 читает его, каким бы он ни был, и показывает один раз, как игры HDD. Выкл. оставляет его в покое.'
+  HINT_RIPPS2_THEME_COLOR: Собственный цвет темы. Выберите Свой как цветовую тему, чтобы выбрать его самим, как цвета текста.
+  HINT_RIPPS2_SWEEP: Пять цветов, через которые тема переходит медленно и плавно. Радуга, смена из каждой цветовой темы или ваша. Выкл. держит тему неподвижной.
+  HINT_RIPPS2_SWEEP_COLORS: Пять цветов смены и её скорость. Измените одну из RIPPS2, и она сохранится как ваша, под данным вами именем.
+  HINT_RIPPS2_SWEEP_NAME: Как называется ваша смена в списке Смена цветов.
+  HINT_RIPPS2_SWEEP_COLOR: Один из пяти цветов, через которые смена проходит по порядку.
+  HINT_RIPPS2_SWEEP_SPEED: 'Сколько длится каждый цвет, пока не войдёт следующий. Даже Живо остаётся плавным: цвета никогда не мигают.'

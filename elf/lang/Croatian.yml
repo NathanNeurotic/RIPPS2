@@ -5,10 +5,6 @@ language: Croatian
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER PRIHVAĆA, ESC ODUSTAJE. BILO KOJA TIPKA PRIKAZUJE TIPKE.
   USB KEYBOARD: USB TIPKOVNICA
-  '      DESR DVR ISOs (experimental)': '      DESR DVR ISO datoteke (eksperimentalno)'
-  '      Internal HDD (exFAT)': '      Unutarnji HDD (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (eksperimentalno)'
-  '      Protocol': '      Protokol'
   Access: Pristup
   Applications Page Start Mode: Način pokretanja stranice aplikacija
   Art Delay: Odgoda slika
@@ -22,7 +18,6 @@ strings:
   Fifth: Peti
   First: Prvi
   Fourth: Četvrti
-  HDD (APA) Start Mode: Način pokretanja HDD-a (APA)
   HDD Cache: HDD predmemorija
   HDD Spindown: Gašenje HDD-a u mirovanju
   MMCE Settings: MMCE postavke
@@ -134,7 +129,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek i Sleek Bold, nacrtani za RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements na konzoli, autor hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL, autor NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed, autor Google (Apache-2.0)
   SOUNDS: ZVUKOVI
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: SP193-ov FMCB instalacijski program i pcm720-ov OSDMenu, praćeni korak po korak
   SUPPORT: PODRŠKA
@@ -843,7 +837,6 @@ strings:
   AUDIO folder: mapa AUDIO
   DRIVES: POGONI
   MANAGE: UPRAVLJAJ
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: UPRAVLJAJ prikazuje što pokreće svaka memorijska kartica te instalira ili popravlja BIBLE.
   MEMORY CARD 0  (about 600 KB): MEMORIJSKA KARTICA 0  (oko 600 KB)
   MEMORY CARD 1  (about 600 KB): MEMORIJSKA KARTICA 1  (oko 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: njegov upravljački program nije se htio učitati (kod %d).'
@@ -1064,6 +1057,50 @@ strings:
   only if you have none: samo ako nemaš nijedan
   starts every drive first: najprije pokreće sve pogone
   Drives, launchers and homebrew: Pogoni, pokretači i homebrew
+  BDM Devices: BDM uređaji
+  Color Sweep: Izmjena boja
+  Colors and Text: Boje i tekst
+  HDD POPS partitions: POPS particije na HDD-u
+  Layout: Raspored
+  Missing Covers: Omoti koji nedostaju
+  Name: Ime
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Još nije pronađena SMB postavka za POPSTARTER. Ispunite retke ispod.
+  POPSTARTER Network: POPSTARTER mreža
+  POPSTARTER SMB Network: POPSTARTER SMB mreža
+  POPSTARTER UDPFS Network: POPSTARTER UDPFS mreža
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 sam dodaje pogon, ISO, VMC-ove i video način.
+  Screen: Zaslon
+  Speed: Brzina
+  Sweep Colors: Boje izmjene
+  Text Weight: Debljina teksta
+  Theme Color: Glavna boja
+  Audio: Zvuk
+  Bold: Podebljano
+  Controllers: Kontroleri
+  Lively: Živahno
+  Medium: Srednje
+  PS Emulation: PS emulacija
+  Regular: Obično
+  Slow: Sporo
+  A MOMENT: TRENUTAK
+  A TASK IN THE BACKGROUND: ZADATAK U POZADINI
+  ABOUT %d S: OKO %d S
+  ANY MOMENT: SVAKI TREN
+  READING THE GAME LIST OF %s: ČITA POPIS IGARA S %s
+  SAVING A LIST: SPREMA POPIS
+  START NOW: POKRENI SADA
+  STARTING: POKREĆE SE
+  STARTS NEXT: POKREĆE SE SLJEDEĆE
+  STOPPING IT SAFELY: SIGURNO ZAUSTAVLJA
+  THE LAST OF THE QUEUE: KRAJ REDA
+  WHEN IT FINISHES: KAD ZAVRŠI
+  What each card starts; install or repair BIBLE.: Što pokreće svaka kartica; instalirajte ili popravite BIBLE.
+  Rainbow: Duga
+  Custom: Vlastito
+  DESR DVR ISOs (experimental): DESR DVR ISO datoteke (eksperimentalno)
+  PC CARD CF (experimental): PC CARD CF (eksperimentalno)
+  HDD Start Mode: Način pokretanja HDD-a
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed, autor The Roboto Project Authors (SIL OFL 1.1)
 labels:
   NETCONFIG: Mrežne postavke
   BDMMODE: Način pokretanja BDM-a
@@ -1514,3 +1551,15 @@ labels:
   RIPPS2_HIDE_GAME: Sakrij igru
   RIPPS2_HIDDEN_GAMES: Skrivene igre
   HINT_RIPPS2_HIDDEN_GAMES: Igre skrivene sa Sakrij igru, na pokrenutim pogonima. Ponovno prikaži jednu ili je obriši. Svaki pogon čuva svoj popis.
+  HINT_RIPPS2_BDM_DEVICES: 'Pogoni s kojih BDM čita igre: USB, MX4SIO, PC Card CF, DVR pogon DESR-a i iLink. Unutarnji HDD prati način pokretanja HDD-a.'
+  HINT_RIPPS2_SCREEN: 'Slika izbornika: video način, široki zaslon, gdje stoji na televizoru (H-POS, V-POS) i overscan.'
+  HINT_RIPPS2_LAYOUT: Gdje stoje kategorije i kako stranica ulazi, zatim omoti RIPFLOW-a i mreža RIPGRID-a.
+  HINT_RIPPS2_COLORS_TEXT: Debljina teksta, tema boja, izmjena boja i svaka boja.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Koliko je debeo vlastiti tekst RIPPS2-a: savjeti u postavkama, STATUS i O programu. Obično je kao prije; Srednje i Podebljano bolje se čitaju na mekoj slici.'
+  HINT_RIPPS2_HDD_START: 'Unutarnji HDD, APA ili exFAT: RIPPS2 ga čita kakav god bio i prikazuje jednom, kao HDD igre. Isključeno ga ostavlja na miru.'
+  HINT_RIPPS2_THEME_COLOR: Vlastita boja teme. Odaberite Vlastito kao temu boja da je sami birate, kao boje teksta.
+  HINT_RIPPS2_SWEEP: Pet boja kroz koje tema prelazi polako i glatko. Duga, izmjena iz svake teme boja ili vaša vlastita. Isključeno drži temu mirnom.
+  HINT_RIPPS2_SWEEP_COLORS: Pet boja izmjene i njezina brzina. Promijenite jednu od RIPPS2-ovih i čuva se kao vaša, pod imenom koje joj date.
+  HINT_RIPPS2_SWEEP_NAME: Kako se vaša izmjena zove na popisu Izmjena boja.
+  HINT_RIPPS2_SWEEP_COLOR: Jedna od pet boja kroz koje izmjena prolazi, redom.
+  HINT_RIPPS2_SWEEP_SPEED: 'Koliko traje svaka boja prije nego što uđe sljedeća. I Živahno ostaje glatko: boje nikad ne bljeskaju.'

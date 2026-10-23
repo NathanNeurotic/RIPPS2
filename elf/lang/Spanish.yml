@@ -5,10 +5,6 @@ language: Spanish
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER ACEPTA, ESC CANCELA. CUALQUIER BOTÓN MUESTRA LAS TECLAS.
   USB KEYBOARD: TECLADO USB
-  '      DESR DVR ISOs (experimental)': '      ISO DESR DVR (experimental)'
-  '      Internal HDD (exFAT)': '      Disco duro interno (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (experimental)'
-  '      Protocol': '      Protocolo'
   Access: Acceso
   Applications Page Start Mode: Inicio de la página Aplicaciones
   Art Delay: Retraso de las imágenes
@@ -23,7 +19,6 @@ strings:
   Fifth: Quinto
   First: Primero
   Fourth: Cuarto
-  HDD (APA) Start Mode: Inicio del disco duro (APA)
   HDD Cache: Caché del disco duro
   HDD Spindown: Reposo del disco duro
   MMCE Settings: Ajustes de MMCE
@@ -135,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek y Sleek Bold, dibujadas para RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements en la consola, de hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL de NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed de Google (Apache-2.0)
   SOUNDS: SONIDOS
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: el instalador de FMCB de SP193 y el OSDMenu de pcm720, seguidos paso a paso
   SUPPORT: SOPORTE
@@ -844,7 +838,6 @@ strings:
   AUDIO folder: carpeta AUDIO
   DRIVES: UNIDADES
   MANAGE: GESTIONAR
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: GESTIONAR muestra lo que inicia cada tarjeta de memoria, e instala o repara BIBLE.
   MEMORY CARD 0  (about 600 KB): TARJETA DE MEMORIA 0  (unos 600 KB)
   MEMORY CARD 1  (about 600 KB): TARJETA DE MEMORIA 1  (unos 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: su controlador no se pudo cargar (código %d).'
@@ -1065,6 +1058,48 @@ strings:
   only if you have none: solo si no tienes ninguno
   starts every drive first: inicia primero todas las unidades
   Drives, launchers and homebrew: Unidades, lanzadores y homebrew
+  BDM Devices: Dispositivos BDM
+  Color Sweep: Transición de colores
+  Colors and Text: Colores y texto
+  HDD POPS partitions: Particiones POPS del disco duro
+  Layout: Disposición
+  Missing Covers: Portadas que faltan
+  Name: Nombre
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Aún no se encontró una configuración SMB de POPSTARTER. Rellena las filas de abajo.
+  POPSTARTER Network: Red de POPSTARTER
+  POPSTARTER SMB Network: Red SMB de POPSTARTER
+  POPSTARTER UDPFS Network: Red UDPFS de POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 añade por sí mismo la unidad, la ISO, las VMC y el modo de vídeo.
+  Screen: Pantalla
+  Speed: Velocidad
+  Sweep Colors: Colores de la transición
+  Text Weight: Grosor del texto
+  Theme Color: Color principal
+  Bold: Negrita
+  Controllers: Mandos
+  Lively: Vivo
+  Medium: Medio
+  PS Emulation: Emulación PS
+  Regular: Normal
+  Slow: Lento
+  A MOMENT: UN MOMENTO
+  A TASK IN THE BACKGROUND: UNA TAREA EN SEGUNDO PLANO
+  ABOUT %d S: UNOS %d S
+  ANY MOMENT: EN CUALQUIER MOMENTO
+  READING THE GAME LIST OF %s: LEYENDO LA LISTA DE JUEGOS DE %s
+  SAVING A LIST: GUARDANDO UNA LISTA
+  START NOW: INICIAR YA
+  STARTING: INICIANDO
+  STARTS NEXT: SE INICIA A CONTINUACIÓN
+  STOPPING IT SAFELY: DETENIENDO CON SEGURIDAD
+  THE LAST OF THE QUEUE: EL FINAL DE LA COLA
+  WHEN IT FINISHES: CUANDO TERMINE
+  What each card starts; install or repair BIBLE.: Lo que inicia cada tarjeta; instala o repara BIBLE.
+  Rainbow: Arcoíris
+  Custom: Personalizado
+  DESR DVR ISOs (experimental): ISO DESR DVR (experimental)
+  HDD Start Mode: Inicio del disco duro
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed de The Roboto Project Authors (SIL OFL 1.1)
 labels:
   HINT_NEUTRINO_AUTO_ELF: Pasa el ELF de arranque del juego a Neutrino para buscar su configuración por título. Activado por defecto; una opción Boot ELF puesta a mano tiene prioridad.
   HINT_POPSTARTER_PATH: Dónde está POPSTARTER.ELF. Si lo dejas vacío, RIPPS2 pone uno que encuentre en una unidad; escribe encima para usar otro, como usb:/POPS/POPSTARTER.ELF
@@ -1491,3 +1526,15 @@ labels:
   RIPPS2_HIDE_GAME: Ocultar juego
   RIPPS2_HIDDEN_GAMES: Juegos ocultos
   HINT_RIPPS2_HIDDEN_GAMES: Los juegos ocultos con Ocultar juego, en las unidades iniciadas. Vuelve a mostrar uno, o bórralo. Cada unidad guarda su propia lista.
+  HINT_RIPPS2_BDM_DEVICES: 'Las unidades de las que BDM lee juegos: USB, MX4SIO, una PC Card CF, la unidad DVR de un DESR e iLink. El disco duro interno sigue el inicio del disco duro.'
+  HINT_RIPPS2_SCREEN: 'La imagen del menú: modo de vídeo, pantalla ancha, dónde queda en el televisor (H-POS, V-POS) y overscan.'
+  HINT_RIPPS2_LAYOUT: Dónde van las categorías y cómo entra una página, luego las portadas de RIPFLOW y la cuadrícula de RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Grosor del texto, el color del tema, la transición de colores y cada color.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Lo grueso que es el texto propio de RIPPS2: las ayudas de los ajustes, ESTADO y Acerca de. Normal es como antes; Medio y Negrita se leen mejor en una imagen suave.'
+  HINT_RIPPS2_HDD_START: 'El disco duro interno, APA o exFAT: RIPPS2 lo lee sea cual sea y lo muestra una sola vez, como juegos del disco duro. Desactivado lo deja en paz.'
+  HINT_RIPPS2_THEME_COLOR: El color propio del tema. Elige Personalizado como color del tema para elegirlo tú, como los colores del texto.
+  HINT_RIPPS2_SWEEP: Cinco colores por los que pasa el tema, despacio y con suavidad. Arcoíris, una transición hecha de cada color de tema o la tuya. Desactivado deja el tema quieto.
+  HINT_RIPPS2_SWEEP_COLORS: Los cinco colores de la transición y su velocidad. Cambia una de RIPPS2 y se guarda como tuya, con el nombre que le pongas.
+  HINT_RIPPS2_SWEEP_NAME: Cómo se llama tu transición en la lista Transición de colores.
+  HINT_RIPPS2_SWEEP_COLOR: Uno de los cinco colores por los que pasa la transición, en orden.
+  HINT_RIPPS2_SWEEP_SPEED: 'Cuánto dura cada color antes de que entre el siguiente. Incluso Vivo sigue suave: los colores nunca parpadean.'

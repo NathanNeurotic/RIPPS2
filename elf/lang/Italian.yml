@@ -5,10 +5,6 @@ language: Italian
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: INVIO CONFERMA, ESC ANNULLA. QUALSIASI TASTO MOSTRA I TASTI.
   USB KEYBOARD: TASTIERA USB
-  '      DESR DVR ISOs (experimental)': '      ISO DESR DVR (sperimentale)'
-  '      Internal HDD (exFAT)': '      Hard disk interno (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (sperimentale)'
-  '      Protocol': '      Protocollo'
   Access: Accesso
   Applications Page Start Mode: Avvio della pagina Applicazioni
   Art Delay: Ritardo delle immagini
@@ -22,7 +18,6 @@ strings:
   Fifth: Quinto
   First: Primo
   Fourth: Quarto
-  HDD (APA) Start Mode: Avvio dell'hard disk (APA)
   HDD Cache: Cache dell'hard disk
   HDD Spindown: Sospensione dell'hard disk
   MMCE Settings: Impostazioni MMCE
@@ -134,7 +129,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek e Sleek Bold, disegnati per RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements sulla console, di hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL di NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed di Google (Apache-2.0)
   SOUNDS: SUONI
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: l'installer di FMCB di SP193 e l'OSDMenu di pcm720, seguiti passo per passo
   SUPPORT: SUPPORTO
@@ -843,7 +837,6 @@ strings:
   AUDIO folder: cartella AUDIO
   DRIVES: UNITÀ
   MANAGE: GESTISCI
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: GESTISCI mostra cosa avvia ogni memory card, e installa o ripara BIBLE.
   MEMORY CARD 0  (about 600 KB): MEMORY CARD 0  (circa 600 KB)
   MEMORY CARD 1  (about 600 KB): MEMORY CARD 1  (circa 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: il suo driver non si è caricato (codice %d).'
@@ -1064,6 +1057,49 @@ strings:
   only if you have none: solo se non ne hai
   starts every drive first: avvia prima tutte le unità
   Drives, launchers and homebrew: Unità, launcher e homebrew
+  BDM Devices: Dispositivi BDM
+  Color Sweep: Sfumatura di colori
+  Colors and Text: Colori e testo
+  HDD POPS partitions: Partizioni POPS dell'hard disk
+  Layout: Disposizione
+  Missing Covers: Copertine mancanti
+  Name: Nome
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Nessuna configurazione SMB di POPSTARTER trovata. Compila le righe qui sotto.
+  POPSTARTER Network: Rete POPSTARTER
+  POPSTARTER SMB Network: Rete SMB di POPSTARTER
+  POPSTARTER UDPFS Network: Rete UDPFS di POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 aggiunge da sé l'unità, l'ISO, le VMC e la modalità video.
+  Screen: Schermo
+  Speed: Velocità
+  Sweep Colors: Colori della sfumatura
+  Text Weight: Spessore del testo
+  Theme Color: Colore principale
+  Bold: Grassetto
+  Controllers: Controller
+  Lively: Vivace
+  Medium: Medio
+  PS Emulation: Emulazione PS
+  Regular: Normale
+  Slow: Lento
+  A MOMENT: UN ATTIMO
+  A TASK IN THE BACKGROUND: UN'ATTIVITÀ IN BACKGROUND
+  ABOUT %d S: CIRCA %d S
+  ANY MOMENT: DA UN MOMENTO ALL'ALTRO
+  READING THE GAME LIST OF %s: LETTURA DELLA LISTA GIOCHI DI %s
+  SAVING A LIST: SALVATAGGIO DI UNA LISTA
+  START NOW: AVVIA ORA
+  STARTING: AVVIO
+  STARTS NEXT: SI AVVIA SUBITO DOPO
+  STOPPING IT SAFELY: ARRESTO IN SICUREZZA
+  THE LAST OF THE QUEUE: LA FINE DELLA CODA
+  WHEN IT FINISHES: QUANDO HA FINITO
+  What each card starts; install or repair BIBLE.: Cosa avvia ogni scheda; installa o ripara BIBLE.
+  Rainbow: Arcobaleno
+  Custom: Personalizzato
+  DESR DVR ISOs (experimental): ISO DESR DVR (sperimentale)
+  PC CARD CF (experimental): PC CARD CF (sperimentale)
+  HDD Start Mode: Avvio dell'hard disk
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed di The Roboto Project Authors (SIL OFL 1.1)
 labels:
   'ON': Attivo
   'OFF': Disattivo
@@ -1495,3 +1531,15 @@ labels:
   RIPPS2_HIDE_GAME: Nascondi gioco
   RIPPS2_HIDDEN_GAMES: Giochi nascosti
   HINT_RIPPS2_HIDDEN_GAMES: I giochi nascosti con Nascondi gioco, sulle unità avviate. Mostrane uno di nuovo, o eliminalo. Ogni unità tiene il proprio elenco.
+  HINT_RIPPS2_BDM_DEVICES: 'Le unità da cui BDM legge i giochi: USB, MX4SIO, una PC Card CF, l''unità DVR di un DESR e iLink. L''hard disk interno segue l''avvio dell''hard disk.'
+  HINT_RIPPS2_SCREEN: 'L''immagine del menu: modalità video, schermo largo, la sua posizione sul televisore (H-POS, V-POS) e overscan.'
+  HINT_RIPPS2_LAYOUT: Dove stanno le categorie e come entra una pagina, poi le copertine di RIPFLOW e la griglia di RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Spessore del testo, il colore del tema, la sfumatura di colori e ogni colore.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Quanto è spesso il testo di RIPPS2: i suggerimenti delle impostazioni, STATO e Informazioni. Normale è come prima; Medio e Grassetto si leggono meglio su un''immagine morbida.'
+  HINT_RIPPS2_HDD_START: 'L''hard disk interno, APA o exFAT: RIPPS2 lo legge qualunque sia e lo mostra una volta, come giochi dell''hard disk. Disattivo lo lascia stare.'
+  HINT_RIPPS2_THEME_COLOR: Il colore proprio del tema. Scegli Personalizzato come colore del tema per sceglierlo tu, come i colori del testo.
+  HINT_RIPPS2_SWEEP: Cinque colori che il tema attraversa, piano e in modo fluido. Arcobaleno, una sfumatura da ogni colore del tema o la tua. Disattivo tiene fermo il tema.
+  HINT_RIPPS2_SWEEP_COLORS: I cinque colori della sfumatura e la sua velocità. Cambiane una di RIPPS2 e viene tenuta come tua, con il nome che le dai.
+  HINT_RIPPS2_SWEEP_NAME: Il nome della tua sfumatura nella lista Sfumatura di colori.
+  HINT_RIPPS2_SWEEP_COLOR: Uno dei cinque colori che la sfumatura attraversa, in ordine.
+  HINT_RIPPS2_SWEEP_SPEED: 'Quanto dura ogni colore prima che entri il successivo. Anche Vivace resta fluido: i colori non lampeggiano mai.'
