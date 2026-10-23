@@ -36,11 +36,19 @@ Queen for the montage; Money Longer for the colours and the finale. Every cut on
 - The finale on the hardest beats: the guard panel, the sidebar, the themes (t_ripps2, t_adapt, t_ripgrid,
   t_ripflow, t_disc), fast cuts with RGB split and punch zooms.
 
-## 3. End card, menu wave
-- v1.1.4, github.com/akilluminati47/RIPPS2, the dead elf's hat.
+## 3. Moonlight (the user, 10/23), to the end
+- As Money Longer ends, Memory Files in the Moonlight Color Theme: the browser, the HDD's MEDIA folder, the song's
+  AVI (XXXTENTACION, Moonlight: a ghost-white moon visualiser, XviD with MP3, made for the reel) and its info, Cross:
+  the player opens it, and the song carries the rest (laid from the FLAC on the player's own start).
+- The reel's colours go Moonlight's ghostly white from here (a grade), back to colour under the hat.
+- The player, then beside it the type: what RIPPS2 has done from build 1 to 114, a page every four bars (a kicker, a
+  title, short points one beat apart), glowing on the beat; "114 builds" and a thank you at the song's break.
+- The end card when the beat comes back: v1.1.4, github.com/akilluminati47/RIPPS2, psx-place, the testers, the
+  credits and music lines, then the dead elf's hat. No lyric lines on screen.
 
 ## Takes needed on the final ELF (takes114v.ps1)
 p_hub, p_sources, p_bdm, p_interface, p_screen, p_layout, p_colors, p_status, p_about (preface); s_all_on,
 s_off_settings, s_after (sidebar); g_wait, g_now (guard, test ELF); w_weight (Text Weight); c_tangerine,
 c_flamingo, c_turquoise, c_moonlight, c_custom, c_sweep_rainbow, c_sweep_flamingo, c_sweep_page, c_sweep_ripflow;
+m_moon (Memory Files to the player, takes114r.ps1);
 plus the 114 takes kept (v_master, v_hide, v_delete, v_apa_no, v_cache, v_handover, v_lang_ja, t_*).
