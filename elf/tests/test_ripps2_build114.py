@@ -140,7 +140,18 @@ for head in ('void deinitEx(int exception, int modeSelected, int modeSelected2)'
         fail.append('opl.c: %s raises the launch flag before anything else' % head.split('(')[0])
     if td.find('ioWaitWrites(') < td.find('ioBlockOpsTimed('):
         fail.append('opl.c: %s waits for the writes already started, after the drain' % head.split('(')[0])
-need(rd('src/ioman.c'), (('int ioWriteBegin(void)', 'the write gate'), ('ok = !gIoLaunching;', 'closed once a launch begins')), 'ioman.c')
+need(rd('src/ioman.c'), (('int ioWriteBegin(void)', 'the write gate'), ('ok = !gIoLaunching;', 'closed once a launch begins'),
+                         ('PollSema(gIoWriteSema) < 0', 'one background write at a time'), ('if (tries >= 150 || gIoLaunching)', 'a bounded wait, then skipped'),
+                         ('if (!ok && gIoWriteSema >= 0)\n        SignalSema(gIoWriteSema);', 'given back when a launch closed the gate'),
+                         ('gIoWriteSema = CreateSema(&ws);', 'made in ioInit')), 'ioman.c')
+fw_ = rd('src/ripps2files.c')
+fw_ = fw_[fw_.index('static void fbWorker(void)'):]
+fw_ = fw_[:fw_.index('\n}\n')]
+if 'ioLaunchBegin();\n    if (fbOp == FB_OP_PASTE)' not in fw_ or 'ioLaunchCancel();\n    if (fbPath[0])' not in fw_:
+    fail.append('ripps2files.c: no background write while Memory Files copies, unpacks or deletes (held, then given back)')
+bs_ = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'build.sh'), encoding='utf-8').read()
+if 'python3 .github/scripts/install_safe_bdmfs.py' not in bs_ or bs_.find('install_safe_bdmfs.py') > bs_.find('make clean'):
+    fail.append("elf/build.sh: RiptOPL's guarded exFAT/FAT driver (install_safe_bdmfs.py) is installed before the build, as its releases do")
 snapw = body(rd('src/supportbase.c'), 'void sbSnapScanned(')
 if snapw.find('ioWriteBegin()') < 0 or snapw.find('ioWriteBegin()') > snapw.find('O_WRONLY'):
     fail.append('supportbase.c: RIPPS2.LST is written only through the write gate')

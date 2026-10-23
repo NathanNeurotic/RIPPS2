@@ -85347,7 +85347,7 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..73525ed 100644
+index 3dc8c13..36e4a79 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
 @@ -223,6 +223,115 @@ int ioDescribeRunning(char *out, int size)
@@ -85501,7 +85501,18 @@ index 3dc8c13..73525ed 100644
  
      gIOTerminate = 0;
      gHandlerCount = 0;
-@@ -735,6 +863,65 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -400,6 +528,10 @@ void ioInit(void)
+     gProcSemaId = CreateSema(&gQueueSema);
+     gEndSemaId = CreateSema(&gQueueSema);
+     gIOPrintfSemaId = CreateSema(&gQueueSema);
++    if (gIoWriteSema < 0) { // build 114: RIPPS2's background writes, one at a time (ioWriteBegin)
++        ee_sema_t ws = {.init_count = 1, .max_count = 1, .option = 0};
++        gIoWriteSema = CreateSema(&ws);
++    }
+ 
+     // default custom simple action handler
+     ioRegisterHandler(IO_CUSTOM_SIMPLEACTION, &ioSimpleActionHandler);
+@@ -735,6 +867,80 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
@@ -85509,14 +85520,27 @@ index 3dc8c13..73525ed 100644
 +// start after the launch has looked at the count (one core: no thread switch without an interrupt).
 +static volatile int gIoLaunching = 0, gIoWrites = 0;
 +
++// build 114 (the lab, 10/23): ps2sdk's exFAT driver loses whole clusters of a file that grows beside another, so RIPPS2's
++// background writes (a list, the master list, art, a RIPSHOT developed, the hidden list) go one at a time: a write waits
++// up to about 3 s for the one before it, else it is skipped (each is kept again next time). A holder never waits on
++// another writer, so this cannot deadlock.
++static int gIoWriteSema = -1;
++
 +int ioWriteBegin(void)
 +{
-+    int ok;
++    int ok, tries;
++    for (tries = 0; gIoWriteSema >= 0 && PollSema(gIoWriteSema) < 0; tries++) {
++        if (tries >= 150 || gIoLaunching)
++            return 0;
++        DelayThread(20 * 1000);
++    }
 +    DIntr();
 +    ok = !gIoLaunching;
 +    if (ok)
 +        gIoWrites++;
 +    EIntr();
++    if (!ok && gIoWriteSema >= 0)
++        SignalSema(gIoWriteSema);
 +    return ok;
 +}
 +
@@ -85526,6 +85550,8 @@ index 3dc8c13..73525ed 100644
 +    if (gIoWrites > 0)
 +        gIoWrites--;
 +    EIntr();
++    if (gIoWriteSema >= 0)
++        SignalSema(gIoWriteSema);
 +}
 +
 +void ioLaunchBegin(void)
@@ -87511,7 +87537,7 @@ index 459b24e..5651a19 100644
      if (guiMsgBox(msg, 1, NULL) != 1)
          return 0;
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 4bedb0c..f2306fc 100644
+index 4bedb0c..5bcb226 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -53,6 +53,7 @@
@@ -87530,7 +87556,25 @@ index 4bedb0c..f2306fc 100644
          if (res >= -2) {
              if (freeKb != NULL)
                  *freeKb = res >= -1 && type == sceMcTypePS2 && format == MC_FORMATTED ? freeC : -1;
-@@ -1379,6 +1381,8 @@ static void fbRunElf(const fb_entry_t *e)
+@@ -1093,6 +1095,9 @@ static void fbReport(const char *verb, int done)
+ 
+ static void fbWorker(void)
+ {
++    // build 114: no background write of RIPPS2's while a copy grows its files (the lab, 10/23: ps2sdk's exFAT driver loses
++    // clusters of a file growing beside another)
++    ioLaunchBegin();
+     if (fbOp == FB_OP_PASTE) {
+         fbPasteWork();
+         fbReport(fbPasteMode == FB_PASTE_PSU ? _t("EXPORTED AS PSU") : fbPasteMode == FB_PASTE_UNPACK ? _t("UNPACKED") : fbClipCut ? _t("MOVED") : _t("PASTED"), fbDoneItems);
+@@ -1105,6 +1110,7 @@ static void fbWorker(void)
+         fbDeleteWork();
+         fbReport(_t("DELETED"), fbDoneItems);
+     }
++    ioLaunchCancel();
+     if (fbPath[0])
+         fbScanDir();
+     else
+@@ -1379,6 +1385,8 @@ static void fbRunElf(const fb_entry_t *e)
      // way the PS1 pages start it, the IOP and its drives kept, its own path as argv[0] (on the HDD
      // too: it reads its games through the live pfs0: mount)
      const char *base = strrchr(elfPath, '/');
@@ -87539,7 +87583,7 @@ index 4bedb0c..f2306fc 100644
      if (!strcasecmp(base != NULL ? base + 1 : elfPath, EMBER_ELF_NAME)) {
          ripps2PlayLaunchSequence();
          deinit(UNMOUNT_EXCEPTION, IO_MODE_SELECTED_ALL_SPARE);
-@@ -1441,6 +1445,8 @@ static void fbRunVcd(const fb_entry_t *e)
+@@ -1441,6 +1449,8 @@ static void fbRunVcd(const fb_entry_t *e)
      snprintf(ask, sizeof(ask), _t("Play %s?"), name);
      if (!guiMsgBox(ask, 1, NULL))
          return;
@@ -87548,7 +87592,7 @@ index 4bedb0c..f2306fc 100644
      ripps2LaunchDiscArmGeneric(); // build 91: a PS1 disc image
      ripps2PlayLaunchSequence();
      mod->support->itemLaunchVcd(mod->support, name, NULL);
-@@ -1555,6 +1561,8 @@ static void fbRunIsoAt(item_list_t *src, const fb_entry_t *e)
+@@ -1555,6 +1565,8 @@ static void fbRunIsoAt(item_list_t *src, const fb_entry_t *e)
      g.parts = 1;
      g.media = dvd ? SCECdPS2DVD : SCECdPS2CD;
      g.format = GAME_FORMAT_ISO;
@@ -87557,7 +87601,7 @@ index 4bedb0c..f2306fc 100644
      (void)cacheCancelPendingImageLoadsTimed(0); // the launch owns the drive now
      config_set_t *cfg = sbPopulateConfig(&g, src->itemGetPrefix(src), "/");
      ripps2LaunchDiscArm(src, startup);
-@@ -1605,6 +1613,8 @@ static void fbRunIso(const fb_entry_t *e)
+@@ -1605,6 +1617,8 @@ static void fbRunIso(const fb_entry_t *e)
      snprintf(ask, sizeof(ask), _t("Play %s?"), view.itemGetName(&view, found));
      if (!guiMsgBox(ask, 1, NULL))
          return;
@@ -87566,7 +87610,7 @@ index 4bedb0c..f2306fc 100644
      char *st = view.itemGetStartup(&view, found);
      snprintf(startup, sizeof(startup), "%s", st != NULL ? st : "");
      // the launch owns the drive now: queued art reads go first (menuLoadConfig does the same for Storage)
-@@ -1616,7 +1626,9 @@ static void fbRunIso(const fb_entry_t *e)
+@@ -1616,7 +1630,9 @@ static void fbRunIso(const fb_entry_t *e)
      ripps2LaunchDiscArm(&view, startup);
      ripps2PlayLaunchSequence();
      guiShowGameID(startup);
@@ -87576,7 +87620,7 @@ index 4bedb0c..f2306fc 100644
      ripps2LaunchAborted();
      if (cfg != NULL)
          configFree(cfg);
-@@ -1649,6 +1661,8 @@ static void fbRunCue(const fb_entry_t *e)
+@@ -1649,6 +1665,8 @@ static void fbRunCue(const fb_entry_t *e)
      snprintf(ask, sizeof(ask), _t("Play %s with Ember?"), folder);
      if (!guiMsgBox(ask, 1, NULL))
          return;
@@ -87585,7 +87629,7 @@ index 4bedb0c..f2306fc 100644
      ripps2LaunchDiscArmGeneric(); // a PS1 disc
      ripps2PlayLaunchSequence();
      src->itemLaunchCue(src, folder, NULL);
-@@ -1735,6 +1749,41 @@ static void fbStartDrivesWork(void)
+@@ -1735,6 +1753,41 @@ static void fbStartDrivesWork(void)
      fbDrivesDone = 1;
  }
  

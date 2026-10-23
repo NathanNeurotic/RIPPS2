@@ -133,6 +133,10 @@ fi
 
 cd "$SRC"
 sh .github/scripts/install_coherent_mmce.sh
+# build 114: RiptOPL's own releases rebuild the SDK's exFAT/FAT driver with its fragment walker guard (#986: a corrupt
+# chain fails the launch instead of handing the game's driver wrong sectors to write a VMC to) and the contiguous VMC
+# reserve genvmc asks for. RIPPS2 shipped the stock driver until now (FifthFox's corrupted drives, 10/22)
+python3 .github/scripts/install_safe_bdmfs.py
 make clean
 # DIRTY= : the tree is RiptOPL plus our patches by design, so the version never says -dirty
 # RIPPS2_MAKE_FLAGS: extra make flags, e.g. DEBUG=1 EESIO_DEBUG=1 for a build that logs over EE SIO
