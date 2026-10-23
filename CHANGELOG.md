@@ -5,7 +5,8 @@
 The user's plans of 10/22: All Games before the drives answer, hide and delete games, the launchers found and
 remembered, a smaller ELF for memory cards, and the field reports from FifthFox (iLink, size) and Berion (APA). And of
 10/23: launches that never run into RIPPS2's own reading and writing, every settings page on one screen, one HDD, new
-Color Themes and the Color Sweep, and one newer Roboto with weights.
+Color Themes and the Color Sweep, and one newer Roboto with weights. Then: a theme list on the SELECT hold, games
+compressed to ZSO and back, a launch guard that only shows when a wait is long, and RiptOPL's guarded exFAT driver.
 
 ### RiptOPL brought up to date
 - **RiptOPL rebuild/main 57c45b4 merged** (192 commits since 3cd7f89): i.LINK logs back in after an IOP reset and
@@ -68,13 +69,23 @@ Color Themes and the Color Sweep, and one newer Roboto with weights.
 
 ### Safe launches, and the launch guard
 - **No write runs into a launch.** FifthFox lost two card images and a USB stick, likely to a write cut by a launch's
-  reset. A launch now stops RIPPS2's background writes before anything else (RIPPS2.LST, allgames.bin, the hidden
-  lists, art, RIPSHOT, the games list cache), waits for one already started, and stops a drive's list read at its next
-  entry.
+  reset. A launch now stops RIPPS2's background writes the moment the game is picked (RIPPS2.LST, allgames.bin, the
+  hidden lists, art, RIPSHOT, the games list cache), waits for one already started, and stops a drive's list read at its
+  next entry.
+- **One background write at a time.** In the lab, ps2sdk's exFAT driver lost whole 32 KB clusters of a file that grew
+  beside another file. RIPPS2's own background writes now wait for each other (about 3 seconds at most; one that cannot
+  wait is simply written next time), and none starts while Memory Files pastes, unpacks or deletes, while RIPDISC rips,
+  or while a game is compressed.
+- **RiptOPL's guarded exFAT driver.** RIPPS2 shipped the SDK's stock exFAT/FAT driver; it now ships the one RiptOPL's
+  own releases build. A game on a damaged FAT chain is refused at launch (#986) instead of handing the game's
+  driver wrong sectors to write its VMC to, and the merged RiptOPL's new VMC maker can reserve a card in one piece on
+  USB and the other BDM drives (with the stock driver it refused).
 - **The launch guard.** A game picked while RIPPS2 is still reading a drive or saving a list waits its turn: a glass
   panel fades in as RIPDISC's does, names what RIPPS2 is finishing, and RIPDISC's notches fill toward when it will be
   done (each drive's last list read is timed). The game starts by itself when the work is done. **START NOW** stops
   the work safely and starts at once; **Back** returns to the page the launch began on, unchanged. Music plays on.
+- **Only when it is needed.** A wait of a second or two shows the loading icon over the page and nothing else; the
+  panel fades in when the work will take longer, or has run past what it was expected to take.
 
 ### Settings, every page on one screen
 - **Game Sources**: the BDM drives (USB, MX4SIO, PC Card, DESR, iLink) on a **BDM Devices** page of their own; the
@@ -101,6 +112,23 @@ Color Themes and the Color Sweep, and one newer Roboto with weights.
   **Rainbow**, then a sweep made from each Color Theme (an all-pink Flamingo, a ghostly Moonlight). **Sweep Colors**
   opens its five pickers and its speed (Slow, Normal, Lively), seen live; change one of RIPPS2's and it is kept as
   your own, under the name you give it (up to four; left as it is, "Rainbow" becomes "Rainbow 2").
+- **The notch panels line up**: RIPDISC, the launch guard and compression share one frame, the same width and place,
+  with the same wheel.
+
+### The theme list
+- **Hold SELECT** on a game list opens your themes in a glass panel, eight to a page, in the Settings font: pick one and
+  the panel fades out and the theme loads (the one in use just refreshes the page). **Settings > Interface > Hold
+  SELECT**: List (the default), Cycle (the next theme, as before) or Off.
+
+### Hide Game and Compression
+- A game's Triangle options say **Hide Game and Compression** for an ISO or ZSO (USB, MX4SIO, iLink, the exFAT HDD,
+  MMCE): **Hide Game** as before, **Compress to ZSO**, or for a ZSO **Uncompress to ISO**.
+- **Experimental, and asked twice**: a panel with RIPDISC's notches shows the game, its size, its drive and about how
+  long it takes, and fills while you hold SELECT; then a second yes. A RIPPS2 progress bar runs the whole way
+  (COMPRESSING 1 OF 2, 2 OF 2, CHECKING EVERY PIECE) with CANCEL, which removes what was written.
+- **Nothing is lost.** The ISO stays until the ZSO has been read back and every piece checked against it, and only then
+  does RIPPS2 ask before removing it. The ZSO starts with the OPL core (Neutrino does not read ZSO); its VMC, settings,
+  art and cheats are the same game's. Uncompress makes the ISO again the same way.
 
 ### Fonts
 - **One Roboto Condensed 3.015** (SIL OFL), variable from 400 to 700, replaces the 2011 Bold and 2014 Regular for
@@ -120,7 +148,8 @@ Color Themes and the Color Sweep, and one newer Roboto with weights.
 ### Underneath
 - The new words in all 33 languages.
 - Host test `test_ripps2_build114.py`: every part statically, the APA check against six synthetic disks, the
-  master list's round trip and its refusal of a damaged or short file.
+  master list's round trip and its refusal of a damaged or short file, the one-at-a-time write gate, the ZSO written in
+  one stream, and elf/build.sh installing RiptOPL's guarded driver.
 
 ## Build 113 (beta, v1.1.3-beta), changes since build 112
 

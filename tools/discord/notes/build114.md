@@ -1,16 +1,19 @@
-# Build 114 is RIPPS2 v1.1.4 beta: All Games from the first frame, hide and delete, your launchers found once, safe launches with the launch guard, every settings page on one screen, one HDD, new Color Themes and the Color Sweep, and one newer Roboto.
+# Build 114 is RIPPS2 v1.1.4 beta: All Games from the first frame, hide and delete, your launchers found once, safe launches with the launch guard, every settings page on one screen, one HDD, new Color Themes and the Color Sweep, one newer Roboto, a theme list on SELECT, and games compressed to ZSO.
 
 ## Get it
 - [Download the latest RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf) (this link always gets the newest build), [RIPPS2-languages.zip](https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip) for your language, and [the theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest/download/RIPPS2-themes.zip) (edition 114: Adapt on the built-in fonts)
 
 ## Safe launches
 - **No write runs into a launch.** A launch now stops RIPPS2's own background saving first and waits for one already started, so a card image or a stick is never left half written by the reset.
-- **The launch guard.** Pick a game while a drive is still being read and a glass panel says what RIPPS2 is finishing; its notches fill toward when it will be done, and the game starts by itself. **START NOW** stops the work safely and goes; **Back** returns to where you were. Music keeps playing.
+- **One write at a time.** RIPPS2's own saving waits its turn, and stops while Memory Files copies, RIPDISC rips or a game is compressed (the PS2's exFAT driver can lose pieces of a file growing beside another).
+- **RiptOPL's guarded exFAT driver**: a game on a damaged FAT chain refuses to start instead of writing its VMC to the wrong place.
+- **The launch guard.** Pick a game while a drive is still being read and a glass panel says what RIPPS2 is finishing; its notches fill toward when it will be done, and the game starts by itself. **START NOW** stops the work safely and goes; **Back** returns to where you were. Music keeps playing. A short wait shows only the loading icon.
 
 ## Games
 - **All Games at once** at boot, from a saved list, even before the drives answer; a game on a drive still waking waits for it.
 - **Hide Game** (Triangle options): gone from every list until you show it again from Game Sources > Hidden Games.
 - **Delete, completely**: the image, its settings, art and cheats; its saves only if you say Yes. On the internal HDD (APA) the table is checked first and a damaged one is refused before anything changes.
+- **Compress to ZSO** (experimental, Triangle > Hide Game and Compression): hold SELECT, say yes again, watch the progress bar. The ISO stays until every piece of the ZSO is checked; the ZSO starts with the OPL core, saves and all, and can be made an ISO again.
 - **Your launchers, found once**: POPSTARTER, the POPS files, Ember, its BIOS and Neutrino are searched for on your drives and remembered (Game Sources > Cache > Look now).
 
 ## Settings and looks
@@ -18,12 +21,17 @@
 - **One HDD**: HDD Start Mode covers the internal drive, APA or exFAT, and Storage shows it once.
 - **Color Themes**: Tangerine, Flamingo, Turquoise, Moonlight and Custom (pick your own color).
 - **Color Sweep**: five colors the theme fades through, gently. Rainbow, one made from each Color Theme, or your own (Sweep Colors).
+- **The theme list**: hold SELECT on a game list and pick a theme from a panel (Settings > Interface > Hold SELECT: List, Cycle or Off).
 - **Text Weight** for the Settings tooltips, STATUS and About; one newer Roboto Condensed everywhere, the language pack included.
 
 ## Test list
 - **A launch right after boot** while a drive is still listing (MMCE, iLink, a big USB): does the guard panel show, fill, and start the game by itself?
 - **START NOW** on the guard panel: does the game start cleanly, and are your drives and cards fine after?
 - **Back** on the guard panel: back on the list where you were, nothing changed?
+- **A launch a few seconds after boot**: only the loading icon, then the game, no panel?
+- **Compress a test game** (one you have a copy of) on USB or the exFAT HDD: does it finish, does the ZSO start with the OPL core and keep its VMC save, and does Uncompress give the ISO back?
+- **A new VMC on USB** (a game's VMC settings, Create): made, and the game saves to it?
+- **Hold SELECT** on a game list: the theme list, your pick loaded? Cycle and Off in Settings > Interface?
 - **All Games after a power cycle**: every game listed at once, the covers coming in as the drives answer?
 - **Hide Game**, then Game Sources > Hidden Games > Show Again: back in every list?
 - **Delete** a test game: everything of it gone, its VMC kept when you answer No?
