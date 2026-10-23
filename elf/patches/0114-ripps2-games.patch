@@ -85215,7 +85215,7 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..fb440ae 100644
+index 3dc8c13..a38836d 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
 @@ -223,6 +223,113 @@ int ioDescribeRunning(char *out, int size)
@@ -85270,7 +85270,7 @@ index 3dc8c13..fb440ae 100644
 +
 +static int ioListMs(void *data)
 +{
-+    int m = data != NULL ? *(int *)data : -1;
++    int m = data != NULL ? *(short *)data : -1; // a list request carries &support->mode, a short
 +    return m >= 0 && m < IO_LIST_MODES ? gIoListMs[m] : 0;
 +}
 +
@@ -85339,15 +85339,15 @@ index 3dc8c13..fb440ae 100644
 +#ifdef RIPPS2_GUARD_TEST
 +            // a game list (a source's, or All Games put together), not the Apps or Starred pages a rebuild queues
 +            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && clock() < gGuardTestUntil &&
-+                *(int *)req->data != APP_MODE && *(int *)req->data != FAV_MODE) {
++                *(short *)req->data != APP_MODE && *(short *)req->data != FAV_MODE) {
 +                gGuardTestUntil = 0;
-+                printf("RIPPS2_GUARD_TEST: the list read of mode %d held 8 s\n", *(int *)req->data);
++                printf("RIPPS2_GUARD_TEST: the list read of mode %d held 8 s\n", *(short *)req->data);
 +                DelayThread(8 * 1000 * 1000);
 +            }
 +#endif
              ioProcessRequest(req);
 +            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && !gIoCancelScans) { // build 114: timed
-+                int m = *(int *)req->data;
++                int m = *(short *)req->data;
 +                if (m >= 0 && m < IO_LIST_MODES)
 +                    gIoListMs[m] = (int)(((u64)(clock() - gRunSince)) * 1000 / CLOCKS_PER_SEC);
 +            }
@@ -87239,7 +87239,7 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..763af24
+index 0000000..0076707
 --- /dev/null
 +++ b/src/ripps2games.c
 @@ -0,0 +1,1135 @@
@@ -87958,7 +87958,7 @@ index 0000000..763af24
 +    if (!ioRunningJob(&type, &data, &secs))
 +        snprintf(out, size, "%s", ioWritesOpen() ? _t("SAVING A LIST") : _t("THE LAST OF THE QUEUE"));
 +    else if (type == IO_MENU_UPDATE_DEFFERED && data != NULL)
-+        snprintf(out, size, _t("READING THE GAME LIST OF %s"), lrWhere(*(int *)data));
++        snprintf(out, size, _t("READING THE GAME LIST OF %s"), lrWhere(*(short *)data));
 +    else if ((name = ioRunningName()) != NULL)
 +        snprintf(out, size, "%s", name);
 +    else
@@ -88005,7 +88005,7 @@ index 0000000..763af24
 +        int ty = 0, se = 0;
 +        void *da = NULL;
 +        if (ioRunningJob(&ty, &da, &se))
-+            printf("RIPPS2_GUARD_TEST: the guard waits on job type %d, mode %d; estimate %d ms\n", ty, da != NULL ? *(int *)da : -1, est);
++            printf("RIPPS2_GUARD_TEST: the guard waits on job type %d, mode %d; estimate %d ms\n", ty, da != NULL ? *(short *)da : -1, est);
 +    }
 +#endif
 +    for (;;) {

@@ -224,6 +224,11 @@ if 'gEnableBdmHDD = gHDDStartMode != START_MODE_DISABLED; // build 114' not in r
 bdm_ = rd('src/bdmsupport.c')
 need(bdm_, (('(type == BDM_TYPE_ATA && gEnableBdmHDD); // build 114: one HDD', 'BDM Devices Off never withholds the internal HDD'),
             ('if (gEnableBdmHDD && gHDDStartMode == START_MODE_AUTO && gBDMStartMode != START_MODE_AUTO)', 'HDD Start Mode Auto reads an exFAT drive')), 'bdmsupport.c')
+# the guard: a list request carries &support->mode, a short; read as an int it took the next field too, so no list
+# read was ever timed (no notches) and the panel named no drive (the reel's guard takes, 10/23)
+for f_ in ('src/ioman.c', 'src/ripps2games.c'):
+    if re.search(r'\*\(int \*\)\s*(req->data|data|da)\b', rd(f_)):
+        fail.append('%s: a list request\'s mode is a short' % f_)
 # and Network Connectivity Off left the SMB page up: Game Sources lost the protocol's re-derive with its Protocol row
 if 'guiNetProtocolApplied(netProtocolWas);' not in body(g, 'static void guiSourcesNetRowsRead('):
     fail.append('gui.c: Network Connectivity on Game Sources turns the network page on and off')
