@@ -85207,10 +85207,10 @@ index 4bedb0c..2ccde25 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..261b9df
+index 0000000..f17b839
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,968 @@
+@@ -0,0 +1,980 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -85463,21 +85463,33 @@ index 0000000..261b9df
 +static int shResolve(item_list_t *support, int id, sh_row_t *r)
 +{
 +    const char *n;
++    int tries;
 +    if (support == NULL)
 +        return 0;
-+    if (support->mode == MIX_MODE) {
-+        if (mixIsWaiting(id)) {
++    if (support->mode == MIX_MODE || support->mode == FAV_MODE) {
++        int mix = support->mode == MIX_MODE;
++        if (mix && mixIsWaiting(id)) {
 +            guiMsgBoxSound(SFX_ERROR);
 +            guiMsgBox(_t("This game's drive has not answered yet. Wait for it, then try again."), 0, NULL);
 +            return 0;
 +        }
-+        r->mode = mixGetItemSourceMode(id);
-+        r->id = mixGetItemSourceId(id);
-+        r->kind = mixGetItemKind(id);
-+    } else if (support->mode == FAV_MODE) {
-+        r->mode = favGetItemSourceMode(id);
-+        r->id = favGetItemSourceId(id);
-+        r->kind = favGetItemKind(id);
++        r->mode = mix ? mixGetItemSourceMode(id) : favGetItemSourceMode(id);
++        r->kind = mix ? mixGetItemKind(id) : favGetItemKind(id);
++        // the lab, 10/22: a drive reads its list again behind the saved one (Fast Cache), and while it does the
++        // game is not in that list for a moment, so Hide Game and Delete did nothing at all. Wait for it a little,
++        // then say so rather than stay silent.
++        for (tries = 0; tries < 15; tries++) {
++            r->id = mix ? mixGetItemSourceId(id) : favGetItemSourceId(id);
++            if (r->id >= 0 || r->mode < 0)
++                break;
++            DelayThread(100 * 1000);
++        }
++        if (r->mode >= 0 && r->id < 0) {
++            LOG("SHROUD: row %d (mode %d) not in its drive's list after %d tries\n", id, r->mode, tries);
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(_t("This game's drive has not answered yet. Wait for it, then try again."), 0, NULL);
++            return 0;
++        }
 +    } else {
 +        int view = support->itemGetView != NULL ? support->itemGetView(support, id) : libListViewActive(support);
 +        r->mode = support->mode;
@@ -86866,7 +86878,7 @@ index 0000000..dee0a44
 +    return 0;
 +}
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index f2c48c4..80508dd 100644
+index f2c48c4..f280ec2 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -3,6 +3,11 @@
@@ -86890,7 +86902,7 @@ index f2c48c4..80508dd 100644
  #include <zlib.h>                 // build 85: crc32 for the launch report
  #include "include/ripps2_build.h" // build 85: the launch report names its build
  #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
-@@ -64,7 +71,9 @@ enum {
+@@ -64,16 +71,18 @@ enum {
      ACT_POPS_SETTINGS,
      ACT_POPS_NET,
      ACT_BIBLE_MANAGE,
@@ -86901,8 +86913,10 @@ index f2c48c4..80508dd 100644
  };
  
  typedef struct
-@@ -73,7 +82,7 @@ typedef struct
-     char text[224], aside[48]; // build 113: room for a translated line (UTF-8 runs longer)
+ {
+     int kind, action, ok;
+-    char text[224], aside[48]; // build 113: room for a translated line (UTF-8 runs longer)
++    char text[224], aside[96]; // build 113: room for a translated line (UTF-8 runs longer); 114: Lao and Persian asides run to 73 bytes
  } st_row_t;
  
 -#define ST_ROWS 28

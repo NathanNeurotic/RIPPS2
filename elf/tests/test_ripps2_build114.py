@@ -87,6 +87,8 @@ if st.index('"DRIVES"') > st.index('"LAUNCHERS"') or st.index('"LAUNCHERS"') > s
     fail.append('STATUS: DRIVES first, then LAUNCHERS, then BIBLE')
 need(st, (('"Internal HDD (APA): %s free of %s"', 'the APA drive\'s space'), ('"Memory card %d: %d KB free"', 'the cards\' space'),
           ('ACT_START_DRIVES', 'START EVERY DRIVE'), ('ACT_SEANCE_SEARCH', 'LOOK FOR THEM'), ('"only if you have none"', 'the install row says when')), 'ripps2status.c')
+if 'aside[96]' not in st:
+    fail.append('STATUS: a translated note runs to 73 bytes (Lao, Persian): aside[96]')
 dlg = rd('src/dialogs.c')
 need(dlg, (('RIPPS2_SEANCE_ROW0', 'Cache > Launchers lines'), ('RIPPS2_SEANCE_BUTTON', 'Look now'), ('RIPPS2_HIDDEN_BUTTON', 'Game Sources > Hidden Games')), 'dialogs.c')
 
