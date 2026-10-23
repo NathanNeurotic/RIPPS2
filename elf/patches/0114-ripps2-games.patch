@@ -85207,10 +85207,10 @@ index 4bedb0c..2ccde25 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..f17b839
+index 0000000..d56d0b2
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,980 @@
+@@ -0,0 +1,981 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -85249,6 +85249,7 @@ index 0000000..f17b839
 +#include <dirent.h>
 +#include <sys/stat.h>
 +#include <kernel.h>
++#include <delaythread.h> // shResolve waits for a drive rereading its list
 +#define NEWLIB_PORT_AWARE
 +#include <fileXio_rpc.h> // fileXioRemove on hdd0: (the partition)
 +
