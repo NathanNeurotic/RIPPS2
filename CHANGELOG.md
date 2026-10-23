@@ -1,5 +1,81 @@
 # RIPPS2 changelog
 
+## Build 114 (beta, v1.1.4-beta when released), changes since build 113
+
+The user's plans of 10/22: All Games before the drives answer, hide and delete games, the launchers found and
+remembered, a smaller ELF for memory cards, and the field reports from FifthFox (iLink, size) and Berion (APA).
+
+### RiptOPL brought up to date
+- **RiptOPL rebuild/main 57c45b4 merged** (192 commits since 3cd7f89): i.LINK logs back in after an IOP reset and
+  RiptOPL's i.LINK driver rides with Neutrino and POPSTARTER (#1018, FifthFox's iLink report), the in-game menu
+  from the VBLANK handler (#984), the USB / MX4SIO / iLink discovery waits skipped, VMC and ZSO fixes, Ember's
+  starting disc from discs.txt, and the translation format checks. RIPPS2's own sound voices, in-game menu and
+  keyed language files kept their build 104 to 113 behaviour on top.
+
+### All Games, whole from the first frame
+- **The master list.** Every game All Games lists is kept in `allgames.bin` beside the settings (mc0:/RIPPS2, or
+  where Save Settings To points). At boot All Games shows all of them at once: a game whose drive has not answered
+  yet is listed and waits for it, and is swapped for the real row the moment its drive's list comes in.
+- **Drives on Manual stay instant.** Their games are listed too; Cross on one starts its drive, waits for its list
+  and launches the game. A drive that is turned off, or started and silent for 40 seconds, drops its saved games.
+- Written in place only when the list changed and no started drive is still to answer, never with Write
+  Operations or Fast Cache off; a short or damaged file is ignored, never half read.
+
+### SEANCE: the launchers you keep, found once
+- **SEANCE** searches the started drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino and
+  remembers where each one is, by drive kind (`launchers.txt` beside the settings). Every launch reads them from
+  there after the places RIPPS2 always looked, and every launch that finds one notes it.
+- **Settings > Game Sources > Cache** shows each of the five as found (and where) or not found yet, with **Look
+  now**. A launch that finds none offers the search, and the place found is kept for every launch after.
+- **Ember** needs its files beside the games: when SEANCE knows a copy elsewhere, START copies Ember (or its BIOS)
+  there and starts the game. **RIPPOPS** copies the POPS files from where SEANCE found them.
+- **Neutrino** is looked for at Settings' path, on the game's drive, on the memory cards and on every started
+  drive before anything is offered; RIPPS2's own 1.8.0 is offered once, only when none is found anywhere.
+
+### STATUS: drives first
+- **DRIVES** opens the page: every started drive by kind, the internal HDD (APA)'s free space, each memory card's
+  free KB, the MMCE card, and what is off. **START EVERY DRIVE** starts the rest.
+- **LAUNCHERS**: one line each for Neutrino, POPSTARTER, the POPS files, Ember and Ember's BIOS, and **LOOK FOR
+  THEM** (it can start every drive first). Then the homebrew and BIBLE as before. The page is now titled Drives,
+  launchers and homebrew.
+
+### SHROUD: hide a game
+- **Hide Game** in a game's Triangle options (on All Games and Starred Games rows too): the game leaves every list,
+  All Games, Starred Games, Recents and Random Game included. The hidden list is kept on the game's own drive
+  (`RIPPS2.HID` beside RIPPS2.LST), so it travels with the drive.
+- **Settings > Game Sources > Hidden Games** lists every started drive's hidden games: Show Again, or Delete.
+
+### LAST RITES: delete a game completely
+- **Delete** now takes everything of the game's: every part of the image (ul.cfg rebuilt for a UL game), its CFG,
+  its art and its cheats; on the internal HDD (APA) its partition, then its CFG, art and cheats in +OPL. Delete
+  works on APA games, All Games and Starred Games rows (found on their drive at that moment), and hidden games.
+- **Saves stay unless you say.** Its VMC, POPSTARTER saves and RIPSHOT pictures are kept unless you answer Yes,
+  and a CFG or art another copy of the game still uses is kept and named. A last screen only START gets past.
+- **Berion's APA check.** Before any partition goes (the HDD MANAGER's remove too), RIPPS2 walks the whole table:
+  every header's magic and checksum, each link forward and back, every partition inside this disk, no size or
+  alignment this disk cannot have, the chain closing at __mbr. A table written from an image of another disk size
+  is refused with the reason, and nothing is touched. The walk runs again after, and `REMOVED.TXT` in mc0:/RIPPS2
+  keeps what went, from where, the space freed and the table's state.
+
+### RIPPS2-lite.elf, for memory cards
+- **A second ELF from the same code**, under 2 MB: no BIBLE install (it starts from a BIBLE the full ELF
+  installed), no Neutrino inside (it uses yours, found by SEANCE), no OPL default background. The full ELF still
+  carries Neutrino and BIBLE.
+- **Both are smaller.** FreeType is started with only the modules RIPPS2 reads (TrueType, sfnt, the autohinter,
+  the smooth renderer, and CFF in the full ELF), so Type 1, CID, PFR, BDF, PCF, WinFNT, SDF and SVG leave the
+  link; the built-in fonts lose glyph names, extra name records and substitution tables (render-checked
+  identical at 14 to 32 px).
+
+### Credits
+- **Neutrino beside RiptOPL** on the About page: rickgaiser's Neutrino named in the opening lines as the second
+  game core, with its link, in a BUILT ON RIPTOPL, WITH NEUTRINO section.
+- **TESTERS** closes with "Special thanks to all the YouTube love as well: glad to help however you reach me."
+
+### Underneath
+- The new words in all 33 languages.
+- Host test `test_ripps2_build114.py`: every part statically, the APA check against six synthetic disks, the
+  master list's round trip and its refusal of a damaged or short file.
+
 ## Build 113 (beta, v1.1.3-beta), changes since build 112
 
 The user's plans of 10/21 and 10/22: the Adapt sidebar, the legacy theme key, cutting the launchers RIPPS2 carried

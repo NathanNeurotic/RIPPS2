@@ -213,7 +213,11 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
 - [x] Mockup: docs/plans/mockups/b113-sidebar-sheet.png (make_b113_sidebar.py: the three glyphs drawn as vectors,
       the sidebar on real Adapt captures of Storage, Launch Disc, Memory Files, the Left focus and Circle's sources).
 
-## Build 114 (the user 10/22: All Games before the drives answer, hide and delete games): planned
+## Build 114 (the user 10/22: All Games before the drives answer, hide and delete games): built, not released
+Where it stands (10/22 evening): every part below is in patch 0114 on `b114` with the RiptOPL merge, SEANCE, STATUS's
+drives, the lite ELF and the new words in all 33 languages; CI green, host tests clean, the hidden lab passes listed
+under Tests and lab done. Not released and not posted: the user decides after the showcase. Decisions 1 to 5 were
+taken as recommended (the user left them to me on 10/22, to recap): see the end of this section.
 One patch, `elf/patches/0114-ripps2-games.patch`, on branch `b114`; test `elf/tests/test_ripps2_build114.py`. Three parts,
 built in this order: A (the riskiest: All Games crashed a console in build 66 when its records were freed under a
 cover lookup), then C (delete, which B's page uses), then B. Part D is a decision, not work yet.
@@ -248,61 +252,63 @@ cover lookup), then C (delete, which B's page uses), then B. Part D is a decisio
   remove touch the chain; both get the check in part C.
 
 ### Credits (the user 10/22, first: small and independent)
-- [ ] **Neutrino beside RiptOPL** on the About page: its own section sits mid-page while BUILT ON RIPTOPL closes it,
+- [x] **Neutrino beside RiptOPL** on the About page: its own section sits mid-page while BUILT ON RIPTOPL closes it,
       so RiptOPL overshadows it. The opening lines name rickgaiser's Neutrino as the second game core with its
       link (github.com/rickgaiser/neutrino), and its section moves up beside BUILT ON RIPTOPL. (README done on main
       10/22: the intro, the on-board line and a credits entry right after RiptOPL's.)
-- [ ] **TESTERS** ends with "Special thanks to all the YouTube love as well: glad to help however you reach me."
+- [x] **TESTERS** ends with "Special thanks to all the YouTube love as well: glad to help however you reach me."
       (the user's words), in all 33 languages; every tester list from now on carries it (README done 10/22).
 
 ### A. All Games from a master list
 What is there now: each source keeps its own last list on itself (RIPPS2.LST, build 110), so a source's page fills
 the moment that source answers. All Games (mixsupport.c) is built only from sources that answered, so at boot it
 fills source by source, and with a Manual source it shows nothing until START is pressed.
-- [ ] **allgames.bin beside the settings** (where favourites.bin and recents.bin are: favGetNamedPath, so mc0:/RIPPS2
+- [x] **allgames.bin beside the settings** (where favourites.bin and recents.bin are: favGetNamedPath, so mc0:/RIPPS2
       or the drive Save Settings To chose; never on a game source, which is what has not answered yet). Header
       `RIPALL01`, count, FNV-1a sum; then per game: kind (PS2 ISO / VCD / CUE), source family (HDD APA, BDM by its
       driver type: usb, ata, sdc, ieee, udp; MMCE, SMB, UDPFS, HTTP), media (CD / DVD, for the icon), startup, name.
       About 50 bytes a game: 1,000 games is about 50 KB, a few hundred ms on a memory card. Written staged (a
-      `.new` file, then renamed) as favourites.bin is, on the IO worker, only when the sum changed, only once
+      `.new` file, then renamed) as favourites.bin is (built: written in place, since a memory card has no rename
+      and the lab found the `.new` copy left behind; a short or damaged file fails its sum and is not read), on the IO worker, only when the sum changed, only once
       every Auto source has answered (or 20 s after boot), never with Write Operations or Fast Cache off.
-- [ ] **Waiting rows.** The first All Games pass reads allgames.bin and shows every game at once, sorted and with
+- [x] **Waiting rows.** The first All Games pass reads allgames.bin and shows every game at once, sorted and with
       duplicates dropped by the same rules as now (mixCompare). A row whose source has not answered has no owner
       list yet (owner NULL): mixRow, mixGetImage and mixGetArtMode already skip a NULL owner, so no reader can
       reach a source through it. Its art comes when its source does.
-- [ ] **The handover.** When a source publishes its list (opl.c already queues mixRequestUpdate behind it), its
+- [x] **The handover.** When a source publishes its list (opl.c already queues mixRequestUpdate behind it), its
       waiting rows are swapped for its real ones in the one locked publish mixUpdateItemList does now (mixSema
       held only for the pointer swap, never across a device read or a wait). The cursor stays on its game:
       updateMenuFromGameList keeps the selection by startup, and waiting rows carry their startup.
-- [ ] **Rows that go.** A source's waiting rows are dropped when its list comes (anything it no longer has is gone),
-      or when it is known absent: start mode Off, no HDD (hddCheck), no card in the MMCE slot, a BDM driver type
+- [x] **Rows that go.** A source's waiting rows are dropped when its list comes (anything it no longer has is gone),
+      or when it is known absent (built: start mode Off, or started and silent for 40 s): start mode Off, no HDD (hddCheck), no card in the MMCE slot, a BDM driver type
       with no device after BDM settles, SMB failing to connect. Before that, a moved stick only changes its BDM
       slot, and rows match by family and name, never by slot.
-- [ ] **Manual sources stay instant.** RIPPS2 defaults BDM to Manual for the instant boot. With the master list,
+- [x] **Manual sources stay instant.** RIPPS2 defaults BDM to Manual for the instant boot. With the master list,
       All Games shows those games too: Cross on one starts that source (as All Games' START starts every source
       today), waits for its list, then launches. So boot stays instant and the list is still whole.
-- [ ] **Cross on a waiting row**: a message box "Starting USB Drive..." (the source's own name), Circle cancels. On
+- [x] **Cross on a waiting row**: a message box "Starting USB Drive..." (the source's own name), Circle cancels. On
       the list's arrival the game is found by name (mixOwnerId already does this) and launched; a game the
       source no longer has says so and leaves the list; 30 s with no answer says the drive did not answer.
-- [ ] **Other buttons on a waiting row**: Square shows the info page with what the master list knows (name,
+- [ ] (part, to 115) **Other buttons on a waiting row**: Delete and Hide refuse it; Square and R3 have nothing
+      of their own yet.: Square shows the info page with what the master list knows (name,
       startup, source) and "starting"; R3 (star), Triangle's rename / hide / delete say to wait for the drive (a
       toast: this is the game list, where toasts draw).
-- [ ] **Cache page lines** (carried from 113): under Fast Cache, one line per source with its saved list (games,
+- [ ] (to 115; the Cache page got SEANCE's launcher lines instead) **Cache page lines** (carried from 113): under Fast Cache, one line per source with its saved list (games,
       date) and All Games' (games, where it is kept); each support module gets an accessor for its sb_snap_t.
-- [ ] The new words in all 33 languages.
+- [x] The new words in all 33 languages (94 strings and 6 labels, 10/22).
 
 ### B. Hidden games
-- [ ] **Hide Game** in a game's Triangle options (and on All Games and Starred Games rows, proxied to the source).
+- [x] **Hide Game** in a game's Triangle options (and on All Games and Starred Games rows, proxied to the source).
       One confirm, since it can be undone. Stored **on the source**, as RIPPS2.HID beside RIPPS2.LST (the device
       root; on APA in +OPL; the SMB share root; the MMCE card), so a hidden game stays hidden when the drive goes
       to another console. Records: kind and name (the file name: two dumps of one game share a startup).
-- [ ] **Hidden everywhere** but one place: skipped when updateMenuFromGameList builds a source page (rows keep their
+- [x] **Hidden everywhere** but one place: skipped when updateMenuFromGameList builds a source page (rows keep their
       ids into the source's own array, so launch, config and art are untouched), in mixCollect and allgames.bin,
       in Starred Games and Recents (the star is kept, so Show Again brings the game back starred), in RIPFLOW and
       RIPGRID (they draw the same submenu), in Random Game (L2 + R2) and in the game count.
-- [ ] **Settings > Game Sources > Hidden Games**: every started source's hidden games under their source's name,
+- [x] **Settings > Game Sources > Hidden Games**: every started source's hidden games under their source's name,
       with size. Cross on one: Show Again, Delete (part C). Asks the Parental Lock password when one is set.
-- [ ] Rename and delete keep RIPPS2.HID in step (sbRename, part C).
+- [x] Rename and delete keep RIPPS2.HID in step (sbRename, part C).
 
 ### C. Delete a game completely and cleanly
 What is there now: OPL's delete (Triangle > Delete) unlinks only the image's files (sbDelete, ul.cfg rebuilt for
@@ -310,32 +316,64 @@ UL); its CFG, art, cheats and VMC stay behind. APA games have no delete at all (
 All Games' and Starred Games' are NULL too, and a starred game refuses ("Delete is not allowed while the game is starred.").
 RIPPS2's APA driver already takes a user partition's delete for the HDD MANAGER (build 73, hddRemove: never a __
 name, -EBUSY when open, every header write through the table fence).
-- [ ] **A removal plan first**, from one pure function (host-tested): the game and its source in, the list of
+- [x] **A removal plan first**, from one pure function (host-tested): the game and its source in, the list of
       what goes and what stays out, with sizes. On BDM, MMCE, SMB and UDPFS: every part of the image (sbDelete's
       paths, the browse subfolder included), ul.cfg rebuilt for a UL game; CFG/<startup>.cfg; ART/<startup>_*
       (COV, COV2, ICO, LAB, LGO, BG, SCR, SCR2 to SCR9); CHT/<startup>.cht. On APA: the game's partition (PP.*)
       through hddRemove, then its CFG, art and cheats inside +OPL (files in the PFS; the +OPL partition itself is
       never touched). PS1: the VCD (POPS) or the game's EMBER/games/<Title> folder.
-- [ ] **Kept unless ticked**: the game's VMC (it holds saves; named in its CFG), POPSTARTER's saves folder
-      (POPS/<name>/), Ember's saves (where Ember keeps them: to check), RIPSHOT's MEDIA/<title> shots. A CFG or art
+- [x] **Kept unless ticked**: the game's VMC (it holds saves; named in its CFG), POPSTARTER's saves folder
+      (POPS/<name>/), Ember's saves (where Ember keeps them: to check), RIPSHOT's MEDIA/<title> shots (built as one
+      question, "Delete its saves and RIPSHOT pictures too? No keeps them."). A CFG or art
       another copy of the same startup on that source still uses is kept, and the screen says why.
-- [ ] **Two screens, as the HDD MANAGER**: what goes, what stays, and the space freed; then a last screen only START
+- [x] **Two screens, as the HDD MANAGER**: what goes, what stays, and the space freed; then a last screen only START
       gets past (REMOVE FOR GOOD). Never with Write Operations off; Parental Lock asked first; refused for the
       partition RIPPS2 runs from or keeps its settings on (hmKept's rules) and for any __ partition.
-- [ ] **Order**: the image first (a cut-off delete leaves stray CFG or art, never a half game listed), then the rest;
+- [x] **Order**: the image first (a cut-off delete leaves stray CFG or art, never a half game listed), then the rest;
       APA under ioBlockOps, then hddPartitionsChanged so games.bin is rebuilt. The star and the Recents entry go,
       RIPPS2.HID drops it, the source rescans (RIPPS2.LST follows), All Games and allgames.bin follow.
-- [ ] **The APA table checked before any partition goes** (Berion's warning; the HDD MANAGER's remove too): a
+- [x] **The APA table checked before any partition goes** (Berion's warning; the HDD MANAGER's remove too): a
       read-only walk of the whole chain from __mbr: every header's magic and checksum, each start equal to the
       last one's next and each prev pointing back, every partition inside the disk (start + length within
       HDIOC_TOTALSECTOR), no length above what this disk allows (apaGetPartitionMax of its own size) or off its
       power-of-two alignment, and the chain closing at 0. Anything off: no delete, and the screen says the table
       does not fit this disk (written from an image of another size?) and to repair it on a PC first. The walk
-      runs again after the delete, and the result goes into REMOVED.TXT.
-- [ ] **Delete on All Games and Starred Games** proxies to the source row found by name at that moment
+      runs again after the delete, and the result goes into REMOVED.TXT. (The HDD MANAGER's remove runs the same
+      walk first since 10/22 evening.)
+- [x] **Delete on All Games and Starred Games** proxies to the source row found by name at that moment
       (mixOwnerId), never the stored id; refused on a waiting row.
-- [ ] **A receipt**: mc0:/RIPPS2/REMOVED.TXT gets what was removed, from where, and the bytes freed (as LAUNCH.TXT
+- [x] **A receipt**: mc0:/RIPPS2/REMOVED.TXT gets what was removed, from where, and the bytes freed (as LAUNCH.TXT
       reports a launch), and the list shows "REMOVED <title>: 3.1 GB FREED".
+
+### E. SEANCE: the launchers RIPPS2 does not carry, found and remembered (the user 10/22)
+- [x] **ripps2seance.c**: POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino searched on the drives RIPPS2
+      has started (never loading a driver to look), skipping the game and art folders; kept by drive kind (usb,
+      ata, mx4sio, ilink, mmce, hdd, smb) in `launchers.txt` beside the settings, so a stick in another slot still
+      matches. Every launch that finds one notes it.
+- [x] **Used at launch**: POPSTARTER after Settings' path and the game's drive, before the cards; RIPPOPS copies the
+      POPS files from the folder found; Neutrino after the cards, then a search, and RIPPS2's own copy offered once,
+      only when none is found anywhere; Ember and its BIOS copied beside the games by a pre-flight before the
+      launch (START), so RiptOPL's launch legs and guiMsgBoxMissing stay as upstream has them (their host
+      harnesses copy them word for word: a weak seanceHook is NULL there).
+- [x] **Settings > Game Sources > Cache**: five Found / Not found lines and **Look now** (no on/off: it only helps).
+- [x] Lab 10/22: "knows 5 of the 5" on the 114 disk, each at its odd path; Cache rows and Look now.
+
+### F. STATUS: the drives before the homebrew (the user 10/22)
+- [x] **DRIVES** first: every started drive by kind, the internal HDD (APA)'s free space, each memory card's free
+      KB (asked twice after START DRIVES: a changed card answers short once), the MMCE card, what is off; **START
+      EVERY DRIVE**. Then **LAUNCHERS** (one line each, LOOK FOR THEM starting every drive first on Cross), then the
+      homebrew and BIBLE. The subtitle reads Drives, launchers and homebrew (10/22 evening).
+
+### G. RIPPS2-lite.elf and the font trim (FifthFox's 2 MB)
+- [x] **RIPPS2-lite.elf** (RIPPS2_LITE=1, its own CI artifact): no BIBLE KELFs, no Neutrino tar, no OPL background;
+      under 2 MB. It says where Neutrino goes and that BIBLE installs once from the full ELF. Lab 10/22: boots,
+      START menu, STATUS with DRIVES and LAUNCHERS.
+- [x] **FreeType** started with RIPPS2's own module list (TrueType, sfnt, autofit, smooth; CFF and its helpers in
+      the full ELF) and freed without ftinit.c, so Type 1, CID, Type 42, PFR, BDF, PCF, WinFNT, SDF, SVG and the mono
+      rasteriser leave the link. **strip_fonts.py** strips the compiled-in fonts (render-checked identical).
+- Where the rest of the size is: the fonts are about 75 KB packed, and the packer is near LZMA's best on what is
+  left; the big wins were the carried blobs (lite) and FreeType. Next candidate: libjpeg-turbo's 12 and 16-bit
+  decoders.
 
 ### D. Compress on hide (ISO to ZSO): the user's call before any code
 The user's idea (10/22): hiding can compress the game into the hidden list; Show Again un-compresses when the
@@ -355,19 +393,23 @@ the lab at EECycleRate -3, then on a console) and decide compression for 115, in
 the time it will take shown before it starts and the game's core checked first.
 
 ### Tests and lab
-- [ ] Host (test_ripps2_build114.py, the module compiled with -DRIPPS2_MIX_HOST_TEST as earlier builds do):
+- [x] Host (test_ripps2_build114.py, the module compiled with -DRIPPS2_MIX_HOST_TEST as earlier builds do):
       allgames.bin round trip; a short, corrupt or oversized file is ignored, never half read; the merge of
       waiting and live rows (live replaces, absent drops, Manual stays, cursor key kept); RIPPS2.HID filtering;
       the removal planner for every format and source (nothing outside the source's prefix, shared CFG kept,
       __ and kept partitions refused, APA = partition + PFS files).
-- [ ] Lab (ps2bg, hidden): reel HDD with allgames.bin, grabs at 3 s (every game listed before the drive answers)
+- [x] Lab (ps2bg, hidden, 10/22): boot 1 writes allgames.bin on the card; boot 2 on a fresh card with only that
+      file and BDM on Manual lists the game before its drive answers; Hide, Hidden Games and Show Again; delete
+      on exFAT (ISO, CFG, art, cheats gone, VMC kept, read back with exfat_ls) and on a scratch APA disk (PP.TEST.HDL
+      gone, the chain in order: apa_ls and REMOVED.TXT agree); the lite ELF's smoke run. Not in the lab: Cross on a
+      waiting row (the lab's games are dummies, so nothing is launched there). The plan was: reel HDD with allgames.bin, grabs at 3 s (every game listed before the drive answers)
       and after the handover (same cursor); BDM on Manual: rows listed, Cross starts the drive and launches;
       hide and Show Again on exFAT (RIPPS2.HID read back with the exFAT tools); delete on a scratch copy of
       ripps2-apa.raw, then pfsshell: the PP partition gone, +OPL whole, the CFG and art gone from it.
 - [ ] Consoles (the Discord test list): MMCE with a big library (lukeatmynose's 180 games), SMB, a real APA
       delete (after a backup), boot to a whole All Games with every source on Manual.
 
-### Decisions for the user
+### Decisions (taken 10/22 as recommended, the user to review in the recap)
 1. Compression (part D): measure first and decide for 115 (recommended), or build it into 114.
 2. The hidden list on each drive (travels with it; recommended) or one list in the settings.
 3. Delete keeps saves (VMC, POPS saves) and RIPSHOT shots unless ticked (recommended), or removes everything.
@@ -379,6 +421,17 @@ the time it will take shown before it starts and the game's core checked first.
    keep 114 for the games and merge as 115.
 5. Size: RIPPS2-lite.elf beside the full ELF (recommended: keeps Neutrino and BIBLE in the full one, as decided),
    or Neutrino and BIBLE found rather than carried in the one ELF.
+
+Taken: 1. measure first, ZSO decided for 115 (no code in 114); 2. the hidden list on each drive (RIPPS2.HID);
+3. saves and RIPSHOT pictures kept unless the one question gets Yes; 4. merged first, in 114 (57c45b4, so the
+iLink fixes reach testers now); 5. RIPPS2-lite.elf beside the full ELF.
+
+### Console checks the lab cannot make
+- IGR on the merged VBLANK path (#984) on a real game; the ee_core stack (0xC80, as v1.1.3).
+- FifthFox's iLink: Neutrino and POPSTARTER from the HD-338 (the #1018 fixes).
+- A real APA delete after a backup, and the HDD MANAGER refusing a cloned table of another size.
+- Boot with every source on Manual to a whole All Games, then Cross on a waiting row: the drive starts, the game launches.
+- MMCE with a big library (lukeatmynose's 180 games) for the master list's size and speed.
 
 ## Skipped
 - **RIPCON** (format conversion, as OrbitOPL Toolbox does on a PC): not done on PS2 hardware yet, likely failure
