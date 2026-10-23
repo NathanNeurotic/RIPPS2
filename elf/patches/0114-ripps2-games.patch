@@ -85215,7 +85215,7 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..4ad84c0 100644
+index 3dc8c13..fb440ae 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
 @@ -223,6 +223,113 @@ int ioDescribeRunning(char *out, int size)
@@ -85332,7 +85332,7 @@ index 3dc8c13..4ad84c0 100644
  // RIPPS2: is the worker inside a job right now
  int ioWorkerBusy(void)
  {
-@@ -322,7 +429,22 @@ static void ioWorkerThread(void *arg)
+@@ -322,7 +429,21 @@ static void ioWorkerThread(void *arg)
              gRunSince = clock();
              gRunData = req->data;
              gRunType = req->type;
@@ -85341,8 +85341,7 @@ index 3dc8c13..4ad84c0 100644
 +            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && clock() < gGuardTestUntil &&
 +                *(int *)req->data != APP_MODE && *(int *)req->data != FAV_MODE) {
 +                gGuardTestUntil = 0;
-+                printf("RIPPS2_GUARD_TEST: the list read of mode %d held 8 s
-+", *(int *)req->data);
++                printf("RIPPS2_GUARD_TEST: the list read of mode %d held 8 s\n", *(int *)req->data);
 +                DelayThread(8 * 1000 * 1000);
 +            }
 +#endif
@@ -85355,7 +85354,7 @@ index 3dc8c13..4ad84c0 100644
              gRunType = 0;
  
              // lock the queue tip as well now
-@@ -735,6 +857,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -735,6 +856,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
@@ -87240,10 +87239,10 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..b293f7b
+index 0000000..763af24
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1136 @@
+@@ -0,0 +1,1135 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -88006,8 +88005,7 @@ index 0000000..b293f7b
 +        int ty = 0, se = 0;
 +        void *da = NULL;
 +        if (ioRunningJob(&ty, &da, &se))
-+            printf("RIPPS2_GUARD_TEST: the guard waits on job type %d, mode %d; estimate %d ms
-+", ty, da != NULL ? *(int *)da : -1, est);
++            printf("RIPPS2_GUARD_TEST: the guard waits on job type %d, mode %d; estimate %d ms\n", ty, da != NULL ? *(int *)da : -1, est);
 +    }
 +#endif
 +    for (;;) {
