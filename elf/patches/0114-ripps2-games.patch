@@ -10419,7 +10419,7 @@ z1|)Oi{SJpAnfX78HAufmQ)Io!Mv-BWEslJQT162N85L=XY!}%fvP)#Q$R3fsA~P&i
 Hspb7&p}~h#
 
 diff --git a/Makefile b/Makefile
-index 31e61cd..1d81518 100644
+index 31e61cd..b1be2f3 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -138,9 +138,9 @@ ifneq ($(GIT_TAG),latest)
@@ -10452,7 +10452,17 @@ index 31e61cd..1d81518 100644
  
  TRANSLATIONS = Albanian Arabic Bulgarian Cebuano Croatian Czech Danish Dutch Filipino French \
  	Galician German Greek Hungarian Indonesian Italian Japanese Korean Laotian Persian Polish Portuguese \
-@@ -436,7 +436,7 @@ ifeq ($(RETROACHIEVEMENTS),1)
+@@ -340,6 +340,9 @@ ifeq ($(RIPPS2_PERF_HUD),1)
+   EE_CFLAGS += -DRIPPS2_PERF_HUD=1
+ endif
+ 
++ifeq ($(RIPPS2_GUARD_TEST),1)
++  EE_CFLAGS += -DRIPPS2_GUARD_TEST
++endif
+ ifeq ($(RIPPS2_IO_STALL_TEST),1)
+   EE_CFLAGS += -DRIPPS2_IO_STALL_TEST
+ endif
+@@ -436,7 +439,7 @@ ifeq ($(RETROACHIEVEMENTS),1)
    RATLS_ROOTS = gtsr1 gtsr2 gtsr3 gtsr4 isrgrootx1 isrgrootx2
    EE_OBJS += $(MBEDTLS_OBJS) $(RATLS_ROOTS:%=$(EE_OBJS_DIR)ratls_root_%.o)
  endif
@@ -10461,7 +10471,7 @@ index 31e61cd..1d81518 100644
  
  # To help linking getting rid off unused functions and data
  EE_CFLAGS += -fdata-sections -ffunction-sections
-@@ -544,6 +544,8 @@ clean:	download_lwNBD
+@@ -544,6 +547,8 @@ clean:	download_lwNBD
  	$(MAKE) -C modules/network/httpclient clean
  	echo " -bdm"
  	$(MAKE) -C modules/bdm clean
@@ -10470,7 +10480,7 @@ index 31e61cd..1d81518 100644
  	echo " -atad (ata_bd)"
  	$(MAKE) -C modules/hdd/atad clean
  	echo " -xhdd"
-@@ -589,8 +591,9 @@ realclean: clean
+@@ -589,8 +594,9 @@ realclean: clean
  
  rebuild: clean all
  
@@ -10481,7 +10491,7 @@ index 31e61cd..1d81518 100644
  
  sim: $(EE_BIN_PACKED)
  	PCSX2 --elf=$(PWD)/$< --nodisc --nogui
-@@ -898,12 +901,25 @@ $(EE_ASM_DIR)bdmfs_fatfs.c: $(PS2SDK)/iop/irx/bdmfs_fatfs.irx | $(EE_ASM_DIR)
+@@ -898,12 +904,25 @@ $(EE_ASM_DIR)bdmfs_fatfs.c: $(PS2SDK)/iop/irx/bdmfs_fatfs.irx | $(EE_ASM_DIR)
  $(EE_ASM_DIR)iLinkman.c: $(PS2SDK)/iop/irx/iLinkman.irx | $(EE_ASM_DIR)
  	$(BIN2C) $< $@ $(*F)_irx
  
@@ -10508,7 +10518,7 @@ index 31e61cd..1d81518 100644
  	$(BIN2C) $< $@ $(*F)_irx
  
  $(EE_ASM_DIR)mx4sio_bd.c: $(PS2SDK)/iop/irx/mx4sio_bd.irx | $(EE_ASM_DIR)
-@@ -913,7 +929,7 @@ else
+@@ -913,7 +932,7 @@ else
  $(EE_ASM_DIR)usbmass_bd.c: $(PS2SDK)/iop/irx/usbmass_bd_mini.irx | $(EE_ASM_DIR)
  	$(BIN2C) $< $@ $(*F)_irx
  
@@ -10517,7 +10527,7 @@ index 31e61cd..1d81518 100644
  	$(BIN2C) $< $@ $(*F)_irx
  
  $(EE_ASM_DIR)mx4sio_bd.c: $(PS2SDK)/iop/irx/mx4sio_bd_mini.irx | $(EE_ASM_DIR)
-@@ -1276,11 +1292,9 @@ $(EE_ASM_DIR)ripps2_sleekcase.c: misc/ripps2_sleekcase.ttf | $(EE_ASM_DIR)
+@@ -1276,11 +1295,9 @@ $(EE_ASM_DIR)ripps2_sleekcase.c: misc/ripps2_sleekcase.ttf | $(EE_ASM_DIR)
  $(EE_ASM_DIR)neutrino_tgz.c: misc/neutrino.tar.gz | $(EE_ASM_DIR)
  	$(BIN2C) $< $@ neutrino_tgz
  
@@ -10532,7 +10542,7 @@ index 31e61cd..1d81518 100644
  	$(BIN2C) $< $@ $(*F)_raw
  
  # RIPPS2: a flagged 1 in the main font's weight (misc/ripps2_one.ttf); fntsys draws Planet N's 1 from it
-@@ -1364,6 +1378,7 @@ INTERNAL_LANGUAGE_H = include/lang_autogen.h
+@@ -1364,6 +1381,7 @@ INTERNAL_LANGUAGE_H = include/lang_autogen.h
  LANG_COMPILER = tools/lang_compiler.py
  
  languages: | download_lng $(ENGLISH_TEMPLATE_YML) $(TRANSLATIONS_YML) $(ENGLISH_LNG) $(TRANSLATIONS_LNG) $(INTERNAL_LANGUAGE_C) $(INTERNAL_LANGUAGE_H)
@@ -85150,7 +85160,7 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..8d2ae01 100644
+index 3dc8c13..001531d 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
 @@ -223,6 +223,102 @@ int ioDescribeRunning(char *out, int size)
@@ -85256,9 +85266,15 @@ index 3dc8c13..8d2ae01 100644
  // RIPPS2: is the worker inside a job right now
  int ioWorkerBusy(void)
  {
-@@ -323,6 +419,11 @@ static void ioWorkerThread(void *arg)
+@@ -322,7 +418,17 @@ static void ioWorkerThread(void *arg)
+             gRunSince = clock();
              gRunData = req->data;
              gRunType = req->type;
++#ifdef RIPPS2_GUARD_TEST
++            // a test build (build 114): each list read takes 8 s more, so the launch guard's panel shows and is filmed
++            if (req->type == IO_MENU_UPDATE_DEFFERED)
++                DelayThread(8 * 1000 * 1000);
++#endif
              ioProcessRequest(req);
 +            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL && !gIoCancelScans) { // build 114: timed
 +                int m = *(int *)req->data;
@@ -85268,7 +85284,7 @@ index 3dc8c13..8d2ae01 100644
              gRunType = 0;
  
              // lock the queue tip as well now
-@@ -735,6 +836,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -735,6 +841,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
