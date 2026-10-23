@@ -239,6 +239,10 @@ if m_ is None or min(float(x.strip().rstrip('f')) for x in m_.group(1).split(','
 if '#define RIPPS2_PALETTE_COUNT 11' not in rd('include/ripps2.h') or 'if (!gRipps2TintOn)' not in rd('include/ripps2tint.h'):
     fail.append('ripps2.h / ripps2tint.h: eleven Color Themes, the tint on whenever a theme, Custom or a sweep draws')
 need(dia, (('struct UIItem diaSweepConfig[]', 'the sweep page'), ('UICFG_RIPPS2_PALETTE_COLOR', 'the Theme Color picker')), 'dialogs.c')
+# the reel's take: the Name row said "Rainbow 2" before anything was changed; the copy's name comes at the save
+sw_ = body(g, 'static void guiShowSweepConfig(void)')
+if '"%s 2", _t(was.name)); // the copy' not in sw_ or 'from <= RIPPS2_SWEEP_BUILTIN ? _t(was.name) : was.name' not in sw_:
+    fail.append("gui.c: Sweep Colors shows the sweep's own name; a changed built-in is saved as '<name> 2'")
 
 # ---- fonts (the font audit's answers)
 need(rd('src/fntsys.c'), (('void fntSetWeight(int id, int weight)', 'a weight for any font'), ('FT_Set_Var_Design_Coordinates(', 'a variable face takes it'),
