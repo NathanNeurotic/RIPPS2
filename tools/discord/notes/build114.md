@@ -28,7 +28,7 @@
 - **Hide Game**, then Game Sources > Hidden Games > Show Again: back in every list?
 - **Delete** a test game: everything of it gone, its VMC kept when you answer No?
 - **Look now** (Game Sources > Cache): does it find your POPSTARTER, Ember and Neutrino where you keep them?
-- **One HDD**: on an exFAT internal drive, one HDD Games in Storage (no empty APA page)? On APA, still there?
+- **One HDD**: on an exFAT internal drive, one HDD Games in Storage (no empty APA page), and still there with BDM Devices Start Mode Off? On APA, still there?
 - **Game Sources and Interface**: everything on one screen, OK visible without scrolling?
 - **Colors and Text**: Tangerine, Flamingo, Turquoise, Moonlight; then Custom and your own Theme Color?
 - **Color Sweep Rainbow**: smooth, never flashing, on your TV (480i, 720p, 1080i)?
