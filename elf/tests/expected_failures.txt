@@ -24,3 +24,4 @@ test_ingame_freeze_diag.py the VBLANK handler also opens RIPPS2's in-game menu, 
 test_sfx_oneshot_cut.py RIPPS2's own voice allocator (build 95: sfxStart / voiceMute, the newest press mutes the old one) replaces RiptOPL's one-shot voice pool for #504 (build 114 merge)
 test_error_dialog_render.py the error box draws RIPPS2's START option (guiMsgBoxStartOption) and its pillars backdrop (guiDrawStatusBackdrop), which the harness does not stub (build 114 merge)
 test_wiki_sync.py RiptOPL's wiki tool (needs bs4); RIPPS2 does not publish that wiki (build 114 merge)
+test_net_protocol_pick.py Game Sources has no Protocol row of its own (build 114, the settings audit): the Network page alone picks the protocol and its Access, so Game Sources reads no UDPFS Access

@@ -26737,7 +26737,7 @@ index 10e6306..c65f5be 100644
 +  PCCF_UNSUPPORTED_GAME: Hiện CF chỉ hỗ trợ trò chơi PS2 gốc. VMC trên CF, nạp PS1 và thành tích qua mạng không dùng được.
 +  HINT_ENABLE_DVR: Tìm ISO DESR DVR thử nghiệm. Cần bật nguồn HDD; chạy trò chơi cần Neutrino bên ngoài có hỗ trợ DVR.
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index e2e218a..308062a 100644
+index e2e218a..6ba711c 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -818,7 +818,7 @@ gui_strings:
@@ -26745,7 +26745,7 @@ index e2e218a..308062a 100644
    string: Show only Disc 1 of a multi-disc PS1 game in the device lists (POPSLoader style). Hides files named (Disc 2), (CD 2), etc. All discs stay on the card for in-game swapping; starred games are not filtered.
  - label: HINT_VCD_HIDE_GAMEID
 -  string: Cosmetic only -- hide a leading game-ID prefix (e.g. SLUS_005.51.) from PS1/VCD list names. Names without an ID are shown as-is. Does not change launch, cover art, or stars.
-+  string: Cosmetic only: hides a leading game ID prefix (e.g. SLUS_005.51.) from PS1/VCD list names. Names without an ID are shown as they are. Launch, cover art and stars stay the same.
++  string: "Cosmetic only: hides a leading game ID prefix (e.g. SLUS_005.51.) from PS1/VCD list names. Names without an ID are shown as they are. Launch, cover art and stars stay the same."
  - label: HINT_VCD_SHOW_PP_POPS
    string: HDD only -- list one-game partitions named PP.<ID>.POPS.<name> (e.g. PP.SCES-01492.POPS.MEDIEVIL) as PS1 games. Enumeration only; launch is unchanged. Other PP.* partitions (apps, PS2 games) stay hidden.
  - label: HINT_VMC_SLOT_DISABLE
@@ -26841,7 +26841,7 @@ index e2e218a..308062a 100644
 +  string: "The games hidden with Hide Game, on the started drives. Show one again, or delete it. Each drive keeps its own list."
 +
 +- label: HINT_RIPPS2_BDM_DEVICES
-+  string: "The drives BDM reads games from: the internal HDD (exFAT), USB, MX4SIO, a PC Card CF, a DESR's DVR drive and iLink."
++  string: "The drives BDM reads games from: USB, MX4SIO, a PC Card CF, a DESR's DVR drive and iLink. The internal HDD follows HDD Start Mode."
 +
 +- label: HINT_RIPPS2_SCREEN
 +  string: "The menu's picture: its video mode, widescreen, where it sits on the TV (H-POS, V-POS) and overscan."
@@ -89283,7 +89283,7 @@ index f2c48c4..6168630 100644
              if (rescan)
                  stScan();
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 02b03e6..f07e6ce 100644
+index 02b03e6..acb44eb 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -143,9 +143,12 @@ static int catSwapMode(void)
@@ -89318,7 +89318,7 @@ index 02b03e6..f07e6ce 100644
 +    {"RIPPS2", 0.0f, 1.0f, 0.0f}, {"Ember", 150.0f, 1.6f, 0.0f}, {"Blood", 130.0f, 1.8f, 0.0f},
 +    {"Ectoplasm", 250.0f, 1.2f, 0.0f}, {"Amethyst", 40.0f, 1.1f, 0.0f}, {"Bone", 180.0f, 0.25f, 0.0f},
 +    {"Tangerine", 172.0f, 1.7f, 0.05f}, {"Flamingo", 112.0f, 0.85f, 0.18f}, {"Turquoise", 318.0f, 1.15f, 0.04f},
-+    {"Moonlight", 0.0f, 0.10f, 0.55f}, {"Custom", 0.0f, 1.0f, 0.0f}};
++    {"Moonlight", 0.0f, 0.10f, 0.55f}, {N_("Custom"), 0.0f, 1.0f, 0.0f}}; // the names stay English; Custom is a word
 +
 +int gRipps2TintOn = 0;
 +unsigned char gRipps2CustomColor[3] = {0xFF, 0x83, 0xAF}; // a Flamingo pink to start from
