@@ -14482,7 +14482,7 @@ index ccda44b..3797788 100644
  void rmStartFrame(void);
  
 diff --git a/include/ripps2.h b/include/ripps2.h
-index a10c426..749c076 100644
+index a10c426..a99f25f 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -87,7 +87,8 @@ enum { RIPPS2_SRC_POP = RIPPS2_SHOW_COUNT, RIPPS2_SRC_COUNT };
@@ -14535,13 +14535,14 @@ index a10c426..749c076 100644
  void ripps2HintsSaveConfig(config_set_t *config);
  int ripps2EditFile(const char *path);                              // 1 when it saved
  int ripps2EditMetadata(config_set_t *config, const char *gameName); // 1 when SAVE was chosen (values set, not written)
-@@ -265,12 +292,20 @@ void ripps2PlayLaunchSequence(void); // pillars only, light-up and flash; the la
+@@ -265,12 +292,21 @@ void ripps2PlayLaunchSequence(void); // pillars only, light-up and flash; the la
  int ripps2LaunchScreenHeld(void);    // that frame is up: the teardown must not draw over it
  void ripps2LaunchPump(void);         // build 70: one more frame of it, with the loading mark, from the teardown's waits
  void ripps2LaunchAborted(void);      // the launch failed and returned to the menu
 +int ripps2LaunchGuard(void);         // build 114: 1 to start; 0 when the user backed out (ripps2games.c)
 +void ripps2NotchRing(int cx, int cy, float p, int a); // build 114: RIPDISC's notches (ripps2disc.c)
 +void ripps2HintPairA(int iconA, const char *a, int iconB, const char *b, int y, int alpha);
++void ripps2HintOneA(int icon, const char *a, int y, int alpha); // build 114: one hint, centred
 +int ripps2ThemePanel(const char **names, int cur); // build 114: the theme list (SELECT held, Hold SELECT: List)
  int ripps2LaunchDiscFrame(void);     // build 91: one frame of the field with the launch disc on it; 0 when no disc is armed
  
@@ -14558,10 +14559,10 @@ index a10c426..749c076 100644
  void ripps2LaunchDiscArmGeneric(void);                             // a disc with no art (Launch Disc, DVD, a VCD)
 diff --git a/include/ripps2games.h b/include/ripps2games.h
 new file mode 100644
-index 0000000..e5e00d4
+index 0000000..600e345
 --- /dev/null
 +++ b/include/ripps2games.h
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,20 @@
 +#ifndef __RIPPS2_GAMES_H
 +#define __RIPPS2_GAMES_H
 +
@@ -14578,6 +14579,8 @@ index 0000000..e5e00d4
 +void ripps2HiddenGames(void);                               // Settings > Game Sources > Hidden Games
 +void ripps2LastRites(item_list_t *support, int id);         // the game options' Delete, every source but Apps
 +int ripps2ApaCheck(char *why, int whySize);                 // 1: the APA table fits this disk (why: what does not)
++int ripps2PackKind(item_list_t *support, int id);           // build 114: 1 an ISO to compress, 2 a ZSO to make an ISO, 0 neither
++void ripps2PackGame(item_list_t *support, int id);          // the game options' Compress to ZSO / Uncompress to ISO
 +
 +#endif
 diff --git a/include/ripps2seance.h b/include/ripps2seance.h
@@ -26784,7 +26787,7 @@ index 10e6306..c65f5be 100644
 +  PCCF_UNSUPPORTED_GAME: Hiện CF chỉ hỗ trợ trò chơi PS2 gốc. VMC trên CF, nạp PS1 và thành tích qua mạng không dùng được.
 +  HINT_ENABLE_DVR: Tìm ISO DESR DVR thử nghiệm. Cần bật nguồn HDD; chạy trò chơi cần Neutrino bên ngoài có hỗ trợ DVR.
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index e2e218a..8b86673 100644
+index e2e218a..aef6bd1 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -818,7 +818,7 @@ gui_strings:
@@ -26805,7 +26808,7 @@ index e2e218a..8b86673 100644
  - label: HINT_UDPFS_ACCESS
    string: "UDPFS only. Files reads loose ISOs from the server's games folder; IMG reads a disk image as a drive. SMB and HTTP always use Files, UDPBD always IMG."
  - label: HINT_SMB_VERSION
-@@ -2076,3 +2076,127 @@ gui_strings:
+@@ -2076,3 +2076,129 @@ gui_strings:
  
  - label: HINT_ENABLE_DVR
    string: "Experimental DESR DVR ISO discovery. Requires HDD source enabled; game launch needs external DVR-capable Neutrino."
@@ -26889,6 +26892,8 @@ index e2e218a..8b86673 100644
 +
 +- label: RIPPS2_HIDE_GAME
 +  string: "Hide Game"
++- label: RIPPS2_HIDE_COMPRESS
++  string: "Hide Game and Compression"
 +
 +- label: RIPPS2_HIDDEN_GAMES
 +  string: "Hidden Games"
@@ -86029,7 +86034,7 @@ index 6bb34ce..2b0a704 100644
                      thmSetGuiValue(thmGetGuiValue(), 1);
                      bgmUnMute();
 diff --git a/src/menusys.c b/src/menusys.c
-index 879e0d7..b0ae062 100644
+index 879e0d7..62d4fe6 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -33,6 +33,7 @@
@@ -86063,7 +86068,7 @@ index 879e0d7..b0ae062 100644
  };
  
  // global menu variables
-@@ -246,6 +250,18 @@ static void menuRenameGame(submenu_list_t **submenu)
+@@ -246,6 +250,27 @@ static void menuRenameGame(submenu_list_t **submenu)
          guiMsgBox("NULL Support object. Please report", 0, NULL);
  }
  
@@ -86074,15 +86079,24 @@ index 879e0d7..b0ae062 100644
 +    if (!selected_item->item->current || !gEnableWrite || support == NULL)
 +        return;
 +    int id = selected_item->item->current->item.id;
++    int kind = ripps2PackKind(support, id), pick = 0; // build 114: Hide Game and Compression
++    if (kind > 0) {
++        const char *items[2] = {_l(_STR_RIPPS2_HIDE_GAME), kind == 1 ? _t("Compress to ZSO") : _t("Uncompress to ISO")};
++        if ((pick = ripps2PickList(items, 2)) < 0)
++            return; // backed out: the options stay open
++    }
 +    guiSwitchScreen(GUI_SCREEN_MAIN);
 +    submenuDestroy(submenu);
-+    ripps2ShroudHide(support, id);
++    if (pick == 1)
++        ripps2PackGame(support, id);
++    else
++        ripps2ShroudHide(support, id);
 +}
 +
  static void menuDeleteGame(submenu_list_t **submenu)
  {
      if (!selected_item->item->current)
-@@ -256,6 +272,17 @@ static void menuDeleteGame(submenu_list_t **submenu)
+@@ -256,6 +281,17 @@ static void menuDeleteGame(submenu_list_t **submenu)
  
      item_list_t *support = selected_item->item->userdata;
  
@@ -86100,7 +86114,7 @@ index 879e0d7..b0ae062 100644
      if (support && support->mode == FAV_MODE) {
          char text[128];
          snprintf(text, sizeof(text), _l(_STR_FAV_MSG), _l(_STR_DELETE));
-@@ -800,13 +827,14 @@ void menuInitGameMenu(item_list_t *support)
+@@ -800,13 +836,17 @@ void menuInitGameMenu(item_list_t *support)
          int fav = support != NULL && support->mode == FAV_MODE;
          if (fav || (support != NULL && support->itemRename != NULL && support->mode != HDD_MODE))
              submenuAppendItem(&gameMenu, -1, NULL, GAME_RENAME_GAME, _STR_RENAME);
@@ -86108,7 +86122,10 @@ index 879e0d7..b0ae062 100644
 +        // RIPPS2 build 114: LAST RITES deletes on every source but Apps (the APA HDD by its partition), and Hide Game
 +        if (support != NULL && support->mode != APP_MODE) {
              submenuAppendItem(&gameMenu, -1, NULL, GAME_DELETE_GAME, _STR_DELETE);
-+            submenuAppendItem(&gameMenu, -1, NULL, GAME_HIDE_GAME, _STR_RIPPS2_HIDE_GAME);
++            // build 114 (the user, 10/23): an ISO or ZSO the game's drive can rewrite: Hide Game and Compression, a pick of
++            // the two (compression is experimental, and the panel says so)
++            int packable = selected_item != NULL && selected_item->item->current != NULL && ripps2PackKind(support, selected_item->item->current->item.id) > 0;
++            submenuAppendItem(&gameMenu, -1, NULL, GAME_HIDE_GAME, packable ? _STR_RIPPS2_HIDE_COMPRESS : _STR_RIPPS2_HIDE_GAME);
 +        }
      }
  #ifdef RETROACHIEVEMENTS
@@ -86119,7 +86136,7 @@ index 879e0d7..b0ae062 100644
  #endif
  
      gameMenuCurrent = gameMenu;
-@@ -842,17 +870,30 @@ void menuInitVcdMenu(int isEmber)
+@@ -842,17 +882,30 @@ void menuInitVcdMenu(int isEmber)
      if (isEmber)
          submenuAppendItem(&appMenu, -1, NULL, APP_EMBER_GAME_SETTINGS, _STR_EMBER_GAME_SETTINGS);
      submenuAppendItem(&appMenu, -1, NULL, APP_RENAME, _STR_RENAME);
@@ -86155,7 +86172,7 @@ index 879e0d7..b0ae062 100644
  // -------------------------------------------------------------------------------------------
  // ---------------------------------------- Menu manipulation --------------------------------
  // -------------------------------------------------------------------------------------------
-@@ -1377,7 +1418,10 @@ static void menuFolderResetLeaving(struct menu_list *leaving)
+@@ -1377,7 +1430,10 @@ static void menuFolderResetLeaving(struct menu_list *leaving)
  
  static void menuNextH()
  {
@@ -86167,7 +86184,7 @@ index 879e0d7..b0ae062 100644
      while (next != NULL && next->item->visible == 0)
          next = next->next;
  
-@@ -1386,13 +1430,19 @@ static void menuNextH()
+@@ -1386,13 +1442,19 @@ static void menuNextH()
          menuFolderResetLeaving(selected_item);
          selected_item = next;
          itemConfigId = -1;
@@ -86189,7 +86206,7 @@ index 879e0d7..b0ae062 100644
      while (prev != NULL && prev->item->visible == 0)
          prev = prev->prev;
  
-@@ -1400,8 +1450,12 @@ static void menuPrevH()
+@@ -1400,8 +1462,12 @@ static void menuPrevH()
          menuFolderResetLeaving(selected_item);
          selected_item = prev;
          itemConfigId = -1;
@@ -86203,7 +86220,7 @@ index 879e0d7..b0ae062 100644
  }
  
  static void menuFirstPage()
-@@ -2423,7 +2477,9 @@ void menuHandleInputMain()
+@@ -2423,7 +2489,9 @@ void menuHandleInputMain()
      }
  
      // RIPPS2 build 79: SELECT. A press refreshes the list when it is let go (within 4.2 s); held 4.2 s it
@@ -86214,7 +86231,7 @@ index 879e0d7..b0ae062 100644
      {
          static clock_t selectSince = 0;
          static int selectHeld = 0, selectCycled = 0;
-@@ -2432,9 +2488,12 @@ void menuHandleInputMain()
+@@ -2432,9 +2500,12 @@ void menuHandleInputMain()
              selectCycled = 0;
              selectSince = clock();
          } else if (selectHeld && getKeyPressed(KEY_SELECT)) {
@@ -86229,7 +86246,7 @@ index 879e0d7..b0ae062 100644
              }
          } else if (selectHeld) {
              selectHeld = 0;
-@@ -2718,6 +2777,10 @@ void menuHandleInputGameMenu()
+@@ -2718,6 +2789,10 @@ void menuHandleInputGameMenu()
          int menuID = gameMenuCurrent->item.id;
  
          sfxPlay(SFX_CONFIRM);
@@ -86240,7 +86257,7 @@ index 879e0d7..b0ae062 100644
  
  #ifdef RETROACHIEVEMENTS
          if (menuID == GAME_RA_CHECK) {
-@@ -2815,6 +2878,8 @@ void menuHandleInputGameMenu()
+@@ -2815,6 +2890,8 @@ void menuHandleInputGameMenu()
              menuRenameGame(&gameMenu);
          } else if (menuID == GAME_DELETE_GAME) {
              menuDeleteGame(&gameMenu);
@@ -86249,7 +86266,7 @@ index 879e0d7..b0ae062 100644
          }
          // so the exit press wont propagate twice
          readPads();
-@@ -2957,6 +3022,10 @@ void menuHandleInputAppMenu()
+@@ -2957,6 +3034,10 @@ void menuHandleInputAppMenu()
          int menuID = appMenuCurrent->item.id;
  
          sfxPlay(SFX_CONFIRM);
@@ -86260,7 +86277,7 @@ index 879e0d7..b0ae062 100644
  
          if (menuID == APP_CASE_SHAPE) { // build 102: PS1, PS2, Theme, round again
              thmAppCaseShapeSet(appCaseTitle(), (thmAppCaseShape(appCaseTitle()) + 1) % THM_APP_CASES_N);
-@@ -2966,6 +3035,8 @@ void menuHandleInputAppMenu()
+@@ -2966,6 +3047,8 @@ void menuHandleInputAppMenu()
              menuRenameGame(&appMenu);
          } else if (menuID == APP_DELETE) {
              menuDeleteGame(&appMenu);
@@ -87268,10 +87285,10 @@ index 4f99d23..668955a 100644
  
  // ---------------------------------------------------------------- orbs
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
-index fa2ee5d..df3e628 100644
+index fa2ee5d..5045ddc 100644
 --- a/src/ripps2disc.c
 +++ b/src/ripps2disc.c
-@@ -550,6 +550,33 @@ static void rdRing(int cx, int cy, float p, int a)
+@@ -550,6 +550,39 @@ static void rdRing(int cx, int cy, float p, int a)
      }
  }
  
@@ -87295,6 +87312,12 @@ index fa2ee5d..df3e628 100644
 +    }
 +}
 +
++void ripps2HintOneA(int icon, const char *a, int y, int alpha)
++{
++    int x = 320 - (rdHintWidth(a) - 18) / 2; // centred as the rip's CANCEL is
++    rdHint(icon, a, &x, y, alpha);
++}
++
 +void ripps2HintPairA(int iconA, const char *a, int iconB, const char *b, int y, int alpha)
 +{
 +    int x = 320 - (rdHintWidth(a) + rdHintWidth(b) - 18) / 2;
@@ -87305,7 +87328,7 @@ index fa2ee5d..df3e628 100644
  static void rdPage(void) // the page under every RIPDISC step: the towers and the category bar
  {
      ripps2DrawBackground();
-@@ -561,7 +588,7 @@ void ripps2DiscRipRender(void)
+@@ -561,7 +594,7 @@ void ripps2DiscRipRender(void)
  {
      double now = ripps2Seconds();
      int kind = ripps2DiscInfo(NULL, 0, NULL, 0);
@@ -87314,7 +87337,7 @@ index fa2ee5d..df3e628 100644
      float t, a;
      const char *hold = _t("HOLD");
  
-@@ -589,11 +616,11 @@ void ripps2DiscRipRender(void)
+@@ -589,11 +622,11 @@ void ripps2DiscRipRender(void)
      // build 113: the ring has its own room, the button at its centre, HOLD after it, the pair centred
      hx = 320 - (RD_RING_W + 6 + ripps2HintWidth(hold)) / 2;
      float p = rdHolding ? (float)(now - rdHoldSince) / RD_HOLD_S : 0.0f;
@@ -87464,10 +87487,10 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..8edac2e
+index 0000000..8741d2d
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1166 @@
+@@ -0,0 +1,1664 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -87534,6 +87557,9 @@ index 0000000..8edac2e
 +#include "include/menusys.h"
 +#include "include/ripps2.h"
 +#include "include/ripps2games.h"
++#include <ps2sdkapi.h>             // build 114: lseek64, a game image is bigger than 2 GB
++#include <zlib.h>                  // crc32: compression checks every piece before the original goes
++#include "modules/isofs/lz4.h"     // the LZ4 the EE build carries to read ZSOs, here to write them
 +#include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
 +#include "include/ripps2tr.h"   // _t, RIPPS2's words in the chosen language
 +
@@ -88633,6 +88659,501 @@ index 0000000..8edac2e
 +            top = sel - rows + 1;
 +    }
 +    readPads();
++}
++
++// ---- build 114: compression (the user, 10/23) ----
++// Game options > Hide Game and Compression: a PS2 game's ISO on a BDM drive or an MMCE card made a ZSO (OPL's own
++// compressed image: LZ4, 2 KB blocks, the index right after a 24-byte header), or a ZSO made an ISO again. Experimental,
++// and said so: a ZSO starts with the OPL core only (Neutrino reads no ZSO). The game's settings, art, cheats and saves
++// are kept by its ID and name, so they stay with it either way. A panel on the launch guard's frame says what it will do;
++// SELECT held fills the notches, then a last word to go ahead or back out (asked twice). The work shows the progress bar;
++// what was written is read back and checked piece by piece before anything else, and the original goes only when that
++// is asked too. The new image is <name>.zso.part (no list shows it) until it is checked; a cancel or a failure removes it.
++
++#define ZP_MAGIC 0x4F53495A // "ZISO"
++#define ZP_HEAD  24         // the header; the index (one entry a block, and the end) follows it
++#define ZP_RUN   64         // blocks read, packed and checked at a time (128 KB)
++#define ZP_IDX   16384      // index entries held before they are written back in place
++#define ZP_HOLD  4.2        // SELECT held to go on, as RIPDISC's
++
++typedef struct
++{
++    int fdIn, fdOut, align, pack, phase; // pack: ISO to ZSO; phase: 0 the work, 1 the check
++    u32 blocks, *crcs;
++    s64 inBytes, outBytes, done, work; // work: every byte read on the way, for the bar
++    double began, drawnAt;
++    char name[160];
++} zp_job_t;
++
++static int zpRow(item_list_t *support, int id, sh_row_t *r, item_list_t *view, const base_game_info_t **g)
++{
++    opl_io_module_t *mod;
++    if (support == NULL || !gEnableWrite)
++        return 0;
++    if (support->mode == MIX_MODE || support->mode == FAV_MODE) {
++        int mix = support->mode == MIX_MODE;
++        if (mix && mixIsWaiting(id))
++            return 0;
++        r->mode = mix ? mixGetItemSourceMode(id) : favGetItemSourceMode(id);
++        r->id = mix ? mixGetItemSourceId(id) : favGetItemSourceId(id);
++        r->kind = mix ? mixGetItemKind(id) : favGetItemKind(id);
++    } else {
++        int v = support->itemGetView != NULL ? support->itemGetView(support, id) : libListViewActive(support);
++        r->mode = support->mode;
++        r->id = id;
++        r->kind = v == LIB_VIEW_PS1 ? FAV_KIND_VCD : FAV_KIND_ISO;
++    }
++    if (r->kind != FAV_KIND_ISO || r->id < 0 || !((r->mode >= BDM_MODE && r->mode <= BDM_MODE_LAST) || r->mode == MMCE_MODE))
++        return 0;
++    mod = oplGetModule(r->mode);
++    if (mod == NULL || mod->support == NULL || mod->support->itemGet == NULL || mod->support->itemGetPrefix == NULL)
++        return 0;
++    *view = *mod->support;
++    view->viewOverride = ITEM_VIEW_FORCE_ISO;
++    *g = (const base_game_info_t *)view->itemGet(view, r->id);
++    if (*g == NULL || (*g)->format != GAME_FORMAT_ISO || (*g)->parts != 1)
++        return 0;
++    snprintf(r->name, sizeof(r->name), "%s", (*g)->name);
++    return 1;
++}
++
++int ripps2PackKind(item_list_t *support, int id)
++{
++    sh_row_t r;
++    item_list_t view;
++    const base_game_info_t *g;
++    if (!zpRow(support, id, &r, &view, &g))
++        return 0;
++    if (!strcasecmp(g->extension, ".iso"))
++        return 1;
++    if (!strcasecmp(g->extension, ".zso"))
++        return 2;
++    return 0;
++}
++
++// how many MB a second the drive moves, read and written together (USB 1.1 on a PS2 is slow), for the time said first
++static double zpSpeed(int mode)
++{
++    if (mode == MMCE_MODE)
++        return 1.0;
++    switch (bdmSlotDeviceType(mode - BDM_MODE)) {
++        case BDM_TYPE_ATA:
++            return 9.0;
++        case BDM_TYPE_ILINK:
++            return 2.5;
++        case BDM_TYPE_SDC:
++            return 1.4;
++        default:
++            return 0.8; // USB
++    }
++}
++
++static void zpPage(void)
++{
++    ripps2DrawBackground();
++    thmDrawBackdrop();
++    ripps2RenderCategoryBar();
++}
++
++// the panel: what it will do, SELECT held to go on (1), Circle to back out (0)
++static int zpAsk(const char *head, const char *name, const char *info)
++{
++    double t0 = ripps2Seconds(), heldSince = 0.0, now;
++    int backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    int backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
++    const char *hold = _t("HOLD");
++    for (;;) {
++        int w = 580, h = 196, x = (640 - w) / 2, y = 134, ia, hx;
++        float a, p = 0.0f;
++        GSTEXTURE *sel = thmGetTexture(SELECT_ICON);
++        now = ripps2Seconds();
++        readPads();
++        if (getKeyOn(backKey)) {
++            sfxPlay(SFX_CANCEL);
++            return 0;
++        }
++        if (getKeyPressed(KEY_SELECT)) {
++            if (heldSince == 0.0)
++                heldSince = now;
++            p = (float)((now - heldSince) / ZP_HOLD);
++            if (p >= 1.0f) {
++                sfxPlay(SFX_CONFIRM);
++                return 1;
++            }
++        } else
++            heldSince = 0.0;
++        a = (float)((now - t0) / 0.6);
++        a = a >= 1.0f ? 1.0f : a * a * (3.0f - 2.0f * a);
++        ia = (int)(0x80 * a);
++        rmStartFrame();
++        zpPage();
++        ripps2DrawHintBoxA(x, y, w, h, a);
++        fntRenderString(gTheme->fonts[4], 320, y + 26, ALIGN_CENTER, 0, 0, head, lgAlpha(LG_LIT, ia));
++        fntRenderStringFit(gTheme->fonts[5], 320, y + 54, ALIGN_CENTER, w - 40, name, lgAlpha(LG_SOFT, ia), 1);
++        // the wheel where RIPDISC's and the guard's are: SELECT at its centre, HOLD after it
++        hx = 320 - (38 + 6 + ripps2HintWidth(hold)) / 2;
++        ripps2NotchRing(hx + 19, y + 90, p, ia);
++        if (sel != NULL)
++            rmDrawPixmap(sel, hx + 9, y + 80, ALIGN_NONE, 20, 20, SCALING_RATIO, lgAlpha(LG_LIT, ia), 0);
++        ripps2HintText(hx + 44, y + 90, hold, lgAlpha(LG_SOFT, ia));
++        fntRenderStringFit(gTheme->fonts[5], 320, y + 122, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
++        fntRenderStringFit(gTheme->fonts[5], 320, y + 144, ALIGN_CENTER, w - 40, _t("Experimental: a ZSO starts with the OPL core only, not Neutrino."),
++                           lgAlpha(LG_SOFT, ia / 2), 1);
++        ripps2HintOneA(backIcon, _t("BACK"), y + 176, ia);
++        rmEndFrame();
++    }
++}
++
++// the progress bar, as RIPDISC's rip shows it; 0 when the user asked to stop (and said yes)
++static int zpTick(zp_job_t *j)
++{
++    char done[24], total[24], line[96], left[64];
++    double now = ripps2Seconds();
++    int backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    float p = j->work > 0 ? (float)((double)j->done / (double)j->work) : 0.0f;
++
++    readPads();
++    if (getKeyOn(backKey)) {
++        guiMsgBoxSound(SFX_ERROR);
++        if (guiMsgBox(_t("Stop? What it has written so far is removed; the game stays as it was."), 1, NULL))
++            return 0;
++        j->drawnAt = 0.0;
++    }
++    if (now - j->drawnAt < 0.2)
++        return 1;
++    j->drawnAt = now;
++    if (p > 1.0f)
++        p = 1.0f;
++    lrSize(j->done, done, sizeof(done));
++    lrSize(j->work, total, sizeof(total));
++    snprintf(line, sizeof(line), _t("%s OF %s   %d%%"), done, total, (int)(p * 100.0f));
++    left[0] = '\0';
++    if (now - j->began > 8.0 && p > 0.005f) {
++        int mins = (int)(((now - j->began) / p - (now - j->began)) / 60.0 + 0.5);
++        if (mins < 1)
++            snprintf(left, sizeof(left), "%s", _t("LESS THAN A MINUTE LEFT"));
++        else
++            snprintf(left, sizeof(left), _t("ABOUT %d MIN"), mins);
++    }
++    rmStartFrame();
++    zpPage();
++    ripps2DrawPanelGlass(60, 150, 520, 170, 0);
++    fntRenderString(gTheme->fonts[5], 320, 178, ALIGN_CENTER, 0, 0,
++                    j->phase ? _t("CHECKING EVERY PIECE") : j->pack ? _t("COMPRESSING") : _t("UNCOMPRESSING"), LG_SOFT);
++    fntRenderStringFit(gTheme->fonts[4], 320, 206, ALIGN_CENTER, 480, j->name, LG_LIT, 1);
++    rmDrawRect(150, 232, 340, 6, GS_SETREG_RGBA(0x03, 0x08, 0x22, 0x80));
++    rmDrawRect(150, 232, (int)(340 * p), 6, GS_SETREG_RGBA(0x4A, 0x8C, 0xF0, 0x80));
++    fntRenderString(gTheme->fonts[5], 320, 262, ALIGN_CENTER, 0, 0, line, LG_SOFT);
++    if (left[0])
++        fntRenderString(gTheme->fonts[5], 320, 286, ALIGN_CENTER, 0, 0, left, lgAlpha(LG_SOFT, 0x50));
++    ripps2HintOneA(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _t("CANCEL"), 448, 0x80);
++    rmEndFrame();
++    return 1;
++}
++
++static int zpReadAll(int fd, void *buf, int n)
++{
++    return read(fd, buf, n) == n;
++}
++
++static int zpWriteAll(int fd, const void *buf, int n)
++{
++    return write(fd, buf, n) == n;
++}
++
++// the index entries held so far, written back in place; the file then goes on where the data ends
++static int zpFlushIdx(int fd, u32 *idx, u32 *start, u32 *n, s64 dataEnd)
++{
++    if (*n == 0)
++        return 1;
++    if (lseek64(fd, ZP_HEAD + (s64)*start * 4, SEEK_SET) < 0 || !zpWriteAll(fd, idx, (int)(*n * 4)) || lseek64(fd, dataEnd, SEEK_SET) != dataEnd)
++        return 0;
++    *start += *n;
++    *n = 0;
++    return 1;
++}
++
++// ISO to ZSO: 1 done, 0 failed, -1 stopped
++static int zpPack(zp_job_t *j, unsigned char *in, unsigned char *out, unsigned char *blk, u32 *idx)
++{
++    unsigned char head[ZP_HEAD];
++    u32 b, k, idxStart = 0, idxN = 0, unit;
++    s64 pos, fileEnd, worst;
++    int cnt, n, o;
++
++    worst = ZP_HEAD + (s64)(j->blocks + 1) * 4 + (s64)j->blocks * 2048;
++    for (j->align = 0; ((worst + (s64)j->blocks * ((1 << j->align) - 1)) >> j->align) >= 0x7FFFFFFF; j->align++)
++        ;
++    unit = 1u << j->align;
++    memset(head, 0, sizeof(head));
++    *(u32 *)(head + 0) = ZP_MAGIC;
++    *(u32 *)(head + 4) = ZP_HEAD;
++    *(u32 *)(head + 8) = (u32)(j->inBytes & 0xFFFFFFFF);
++    *(u32 *)(head + 12) = (u32)(j->inBytes >> 32);
++    *(u32 *)(head + 16) = 2048;
++    head[20] = 1;
++    head[21] = (unsigned char)j->align;
++    if (!zpWriteAll(j->fdOut, head, ZP_HEAD))
++        return 0;
++    // the index's room, filled in as the blocks are packed, then the data from the next boundary
++    memset(out, 0, ZP_RUN * 2048);
++    for (pos = (s64)(j->blocks + 1) * 4; pos > 0; pos -= n) {
++        n = pos > ZP_RUN * 2048 ? ZP_RUN * 2048 : (int)pos;
++        if (!zpWriteAll(j->fdOut, out, n))
++            return 0;
++    }
++    pos = ZP_HEAD + (s64)(j->blocks + 1) * 4;
++    n = (int)((unit - (pos & (unit - 1))) & (unit - 1));
++    if (n && !zpWriteAll(j->fdOut, out, n))
++        return 0;
++    pos += n;
++    fileEnd = pos;
++    for (b = 0; b < j->blocks; b += cnt) {
++        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
++        if (!zpReadAll(j->fdIn, in, cnt * 2048))
++            return 0;
++        j->crcs[b / ZP_RUN] = crc32(0L, in, cnt * 2048);
++        for (k = 0, o = 0; k < (u32)cnt; k++) {
++            int raw, sz, pad;
++            n = LZ4_compress((const char *)in + k * 2048, (char *)blk, 2048);
++            raw = n <= 0 || n >= 2048; // a block LZ4 cannot shrink is kept as it is (the top bit says so)
++            idx[idxN++] = (u32)(pos >> j->align) | (raw ? 0x80000000u : 0);
++            sz = raw ? 2048 : n;
++            memcpy(out + o, raw ? in + k * 2048 : blk, sz);
++            o += sz;
++            pos += sz;
++            pad = (int)((unit - (pos & (unit - 1))) & (unit - 1));
++            memset(out + o, 0, pad);
++            o += pad;
++            pos += pad;
++            if (idxN == ZP_IDX && !zpFlushIdx(j->fdOut, idx, &idxStart, &idxN, fileEnd))
++                return 0;
++        }
++        if (!zpWriteAll(j->fdOut, out, o))
++            return 0;
++        fileEnd += o;
++        j->done += cnt * 2048;
++        if (!zpTick(j))
++            return -1;
++    }
++    idx[idxN++] = (u32)(pos >> j->align); // where the last block ends
++    if (!zpFlushIdx(j->fdOut, idx, &idxStart, &idxN, fileEnd))
++        return 0;
++    j->outBytes = fileEnd;
++    return 1;
++}
++
++// a ZSO's blocks b.. (cnt of them) into out, as OPL's own reader does it (LZ4_decompress_fast, 2048 bytes a block)
++static int zpUnzip(int fd, int align, u32 b, int cnt, unsigned char *cbuf, int cap, unsigned char *out)
++{
++    u32 ent[ZP_RUN + 1];
++    s64 o0, o1;
++    int k;
++    if (lseek64(fd, ZP_HEAD + (s64)b * 4, SEEK_SET) < 0 || !zpReadAll(fd, ent, (cnt + 1) * 4))
++        return 0;
++    o0 = (s64)(ent[0] & 0x7FFFFFFF) << align;
++    o1 = (s64)(ent[cnt] & 0x7FFFFFFF) << align;
++    if (o1 < o0 || o1 - o0 > cap || lseek64(fd, o0, SEEK_SET) != o0 || !zpReadAll(fd, cbuf, (int)(o1 - o0)))
++        return 0;
++    for (k = 0; k < cnt; k++) {
++        s64 s = ((s64)(ent[k] & 0x7FFFFFFF) << align) - o0, e = ((s64)(ent[k + 1] & 0x7FFFFFFF) << align) - o0;
++        if (e < s || e - s > 2048 + (1 << align))
++            return 0;
++        if (ent[k] & 0x80000000u)
++            memcpy(out + k * 2048, cbuf + s, 2048);
++        else {
++            int used = LZ4_decompress_fast((const char *)cbuf + s, (char *)out + k * 2048, 2048);
++            if (used <= 0 || used > e - s)
++                return 0;
++        }
++    }
++    return 1;
++}
++
++// ZSO to ISO: 1 done, 0 failed, -1 stopped
++static int zpUnpack(zp_job_t *j, unsigned char *in, unsigned char *cbuf, int cap)
++{
++    u32 b;
++    int cnt;
++    for (b = 0; b < j->blocks; b += cnt) {
++        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
++        if (!zpUnzip(j->fdIn, j->align, b, cnt, cbuf, cap, in))
++            return 0;
++        j->crcs[b / ZP_RUN] = crc32(0L, in, cnt * 2048);
++        if (!zpWriteAll(j->fdOut, in, cnt * 2048))
++            return 0;
++        j->done += cnt * 2048;
++        if (!zpTick(j))
++            return -1;
++    }
++    j->outBytes = j->inBytes;
++    return 1;
++}
++
++// the check: what was written, read back, piece by piece against the crc taken from the original
++static int zpCheck(zp_job_t *j, const char *path, unsigned char *in, unsigned char *cbuf, int cap)
++{
++    unsigned char head[ZP_HEAD];
++    u32 b;
++    int cnt, fd, ok = 1;
++    if ((fd = open(path, O_RDONLY)) < 0)
++        return 0;
++    if (j->pack && (!zpReadAll(fd, head, ZP_HEAD) || *(u32 *)head != ZP_MAGIC || head[21] != j->align))
++        ok = 0;
++    for (b = 0; ok && b < j->blocks; b += cnt) {
++        cnt = j->blocks - b > ZP_RUN ? ZP_RUN : (int)(j->blocks - b);
++        ok = j->pack ? zpUnzip(fd, j->align, b, cnt, cbuf, cap, in) : zpReadAll(fd, in, cnt * 2048);
++        ok = ok && crc32(0L, in, cnt * 2048) == j->crcs[b / ZP_RUN];
++        j->done += cnt * 2048;
++        if (ok && !zpTick(j))
++            ok = -1;
++    }
++    close(fd);
++    return ok;
++}
++
++void ripps2PackGame(item_list_t *support, int id)
++{
++    char prefix[160], src[300], dst[300], tmp[310], info[200], msg[400], a[24], b[24], *dot;
++    sh_row_t r;
++    item_list_t view;
++    const base_game_info_t *g;
++    zp_job_t j;
++    unsigned char *in = NULL, *out = NULL, *blk = NULL;
++    u32 *idx = NULL;
++    int kind, rv = 0, cap, mins, sep;
++    const char *pfx, *where;
++
++    if (!zpRow(support, id, &r, &view, &g) || (kind = ripps2PackKind(support, id)) == 0)
++        return;
++    pfx = view.itemGetPrefix(&view);
++    snprintf(prefix, sizeof(prefix), "%s", pfx != NULL ? pfx : "");
++    sep = prefix[0] && prefix[strlen(prefix) - 1] == '\\' ? '\\' : '/';
++    {
++        char sepStr[2] = {(char)sep, 0};
++        sbCreatePath(g, src, prefix, sepStr, 0);
++    }
++    snprintf(dst, sizeof(dst), "%s", src);
++    if ((dot = strrchr(dst, '.')) == NULL)
++        return;
++    strcpy(dot, kind == 1 ? ".zso" : ".iso");
++    snprintf(tmp, sizeof(tmp), "%s.part", dst);
++    where = lrWhere(r.mode);
++
++    memset(&j, 0, sizeof(j));
++    j.pack = kind == 1;
++    snprintf(j.name, sizeof(j.name), "%s", r.name);
++    j.fdIn = j.fdOut = -1;
++    if ((j.fdIn = open(dst, O_RDONLY)) >= 0) {
++        close(j.fdIn);
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(j.pack ? _t("A ZSO of this game is already beside it. Remove one of the two first.") : _t("An ISO of this game is already beside it. Remove one of the two first."), 0, NULL);
++        return;
++    }
++    if ((j.fdIn = open(src, O_RDONLY)) < 0) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("RIPPS2 could not find this game's files on its drive."), 0, NULL);
++        return;
++    }
++    if (j.pack) {
++        j.inBytes = lseek64(j.fdIn, 0, SEEK_END);
++        lseek64(j.fdIn, 0, SEEK_SET);
++    } else {
++        unsigned char head[ZP_HEAD];
++        if (!zpReadAll(j.fdIn, head, ZP_HEAD) || *(u32 *)head != ZP_MAGIC || *(u32 *)(head + 16) != 2048)
++            j.inBytes = -1;
++        else {
++            j.inBytes = (s64)*(u32 *)(head + 8) | ((s64)*(u32 *)(head + 12) << 32);
++            j.align = head[21];
++        }
++    }
++    if (j.inBytes <= 0 || (j.inBytes & 2047)) {
++        close(j.fdIn);
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks)."), 0, NULL);
++        return;
++    }
++    j.blocks = (u32)(j.inBytes / 2048);
++    // packing reads the ISO and writes about two thirds of it; the check reads that again
++    mins = (int)((double)j.inBytes * (j.pack ? 2.4 : 2.7) / (zpSpeed(r.mode) * 1048576.0) / 60.0 + 0.5);
++    lrSize(j.inBytes, a, sizeof(a));
++    if (mins < 1)
++        snprintf(info, sizeof(info), _t("%s on %s: under a minute, every piece checked"), a, where);
++    else
++        snprintf(info, sizeof(info), _t("%s on %s: about %d min, every piece checked"), a, where, mins);
++    if (!zpAsk(j.pack ? _t("COMPRESS TO ZSO") : _t("UNCOMPRESS TO ISO"), r.name, info)) {
++        close(j.fdIn);
++        return;
++    }
++    snprintf(msg, sizeof(msg),
++             j.pack ? _t("Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.")
++                    : _t("Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it."),
++             r.name);
++    if (!guiMsgBox(msg, 1, NULL)) {
++        close(j.fdIn);
++        return;
++    }
++
++    cap = ZP_RUN * (2048 + (1 << (j.align > 4 ? j.align : 4)));
++    in = malloc(ZP_RUN * 2048);
++    out = malloc(cap);
++    blk = malloc(LZ4_compressBound(2048));
++    idx = malloc(ZP_IDX * 4);
++    j.crcs = malloc((j.blocks / ZP_RUN + 1) * 4);
++    if (in == NULL || out == NULL || blk == NULL || idx == NULL || j.crcs == NULL) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("There is not enough memory for this just now."), 0, NULL);
++        goto end;
++    }
++    ioBlockOps(1); // nothing else reads or writes the drive while the image is made
++    j.fdOut = open(tmp, O_WRONLY | O_CREAT | O_TRUNC, 0644);
++    j.began = ripps2Seconds();
++    j.work = j.inBytes * 2; // the work, then the check, each over the game's size
++    if (j.fdOut >= 0)
++        rv = j.pack ? zpPack(&j, in, out, blk, idx) : zpUnpack(&j, in, out, cap);
++    if (j.fdOut >= 0 && close(j.fdOut) < 0 && rv == 1)
++        rv = 0;
++    j.fdOut = -1;
++    close(j.fdIn);
++    j.fdIn = -1;
++    if (rv == 1) {
++        j.phase = 1;
++        j.done = j.inBytes;
++        rv = zpCheck(&j, tmp, in, out, cap);
++    }
++    if (rv == 1 && rename(tmp, dst) != 0)
++        rv = 0;
++    if (rv != 1)
++        unlink(tmp);
++    ioBlockOps(0);
++    if (rv == 0) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("It could not be finished (the drive may be full, or a piece read back did not match). What it wrote was removed; the game is as it was."), 0, NULL);
++        goto end;
++    }
++    if (rv < 0)
++        goto end;
++    lrSize(j.inBytes, a, sizeof(a));
++    lrSize(j.outBytes, b, sizeof(b));
++    snprintf(msg, sizeof(msg),
++             j.pack ? _t("%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?")
++                    : _t("%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?"),
++             r.name, j.pack ? a : b, j.pack ? b : a, (int)(j.outBytes * 100 / (j.inBytes > 0 ? j.inBytes : 1)));
++    guiMsgBoxSound(SFX_SAVE);
++    if (guiMsgBox(msg, 1, NULL) && unlink(src) == 0) {
++        lrSize(j.pack ? j.inBytes - j.outBytes : 0, a, sizeof(a));
++        snprintf(msg, sizeof(msg), j.pack ? _t("COMPRESSED %s: %s FREED") : _t("UNCOMPRESSED %s"), r.name, a);
++        guiShowToast(msg);
++    }
++    shRefresh(r.mode);
++end:
++    if (j.fdIn >= 0)
++        close(j.fdIn);
++    free(in);
++    free(out);
++    free(blk);
++    free(idx);
++    free(j.crcs);
 +}
 diff --git a/src/ripps2hdd.c b/src/ripps2hdd.c
 index ce09083..3b36c8e 100644

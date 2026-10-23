@@ -255,6 +255,19 @@ need(dia, (('{.label = {"Hold SELECT", -1}}', 'the Interface row'),), 'dialogs.c
 need(rd('src/menusys.c'), (('if (gRipps2SelectHold == RIPPS2_HOLD_CYCLE)', 'Cycle as before'),
                            ('else if (!guiPickTheme() && !viewPending)', 'the theme in use picked: a refresh')), 'menusys.c')
 need(rd('src/opl.c'), (('"ripps2_select_hold"', 'kept in the settings'),), 'opl.c')
+# Hide Game and Compression (the user, 10/23): an ISO made a ZSO (OPL's own format) or back, asked twice, every piece
+# read back and checked before the original goes (that asked too), the work in <name>.part until then
+pk_ = rd('src/ripps2games.c')
+need(pk_, (('#define ZP_MAGIC 0x4F53495A', 'the ZISO header'), ('#define ZP_HEAD  24', 'the index right after a 24-byte header'),
+           ('raw = n <= 0 || n >= 2048;', 'a block LZ4 cannot shrink stays raw'), ('| (raw ? 0x80000000u : 0)', 'the top bit marks a raw block'),
+           ('LZ4_decompress_fast(', 'read back as OPL reads it'), ('crc32(0L, in, cnt * 2048) == j->crcs[b / ZP_RUN]', 'every piece checked'),
+           ('snprintf(tmp, sizeof(tmp), "%s.part", dst);', 'the work in a .part file'), ('if (rv == 1 && rename(tmp, dst) != 0)', 'named only once checked'),
+           ('if (rv != 1)\n        unlink(tmp);', 'a cancel or failure removes it'), ('if (!zpAsk(', 'the panel: SELECT held'),
+           ('if (!guiMsgBox(msg, 1, NULL)) {', 'then a last word'), ('if (guiMsgBox(msg, 1, NULL) && unlink(src) == 0)', 'the original goes only when asked')), 'ripps2games.c compression')
+if 'GAME_FORMAT_ISO || (*g)->parts != 1' not in pk_.replace('(*g)->format != GAME_FORMAT_ISO || (*g)->parts != 1', 'GAME_FORMAT_ISO || (*g)->parts != 1'):
+    fail.append('ripps2games.c: only a whole ISO or ZSO (never a split UL game)')
+need(rd('src/menusys.c'), (('packable ? _STR_RIPPS2_HIDE_COMPRESS : _STR_RIPPS2_HIDE_GAME', 'the row says Compression where it applies'),
+                           ('ripps2PackGame(support, id);', 'the pick runs it')), 'menusys.c')
 # and Network Connectivity Off left the SMB page up: Game Sources lost the protocol's re-derive with its Protocol row
 if 'guiNetProtocolApplied(netProtocolWas);' not in body(g, 'static void guiSourcesNetRowsRead('):
     fail.append('gui.c: Network Connectivity on Game Sources turns the network page on and off')
