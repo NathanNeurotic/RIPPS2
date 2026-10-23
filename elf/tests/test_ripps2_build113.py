@@ -64,8 +64,9 @@ need(rd('src/dialogs.c'), (('{UI_ENUM, UICFG_RIPPS2_CATLAYOUT, 1, 1, _STR_HINT_R
 gui = rd('src/gui.c')
 need(gui, (('static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), NULL};', 'its three choices'),
            ('        gRipps2CatLayout = v; // build 113', 'it is read as it changes (the page behind shows it)'),
-           ('        gRipps2CatLayout = keepLayout;', 'Cancel puts it back'),
-           ('gRipps2CatLayout != keepLayout)\n        guiSettingsSavePending = 1;', 'a change is saved')), 'gui.c')
+           # build 114 (the settings audit): the category rows are Layout's; Back there puts them back, a change is saved
+           ('        gRipps2CatLayout = keepCat[4];', 'Cancel puts it back'),
+           ('gRipps2CatLayout != keepCat[4]', 'a change is saved')), 'gui.c')
 need(rd('lng_tmpl/_base.yml'), (('- label: RIPPS2_CATEGORY_LAYOUT\n  string: Category Layout\n', 'its label'),), '_base.yml')
 # The legacy key (the user): categories=three; a theme made for OPL shows Storage alone, Launch Disc and Memory Files in
 # the START menu; a RIPPS2 theme from before the key (any RIPPS2 key) keeps the three
@@ -126,7 +127,7 @@ cache = table('diaCacheConfig')
 for want in ('CFG_RIPPS2_FASTCACHE', 'CFG_HDDGAMELISTCACHE', 'UICFG_AUTOREFRESH'):
     if want not in cache:
         fail.append('dialogs.c: Game Sources > Cache needs %s' % want)
-need(gui, (('struct UIItem *ui = guiSettingsCompose(parts, 2, NULL, 0, -1, 1);', "Video Mode shows in Interface's Display section"),
+need(gui, (('ret = diaExecuteDialog(diaDisplayConfig, -1, 1, &guiSettingsDisplayUpdater);', "Video Mode shows on the Display section (build 114: Interface's Screen page)"),
            ('if (lock && !bootLockWas && gExitPath[0] == \'\\0\')', 'BOOT LOCK fills an empty IGR Path itself'),
            ('static void guiShowCacheConfig(void)', 'the Cache page'), ('guiSaveAdvancedSettings(ui); // build 113: the read-ahead caches', 'Game Launching keeps the caches')), 'gui.c')
 if gui.count('guiShowCacheConfig();') != 2:

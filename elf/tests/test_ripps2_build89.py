@@ -52,7 +52,7 @@ for branch in body[body.index('if (!strcmp(deviceName, "apa"))'):].split('} else
 if '"CARD MANAGER"' not in rd('src/ripps2card.c'):
     fail.append('the card manager keeps its name on screen')
 about = rd('src/ripps2about.c')
-for credit in ("ORBIT's Neutrino fork by danielnuld", 'Roboto Condensed by Google', 'RIPPS2 Audio Studio', "MCKILLA, RIPPS2's card manager fork"):
+for credit in ("ORBIT's Neutrino fork by danielnuld", 'Roboto Condensed by The Roboto Project Authors', 'RIPPS2 Audio Studio', "MCKILLA, RIPPS2's card manager fork"):
     if credit not in about:
         fail.append('About must credit: %s' % credit)
 

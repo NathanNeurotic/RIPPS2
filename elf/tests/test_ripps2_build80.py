@@ -24,7 +24,8 @@ if 'ripps2Status();' not in ms:
     fail.append('MENU_STATUS must open ripps2Status')
 idx = gui[gui.index('static int guiSettingsShowIndex(int *page)'):]
 idx = idx[:idx.index('\n}\n')]
-if '_l(_STR_AUDIO_SETTINGS),\n#ifdef RETROACHIEVEMENTS\n        _l(_STR_RIPPS2_ACHIEVEMENTS)' not in idx or 'ripps2Achievements();' not in idx:
+# build 114 (the settings audit): Audio is the hub's short name now
+if not re.search(r'"Audio"\),\n#ifdef RETROACHIEVEMENTS\n        _l\(_STR_RIPPS2_ACHIEVEMENTS\)', idx) or 'ripps2Achievements();' not in idx:
     fail.append('Settings must list Achievements right after Audio and open it')
 if 'labels[SETTINGS_PAGE_COUNT + 2]' not in idx:
     fail.append('the Settings index labels must have room for Achievements and Save')
@@ -49,14 +50,17 @@ if not re.search(r'\{\.label = \{" ", -1\}\}\},\s*\{UI_BREAK\},\s*//[^\n]*\n\s*\
 # --- Colors and More: the Color Theme heading the pickers. Build 113 (the user's settings moves): the category rows
 # together with Source Name last, D-pad Glyphs and Button Hints moved to Hints and Glyphs, Show Recents to Game Sources
 cm = table(dia, 'diaColorsConfig')
-order = [cm.index(k) for k in ('UICFG_RIPPS2_CATLAYOUT', 'UICFG_RIPPS2_CATBAR', 'UICFG_RIPPS2_CATSWAP', 'UICFG_RIPPS2_TRANSITION', 'UICFG_RIPPS2_SRCNAME')]
+# build 114 (the settings audit): the category rows moved to Layout (was Flow and Grid), still together, Source Name last,
+# a line under them; Colors and Text keeps the Color Theme heading the pickers
+lay = table(dia, 'diaCoverflowConfig')
+order = [lay.index(k) for k in ('UICFG_RIPPS2_CATLAYOUT', 'UICFG_RIPPS2_CATBAR', 'UICFG_RIPPS2_CATSWAP', 'UICFG_RIPPS2_TRANSITION', 'UICFG_RIPPS2_SRCNAME')]
 if order != sorted(order):
-    fail.append('Colors and More: the category rows together, Source Name after them')
-for gone in ('UICFG_RIPPS2_GLYPHS', 'UICFG_RIPPS2_HINTS,', 'UICFG_RIPPS2_RECENTS'):
+    fail.append('Layout: the category rows together, Source Name after them')
+for gone in ('UICFG_RIPPS2_GLYPHS', 'UICFG_RIPPS2_HINTS,', 'UICFG_RIPPS2_RECENTS', 'UICFG_RIPPS2_CATLAYOUT'):
     if gone in cm:
-        fail.append('Colors and More still has %s (build 113 moved it)' % gone)
-split = cm.index('{UI_SPLITTER}', cm.index('UICFG_RIPPS2_SRCNAME'))
-if not (split < cm.index('UICFG_RIPPS2_PALETTE') < cm.index('UICFG_TXTCOL')):
+        fail.append('Colors and Text still has %s (builds 113 and 114 moved it)' % gone)
+split = lay.index('{UI_SPLITTER}', lay.index('UICFG_RIPPS2_SRCNAME'))
+if not (split < lay.index('COVERFLOW_CFG_COUNT') and cm.index('UICFG_RIPPS2_PALETTE') < cm.index('UICFG_TXTCOL')):
     fail.append('the Color Theme must head the colour pickers')
 
 # --- Source Name: Pop In, and a theme's source_name=pop for its Shown

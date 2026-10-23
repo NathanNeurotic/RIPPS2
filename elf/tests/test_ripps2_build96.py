@@ -45,7 +45,7 @@ if 'padGetRightStick(&sx, &sy)' not in st or 'a scroll bar when the page runs pa
     fail.append('STATUS must scroll with the right stick and show a scroll bar')
 
 # settings faces
-if 'RIPPS2_UI_FONT' in dia or 'builtin:ripflowbold", 19' not in rd('src/themes.c'):
+if 'RIPPS2_UI_FONT' in dia or 'builtin:ripflowbold", 18' not in rd('src/themes.c'):  # build 114: the variable Roboto at 18 px
     fail.append('settings pages must draw in the built-in Roboto faces on every theme')
 
 # Last Used and Page Buttons

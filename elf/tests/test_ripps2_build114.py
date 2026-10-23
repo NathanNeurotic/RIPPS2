@@ -166,8 +166,81 @@ if sysd.find('ripps2LaunchGuard()') < 0 or sysd.find('ripps2LaunchGuard()') > sy
 need(rd('src/supportbase.c'), (('int ioScanCancelled(void) __attribute__((weak));', "the list read's stop is weak (host harness)"),
                                ('if (ioScanCancelled != NULL && ioScanCancelled())', 'a list read stops when asked')), 'supportbase.c')
 lg = body(gm, 'int ripps2LaunchGuard(void)')
-if not (lg.find('guiMsgBox(') < lg.find('ioLaunchBegin();') < lg.find('ioCancelScans();')):
-    fail.append('ripps2games.c: the guard asks first, then stops writes and the list read')
+# the user 10/23: a RIPDISC-style panel; the launch waits at the end of the queue and goes on by itself; Cross stops the
+# work safely and starts, Circle backs out; the notches fill toward the estimate
+need(lg, (('ioQueueEstimateMs()', 'the panel estimates the queue'), ('lgDraw(', 'the panel is drawn'),
+          ('return 1; // a job that never ends', 'a stop is bounded'), ('if (done > 0.0 && now - done > 0.35)', 'the launch goes on by itself when the queue is done'),
+          ('return 0;', 'Circle backs out')), 'ripps2games.c guard')
+if not (lg.find('getKeyOn(gSelectButton)') < lg.find('ioLaunchBegin();') < lg.find('ioCancelScans();')):
+    fail.append('ripps2games.c: Cross stops writes, then the list read')
+if 'guiMsgBox(' in lg:
+    fail.append('ripps2games.c: the guard is the panel, not a message box')
+need(rd('src/ripps2disc.c'), (('void ripps2NotchRing(int cx, int cy, float p, int a)', "RIPDISC's notches for the guard"),), 'ripps2disc.c')
+io = rd('src/ioman.c')
+need(io, (('gIoListMs[m] = (int)', 'each list read is timed'), ('int ioQueueEstimateMs(void)', 'the queue estimate')), 'ioman.c')
+
+# ---- the settings audit (the user 10/23)
+dia = rd('src/dialogs.c')
+
+
+def dtab(text, head):
+    i = text.index(head)
+    return text[i:text.index('{UI_TERMINATOR}};', i)]
+
+
+need(dia, (('struct UIItem diaBdmDevicesConfig[]', 'BDM Devices has its page'), ('{.label = {"Layout", -1}}', 'Flow and Grid is Layout'),
+           ('{.label = {"Colors and Text", -1}}', 'Colors and Text'), ('UICFG_RIPPS2_TEXTWEIGHT', 'Text Weight'),
+           ('{.label = {"Screen", -1}}', 'the Screen page'), ('{.label = {"Neutrino Advanced Arguments", -1}}', "the Neutrino page has its row's name"),
+           ('{.label = {"POPSTARTER Network", -1}}', 'POPSTARTER Network'), ('{.label = {"HDD POPS partitions", -1}}', 'the short VCD label'),
+           ('{.label = {"Missing Covers", -1}}', 'Artwork has Missing Covers'), ('_STR_GENERAL_SYSTEM}}}, // build 114', "General & System's title")), 'dialogs.c')
+dev = dtab(dia, 'struct UIItem diaDeviceConfig[]')
+for gone in ('CFG_NETPROTOCOL', 'CFG_ENABLEUSB', 'CFG_ENABLEILK'):
+    if gone in dev:
+        fail.append('dialogs.c: Game Sources keeps %s off its page (the settings audit)' % gone)
+uic = dtab(dia, 'struct UIItem diaUIConfig[]')
+for gone in ('UICFG_GAME_LIST_BUTTON', 'UICFG_VMODE', 'UICFG_XOFF'):
+    if gone in uic:
+        fail.append('dialogs.c: Interface keeps %s off its page (the settings audit)' % gone)
+if 'UICFG_RIPPS2_CATLAYOUT' in dtab(dia, 'struct UIItem diaColorsConfig[]') or 'UICFG_RIPPS2_CATLAYOUT' not in dtab(dia, 'struct UIItem diaCoverflowConfig[]'):
+    fail.append('dialogs.c: the category rows are on Layout')
+g = rd('src/gui.c')
+need(g, (('const struct UIItem *parts[] = {diaUIConfig};', 'Interface is one part'), ('static void guiShowScreenConfig(void)', 'the Screen page'),
+         ('static int guiShowBdmDevicesConfig(void)', 'the BDM Devices page'), ('"PS Emulation", // build 114', 'the hub\'s short names'),
+         ('deviceOnOff[0] = _l(_STR_OFF);', "MMCE's On / Off")), 'gui.c')
+need(rd('src/menusys.c'), (('GAME_RA_MENU, _STR_RIPPS2_ACHIEVEMENTS', 'one Achievements row'), ('menuID = menuPickAchievements();', 'its three in a list')), 'menusys.c')
+need(rd('src/ripps2status.c'), (('"What each card starts; install or repair BIBLE."', "STATUS's BIBLE line fits"),), 'ripps2status.c')
+
+# ---- one HDD (the user 10/23: "on a fat ps2 only one would ever be possible")
+need(rd('src/hddsupport.c'), (('hddHideNotApa(); // RIPPS2 build 114', 'an exFAT drive has no APA page'),), 'hddsupport.c')
+need(rd('src/opl.c'), (('mod->menuItem.visible = !(mode == HDD_MODE && hddDriveNotApa());', 'a re-enable keeps it hidden'),), 'opl.c')
+need(dia, (('{.label = {"HDD Start Mode", -1}}', 'one HDD Start Mode'),), 'dialogs.c')
+if 'CFG_ENABLEBDMHDD' in dtab(dia, 'struct UIItem diaBdmDevicesConfig[]'):
+    fail.append('dialogs.c: the exFAT HDD follows HDD Start Mode, not a BDM Devices row')
+if g.count('gEnableBdmHDD = gHDDStartMode != START_MODE_DISABLED;') != 2:
+    fail.append('gui.c: both Game Sources editors set the exFAT HDD from HDD Start Mode')
+
+# ---- colours (the user 10/23)
+ui_ = rd('src/ripps2ui.c')
+need(ui_, (('{"Moonlight", 0.0f, 0.10f, 0.55f}, {"Custom", 0.0f, 1.0f, 0.0f}}', 'Moonlight, then Custom, last'),
+           ('{"Tangerine",', 'Tangerine'), ('{"Flamingo",', 'Flamingo'), ('{"Turquoise",', 'Turquoise'),
+           ('{"Rainbow", {{0xFF, 0x4D, 0x4D}', 'Rainbow is the first sweep'), ('static void tintSolve(', 'Custom and the sweeps are worked out from a colour')), 'ripps2ui.c')
+m_ = re.search(r'static const float sweepSecs\[3\] = \{([0-9.f, ]+)\}', ui_)
+if m_ is None or min(float(x.strip().rstrip('f')) for x in m_.group(1).split(',')) < 3.0:
+    fail.append('ripps2ui.c: a sweep colour lasts 3 s at the quickest (the user: never flashy)')
+if '#define RIPPS2_PALETTE_COUNT 11' not in rd('include/ripps2.h') or 'if (!gRipps2TintOn)' not in rd('include/ripps2tint.h'):
+    fail.append('ripps2.h / ripps2tint.h: eleven Color Themes, the tint on whenever a theme, Custom or a sweep draws')
+need(dia, (('struct UIItem diaSweepConfig[]', 'the sweep page'), ('UICFG_RIPPS2_PALETTE_COLOR', 'the Theme Color picker')), 'dialogs.c')
+
+# ---- fonts (the font audit's answers)
+need(rd('src/fntsys.c'), (('void fntSetWeight(int id, int weight)', 'a weight for any font'), ('FT_Set_Var_Design_Coordinates(', 'a variable face takes it'),
+           ('FT_Outline_EmboldenXY(', 'a static face is grown'), ('"builtin:roboto"', 'builtin:roboto')), 'fntsys.c')
+th = rd('src/themes.c')
+need(th, (('"font%d_weight"', 'the theme key'), ('fntLoadFile("builtin:ripflowbold", 18)', 'Settings rows at 18 px'),
+          ('void ripps2ApplyTextWeight(void)', 'Text Weight')), 'themes.c')
+if 'ripflow.o' in rd('Makefile') or 'ripps2roboto.o' not in rd('Makefile'):
+    fail.append('Makefile: the one variable Roboto')
+if not (repo / 'elf/theme/fonts/ripps2_roboto.ttf').exists() or (repo / 'elf/theme/fonts/ripflow.ttf').exists():
+    fail.append('elf/theme/fonts: ripps2_roboto.ttf replaces ripflow.ttf and ripflow_bold.ttf')
 
 # ---- one ELF (the user 10/23: no lite ELF), FreeType, fonts
 mk = rd('Makefile')

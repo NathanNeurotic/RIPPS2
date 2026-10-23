@@ -55,7 +55,7 @@ if '(gRipps2UserSet & bit) || setting != settingDefault || themeValue < 0' not i
 for fn in ('hintsMode()', 'catBarMode()', 'glyphsMode()', 'catSwapMode()'):
     if fn not in ui:
         fail.append('ripps2ui.c must read %s, not the raw setting' % fn)
-if 'gRipps2PaletteShown == 0' not in tint or 'gRipps2Palette ' in tint.replace('gRipps2PaletteShown', ''):
+if '!gRipps2TintOn' not in tint or 'gRipps2Palette ' in tint.replace('gRipps2PaletteShown', ''):  # build 114: on for a theme, Custom or a sweep
     fail.append('the tint must draw the palette in effect (gRipps2PaletteShown)')
 take = gui[gui.index('static void guiRipps2Take('):]
 take = take[:take.index('\n}\n')]
