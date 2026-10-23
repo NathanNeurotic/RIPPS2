@@ -57,14 +57,12 @@ remembered, a smaller ELF for memory cards, and the field reports from FifthFox 
   is refused with the reason, and nothing is touched. The walk runs again after, and `REMOVED.TXT` in mc0:/RIPPS2
   keeps what went, from where, the space freed and the table's state.
 
-### RIPPS2-lite.elf, for memory cards
-- **A second ELF from the same code**, under 2 MB: no BIBLE install (it starts from a BIBLE the full ELF
-  installed), no Neutrino inside (it uses yours, wherever you keep it), no OPL default background. The full ELF still
-  carries Neutrino and BIBLE.
-- **Both are smaller.** FreeType is started with only the modules RIPPS2 reads (TrueType, sfnt, the autohinter,
-  the smooth renderer, and CFF in the full ELF), so Type 1, CID, PFR, BDF, PCF, WinFNT, SDF and SVG leave the
-  link; the built-in fonts lose glyph names, extra name records and substitution tables (render-checked
-  identical at 14 to 32 px).
+### A smaller RIPPS2.elf
+- **One ELF, as before**, carrying BIBLE and Neutrino; POPSTARTER and Ember are found where you keep them, as
+  since build 113. It is about 26 KB smaller than v1.1.3 with everything above in it: FreeType is started with only
+  the modules RIPPS2 reads (TrueType, sfnt, the autohinter, the smooth renderer, CFF), so Type 1, CID, PFR, BDF,
+  PCF, WinFNT, SDF and SVG leave the link, and the built-in fonts lose glyph names, extra name records and
+  substitution tables (render-checked identical at 14 to 32 px).
 
 ### Credits
 - **Neutrino beside RiptOPL** on the About page: rickgaiser's Neutrino named in the opening lines as the second

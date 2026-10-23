@@ -215,7 +215,7 @@ pre-allocate a file before launch and write its sectors as VMC writes do. The de
 
 ## Build 114 (the user 10/22: All Games before the drives answer, hide and delete games): built, not released
 Where it stands (10/22 evening): every part below is in patch 0114 on `b114` with the RiptOPL merge, the launcher search, STATUS's
-drives, the lite ELF and the new words in all 33 languages; CI green, host tests clean, the hidden lab passes listed
+drives, the FreeType trim and the new words in all 33 languages; CI green, host tests clean, the hidden lab passes listed
 under Tests and lab done. Not released and not posted: the user decides after the showcase. Decisions 1 to 5 were
 taken as recommended (the user left them to me on 10/22, to recap): see the end of this section.
 One patch, `elf/patches/0114-ripps2-games.patch`, on branch `b114`; test `elf/tests/test_ripps2_build114.py`. Three parts,
@@ -365,8 +365,9 @@ name, -EBUSY when open, every header write through the table fence).
       EVERY DRIVE**. Then **LAUNCHERS** (one line each, LOOK FOR THEM starting every drive first on Cross), then the
       homebrew and BIBLE. The subtitle reads Drives, launchers and homebrew (10/22 evening).
 
-### G. RIPPS2-lite.elf and the font trim (FifthFox's 2 MB)
-- [x] **RIPPS2-lite.elf** (RIPPS2_LITE=1, its own CI artifact): no BIBLE KELFs, no Neutrino tar, no OPL background;
+### G. The font trim, and no lite ELF (FifthFox's 2 MB; the user 10/23: "ideally there is no lite elf we just ship
+the one that makes the most sense": the lite variant was built, then removed before release)
+- [x] ~~RIPPS2-lite.elf~~ removed 10/23 (RIPPS2_LITE=1, its own CI artifact): no BIBLE KELFs, no Neutrino tar, no OPL background;
       under 2 MB. It says where Neutrino goes and that BIBLE installs once from the full ELF. Lab 10/22: boots,
       START menu, STATUS with DRIVES and LAUNCHERS.
 - [x] **FreeType** started with RIPPS2's own module list (TrueType, sfnt, autofit, smooth; CFF and its helpers in
@@ -402,7 +403,7 @@ the time it will take shown before it starts and the game's core checked first.
 - [x] Lab (ps2bg, hidden, 10/22): boot 1 writes allgames.bin on the card; boot 2 on a fresh card with only that
       file and BDM on Manual lists the game before its drive answers; Hide, Hidden Games and Show Again; delete
       on exFAT (ISO, CFG, art, cheats gone, VMC kept, read back with exfat_ls) and on a scratch APA disk (PP.TEST.HDL
-      gone, the chain in order: apa_ls and REMOVED.TXT agree); the lite ELF's smoke run. Not in the lab: Cross on a
+      gone, the chain in order: apa_ls and REMOVED.TXT agree); the lite ELF's smoke run (since removed). Not in the lab: Cross on a
       waiting row (the lab's games are dummies, so nothing is launched there). The plan was: reel HDD with allgames.bin, grabs at 3 s (every game listed before the drive answers)
       and after the handover (same cursor); BDM on Manual: rows listed, Cross starts the drive and launches;
       hide and Show Again on exFAT (RIPPS2.HID read back with the exFAT tools); delete on a scratch copy of
@@ -425,7 +426,8 @@ the time it will take shown before it starts and the game's core checked first.
 
 Taken: 1. measure first, ZSO decided for 115 (no code in 114); 2. the hidden list on each drive (RIPPS2.HID);
 3. saves and RIPSHOT pictures kept unless the one question gets Yes; 4. merged first, in 114 (57c45b4, so the
-iLink fixes reach testers now); 5. RIPPS2-lite.elf beside the full ELF.
+iLink fixes reach testers now); 5. RIPPS2-lite.elf beside the full ELF, built and then removed on 10/23 (the user:
+one ELF; POPSTARTER and Ember found by association, as since 113).
 
 ### Console checks the lab cannot make
 - IGR on the merged VBLANK path (#984) on a real game; the ee_core stack (0xC80, as v1.1.3).

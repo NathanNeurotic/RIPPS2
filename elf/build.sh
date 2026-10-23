@@ -167,13 +167,4 @@ python3 "$HERE/lang/ripps2lang.py" extract "$SRC" --check || echo "::warning::el
 python3 -c "import fontTools" 2>/dev/null || pip3 install --quiet --break-system-packages fonttools || true
 python3 "$HERE/lang/ripps2lang.py" pack "$SRC" "$OUT"
 
-# build 114: RIPPS2-lite.elf, the same code without BIBLE's KELFs, Neutrino's tar and OPL's background
-# (RIPPS2_LITE=1): for a memory card, under 2 MB. RIPPS2_LITE=0 in the environment skips it.
-if [ "${RIPPS2_LITE:-1}" != 0 ]; then
-  make clean >/dev/null
-  make LOCALVERSION=RIPPS2 DIRTY= REVISION="$UP_REV" GIT_HASH="$UP_HASH" RETROACHIEVEMENTS=1 RIPPS2_LITE=1 ${RIPPS2_MAKE_FLAGS:-} release
-  ELF="$(ls RIPTOPL-*.ELF | head -n1)"
-  cp -f "$ELF" "$OUT/RIPPS2-lite.elf"
-  echo "Built $ELF -> out/RIPPS2-lite.elf"
-fi
 ls -la "$OUT"

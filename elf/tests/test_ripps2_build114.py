@@ -1,7 +1,7 @@
-"""Build 114: RiptOPL 57c45b4 merged; SEANCE (the launchers RIPPS2 does not carry, found and remembered); STATUS with
-the drives first; All Games from a master list; Hide Game and Hidden Games; Delete with everything of a game (LAST
-RITES) behind the APA table check; Neutrino named beside RiptOPL; RIPPS2-lite.elf; FreeType with the modules RIPPS2
-reads; the compiled-in fonts stripped.
+"""Build 114: RiptOPL 57c45b4 merged; the launchers RIPPS2 does not carry, found and remembered (ripps2seance.c); STATUS
+with the drives first; All Games from a master list; Hide Game and Hidden Games; Delete with everything of a game
+behind the APA table check; Neutrino named beside RiptOPL; one RIPPS2.elf (no lite variant); FreeType with the modules
+RIPPS2 reads; the compiled-in fonts stripped.
 
 Static checks on the patched tree, then two pieces compiled on the PC: the APA check against synthetic disks (a good
 table, one written from a bigger disk, a partition too big for the disk, one off its alignment, a broken link, a
@@ -132,10 +132,14 @@ need(ab, (('"with rickgaiser\'s Neutrino inside as its second game core,"', 'the
 if ab.count('{\'H\', "NEUTRINO"}'):
     fail.append('ripps2about.c: Neutrino\'s old mid-page section went to the closing credits')
 
-# ---- lite, FreeType, fonts
+# ---- one ELF (the user 10/23: no lite ELF), FreeType, fonts
 mk = rd('Makefile')
-need(mk, (('MISC_OBJS := $(filter-out bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o neutrino_tgz.o,$(MISC_OBJS))', 'lite: no BIBLE, no Neutrino'),
-          ('PNG_ASSETS := $(filter-out incebtion,$(PNG_ASSETS))', 'lite: no OPL background'), ('EE_CFLAGS += -DRIPPS2_LITE=1', 'the lite flag')), 'Makefile')
+need(mk, (('bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o', 'BIBLE is carried'), ('neutrino_tgz.o', 'Neutrino is carried')), 'Makefile')
+for f in ('Makefile', 'src/fntsys.c', 'src/ripps2boot.c', 'src/ripps2ember.c', 'src/ripps2status.c', 'src/textures.c'):
+    if 'RIPPS2_LITE' in raw(f):
+        fail.append('%s: one RIPPS2.elf, no lite variant' % f)
+if '{INCEBTION_PICTURE, "incebtion", &incebtion_png}' not in rd('src/textures.c'):
+    fail.append('textures.c: OPL\'s background is carried for its built-in look')
 fnt = rd('src/fntsys.c')
 if 'FT_Init_FreeType(' in fnt or 'static FT_Error fntNewLibrary(FT_Library *library)' not in fnt:
     fail.append('fntsys.c: FreeType starts with RIPPS2\'s own module list (FT_Init_FreeType links every module)')
@@ -146,9 +150,10 @@ for gone in ('t1_driver_class', 'bdf_driver_class', 'pcf_driver_class', 'pfr_dri
     if gone in fnt:
         fail.append('fntsys.c: %s stays out' % gone)
 bsh = (repo / 'elf/build.sh').read_text(encoding='utf-8')
-need(bsh, (('strip_fonts.py', 'the compiled-in fonts are stripped'), ('RIPPS2_LITE=1', 'the lite ELF is built'), ('out/RIPPS2-lite.elf', 'beside the full one')), 'build.sh')
+need(bsh, (('strip_fonts.py', 'the compiled-in fonts are stripped'),), 'build.sh')
 wf = (repo / '.github/workflows/build-elf.yml').read_text(encoding='utf-8')
-need(wf, (('RIPPS2-lite-elf', 'its artifact'),), 'build-elf.yml')
+if 'RIPPS2_LITE' in bsh or 'lite' in wf.lower():
+    fail.append('build.sh / build-elf.yml: one RIPPS2.elf, no lite build or artifact')
 
 # ---- compiled: the APA check against synthetic disks
 cc = shutil.which('gcc') or shutil.which('cc')
@@ -302,4 +307,4 @@ int main(int argc, char **argv)
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build114: the merge, the launcher search, STATUS, the master list, hide and delete with the APA check, credits, lite, FreeType OK')
+print('build114: the merge, the launcher search, STATUS, the master list, hide and delete with the APA check, credits, one ELF, FreeType OK')

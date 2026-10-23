@@ -48,7 +48,7 @@ one deleted completely. (No code names on screen: the user, 10/23.)
 | 34 to 36 | | "Delete its saves and RIPSHOT pictures too?" | Saves stay / Unless you say so. | |
 | 36 to 38 | | Last check, START, DELETED ...: ... FREED | START, and only START / Then a receipt in REMOVED.TXT. | |
 | 38 to 40 | | the APA disk with a table cloned from a bigger drive: "Nothing was deleted" | Berion's check / A table written from another size of disk is refused. | the forum's own expert, credited |
-| 40 to 42 | V. Lighter | text card over the lite boot: 2.69 MB / 1.97 MB | RIPPS2-lite.elf / Under 2 MB for memory cards: your Neutrino, found. | FifthFox's 2 MB |
+| 40 to 42 | V. Everywhere | the About page: Neutrino beside RiptOPL, the testers and the YouTube thanks | Credits / Neutrino by rickgaiser, beside RiptOPL. | the user asked for both |
 | 42 to 44 | | STATUS in Japanese | Every word, 33 languages / The new pages too. | |
 | 44 to 48 | Montage | half-bar cuts: covers, the search summary, Hidden Games, the plan, STATUS, Adapt | | the energy before the outro |
 | 60 to 62 | Outro | "Rip it." over the list | | |
@@ -72,7 +72,7 @@ the same table on a smaller disk, for the refusal.
 | v_hide | t114-reel | fresh | Triangle on Burnout 3, Hide Game, Cross, the list, START > Settings > Game Sources > Hidden Games, SHOW IT AGAIN |
 | v_delete | t114-reel | fresh | Triangle on a game with CFG, art and cheats, Delete, Cross, Circle, START |
 | v_apa_no | t114-apa-clone | fresh | Triangle, Delete: the refusal |
-| v_lite | t114-reel, lite ELF | fresh | boot, START, STATUS |
+| v_about | t114-reel | fresh | START, About, scrolled to the credits |
 | v_lang_ja | t114-reel | language Japanese | START, STATUS |
 
 ## 3. The first post's gallery: a tour, not a changelog
