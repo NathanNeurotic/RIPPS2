@@ -14151,10 +14151,10 @@ index b3e36fb..f924a19 100644
  // Pure residency check: unlike hddLoadModulesReady(), never tries to load the ATA
  // stack. Both checks are non-acquiring once the modules are resident (one DEV9 owner).
 diff --git a/include/ioman.h b/include/ioman.h
-index 8bf8fcf..85a6840 100644
+index 8bf8fcf..c3f3987 100644
 --- a/include/ioman.h
 +++ b/include/ioman.h
-@@ -74,6 +74,20 @@ int ioBlockOps(int block);
+@@ -74,6 +74,23 @@ int ioBlockOps(int block);
  */
  int ioBlockOpsTimed(int block, int timeoutTicks);
  
@@ -14167,7 +14167,10 @@ index 8bf8fcf..85a6840 100644
 +void ioLaunchBegin(void);
 +int ioWaitWrites(int timeoutTicks);
 +int ioWritesOpen(void);                                // build 114: writes started and not yet ended
-+int ioQueueEstimateMs(void);                           // build 114: the queue's work left (ms), -1 unknown
++int ioQueueEstimateMs(void);
++#ifdef RIPPS2_GUARD_TEST
++void ioGuardTestArm(void); // a test build: the next list read takes 8 s more
++#endif                           // build 114: the queue's work left (ms), -1 unknown
 +int ioRunningJob(int *type, void **data, int *seconds); // build 114: the worker's job now (0 when idle)
 +const char *ioRunningName(void);                       // its name when it is a named action, else NULL
 +void ioCancelScans(void);                              // build 114: a list read gives up at its next entry
@@ -85211,10 +85214,10 @@ index a1027e5..71b63cf 100644
  
  // This may be called, even if hddInit() was not.
 diff --git a/src/ioman.c b/src/ioman.c
-index 3dc8c13..cd3306e 100644
+index 3dc8c13..c7c60aa 100644
 --- a/src/ioman.c
 +++ b/src/ioman.c
-@@ -223,6 +223,102 @@ int ioDescribeRunning(char *out, int size)
+@@ -223,6 +223,114 @@ int ioDescribeRunning(char *out, int size)
      return 1;
  }
  
@@ -85251,6 +85254,18 @@ index 3dc8c13..cd3306e 100644
 +// queue will be done: the running job's time left, then each queued one's
 +#define IO_LIST_MODES 16
 +static int gIoListMs[IO_LIST_MODES];
++
++#ifdef RIPPS2_GUARD_TEST
++// a test build (build 114): a refresh (SELECT) makes the list read that follows it 8 s longer, so the launch guard's panel
++// shows and is filmed; a second refresh gets the notches that read's measured time (All Games' first list comes from its
++// saved list, not a read, so "slow every read after the first" never slowed the one a refresh starts)
++static volatile clock_t gGuardTestUntil;
++
++void ioGuardTestArm(void)
++{
++    gGuardTestUntil = clock() + CLOCKS_PER_SEC * 2;
++}
++#endif
 +
 +static int ioListMs(void *data)
 +{
@@ -85317,18 +85332,14 @@ index 3dc8c13..cd3306e 100644
  // RIPPS2: is the worker inside a job right now
  int ioWorkerBusy(void)
  {
-@@ -322,7 +418,22 @@ static void ioWorkerThread(void *arg)
+@@ -322,7 +430,18 @@ static void ioWorkerThread(void *arg)
              gRunSince = clock();
              gRunData = req->data;
              gRunType = req->type;
 +#ifdef RIPPS2_GUARD_TEST
-+            // a test build (build 114): a source's list read takes 8 s more after its first (boot stays quick), so
-+            // the launch guard's panel shows, against a measured time, and is filmed
-+            if (req->type == IO_MENU_UPDATE_DEFFERED && req->data != NULL) {
-+                static unsigned char seen[IO_LIST_MODES];
-+                int m = *(int *)req->data;
-+                if (m >= 0 && m < IO_LIST_MODES && seen[m]++)
-+                    DelayThread(8 * 1000 * 1000);
++            if (req->type == IO_MENU_UPDATE_DEFFERED && clock() < gGuardTestUntil) {
++                gGuardTestUntil = 0;
++                DelayThread(8 * 1000 * 1000);
 +            }
 +#endif
              ioProcessRequest(req);
@@ -85340,7 +85351,7 @@ index 3dc8c13..cd3306e 100644
              gRunType = 0;
  
              // lock the queue tip as well now
-@@ -735,6 +846,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+@@ -735,6 +854,55 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
      return IO_OK;
  }
  
@@ -86676,7 +86687,7 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..c604cd0 100644
+index 13c78db..0cf4160 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -50,6 +50,8 @@
@@ -86719,7 +86730,17 @@ index 13c78db..c604cd0 100644
                  ripps2LaunchAborted();
              }
          } else {
-@@ -1021,6 +1032,12 @@ static int modeStartMode(int mode)
+@@ -552,6 +563,9 @@ static void itemExecRefresh(struct menu_item *curMenu)
+     item_list_t *support = curMenu->userdata;
+ 
+     if (support && support->enabled) {
++#ifdef RIPPS2_GUARD_TEST
++        ioGuardTestArm();
++#endif
+         if (bdmModeIsPCCF(support->mode))
+             bdmRequestPccfProbe();
+         // FAV has no device to rescan: loadFavourites() re-reads favourites.bin and schedules its
+@@ -1021,6 +1035,12 @@ static int modeStartMode(int mode)
      return startMode;
  }
  
@@ -86732,7 +86753,7 @@ index 13c78db..c604cd0 100644
  // RIPPS2: All Games starts with its sources: Auto when any game source is Auto, Manual when any is
  // Manual (its Start then starts them all), hidden when every one is off
  static int mixStartMode(void)
-@@ -1072,7 +1089,8 @@ void initSupport(item_list_t *itemList, int mode, int force_reinit)
+@@ -1072,7 +1092,8 @@ void initSupport(item_list_t *itemList, int mode, int force_reinit)
              // network protocol after having switched away from it showed no tab. BDM device tabs escape
              // this via bdmNeedsUpdate's per-refresh visibility (and bdmInitDevicesData overrides it on
              // its own path); ETH/UDPFS/APP/FAV/HDD have no such hook, so restore it here.
@@ -86742,7 +86763,7 @@ index 13c78db..c604cd0 100644
          }
  
          if (((force_reinit) && (mod->support->enabled)) || (startMode == START_MODE_AUTO && !mod->support->enabled)) {
-@@ -1457,6 +1475,7 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+@@ -1457,6 +1478,7 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
      }
  
      clearMenuGameList(mdl);
@@ -86750,7 +86771,7 @@ index 13c78db..c604cd0 100644
      // An L3 transition is staged while the old submenu is still live. Commit only after that submenu
      // is gone, then every array read below and every newly queued row belongs to the same new view.
      viewTransition = libViewPending(mdl->support->mode);
-@@ -1530,6 +1549,9 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+@@ -1530,6 +1552,9 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
                  // Pass 0 emits folders, pass 1 emits games (single-pass mode emits every row).
                  if (passes == 2 && ((pass == 0) != (isFolderRow != 0)))
                      continue;
@@ -86760,7 +86781,7 @@ index 13c78db..c604cd0 100644
  
                  gup = guiOpCreate(GUI_OP_APPEND_MENU);
                  if (!gup) // OOM: skip this entry rather than deref NULL
-@@ -1660,9 +1682,10 @@ void menuDeferredUpdate(void *data)
+@@ -1660,9 +1685,10 @@ void menuDeferredUpdate(void *data)
          if (gFAVStartMode && mod->support->mode != FAV_MODE)
              loadFavourites();
  
@@ -86773,7 +86794,7 @@ index 13c78db..c604cd0 100644
      } else if (libViewPending(mod->support->mode)) {
          // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
          // no card inserted). Still retire the old rows and commit the retained destination so input
-@@ -3649,7 +3672,10 @@ static void _loadConfig()
+@@ -3649,7 +3675,10 @@ static void _loadConfig()
      const char *temp;
      char cardHome[16], prevHome[256], redirect[256];
      int fromCard = 0;
@@ -86785,7 +86806,7 @@ index 13c78db..c604cd0 100644
      // RIPPS2 build 100: RIPPS2's own save on a memory card first, unless a Custom Settings Path points elsewhere
      if ((lscstatus & CONFIG_OPL) && !readConfigPathRedirect(redirect, sizeof(redirect)) &&
          ripps2CardSettingsHome(cardHome, sizeof(cardHome), 1)) {
-@@ -3721,6 +3747,11 @@ static void _loadConfig()
+@@ -3721,6 +3750,11 @@ static void _loadConfig()
              if (configGetInt(configOPL, "ripps2_userset", &value) && value >= 0)
                  gRipps2UserSet = value; // build 81: the rows a theme's defaults never touch
              ripps2HintsLoadConfig(configOPL); // build 90: Hints and Glyphs
@@ -86797,7 +86818,7 @@ index 13c78db..c604cd0 100644
              if (configGetInt(configOPL, "ripps2_launch_disc", &value) && value >= 0 && value <= 3)
                  gRipps2LaunchDisc = value; // build 91: Flow and Grid > Launch Disc
              if (configGetInt(configOPL, "ripps2_vignette", &value) && value >= 0 && value <= 2)
-@@ -3970,6 +4001,7 @@ static void _loadConfig()
+@@ -3970,6 +4004,7 @@ static void _loadConfig()
              configGetInt(configOPL, CONFIG_OPL_ENABLE_PCCF, &gEnablePCCF);
              configGetInt(configOPL, CONFIG_OPL_ENABLE_DVR, &gEnableDVR);
              configGetInt(configOPL, CONFIG_OPL_ENABLE_BDMHDD, &gEnableBdmHDD);
@@ -86805,7 +86826,7 @@ index 13c78db..c604cd0 100644
              int udpbdKeyPresent = configGetInt(configOPL, CONFIG_OPL_ENABLE_UDPBD, &gEnableUDPBD);
              configGetInt(configOPL, CONFIG_OPL_NET_BOOT_PROTOCOL, &gNetBootProtocol);
              // Unified network-protocol selector (single SMAP NIC -> at most one transport per session).
-@@ -4435,6 +4467,8 @@ static void _saveConfig()
+@@ -4435,6 +4470,8 @@ static void _saveConfig()
          configSetInt(configOPL, "ripps2_recents", gRipps2Recents);
          configSetInt(configOPL, "ripps2_userset", gRipps2UserSet); // build 81
          ripps2HintsSaveConfig(configOPL);                          // build 90: Hints and Glyphs
@@ -86814,7 +86835,7 @@ index 13c78db..c604cd0 100644
          configSetInt(configOPL, "ripps2_launch_disc", gRipps2LaunchDisc); // build 91
          configSetInt(configOPL, "ripps2_vignette", gRipps2Vignette);
          configSetInt(configOPL, "ripps2_grid_layout", gRipps2GridLayout);
-@@ -5292,6 +5326,7 @@ int gArtAbandoned = 0;
+@@ -5292,6 +5329,7 @@ int gArtAbandoned = 0;
  
  void deinitEx(int exception, int modeSelected, int modeSelected2)
  {
@@ -86822,7 +86843,7 @@ index 13c78db..c604cd0 100644
      gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
  
      // Say something BEFORE the blocking teardown below, because it can hold this thread for the
-@@ -5339,6 +5374,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+@@ -5339,6 +5377,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
  
      // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
      ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
@@ -86832,7 +86853,7 @@ index 13c78db..c604cd0 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
-@@ -5384,6 +5422,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+@@ -5384,6 +5425,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
  
  void deinit(int exception, int modeSelected)
  {
@@ -86840,7 +86861,7 @@ index 13c78db..c604cd0 100644
      gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
  
      // Say something BEFORE the blocking teardown below, because it can hold this thread for the
-@@ -5431,6 +5470,9 @@ void deinit(int exception, int modeSelected)
+@@ -5431,6 +5473,9 @@ void deinit(int exception, int modeSelected)
  
      // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
      ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
@@ -86850,7 +86871,7 @@ index 13c78db..c604cd0 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
-@@ -5730,6 +5772,7 @@ static void init(void)
+@@ -5730,6 +5775,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
      ioNameAction((void *)&deferredAudioInit, "SOUND LOAD");
@@ -86858,7 +86879,7 @@ index 13c78db..c604cd0 100644
      menuInit();
  
      startPads();
-@@ -5885,6 +5928,9 @@ static void miniInit(int mode)
+@@ -5885,6 +5931,9 @@ static void miniInit(int mode)
      configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd)
  
      ioInit();
