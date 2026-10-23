@@ -132,6 +132,26 @@ need(ab, (('"with rickgaiser\'s Neutrino inside as its second game core,"', 'the
 if ab.count('{\'H\', "NEUTRINO"}'):
     fail.append('ripps2about.c: Neutrino\'s old mid-page section went to the closing credits')
 
+# ---- no background write runs into a launch (FifthFox, 10/22: damaged card images and a USB stick)
+for head in ('void deinitEx(int exception, int modeSelected, int modeSelected2)', 'void deinit(int exception, int modeSelected)'):
+    td = body(opl, head)
+    if td.find('ioLaunchBegin();') < 0 or td.find('ioLaunchBegin();') > td.find('ioBlockOpsTimed('):
+        fail.append('opl.c: %s raises the launch flag before anything else' % head.split('(')[0])
+    if td.find('ioWaitWrites(') < td.find('ioBlockOpsTimed('):
+        fail.append('opl.c: %s waits for the writes already started, after the drain' % head.split('(')[0])
+need(rd('src/ioman.c'), (('int ioWriteBegin(void)', 'the write gate'), ('ok = !gIoLaunching;', 'closed once a launch begins')), 'ioman.c')
+snapw = body(rd('src/supportbase.c'), 'void sbSnapScanned(')
+if snapw.find('ioWriteBegin()') < 0 or snapw.find('ioWriteBegin()') > snapw.find('O_WRONLY'):
+    fail.append('supportbase.c: RIPPS2.LST is written only through the write gate')
+need(rd('src/supportbase.c'), (('result = updateISOGameListNow(path, cache, head, count);', 'the games list cache through the gate'),), 'supportbase.c')
+mw = body(mix, 'static void mixMasterSave(')
+if mw.find('ioWriteBegin()') < 0 or mw.find('ioWriteBegin()') > mw.find('O_WRONLY'):
+    fail.append('mixsupport.c: allgames.bin is written only through the write gate')
+for f, needle in (('src/ripps2shot.c', 'ok = rsPngNow('), ('src/ripps2art.c', 'if (!ioWriteBegin())'), ('src/ripps2seance.c', '!ioWriteBegin()'),
+                  ('src/ripps2games.c', 'if (!ioWriteBegin())')):
+    if needle not in rd(f):
+        fail.append('%s: its background write goes through the gate' % f)
+
 # ---- one ELF (the user 10/23: no lite ELF), FreeType, fonts
 mk = rd('Makefile')
 need(mk, (('bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o', 'BIBLE is carried'), ('neutrino_tgz.o', 'Neutrino is carried')), 'Makefile')
@@ -265,6 +285,8 @@ typedef struct { void *owner; int mode, id, kind, rank; char *text, *startup; in
 typedef struct { unsigned char kind, family; char *text, *startup; } mix_master_t;
 static mix_master_t *mixMaster; static int mixMasterCount, mixMasterLoaded, mixMasterSaved = -1; static unsigned int mixMasterSum;
 static int gRipps2FastCache = 1, gEnableWrite = 1;
+static int ioWriteBegin(void) { return 1; } /* build 114's write gate: open, no launch here */
+static void ioWriteEnd(void) {}
 static char gPath[512];
 static void mixMasterPath(char *out, int size) { snprintf(out, size, "%s", gPath); }
 ''' + pick + r'''
@@ -307,4 +329,4 @@ int main(int argc, char **argv)
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build114: the merge, the launcher search, STATUS, the master list, hide and delete with the APA check, credits, one ELF, FreeType OK')
+print('build114: the merge, the launcher search, STATUS, the master list, hide and delete with the APA check, credits, launch write safety, one ELF, FreeType OK')

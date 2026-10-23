@@ -14043,6 +14043,26 @@ index b3e36fb..03234c9 100644
  typedef enum {
      HDD_LOADMODULES_STATUS_ERROR = -2,
      HDD_LOADMODULES_STATUS_UNK = -1,
+diff --git a/include/ioman.h b/include/ioman.h
+index 8bf8fcf..1d82e03 100644
+--- a/include/ioman.h
++++ b/include/ioman.h
+@@ -74,6 +74,15 @@ int ioBlockOps(int block);
+ */
+ int ioBlockOpsTimed(int block, int timeoutTicks);
+ 
++/** RIPPS2 build 114 (FifthFox's damaged card images and USB stick): a launch stops RIPPS2's background writes. A
++ *  write wraps itself in ioWriteBegin / ioWriteEnd and is skipped when ioWriteBegin returns 0 (a launch has begun);
++ *  the launch raises that with ioLaunchBegin, and after the IO drain waits on ioWaitWrites for the writes already
++ *  started (timeoutTicks: about a quarter second each). */
++int ioWriteBegin(void);
++void ioWriteEnd(void);
++void ioLaunchBegin(void);
++int ioWaitWrites(int timeoutTicks);
++
+ // RIPPS2: name a simple action for ioDescribeRunning; describe what the worker runs now ("" when idle)
+ void ioNameAction(void *fn, const char *name);
+ int ioDescribeRunning(char *out, int size);
 diff --git a/include/iosupport.h b/include/iosupport.h
 index 10b707f..633b8fd 100644
 --- a/include/iosupport.h
@@ -83572,6 +83592,61 @@ index a1027e5..eb92416 100644
  }
  
  // This may be called, even if hddInit() was not.
+diff --git a/src/ioman.c b/src/ioman.c
+index 3dc8c13..084a79c 100644
+--- a/src/ioman.c
++++ b/src/ioman.c
+@@ -735,6 +735,50 @@ int ioBlockOpsTimed(int block, int timeoutTicks)
+     return IO_OK;
+ }
+ 
++// RIPPS2 build 114: see ioman.h. The flag test and the count move together with interrupts off, so a write can never
++// start after the launch has looked at the count (one core: no thread switch without an interrupt).
++static volatile int gIoLaunching = 0, gIoWrites = 0;
++
++int ioWriteBegin(void)
++{
++    int ok;
++    DIntr();
++    ok = !gIoLaunching;
++    if (ok)
++        gIoWrites++;
++    EIntr();
++    return ok;
++}
++
++void ioWriteEnd(void)
++{
++    DIntr();
++    if (gIoWrites > 0)
++        gIoWrites--;
++    EIntr();
++}
++
++void ioLaunchBegin(void)
++{
++    DIntr();
++    gIoLaunching = 1;
++    EIntr();
++}
++
++int ioWaitWrites(int timeoutTicks)
++{
++    clock_t from = clock(), budget = (clock_t)timeoutTicks * (CLOCKS_PER_SEC / 4);
++    while (gIoWrites > 0 && clock() - from < budget) {
++        if (ioWaitPump != NULL)
++            ioWaitPump();
++        else
++            delay(1);
++    }
++    if (gIoWrites > 0)
++        LOG("ioWaitWrites: %d write(s) still open after the wait\n", gIoWrites);
++    return gIoWrites == 0;
++}
++
+ int ioBlockOps(int block)
+ {
+     // Unbounded wait (historical behavior) for all non-teardown callers.
 diff --git a/src/lang.c b/src/lang.c
 index 6bb34ce..2b0a704 100644
 --- a/src/lang.c
@@ -84209,7 +84284,7 @@ index 879e0d7..3c15d07 100644
              guiShowPsEmulationSettings();
          } else if (menuID == APP_EMBER_GAME_SETTINGS) {
 diff --git a/src/mixsupport.c b/src/mixsupport.c
-index 116a919..98ef632 100644
+index 116a919..3eb2114 100644
 --- a/src/mixsupport.c
 +++ b/src/mixsupport.c
 @@ -18,6 +18,16 @@
@@ -84257,7 +84332,7 @@ index 116a919..98ef632 100644
  } mix_rec_t;
  
  static mix_rec_t *mixArray = NULL;
-@@ -86,6 +110,244 @@ static const int mixSourceModes[] = {HDD_MODE, BDM_MODE, BDM_MODE1, BDM_MODE2, B
+@@ -86,6 +110,249 @@ static const int mixSourceModes[] = {HDD_MODE, BDM_MODE, BDM_MODE1, BDM_MODE2, B
                                       BDM_MODE6, BDM_MODE7, MMCE_MODE, ETH_MODE, UDPFS_MODE, HTTP_MODE};
  #define MIX_SOURCE_COUNT ((int)(sizeof(mixSourceModes) / sizeof(mixSourceModes[0])))
  
@@ -84486,11 +84561,16 @@ index 116a919..98ef632 100644
 +    // written in place, as favourites.bin is: a memory card has no rename to put a staged copy in place (the lab found
 +    // allgames.bin.new left behind), and a file cut short fails its sum and is not read
 +    mixMasterPath(path, sizeof(path));
++    if (!ioWriteBegin()) { // build 114: the IO worker writes this; never once a launch has begun
++        free(buf);
++        return;
++    }
 +    ok = (fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0;
 +    if (ok) {
 +        ok = write(fd, buf, len) == len;
 +        close(fd);
 +    }
++    ioWriteEnd();
 +    free(buf);
 +    if (ok) {
 +        mixMasterSum = sum;
@@ -84502,7 +84582,7 @@ index 116a919..98ef632 100644
  static char *mixStrdup(const char *s)
  {
      int n = (int)strlen(s) + 1;
-@@ -133,7 +395,7 @@ typedef struct
+@@ -133,7 +400,7 @@ typedef struct
      int count, cap;
  } mix_build_t;
  
@@ -84511,7 +84591,7 @@ index 116a919..98ef632 100644
  {
      if (b->count == b->cap) {
          int cap = b->cap ? b->cap * 2 : 256;
-@@ -157,6 +419,7 @@ static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int
+@@ -157,6 +424,7 @@ static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int
      r->rank = rank;
      r->text = text;
      r->startup = st;
@@ -84519,7 +84599,7 @@ index 116a919..98ef632 100644
  }
  
  // One source's games: its PS2 list, then its PS1 list when it can launch PS1 titles
-@@ -190,7 +453,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+@@ -190,7 +458,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
              LOG("mixCollect: mode %d row %d has no name\n", mode, i);
              continue;
          }
@@ -84530,7 +84610,7 @@ index 116a919..98ef632 100644
      }
  
      if (!libViewSupported(mode, LIB_VIEW_PS1) || (src->itemLaunchVcd == NULL && src->itemLaunchCue == NULL))
-@@ -215,7 +480,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+@@ -215,7 +485,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
              continue;
          if (kind == FAV_KIND_CUE && src->itemLaunchCue == NULL)
              continue;
@@ -84541,7 +84621,7 @@ index 116a919..98ef632 100644
      }
  }
  
-@@ -244,11 +511,15 @@ static void mixInit(item_list_t *itemList)
+@@ -244,11 +516,15 @@ static void mixInit(item_list_t *itemList)
  static int mixNeedsUpdate(item_list_t *itemList)
  {
      // the L3 dirty flag is consumed first and always, so a forced rebuild clears it too (as favNeedsUpdate)
@@ -84558,7 +84638,7 @@ index 116a919..98ef632 100644
      return viewToggled;
  }
  
-@@ -257,38 +528,59 @@ static int mixNeedsUpdate(item_list_t *itemList)
+@@ -257,38 +533,59 @@ static int mixNeedsUpdate(item_list_t *itemList)
  static int mixUpdateItemList(item_list_t *itemList)
  {
      mix_build_t b = {NULL, 0, 0};
@@ -84629,7 +84709,7 @@ index 116a919..98ef632 100644
  }
  
  static int mixGetItemCount(item_list_t *itemList) { return mixCount; }
-@@ -497,6 +789,8 @@ int mixGetArtMode(const char *value)
+@@ -497,6 +794,8 @@ int mixGetArtMode(const char *value)
          return -1;
      mixLock();
      for (i = 0; i < mixCount && mode < 0; i++) {
@@ -84638,7 +84718,7 @@ index 116a919..98ef632 100644
          if (mixKindIsPs1(mixArray[i].kind)) {
              if (strcmp(mixArray[i].text, value) != 0) {
                  char key[VCD_ID_MAX];
-@@ -573,6 +867,108 @@ int mixGetItemKind(int id)
+@@ -573,6 +872,108 @@ int mixGetItemKind(int id)
      return kind;
  }
  
@@ -84787,7 +84867,7 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..b10df55 100644
+index 13c78db..19a8548 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -50,6 +50,8 @@
@@ -84877,7 +84957,43 @@ index 13c78db..b10df55 100644
      // RIPPS2 build 100: RIPPS2's own save on a memory card first, unless a Custom Settings Path points elsewhere
      if ((lscstatus & CONFIG_OPL) && !readConfigPathRedirect(redirect, sizeof(redirect)) &&
          ripps2CardSettingsHome(cardHome, sizeof(cardHome), 1)) {
-@@ -5730,6 +5753,7 @@ static void init(void)
+@@ -5292,6 +5315,7 @@ int gArtAbandoned = 0;
+ 
+ void deinitEx(int exception, int modeSelected, int modeSelected2)
+ {
++    ioLaunchBegin(); // RIPPS2 build 114: no background write starts from here on (FifthFox's damaged cards)
+     gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
+ 
+     // Say something BEFORE the blocking teardown below, because it can hold this thread for the
+@@ -5339,6 +5363,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+ 
+     // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
+     ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
++    // RIPPS2 build 114: the drain above gives up after its bound and the worker keeps going; a cache write it started
++    // must still finish before any device goes (a cut write left FifthFox's card images and stick damaged)
++    ioWaitWrites(80);
+ 
+     // Drain is finished; now fade the status screen to black before device/GS teardown.
+     guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
+@@ -5384,6 +5411,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+ 
+ void deinit(int exception, int modeSelected)
+ {
++    ioLaunchBegin(); // RIPPS2 build 114: no background write starts from here on (FifthFox's damaged cards)
+     gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
+ 
+     // Say something BEFORE the blocking teardown below, because it can hold this thread for the
+@@ -5431,6 +5459,9 @@ void deinit(int exception, int modeSelected)
+ 
+     // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
+     ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
++    // RIPPS2 build 114: the drain above gives up after its bound and the worker keeps going; a cache write it started
++    // must still finish before any device goes (a cut write left FifthFox's card images and stick damaged)
++    ioWaitWrites(80);
+ 
+     // Drain is finished; now fade the status screen to black before device/GS teardown.
+     guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
+@@ -5730,6 +5761,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
      ioNameAction((void *)&deferredAudioInit, "SOUND LOAD");
@@ -84885,7 +85001,7 @@ index 13c78db..b10df55 100644
      menuInit();
  
      startPads();
-@@ -5885,6 +5909,9 @@ static void miniInit(int mode)
+@@ -5885,6 +5917,9 @@ static void miniInit(int mode)
      configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd)
  
      ioInit();
@@ -84995,6 +85111,34 @@ index 0ec24b6..05d46fb 100644
      {'G', NULL},
      {'H', N_("OPEN PS2 LOADER DEVELOPERS")},
      {'T', "BatRastard - bbsan2k - belek666 - crazyc"},
+diff --git a/src/ripps2art.c b/src/ripps2art.c
+index 4846240..68b685e 100644
+--- a/src/ripps2art.c
++++ b/src/ripps2art.c
+@@ -706,15 +706,18 @@ static int artSave(const art_target_t *t, const unsigned char *buf, int len)
+         mkdir(dir, 0777); // ART: there already on most drives
+     }
+     snprintf(file, sizeof(file), "%s.png", t->path);
+-    if ((fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
++    if (!ioWriteBegin()) // build 114: never once a launch has begun
+         return 0;
++    if ((fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0) {
++        ioWriteEnd();
++        return 0;
++    }
+     w = write(fd, buf, len);
+     close(fd);
+-    if (w != len) {
++    if (w != len)
+         remove(file);
+-        return 0;
+-    }
+-    return 1;
++    ioWriteEnd();
++    return w == len;
+ }
+ 
+ // ---------------------------------------------------------------- the run
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
 index 459b24e..5651a19 100644
 --- a/src/ripps2ember.c
@@ -85085,10 +85229,10 @@ index 4bedb0c..2ccde25 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..1d80dee
+index 0000000..2af37d6
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,990 @@
+@@ -0,0 +1,997 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -85264,15 +85408,22 @@ index 0000000..1d80dee
 +    if (!gEnableWrite || !s->loaded || s->prefix[0] == '\0')
 +        return 0;
 +    snprintf(path, sizeof(path), "%s%s", s->prefix, SH_FILE);
++    if (!ioWriteBegin()) // build 114: never once a launch has begun
++        return 0;
 +    if (s->count == 0) {
 +        remove(path);
++        ioWriteEnd();
 +        return 1;
 +    }
-+    if ((f = fopen(path, "w")) == NULL)
++    if ((f = fopen(path, "w")) == NULL) {
++        ioWriteEnd();
 +        return 0;
++    }
 +    for (i = 0; i < s->count; i++)
 +        fprintf(f, "%d\t%s\n", s->ps1[i], s->names[i]);
-+    return fclose(f) == 0;
++    i = fclose(f) == 0;
++    ioWriteEnd();
++    return i;
 +}
 +
 +void ripps2ShroudReload(int mode)
@@ -86129,10 +86280,10 @@ index ce09083..3b36c8e 100644
                  snprintf(name, sizeof(name), "%s", p->name); // the list is read again below: keep the name
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
 new file mode 100644
-index 0000000..a71c177
+index 0000000..4a70bf8
 --- /dev/null
 +++ b/src/ripps2seance.c
-@@ -0,0 +1,632 @@
+@@ -0,0 +1,636 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -86182,6 +86333,7 @@ index 0000000..a71c177
 +#include "include/supportbase.h"
 +#include "include/bdmsupport.h"
 +#include "include/iosupport.h"
++#include "include/ioman.h" // build 114: ioWriteBegin, no write once a launch has begun
 +#include "include/libview.h"
 +#include "include/favsupport.h"
 +#include "include/mixsupport.h"
@@ -86266,11 +86418,13 @@ index 0000000..a71c177
 +    FILE *f;
 +    int i;
 +
-+    if (!gEnableWrite)
++    if (!gEnableWrite || !ioWriteBegin()) // build 114: never once a launch has begun
 +        return;
 +    sePath(path, sizeof(path));
-+    if ((f = fopen(path, "w")) == NULL)
++    if ((f = fopen(path, "w")) == NULL) {
++        ioWriteEnd();
 +        return;
++    }
 +    fprintf(f, "# RIPPS2 (build 114): where each launcher RIPPS2 does not carry was found. RIPPS2 keeps this file.\n"
 +               "# A path names its drive by kind (usb:, ata:, mx4sio:, ilink:, mmce:, pfs:, mc:), so any slot finds it.\n");
 +    for (i = 0; i < SEANCE_COUNT; i++)
@@ -86278,6 +86432,7 @@ index 0000000..a71c177
 +            fprintf(f, "%s=%s\n", seKey[i], seWhere[i]);
 +    fprintf(f, "LOOKED=%d\n", seLooked);
 +    fclose(f);
++    ioWriteEnd();
 +}
 +
 +// "mass1:/POPS/POPSTARTER.ELF" -> "usb:/POPS/POPSTARTER.ELF": the drive by its kind. 0 for what is not kept (a share)
@@ -86765,6 +86920,33 @@ index 0000000..a71c177
 +    }
 +    return 0;
 +}
+diff --git a/src/ripps2shot.c b/src/ripps2shot.c
+index a883b4b..324b0cd 100644
+--- a/src/ripps2shot.c
++++ b/src/ripps2shot.c
+@@ -516,8 +516,21 @@ void ripps2ShotFillConfig(struct EECoreConfig_t *config, const char *mode)
+ 
+ // ---- developing (step 5): a kept shot to its PNGs
+ 
+-// idx (w x h, each row twice when twice) as an 8-bit palette PNG at path
++static int rsPngNow(const char *path, const u8 *idx, int w, int h, int twice, const u8 *pal, int n);
++
++// build 114: developing runs in the background too (Develop Shots: Auto); never once a launch has begun
+ static int rsPng(const char *path, const u8 *idx, int w, int h, int twice, const u8 *pal, int n)
++{
++    int ok;
++    if (!ioWriteBegin())
++        return 0;
++    ok = rsPngNow(path, idx, w, h, twice, pal, n);
++    ioWriteEnd();
++    return ok;
++}
++
++// idx (w x h, each row twice when twice) as an 8-bit palette PNG at path
++static int rsPngNow(const char *path, const u8 *idx, int w, int h, int twice, const u8 *pal, int n)
+ {
+     FILE *f = fopen(path, "wb");
+     png_structp png;
 diff --git a/src/ripps2status.c b/src/ripps2status.c
 index f2c48c4..356a4d8 100644
 --- a/src/ripps2status.c
@@ -87091,7 +87273,7 @@ index 43ed8bd..f4d22b4 100644
  /* MENU RUMBLE TIMING -- the RETROLauncher model, which is the reference for feedback that actually
     reads as feedback on hardware. Two shapes, and the split matters more than either value:
 diff --git a/src/supportbase.c b/src/supportbase.c
-index 0517e61..1bc5e22 100644
+index 0517e61..3c59179 100644
 --- a/src/supportbase.c
 +++ b/src/supportbase.c
 @@ -4,6 +4,7 @@
@@ -87102,7 +87284,61 @@ index 0517e61..1bc5e22 100644
  #include "include/folderbrowse.h" // FOLDER_SUB_MAX + folder-browse subpath state
  #include "include/vcdsupport.h"   // vcdExtractGameId + VCD_ID_MAX -- VCD per-game CFG keying
  #include "include/cuesupport.h"   // cueIsCueEntry -- Ember rows key their CFG by folder name too
-@@ -924,10 +925,7 @@ static const struct
+@@ -211,7 +212,20 @@ static void freeISOGameListCache(struct game_cache_list *cache)
+     }
+ }
+ 
++static int updateISOGameListNow(const char *path, const struct game_cache_list *cache, const struct game_list_t *head, int count);
++
++// RIPPS2 build 114: the games list cache is written by the IO worker; never once a launch has begun
+ static int updateISOGameList(const char *path, const struct game_cache_list *cache, const struct game_list_t *head, int count)
++{
++    int result;
++    if (!ioWriteBegin())
++        return 0;
++    result = updateISOGameListNow(path, cache, head, count);
++    ioWriteEnd();
++    return result;
++}
++
++static int updateISOGameListNow(const char *path, const struct game_cache_list *cache, const struct game_list_t *head, int count)
+ {
+     char filename[256];
+     FILE *file;
+@@ -784,16 +798,22 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+         return;
+     snprintf(path, sizeof(path), "%s%s", prefix, SB_SNAP_FILE);
+     if (gamecount <= 0 || list == NULL) { // nothing there now: no list to show next time
+-        if (snap->sum != 0)
++        if (snap->sum != 0 && ioWriteBegin()) { // build 114: never once a launch has begun
+             remove(path);
++            ioWriteEnd();
++        }
+         snap->sum = 0;
+         return;
+     }
+     sum = sbSnapHash(list, gamecount, fsize);
+     if (sum == snap->sum)
+         return;
+-    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
++    if (!ioWriteBegin()) // build 114: a scan that outlasted a launch's drain writes nothing
+         return;
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0) {
++        ioWriteEnd();
++        return;
++    }
+     memset(&h, 0, sizeof(h));
+     memcpy(h.magic, SB_SNAP_MAGIC, 8);
+     h.count = gamecount;
+@@ -803,6 +823,7 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+     if (write(fd, &h, sizeof(h)) == (int)sizeof(h) && write(fd, list, bytes) == bytes)
+         snap->sum = sum;
+     close(fd);
++    ioWriteEnd();
+ }
+ 
+ void sbSnapForget(sb_snap_t *snap)
+@@ -924,10 +945,7 @@ static const struct
      int compatModes;
  } sbTitleCompatDefaults[] = {
      {"SLES_511.14", COMPAT_MODE_1}, // Pro Evolution Soccer 2 (Europe): streamed audio breaks without Accurate Reads (upstream OPL #1686)
@@ -87114,7 +87350,7 @@ index 0517e61..1bc5e22 100644
  };
  
  int sbTitleCompatDefault(config_set_t *configSet)
-@@ -1081,6 +1079,11 @@ int sbPrepare(base_game_info_t *game, config_set_t *configSet, int size_cdvdman,
+@@ -1081,6 +1099,11 @@ int sbPrepare(base_game_info_t *game, config_set_t *configSet, int size_cdvdman,
          settings->flags |= IOPCORE_COMPAT_ACCU_READS;
      }
  
@@ -87126,7 +87362,7 @@ index 0517e61..1bc5e22 100644
      if (compatmask & COMPAT_MODE_2) {
          settings->flags |= IOPCORE_COMPAT_ALT_READ;
      }
-@@ -1847,6 +1850,8 @@ static const char *sbNeutrinoResolved(const char *path)
+@@ -1847,6 +1870,8 @@ static const char *sbNeutrinoResolved(const char *path)
  {
      if (path == NULL)
          return NULL;
@@ -87135,7 +87371,7 @@ index 0517e61..1bc5e22 100644
      const char *slash = sbLastPathSeparator(path);
      if (slash != NULL) {
          char vpath[320], ver[128]; // same headroom rationale as sbNeutrinoInstallComplete's probe
-@@ -2433,6 +2438,18 @@ const char *sbResolveNeutrinoPath(const char *activePrefix)
+@@ -2433,6 +2458,18 @@ const char *sbResolveNeutrinoPath(const char *activePrefix)
              return mcHit;
      }
  
