@@ -84248,7 +84248,7 @@ index 879e0d7..3c15d07 100644
              guiShowPsEmulationSettings();
          } else if (menuID == APP_EMBER_GAME_SETTINGS) {
 diff --git a/src/mixsupport.c b/src/mixsupport.c
-index 116a919..aadcd3e 100644
+index 116a919..98ef632 100644
 --- a/src/mixsupport.c
 +++ b/src/mixsupport.c
 @@ -18,6 +18,16 @@
@@ -84296,7 +84296,7 @@ index 116a919..aadcd3e 100644
  } mix_rec_t;
  
  static mix_rec_t *mixArray = NULL;
-@@ -86,6 +110,248 @@ static const int mixSourceModes[] = {HDD_MODE, BDM_MODE, BDM_MODE1, BDM_MODE2, B
+@@ -86,6 +110,244 @@ static const int mixSourceModes[] = {HDD_MODE, BDM_MODE, BDM_MODE1, BDM_MODE2, B
                                       BDM_MODE6, BDM_MODE7, MMCE_MODE, ETH_MODE, UDPFS_MODE, HTTP_MODE};
  #define MIX_SOURCE_COUNT ((int)(sizeof(mixSourceModes) / sizeof(mixSourceModes[0])))
  
@@ -84490,10 +84490,10 @@ index 116a919..aadcd3e 100644
 +    LOG("mixMasterLoad: %d games from %s" "\n", count, path);
 +}
 +
-+// The list as it stands, when it differs from the one kept: written beside, then put in place
++// The list as it stands, when it differs from the one kept
 +static void mixMasterSave(const mix_rec_t *arr, int count)
 +{
-+    char path[256], tmp[268];
++    char path[256];
 +    unsigned char *buf, *p;
 +    unsigned int sum;
 +    int i, len = 16, fd, ok;
@@ -84522,18 +84522,14 @@ index 116a919..aadcd3e 100644
 +    memcpy(buf, MIX_MASTER_MAGIC, 8);
 +    mixPutLe32(buf + 8, count);
 +    mixPutLe32(buf + 12, sum);
++    // written in place, as favourites.bin is: a memory card has no rename to put a staged copy in place (the lab found
++    // allgames.bin.new left behind), and a file cut short fails its sum and is not read
 +    mixMasterPath(path, sizeof(path));
-+    snprintf(tmp, sizeof(tmp), "%s.new", path);
-+    ok = (fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0;
++    ok = (fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0;
 +    if (ok) {
 +        ok = write(fd, buf, len) == len;
 +        close(fd);
 +    }
-+    if (ok) {
-+        remove(path);
-+        ok = rename(tmp, path) == 0;
-+    } else
-+        remove(tmp);
 +    free(buf);
 +    if (ok) {
 +        mixMasterSum = sum;
@@ -84545,7 +84541,7 @@ index 116a919..aadcd3e 100644
  static char *mixStrdup(const char *s)
  {
      int n = (int)strlen(s) + 1;
-@@ -133,7 +399,7 @@ typedef struct
+@@ -133,7 +395,7 @@ typedef struct
      int count, cap;
  } mix_build_t;
  
@@ -84554,7 +84550,7 @@ index 116a919..aadcd3e 100644
  {
      if (b->count == b->cap) {
          int cap = b->cap ? b->cap * 2 : 256;
-@@ -157,6 +423,7 @@ static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int
+@@ -157,6 +419,7 @@ static void mixAppend(mix_build_t *b, item_list_t *owner, int mode, int id, int
      r->rank = rank;
      r->text = text;
      r->startup = st;
@@ -84562,7 +84558,7 @@ index 116a919..aadcd3e 100644
  }
  
  // One source's games: its PS2 list, then its PS1 list when it can launch PS1 titles
-@@ -190,7 +457,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+@@ -190,7 +453,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
              LOG("mixCollect: mode %d row %d has no name\n", mode, i);
              continue;
          }
@@ -84573,7 +84569,7 @@ index 116a919..aadcd3e 100644
      }
  
      if (!libViewSupported(mode, LIB_VIEW_PS1) || (src->itemLaunchVcd == NULL && src->itemLaunchCue == NULL))
-@@ -215,7 +484,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+@@ -215,7 +480,9 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
              continue;
          if (kind == FAV_KIND_CUE && src->itemLaunchCue == NULL)
              continue;
@@ -84584,7 +84580,7 @@ index 116a919..aadcd3e 100644
      }
  }
  
-@@ -244,11 +515,15 @@ static void mixInit(item_list_t *itemList)
+@@ -244,11 +511,15 @@ static void mixInit(item_list_t *itemList)
  static int mixNeedsUpdate(item_list_t *itemList)
  {
      // the L3 dirty flag is consumed first and always, so a forced rebuild clears it too (as favNeedsUpdate)
@@ -84601,7 +84597,7 @@ index 116a919..aadcd3e 100644
      return viewToggled;
  }
  
-@@ -257,38 +532,59 @@ static int mixNeedsUpdate(item_list_t *itemList)
+@@ -257,38 +528,59 @@ static int mixNeedsUpdate(item_list_t *itemList)
  static int mixUpdateItemList(item_list_t *itemList)
  {
      mix_build_t b = {NULL, 0, 0};
@@ -84672,7 +84668,7 @@ index 116a919..aadcd3e 100644
  }
  
  static int mixGetItemCount(item_list_t *itemList) { return mixCount; }
-@@ -497,6 +793,8 @@ int mixGetArtMode(const char *value)
+@@ -497,6 +789,8 @@ int mixGetArtMode(const char *value)
          return -1;
      mixLock();
      for (i = 0; i < mixCount && mode < 0; i++) {
@@ -84681,7 +84677,7 @@ index 116a919..aadcd3e 100644
          if (mixKindIsPs1(mixArray[i].kind)) {
              if (strcmp(mixArray[i].text, value) != 0) {
                  char key[VCD_ID_MAX];
-@@ -573,6 +871,108 @@ int mixGetItemKind(int id)
+@@ -573,6 +867,108 @@ int mixGetItemKind(int id)
      return kind;
  }
  
@@ -85203,10 +85199,10 @@ index 4bedb0c..a2e66ed 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..fbc2898
+index 0000000..261b9df
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,963 @@
+@@ -0,0 +1,968 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -85847,7 +85843,12 @@ index 0000000..fbc2898
 +    if (mode == HDD_MODE)
 +        return _t("the internal HDD (APA)");
 +    if (mode >= BDM_MODE && mode <= BDM_MODE_LAST) {
++        int t = bdmSlotDeviceType(mode - BDM_MODE);
 +        const char *n = bdmSlotDriveName(mode - BDM_MODE);
++        if (t == BDM_TYPE_ATA)
++            return _t("the internal HDD (exFAT)");
++        if (t == BDM_TYPE_USB)
++            return _t("the USB drive");
 +        return n != NULL ? n : _t("the drive");
 +    }
 +    if (mode == MMCE_MODE)
