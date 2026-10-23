@@ -26747,7 +26747,7 @@ index 10e6306..c65f5be 100644
 +  PCCF_UNSUPPORTED_GAME: Hiện CF chỉ hỗ trợ trò chơi PS2 gốc. VMC trên CF, nạp PS1 và thành tích qua mạng không dùng được.
 +  HINT_ENABLE_DVR: Tìm ISO DESR DVR thử nghiệm. Cần bật nguồn HDD; chạy trò chơi cần Neutrino bên ngoài có hỗ trợ DVR.
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index e2e218a..6ba711c 100644
+index e2e218a..b1a0d00 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -818,7 +818,7 @@ gui_strings:
@@ -26759,6 +26759,15 @@ index e2e218a..6ba711c 100644
  - label: HINT_VCD_SHOW_PP_POPS
    string: HDD only -- list one-game partitions named PP.<ID>.POPS.<name> (e.g. PP.SCES-01492.POPS.MEDIEVIL) as PS1 games. Enumeration only; launch is unchanged. Other PP.* partitions (apps, PS2 games) stay hidden.
  - label: HINT_VMC_SLOT_DISABLE
+@@ -1634,7 +1634,7 @@ gui_strings:
+ - label: NETBOOT_RESTART_NOW
+   string: "The network protocol changes after a restart. Save settings and restart OPL now?"
+ - label: HINT_NET_PROTOCOL
+-  string: "Which network service RiptOPL uses: an SMB share, UDPFS, UDPBD or HTTP. The same setting as on Game Sources. Switching away from one that is already running needs a restart."
++  string: "Which network service RiptOPL uses: an SMB share, UDPFS, UDPBD or HTTP. Switching away from one that is already running needs a restart."
+ - label: HINT_UDPFS_ACCESS
+   string: "UDPFS only. Files reads loose ISOs from the server's games folder; IMG reads a disk image as a drive. SMB and HTTP always use Files, UDPBD always IMG."
+ - label: HINT_SMB_VERSION
 @@ -2076,3 +2076,125 @@ gui_strings:
  
  - label: HINT_ENABLE_DVR
