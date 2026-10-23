@@ -171,8 +171,8 @@ lg = body(gm, 'int ripps2LaunchGuard(void)')
 need(lg, (('ioQueueEstimateMs()', 'the panel estimates the queue'), ('lgDraw(', 'the panel is drawn'),
           ('return 1; // a job that never ends', 'a stop is bounded'), ('if (done > 0.0 && now - done > 0.35)', 'the launch goes on by itself when the queue is done'),
           ('return 0;', 'Circle backs out')), 'ripps2games.c guard')
-if not (lg.find('getKeyOn(gSelectButton)') < lg.find('ioLaunchBegin();') < lg.find('ioCancelScans();')):
-    fail.append('ripps2games.c: Cross stops writes, then the list read')
+if not (lg.find('ioLaunchBegin();') < lg.find('getKeyOn(gSelectButton)') < lg.find('ioCancelScans();')):
+    fail.append('ripps2games.c: writes stop at the pick; Cross then stops the list read')
 if 'guiMsgBox(' in lg:
     fail.append('ripps2games.c: the guard is the panel, not a message box')
 need(rd('src/ripps2disc.c'), (('void ripps2NotchRing(int cx, int cy, float p, int a)', "RIPDISC's notches for the guard"),), 'ripps2disc.c')
@@ -238,6 +238,23 @@ need(rd('src/ioman.c'), (('if (!(gIoCancelScans && req->type == IO_MENU_UPDATE_D
                          ('ioLaunchCancel(); // build 114: the menu again', 'ioInit clears the launch flags')), 'ioman.c')
 if 'ioLaunchCancel();' not in body(rd('src/ripps2bg.c'), 'void ripps2LaunchAborted(void)'):
     fail.append('ripps2bg.c: a launch that comes back clears the launch flags')
+# FifthFox (10/23, MMCE card images and a USB stick): the launch is committed at the pick (no background write starts
+# before the MMCE switches cards or the IOP resets); Back gives the writes back; a short wait shows only the loading mark
+if guard_.find('ioLaunchBegin();') < 0 or guard_.find('ioLaunchBegin();') > guard_.find('if (!lgBusy())'):
+    fail.append('ripps2games.c: the guard commits the launch (ioLaunchBegin) before it looks at the queue')
+if 'ioLaunchCancel(); // back where the launch began' not in guard_ or 'lgDrawQuiet();' not in guard_:
+    fail.append('ripps2games.c: Back clears the launch; a short wait is quiet (the loading mark, no panel)')
+if 'int w = 580, h = 118, x = (640 - w) / 2, y = 134' not in rd('src/ripps2disc.c'):
+    fail.append('ripps2disc.c: RIPDISC\'s panel on the launch guard\'s frame (one wheel in one place)')
+# the theme list (the user, 10/23): Hold SELECT List (default), Cycle, Off
+need(rd('src/ripps2ui.c'), (('int ripps2ThemePanel(const char **names, int cur)', 'the theme panel'),
+                            ('"THEMES"', 'its title'), ('"IN USE"', 'the theme in use marked')), 'ripps2ui.c')
+need(g, (('int guiPickTheme(void)', 'the list\'s entry'), ('int gRipps2SelectHold = RIPPS2_HOLD_LIST;', 'List by default'),
+         ('{"List", "Cycle", "Off", NULL}', 'its three choices')), 'gui.c')
+need(dia, (('{.label = {"Hold SELECT", -1}}', 'the Interface row'),), 'dialogs.c')
+need(rd('src/menusys.c'), (('if (gRipps2SelectHold == RIPPS2_HOLD_CYCLE)', 'Cycle as before'),
+                           ('else if (!guiPickTheme() && !viewPending)', 'the theme in use picked: a refresh')), 'menusys.c')
+need(rd('src/opl.c'), (('"ripps2_select_hold"', 'kept in the settings'),), 'opl.c')
 # and Network Connectivity Off left the SMB page up: Game Sources lost the protocol's re-derive with its Protocol row
 if 'guiNetProtocolApplied(netProtocolWas);' not in body(g, 'static void guiSourcesNetRowsRead('):
     fail.append('gui.c: Network Connectivity on Game Sources turns the network page on and off')

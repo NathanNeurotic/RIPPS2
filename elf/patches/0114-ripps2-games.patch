@@ -14029,7 +14029,7 @@ index 726c128..2cf6604 100644
  
  // Scan "<devPrefix><EmberFolder>/games/" for game SUBDIRECTORIES -- and a subdirectory only counts
 diff --git a/include/dialogs.h b/include/dialogs.h
-index f70771d..5b82000 100644
+index f70771d..5f778be 100644
 --- a/include/dialogs.h
 +++ b/include/dialogs.h
 @@ -326,6 +326,7 @@ enum UI_ITEMS {
@@ -14040,7 +14040,7 @@ index f70771d..5b82000 100644
  
      OSD_LANGUAGE_SOURCE,
      OSD_LANGUAGE_ENABLE,
-@@ -369,6 +370,27 @@ enum UI_ITEMS {
+@@ -369,6 +370,28 @@ enum UI_ITEMS {
      RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
      CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
      LAUNCH_GSM_DEFAULTS_BUTTON,
@@ -14065,10 +14065,11 @@ index f70771d..5b82000 100644
 +    SWEEP_COLOR3,
 +    SWEEP_COLOR4,
 +    SWEEP_SPEED,
++    UICFG_RIPPS2_SELECT_HOLD, // build 114: Interface > Hold SELECT (the theme list, the next theme, nothing)
  
  #ifdef PADEMU
      PADEMU_GLOBAL_BUTTON,
-@@ -453,6 +475,8 @@ extern struct UIItem diaOSDConfig[];
+@@ -453,6 +476,8 @@ extern struct UIItem diaOSDConfig[];
  extern struct UIItem diaCoverflowConfig[];
  extern struct UIItem diaNeutrinoArgs[];
  extern struct UIItem diaDeviceConfig[];
@@ -14091,10 +14092,20 @@ index 7e6c20a..917e3c4 100644
  /** Updates to the native display resolution and aspect ratio
   * @note Invalidates the whole glyph cache for all fonts! */
 diff --git a/include/gui.h b/include/gui.h
-index ad18867..f249395 100644
+index ad18867..d0835d7 100644
 --- a/include/gui.h
 +++ b/include/gui.h
-@@ -177,6 +177,7 @@ int guiPopstarterPathHandler(char *text, int maxLen);
+@@ -127,6 +127,9 @@ int guiShowKeyboard(char *value, int maxLength);
+ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui);
+ int guiIsActive(void);
+ void guiCycleTheme(void); // build 79: the next theme (SELECT held 4.2 s)
++enum { RIPPS2_HOLD_LIST = 0, RIPPS2_HOLD_CYCLE, RIPPS2_HOLD_OFF };
++extern int gRipps2SelectHold; // build 114: Settings > Interface > Hold SELECT (SELECT held 4.2 s on a list)
++int guiPickTheme(void);   // build 114: the theme list (SELECT held 4.2 s, Hold SELECT: List); 0: the one in use, refresh
+ void guiMsgBoxStartOption(const char *label); // RIPPS2: the next guiMsgBox offers START (returns 2)
+ void guiMsgBoxSound(int sfx); // RIPPS2: the next message box plays this sound (SFX_ERROR, SFX_SAVE)
+ int guiPromptRebootIop(void);
+@@ -177,6 +180,7 @@ int guiPopstarterPathHandler(char *text, int maxLen);
  int guiExitPathHandler(char *text, int maxLen);
  int guiShowNeutrinoArgsConfig(char *argsBuf, int bufSize); // 1 when the saved args changed
  int guiNeutrinoArgsCwdHandler(char *text, int maxLen);
@@ -14102,7 +14113,7 @@ index ad18867..f249395 100644
  int guiNeutrinoArgsCfgHandler(char *text, int maxLen);
  int guiNeutrinoArgsElfHandler(char *text, int maxLen);
  int guiNeutrinoArgsAta0Handler(char *text, int maxLen);
-@@ -203,6 +204,8 @@ int guiNetProtocolNeedsRestart(void);
+@@ -203,6 +207,8 @@ int guiNetProtocolNeedsRestart(void);
  // One-shot POPSTARTER USB driver pick (FAT32 vs exFAT), shown on EVERY USB VCD launch
  // (maintainer directive 2026-08-01: the user picks per launch, never a sticky default).
  int guiShowVcdUsbMode(void);
@@ -14471,7 +14482,7 @@ index ccda44b..3797788 100644
  void rmStartFrame(void);
  
 diff --git a/include/ripps2.h b/include/ripps2.h
-index a10c426..d030928 100644
+index a10c426..749c076 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -87,7 +87,8 @@ enum { RIPPS2_SRC_POP = RIPPS2_SHOW_COUNT, RIPPS2_SRC_COUNT };
@@ -14524,13 +14535,14 @@ index a10c426..d030928 100644
  void ripps2HintsSaveConfig(config_set_t *config);
  int ripps2EditFile(const char *path);                              // 1 when it saved
  int ripps2EditMetadata(config_set_t *config, const char *gameName); // 1 when SAVE was chosen (values set, not written)
-@@ -265,12 +292,19 @@ void ripps2PlayLaunchSequence(void); // pillars only, light-up and flash; the la
+@@ -265,12 +292,20 @@ void ripps2PlayLaunchSequence(void); // pillars only, light-up and flash; the la
  int ripps2LaunchScreenHeld(void);    // that frame is up: the teardown must not draw over it
  void ripps2LaunchPump(void);         // build 70: one more frame of it, with the loading mark, from the teardown's waits
  void ripps2LaunchAborted(void);      // the launch failed and returned to the menu
 +int ripps2LaunchGuard(void);         // build 114: 1 to start; 0 when the user backed out (ripps2games.c)
 +void ripps2NotchRing(int cx, int cy, float p, int a); // build 114: RIPDISC's notches (ripps2disc.c)
 +void ripps2HintPairA(int iconA, const char *a, int iconB, const char *b, int y, int alpha);
++int ripps2ThemePanel(const char **names, int cur); // build 114: the theme list (SELECT held, Hold SELECT: List)
  int ripps2LaunchDiscFrame(void);     // build 91: one frame of the field with the launch disc on it; 0 when no disc is armed
  
  // ---- The launch disc (ripps2ui.c, build 91) ----
@@ -26772,7 +26784,7 @@ index 10e6306..c65f5be 100644
 +  PCCF_UNSUPPORTED_GAME: Hiện CF chỉ hỗ trợ trò chơi PS2 gốc. VMC trên CF, nạp PS1 và thành tích qua mạng không dùng được.
 +  HINT_ENABLE_DVR: Tìm ISO DESR DVR thử nghiệm. Cần bật nguồn HDD; chạy trò chơi cần Neutrino bên ngoài có hỗ trợ DVR.
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index e2e218a..b1a0d00 100644
+index e2e218a..8b86673 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -818,7 +818,7 @@ gui_strings:
@@ -26793,7 +26805,7 @@ index e2e218a..b1a0d00 100644
  - label: HINT_UDPFS_ACCESS
    string: "UDPFS only. Files reads loose ISOs from the server's games folder; IMG reads a disk image as a drive. SMB and HTTP always use Files, UDPBD always IMG."
  - label: HINT_SMB_VERSION
-@@ -2076,3 +2076,125 @@ gui_strings:
+@@ -2076,3 +2076,127 @@ gui_strings:
  
  - label: HINT_ENABLE_DVR
    string: "Experimental DESR DVR ISO discovery. Requires HDD source enabled; game launch needs external DVR-capable Neutrino."
@@ -26919,6 +26931,8 @@ index e2e218a..b1a0d00 100644
 +
 +- label: HINT_RIPPS2_SWEEP_SPEED
 +  string: "How long each color lasts before the next fades in. Even Lively stays smooth: the colors never flash."
++- label: HINT_RIPPS2_SELECT_HOLD
++  string: "SELECT held 4.2 s on a game list. List: the themes in a panel, pick one. Cycle: the next theme. Off: nothing (a press still refreshes)."
 diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
 index 4b68ab4..0c9f01e 100644
 --- a/misc/theme_coverflow.cfg
@@ -83046,7 +83060,7 @@ index 72b562e..2639ae1 100644
          return -1;
      }
 diff --git a/src/dialogs.c b/src/dialogs.c
-index 238686c..9c60c47 100644
+index 238686c..19a2ad9 100644
 --- a/src/dialogs.c
 +++ b/src/dialogs.c
 @@ -221,9 +221,9 @@ struct UIItem diaNetConfig[] = {
@@ -83224,9 +83238,15 @@ index 238686c..9c60c47 100644
      {UI_SPACER},
      {UI_BOOL, CFG_VCD_SHOW_PP_POPS, 1, 1, _STR_HINT_VCD_SHOW_PP_POPS, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
-@@ -860,27 +873,29 @@ struct UIItem diaUIConfig[] = {
+@@ -859,28 +872,35 @@ struct UIItem diaUIConfig[] = {
+     {UI_SPACER},
      {UI_ENUM, UICFG_THEME, 1, 1, _STR_HINT_RIPPS2_THEME, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
++    // build 114 (the user, 10/23): what SELECT held 4.2 s on a list does: the theme list, the next theme, or nothing
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"Hold SELECT", -1}}},
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_SELECT_HOLD, 1, 1, _STR_HINT_RIPPS2_SELECT_HOLD, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
  
 -    // Theme-specific presentation controls stay together.
 -    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COVERFLOW_SETTINGS}}},
@@ -83261,7 +83281,7 @@ index 238686c..9c60c47 100644
      {UI_BREAK},
  
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_LANGUAGE}}},
-@@ -898,6 +913,11 @@ struct UIItem diaUIConfig[] = {
+@@ -898,6 +918,11 @@ struct UIItem diaUIConfig[] = {
      {UI_BOOL, UICFG_AUTOSORT, 1, 1, _STR_HINT_AUTOSORT, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -83273,7 +83293,7 @@ index 238686c..9c60c47 100644
  
      // buttons
      {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
-@@ -916,6 +936,12 @@ struct UIItem diaArtworkConfig[] = {
+@@ -916,6 +941,12 @@ struct UIItem diaArtworkConfig[] = {
      {UI_BOOL, UICFG_COVERART, 1, 1, _STR_HINT_COVERART, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -83286,7 +83306,7 @@ index 238686c..9c60c47 100644
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"Disc Artwork", -1}}},
      {UI_SPACER},
      {UI_BOOL, UICFG_ENABLE_DISCART, 1, 1, _STR_HINT_DISCART, 0, 0, {.intvalue = {0, 0}}},
-@@ -961,45 +987,39 @@ struct UIItem diaArtworkConfig[] = {
+@@ -961,45 +992,39 @@ struct UIItem diaArtworkConfig[] = {
  
  // Interface -> Colors. Colour rows + Reset Colors moved out of diaUIConfig.
  struct UIItem diaColorsConfig[] = {
@@ -83349,7 +83369,7 @@ index 238686c..9c60c47 100644
      {UI_BREAK},
  
      {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_TXTCOLOR}}},
-@@ -1042,11 +1062,52 @@ struct UIItem diaColorsConfig[] = {
+@@ -1042,11 +1067,52 @@ struct UIItem diaColorsConfig[] = {
      // end of dialog
      {UI_TERMINATOR}};
  
@@ -83403,7 +83423,7 @@ index 238686c..9c60c47 100644
      {UI_SPLITTER},
  
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_VMODE}}},
-@@ -1074,11 +1135,7 @@ struct UIItem diaDisplayConfig[] = {
+@@ -1074,11 +1140,7 @@ struct UIItem diaDisplayConfig[] = {
      {UI_INT, UICFG_OVERSCAN, 1, 1, _STR_HINT_MENU_OVERSCAN, 0, 0, {.intvalue = {0, 0, 0, 100}}},
      {UI_BREAK},
  
@@ -83416,7 +83436,7 @@ index 238686c..9c60c47 100644
      // build 113: GSM Defaults (the video mode games launch in) lives on Game Launching alone
      // buttons
      {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
-@@ -1303,6 +1360,10 @@ struct UIItem diaCompatConfig[] = {
+@@ -1303,6 +1365,10 @@ struct UIItem diaCompatConfig[] = {
      {UI_LABEL, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_MODE7}}},
      {UI_SPACER},
      {UI_BOOL, COMPAT_MODE_BASE + 6, 1, 1, _STR_HINT_MODE7, -10, 0, {.intvalue = {0, 0}}},
@@ -83427,7 +83447,7 @@ index 238686c..9c60c47 100644
      {UI_BREAK},
  
      {UI_SPACER},
-@@ -1398,6 +1459,8 @@ struct UIItem diaVMC[] = {
+@@ -1398,6 +1464,8 @@ struct UIItem diaVMC[] = {
      {UI_BUTTON, VMC_BUTTON_CREATE, 1, 1, _STR_HINT_VMC_CREATE, 0, 0, {.label = {NULL, -1}}},
      {UI_SPACER},
      {UI_BUTTON, VMC_BUTTON_DELETE, 1, 1, _STR_HINT_VMC_DELETE, 0, 0, {.label = {NULL, _STR_DELETE}}},
@@ -83436,7 +83456,7 @@ index 238686c..9c60c47 100644
      {UI_BREAK},
  
      // end of dialog
-@@ -2030,6 +2093,24 @@ struct UIItem diaCacheConfig[] = {
+@@ -2030,6 +2098,24 @@ struct UIItem diaCacheConfig[] = {
      {UI_BOOL, UICFG_AUTOREFRESH, 1, 1, _STR_HINT_AUTOREFRESH, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -83461,7 +83481,7 @@ index 238686c..9c60c47 100644
      // buttons
      {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
      {UI_BREAK},
-@@ -2132,7 +2213,36 @@ struct UIItem diaHintOrder[] = {
+@@ -2132,7 +2218,36 @@ struct UIItem diaHintOrder[] = {
      {UI_TERMINATOR}};
  
  struct UIItem diaCoverflowConfig[] = {
@@ -83499,7 +83519,7 @@ index 238686c..9c60c47 100644
      {UI_SPLITTER},
  
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COVERFLOW_COUNT}}},
-@@ -2179,7 +2289,7 @@ struct UIItem diaCoverflowConfig[] = {
+@@ -2179,7 +2294,7 @@ struct UIItem diaCoverflowConfig[] = {
      {UI_TERMINATOR}};
  
  struct UIItem diaNeutrinoArgs[] = {
@@ -83508,7 +83528,7 @@ index 238686c..9c60c47 100644
      {UI_SPLITTER},
  
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_QB}}},
-@@ -2232,7 +2342,7 @@ struct UIItem diaNeutrinoArgs[] = {
+@@ -2232,7 +2347,7 @@ struct UIItem diaNeutrinoArgs[] = {
      {UI_STRING, NARGS_EXTRA, 1, 1, _STR_HINT_NARGS_EXTRA, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsExtraHandler}}},
      {UI_BREAK},
  
@@ -83854,7 +83874,7 @@ index d59e71c..7a1b2b6 100644
          LOG("FNTSYS Error loading glyph - %d\n", error);
          return NULL;
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..661ce49 100644
+index 2b110ad..640994d 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -12,10 +12,13 @@
@@ -83910,11 +83930,15 @@ index 2b110ad..661ce49 100644
      guiNetProtocolApplied(netProtocolWas);
  }
  
-@@ -924,26 +914,63 @@ static void guiSourcesNetRowsRead(struct UIItem *ui)
+@@ -924,26 +914,67 @@ static void guiSourcesNetRowsRead(struct UIItem *ui)
  // RIPPS2 build 106: Starred Games Star (gRipps2StarSide): Theme follows the list's <name>_star key
  static const char *guiStarSides[] = {N_("Theme"), N_("Left"), N_("Right"), N_("Hidden"), NULL};
  
 -static int guiDeviceConfigUpdater(int modified)
++// build 114 (the user, 10/23): Interface > Hold SELECT: the theme list (the default), the next theme, or nothing
++int gRipps2SelectHold = RIPPS2_HOLD_LIST;
++static const char *guiHoldModes[] = {N_("List"), N_("Cycle"), N_("Off"), NULL};
++
 +// RIPPS2 build 114 (the settings audit): Game Sources > BDM Devices, the drives BDM reads on a page of their own (they
 +// made Game Sources scroll). Returns 1 when one was turned on or off: Game Sources applies it with the rest of its page.
 +static int guiShowBdmDevicesConfig(void)
@@ -83980,7 +84004,7 @@ index 2b110ad..661ce49 100644
          return;
      diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, &gRipps2FastCache);
      diaGetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, &gHDDGameListCache);
-@@ -988,19 +1015,11 @@ void guiShowDeviceConfig(void)
+@@ -988,19 +1019,11 @@ void guiShowDeviceConfig(void)
      diaSetInt(diaDeviceConfig, CFG_APPMODE, gAPPStartMode);
      diaSetInt(diaDeviceConfig, CFG_FAVMODE, gFAVStartMode);
  
@@ -84001,7 +84025,7 @@ index 2b110ad..661ce49 100644
      guiSourcesNetRowsBegin(diaDeviceConfig, deviceModes);
  
      // MMCE Start Mode
-@@ -1010,11 +1029,19 @@ void guiShowDeviceConfig(void)
+@@ -1010,11 +1033,19 @@ void guiShowDeviceConfig(void)
  
      int ret;
  reshow_device:
@@ -84022,7 +84046,7 @@ index 2b110ad..661ce49 100644
      if (ret == MMCE_SETTINGS_BUTTON) {
          guiShowMmceConfig();
          goto reshow_device;
-@@ -1026,25 +1053,14 @@ reshow_device:
+@@ -1026,25 +1057,14 @@ reshow_device:
              gDefaultDevice = guiDeviceTypeToIoMode(deviceModeIndex);
          diaGetInt(diaDeviceConfig, CFG_BDMMODE, &gBDMStartMode);
          diaGetInt(diaDeviceConfig, CFG_HDDMODE, &gHDDStartMode);
@@ -84050,7 +84074,7 @@ index 2b110ad..661ce49 100644
  
          // A BDM tab can be latched hidden (bdmNeedsUpdate short-circuits until the device generation
          // bumps). Re-evaluate device visibility now so re-enabling a device here brings its tab back
-@@ -1066,13 +1082,15 @@ int guiShowMmceConfig(void)
+@@ -1066,13 +1086,15 @@ int guiShowMmceConfig(void)
      static const char *deviceSlots[] = {"0", "1", NULL, NULL};
      static const char *deviceIGRSlots[] = {"NONE", "0", "1", "BOTH", NULL};
      static const char *deviceAckWaitCycles[] = {"0", "1", "2", "3", "4", "5", NULL};
@@ -84067,7 +84091,16 @@ index 2b110ad..661ce49 100644
      ui = guiSettingsComposeInto(guiMmceSettingsDialog, parts, 3, skipIDs, 2, -1, 1);
  
      if (ui == NULL)
-@@ -1303,6 +1321,10 @@ reshow_ui:
+@@ -1289,6 +1311,8 @@ reshow_ui:
+     diaSetEnum(diaUIConfig, UICFG_THEME, themeNamesSnap != NULL ? themeNamesSnap : (const char **)thmGetGuiList());
+     diaSetEnum(diaUIConfig, UICFG_LANG, langNamesSnap != NULL ? langNamesSnap : (const char **)lngGetGuiList());
+     diaSetInt(diaUIConfig, UICFG_THEME, thmGetGuiValue());
++    diaSetEnum(diaUIConfig, UICFG_RIPPS2_SELECT_HOLD, guiHoldModes); // build 114
++    diaSetInt(diaUIConfig, UICFG_RIPPS2_SELECT_HOLD, gRipps2SelectHold);
+     diaSetInt(diaUIConfig, UICFG_LANG, lngGetGuiValue());
+     diaSetInt(diaUIConfig, UICFG_AUTOSORT, gAutosort);
+     diaSetInt(diaUIConfig, UICFG_AUTOREFRESH, gAutoRefresh);
+@@ -1303,6 +1327,10 @@ reshow_ui:
  
      int ret = diaExecuteDialog(diaUIConfig, -1, 1, NULL);
  
@@ -84078,7 +84111,76 @@ index 2b110ad..661ce49 100644
      if (ret == UICFG_ARTWORK_BUTTON) {
          guiShowArtworkConfig();
          goto reshow_ui;
-@@ -1908,6 +1930,79 @@ int guiShowVcdUsbMode(void)
+@@ -1337,6 +1365,7 @@ reshow_ui:
+     if (ret) {
+         diaGetInt(diaUIConfig, UICFG_LANG, &langID);
+         diaGetInt(diaUIConfig, UICFG_THEME, &themeID);
++        diaGetInt(diaUIConfig, UICFG_RIPPS2_SELECT_HOLD, &gRipps2SelectHold); // build 114
+         diaGetInt(diaUIConfig, UICFG_AUTOSORT, &gAutosort);
+         diaGetInt(diaUIConfig, UICFG_AUTOREFRESH, &gAutoRefresh);
+         diaGetInt(diaUIConfig, UICFG_NOTIFICATIONS, &gEnableNotifications);
+@@ -1383,17 +1412,11 @@ reshow_ui:
+ // RIPPS2 build 79: SELECT held 4.2 s on the game list -- the next theme in the Theme list (the built-in
+ // ones and every theme found on a drive), applied the way Settings applies one, without a device
+ // refresh, and saved quietly so it is there next time
+-void guiCycleTheme(void)
++// a theme from SELECT held (the next one, or the one picked from the list), with its music and sounds, kept in the settings
++static void guiQuickTheme(int next)
+ {
+-    const char **names = thmGetGuiList();
+-    int n = 0, cur = thmGetGuiValue(), next;
+     char msg[96];
+ 
+-    while (names != NULL && names[n] != NULL)
+-        n++;
+-    if (n < 2)
+-        return;
+-    next = (cur + 1) % n;
+     padRumbleFlush();
+     if (isBgmPlaying())
+         bgmStop(); // a theme may bring its own music
+@@ -1408,6 +1431,40 @@ void guiCycleTheme(void)
+     }
+ }
+ 
++void guiCycleTheme(void)
++{
++    const char **names = thmGetGuiList();
++    int n = 0;
++
++    while (names != NULL && names[n] != NULL)
++        n++;
++    if (n < 2)
++        return;
++    guiQuickTheme((thmGetGuiValue() + 1) % n);
++}
++
++// build 114 (the user, 10/23): Hold SELECT on List: the themes in a panel. The one in use picked: 0, the caller refreshes
++// the list as a SELECT press would; another: loaded, 1; backed out of: 1 (nothing to refresh)
++int guiPickTheme(void)
++{
++    const char **names;
++    int picked, cur = thmGetGuiValue();
++
++    guiLock(); // the list a theme rescan may replace (as the Interface page takes it)
++    names = guiCopyNameList((const char **)thmGetGuiList());
++    guiUnlock();
++    if (names == NULL)
++        return 1;
++    picked = ripps2ThemePanel(names, cur);
++    guiFreeNameList(names);
++    if (picked < 0)
++        return 1;
++    if (picked == cur)
++        return 0;
++    guiQuickTheme(picked);
++    return 1;
++}
++
+ static int httpTestBusy;
+ static int httpTestIp[4], httpTestPort;
+ static char httpTestBase[HTTP_BASE_PATH_MAX], httpTestMessage[128];
+@@ -1908,6 +1965,79 @@ int guiShowVcdUsbMode(void)
      return diaExecuteDialog(diaVcdUsbMode, -1, 1, NULL);
  }
  
@@ -84158,7 +84260,7 @@ index 2b110ad..661ce49 100644
  static void guiSetBdmaSettings(struct UIItem *ui)
  {
      static const char *bdmaSourceStrs[] = {NULL, NULL, NULL, NULL, NULL, NULL};
-@@ -2281,7 +2376,7 @@ void guiShowPopsNetConfig(void)
+@@ -2281,7 +2411,7 @@ void guiShowPopsNetConfig(void)
          snprintf(popsNotice, sizeof(popsNotice), _l(_STR_POPS_LOADED_FROM), popsOriginal.home);
          diaSetLabel(diaPopsNetConfig, NETCFG_POPS_NOTICE, popsNotice);
      } else {
@@ -84167,7 +84269,7 @@ index 2b110ad..661ce49 100644
      }
  
      for (;;) {
-@@ -2580,7 +2675,9 @@ void guiShowArtworkConfig(void)
+@@ -2580,7 +2710,9 @@ void guiShowArtworkConfig(void)
      diaSetEnum(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, bgBlurNames);
      diaSetInt(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, gRipps2BgBlur);
  
@@ -84178,7 +84280,7 @@ index 2b110ad..661ce49 100644
      if (ret) {
          diaGetInt(diaArtworkConfig, UICFG_COVERART, &gEnableArt);
          diaGetInt(diaArtworkConfig, UICFG_ENABLE_DISCART, &gEnableDiscArt);
-@@ -2652,18 +2749,70 @@ static int guiRipps2Shown(int bit, int setting, int def)
+@@ -2652,18 +2784,70 @@ static int guiRipps2Shown(int bit, int setting, int def)
      return (gRipps2UserSet & bit) || setting != def ? setting + 1 : 0;
  }
  
@@ -84255,7 +84357,7 @@ index 2b110ad..661ce49 100644
  }
  
  // build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
-@@ -2689,6 +2838,84 @@ static int guiRipps2SettingsUpdater(int modified)
+@@ -2689,6 +2873,84 @@ static int guiRipps2SettingsUpdater(int modified)
      return 0;
  }
  
@@ -84340,7 +84442,7 @@ index 2b110ad..661ce49 100644
  static void guiRipps2SettingsSet(void)
  {
      int i;
-@@ -2697,19 +2924,14 @@ static void guiRipps2SettingsSet(void)
+@@ -2697,19 +2959,14 @@ static void guiRipps2SettingsSet(void)
          guiRipps2PaletteNames[i + 1] = ripps2PaletteName(i);
      guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1] = NULL;
      diaSetEnum(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2PaletteNames);
@@ -84366,7 +84468,7 @@ index 2b110ad..661ce49 100644
  }
  
  void guiShowColorsConfig(void)
-@@ -2720,8 +2942,10 @@ void guiShowColorsConfig(void)
+@@ -2720,8 +2977,10 @@ void guiShowColorsConfig(void)
      const char *own = editable ? NULL : thmColorName(themeID);
      unsigned char shown[6][3];
      int keep[8] = {gRipps2Glyphs, gRipps2Palette, gRipps2Hints, gRipps2CatBar, gRipps2CatSwap, gRipps2SrcName, gRipps2Recents, gRipps2UserSet};
@@ -84379,7 +84481,7 @@ index 2b110ad..661ce49 100644
  
      guiRipps2SettingsSet();
  
-@@ -2756,7 +2980,11 @@ void guiShowColorsConfig(void)
+@@ -2756,7 +3015,11 @@ void guiShowColorsConfig(void)
      diaSetEnabled(diaColorsConfig, UICFG_PLASCOL, editable || own != NULL);
      diaSetEnabled(diaColorsConfig, UICFG_RESETCOL, editable || own != NULL);
  
@@ -84392,7 +84494,7 @@ index 2b110ad..661ce49 100644
      if (ret)
          guiRipps2SettingsRead();
      else {
-@@ -2768,11 +2996,17 @@ void guiShowColorsConfig(void)
+@@ -2768,11 +3031,17 @@ void guiShowColorsConfig(void)
          gRipps2SrcName = keep[5];
          gRipps2Recents = keep[6];
          gRipps2UserSet = keep[7];
@@ -84413,7 +84515,7 @@ index 2b110ad..661ce49 100644
          guiSettingsSavePending = 1;
      if (gRipps2Glyphs != keep[0] || gRipps2Palette != keep[1] || gRipps2Hints != keep[2] || gRipps2CatBar != keep[3] ||
          gRipps2CatSwap != keep[4] || gRipps2SrcName != keep[5] || gRipps2UserSet != keep[7])
-@@ -2879,7 +3113,10 @@ void guiShowCoverflowConfig(void)
+@@ -2879,7 +3148,10 @@ void guiShowCoverflowConfig(void)
      static const char *gridLayouts[] = {N_("Theme"), "4 x 2", "5 x 2", N_("3 x 2 Large"), N_("6 x 3 Compact"), NULL};
      static const char *launchDiscs[] = {N_("Theme"), N_("Off"), N_("Pop In"), N_("Spin"), NULL};
      int keepLayout = gRipps2GridLayout;
@@ -84424,7 +84526,7 @@ index 2b110ad..661ce49 100644
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, gridLayouts);
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAUNCHDISC, launchDiscs);
      diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, gRipps2GridLayout);
-@@ -2913,7 +3150,22 @@ void guiShowCoverflowConfig(void)
+@@ -2913,7 +3185,22 @@ void guiShowCoverflowConfig(void)
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gridWideNames);
      diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gRipps2GridWide);
  
@@ -84448,7 +84550,7 @@ index 2b110ad..661ce49 100644
      if (result) {
          if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_COUNT, &value))
              gCoverflowCount = (value == 1) ? 5 : 3;
-@@ -3349,13 +3601,6 @@ reshow_general:
+@@ -3349,13 +3636,6 @@ reshow_general:
  }
  
  
@@ -84462,7 +84564,7 @@ index 2b110ad..661ce49 100644
  static int guiSettingsShowSources(void)
  {
      const struct UIItem *parts[] = {diaDeviceConfig};
-@@ -3365,6 +3610,7 @@ static int guiSettingsShowSources(void)
+@@ -3365,6 +3645,7 @@ static int guiSettingsShowSources(void)
      struct UIItem *ui = guiSettingsCompose(parts, 1, NULL, 0, -1, 0);
      int deviceModeIndex;
      int result;
@@ -84470,7 +84572,7 @@ index 2b110ad..661ce49 100644
  
      if (ui == NULL)
          return 0;
-@@ -3384,13 +3630,6 @@ static int guiSettingsShowSources(void)
+@@ -3384,13 +3665,6 @@ static int guiSettingsShowSources(void)
      diaSetInt(ui, CFG_RIPPS2_STARSIDE, gRipps2StarSide);
      diaSetInt(ui, UICFG_RIPPS2_RECENTS, gRipps2Recents); // build 113: beside the Starred Games rows
      guiSetAdvancedSettings(ui);                         // build 113: the prefix paths, HDD Spindown
@@ -84484,7 +84586,7 @@ index 2b110ad..661ce49 100644
      diaSetEnabled(ui, CFG_HDDMODE, 1);
      guiSourcesNetRowsBegin(ui, deviceModes);
      diaSetEnum(ui, CFG_MMCEMODE, deviceModes);
-@@ -3399,11 +3638,19 @@ static int guiSettingsShowSources(void)
+@@ -3399,11 +3673,19 @@ static int guiSettingsShowSources(void)
      guiSettingsBeginDialog(ui);
  
  reshow_sources:
@@ -84505,7 +84607,7 @@ index 2b110ad..661ce49 100644
      if (result == MMCE_SETTINGS_BUTTON) {
          // MMCE uses a separate composition buffer. Confirming the child editor finishes the
          // Settings page and returns to the hub; Circle resumes Game Sources as the parent page.
-@@ -3417,29 +3664,21 @@ reshow_sources:
+@@ -3417,29 +3699,21 @@ reshow_sources:
          result = UIID_BTN_OK;
      }
  
@@ -84538,7 +84640,7 @@ index 2b110ad..661ce49 100644
  
          bdmForceDeviceRefresh();
          applyConfig(-1, -1, 0);
-@@ -3507,9 +3746,11 @@ static int guiSettingsDisplayUpdater(int modified)
+@@ -3507,9 +3781,11 @@ static int guiSettingsDisplayUpdater(int modified)
      return 0;
  }
  
@@ -84552,7 +84654,7 @@ index 2b110ad..661ce49 100644
      const char *vmodeNames[] = {_l(_STR_AUTO), "PAL 640x512i @50Hz 24bit", "NTSC 640x448i @60Hz 24bit",
                                  "EDTV 640x448p @60Hz 24bit", "EDTV 640x512p @50Hz 24bit", "VGA 640x480p @60Hz 24bit",
                                  "PAL 704x576i @50Hz 16bit", "NTSC 704x480i @60Hz 16bit",
-@@ -3517,12 +3758,62 @@ static int guiSettingsShowInterface(void)
+@@ -3517,12 +3793,62 @@ static int guiSettingsShowInterface(void)
                                  "HDTV 1280x720p @60Hz 16bit", "HDTV 1920x1080i @60Hz 16bit",
                                  "PAL 640x256p @50Hz 24bit", "NTSC 640x224p @60Hz 24bit",
                                  "PAL 640x512i @50Hz 24bit (FLICKER-FREE)", "NTSC 640x448i @60Hz 24bit (FLICKER-FREE)", NULL};
@@ -84619,7 +84721,7 @@ index 2b110ad..661ce49 100644
      int gameViewChanged = 0;
      int cfgTitlesChanged = 0;
      int appsViewChanged = 0;
-@@ -3533,7 +3824,6 @@ static int guiSettingsShowInterface(void)
+@@ -3533,7 +3859,6 @@ static int guiSettingsShowInterface(void)
      showCfgPopup = 0;
      guiResetNotifications();
      previousTheme = thmGetGuiValue();
@@ -84627,15 +84729,18 @@ index 2b110ad..661ce49 100644
  
      guiLock();
      themeNamesSnap = guiCopyNameList((const char **)thmGetGuiList());
-@@ -3543,7 +3833,6 @@ static int guiSettingsShowInterface(void)
+@@ -3543,8 +3868,9 @@ static int guiSettingsShowInterface(void)
      diaSetEnum(ui, UICFG_LANG, langNamesSnap != NULL ? langNamesSnap : (const char **)lngGetGuiList());
      guiSetGameViewPicker(ui);
      guiSetAppsViewPicker(ui);
 -    diaSetEnum(ui, UICFG_VMODE, vmodeNames);
      diaSetInt(ui, UICFG_THEME, thmGetGuiValue());
++    diaSetEnum(ui, UICFG_RIPPS2_SELECT_HOLD, guiHoldModes); // build 114
++    diaSetInt(ui, UICFG_RIPPS2_SELECT_HOLD, gRipps2SelectHold);
      diaSetInt(ui, UICFG_LANG, lngGetGuiValue());
      diaSetInt(ui, UICFG_AUTOSORT, gAutosort);
-@@ -3554,19 +3843,17 @@ static int guiSettingsShowInterface(void)
+     diaSetInt(ui, UICFG_AUTOREFRESH, gAutoRefresh);
+@@ -3554,19 +3880,17 @@ static int guiSettingsShowInterface(void)
      // Keep the editor reachable even when the current theme has no active Coverflow view; users
      // need to be able to configure it before enabling or switching to a Coverflow-capable theme.
      diaSetVisible(ui, UICFG_COVERFLOW_BUTTON, 1);
@@ -84660,7 +84765,7 @@ index 2b110ad..661ce49 100644
      if (result == UICFG_ARTWORK_BUTTON) {
          guiShowArtworkConfig();
          goto reshow_interface;
-@@ -3584,10 +3871,6 @@ reshow_interface:
+@@ -3584,15 +3908,12 @@ reshow_interface:
              guiSettingsSavePending = 1;
          goto reshow_interface;
      }
@@ -84671,7 +84776,13 @@ index 2b110ad..661ce49 100644
  
      padRumbleFlush();
      if (result != UIID_BTN_CANCEL && result != -1) {
-@@ -3604,11 +3887,6 @@ reshow_interface:
+         diaGetInt(ui, UICFG_LANG, &langID);
+         diaGetInt(ui, UICFG_THEME, &themeID);
++        diaGetInt(ui, UICFG_RIPPS2_SELECT_HOLD, &gRipps2SelectHold); // build 114
+         diaGetInt(ui, UICFG_AUTOSORT, &gAutosort);
+         diaGetInt(ui, UICFG_AUTOREFRESH, &gAutoRefresh);
+         diaGetInt(ui, UICFG_NOTIFICATIONS, &gEnableNotifications);
+@@ -3604,11 +3925,6 @@ reshow_interface:
          }
          gameViewChanged = guiReadGameViewPicker(ui);
          appsViewChanged = guiReadAppsViewPicker(ui);
@@ -84683,7 +84794,7 @@ index 2b110ad..661ce49 100644
          {
              int gameIDMode;
              diaGetInt(ui, CFG_APPLYGAMEID, &gameIDMode);
-@@ -3617,8 +3895,6 @@ reshow_interface:
+@@ -3617,8 +3933,6 @@ reshow_interface:
  
          if (previousTheme != themeID && isBgmPlaying())
              bgmStop();
@@ -84692,7 +84803,7 @@ index 2b110ad..661ce49 100644
          applyConfig(themeID, langID, 1);
          if (cfgTitlesChanged) {
              guiRefreshCfgTitles(); // rebuilds every game list, which also covers a view change
-@@ -3631,11 +3907,6 @@ reshow_interface:
+@@ -3631,11 +3945,6 @@ reshow_interface:
              sfxReload(-1);             // sound was the beep's moment); RIPPS2 build 95: on the IO worker
          if (gEnableBGM && !isBgmPlaying())
              bgmStart();
@@ -84704,7 +84815,7 @@ index 2b110ad..661ce49 100644
      }
  
      guiFreeNameList(themeNamesSnap);
-@@ -3937,9 +4208,9 @@ static int guiSettingsShowIndex(int *page)
+@@ -3937,9 +4246,9 @@ static int guiSettingsShowIndex(int *page)
          _l(_STR_MENU_NETWORK),
          _l(_STR_INTERFACE_SETTINGS),
          _l(_STR_GAME_LAUNCHING),
@@ -84717,7 +84828,7 @@ index 2b110ad..661ce49 100644
  #ifdef RETROACHIEVEMENTS
          _l(_STR_RIPPS2_ACHIEVEMENTS), // build 80: moved here from the main menu, last of the pages
  #endif
-@@ -5428,13 +5699,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5428,13 +5737,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
  
          if (ui)
              diaRenderUI(ui, screenHandler->inMenu, NULL, 0);
@@ -85918,7 +86029,7 @@ index 6bb34ce..2b0a704 100644
                      thmSetGuiValue(thmGetGuiValue(), 1);
                      bgmUnMute();
 diff --git a/src/menusys.c b/src/menusys.c
-index 879e0d7..ba23798 100644
+index 879e0d7..b0ae062 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -33,6 +33,7 @@
@@ -86092,7 +86203,33 @@ index 879e0d7..ba23798 100644
  }
  
  static void menuFirstPage()
-@@ -2718,6 +2772,10 @@ void menuHandleInputGameMenu()
+@@ -2423,7 +2477,9 @@ void menuHandleInputMain()
+     }
+ 
+     // RIPPS2 build 79: SELECT. A press refreshes the list when it is let go (within 4.2 s); held 4.2 s it
+-    // switches to the next theme instead, once per hold, with no refresh (the theme is all that changed)
++    // switches to the next theme instead, once per hold, with no refresh (the theme is all that changed). Build 114:
++    // Settings > Interface > Hold SELECT: List (the default) opens the themes to pick from, Cycle is the old next theme,
++    // Off leaves the hold doing nothing; the theme in use picked from the list refreshes the list instead
+     {
+         static clock_t selectSince = 0;
+         static int selectHeld = 0, selectCycled = 0;
+@@ -2432,9 +2488,12 @@ void menuHandleInputMain()
+             selectCycled = 0;
+             selectSince = clock();
+         } else if (selectHeld && getKeyPressed(KEY_SELECT)) {
+-            if (!selectCycled && (clock() - selectSince) >= (clock_t)(4.2f * CLOCKS_PER_SEC)) {
++            if (!selectCycled && gRipps2SelectHold != RIPPS2_HOLD_OFF && (clock() - selectSince) >= (clock_t)(4.2f * CLOCKS_PER_SEC)) {
+                 selectCycled = 1;
+-                guiCycleTheme();
++                if (gRipps2SelectHold == RIPPS2_HOLD_CYCLE)
++                    guiCycleTheme();
++                else if (!guiPickTheme() && !viewPending)
++                    selected_item->item->refresh(selected_item->item);
+             }
+         } else if (selectHeld) {
+             selectHeld = 0;
+@@ -2718,6 +2777,10 @@ void menuHandleInputGameMenu()
          int menuID = gameMenuCurrent->item.id;
  
          sfxPlay(SFX_CONFIRM);
@@ -86103,7 +86240,7 @@ index 879e0d7..ba23798 100644
  
  #ifdef RETROACHIEVEMENTS
          if (menuID == GAME_RA_CHECK) {
-@@ -2815,6 +2873,8 @@ void menuHandleInputGameMenu()
+@@ -2815,6 +2878,8 @@ void menuHandleInputGameMenu()
              menuRenameGame(&gameMenu);
          } else if (menuID == GAME_DELETE_GAME) {
              menuDeleteGame(&gameMenu);
@@ -86112,7 +86249,7 @@ index 879e0d7..ba23798 100644
          }
          // so the exit press wont propagate twice
          readPads();
-@@ -2957,6 +3017,10 @@ void menuHandleInputAppMenu()
+@@ -2957,6 +3022,10 @@ void menuHandleInputAppMenu()
          int menuID = appMenuCurrent->item.id;
  
          sfxPlay(SFX_CONFIRM);
@@ -86123,7 +86260,7 @@ index 879e0d7..ba23798 100644
  
          if (menuID == APP_CASE_SHAPE) { // build 102: PS1, PS2, Theme, round again
              thmAppCaseShapeSet(appCaseTitle(), (thmAppCaseShape(appCaseTitle()) + 1) % THM_APP_CASES_N);
-@@ -2966,6 +3030,8 @@ void menuHandleInputAppMenu()
+@@ -2966,6 +3035,8 @@ void menuHandleInputAppMenu()
              menuRenameGame(&appMenu);
          } else if (menuID == APP_DELETE) {
              menuDeleteGame(&appMenu);
@@ -86716,7 +86853,7 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..0cf4160 100644
+index 13c78db..1baf7a5 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -50,6 +50,8 @@
@@ -86855,7 +86992,17 @@ index 13c78db..0cf4160 100644
              int udpbdKeyPresent = configGetInt(configOPL, CONFIG_OPL_ENABLE_UDPBD, &gEnableUDPBD);
              configGetInt(configOPL, CONFIG_OPL_NET_BOOT_PROTOCOL, &gNetBootProtocol);
              // Unified network-protocol selector (single SMAP NIC -> at most one transport per session).
-@@ -4435,6 +4470,8 @@ static void _saveConfig()
+@@ -4059,6 +4094,9 @@ static void _loadConfig()
+             configGetStrCopy(configOPL, CONFIG_OPL_DEFAULT_BGM_PATH, gDefaultBGMPath, sizeof(gDefaultBGMPath));
+             configGetStrCopy(configOPL, "ripps2_music", gRipps2Music, sizeof(gRipps2Music)); // RIPPS2
+             configGetInt(configOPL, "ripps2_star_side", &gRipps2StarSide); // build 106
++            configGetInt(configOPL, "ripps2_select_hold", &gRipps2SelectHold); // build 114: Hold SELECT
++            if (gRipps2SelectHold < RIPPS2_HOLD_LIST || gRipps2SelectHold > RIPPS2_HOLD_OFF)
++                gRipps2SelectHold = RIPPS2_HOLD_LIST;
+             if (gRipps2StarSide < 0 || gRipps2StarSide > 3)
+                 gRipps2StarSide = 0;
+         }
+@@ -4435,6 +4473,8 @@ static void _saveConfig()
          configSetInt(configOPL, "ripps2_recents", gRipps2Recents);
          configSetInt(configOPL, "ripps2_userset", gRipps2UserSet); // build 81
          ripps2HintsSaveConfig(configOPL);                          // build 90: Hints and Glyphs
@@ -86864,7 +87011,15 @@ index 13c78db..0cf4160 100644
          configSetInt(configOPL, "ripps2_launch_disc", gRipps2LaunchDisc); // build 91
          configSetInt(configOPL, "ripps2_vignette", gRipps2Vignette);
          configSetInt(configOPL, "ripps2_grid_layout", gRipps2GridLayout);
-@@ -5292,6 +5329,7 @@ int gArtAbandoned = 0;
+@@ -4559,6 +4599,7 @@ static void _saveConfig()
+         configSetStr(configOPL, CONFIG_OPL_DEFAULT_BGM_PATH, gDefaultBGMPath);
+         configSetStr(configOPL, "ripps2_music", gRipps2Music); // RIPPS2
+         configSetInt(configOPL, "ripps2_star_side", gRipps2StarSide); // build 106
++        configSetInt(configOPL, "ripps2_select_hold", gRipps2SelectHold); // build 114: Hold SELECT
+         configSetInt(configOPL, CONFIG_OPL_XSENSITIVITY, gXSensitivity);
+         configSetInt(configOPL, CONFIG_OPL_YSENSITIVITY, gYSensitivity);
+ 
+@@ -5292,6 +5333,7 @@ int gArtAbandoned = 0;
  
  void deinitEx(int exception, int modeSelected, int modeSelected2)
  {
@@ -86872,7 +87027,7 @@ index 13c78db..0cf4160 100644
      gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
  
      // Say something BEFORE the blocking teardown below, because it can hold this thread for the
-@@ -5339,6 +5377,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+@@ -5339,6 +5381,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
  
      // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
      ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
@@ -86882,7 +87037,7 @@ index 13c78db..0cf4160 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
-@@ -5384,6 +5425,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+@@ -5384,6 +5429,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
  
  void deinit(int exception, int modeSelected)
  {
@@ -86890,7 +87045,7 @@ index 13c78db..0cf4160 100644
      gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
  
      // Say something BEFORE the blocking teardown below, because it can hold this thread for the
-@@ -5431,6 +5473,9 @@ void deinit(int exception, int modeSelected)
+@@ -5431,6 +5477,9 @@ void deinit(int exception, int modeSelected)
  
      // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
      ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
@@ -86900,7 +87055,7 @@ index 13c78db..0cf4160 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
-@@ -5730,6 +5775,7 @@ static void init(void)
+@@ -5730,6 +5779,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
      ioNameAction((void *)&deferredAudioInit, "SOUND LOAD");
@@ -86908,7 +87063,7 @@ index 13c78db..0cf4160 100644
      menuInit();
  
      startPads();
-@@ -5885,6 +5931,9 @@ static void miniInit(int mode)
+@@ -5885,6 +5935,9 @@ static void miniInit(int mode)
      configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd)
  
      ioInit();
@@ -87113,7 +87268,7 @@ index 4f99d23..668955a 100644
  
  // ---------------------------------------------------------------- orbs
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
-index fa2ee5d..decefd7 100644
+index fa2ee5d..df3e628 100644
 --- a/src/ripps2disc.c
 +++ b/src/ripps2disc.c
 @@ -550,6 +550,33 @@ static void rdRing(int cx, int cy, float p, int a)
@@ -87150,6 +87305,30 @@ index fa2ee5d..decefd7 100644
  static void rdPage(void) // the page under every RIPDISC step: the towers and the category bar
  {
      ripps2DrawBackground();
+@@ -561,7 +588,7 @@ void ripps2DiscRipRender(void)
+ {
+     double now = ripps2Seconds();
+     int kind = ripps2DiscInfo(NULL, 0, NULL, 0);
+-    int w = 400, h = 118, x = (640 - w) / 2, y = 146, ia, hx;
++    int w = 580, h = 118, x = (640 - w) / 2, y = 134, ia, hx; // the launch guard's frame: one wheel in one place
+     float t, a;
+     const char *hold = _t("HOLD");
+ 
+@@ -589,11 +616,11 @@ void ripps2DiscRipRender(void)
+     // build 113: the ring has its own room, the button at its centre, HOLD after it, the pair centred
+     hx = 320 - (RD_RING_W + 6 + ripps2HintWidth(hold)) / 2;
+     float p = rdHolding ? (float)(now - rdHoldSince) / RD_HOLD_S : 0.0f;
+-    rdRing(hx + RD_RING_W / 2, y + 88, p > 1.0f ? 1.0f : p, ia);
++    rdRing(hx + RD_RING_W / 2, y + 90, p > 1.0f ? 1.0f : p, ia);
+     GSTEXTURE *sel = thmGetTexture(SELECT_ICON);
+     if (sel != NULL)
+-        rmDrawPixmap(sel, hx + RD_RING_W / 2 - 10, y + 78, ALIGN_NONE, 20, 20, SCALING_RATIO, rdAlpha(RD_LIT, ia), 0);
+-    ripps2HintText(hx + RD_RING_W + 6, y + 88, hold, rdAlpha(RD_SOFT, ia));
++        rmDrawPixmap(sel, hx + RD_RING_W / 2 - 10, y + 80, ALIGN_NONE, 20, 20, SCALING_RATIO, rdAlpha(RD_LIT, ia), 0);
++    ripps2HintText(hx + RD_RING_W + 6, y + 90, hold, rdAlpha(RD_SOFT, ia));
+ }
+ 
+ // The rip's screen, a few times a second: what, how far, how long is left; 0 when it is to stop (asked first)
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
 index 459b24e..5651a19 100644
 --- a/src/ripps2ember.c
@@ -87285,10 +87464,10 @@ index 4bedb0c..f2306fc 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..ef983ba
+index 0000000..8edac2e
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1135 @@
+@@ -0,0 +1,1166 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -88032,15 +88211,44 @@ index 0000000..ef983ba
 +    rmEndFrame();
 +}
 +
++// a short wait: the page and the loading mark breathing in its bar, no panel to read
++static void lgDrawQuiet(void)
++{
++    rmStartFrame();
++    ripps2DrawBackground();
++    thmDrawBackdrop();
++    ripps2RenderCategoryBar();
++    ripps2DrawBusy(0x80);
++    rmEndFrame();
++}
++
++// a list read is all that is left: START NOW need not wait for it (the teardown's own bounded drain and the launch's IOP
++// reset end it; a read cut short harms nothing), unlike a write
++static int lgOnlyReads(void)
++{
++    int type = 0, secs = 0;
++    void *data = NULL;
++    return !ioWritesOpen() && (!ioRunningJob(&type, &data, &secs) || type == IO_MENU_UPDATE_DEFFERED);
++}
++
 +int ripps2LaunchGuard(void)
 +{
 +    char line[160], left[64];
-+    clock_t from = clock();
-+    double t0, now, done = 0.0, stopAt = 0.0;
++    double t0, now, quiet, done = 0.0, stopAt = 0.0;
 +    int est, stopping = 0, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
 +
-+    while (lgBusy() && clock() - from < CLOCKS_PER_SEC * 3 / 2)
-+        DelayThread(20 * 1000);
++    // the launch is picked: no background write of RIPPS2's starts from here to the handoff (FifthFox: a list or cache
++    // written as the MMCE switched cards or the IOP reset). Back, or a launch that comes back, gives them back
++    ioLaunchBegin();
++    if (!lgBusy())
++        return 1;
++    // the user (10/23): graceful. A wait of a second or two shows only the loading mark; the panel is for a wait worth
++    // reading (a known long one at once, an unknown one after 2 s)
++    est = ioQueueEstimateMs();
++    quiet = est > 0 && est <= 2500 ? est / 1000.0 + 0.8 : est > 2500 ? 0.3 : 2.0;
++    t0 = ripps2Seconds();
++    while (lgBusy() && ripps2Seconds() - t0 < quiet)
++        lgDrawQuiet();
 +    if (!lgBusy())
 +        return 1;
 +    guiMsgBoxSound(SFX_MESSAGE);
@@ -88063,19 +88271,21 @@ index 0000000..ef983ba
 +            return 1;
 +        if (stopping && now - stopAt > 30.0)
 +            return 1; // a job that never ends: the teardown's own bounded wait takes it from here
++        if (stopping && now - stopAt > 1.0 && lgOnlyReads())
++            return 1; // only reads left: go (never while a write is open: that is what the guard is for)
 +        readPads();
 +        if (!stopping && done == 0.0) {
 +            if (getKeyOn(gSelectButton)) {
-+                // stop: no write starts from here, a list read gives up at its next entry, the worker skips the queued
-+                // ones; an open write ends. (Never ioRemoveRequests here: the worker holds its lock for the whole drain,
-+                // so the panel froze until the work was done.)
++                // stop: no write starts (since the pick), a list read gives up at its next entry, the worker skips the
++                // queued ones; an open write ends. (Never ioRemoveRequests here: the worker holds its lock for the whole
++                // drain, so the panel froze until the work was done.)
 +                sfxPlay(SFX_CONFIRM);
 +                stopping = 1;
 +                stopAt = now;
-+                ioLaunchBegin();
 +                ioCancelScans();
 +            } else if (getKeyOn(backKey)) {
 +                sfxPlay(SFX_CANCEL);
++                ioLaunchCancel(); // back where the launch began: RIPPS2 writes its lists again
 +                return 0;
 +            }
 +        }
@@ -89446,7 +89656,7 @@ index f2c48c4..6168630 100644
              if (rescan)
                  stScan();
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 02b03e6..acb44eb 100644
+index 02b03e6..916310e 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -143,9 +143,12 @@ static int catSwapMode(void)
@@ -89836,6 +90046,104 @@ index 02b03e6..acb44eb 100644
  // Category Order: Memory Files and Launch Disc trade places on the bar (Storage stays in the middle).
  // A category's place on the bar, and the category at a place: the same swap both ways.
  static int catSlot(int cat)
+@@ -2002,3 +2312,97 @@ int ripps2StickSide(void)
+     padGetRightStick(&sx, &sy);
+     return sx > 100 ? 1 : sx < -100 ? -1 : 0;
+ }
++
++// ---- build 114: the theme list (the user, 10/23) ----
++// SELECT held 4.2 s on a list with Settings > Interface > Hold SELECT on List (the default; Cycle loads the next theme as
++// before, Off leaves SELECT to refresh): a glass panel on the launch guard's frame fades in over the page with the themes,
++// eight to a page, in the Settings face. Up and Down pick, Left and Right (or L1 and R1) turn the page, Cross picks and
++// the panel fades out, Circle closes it. Returns the theme picked (the one in use as well: the caller refreshes the list
++// then instead of loading it again), or -1.
++#define TP_ROWS 8
++#define TP_LIT  GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80)
++#define TP_SOFT GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)
++
++static u64 tpAlpha(u64 c, int a)
++{
++    return (c & ~(0xFFULL << 24)) | ((u64)(a & 0xFF) << 24);
++}
++
++static void tpDraw(const char **names, int n, int cur, int sel, float a)
++{
++    char pg[16];
++    int page = sel / TP_ROWS, first = page * TP_ROWS, pages = (n + TP_ROWS - 1) / TP_ROWS, rows = n < TP_ROWS ? n : TP_ROWS;
++    int w = 580, h = 84 + rows * 24, x = (640 - w) / 2, y = 134, ia = (int)(0x80 * a), i;
++    int confirmIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON;
++    int backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
++
++    rmStartFrame();
++    ripps2DrawBackground();
++    thmDrawBackdrop();
++    ripps2RenderCategoryBar();
++    ripps2DrawHintBoxA(x, y, w, h, a);
++    fntRenderString(gTheme->fonts[4], 320, y + 26, ALIGN_CENTER, 0, 0, _t("THEMES"), tpAlpha(TP_LIT, ia));
++    if (pages > 1) {
++        snprintf(pg, sizeof(pg), "%d / %d", page + 1, pages);
++        fntRenderString(RIPPS2_DIA_FONT, x + w - 22, y + 26, ALIGN_VCENTER | ALIGN_RIGHT, 0, 0, pg, tpAlpha(TP_SOFT, ia));
++    }
++    for (i = 0; i < TP_ROWS && first + i < n; i++) {
++        int k = first + i, ry = y + 56 + i * 24;
++        if (k == sel)
++            rmDrawRect(x + 16, ry - 11, w - 32, 22, GS_SETREG_RGBA(0x4A, 0x8C, 0xF0, ia / 4));
++        fntRenderString(RIPPS2_DIA_FONT, x + 30, ry, ALIGN_VCENTER | ALIGN_LEFT, 0, 0, names[k], tpAlpha(k == sel ? TP_LIT : TP_SOFT, ia));
++        if (k == cur)
++            fntRenderString(RIPPS2_DIA_FONT, x + w - 30, ry, ALIGN_VCENTER | ALIGN_RIGHT, 0, 0, _t("IN USE"), tpAlpha(TP_SOFT, ia));
++    }
++    ripps2HintPairA(confirmIcon, _t("CHOOSE"), backIcon, _t("BACK"), y + h - 20, ia);
++    rmEndFrame();
++}
++
++int ripps2ThemePanel(const char **names, int cur)
++{
++    int n = 0, sel = cur, picked = -1, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    double t0, outAt = 0.0, now;
++    float a;
++
++    while (names != NULL && names[n] != NULL)
++        n++;
++    if (n < 1)
++        return -1;
++    if (sel < 0 || sel >= n)
++        sel = 0;
++    sfxPlay(SFX_TRANSITION);
++    t0 = ripps2Seconds();
++    for (;;) {
++        now = ripps2Seconds();
++        readPads();
++        if (outAt == 0.0) {
++            if (getKeyOn(KEY_UP)) {
++                sel = (sel + n - 1) % n;
++                sfxPlay(SFX_CURSOR);
++            } else if (getKeyOn(KEY_DOWN)) {
++                sel = (sel + 1) % n;
++                sfxPlay(SFX_CURSOR);
++            } else if ((getKeyOn(KEY_RIGHT) || getKeyOn(KEY_R1)) && n > TP_ROWS) {
++                sel = (sel / TP_ROWS + 1) * TP_ROWS < n ? (sel / TP_ROWS + 1) * TP_ROWS : 0; // the next page's first
++                sfxPlay(SFX_CURSOR);
++            } else if ((getKeyOn(KEY_LEFT) || getKeyOn(KEY_L1)) && n > TP_ROWS) {
++                sel = sel >= TP_ROWS ? (sel / TP_ROWS - 1) * TP_ROWS : ((n - 1) / TP_ROWS) * TP_ROWS;
++                sfxPlay(SFX_CURSOR);
++            } else if (getKeyOn(gSelectButton)) {
++                sfxPlay(SFX_CONFIRM);
++                picked = sel;
++                outAt = now;
++            } else if (getKeyOn(backKey)) {
++                sfxPlay(SFX_CANCEL);
++                outAt = now;
++            }
++        }
++        a = (float)((now - t0) / 0.35);
++        if (outAt > 0.0)
++            a = 1.0f - (float)((now - outAt) / 0.3);
++        if (outAt > 0.0 && a <= 0.0f)
++            return picked;
++        a = a >= 1.0f ? 1.0f : a * a * (3.0f - 2.0f * a);
++        tpDraw(names, n, cur, sel, a);
++    }
++}
 diff --git a/src/sound.c b/src/sound.c
 index 43ed8bd..f4d22b4 100644
 --- a/src/sound.c
