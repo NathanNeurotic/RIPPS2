@@ -218,6 +218,15 @@ if 'CFG_ENABLEBDMHDD' in dtab(dia, 'struct UIItem diaBdmDevicesConfig[]'):
     fail.append('dialogs.c: the exFAT HDD follows HDD Start Mode, not a BDM Devices row')
 if g.count('gEnableBdmHDD = gHDDStartMode != START_MODE_DISABLED;') != 2:
     fail.append('gui.c: both Game Sources editors set the exFAT HDD from HDD Start Mode')
+if 'gEnableBdmHDD = gHDDStartMode != START_MODE_DISABLED; // build 114' not in rd('src/opl.c'):
+    fail.append('opl.c: an older config\'s exFAT HDD follows HDD Start Mode at boot')
+# the reel's sidebar take: BDM Devices Off took the exFAT HDD Games with it
+bdm_ = rd('src/bdmsupport.c')
+need(bdm_, (('(type == BDM_TYPE_ATA && gEnableBdmHDD); // build 114: one HDD', 'BDM Devices Off never withholds the internal HDD'),
+            ('if (gEnableBdmHDD && gHDDStartMode == START_MODE_AUTO && gBDMStartMode != START_MODE_AUTO)', 'HDD Start Mode Auto reads an exFAT drive')), 'bdmsupport.c')
+# and Network Connectivity Off left the SMB page up: Game Sources lost the protocol's re-derive with its Protocol row
+if 'guiNetProtocolApplied(netProtocolWas);' not in body(g, 'static void guiSourcesNetRowsRead('):
+    fail.append('gui.c: Network Connectivity on Game Sources turns the network page on and off')
 
 # ---- colours (the user 10/23)
 ui_ = rd('src/ripps2ui.c')

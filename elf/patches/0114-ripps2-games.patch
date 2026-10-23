@@ -82499,7 +82499,7 @@ index 0000000..2887304
 +C:/Users/natha/Github/Open-PS2-Loader/build/psbbn-flow|codex/psbbn-flow-theme
 +C:/Users/natha/Github/Open-PS2-Loader/build/vmc-sdk-guard-integration-986|codex/vmc-sdk-guard-integration-986
 diff --git a/src/bdmsupport.c b/src/bdmsupport.c
-index ecfafb2..cd8832a 100644
+index ecfafb2..bf1197f 100644
 --- a/src/bdmsupport.c
 +++ b/src/bdmsupport.c
 @@ -21,6 +21,8 @@
@@ -82519,6 +82519,15 @@ index ecfafb2..cd8832a 100644
  static int iLinkManModLoaded = 0;
  static int ieee1394ModLoaded = 0;
  static int mx4sioModLoaded = 0;
+@@ -1195,7 +1198,7 @@ static int bdmPccfCandidate(void)
+ static int bdmStartModeAllowsDevice(int type)
+ {
+     return gBDMStartMode != START_MODE_DISABLED || type == BDM_TYPE_UDPBD ||
+-           (type == BDM_TYPE_PCCF && gEnablePCCF);
++           (type == BDM_TYPE_PCCF && gEnablePCCF) || (type == BDM_TYPE_ATA && gEnableBdmHDD); // build 114: one HDD
+ }
+ 
+ int bdmModeIsPCCF(int mode)
 @@ -1369,6 +1372,8 @@ static void bdmLoadBlockDeviceModules(void)
      if (modsNow != modsWere && !wasFirstPass)
          bdmForceDeviceRefresh();
@@ -82574,7 +82583,18 @@ index ecfafb2..cd8832a 100644
  void bdmLoadModules(void)
  {
      bdmLoadCoreModules(0); // normal enumeration: USB residency follows gEnableUSB
-@@ -2013,7 +2028,7 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+@@ -1562,6 +1577,10 @@ int bdmEffectiveStartMode(void)
+     // RIPPS2 build 96: Default Menu > Last Used, last on a drive page: the drives start with the boot
+     if (gRipps2StartLast && gBDMStartMode == START_MODE_MANUAL && gRipps2LastDevice >= BDM_MODE && gRipps2LastDevice < ETH_MODE)
+         return START_MODE_AUTO;
++    // RIPPS2 build 114: one HDD: an exFAT internal drive is the HDD's, so HDD Start Mode Auto reads it with BDM Devices Off
++    // (the other drives stay withheld: bdmStartModeAllowsDevice)
++    if (gEnableBdmHDD && gHDDStartMode == START_MODE_AUTO && gBDMStartMode != START_MODE_AUTO)
++        return START_MODE_AUTO;
+     return gBDMStartMode;
+ }
+ 
+@@ -2013,7 +2032,7 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
      bdmBuildPs1Prefix(ps1Prefix, sizeof(ps1Prefix), itemList->mode); // device ROOT: EMBER/ lives there
  
      // The resolvers leave the path they tried in their buffer, so the message can name it.
@@ -82583,7 +82603,7 @@ index ecfafb2..cd8832a 100644
          guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
          return;
      }
-@@ -2023,6 +2038,8 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+@@ -2023,6 +2042,8 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
          guiMsgBoxMissing(_l(_STR_EMBER_BIOS_MISSING), biosPath);
          return;
      }
@@ -82592,7 +82612,7 @@ index ecfafb2..cd8832a 100644
      // The scan lists folders without reading inside them -- that would be a directory read per row
      // on every refresh. Pay for it once, HERE, while a dialog can still be drawn: an empty or
      // mis-filled folder otherwise drops the user into the PS1 BIOS shell with no explanation.
-@@ -2043,13 +2060,10 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+@@ -2043,13 +2064,10 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
          }
      }
  
@@ -82608,7 +82628,7 @@ index ecfafb2..cd8832a 100644
  
      // UNMOUNT_EXCEPTION is load-bearing here, not defensive: Ember never resets the IOP, so the
      // device it reads its game from must still be mounted when it starts.
-@@ -2223,8 +2237,10 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
+@@ -2223,8 +2241,10 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
      if (fd >= 0) {
          isoFrags = fileXioIoctl2(ps2sdk_get_iop_fd(fd), USBMASS_IOCTL_GET_FRAGLIST, NULL, 0, NULL, 0);
          close(fd);
@@ -82621,7 +82641,7 @@ index ecfafb2..cd8832a 100644
      }
      total = isoFrags;
  
-@@ -2236,6 +2252,10 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
+@@ -2236,6 +2256,10 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
              if (fd >= 0) {
                  int frags = fileXioIoctl2(ps2sdk_get_iop_fd(fd), USBMASS_IOCTL_GET_FRAGLIST, NULL, 0, NULL, 0);
                  close(fd);
@@ -82632,7 +82652,7 @@ index ecfafb2..cd8832a 100644
                  if (frags > 0)
                      vmcFrags[i] = frags;
              }
-@@ -2265,7 +2285,7 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
+@@ -2265,7 +2289,7 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
  
                      if (gAutoLaunchBDMGame == NULL && guiIsActive()) {
                          char error[256];
@@ -82641,7 +82661,7 @@ index ecfafb2..cd8832a 100644
                          if (!guiMsgBox(error, 1, NULL))
                              return -1; // Abort launch to menu
                      }
-@@ -2473,6 +2493,36 @@ void bdmLaunchIsoAt(item_list_t *itemList, const char *path, const char *startup
+@@ -2473,6 +2497,36 @@ void bdmLaunchIsoAt(item_list_t *itemList, const char *path, const char *startup
      sbSetPathOverride(NULL);
  }
  
@@ -82678,7 +82698,7 @@ index ecfafb2..cd8832a 100644
  void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
  {
  #ifdef RETROACHIEVEMENTS
-@@ -2487,8 +2537,6 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2487,8 +2541,6 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
      int result;
      u64 isoTotalBytes = 0;
      int isoSizeKnown = 1;
@@ -82687,7 +82707,7 @@ index ecfafb2..cd8832a 100644
      char partname[256], filename[32];
      base_game_info_t *game;
      struct cdvdman_settings_bdm *settings;
-@@ -2612,16 +2660,17 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2612,16 +2664,17 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
          return;
      }
  
@@ -82708,7 +82728,7 @@ index ecfafb2..cd8832a 100644
              int vmcSizeInMb = sysCheckVMC(pDeviceData->bdmPrefix, "/", vmc_name, 0, &vmc_superblock);
              if (vmcSizeInMb > 0) {
                  bdm_vmc_infos.flags = vmc_superblock.mc_flag & 0xFF;
-@@ -2630,31 +2679,19 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2630,31 +2683,19 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
                  bdm_vmc_infos.specs.block_size = vmc_superblock.pages_per_block;
                  bdm_vmc_infos.specs.card_size = vmc_superblock.pages_per_cluster * vmc_superblock.clusters_per_card;
  
@@ -82749,7 +82769,7 @@ index ecfafb2..cd8832a 100644
                      }
  
                      close(fd);
-@@ -2665,8 +2702,12 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2665,8 +2706,12 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
          if (gAutoLaunchBDMGame == NULL) {
              if (have_error) {
                  char error[256];
@@ -82763,7 +82783,7 @@ index ecfafb2..cd8832a 100644
                  else
                      snprintf(error, sizeof(error), _l(_STR_ERR_VMC_CONTINUE), vmc_name, (vmc_id + 1));
                  if (!guiMsgBox(error, 1, NULL)) {
-@@ -3044,6 +3085,14 @@ static int bdmCheckVMC(item_list_t *itemList, char *name, int createSize)
+@@ -3044,6 +3089,14 @@ static int bdmCheckVMC(item_list_t *itemList, char *name, int createSize)
      return pDeviceData != NULL ? sysCheckVMC(pDeviceData->bdmPrefix, "/", name, createSize, NULL) : -1;
  }
  
@@ -82778,7 +82798,7 @@ index ecfafb2..cd8832a 100644
  static char *bdmGetPrefix(item_list_t *itemList)
  {
      bdm_device_data_t *pDeviceData = (bdm_device_data_t *)itemList->priv;
-@@ -3077,7 +3126,7 @@ static item_list_t bdmGameList = {
+@@ -3077,7 +3130,7 @@ static item_list_t bdmGameList = {
      BDM_MODE, 2, 0, 0, MENU_MIN_INACTIVE_FRAMES, BDM_MODE_UPDATE_DELAY, NULL, NULL, &bdmGetTextId, &bdmGetPrefix, &bdmInit, &bdmNeedsUpdate,
      &bdmUpdateGameList, &bdmGetGameCount, &bdmGetGame, &bdmGetGameName, &bdmGetGameNameLength, &bdmGetGameStartup, &bdmDeleteGame, &bdmRenameGame,
      &bdmLaunchGame, &bdmGetConfig, &bdmGetImage, &bdmCleanUp, &bdmShutdown, &bdmCheckVMC, &bdmGetIconId, &bdmLaunchVcd,
@@ -83809,7 +83829,7 @@ index d59e71c..7a1b2b6 100644
          LOG("FNTSYS Error loading glyph - %d\n", error);
          return NULL;
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..4f6dc84 100644
+index 2b110ad..32d5994 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -12,10 +12,13 @@
@@ -83826,7 +83846,7 @@ index 2b110ad..4f6dc84 100644
  #include "include/ripps2shot.h" // build 108: ripps2ShotTick
  #include "include/ripps2biossnd.h" // RIPPS2 build 88: Audio settings > BIOS Sounds
  #include "include/fntsys.h"
-@@ -886,35 +889,17 @@ static void guiNetProtocolApplied(int netProtocolWas)
+@@ -886,34 +889,21 @@ static void guiNetProtocolApplied(int netProtocolWas)
          guiMsgBox(_l(_STR_NET_UDPBD_TAB_HINT), 0, NULL);
  }
  
@@ -83853,18 +83873,19 @@ index 2b110ad..4f6dc84 100644
 -// Game Sources has no Access row. Restore UDPFS's own preference, not UDPBD's IMG.
  static void guiSourcesNetRowsRead(struct UIItem *ui)
  {
--    int netProtocolWas = gNetworkProtocol;
+     int netProtocolWas = gNetworkProtocol;
 -    int access = gUdpfsAccessMode;
 -    int picker = guiNetProtocolToPicker(guiNetProtocolShown());
--
+ 
++    // the protocol stays the one picked on the Network page; Connectivity Off turns it off (and its page with it)
      diaGetInt(ui, CFG_NETSTART, &gNetStartMode);
 -    diaGetInt(ui, CFG_NETPROTOCOL, &picker);
 -    guiNetProtocolStore(picker, access);
--    guiNetProtocolApplied(netProtocolWas);
++    guiNetProtocolStore(guiNetProtocolToPicker(guiNetProtocolShown()), gUdpfsAccessMode);
+     guiNetProtocolApplied(netProtocolWas);
  }
  
- // guiShowDeviceConfig is retained for the legacy entry point outside the Settings peer shell.
-@@ -924,26 +909,63 @@ static void guiSourcesNetRowsRead(struct UIItem *ui)
+@@ -924,26 +914,63 @@ static void guiSourcesNetRowsRead(struct UIItem *ui)
  // RIPPS2 build 106: Starred Games Star (gRipps2StarSide): Theme follows the list's <name>_star key
  static const char *guiStarSides[] = {N_("Theme"), N_("Left"), N_("Right"), N_("Hidden"), NULL};
  
@@ -83934,7 +83955,7 @@ index 2b110ad..4f6dc84 100644
          return;
      diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, &gRipps2FastCache);
      diaGetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, &gHDDGameListCache);
-@@ -988,19 +1010,11 @@ void guiShowDeviceConfig(void)
+@@ -988,19 +1015,11 @@ void guiShowDeviceConfig(void)
      diaSetInt(diaDeviceConfig, CFG_APPMODE, gAPPStartMode);
      diaSetInt(diaDeviceConfig, CFG_FAVMODE, gFAVStartMode);
  
@@ -83955,7 +83976,7 @@ index 2b110ad..4f6dc84 100644
      guiSourcesNetRowsBegin(diaDeviceConfig, deviceModes);
  
      // MMCE Start Mode
-@@ -1010,11 +1024,19 @@ void guiShowDeviceConfig(void)
+@@ -1010,11 +1029,19 @@ void guiShowDeviceConfig(void)
  
      int ret;
  reshow_device:
@@ -83976,7 +83997,7 @@ index 2b110ad..4f6dc84 100644
      if (ret == MMCE_SETTINGS_BUTTON) {
          guiShowMmceConfig();
          goto reshow_device;
-@@ -1026,25 +1048,14 @@ reshow_device:
+@@ -1026,25 +1053,14 @@ reshow_device:
              gDefaultDevice = guiDeviceTypeToIoMode(deviceModeIndex);
          diaGetInt(diaDeviceConfig, CFG_BDMMODE, &gBDMStartMode);
          diaGetInt(diaDeviceConfig, CFG_HDDMODE, &gHDDStartMode);
@@ -84004,7 +84025,7 @@ index 2b110ad..4f6dc84 100644
  
          // A BDM tab can be latched hidden (bdmNeedsUpdate short-circuits until the device generation
          // bumps). Re-evaluate device visibility now so re-enabling a device here brings its tab back
-@@ -1066,13 +1077,15 @@ int guiShowMmceConfig(void)
+@@ -1066,13 +1082,15 @@ int guiShowMmceConfig(void)
      static const char *deviceSlots[] = {"0", "1", NULL, NULL};
      static const char *deviceIGRSlots[] = {"NONE", "0", "1", "BOTH", NULL};
      static const char *deviceAckWaitCycles[] = {"0", "1", "2", "3", "4", "5", NULL};
@@ -84021,7 +84042,7 @@ index 2b110ad..4f6dc84 100644
      ui = guiSettingsComposeInto(guiMmceSettingsDialog, parts, 3, skipIDs, 2, -1, 1);
  
      if (ui == NULL)
-@@ -1303,6 +1316,10 @@ reshow_ui:
+@@ -1303,6 +1321,10 @@ reshow_ui:
  
      int ret = diaExecuteDialog(diaUIConfig, -1, 1, NULL);
  
@@ -84032,7 +84053,7 @@ index 2b110ad..4f6dc84 100644
      if (ret == UICFG_ARTWORK_BUTTON) {
          guiShowArtworkConfig();
          goto reshow_ui;
-@@ -1908,6 +1925,79 @@ int guiShowVcdUsbMode(void)
+@@ -1908,6 +1930,79 @@ int guiShowVcdUsbMode(void)
      return diaExecuteDialog(diaVcdUsbMode, -1, 1, NULL);
  }
  
@@ -84112,7 +84133,7 @@ index 2b110ad..4f6dc84 100644
  static void guiSetBdmaSettings(struct UIItem *ui)
  {
      static const char *bdmaSourceStrs[] = {NULL, NULL, NULL, NULL, NULL, NULL};
-@@ -2281,7 +2371,7 @@ void guiShowPopsNetConfig(void)
+@@ -2281,7 +2376,7 @@ void guiShowPopsNetConfig(void)
          snprintf(popsNotice, sizeof(popsNotice), _l(_STR_POPS_LOADED_FROM), popsOriginal.home);
          diaSetLabel(diaPopsNetConfig, NETCFG_POPS_NOTICE, popsNotice);
      } else {
@@ -84121,7 +84142,7 @@ index 2b110ad..4f6dc84 100644
      }
  
      for (;;) {
-@@ -2580,7 +2670,9 @@ void guiShowArtworkConfig(void)
+@@ -2580,7 +2675,9 @@ void guiShowArtworkConfig(void)
      diaSetEnum(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, bgBlurNames);
      diaSetInt(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, gRipps2BgBlur);
  
@@ -84132,7 +84153,7 @@ index 2b110ad..4f6dc84 100644
      if (ret) {
          diaGetInt(diaArtworkConfig, UICFG_COVERART, &gEnableArt);
          diaGetInt(diaArtworkConfig, UICFG_ENABLE_DISCART, &gEnableDiscArt);
-@@ -2652,18 +2744,70 @@ static int guiRipps2Shown(int bit, int setting, int def)
+@@ -2652,18 +2749,70 @@ static int guiRipps2Shown(int bit, int setting, int def)
      return (gRipps2UserSet & bit) || setting != def ? setting + 1 : 0;
  }
  
@@ -84209,7 +84230,7 @@ index 2b110ad..4f6dc84 100644
  }
  
  // build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
-@@ -2689,6 +2833,83 @@ static int guiRipps2SettingsUpdater(int modified)
+@@ -2689,6 +2838,83 @@ static int guiRipps2SettingsUpdater(int modified)
      return 0;
  }
  
@@ -84293,7 +84314,7 @@ index 2b110ad..4f6dc84 100644
  static void guiRipps2SettingsSet(void)
  {
      int i;
-@@ -2697,19 +2918,14 @@ static void guiRipps2SettingsSet(void)
+@@ -2697,19 +2923,14 @@ static void guiRipps2SettingsSet(void)
          guiRipps2PaletteNames[i + 1] = ripps2PaletteName(i);
      guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1] = NULL;
      diaSetEnum(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2PaletteNames);
@@ -84319,7 +84340,7 @@ index 2b110ad..4f6dc84 100644
  }
  
  void guiShowColorsConfig(void)
-@@ -2720,8 +2936,10 @@ void guiShowColorsConfig(void)
+@@ -2720,8 +2941,10 @@ void guiShowColorsConfig(void)
      const char *own = editable ? NULL : thmColorName(themeID);
      unsigned char shown[6][3];
      int keep[8] = {gRipps2Glyphs, gRipps2Palette, gRipps2Hints, gRipps2CatBar, gRipps2CatSwap, gRipps2SrcName, gRipps2Recents, gRipps2UserSet};
@@ -84332,7 +84353,7 @@ index 2b110ad..4f6dc84 100644
  
      guiRipps2SettingsSet();
  
-@@ -2756,7 +2974,11 @@ void guiShowColorsConfig(void)
+@@ -2756,7 +2979,11 @@ void guiShowColorsConfig(void)
      diaSetEnabled(diaColorsConfig, UICFG_PLASCOL, editable || own != NULL);
      diaSetEnabled(diaColorsConfig, UICFG_RESETCOL, editable || own != NULL);
  
@@ -84345,7 +84366,7 @@ index 2b110ad..4f6dc84 100644
      if (ret)
          guiRipps2SettingsRead();
      else {
-@@ -2768,11 +2990,17 @@ void guiShowColorsConfig(void)
+@@ -2768,11 +2995,17 @@ void guiShowColorsConfig(void)
          gRipps2SrcName = keep[5];
          gRipps2Recents = keep[6];
          gRipps2UserSet = keep[7];
@@ -84366,7 +84387,7 @@ index 2b110ad..4f6dc84 100644
          guiSettingsSavePending = 1;
      if (gRipps2Glyphs != keep[0] || gRipps2Palette != keep[1] || gRipps2Hints != keep[2] || gRipps2CatBar != keep[3] ||
          gRipps2CatSwap != keep[4] || gRipps2SrcName != keep[5] || gRipps2UserSet != keep[7])
-@@ -2879,7 +3107,10 @@ void guiShowCoverflowConfig(void)
+@@ -2879,7 +3112,10 @@ void guiShowCoverflowConfig(void)
      static const char *gridLayouts[] = {N_("Theme"), "4 x 2", "5 x 2", N_("3 x 2 Large"), N_("6 x 3 Compact"), NULL};
      static const char *launchDiscs[] = {N_("Theme"), N_("Off"), N_("Pop In"), N_("Spin"), NULL};
      int keepLayout = gRipps2GridLayout;
@@ -84377,7 +84398,7 @@ index 2b110ad..4f6dc84 100644
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, gridLayouts);
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAUNCHDISC, launchDiscs);
      diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, gRipps2GridLayout);
-@@ -2913,7 +3144,22 @@ void guiShowCoverflowConfig(void)
+@@ -2913,7 +3149,22 @@ void guiShowCoverflowConfig(void)
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gridWideNames);
      diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gRipps2GridWide);
  
@@ -84401,7 +84422,7 @@ index 2b110ad..4f6dc84 100644
      if (result) {
          if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_COUNT, &value))
              gCoverflowCount = (value == 1) ? 5 : 3;
-@@ -3349,13 +3595,6 @@ reshow_general:
+@@ -3349,13 +3600,6 @@ reshow_general:
  }
  
  
@@ -84415,7 +84436,7 @@ index 2b110ad..4f6dc84 100644
  static int guiSettingsShowSources(void)
  {
      const struct UIItem *parts[] = {diaDeviceConfig};
-@@ -3365,6 +3604,7 @@ static int guiSettingsShowSources(void)
+@@ -3365,6 +3609,7 @@ static int guiSettingsShowSources(void)
      struct UIItem *ui = guiSettingsCompose(parts, 1, NULL, 0, -1, 0);
      int deviceModeIndex;
      int result;
@@ -84423,7 +84444,7 @@ index 2b110ad..4f6dc84 100644
  
      if (ui == NULL)
          return 0;
-@@ -3384,13 +3624,6 @@ static int guiSettingsShowSources(void)
+@@ -3384,13 +3629,6 @@ static int guiSettingsShowSources(void)
      diaSetInt(ui, CFG_RIPPS2_STARSIDE, gRipps2StarSide);
      diaSetInt(ui, UICFG_RIPPS2_RECENTS, gRipps2Recents); // build 113: beside the Starred Games rows
      guiSetAdvancedSettings(ui);                         // build 113: the prefix paths, HDD Spindown
@@ -84437,7 +84458,7 @@ index 2b110ad..4f6dc84 100644
      diaSetEnabled(ui, CFG_HDDMODE, 1);
      guiSourcesNetRowsBegin(ui, deviceModes);
      diaSetEnum(ui, CFG_MMCEMODE, deviceModes);
-@@ -3399,11 +3632,19 @@ static int guiSettingsShowSources(void)
+@@ -3399,11 +3637,19 @@ static int guiSettingsShowSources(void)
      guiSettingsBeginDialog(ui);
  
  reshow_sources:
@@ -84458,7 +84479,7 @@ index 2b110ad..4f6dc84 100644
      if (result == MMCE_SETTINGS_BUTTON) {
          // MMCE uses a separate composition buffer. Confirming the child editor finishes the
          // Settings page and returns to the hub; Circle resumes Game Sources as the parent page.
-@@ -3417,29 +3658,21 @@ reshow_sources:
+@@ -3417,29 +3663,21 @@ reshow_sources:
          result = UIID_BTN_OK;
      }
  
@@ -84491,7 +84512,7 @@ index 2b110ad..4f6dc84 100644
  
          bdmForceDeviceRefresh();
          applyConfig(-1, -1, 0);
-@@ -3507,9 +3740,11 @@ static int guiSettingsDisplayUpdater(int modified)
+@@ -3507,9 +3745,11 @@ static int guiSettingsDisplayUpdater(int modified)
      return 0;
  }
  
@@ -84505,7 +84526,7 @@ index 2b110ad..4f6dc84 100644
      const char *vmodeNames[] = {_l(_STR_AUTO), "PAL 640x512i @50Hz 24bit", "NTSC 640x448i @60Hz 24bit",
                                  "EDTV 640x448p @60Hz 24bit", "EDTV 640x512p @50Hz 24bit", "VGA 640x480p @60Hz 24bit",
                                  "PAL 704x576i @50Hz 16bit", "NTSC 704x480i @60Hz 16bit",
-@@ -3517,12 +3752,62 @@ static int guiSettingsShowInterface(void)
+@@ -3517,12 +3757,62 @@ static int guiSettingsShowInterface(void)
                                  "HDTV 1280x720p @60Hz 16bit", "HDTV 1920x1080i @60Hz 16bit",
                                  "PAL 640x256p @50Hz 24bit", "NTSC 640x224p @60Hz 24bit",
                                  "PAL 640x512i @50Hz 24bit (FLICKER-FREE)", "NTSC 640x448i @60Hz 24bit (FLICKER-FREE)", NULL};
@@ -84572,7 +84593,7 @@ index 2b110ad..4f6dc84 100644
      int gameViewChanged = 0;
      int cfgTitlesChanged = 0;
      int appsViewChanged = 0;
-@@ -3533,7 +3818,6 @@ static int guiSettingsShowInterface(void)
+@@ -3533,7 +3823,6 @@ static int guiSettingsShowInterface(void)
      showCfgPopup = 0;
      guiResetNotifications();
      previousTheme = thmGetGuiValue();
@@ -84580,7 +84601,7 @@ index 2b110ad..4f6dc84 100644
  
      guiLock();
      themeNamesSnap = guiCopyNameList((const char **)thmGetGuiList());
-@@ -3543,7 +3827,6 @@ static int guiSettingsShowInterface(void)
+@@ -3543,7 +3832,6 @@ static int guiSettingsShowInterface(void)
      diaSetEnum(ui, UICFG_LANG, langNamesSnap != NULL ? langNamesSnap : (const char **)lngGetGuiList());
      guiSetGameViewPicker(ui);
      guiSetAppsViewPicker(ui);
@@ -84588,7 +84609,7 @@ index 2b110ad..4f6dc84 100644
      diaSetInt(ui, UICFG_THEME, thmGetGuiValue());
      diaSetInt(ui, UICFG_LANG, lngGetGuiValue());
      diaSetInt(ui, UICFG_AUTOSORT, gAutosort);
-@@ -3554,19 +3837,17 @@ static int guiSettingsShowInterface(void)
+@@ -3554,19 +3842,17 @@ static int guiSettingsShowInterface(void)
      // Keep the editor reachable even when the current theme has no active Coverflow view; users
      // need to be able to configure it before enabling or switching to a Coverflow-capable theme.
      diaSetVisible(ui, UICFG_COVERFLOW_BUTTON, 1);
@@ -84613,7 +84634,7 @@ index 2b110ad..4f6dc84 100644
      if (result == UICFG_ARTWORK_BUTTON) {
          guiShowArtworkConfig();
          goto reshow_interface;
-@@ -3584,10 +3865,6 @@ reshow_interface:
+@@ -3584,10 +3870,6 @@ reshow_interface:
              guiSettingsSavePending = 1;
          goto reshow_interface;
      }
@@ -84624,7 +84645,7 @@ index 2b110ad..4f6dc84 100644
  
      padRumbleFlush();
      if (result != UIID_BTN_CANCEL && result != -1) {
-@@ -3604,11 +3881,6 @@ reshow_interface:
+@@ -3604,11 +3886,6 @@ reshow_interface:
          }
          gameViewChanged = guiReadGameViewPicker(ui);
          appsViewChanged = guiReadAppsViewPicker(ui);
@@ -84636,7 +84657,7 @@ index 2b110ad..4f6dc84 100644
          {
              int gameIDMode;
              diaGetInt(ui, CFG_APPLYGAMEID, &gameIDMode);
-@@ -3617,8 +3889,6 @@ reshow_interface:
+@@ -3617,8 +3894,6 @@ reshow_interface:
  
          if (previousTheme != themeID && isBgmPlaying())
              bgmStop();
@@ -84645,7 +84666,7 @@ index 2b110ad..4f6dc84 100644
          applyConfig(themeID, langID, 1);
          if (cfgTitlesChanged) {
              guiRefreshCfgTitles(); // rebuilds every game list, which also covers a view change
-@@ -3631,11 +3901,6 @@ reshow_interface:
+@@ -3631,11 +3906,6 @@ reshow_interface:
              sfxReload(-1);             // sound was the beep's moment); RIPPS2 build 95: on the IO worker
          if (gEnableBGM && !isBgmPlaying())
              bgmStart();
@@ -84657,7 +84678,7 @@ index 2b110ad..4f6dc84 100644
      }
  
      guiFreeNameList(themeNamesSnap);
-@@ -3937,9 +4202,9 @@ static int guiSettingsShowIndex(int *page)
+@@ -3937,9 +4207,9 @@ static int guiSettingsShowIndex(int *page)
          _l(_STR_MENU_NETWORK),
          _l(_STR_INTERFACE_SETTINGS),
          _l(_STR_GAME_LAUNCHING),
@@ -84670,7 +84691,7 @@ index 2b110ad..4f6dc84 100644
  #ifdef RETROACHIEVEMENTS
          _l(_STR_RIPPS2_ACHIEVEMENTS), // build 80: moved here from the main menu, last of the pages
  #endif
-@@ -5428,13 +5693,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5428,13 +5698,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
  
          if (ui)
              diaRenderUI(ui, screenHandler->inMenu, NULL, 0);
@@ -86634,7 +86655,7 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..35b80e0 100644
+index 13c78db..c604cd0 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -50,6 +50,8 @@
@@ -86755,7 +86776,15 @@ index 13c78db..35b80e0 100644
              if (configGetInt(configOPL, "ripps2_launch_disc", &value) && value >= 0 && value <= 3)
                  gRipps2LaunchDisc = value; // build 91: Flow and Grid > Launch Disc
              if (configGetInt(configOPL, "ripps2_vignette", &value) && value >= 0 && value <= 2)
-@@ -4435,6 +4466,8 @@ static void _saveConfig()
+@@ -3970,6 +4001,7 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_ENABLE_PCCF, &gEnablePCCF);
+             configGetInt(configOPL, CONFIG_OPL_ENABLE_DVR, &gEnableDVR);
+             configGetInt(configOPL, CONFIG_OPL_ENABLE_BDMHDD, &gEnableBdmHDD);
++            gEnableBdmHDD = gHDDStartMode != START_MODE_DISABLED; // build 114: one HDD, APA or exFAT, as Game Sources sets it
+             int udpbdKeyPresent = configGetInt(configOPL, CONFIG_OPL_ENABLE_UDPBD, &gEnableUDPBD);
+             configGetInt(configOPL, CONFIG_OPL_NET_BOOT_PROTOCOL, &gNetBootProtocol);
+             // Unified network-protocol selector (single SMAP NIC -> at most one transport per session).
+@@ -4435,6 +4467,8 @@ static void _saveConfig()
          configSetInt(configOPL, "ripps2_recents", gRipps2Recents);
          configSetInt(configOPL, "ripps2_userset", gRipps2UserSet); // build 81
          ripps2HintsSaveConfig(configOPL);                          // build 90: Hints and Glyphs
@@ -86764,7 +86793,7 @@ index 13c78db..35b80e0 100644
          configSetInt(configOPL, "ripps2_launch_disc", gRipps2LaunchDisc); // build 91
          configSetInt(configOPL, "ripps2_vignette", gRipps2Vignette);
          configSetInt(configOPL, "ripps2_grid_layout", gRipps2GridLayout);
-@@ -5292,6 +5325,7 @@ int gArtAbandoned = 0;
+@@ -5292,6 +5326,7 @@ int gArtAbandoned = 0;
  
  void deinitEx(int exception, int modeSelected, int modeSelected2)
  {
@@ -86772,7 +86801,7 @@ index 13c78db..35b80e0 100644
      gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
  
      // Say something BEFORE the blocking teardown below, because it can hold this thread for the
-@@ -5339,6 +5373,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+@@ -5339,6 +5374,9 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
  
      // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
      ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
@@ -86782,7 +86811,7 @@ index 13c78db..35b80e0 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
-@@ -5384,6 +5421,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
+@@ -5384,6 +5422,7 @@ void deinitEx(int exception, int modeSelected, int modeSelected2)
  
  void deinit(int exception, int modeSelected)
  {
@@ -86790,7 +86819,7 @@ index 13c78db..35b80e0 100644
      gDeinitTerminal = (modeSelected == IO_MODE_SELECTED_ALL || modeSelected == IO_MODE_SELECTED_NONE);
  
      // Say something BEFORE the blocking teardown below, because it can hold this thread for the
-@@ -5431,6 +5469,9 @@ void deinit(int exception, int modeSelected)
+@@ -5431,6 +5470,9 @@ void deinit(int exception, int modeSelected)
  
      // block all io ops, wait for the ones still running to finish (BOUNDED -- see the note above)
      ioBlockOpsTimed(1, gDeinitTerminal ? EXIT_IO_DRAIN_TICKS : LAUNCH_IO_DRAIN_TICKS);
@@ -86800,7 +86829,7 @@ index 13c78db..35b80e0 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
-@@ -5730,6 +5771,7 @@ static void init(void)
+@@ -5730,6 +5772,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
      ioNameAction((void *)&deferredAudioInit, "SOUND LOAD");
@@ -86808,7 +86837,7 @@ index 13c78db..35b80e0 100644
      menuInit();
  
      startPads();
-@@ -5885,6 +5927,9 @@ static void miniInit(int mode)
+@@ -5885,6 +5928,9 @@ static void miniInit(int mode)
      configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd)
  
      ioInit();
