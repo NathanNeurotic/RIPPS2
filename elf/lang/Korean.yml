@@ -1101,6 +1101,36 @@ strings:
   PC CARD CF (experimental): PC CARD CF (실험적)
   HDD Start Mode: HDD 시작 모드
   Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): The Roboto Project Authors의 Roboto Condensed (SIL OFL 1.1)
+  '%s on %s': '%s, %s에 있음'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s에서 %s로 (%d%%), 모든 조각을 확인했습니다. ISO를 지우고 ZSO를 남길까요?'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s에서 다시 %s로, 모든 조각을 확인했습니다. ZSO를 지우고 ISO를 남길까요?'
+  A ZSO of this game is already beside it. Remove one of the two first.: 이 게임의 ZSO가 이미 옆에 있습니다. 둘 중 하나를 먼저 지우세요.
+  About %d min, then checked: 약 %d분, 그다음 확인
+  An ISO of this game is already beside it. Remove one of the two first.: 이 게임의 ISO가 이미 옆에 있습니다. 둘 중 하나를 먼저 지우세요.
+  CHECKING EVERY PIECE: 모든 조각 확인 중
+  COMPRESS TO ZSO: ZSO로 압축
+  'COMPRESSED %s: %s FREED': '%s 압축됨: %s 확보'
+  COMPRESSING 1 OF 2: 압축 중 1/2
+  COMPRESSING 2 OF 2: 압축 중 2/2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : '%s을(를) 압축할까요? ZSO를 다시 읽어 확인할 때까지 ISO는 남아 있고, 그다음 RIPPS2가 ISO를 지우기 전에 묻습니다. 작업하는 동안 드라이브에 둘 다 들어갈 공간이 필요합니다. 끝날 때까지 본체를 켜 두세요. ZSO는 OPL 코어로만 시작합니다 (Neutrino 불가). 세이브, 설정, 이미지, 치트는 그대로 따라가며 언제든 다시 ISO로 만들 수 있습니다.'
+  Compress to ZSO: ZSO로 압축
+  Cycle: 순환
+  'Experimental: OPL core only (not Neutrino)': '실험적: OPL 코어만 (Neutrino 불가)'
+  Hold SELECT: SELECT 길게 누르기
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: 끝내지 못했습니다 (%s). 쓴 것은 지웠으며 게임은 그대로입니다.
+  List: 목록
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : '%s을(를) 다시 ISO로 만들까요? ISO를 다시 읽어 확인할 때까지 ZSO는 남아 있고, 그다음 RIPPS2가 ZSO를 지우기 전에 묻습니다. 작업하는 동안 드라이브에 둘 다 들어갈 공간이 필요합니다. 끝날 때까지 본체를 켜 두세요. 세이브, 설정, 이미지, 치트는 그대로 따라갑니다.'
+  Stop? What it has written so far is removed; the game stays as it was.: 중지할까요? 지금까지 쓴 것은 지워지고 게임은 그대로 남습니다.
+  THEMES: 테마
+  There is not enough memory for this just now.: 지금은 이 작업에 필요한 메모리가 부족합니다.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: 이 이미지는 RIPPS2가 압축하거나 풀 수 없습니다 (크기가 2 KB 블록의 정수배가 아닙니다).
+  UNCOMPRESS TO ISO: ISO로 압축 해제
+  UNCOMPRESSED %s: '%s 압축 해제됨'
+  UNCOMPRESSING: 압축 해제 중
+  Uncompress to ISO: ISO로 압축 해제
+  Under a minute, then checked: 1분 미만, 그다음 확인
 labels:
   IP_ADDRESS_TYPE_STATIC: 고정
   HINT_NEUTRINO_AUTO_ELF: 게임의 부트 ELF를 Neutrino에 넘겨 타이틀별 설정을 찾게 합니다. 기본으로 켜져 있으며, 직접 설정한 Boot ELF 옵션이 우선합니다.
@@ -1540,3 +1570,5 @@ labels:
   HINT_RIPPS2_SWEEP_NAME: 색 스윕 목록에서 내 스윕의 이름.
   HINT_RIPPS2_SWEEP_COLOR: 스윕이 차례로 지나가는 다섯 색 중 하나.
   HINT_RIPPS2_SWEEP_SPEED: 다음 색이 들어오기 전까지 각 색이 머무는 시간. 경쾌하게도 부드럽고, 색이 깜박이지 않습니다.
+  RIPPS2_HIDE_COMPRESS: 게임 숨기기 및 압축
+  HINT_RIPPS2_SELECT_HOLD: '게임 목록에서 SELECT를 4.2초 누름. 목록: 패널에 테마를 띄워 하나 고르기. 순환: 다음 테마. 끄기: 아무것도 안 함 (누르면 새로고침은 됨).'

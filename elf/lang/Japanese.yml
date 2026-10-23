@@ -1101,6 +1101,36 @@ strings:
   PC CARD CF (experimental): PC CARD CF（実験的）
   HDD Start Mode: HDD の起動モード
   Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): The Roboto Project Authors による Roboto Condensed（SIL OFL 1.1）
+  '%s on %s': '%s、%s上'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s が %s になりました (%d%%)。すべての断片を確認済み。ISO を削除して ZSO を残しますか？'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s が再び %s になりました。すべての断片を確認済み。ZSO を削除して ISO を残しますか？'
+  A ZSO of this game is already beside it. Remove one of the two first.: このゲームの ZSO がすでに隣にあります。先にどちらかを削除してください。
+  About %d min, then checked: 約 %d 分、その後確認
+  An ISO of this game is already beside it. Remove one of the two first.: このゲームの ISO がすでに隣にあります。先にどちらかを削除してください。
+  CHECKING EVERY PIECE: すべての断片を確認中
+  COMPRESS TO ZSO: ZSO に圧縮
+  'COMPRESSED %s: %s FREED': '%s を圧縮: %s 空きました'
+  COMPRESSING 1 OF 2: 圧縮中 1/2
+  COMPRESSING 2 OF 2: 圧縮中 2/2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : '%s を圧縮しますか？ ZSO を読み戻して確認するまで ISO は残り、その後 RIPPS2 が ISO を削除する前に確認します。作業中はドライブに両方の空きが必要です。終わるまで本体の電源を切らないでください。ZSO は OPL コアでのみ起動します (Neutrino は不可)。セーブ、設定、画像、チートはそのまま使え、いつでも ISO に戻せます。'
+  Compress to ZSO: ZSO に圧縮
+  Cycle: 順送り
+  'Experimental: OPL core only (not Neutrino)': '実験的: OPL コアのみ (Neutrino は不可)'
+  Hold SELECT: SELECT 長押し
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: 完了できませんでした (%s)。書き込んだものは削除され、ゲームは元のままです。
+  List: リスト
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : '%s を ISO に戻しますか？ ISO を読み戻して確認するまで ZSO は残り、その後 RIPPS2 が ZSO を削除する前に確認します。作業中はドライブに両方の空きが必要です。終わるまで本体の電源を切らないでください。セーブ、設定、画像、チートはそのまま使えます。'
+  Stop? What it has written so far is removed; the game stays as it was.: 中止しますか？ これまでに書き込んだものは削除され、ゲームは元のままです。
+  THEMES: テーマ
+  There is not enough memory for this just now.: 今はこれに使えるメモリが足りません。
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: このイメージは RIPPS2 で圧縮も展開もできません (サイズが 2 KB ブロックの整数倍ではありません)。
+  UNCOMPRESS TO ISO: ISO に展開
+  UNCOMPRESSED %s: '%s を展開しました'
+  UNCOMPRESSING: 展開中
+  Uncompress to ISO: ISO に展開
+  Under a minute, then checked: 1 分未満、その後確認
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。
@@ -1540,3 +1570,5 @@ labels:
   HINT_RIPPS2_SWEEP_NAME: カラースイープの一覧でのスイープの名前。
   HINT_RIPPS2_SWEEP_COLOR: スイープが順に移り変わる 5 色のひとつ。
   HINT_RIPPS2_SWEEP_SPEED: 次の色に移るまで各色が続く長さ。軽快でもなめらかで、色が点滅することはありません。
+  RIPPS2_HIDE_COMPRESS: ゲームを非表示と圧縮
+  HINT_RIPPS2_SELECT_HOLD: 'ゲームリストで SELECT を 4.2 秒長押し。リスト: パネルにテーマを並べて選ぶ。順送り: 次のテーマ。オフ: 何もしない (押すと更新はします)。'

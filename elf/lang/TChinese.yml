@@ -1101,6 +1101,36 @@ strings:
   PC CARD CF (experimental): PC CARD CF（實驗性）
   HDD Start Mode: 硬碟 啟動模式
   Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): The Roboto Project Authors 的 Roboto Condensed（SIL OFL 1.1）
+  '%s on %s': '%s，位於 %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s：%s 變為 %s (%d%%)，每一塊皆已檢查。刪除 ISO 並保留 ZSO？'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s：%s 又變回 %s，每一塊皆已檢查。刪除 ZSO 並保留 ISO？'
+  A ZSO of this game is already beside it. Remove one of the two first.: 旁邊已有此遊戲的 ZSO。請先刪除其中一個。
+  About %d min, then checked: 約 %d 分鐘，然後檢查
+  An ISO of this game is already beside it. Remove one of the two first.: 旁邊已有此遊戲的 ISO。請先刪除其中一個。
+  CHECKING EVERY PIECE: 正在檢查每一塊
+  COMPRESS TO ZSO: 壓縮為 ZSO
+  'COMPRESSED %s: %s FREED': 已壓縮 %s：釋放 %s
+  COMPRESSING 1 OF 2: 壓縮中 1/2
+  COMPRESSING 2 OF 2: 壓縮中 2/2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : 壓縮 %s？在 ZSO 讀回並檢查之前 ISO 會保留，之後 RIPPS2 會在刪除 ISO 前詢問。作業期間磁碟需要同時容納兩者的空間；完成前請勿關閉主機。ZSO 只能用 OPL 核心啟動（不支援 Neutrino）；它的存檔、設定、圖片與金手指都會跟著它，並可隨時轉回 ISO。
+  Compress to ZSO: 壓縮為 ZSO
+  Cycle: 輪替
+  'Experimental: OPL core only (not Neutrino)': 實驗性：僅 OPL 核心（不支援 Neutrino）
+  Hold SELECT: 按住 SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: 無法完成（%s）。已寫入的內容已刪除；遊戲維持原樣。
+  List: 清單
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : 將 %s 轉回 ISO？在 ISO 讀回並檢查之前 ZSO 會保留，之後 RIPPS2 會在刪除 ZSO 前詢問。作業期間磁碟需要同時容納兩者的空間；完成前請勿關閉主機。它的存檔、設定、圖片與金手指都會跟著它。
+  Stop? What it has written so far is removed; the game stays as it was.: 停止？目前已寫入的內容會被刪除；遊戲維持原樣。
+  THEMES: 主題
+  There is not enough memory for this just now.: 目前記憶體不足，無法執行此操作。
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: RIPPS2 無法壓縮或解壓此映像檔（其大小不是完整的 2 KB 區塊）。
+  UNCOMPRESS TO ISO: 解壓為 ISO
+  UNCOMPRESSED %s: 已解壓 %s
+  UNCOMPRESSING: 解壓中
+  Uncompress to ISO: 解壓為 ISO
+  Under a minute, then checked: 不到一分鐘，然後檢查
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色
@@ -1550,3 +1580,5 @@ labels:
   HINT_RIPPS2_SWEEP_NAME: 你的漸變在顏色漸變清單中的名字。
   HINT_RIPPS2_SWEEP_COLOR: 漸變依序經過的五種顏色之一。
   HINT_RIPPS2_SWEEP_SPEED: 每種顏色停留多久後下一種淡入。即使活潑也很平順：顏色從不閃爍。
+  RIPPS2_HIDE_COMPRESS: 隱藏遊戲與壓縮
+  HINT_RIPPS2_SELECT_HOLD: 在遊戲清單上按住 SELECT 4.2 秒。清單：在面板中列出主題，選一個。輪替：下一個主題。關閉：不做任何事（按一下仍會重新整理）。

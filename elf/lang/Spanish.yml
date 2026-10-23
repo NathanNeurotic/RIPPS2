@@ -1100,6 +1100,36 @@ strings:
   DESR DVR ISOs (experimental): ISO DESR DVR (experimental)
   HDD Start Mode: Inicio del disco duro
   Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed de The Roboto Project Authors (SIL OFL 1.1)
+  '%s on %s': '%s en %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s pasó a %s (%d%%), cada trozo comprobado. ¿Quitar el ISO y conservar el ZSO?'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s volvió a ser %s, cada trozo comprobado. ¿Quitar el ZSO y conservar el ISO?'
+  A ZSO of this game is already beside it. Remove one of the two first.: Ya hay un ZSO de este juego a su lado. Quita primero uno de los dos.
+  About %d min, then checked: Unos %d min, luego comprobado
+  An ISO of this game is already beside it. Remove one of the two first.: Ya hay un ISO de este juego a su lado. Quita primero uno de los dos.
+  CHECKING EVERY PIECE: COMPROBANDO CADA TROZO
+  COMPRESS TO ZSO: COMPRIMIR A ZSO
+  'COMPRESSED %s: %s FREED': '%s COMPRIMIDO: %s LIBERADOS'
+  COMPRESSING 1 OF 2: COMPRIMIENDO 1 DE 2
+  COMPRESSING 2 OF 2: COMPRIMIENDO 2 DE 2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : ¿Comprimir %s? El ISO se queda hasta que el ZSO se haya vuelto a leer y comprobado; luego RIPPS2 pregunta antes de quitar el ISO. La unidad necesita espacio para ambos mientras trabaja; deja la consola encendida hasta que termine. Un ZSO solo arranca con el núcleo OPL (no Neutrino); sus partidas, ajustes, imágenes y trucos se quedan con él, y puede volver a ser un ISO en cualquier momento.
+  Compress to ZSO: Comprimir a ZSO
+  Cycle: Rotación
+  'Experimental: OPL core only (not Neutrino)': 'Experimental: solo el núcleo OPL (no Neutrino)'
+  Hold SELECT: Mantener SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: No se pudo terminar (%s). Lo que escribió se quitó; el juego está como estaba.
+  List: Lista
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : ¿Volver a hacer de %s un ISO? El ZSO se queda hasta que el ISO se haya vuelto a leer y comprobado; luego RIPPS2 pregunta antes de quitar el ZSO. La unidad necesita espacio para ambos mientras trabaja; deja la consola encendida hasta que termine. Sus partidas, ajustes, imágenes y trucos se quedan con él.
+  Stop? What it has written so far is removed; the game stays as it was.: ¿Detener? Lo escrito hasta ahora se quita; el juego queda como estaba.
+  THEMES: TEMAS
+  There is not enough memory for this just now.: Ahora mismo no hay memoria suficiente para esto.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: RIPPS2 no puede comprimir ni descomprimir esta imagen (su tamaño no son bloques enteros de 2 KB).
+  UNCOMPRESS TO ISO: DESCOMPRIMIR A ISO
+  UNCOMPRESSED %s: '%s DESCOMPRIMIDO'
+  UNCOMPRESSING: DESCOMPRIMIENDO
+  Uncompress to ISO: Descomprimir a ISO
+  Under a minute, then checked: Menos de un minuto, luego comprobado
 labels:
   HINT_NEUTRINO_AUTO_ELF: Pasa el ELF de arranque del juego a Neutrino para buscar su configuración por título. Activado por defecto; una opción Boot ELF puesta a mano tiene prioridad.
   HINT_POPSTARTER_PATH: Dónde está POPSTARTER.ELF. Si lo dejas vacío, RIPPS2 pone uno que encuentre en una unidad; escribe encima para usar otro, como usb:/POPS/POPSTARTER.ELF
@@ -1538,3 +1568,5 @@ labels:
   HINT_RIPPS2_SWEEP_NAME: Cómo se llama tu transición en la lista Transición de colores.
   HINT_RIPPS2_SWEEP_COLOR: Uno de los cinco colores por los que pasa la transición, en orden.
   HINT_RIPPS2_SWEEP_SPEED: 'Cuánto dura cada color antes de que entre el siguiente. Incluso Vivo sigue suave: los colores nunca parpadean.'
+  RIPPS2_HIDE_COMPRESS: Ocultar juego y compresión
+  HINT_RIPPS2_SELECT_HOLD: 'SELECT mantenido 4.2 s en una lista de juegos. Lista: los temas en un panel, elige uno. Rotación: el tema siguiente. Desactivado: nada (una pulsación sigue actualizando).'

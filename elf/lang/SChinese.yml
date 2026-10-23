@@ -1101,6 +1101,36 @@ strings:
   PC CARD CF (experimental): PC CARD CF（实验性）
   HDD Start Mode: 硬盘 启动方式
   Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): The Roboto Project Authors 的 Roboto Condensed（SIL OFL 1.1）
+  '%s on %s': '%s，位于 %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s：%s 变为 %s (%d%%)，每一块均已校验。删除 ISO 并保留 ZSO？'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s：%s 又变回 %s，每一块均已校验。删除 ZSO 并保留 ISO？'
+  A ZSO of this game is already beside it. Remove one of the two first.: 旁边已有此游戏的 ZSO。请先删除其中一个。
+  About %d min, then checked: 约 %d 分钟，然后校验
+  An ISO of this game is already beside it. Remove one of the two first.: 旁边已有此游戏的 ISO。请先删除其中一个。
+  CHECKING EVERY PIECE: 正在校验每一块
+  COMPRESS TO ZSO: 压缩为 ZSO
+  'COMPRESSED %s: %s FREED': 已压缩 %s：释放 %s
+  COMPRESSING 1 OF 2: 压缩中 1/2
+  COMPRESSING 2 OF 2: 压缩中 2/2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : 压缩 %s？在 ZSO 被读回并校验之前 ISO 会保留，之后 RIPPS2 会在删除 ISO 前询问。工作期间驱动器需要同时容纳两者的空间；完成前请不要关闭主机。ZSO 只能用 OPL 核心启动（不支持 Neutrino）；它的存档、设置、图片和金手指都随它保留，并可随时转回 ISO。
+  Compress to ZSO: 压缩为 ZSO
+  Cycle: 轮换
+  'Experimental: OPL core only (not Neutrino)': 实验性：仅 OPL 核心（不支持 Neutrino）
+  Hold SELECT: 按住 SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: 无法完成（%s）。已写入的内容已删除；游戏保持原样。
+  List: 列表
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : 将 %s 转回 ISO？在 ISO 被读回并校验之前 ZSO 会保留，之后 RIPPS2 会在删除 ZSO 前询问。工作期间驱动器需要同时容纳两者的空间；完成前请不要关闭主机。它的存档、设置、图片和金手指都随它保留。
+  Stop? What it has written so far is removed; the game stays as it was.: 停止？目前已写入的内容会被删除；游戏保持原样。
+  THEMES: 主题
+  There is not enough memory for this just now.: 目前内存不足，无法执行此操作。
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: RIPPS2 无法压缩或解压此镜像（其大小不是完整的 2 KB 块）。
+  UNCOMPRESS TO ISO: 解压为 ISO
+  UNCOMPRESSED %s: 已解压 %s
+  UNCOMPRESSING: 解压中
+  Uncompress to ISO: 解压为 ISO
+  Under a minute, then checked: 不到一分钟，然后校验
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
@@ -1541,3 +1571,5 @@ labels:
   HINT_RIPPS2_SWEEP_NAME: 你的渐变在颜色渐变列表中的名字。
   HINT_RIPPS2_SWEEP_COLOR: 渐变依次经过的五种颜色之一。
   HINT_RIPPS2_SWEEP_SPEED: 每种颜色停留多久后下一种淡入。即使活泼也很平滑：颜色从不闪烁。
+  RIPPS2_HIDE_COMPRESS: 隐藏游戏和压缩
+  HINT_RIPPS2_SELECT_HOLD: 在游戏列表上按住 SELECT 4.2 秒。列表：在面板中列出主题，选一个。轮换：下一个主题。关：不做任何事（按一下仍会刷新）。
