@@ -260,7 +260,7 @@ need(rd('src/opl.c'), (('"ripps2_select_hold"', 'kept in the settings'),), 'opl.
 pk_ = rd('src/ripps2games.c')
 need(pk_, (('#define ZP_MAGIC 0x4F53495A', 'the ZISO header'), ('#define ZP_HEAD  24', 'the index right after a 24-byte header'),
            ('raw = n <= 0 || n >= 2048;', 'a block LZ4 cannot shrink stays raw'), ('static int zpLz4(const unsigned char *src, int n, unsigned char *out, int cap)', 'an LZ4 block writer of its own (the EE lz4.c only decodes)'),
-           ('mflimit = n - 12, matchlimit = n - 5', 'the end rules of the block format'), ('| (raw ? 0x80000000u : 0)', 'the top bit marks a raw block'),
+           ('mflimit = n - 12, matchlimit = n - 5', 'the end rules of the block format'), ('(sz[k] & 0x8000 ? 0x80000000u : 0)', 'the top bit marks a raw block'),
            ('LZ4_decompress_fast(', 'read back as OPL reads it'), ('crc32(0L, in, cnt * 2048) != j->crcs[b / ZP_RUN]', 'every piece checked'),
            ('snprintf(tmp, sizeof(tmp), "%s.part", dst);', 'the work in a .part file'), ('if (rv == 1 && rename(tmp, dst) != 0)', 'named only once checked'),
            ('if (rv != 1)\n        unlink(tmp);', 'a cancel or failure removes it'), ('if (!zpAsk(', 'the panel: SELECT held'),
@@ -269,6 +269,16 @@ if 'GAME_FORMAT_ISO || (*g)->parts != 1' not in pk_.replace('(*g)->format != GAM
     fail.append('ripps2games.c: only a whole ISO or ZSO (never a split UL game)')
 need(rd('src/menusys.c'), (('packable ? _STR_RIPPS2_HIDE_COMPRESS : _STR_RIPPS2_HIDE_GAME', 'the row says Compression where it applies'),
                            ('ripps2PackGame(support, id);', 'the pick runs it')), 'menusys.c')
+# the lab (10/23): ps2sdk's exFAT driver lost whole clusters of a file written at two places or growing beside another.
+# A ZSO is written in one straight stream (the sizes first, in a side file that alone grows then), and RIPPS2's own
+# background writes are held off while a compression or a RIPDISC rip runs
+if 'lseek64(j->fdOut' in pk_ or 'zpPlaceIdx' in pk_:
+    fail.append('ripps2games.c: a ZSO is never written at two places (no seek in the file being written)')
+need(pk_, (('// pass one: the sizes', 'the sizes first'), ('// pass two: the data, packed again and held to the sizes, straight on', 'then one stream'),
+           ('ioLaunchBegin(); // and no background write', 'background writes held off during a job'), ('    ioLaunchCancel();\n    ioBlockOps(0);', 'and given back after')), 'ripps2games.c compression')
+dc_ = rd('src/ripps2disc.c')
+if 'ioLaunchBegin();\n    rdWhat = what;' not in dc_ or 'ioLaunchCancel(); // build 114: the rip is over' not in dc_:
+    fail.append('ripps2disc.c: background writes held off while a rip grows its file')
 # and Network Connectivity Off left the SMB page up: Game Sources lost the protocol's re-derive with its Protocol row
 if 'guiNetProtocolApplied(netProtocolWas);' not in body(g, 'static void guiSourcesNetRowsRead('):
     fail.append('gui.c: Network Connectivity on Game Sources turns the network page on and off')
