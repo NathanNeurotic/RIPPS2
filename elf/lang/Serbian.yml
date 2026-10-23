@@ -91,7 +91,6 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Ovo je PS2 igra sa ESR zakrpom. Stavite ESR (esr*.elf) u APPS, BOOT ili ESR na memorijskoj kartici ili USB flešu da biste je pokrenuli.
   '%s, BUILD %d': '%s, VERZIJA %d'
   '... and the anonymous ...': '... i oni bezimeni ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 priložen bez izmena (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Rastavljanje i ponovna izgradnja RiptOPL-a, ogranka Open PS2 Loader-a,
   ABOUT: O PROGRAMU
   'ACHIEVEMENTS: SPIRIT OF RA': 'DOSTIGNUĆA: SPIRIT OF RA'
@@ -103,7 +102,6 @@ strings:
   BOOT LOCK AND BIBLE: BOOT LOCK I BIBLE
   BOOT LOCK edits its config too: BOOT LOCK menja i njegovu konfiguraciju
   BUILD DETAILS: DETALJI VERZIJE
-  BUILT ON RIPTOPL: IZGRAĐENO NA RIPTOPL-U
   BearSSL by Thomas Pornin: BearSSL, autor Thomas Pornin
   Built with Claude (Anthropic): Napravljeno uz Claude (Anthropic)
   CD PLAYER: CD PLEJER
@@ -172,7 +170,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z, autor NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF, autor tim ps2homebrew
   what RIPPS2's card image writes are checked against: sa čime se proverava upisivanje slika kartica u RIPPS2
-  with its own look, launchers, file browser and save tools.: sa sopstvenim izgledom, pokretačima, pregledačem datoteka i alatima za sačuvane igre.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora, autor hacan359; rcheevos, autor RetroAchievements
   your console's own, ripped from its BIOS: sopstveni zvuci vaše konzole, izdvojeni iz njenog BIOS-a
   ' (no DNS answer)': ' (nema DNS odgovora)'
@@ -558,8 +555,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: upisivanje %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino nije mogao da se upiše u %s. Proverite slobodan prostor i da nije zaštićen od upisa, pa pokušajte ponovo.
   THE GAME'S DRIVE  (%s/neutrino): UREĐAJ IGRE  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Ova igra se pokreće preko Neutrina, a tamo gde RIPPS2 traži (Podešavanja, uređaj igre, memorijske kartice) nema Neutrina. RIPPS2 nosi Neutrino 1.8.0 autora rickgaiser (AFL-3.0). Instalirati ga sada? Zatim birate gde.
   '%d / %d FILES': '%d / %d DATOTEKA'
   '%d FOLDERS AND CONTENTS': '%d FASCIKLI I SADRŽAJ'
   '%d FOLDERS, %d FOUND': '%d FASCIKLI, PRONAĐENO %d'
@@ -847,8 +842,6 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Na ovoj konzoli je PS2BBL sa RIPPS2 zaključavanjem.
   AUDIO folder: fascikla AUDIO
   DRIVES: UREĐAJI
-  INSTALL RIPPS2'S COPY: INSTALIRAJ RIPPS2 KOPIJU
-  'Installed: ': 'Instalirano: '
   MANAGE: UPRAVLJAJ
   MANAGE shows what each memory card starts, and installs or repairs BIBLE.: UPRAVLJAJ pokazuje šta pokreće svaka memorijska kartica i instalira ili popravlja BIBLE.
   MEMORY CARD 0  (about 600 KB): MEMORIJSKA KARTICA 0  (oko 600 KB)
@@ -860,7 +853,6 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: drajver je učitan, ali nijedna SD kartica nije odgovorila (slot mc1).'
   NEUTRINO SETTINGS: NEUTRINO PODEŠAVANJA
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Još nema: RIPPS2 nema sopstvene zvuke. Izdvojite zvuke ove konzole ili ih napravite u RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Nije instalirano. Igra kojoj je potrebno nudi RIPPS2 kopiju, ili instalirajte ovde.
   POPSTARTER NETWORK: POPSTARTER MREŽA
   POPSTARTER and Ember: POPSTARTER i Ember
   PS1 SETTINGS: PS1 PODEŠAVANJA
@@ -868,9 +860,7 @@ strings:
   RIP THIS CONSOLE'S SOUNDS: IZDVOJI ZVUKE OVE KONZOLE
   RIPPS2's homebrew: RIPPS2 homebrew
   STATUS: STATUS
-  'STATUS: looking for RIPPS2''s homebrew': 'STATUS: traženje RIPPS2 homebrew programa'
   a drive of unknown kind: uređaj nepoznate vrste
-  a drive or a memory card: uređaj ili memorijska kartica
   boot loader, card by card: učitavač, kartica po kartica
   from its BIOS, into AUDIO: iz njenog BIOS-a, u AUDIO
   internal HDD (exFAT): unutrašnji HDD (exFAT)
@@ -975,10 +965,109 @@ strings:
   Sidebar: Bočna traka
   your own copy, found on your drives and memory cards: vaša sopstvena kopija, pronađena na vašim diskovima i memorijskim karticama
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'vaš sopstveni, pronađen i pokrenut: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Nije pronađen na mass0: (%s). Stavite ember.elf i svoj bios.bin u njegov folder EMBER.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Nije pronađen. Stavite svoj POPSTARTER.ELF u folder POPS na disku.
   Launch Disc: Pokretanje diska
   Memory Files: Memorijske datoteke
+  SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there.: SEANCE je pronašao %d od 5. Svaki se pamti, a svako pokretanje ga čita odatle.
+  not found on the started drives: nije pronađeno na pokrenutim uređajima
+  not looked for yet: još nije traženo
+  '%s did not answer, so %s cannot start. Is it connected?': '%s nije odgovorio, pa %s ne može da se pokrene. Da li je povezan?'
+  '%s is not on %s any more, so it has left All Games.': '%s više nije na %s, pa je napustila Sve igre.'
+  STARTING %s: POKREĆEM %s
+  the SMB share: SMB deljenje
+  the drive: uređaj
+  the internal HDD (APA): unutrašnji HDD (APA)
+  the internal HDD (exFAT): unutrašnji HDD (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: IZGRAĐENO NA RIPTOPL-U, SA NEUTRINOM
+  'Special thanks to all the YouTube love as well:': 'Posebna zahvalnost i za svu ljubav sa YouTube-a:'
+  and its own look, launchers, file browser and save tools.: i sa sopstvenim izgledom, pokretačima, pregledačem datoteka i alatima za sačuvane pozicije.
+  glad to help however you reach me.: rado pomažem, kako god da me nađete.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): drugo jezgro za igre, 1.8.0 priloženo bez izmena (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: sa rickgaiserovim Neutrinom unutra kao drugim jezgrom za igre,
+  ? RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same.
+  : RIPPS2 lite ne nosi BIBLE (PS2BBL). Jednom pokrenite pun RIPPS2.elf da biste ga instalirali; ovaj se pokreće sa njega isto tako.
+  ? 'This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or install it once from the full RIPPS2.elf''s STATUS.'
+  : 'Ova igra se pokreće kroz Neutrino, a RIPPS2 ga nije pronašao ni na jednom pokrenutom uređaju ni memorijskoj kartici. RIPPS2 lite ne nosi Neutrino: stavite Neutrino 1.8.0 (github.com/rickgaiser/neutrino) u fasciklu neutrino na uređaju ili memorijskoj kartici, ili ga jednom instalirajte iz STATUS-a punog RIPPS2.elf.'
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Ova igra se pokreće kroz Neutrino, a RIPPS2 ga nije pronašao: ni na putanji iz Podešavanja, ni na uređaju igre, ni na memorijskim karticama, ni na jednom pokrenutom uređaju. RIPPS2 nosi Neutrino 1.8.0 od rickgaisera (AFL-3.0): instalirajte ga jednom, gde izaberete, i svaka Neutrino igra ga koristi odatle.'
+  STARTING THE DRIVES: POKREĆEM UREĐAJE
+  '%d games, on the started drives': '%d igara, na pokrenutim uređajima'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: NEKE DATOTEKE NISU MOGLE DA SE OBRIŠU'
+  '%u partitions, all in order': '%u particija, sve u redu'
+  ', %d art images': ', %d slika omota'
+  ', and ': ', i '
+  ', its cheats': ', njeni kodovi'
+  ', its settings': ', njena podešavanja'
+  1 game, on the started drives: 1 igra, na pokrenutim uređajima
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: PS1 igra ovde se briše u Memorijskim datotekama, gde je zasebna datoteka.
+  A network catalogue's games are deleted on the PC that serves them.: Igre mrežnog kataloga brišu se na računaru koji ih služi.
+  DELETE FOR GOOD: OBRIŠI ZAUVEK
+  DELETE IT: OBRIŠI JE
+  'DELETED %s: %s FREED': '%s OBRISANA: OSLOBOĐENO %s'
+  'Delete %s from %s? Goes: %s.': 'Obrisati %s sa %s? Odlazi: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Obrisati %s sa %s? Odlazi: %s. Ostaje: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Obrisati i njene sačuvane pozicije i RIPSHOT slike? Ne ih zadržava.
+  HIDDEN GAMES: SKRIVENE IGRE
+  'HIDDEN: %s': 'SKRIVENO: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Sakriti %s? Napušta svaku listu, i Sve igre i Omiljene igre. Podešavanja > Izvori igara > Skrivene igre je ponovo prikazuju.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Poslednja provera. %s se briše zauvek i ništa ne može da je vrati. Pritisnite START da je obrišete.
+  None. Hide Game, in a game's options, puts one here.: Nijedna. Sakrij igru, u opcijama igre, stavlja jednu ovde.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Ništa nije obrisano: tabela particija ovog uređaja ne odgovara ovom disku (%s). Možda je upisana iz slike diska druge veličine. Prvo je popravite na računaru.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 ne može da obriše igru sa ove stranice.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 nije pronašao datoteke ove igre na njenom uređaju.
+  Reading the hidden lists: Čitam skrivene liste
+  SHOW AGAIN OR DELETE: PONOVO PRIKAŽI ILI OBRIŠI
+  SHOW IT AGAIN: PONOVO JE PRIKAŽI
+  That game is not on its drive any more.: Ta igra više nije na svom uređaju.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Skrivena lista nije mogla da se upiše na uređaj igre. Da li je zaštićen od upisa, ili su Operacije Pisanja isključene?
+  The partition could not be removed (%d). Nothing was deleted.: Particija nije mogla da se ukloni (%d). Ništa nije obrisano.
+  This drive cannot keep a hidden list (a network catalogue).: Ovaj uređaj ne može da čuva skrivenu listu (mrežni katalog).
+  This game's drive has not answered yet. Wait for it, then try again.: Uređaj ove igre još nije odgovorio. Sačekajte ga, pa pokušajte ponovo.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Particija ove igre je jedna od onih koje RIPPS2 ne uklanja (sistemska particija, ili ona sa njegovim podešavanjima).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'particija je veća nego što ovaj disk dozvoljava: tabela je napravljena za disk druge veličine'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'particija prelazi kraj ovog diska (sektor %u od %u): tabela je napravljena za veći disk'
+  its RIPSHOT pictures: njene RIPSHOT slike
+  its drive: njen uređaj
+  its saves: njene sačuvane pozicije
+  sector %u holds no partition header: sektor %u nema zaglavlje particije
+  the chain does not close at __mbr: lanac se ne zatvara na __mbr
+  the chain skips from sector %u: lanac preskače od sektora %u
+  the chain's links disagree at sector %u: karike lanca se ne slažu na sektoru %u
+  the drive's size could not be read: veličina uređaja nije mogla da se pročita
+  the game (%s): igra (%s)
+  the game's folder and everything in it (%s): fascikla igre i sve u njoj (%s)
+  the header at sector %u could not be read: zaglavlje na sektoru %u nije moglo da se pročita
+  the header at sector %u fails its checksum: zaglavlje na sektoru %u ne prolazi kontrolni zbir
+  the partition at sector %u is not where or as large as APA puts one: particija na sektoru %u nije tamo gde, ni velika koliko, APA stavlja jednu
+  the settings and art another copy of it uses: podešavanja i slike koje koristi druga njena kopija
+  '%d FOLDERS': '%d FASCIKLI'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s nije moglo da se kopira na %s. Da li je uređaj pun ili zaštićen od upisa?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s nije tamo gde RIPPS2 traži. Potražiti ga na uređajima koje je RIPPS2 pokrenuo? Gde se pronađe, pamti se za svako sledeće pokretanje.'
+  ? 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember nije u %s, pored igara, a mora da bude. SEANCE ga je pronašao na %s: START ga kopira tamo (%d KB) i pokreće igru.'
+  Ember's BIOS: Emberov BIOS
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'Emberov BIOS (bios.bin) nije u %s, pored Embera. SEANCE je pronašao jedan na %s: START ga kopira tamo (%d KB) i pokreće igru.'
+  LOOKING FOR YOUR LAUNCHERS: TRAŽIM VAŠE POKRETAČE
+  The POPS files: POPS datoteke
+  '%s  MMCE card': '%s  MMCE kartica'
+  INSTALL RIPPS2'S NEUTRINO: INSTALIRAJ RIPPS2-OV NEUTRINO
+  'Internal HDD (APA): %s free of %s': 'Unutrašnji HDD (APA): slobodno %s od %s'
+  LAUNCHERS: POKRETAČI
+  LOOK FOR THEM: POTRAŽI IH
+  'Memory card %d: %d KB free': 'Memorijska kartica %d: slobodno %d KB'
+  POPS files: POPS datoteke
+  START EVERY DRIVE: POKRENI SVE UREĐAJE
+  'STATUS: looking at the drives and the homebrew': 'STATUS: pregledam uređaje i homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Prvo pokrenuti sve uređaje, da pretraga stigne do svih? (Ne pretražuje već pokrenute uređaje.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE i ostalo
+  every started drive: svaki pokrenuti uređaj
+  found where you keep them: pronađeni gde ih držite
+  not found yet: još nije pronađeno
+  not on a started drive: nije na pokrenutom uređaju
+  only if you have none: samo ako nemate nijedan
+  starts every drive first: prvo pokreće sve uređaje
 labels:
   ERROR_SAVING_SETTINGS_TO: Podešavanja nisu mogla da se upišu u %s (greška %d)
   LAUNCH_PS2_DISC: Pokreni PS2 disk
@@ -1634,3 +1723,9 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Kako snimci na čekanju na filmu svake igre postaju PNG.
   RIPPS2_SETTINGS_HOME: Čuvaj podešavanja na
   HINT_RIPPS2_SETTINGS_HOME: 'Gde RIPPS2 drži podešavanja: u sopstvenom čuvanju na memorijskoj kartici, u fascikli RIPPS2 na disku (unutrašnjem HDD-u, USB-u, MX4SIO, iLinku ili MMCE) ili u fascikli koju upišeš.'
+  RIPPS2_LAUNCHERS: Pokretači
+  RIPPS2_LOOK_NOW: Potraži sada
+  HINT_RIPPS2_LOOK_NOW: SEANCE na pokrenutim uređajima traži POPSTARTER, POPS datoteke, Ember, Emberov BIOS i Neutrino i pamti gde je svaki. Svako pokretanje ih čita odatle.
+  RIPPS2_HIDE_GAME: Sakrij igru
+  RIPPS2_HIDDEN_GAMES: Skrivene igre
+  HINT_RIPPS2_HIDDEN_GAMES: Igre skrivene sa Sakrij igru, na pokrenutim uređajima. Ponovo prikažite jednu, ili je obrišite. Svaki uređaj čuva svoju listu.

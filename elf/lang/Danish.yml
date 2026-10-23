@@ -91,7 +91,6 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Dette er et ESR-patchet PS2-spil. Læg ESR (esr*.elf) i APPS, BOOT eller ESR på et memorykort eller en USB-nøgle for at starte det.
   '%s, BUILD %d': '%s, BUILD %d'
   '... and the anonymous ...': '... og de anonyme ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 medfølger uændret (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: En adskillelse og genopbygning af RiptOPL, forken af Open PS2 Loader,
   ABOUT: OM
   'ACHIEVEMENTS: SPIRIT OF RA': 'PRÆSTATIONER: SPIRIT OF RA'
@@ -103,7 +102,6 @@ strings:
   BOOT LOCK AND BIBLE: BOOT LOCK OG BIBLE
   BOOT LOCK edits its config too: BOOT LOCK redigerer også dets konfiguration
   BUILD DETAILS: BUILDDETALJER
-  BUILT ON RIPTOPL: BYGGET PÅ RIPTOPL
   BearSSL by Thomas Pornin: BearSSL af Thomas Pornin
   Built with Claude (Anthropic): Lavet med Claude (Anthropic)
   CD PLAYER: CD-AFSPILLER
@@ -172,7 +170,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z af NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF af ps2homebrew-holdet
   what RIPPS2's card image writes are checked against: det, RIPPS2's skrivning af kortbilleder kontrolleres mod
-  with its own look, launchers, file browser and save tools.: med sit eget udseende, startere, filbrowser og gemmeværktøjer.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora af hacan359, rcheevos af RetroAchievements
   your console's own, ripped from its BIOS: din konsols egne lyde, rippet fra dens BIOS
   ' (no DNS answer)': ' (intet DNS-svar)'
@@ -558,8 +555,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: skriver %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino kunne ikke skrives til %s. Tjek den ledige plads, og at den ikke er skrivebeskyttet, og prøv igen.
   THE GAME'S DRIVE  (%s/neutrino): SPILLETS DREV  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Dette spil starter gennem Neutrino, og der er ingen Neutrino, hvor RIPPS2 leder (Indstillinger, spillets drev, memorykortene). RIPPS2 har Neutrino 1.8.0 af rickgaiser (AFL-3.0) med. Installer den nu? Bagefter vælger du hvor.
   '%d / %d FILES': '%d / %d FILER'
   '%d FOLDERS AND CONTENTS': '%d MAPPER OG INDHOLD'
   '%d FOLDERS, %d FOUND': '%d MAPPER, %d FUNDET'
@@ -847,8 +842,6 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Der er en PS2BBL med RIPPS2's lås på denne konsol.
   AUDIO folder: AUDIO-mappen
   DRIVES: DREV
-  INSTALL RIPPS2'S COPY: INSTALLER RIPPS2'S KOPI
-  'Installed: ': 'Installeret: '
   MANAGE: ADMINISTRER
   MANAGE shows what each memory card starts, and installs or repairs BIBLE.: ADMINISTRER viser, hvad hvert memorykort starter, og installerer eller reparerer BIBLE.
   MEMORY CARD 0  (about 600 KB): MEMORYKORT 0  (cirka 600 KB)
@@ -860,7 +853,6 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: driveren er indlæst, men intet SD-kort svarede (stikket mc1).'
   NEUTRINO SETTINGS: NEUTRINO-INDSTILLINGER
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Ingen endnu: RIPPS2 har ingen egne lyde. Rip denne konsols, eller lav dem i RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Ikke installeret. Et spil, der har brug for den, tilbyder RIPPS2's kopi, eller installer den her.
   POPSTARTER NETWORK: POPSTARTER-NETVÆRK
   POPSTARTER and Ember: POPSTARTER og Ember
   PS1 SETTINGS: PS1-INDSTILLINGER
@@ -868,9 +860,7 @@ strings:
   RIP THIS CONSOLE'S SOUNDS: RIP DENNE KONSOLS LYDE
   RIPPS2's homebrew: RIPPS2's homebrew
   STATUS: STATUS
-  'STATUS: looking for RIPPS2''s homebrew': 'STATUS: leder efter RIPPS2''s homebrew'
   a drive of unknown kind: et drev af ukendt slags
-  a drive or a memory card: et drev eller et memorykort
   boot loader, card by card: opstartsindlæser, kort for kort
   from its BIOS, into AUDIO: fra dens BIOS, til AUDIO
   internal HDD (exFAT): intern HDD (exFAT)
@@ -975,10 +965,109 @@ strings:
   Sidebar: Sidebjælke
   your own copy, found on your drives and memory cards: din egen kopi, fundet på dine drev og memory cards
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'din egen, fundet og startet: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Ikke fundet på mass0: (%s). Læg ember.elf og din bios.bin i dens EMBER-mappe.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Ikke fundet. Læg din egen POPSTARTER.ELF i et drevs POPS-mappe.
   Launch Disc: Start disk
   Memory Files: Hukommelsesfiler
+  SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there.: SEANCE fandt %d af de 5. Hver enkelt huskes, og hver start læser den derfra.
+  not found on the started drives: ikke fundet på de startede drev
+  not looked for yet: ikke søgt efter endnu
+  '%s did not answer, so %s cannot start. Is it connected?': '%s svarede ikke, så %s kan ikke starte. Er det tilsluttet?'
+  '%s is not on %s any more, so it has left All Games.': '%s er ikke længere på %s, så det har forladt Alle spil.'
+  STARTING %s: STARTER %s
+  the SMB share: SMB-delingen
+  the drive: drevet
+  the internal HDD (APA): den interne HDD (APA)
+  the internal HDD (exFAT): den interne HDD (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: BYGGET PÅ RIPTOPL, MED NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'En særlig tak også til al kærligheden på YouTube:'
+  and its own look, launchers, file browser and save tools.: og med sit eget udseende, startere, filbrowser og gemmeværktøjer.
+  glad to help however you reach me.: glad for at hjælpe, uanset hvordan I fanger mig.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): den anden spilkerne, 1.8.0 medbragt uændret (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: med rickgaisers Neutrino indeni som sin anden spilkerne,
+  ? RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same.
+  : RIPPS2 lite har ikke BIBLE (PS2BBL) med. Start den fulde RIPPS2.elf én gang for at installere den; denne starter fra den på samme måde.
+  ? 'This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or install it once from the full RIPPS2.elf''s STATUS.'
+  : 'Dette spil starter gennem Neutrino, og RIPPS2 fandt ingen på noget startet drev eller memorykort. RIPPS2 lite har ingen Neutrino med: læg Neutrino 1.8.0 (github.com/rickgaiser/neutrino) i en mappe neutrino på et drev eller et memorykort, eller installer den én gang fra STATUS i den fulde RIPPS2.elf.'
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Dette spil starter gennem Neutrino, og RIPPS2 fandt ingen: ikke ved stien i Indstillinger, ikke på spillets drev, ikke på memorykortene og ikke på noget startet drev. RIPPS2 har Neutrino 1.8.0 af rickgaiser med (AFL-3.0): installer den én gang, hvor du vil, og hvert Neutrino-spil bruger den derfra.'
+  STARTING THE DRIVES: STARTER DREVENE
+  '%d games, on the started drives': '%d spil, på de startede drev'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: NOGLE FILER KUNNE IKKE SLETTES'
+  '%u partitions, all in order': '%u partitioner, alle i orden'
+  ', %d art images': ', %d billeder'
+  ', and ': ', og '
+  ', its cheats': ', dets snydekoder'
+  ', its settings': ', dets indstillinger'
+  1 game, on the started drives: 1 spil, på de startede drev
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Et PS1-spil her slettes i Hukommelsesfiler, hvor det er en fil for sig.
+  A network catalogue's games are deleted on the PC that serves them.: Et netværkskatalogs spil slettes på den pc, der deler dem.
+  DELETE FOR GOOD: SLET FOR ALTID
+  DELETE IT: SLET DET
+  'DELETED %s: %s FREED': '%s SLETTET: %s FRIGJORT'
+  'Delete %s from %s? Goes: %s.': 'Slet %s fra %s? Forsvinder: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Slet %s fra %s? Forsvinder: %s. Bliver: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Slet også dets gemte spil og RIPSHOT-billeder? Nej beholder dem.
+  HIDDEN GAMES: SKJULTE SPIL
+  'HIDDEN: %s': 'SKJULT: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Skjul %s? Det forlader alle lister, også Alle spil og Favoritter. Indstillinger > Spilkilder > Skjulte spil viser det igen.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Sidste tjek. %s slettes for altid, og intet kan bringe det tilbage. Tryk på START for at slette det.
+  None. Hide Game, in a game's options, puts one here.: Ingen. Skjul spil, i et spils indstillinger, lægger et her.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Intet blev slettet: dette drevs partitionstabel passer ikke til denne disk (%s). Den kan være skrevet fra et image af en disk i en anden størrelse. Reparer den først på en pc.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 kan ikke slette et spil fra denne side.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 kunne ikke finde dette spils filer på dets drev.
+  Reading the hidden lists: Læser de skjulte lister
+  SHOW AGAIN OR DELETE: VIS IGEN ELLER SLET
+  SHOW IT AGAIN: VIS DET IGEN
+  That game is not on its drive any more.: Det spil er ikke længere på sit drev.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Den skjulte liste kunne ikke skrives til spillets drev. Er det skrivebeskyttet, eller er Skriveoperationer slået fra?
+  The partition could not be removed (%d). Nothing was deleted.: Partitionen kunne ikke fjernes (%d). Intet blev slettet.
+  This drive cannot keep a hidden list (a network catalogue).: Dette drev kan ikke have en skjult liste (et netværkskatalog).
+  This game's drive has not answered yet. Wait for it, then try again.: Dette spils drev har ikke svaret endnu. Vent på det, og prøv igen.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Dette spils partition er en, som RIPPS2 ikke fjerner (en systempartition eller den med dets indstillinger).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'en partition er større, end denne disk tillader: tabellen blev lavet til en disk i en anden størrelse'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'en partition går ud over slutningen af denne disk (sektor %u af %u): tabellen blev lavet til en større disk'
+  its RIPSHOT pictures: dets RIPSHOT-billeder
+  its drive: dets drev
+  its saves: dets gemte spil
+  sector %u holds no partition header: sektor %u har ingen partitionshoved
+  the chain does not close at __mbr: kæden lukker ikke ved __mbr
+  the chain skips from sector %u: kæden springer fra sektor %u
+  the chain's links disagree at sector %u: kædens led er uenige ved sektor %u
+  the drive's size could not be read: drevets størrelse kunne ikke læses
+  the game (%s): spillet (%s)
+  the game's folder and everything in it (%s): spillets mappe og alt i den (%s)
+  the header at sector %u could not be read: hovedet ved sektor %u kunne ikke læses
+  the header at sector %u fails its checksum: hovedet ved sektor %u fejler sin kontrolsum
+  the partition at sector %u is not where or as large as APA puts one: partitionen ved sektor %u ligger ikke hvor, eller er ikke så stor som, APA lægger en
+  the settings and art another copy of it uses: de indstillinger og billeder, som en anden kopi af det bruger
+  '%d FOLDERS': '%d MAPPER'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s kunne ikke kopieres til %s. Er drevet fuldt eller skrivebeskyttet?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s er ikke der, hvor RIPPS2 kigger. Søg efter det på de drev, RIPPS2 har startet? Hvor det findes, huskes til hver start fremover.'
+  ? 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember er ikke i %s, ved siden af spillene, og det skal det være. SEANCE fandt det på %s: START kopierer det derhen (%d KB) og starter spillet.'
+  Ember's BIOS: Embers BIOS
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'Embers BIOS (bios.bin) er ikke i %s, ved siden af Ember. SEANCE fandt en på %s: START kopierer den derhen (%d KB) og starter spillet.'
+  LOOKING FOR YOUR LAUNCHERS: LEDER EFTER DINE STARTERE
+  The POPS files: POPS-filerne
+  '%s  MMCE card': '%s  MMCE-kort'
+  INSTALL RIPPS2'S NEUTRINO: INSTALLER RIPPS2'S NEUTRINO
+  'Internal HDD (APA): %s free of %s': 'Intern HDD (APA): %s ledigt af %s'
+  LAUNCHERS: STARTERE
+  LOOK FOR THEM: FIND DEM
+  'Memory card %d: %d KB free': 'Memorykort %d: %d KB ledigt'
+  POPS files: POPS-filer
+  START EVERY DRIVE: START ALLE DREV
+  'STATUS: looking at the drives and the homebrew': 'STATUS: kigger på drevene og homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Start alle drev først, så søgningen når dem alle? (Nej søger på de drev, der allerede er startet.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE og resten
+  every started drive: hvert startet drev
+  found where you keep them: fundet, hvor du har dem
+  not found yet: ikke fundet endnu
+  not on a started drive: ikke på et startet drev
+  only if you have none: kun hvis du ikke har nogen
+  starts every drive first: starter alle drev først
 labels:
   OK: OK
   MEDIUM: Mellem
@@ -1416,3 +1505,9 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Hvordan billederne, der venter på hvert spils rulle, bliver til PNG'er.
   RIPPS2_SETTINGS_HOME: Gem indstillinger på
   HINT_RIPPS2_SETTINGS_HOME: 'Hvor RIPPS2 gemmer sine indstillinger: sin egen save på et memorykort, en RIPPS2-mappe på et drev (den interne HDD, USB, MX4SIO, iLink eller MMCE) eller en mappe, du skriver.'
+  RIPPS2_LAUNCHERS: Startere
+  RIPPS2_LOOK_NOW: Søg nu
+  HINT_RIPPS2_LOOK_NOW: SEANCE søger på de startede drev efter POPSTARTER, POPS-filerne, Ember, Embers BIOS og Neutrino og husker, hvor hver enkelt er. Hver start læser dem derfra.
+  RIPPS2_HIDE_GAME: Skjul spil
+  RIPPS2_HIDDEN_GAMES: Skjulte spil
+  HINT_RIPPS2_HIDDEN_GAMES: Spillene skjult med Skjul spil, på de startede drev. Vis et igen, eller slet det. Hvert drev har sin egen liste.

@@ -91,7 +91,6 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: PS2 na laro ito na may ESR patch. Ilagay ang ESR (esr*.elf) sa APPS, BOOT o ESR sa memory card o USB drive para masimulan ito.
   '%s, BUILD %d': '%s, BUILD %d'
   '... and the anonymous ...': '... at ang mga hindi kilala ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 na dala nang walang binago (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Pagbaklas at muling pagbuo ng RiptOPL, ang fork ng Open PS2 Loader,
   ABOUT: TUNGKOL DITO
   'ACHIEVEMENTS: SPIRIT OF RA': 'MGA ACHIEVEMENT: SPIRIT OF RA'
@@ -103,7 +102,6 @@ strings:
   BOOT LOCK AND BIBLE: BOOT LOCK AT BIBLE
   BOOT LOCK edits its config too: Binabago rin ng BOOT LOCK ang config nito
   BUILD DETAILS: MGA DETALYE NG BUILD
-  BUILT ON RIPTOPL: BINUO SA RIPTOPL
   BearSSL by Thomas Pornin: BearSSL ni Thomas Pornin
   Built with Claude (Anthropic): Binuo kasama si Claude (Anthropic)
   CD PLAYER: CD PLAYER
@@ -172,7 +170,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z ni NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF ng ps2homebrew team
   what RIPPS2's card image writes are checked against: ang pinagbabatayan ng pagsusuri sa mga card image na isinusulat ng RIPPS2
-  with its own look, launchers, file browser and save tools.: na may sariling itsura, mga launcher, file browser at mga save tool.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora ni hacan359, rcheevos ng RetroAchievements
   your console's own, ripped from its BIOS: ang sariling tunog ng iyong console, kinuha mula sa BIOS nito
   ' (no DNS answer)': ' (walang sagot ang DNS)'
@@ -558,8 +555,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: isinusulat ang %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Hindi maisulat ang Neutrino sa %s. Tingnan ang libreng espasyo nito at kung hindi ito naka-write-protect, saka subukan ulit.
   THE GAME'S DRIVE  (%s/neutrino): ANG DRIVE NG LARO  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Sa pamamagitan ng Neutrino nagsisimula ang larong ito, at walang Neutrino kung saan naghahanap ang RIPPS2 (Settings, ang drive ng laro, ang mga memory card). Dala ng RIPPS2 ang Neutrino 1.8.0 ni rickgaiser (AFL-3.0). I-install ito ngayon? Susunod, pipili ka kung saan.
   '%d / %d FILES': '%d / %d FILE'
   '%d FOLDERS AND CONTENTS': '%d FOLDER AT LAMAN'
   '%d FOLDERS, %d FOUND': '%d FOLDER, %d NAHANAP'
@@ -847,8 +842,6 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: May PS2BBL na may lock ng RIPPS2 sa console na ito.
   AUDIO folder: AUDIO folder
   DRIVES: MGA DRIVE
-  INSTALL RIPPS2'S COPY: I-INSTALL ANG KOPYA NG RIPPS2
-  'Installed: ': 'Naka-install: '
   MANAGE: PAMAHALAAN
   MANAGE shows what each memory card starts, and installs or repairs BIBLE.: Ipinapakita ng PAMAHALAAN kung ano ang sinisimulan ng bawat memory card, at nag-i-install o nag-aayos ng BIBLE.
   MEMORY CARD 0  (about 600 KB): MEMORY CARD 0  (mga 600 KB)
@@ -860,7 +853,6 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: naka-load ang driver, pero walang SD card na sumagot (ang mc1 slot).'
   NEUTRINO SETTINGS: MGA SETTING NG NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Wala pa: walang sariling tunog ang RIPPS2. I-rip ang sa console na ito, o gumawa sa RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Hindi naka-install. Iaalok ng larong nangangailangan nito ang kopya ng RIPPS2, o i-install ito dito.
   POPSTARTER NETWORK: NETWORK NG POPSTARTER
   POPSTARTER and Ember: POPSTARTER at Ember
   PS1 SETTINGS: MGA SETTING NG PS1
@@ -868,9 +860,7 @@ strings:
   RIP THIS CONSOLE'S SOUNDS: I-RIP ANG MGA TUNOG NG CONSOLE NA ITO
   RIPPS2's homebrew: Homebrew ng RIPPS2
   STATUS: STATUS
-  'STATUS: looking for RIPPS2''s homebrew': 'STATUS: hinahanap ang homebrew ng RIPPS2'
   a drive of unknown kind: drive na hindi alam ang uri
-  a drive or a memory card: drive o memory card
   boot loader, card by card: boot loader, bawat card
   from its BIOS, into AUDIO: mula sa BIOS nito, papunta sa AUDIO
   internal HDD (exFAT): internal HDD (exFAT)
@@ -975,10 +965,109 @@ strings:
   Sidebar: Sidebar
   your own copy, found on your drives and memory cards: sarili mong kopya, nahanap sa iyong mga drive at memory card
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'sarili mo, nahanap at inilunsad: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Hindi nahanap sa mass0: (%s). Ilagay ang ember.elf at ang iyong bios.bin sa EMBER folder nito.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Hindi nahanap. Ilagay ang sarili mong POPSTARTER.ELF sa POPS folder ng isang drive.
   Launch Disc: Ilunsad ang disc
   Memory Files: Memory files
+  SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there.: Nakakita ang SEANCE ng %d sa 5. Tinatandaan ang bawat isa, at doon ito binabasa ng bawat launch.
+  not found on the started drives: hindi nakita sa mga nakasimulang drive
+  not looked for yet: hindi pa hinahanap
+  '%s did not answer, so %s cannot start. Is it connected?': Hindi sumagot ang %s, kaya hindi makakapagsimula ang %s. Nakakonekta ba ito?
+  '%s is not on %s any more, so it has left All Games.': Wala na ang %s sa %s, kaya umalis na ito sa Lahat ng laro.
+  STARTING %s: SINISIMULAN ANG %s
+  the SMB share: ang SMB share
+  the drive: ang drive
+  the internal HDD (APA): ang internal HDD (APA)
+  the internal HDD (exFAT): ang internal HDD (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: BINUO SA RIPTOPL, KASAMA ANG NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Espesyal na pasasalamat din sa lahat ng pagmamahal sa YouTube:'
+  and its own look, launchers, file browser and save tools.: at may sarili nitong itsura, launcher, file browser at save tools.
+  glad to help however you reach me.: masaya akong tumulong, paano mo man ako maabot.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): ang pangalawang game core, 1.8.0 na dala nang walang binago (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: na may Neutrino ni rickgaiser sa loob bilang pangalawang game core nito,
+  ? RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same.
+  : Hindi dala ng RIPPS2 lite ang BIBLE (PS2BBL). Simulan nang isang beses ang buong RIPPS2.elf para i-install ito; magsisimula rin mula roon ang isang ito.
+  ? 'This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or install it once from the full RIPPS2.elf''s STATUS.'
+  : 'Nagsisimula ang larong ito sa Neutrino, at walang nakita ang RIPPS2 sa anumang nakasimulang drive o memory card. Walang dalang Neutrino ang RIPPS2 lite: ilagay ang Neutrino 1.8.0 (github.com/rickgaiser/neutrino) sa isang neutrino folder sa drive o memory card, o i-install ito nang isang beses mula sa STATUS ng buong RIPPS2.elf.'
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Nagsisimula ang larong ito sa Neutrino, at walang nakita ang RIPPS2: wala sa path ng Settings, sa drive ng laro, sa mga memory card o sa anumang nakasimulang drive. Dala ng RIPPS2 ang Neutrino 1.8.0 ni rickgaiser (AFL-3.0): i-install ito nang isang beses, kung saan mo gusto, at doon ito gagamitin ng bawat larong Neutrino.'
+  STARTING THE DRIVES: SINISIMULAN ANG MGA DRIVE
+  '%d games, on the started drives': '%d laro, sa mga nakasimulang drive'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: MAY MGA FILE NA HINDI NABURA'
+  '%u partitions, all in order': '%u partition, lahat maayos'
+  ', %d art images': ', %d art image'
+  ', and ': ', at '
+  ', its cheats': ', ang mga cheat nito'
+  ', its settings': ', ang settings nito'
+  1 game, on the started drives: 1 laro, sa mga nakasimulang drive
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Ang PS1 game dito ay binubura sa Memory Files, kung saan sarili nitong file ito.
+  A network catalogue's games are deleted on the PC that serves them.: Ang mga laro ng network catalogue ay binubura sa PC na nagse-serve sa mga ito.
+  DELETE FOR GOOD: BURAHIN NANG TULUYAN
+  DELETE IT: BURAHIN ITO
+  'DELETED %s: %s FREED': 'NABURA ANG %s: %s ANG NALUWAG'
+  'Delete %s from %s? Goes: %s.': 'Burahin ang %s mula sa %s? Mawawala: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Burahin ang %s mula sa %s? Mawawala: %s. Maiiwan: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Burahin din ang mga save at RIPSHOT picture nito? Itatabi ang mga ito ng No.
+  HIDDEN GAMES: MGA NAKATAGONG LARO
+  'HIDDEN: %s': 'NAKATAGO: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Itago ang %s? Aalis ito sa bawat listahan, pati sa Lahat ng laro at Mga Paborito. Ibabalik ito ng Settings > Mga pinagkukunan ng laro > Mga nakatagong laro.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Huling check. Mabubura nang tuluyan ang %s, at walang makakapagbalik nito. Pindutin ang START para burahin ito.
+  None. Hide Game, in a game's options, puts one here.: Wala. Naglalagay dito ang Itago ang laro, sa options ng isang laro.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Walang nabura: hindi tugma ang partition table ng drive na ito sa disk na ito (%s). Baka isinulat ito mula sa image ng disk na iba ang laki. Ayusin muna ito sa PC.'
+  RIPPS2 cannot delete a game from this page.: Hindi makakabura ng laro ang RIPPS2 mula sa page na ito.
+  RIPPS2 could not find this game's files on its drive.: Hindi nakita ng RIPPS2 ang mga file ng larong ito sa drive nito.
+  Reading the hidden lists: Binabasa ang mga nakatagong listahan
+  SHOW AGAIN OR DELETE: IPAKITA ULIT O BURAHIN
+  SHOW IT AGAIN: IPAKITA ULIT
+  That game is not on its drive any more.: Wala na ang larong iyon sa drive nito.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Hindi maisulat ang nakatagong listahan sa drive ng laro. Write-protected ba ito, o naka-off ang Write Operations?
+  The partition could not be removed (%d). Nothing was deleted.: Hindi maalis ang partition (%d). Walang nabura.
+  This drive cannot keep a hidden list (a network catalogue).: Hindi makakapag-ingat ng nakatagong listahan ang drive na ito (isang network catalogue).
+  This game's drive has not answered yet. Wait for it, then try again.: Hindi pa sumasagot ang drive ng larong ito. Hintayin ito, saka subukan ulit.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Isa ang partition ng larong ito sa mga hindi inaalis ng RIPPS2 (isang system partition, o ang may settings nito).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'mas malaki ang isang partition kaysa sa pinapayagan ng disk na ito: ginawa ang table para sa disk na iba ang laki'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'lumalampas ang isang partition sa dulo ng disk na ito (sector %u ng %u): ginawa ang table para sa mas malaking disk'
+  its RIPSHOT pictures: ang mga RIPSHOT picture nito
+  its drive: ang drive nito
+  its saves: ang mga save nito
+  sector %u holds no partition header: walang partition header ang sector %u
+  the chain does not close at __mbr: hindi nagsasara ang chain sa __mbr
+  the chain skips from sector %u: lumalaktaw ang chain mula sa sector %u
+  the chain's links disagree at sector %u: hindi nagtutugma ang mga link ng chain sa sector %u
+  the drive's size could not be read: hindi mabasa ang laki ng drive
+  the game (%s): ang laro (%s)
+  the game's folder and everything in it (%s): ang folder ng laro at lahat ng laman nito (%s)
+  the header at sector %u could not be read: hindi mabasa ang header sa sector %u
+  the header at sector %u fails its checksum: pumapalya sa checksum ang header sa sector %u
+  the partition at sector %u is not where or as large as APA puts one: wala ang partition sa sector %u sa lugar o sa laking inilalagay ng APA
+  the settings and art another copy of it uses: ang settings at art na ginagamit ng ibang kopya nito
+  '%d FOLDERS': '%d FOLDER'
+  '%s could not be copied to %s. Is the drive full or write-protected?': Hindi makopya ang %s sa %s. Puno ba ang drive o write-protected?
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : Wala ang %s kung saan naghahanap ang RIPPS2. Hanapin ito sa mga drive na sinimulan ng RIPPS2? Tatandaan kung saan ito nakita para sa bawat susunod na launch.
+  ? 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Wala ang Ember sa %s, katabi ng mga laro, at dapat nandoon ito. Nakita ito ng SEANCE sa %s: kinokopya ito roon ng START (%d KB) at sinisimulan ang laro.'
+  Ember's BIOS: BIOS ng Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'Wala ang BIOS ng Ember (bios.bin) sa %s, katabi ng Ember. Nakakita ang SEANCE ng isa sa %s: kinokopya ito roon ng START (%d KB) at sinisimulan ang laro.'
+  LOOKING FOR YOUR LAUNCHERS: HINAHANAP ANG MGA LAUNCHER MO
+  The POPS files: Ang mga POPS file
+  '%s  MMCE card': '%s  MMCE card'
+  INSTALL RIPPS2'S NEUTRINO: I-INSTALL ANG NEUTRINO NG RIPPS2
+  'Internal HDD (APA): %s free of %s': 'Internal HDD (APA): %s ang libre sa %s'
+  LAUNCHERS: MGA LAUNCHER
+  LOOK FOR THEM: HANAPIN SILA
+  'Memory card %d: %d KB free': 'Memory card %d: %d KB ang libre'
+  POPS files: Mga POPS file
+  START EVERY DRIVE: SIMULAN ANG BAWAT DRIVE
+  'STATUS: looking at the drives and the homebrew': 'STATUS: tinitingnan ang mga drive at ang homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Simulan muna ang bawat drive, para maabot ng paghahanap ang lahat? (Sa mga nakasimula nang drive maghahanap ang No.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE at ang iba pa
+  every started drive: bawat nakasimulang drive
+  found where you keep them: nakita kung saan mo sila itinatago
+  not found yet: hindi pa nakikita
+  not on a started drive: wala sa nakasimulang drive
+  only if you have none: kung wala ka lang
+  starts every drive first: sinisimulan muna ang bawat drive
 labels:
   SETTINGS_SAVED: Na-save ang settings sa %s
   SETTINGS: Settings
@@ -1439,3 +1528,9 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Kung paano nagiging PNG ang mga kuhang naghihintay sa rolyo ng bawat laro.
   RIPPS2_SETTINGS_HOME: I-save ang settings sa
   HINT_RIPPS2_SETTINGS_HOME: 'Kung saan itinatago ng RIPPS2 ang settings nito: sariling save sa isang memory card, isang RIPPS2 folder sa isang drive (internal HDD, USB, MX4SIO, iLink o MMCE), o isang folder na isusulat mo.'
+  RIPPS2_LAUNCHERS: Mga launcher
+  RIPPS2_LOOK_NOW: Hanapin ngayon
+  HINT_RIPPS2_LOOK_NOW: Hinahanap ng SEANCE sa mga nakasimulang drive ang POPSTARTER, ang mga POPS file, ang Ember, ang BIOS ng Ember at ang Neutrino, at tinatandaan kung nasaan ang bawat isa. Doon sila binabasa ng bawat launch.
+  RIPPS2_HIDE_GAME: Itago ang laro
+  RIPPS2_HIDDEN_GAMES: Mga nakatagong laro
+  HINT_RIPPS2_HIDDEN_GAMES: Ang mga larong itinago gamit ang Itago ang laro, sa mga nakasimulang drive. Ipakita ulit ang isa, o burahin ito. May sariling listahan ang bawat drive.

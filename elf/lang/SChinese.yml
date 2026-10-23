@@ -91,7 +91,6 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: 这是打过 ESR 补丁的 PS2 游戏。请把 ESR（esr*.elf）放到记忆卡或 U 盘上的 APPS、BOOT 或 ESR 文件夹中来启动它。
   '%s, BUILD %d': '%s，构建 %d'
   '... and the anonymous ...': ……以及匿名的各位……
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': 1.8.0 原样附带（AFL-3.0）：github.com/rickgaiser/neutrino
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: 对 RiptOPL（Open PS2 Loader 的分支）的拆解与重建，
   ABOUT: 关于
   'ACHIEVEMENTS: SPIRIT OF RA': 成就：SPIRIT OF RA
@@ -103,7 +102,6 @@ strings:
   BOOT LOCK AND BIBLE: BOOT LOCK 与 BIBLE
   BOOT LOCK edits its config too: BOOT LOCK 也会编辑它的配置
   BUILD DETAILS: 构建详情
-  BUILT ON RIPTOPL: 基于 RIPTOPL
   BearSSL by Thomas Pornin: Thomas Pornin 的 BearSSL
   Built with Claude (Anthropic): 借助 Claude（Anthropic）制作
   CD PLAYER: CD 播放器
@@ -172,7 +170,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: NathanNeurotic 的 wLaunchELF R3Z
   wLaunchELF by the ps2homebrew team: ps2homebrew 团队的 wLaunchELF
   what RIPPS2's card image writes are checked against: 用来核对 RIPPS2 写入记忆卡镜像的工具
-  with its own look, launchers, file browser and save tools.: 拥有自己的外观、启动器、文件浏览器和存档工具。
   xeRAbora by hacan359, rcheevos by RetroAchievements: hacan359 的 xeRAbora，RetroAchievements 的 rcheevos
   your console's own, ripped from its BIOS: 你主机自己的音效，从它的 BIOS 中提取
   ' (no DNS answer)': ' （DNS 无应答）'
@@ -558,8 +555,6 @@ strings:
   'NEUTRINO: writing %.60s': NEUTRINO：正在写入 %.60s
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: 无法把 Neutrino 写入 %s。请检查剩余空间以及是否写保护，然后重试。
   THE GAME'S DRIVE  (%s/neutrino): 游戏所在驱动器  （%s/neutrino）
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : 这个游戏通过 Neutrino 启动，而 RIPPS2 查找的位置（设置、游戏所在驱动器、记忆卡）都没有 Neutrino。RIPPS2 附带 rickgaiser 的 Neutrino 1.8.0（AFL-3.0）。现在安装吗？接下来选择位置。
   '%d / %d FILES': '%d / %d 个文件'
   '%d FOLDERS AND CONTENTS': '%d 个文件夹及内容'
   '%d FOLDERS, %d FOUND': '%d 个文件夹，找到 %d 个'
@@ -847,8 +842,6 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: 这台主机上有带 RIPPS2 锁定的 PS2BBL。
   AUDIO folder: AUDIO 文件夹
   DRIVES: 驱动器
-  INSTALL RIPPS2'S COPY: 安装 RIPPS2 的副本
-  'Installed: ': '已安装： '
   MANAGE: 管理
   MANAGE shows what each memory card starts, and installs or repairs BIBLE.: “管理”会显示每张记忆卡启动的内容，并安装或修复 BIBLE。
   MEMORY CARD 0  (about 600 KB): 记忆卡 0  （约 600 KB）
@@ -860,7 +853,6 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': MX4SIO：驱动已加载，但没有 SD 卡响应（mc1 插槽）。
   NEUTRINO SETTINGS: NEUTRINO 设置
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 还没有：RIPPS2 没有自带音效。请提取这台主机的音效，或在 RIPPS2 Audio Studio 中制作。
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: 未安装。需要它的游戏会提供 RIPPS2 的副本，或在这里安装。
   POPSTARTER NETWORK: POPSTARTER 网络
   POPSTARTER and Ember: POPSTARTER 与 Ember
   PS1 SETTINGS: PS1 设置
@@ -868,9 +860,7 @@ strings:
   RIP THIS CONSOLE'S SOUNDS: 提取这台主机的音效
   RIPPS2's homebrew: RIPPS2 的自制程序
   STATUS: 状态
-  'STATUS: looking for RIPPS2''s homebrew': 状态：正在查找 RIPPS2 的自制程序
   a drive of unknown kind: 未知类型的驱动器
-  a drive or a memory card: 驱动器或记忆卡
   boot loader, card by card: 引导程序，逐卡查看
   from its BIOS, into AUDIO: 来自其 BIOS，存入 AUDIO
   internal HDD (exFAT): 内置硬盘（exFAT）
@@ -975,10 +965,109 @@ strings:
   Sidebar: 侧边栏
   your own copy, found on your drives and memory cards: 你自己的副本，在你的驱动器和记忆卡上找到
   'your own, found and launched: github.com/Gageformer/Ember/releases': 你自己的，找到并启动：github.com/Gageformer/Ember/releases
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 在 mass0:（%s）上未找到。请把 ember.elf 和你自己的 bios.bin 放进它的 EMBER 文件夹。
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: 未找到。请把你自己的 POPSTARTER.ELF 放进某个驱动器的 POPS 文件夹。
   Launch Disc: 启动光盘
   Memory Files: 记忆文件
+  SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there.: SEANCE 找到了 5 个中的 %d 个。每一个都会被记住，每次启动都从那里读取。
+  not found on the started drives: 在已启动的驱动器上未找到
+  not looked for yet: 尚未查找
+  '%s did not answer, so %s cannot start. Is it connected?': '%s 没有响应，所以 %s 无法启动。它连接好了吗？'
+  '%s is not on %s any more, so it has left All Games.': '%s 已不在 %s 上，所以已离开全部游戏。'
+  STARTING %s: 正在启动 %s
+  the SMB share: SMB 共享
+  the drive: 驱动器
+  the internal HDD (APA): 内置硬盘（APA）
+  the internal HDD (exFAT): 内置硬盘（exFAT）
+  BUILT ON RIPTOPL, WITH NEUTRINO: 基于 RIPTOPL，搭载 NEUTRINO
+  'Special thanks to all the YouTube love as well:': 也特别感谢来自 YouTube 的所有喜爱：
+  and its own look, launchers, file browser and save tools.: 并有自己的外观、启动器、文件浏览器和存档工具。
+  glad to help however you reach me.: 无论你怎样联系我，都乐意帮忙。
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): 第二个游戏核心，1.8.0 原样附带（AFL-3.0）
+  with rickgaiser's Neutrino inside as its second game core,: 内含 rickgaiser 的 Neutrino 作为第二个游戏核心，
+  ? RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same.
+  : RIPPS2 lite 不带 BIBLE（PS2BBL）。请先运行一次完整版 RIPPS2.elf 来安装它；这个版本同样可以从它启动。
+  ? 'This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or install it once from the full RIPPS2.elf''s STATUS.'
+  : 这个游戏通过 Neutrino 启动，而 RIPPS2 在任何已启动的驱动器或记忆卡上都没有找到。RIPPS2 lite 不带 Neutrino：请把 Neutrino 1.8.0（github.com/rickgaiser/neutrino）放进驱动器或记忆卡上的 neutrino 文件夹，或者从完整版 RIPPS2.elf 的状态页安装一次。
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 这个游戏通过 Neutrino 启动，而 RIPPS2 没有找到：设置里的路径、游戏所在的驱动器、记忆卡和任何已启动的驱动器上都没有。RIPPS2 带有 rickgaiser 的 Neutrino 1.8.0（AFL-3.0）：在你选的地方安装一次，之后每个 Neutrino 游戏都从那里使用它。
+  STARTING THE DRIVES: 正在启动驱动器
+  '%d games, on the started drives': '%d 个游戏，在已启动的驱动器上'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s：有些文件无法删除'
+  '%u partitions, all in order': '%u 个分区，全部正常'
+  ', %d art images': 、%d 张封面图片
+  ', and ': ，以及
+  ', its cheats': 、它的金手指
+  ', its settings': 、它的设置
+  1 game, on the started drives: 1 个游戏，在已启动的驱动器上
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: 这里的 PS1 游戏要在记忆文件中删除，在那里它是单独的文件。
+  A network catalogue's games are deleted on the PC that serves them.: 网络目录的游戏要在提供它们的电脑上删除。
+  DELETE FOR GOOD: 永久删除
+  DELETE IT: 删除它
+  'DELETED %s: %s FREED': 已删除 %s：释放 %s
+  'Delete %s from %s? Goes: %s.': 删除 %s（在 %s 上）？删除：%s。
+  'Delete %s from %s? Goes: %s. Kept: %s.': 删除 %s（在 %s 上）？删除：%s。保留：%s。
+  Delete its saves and RIPSHOT pictures too? No keeps them.: 也删除它的存档和 RIPSHOT 照片吗？选“否”则保留。
+  HIDDEN GAMES: 隐藏的游戏
+  'HIDDEN: %s': 已隐藏：%s
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: 隐藏 %s？它会离开所有列表，包括全部游戏和收藏夹。设置 > 游戏来源 > 隐藏的游戏 可以再显示它。
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: 最后确认。%s 将被永久删除，任何方法都无法恢复。按 START 删除。
+  None. Hide Game, in a game's options, puts one here.: 没有。在游戏选项中选择“隐藏游戏”即可放到这里。
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 未删除任何内容：这个驱动器的分区表与这块硬盘不符（%s）。它可能是从其他容量硬盘的镜像写入的。请先在电脑上修复。
+  RIPPS2 cannot delete a game from this page.: RIPPS2 无法在此页面删除游戏。
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 在游戏所在的驱动器上找不到它的文件。
+  Reading the hidden lists: 正在读取隐藏列表
+  SHOW AGAIN OR DELETE: 重新显示或删除
+  SHOW IT AGAIN: 重新显示
+  That game is not on its drive any more.: 该游戏已不在它的驱动器上。
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: 无法把隐藏列表写入游戏所在的驱动器。它是否写保护，或者写入功能已关闭？
+  The partition could not be removed (%d). Nothing was deleted.: 无法移除分区（%d）。未删除任何内容。
+  This drive cannot keep a hidden list (a network catalogue).: 这个驱动器无法保存隐藏列表（网络目录）。
+  This game's drive has not answered yet. Wait for it, then try again.: 这个游戏的驱动器还没有响应。请等它就绪后再试。
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: 这个游戏的分区属于 RIPPS2 不会移除的分区（系统分区，或存放其设置的分区）。
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 有个分区比这块硬盘允许的更大：分区表是为另一容量的硬盘制作的
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 有个分区超出了这块硬盘的末尾（扇区 %u / %u）：分区表是为更大的硬盘制作的
+  its RIPSHOT pictures: 它的 RIPSHOT 照片
+  its drive: 它的驱动器
+  its saves: 它的存档
+  sector %u holds no partition header: 扇区 %u 没有分区头
+  the chain does not close at __mbr: 链没有在 __mbr 处闭合
+  the chain skips from sector %u: 链从扇区 %u 处跳跃
+  the chain's links disagree at sector %u: 链的环节在扇区 %u 处不一致
+  the drive's size could not be read: 无法读取驱动器的容量
+  the game (%s): 游戏本体（%s）
+  the game's folder and everything in it (%s): 游戏文件夹及其中的一切（%s）
+  the header at sector %u could not be read: 无法读取扇区 %u 的分区头
+  the header at sector %u fails its checksum: 扇区 %u 的分区头校验和不通过
+  the partition at sector %u is not where or as large as APA puts one: 扇区 %u 的分区不在 APA 放置分区的位置，或大小不符
+  the settings and art another copy of it uses: 它的另一份副本使用的设置和封面
+  '%d FOLDERS': '%d 个文件夹'
+  '%s could not be copied to %s. Is the drive full or write-protected?': 无法把 %s 复制到 %s。驱动器是否已满或写保护？
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s 不在 RIPPS2 查找的位置。要在 RIPPS2 已启动的驱动器上搜索它吗？找到的位置会在之后每次启动时记住。'
+  ? 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  : Ember 不在游戏旁边的 %s 中，但它必须在那里。SEANCE 在 %s 找到了它：START 会把它复制过去（%d KB）并启动游戏。
+  Ember's BIOS: Ember 的 BIOS
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  : Ember 的 BIOS（bios.bin）不在 Ember 旁边的 %s 中。SEANCE 在 %s 找到了一个：START 会把它复制过去（%d KB）并启动游戏。
+  LOOKING FOR YOUR LAUNCHERS: 正在查找你的启动器
+  The POPS files: POPS 文件
+  '%s  MMCE card': '%s  MMCE 卡'
+  INSTALL RIPPS2'S NEUTRINO: 安装 RIPPS2 的 NEUTRINO
+  'Internal HDD (APA): %s free of %s': 内置硬盘（APA）：可用 %s / 共 %s
+  LAUNCHERS: 启动器
+  LOOK FOR THEM: 查找它们
+  'Memory card %d: %d KB free': 记忆卡 %d：可用 %d KB
+  POPS files: POPS 文件
+  START EVERY DRIVE: 启动所有驱动器
+  'STATUS: looking at the drives and the homebrew': 状态：正在查看驱动器和自制程序
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): 先启动所有驱动器，让搜索覆盖全部吗？（选“否”则只搜索已启动的驱动器。）
+  USB, HDD, MMCE and the rest: USB、硬盘、MMCE 等
+  every started drive: 每个已启动的驱动器
+  found where you keep them: 在你存放的位置找到
+  not found yet: 尚未找到
+  not on a started drive: 不在已启动的驱动器上
+  only if you have none: 仅在你没有时
+  starts every drive first: 先启动所有驱动器
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
@@ -1401,3 +1490,9 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: 各游戏胶卷上等待的照片如何变成 PNG。
   RIPPS2_SETTINGS_HOME: 设置保存到
   HINT_RIPPS2_SETTINGS_HOME: RIPPS2 存放设置的位置：记忆卡上它自己的存档、驱动器（内置硬盘、USB、MX4SIO、iLink 或 MMCE）上的 RIPPS2 文件夹，或你输入的文件夹。
+  RIPPS2_LAUNCHERS: 启动器
+  RIPPS2_LOOK_NOW: 立即查找
+  HINT_RIPPS2_LOOK_NOW: SEANCE 会在已启动的驱动器上查找 POPSTARTER、POPS 文件、Ember、Ember 的 BIOS 和 Neutrino，并记住每一个的位置。每次启动都从那里读取。
+  RIPPS2_HIDE_GAME: 隐藏游戏
+  RIPPS2_HIDDEN_GAMES: 隐藏的游戏
+  HINT_RIPPS2_HIDDEN_GAMES: 用“隐藏游戏”隐藏的游戏，在已启动的驱动器上。可以重新显示其中一个，或删除它。每个驱动器各有自己的列表。

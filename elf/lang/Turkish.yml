@@ -91,7 +91,6 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Bu, ESR yamalı bir PS2 oyunu. Başlatmak için ESR'yi (esr*.elf) bir hafıza kartında veya USB bellekte APPS, BOOT ya da ESR klasörüne koyun.
   '%s, BUILD %d': '%s, DERLEME %d'
   '... and the anonymous ...': '... ve adı bilinmeyenler ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 değiştirilmeden taşınıyor (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Open PS2 Loader çatalı RiptOPL'nin söküp yeniden kurulmuş hâli,
   ABOUT: HAKKINDA
   'ACHIEVEMENTS: SPIRIT OF RA': 'BAŞARIMLAR: SPIRIT OF RA'
@@ -103,7 +102,6 @@ strings:
   BOOT LOCK AND BIBLE: BOOT LOCK VE BIBLE
   BOOT LOCK edits its config too: BOOT LOCK onun yapılandırmasını da düzenler
   BUILD DETAILS: DERLEME AYRINTILARI
-  BUILT ON RIPTOPL: RIPTOPL ÜZERİNE KURULU
   BearSSL by Thomas Pornin: Thomas Pornin'den BearSSL
   Built with Claude (Anthropic): Claude (Anthropic) ile yapıldı
   CD PLAYER: CD ÇALAR
@@ -172,7 +170,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: NathanNeurotic'ten wLaunchELF R3Z
   wLaunchELF by the ps2homebrew team: ps2homebrew ekibinden wLaunchELF
   what RIPPS2's card image writes are checked against: RIPPS2'nin kart görüntüsü yazımlarının karşılaştırıldığı araç
-  with its own look, launchers, file browser and save tools.: kendi görünümü, başlatıcıları, dosya tarayıcısı ve kayıt araçlarıyla.
   xeRAbora by hacan359, rcheevos by RetroAchievements: hacan359'dan xeRAbora, RetroAchievements'tan rcheevos
   your console's own, ripped from its BIOS: konsolunuzun kendi sesleri, BIOS'undan çıkarıldı
   ' (no DNS answer)': ' (DNS yanıtı yok)'
@@ -558,8 +555,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: yazılıyor %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino %s konumuna yazılamadı. Boş alanını ve yazmaya karşı korumalı olmadığını kontrol edip yeniden deneyin.
   THE GAME'S DRIVE  (%s/neutrino): OYUNUN SÜRÜCÜSÜ  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Bu oyun Neutrino ile başlar ve RIPPS2'nin baktığı yerlerde (Ayarlar, oyunun sürücüsü, hafıza kartları) Neutrino yok. RIPPS2, rickgaiser'ın Neutrino 1.8.0'ını (AFL-3.0) taşır. Şimdi kurulsun mu? Ardından yerini seçersiniz.
   '%d / %d FILES': '%d / %d DOSYA'
   '%d FOLDERS AND CONTENTS': '%d KLASÖR VE İÇERİKLERİ'
   '%d FOLDERS, %d FOUND': '%d KLASÖR, %d BULUNDU'
@@ -847,8 +842,6 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Bu konsolda RIPPS2 kilidi olan bir PS2BBL var.
   AUDIO folder: AUDIO klasörü
   DRIVES: SÜRÜCÜLER
-  INSTALL RIPPS2'S COPY: RIPPS2'NİN KOPYASINI KUR
-  'Installed: ': 'Kurulu: '
   MANAGE: YÖNET
   MANAGE shows what each memory card starts, and installs or repairs BIBLE.: YÖNET her hafıza kartının neyi başlattığını gösterir ve BIBLE'ı kurar ya da onarır.
   MEMORY CARD 0  (about 600 KB): HAFIZA KARTI 0  (yaklaşık 600 KB)
@@ -860,7 +853,6 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: sürücü yüklü, ama hiçbir SD kart yanıt vermedi (mc1 yuvası).'
   NEUTRINO SETTINGS: NEUTRINO AYARLARI
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Henüz yok: RIPPS2''nin kendine ait sesi yok. Bu konsolunkileri çıkarın veya RIPPS2 Audio Studio''da yapın.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Kurulu değil. Buna ihtiyaç duyan bir oyun RIPPS2'nin kopyasını önerir, ya da burada kurun.
   POPSTARTER NETWORK: POPSTARTER AĞI
   POPSTARTER and Ember: POPSTARTER ve Ember
   PS1 SETTINGS: PS1 AYARLARI
@@ -868,9 +860,7 @@ strings:
   RIP THIS CONSOLE'S SOUNDS: BU KONSOLUN SESLERİNİ ÇIKAR
   RIPPS2's homebrew: RIPPS2'nin ev yapımı yazılımları
   STATUS: DURUM
-  'STATUS: looking for RIPPS2''s homebrew': 'DURUM: RIPPS2''nin ev yapımı yazılımları aranıyor'
   a drive of unknown kind: türü bilinmeyen bir sürücü
-  a drive or a memory card: bir sürücü veya hafıza kartı
   boot loader, card by card: önyükleyici, kart kart
   from its BIOS, into AUDIO: BIOS'undan, AUDIO içine
   internal HDD (exFAT): dahili HDD (exFAT)
@@ -975,10 +965,109 @@ strings:
   Sidebar: Kenar Çubuğu
   your own copy, found on your drives and memory cards: kendi kopyanız, sürücülerinizde ve hafıza kartlarınızda bulunur
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'kendi kopyanız, bulunup başlatılır: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'mass0: (%s) üzerinde bulunamadı. ember.elf ve kendi bios.bin dosyanızı onun EMBER klasörüne koyun.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Bulunamadı. Kendi POPSTARTER.ELF dosyanızı bir sürücünün POPS klasörüne koyun.
   Launch Disc: Disk başlat
   Memory Files: Hafıza dosyaları
+  SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there.: SEANCE 5'ten %d tanesini buldu. Her biri hatırlanır ve her başlatma onu oradan okur.
+  not found on the started drives: başlatılan sürücülerde bulunamadı
+  not looked for yet: henüz aranmadı
+  '%s did not answer, so %s cannot start. Is it connected?': '%s yanıt vermedi, bu yüzden %s başlayamıyor. Bağlı mı?'
+  '%s is not on %s any more, so it has left All Games.': '%s artık %s üzerinde değil, bu yüzden Tüm Oyunlar''dan çıktı.'
+  STARTING %s: '%s BAŞLATILIYOR'
+  the SMB share: SMB paylaşımı
+  the drive: sürücü
+  the internal HDD (APA): dahili HDD (APA)
+  the internal HDD (exFAT): dahili HDD (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: RIPTOPL ÜZERİNE KURULU, NEUTRINO İLE
+  'Special thanks to all the YouTube love as well:': 'YouTube''daki tüm sevgiye de özel teşekkürler:'
+  and its own look, launchers, file browser and save tools.: ve kendi görünümü, başlatıcıları, dosya tarayıcısı ve kayıt araçlarıyla.
+  glad to help however you reach me.: bana nasıl ulaşırsanız ulaşın, yardım etmekten memnunum.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): ikinci oyun çekirdeği, 1.8.0 değiştirilmeden taşınır (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: içinde ikinci oyun çekirdeği olarak rickgaiser'ın Neutrino'suyla,
+  ? RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same.
+  : RIPPS2 lite, BIBLE'ı (PS2BBL) taşımaz. Kurmak için tam RIPPS2.elf'i bir kez başlatın; bu da ondan aynı şekilde başlar.
+  ? 'This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or install it once from the full RIPPS2.elf''s STATUS.'
+  : 'Bu oyun Neutrino üzerinden başlar ve RIPPS2 başlatılmış hiçbir sürücüde veya hafıza kartında bir tane bulamadı. RIPPS2 lite Neutrino taşımaz: Neutrino 1.8.0''ı (github.com/rickgaiser/neutrino) bir sürücüde veya hafıza kartında neutrino klasörüne koyun ya da tam RIPPS2.elf''in DURUM sayfasından bir kez kurun.'
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Bu oyun Neutrino üzerinden başlar ve RIPPS2 bir tane bulamadı: ne Ayarlar''daki yolda, ne oyunun sürücüsünde, ne hafıza kartlarında, ne de başlatılmış bir sürücüde. RIPPS2, rickgaiser''ın Neutrino 1.8.0''ını taşır (AFL-3.0): onu bir kez, seçtiğiniz yere kurun; her Neutrino oyunu onu oradan kullanır.'
+  STARTING THE DRIVES: SÜRÜCÜLER BAŞLATILIYOR
+  '%d games, on the started drives': '%d oyun, başlatılan sürücülerde'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: BAZI DOSYALAR SİLİNEMEDİ'
+  '%u partitions, all in order': '%u bölüm, hepsi düzgün'
+  ', %d art images': ', %d kapak görseli'
+  ', and ': ', ve '
+  ', its cheats': ', hileleri'
+  ', its settings': ', ayarları'
+  1 game, on the started drives: 1 oyun, başlatılan sürücülerde
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Buradaki bir PS1 oyunu, kendi başına bir dosya olduğu Hafıza Dosyaları'nda silinir.
+  A network catalogue's games are deleted on the PC that serves them.: Bir ağ kataloğunun oyunları, onları sunan bilgisayarda silinir.
+  DELETE FOR GOOD: KALICI OLARAK SİL
+  DELETE IT: SİL
+  'DELETED %s: %s FREED': '%s SİLİNDİ: %s BOŞALDI'
+  'Delete %s from %s? Goes: %s.': '%s, %s üzerinden silinsin mi? Gidecek: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': '%s, %s üzerinden silinsin mi? Gidecek: %s. Kalacak: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Kayıtları ve RIPSHOT resimleri de silinsin mi? Hayır onları tutar.
+  HIDDEN GAMES: GİZLİ OYUNLAR
+  'HIDDEN: %s': 'GİZLENDİ: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: '%s gizlensin mi? Her listeden, Tüm Oyunlar ve Favoriler''den de çıkar. Ayarlar > Oyun kaynakları > Gizli oyunlar onu yeniden gösterir.'
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Son kontrol. %s kalıcı olarak silinir ve hiçbir şey onu geri getiremez. Silmek için START'a basın.
+  None. Hide Game, in a game's options, puts one here.: Yok. Bir oyunun seçeneklerindeki Oyunu gizle buraya bir tane koyar.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Hiçbir şey silinmedi: bu sürücünün bölüm tablosu bu diske uymuyor (%s). Başka boyutta bir diskin imajından yazılmış olabilir. Önce bir bilgisayarda onarın.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 bu sayfadan oyun silemez.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 bu oyunun dosyalarını sürücüsünde bulamadı.
+  Reading the hidden lists: Gizli listeler okunuyor
+  SHOW AGAIN OR DELETE: YENİDEN GÖSTER VEYA SİL
+  SHOW IT AGAIN: YENİDEN GÖSTER
+  That game is not on its drive any more.: O oyun artık sürücüsünde değil.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Gizli liste oyunun sürücüsüne yazılamadı. Yazmaya karşı korumalı mı, yoksa İşlemleri Yaz kapalı mı?
+  The partition could not be removed (%d). Nothing was deleted.: Bölüm kaldırılamadı (%d). Hiçbir şey silinmedi.
+  This drive cannot keep a hidden list (a network catalogue).: Bu sürücü gizli liste tutamaz (bir ağ kataloğu).
+  This game's drive has not answered yet. Wait for it, then try again.: Bu oyunun sürücüsü henüz yanıt vermedi. Bekleyin, sonra yeniden deneyin.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Bu oyunun bölümü, RIPPS2'nin kaldırmadığı bölümlerden biri (bir sistem bölümü ya da ayarlarının bulunduğu bölüm).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'bir bölüm bu diskin izin verdiğinden büyük: tablo başka boyutta bir disk için yapılmış'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'bir bölüm bu diskin sonunu aşıyor (sektör %u / %u): tablo daha büyük bir disk için yapılmış'
+  its RIPSHOT pictures: RIPSHOT resimleri
+  its drive: sürücüsü
+  its saves: kayıtları
+  sector %u holds no partition header: '%u sektöründe bölüm başlığı yok'
+  the chain does not close at __mbr: zincir __mbr'de kapanmıyor
+  the chain skips from sector %u: zincir %u sektöründen atlıyor
+  the chain's links disagree at sector %u: zincirin halkaları %u sektöründe uyuşmuyor
+  the drive's size could not be read: sürücünün boyutu okunamadı
+  the game (%s): oyun (%s)
+  the game's folder and everything in it (%s): oyunun klasörü ve içindeki her şey (%s)
+  the header at sector %u could not be read: '%u sektöründeki başlık okunamadı'
+  the header at sector %u fails its checksum: '%u sektöründeki başlık sağlama toplamını geçemiyor'
+  the partition at sector %u is not where or as large as APA puts one: '%u sektöründeki bölüm, APA''nın bir bölüm koyduğu yerde veya boyutta değil'
+  the settings and art another copy of it uses: başka bir kopyasının kullandığı ayarlar ve kapaklar
+  '%d FOLDERS': '%d KLASÖR'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s, %s konumuna kopyalanamadı. Sürücü dolu mu, yoksa yazmaya karşı korumalı mı?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s, RIPPS2''nin baktığı yerde değil. RIPPS2''nin başlattığı sürücülerde aransın mı? Bulunduğu yer sonraki her başlatma için hatırlanır.'
+  ? 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember, oyunların yanında %s içinde değil ve orada olmalı. SEANCE onu %s konumunda buldu: START onu oraya kopyalar (%d KB) ve oyunu başlatır.'
+  Ember's BIOS: Ember'in BIOS'u
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember''in BIOS''u (bios.bin), Ember''in yanında %s içinde değil. SEANCE %s konumunda bir tane buldu: START onu oraya kopyalar (%d KB) ve oyunu başlatır.'
+  LOOKING FOR YOUR LAUNCHERS: BAŞLATICILARINIZ ARANIYOR
+  The POPS files: POPS dosyaları
+  '%s  MMCE card': '%s  MMCE kartı'
+  INSTALL RIPPS2'S NEUTRINO: RIPPS2'NİN NEUTRINO'SUNU KUR
+  'Internal HDD (APA): %s free of %s': 'Dahili HDD (APA): %s boş, toplam %s'
+  LAUNCHERS: BAŞLATICILAR
+  LOOK FOR THEM: ONLARI ARA
+  'Memory card %d: %d KB free': 'Hafıza kartı %d: %d KB boş'
+  POPS files: POPS dosyaları
+  START EVERY DRIVE: TÜM SÜRÜCÜLERİ BAŞLAT
+  'STATUS: looking at the drives and the homebrew': 'DURUM: sürücülere ve homebrew''a bakılıyor'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Arama hepsine ulaşsın diye önce tüm sürücüler başlatılsın mı? (Hayır, zaten başlatılmış sürücülerde arar.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE ve diğerleri
+  every started drive: başlatılan her sürücü
+  found where you keep them: onları tuttuğunuz yerde bulundu
+  not found yet: henüz bulunamadı
+  not on a started drive: başlatılmış bir sürücüde değil
+  only if you have none: yalnızca hiç yoksa
+  starts every drive first: önce tüm sürücüleri başlatır
 labels:
   ETH_100MFDX: 100Mbit Tam çift yönlü
   ETH_100MHDX: 100Mbit Yarı çift yönlü
@@ -1405,3 +1494,9 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Her oyunun rulosunda bekleyen karelerin nasıl PNG olduğu.
   RIPPS2_SETTINGS_HOME: Ayarları kaydet
   HINT_RIPPS2_SETTINGS_HOME: 'RIPPS2 ayarlarını nerede tutar: hafıza kartındaki kendi kaydında, bir sürücüdeki RIPPS2 klasöründe (dahili HDD, USB, MX4SIO, iLink veya MMCE) veya senin yazdığın bir klasörde.'
+  RIPPS2_LAUNCHERS: Başlatıcılar
+  RIPPS2_LOOK_NOW: Şimdi ara
+  HINT_RIPPS2_LOOK_NOW: SEANCE başlatılan sürücülerde POPSTARTER'ı, POPS dosyalarını, Ember'i, Ember'in BIOS'unu ve Neutrino'yu arar ve her birinin nerede olduğunu hatırlar. Her başlatma onları oradan okur.
+  RIPPS2_HIDE_GAME: Oyunu gizle
+  RIPPS2_HIDDEN_GAMES: Gizli oyunlar
+  HINT_RIPPS2_HIDDEN_GAMES: Oyunu gizle ile gizlenen oyunlar, başlatılan sürücülerde. Birini yeniden gösterin ya da silin. Her sürücü kendi listesini tutar.

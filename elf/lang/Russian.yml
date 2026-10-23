@@ -91,7 +91,6 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Это игра PS2 с патчем ESR. Положите ESR (esr*.elf) в APPS, BOOT или ESR на карте памяти или USB-накопителе, чтобы её запустить.
   '%s, BUILD %d': '%s, СБОРКА %d'
   '... and the anonymous ...': '... и безымянные ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 без изменений (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Разборка и пересборка RiptOPL, форка Open PS2 Loader,
   ABOUT: О ПРОГРАММЕ
   'ACHIEVEMENTS: SPIRIT OF RA': 'ДОСТИЖЕНИЯ: SPIRIT OF RA'
@@ -103,7 +102,6 @@ strings:
   BOOT LOCK AND BIBLE: BOOT LOCK И BIBLE
   BOOT LOCK edits its config too: BOOT LOCK правит и его конфигурацию
   BUILD DETAILS: ПОДРОБНОСТИ СБОРКИ
-  BUILT ON RIPTOPL: ПОСТРОЕНО НА RIPTOPL
   BearSSL by Thomas Pornin: BearSSL от Thomas Pornin
   Built with Claude (Anthropic): Сделано с Claude (Anthropic)
   CD PLAYER: CD-ПЛЕЕР
@@ -172,7 +170,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z от NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF от команды ps2homebrew
   what RIPPS2's card image writes are checked against: с чем сверяются записи образов карт RIPPS2
-  with its own look, launchers, file browser and save tools.: со своим видом, лаунчерами, файловым браузером и инструментами сохранений.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora от hacan359, rcheevos от RetroAchievements
   your console's own, ripped from its BIOS: звуки вашей консоли, извлечённые из её BIOS
   ' (no DNS answer)': ' (нет ответа DNS)'
@@ -558,8 +555,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: запись %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Не удалось записать Neutrino в %s. Проверьте свободное место и отсутствие защиты от записи и попробуйте снова.
   THE GAME'S DRIVE  (%s/neutrino): НАКОПИТЕЛЬ ИГРЫ  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Эта игра запускается через Neutrino, а там, где ищет RIPPS2 (Настройки, накопитель игры, карты памяти), Neutrino нет. RIPPS2 содержит Neutrino 1.8.0 от rickgaiser (AFL-3.0). Установить сейчас? Затем вы выберете, куда.
   '%d / %d FILES': '%d / %d ФАЙЛОВ'
   '%d FOLDERS AND CONTENTS': '%d ПАПОК С СОДЕРЖИМЫМ'
   '%d FOLDERS, %d FOUND': '%d ПАПОК, НАЙДЕНО %d'
@@ -847,8 +842,6 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: На этой консоли есть PS2BBL с блокировкой RIPPS2.
   AUDIO folder: папка AUDIO
   DRIVES: НАКОПИТЕЛИ
-  INSTALL RIPPS2'S COPY: УСТАНОВИТЬ КОПИЮ RIPPS2
-  'Installed: ': 'Установлено: '
   MANAGE: УПРАВЛЕНИЕ
   MANAGE shows what each memory card starts, and installs or repairs BIBLE.: УПРАВЛЕНИЕ показывает, что запускает каждая карта памяти, и устанавливает или исправляет BIBLE.
   MEMORY CARD 0  (about 600 KB): КАРТА ПАМЯТИ 0  (около 600 КБ)
@@ -860,7 +853,6 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: драйвер загружен, но ни одна SD-карта не ответила (слот mc1).'
   NEUTRINO SETTINGS: НАСТРОЙКИ NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Пока нет: у RIPPS2 нет своих звуков. Извлеките звуки этой консоли или сделайте их в RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Не установлен. Игра, которой он нужен, предложит копию RIPPS2, или установите его здесь.
   POPSTARTER NETWORK: СЕТЬ POPSTARTER
   POPSTARTER and Ember: POPSTARTER и Ember
   PS1 SETTINGS: НАСТРОЙКИ PS1
@@ -868,9 +860,7 @@ strings:
   RIP THIS CONSOLE'S SOUNDS: ИЗВЛЕЧЬ ЗВУКИ ЭТОЙ КОНСОЛИ
   RIPPS2's homebrew: Homebrew RIPPS2
   STATUS: СОСТОЯНИЕ
-  'STATUS: looking for RIPPS2''s homebrew': 'СОСТОЯНИЕ: поиск homebrew RIPPS2'
   a drive of unknown kind: накопитель неизвестного типа
-  a drive or a memory card: накопитель или карта памяти
   boot loader, card by card: загрузчик, карта за картой
   from its BIOS, into AUDIO: из её BIOS, в AUDIO
   internal HDD (exFAT): внутренний HDD (exFAT)
@@ -975,10 +965,109 @@ strings:
   Sidebar: Боковая панель
   your own copy, found on your drives and memory cards: ваша собственная копия, найденная на ваших дисках и картах памяти
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'ваш собственный, найденный и запущенный: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Не найден на mass0: (%s). Положите ember.elf и свой bios.bin в его папку EMBER.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Не найден. Положите свой POPSTARTER.ELF в папку POPS на диске.
   Launch Disc: Запуск диска
   Memory Files: Файлы памяти
+  SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there.: SEANCE нашёл %d из 5. Каждый запоминается, и каждый запуск берёт его оттуда.
+  not found on the started drives: не найдено на запущенных накопителях
+  not looked for yet: ещё не искали
+  '%s did not answer, so %s cannot start. Is it connected?': '%s не ответил, поэтому %s не может запуститься. Он подключён?'
+  '%s is not on %s any more, so it has left All Games.': '%s больше нет на %s, поэтому игра ушла из «Всех игр».'
+  STARTING %s: ЗАПУСК %s
+  the SMB share: общая папка SMB
+  the drive: накопитель
+  the internal HDD (APA): внутренний HDD (APA)
+  the internal HDD (exFAT): внутренний HDD (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: ПОСТРОЕН НА RIPTOPL, С NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Особая благодарность и всей любви с YouTube:'
+  and its own look, launchers, file browser and save tools.: и со своим видом, загрузчиками, файловым браузером и инструментами для сохранений.
+  glad to help however you reach me.: рад помочь, как бы вы со мной ни связались.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): второе игровое ядро, 1.8.0 в неизменном виде (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: с Neutrino от rickgaiser внутри как вторым игровым ядром,
+  ? RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same.
+  : В RIPPS2 lite нет BIBLE (PS2BBL). Один раз запустите полный RIPPS2.elf, чтобы установить его; этот запускается с него точно так же.
+  ? 'This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or install it once from the full RIPPS2.elf''s STATUS.'
+  : 'Эта игра запускается через Neutrino, а RIPPS2 не нашёл его ни на одном запущенном накопителе или карте памяти. В RIPPS2 lite нет Neutrino: положите Neutrino 1.8.0 (github.com/rickgaiser/neutrino) в папку neutrino на накопителе или карте памяти или установите его один раз из СОСТОЯНИЯ полного RIPPS2.elf.'
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Эта игра запускается через Neutrino, а RIPPS2 его не нашёл: ни по пути из Настроек, ни на накопителе игры, ни на картах памяти, ни на одном запущенном накопителе. В RIPPS2 есть Neutrino 1.8.0 от rickgaiser (AFL-3.0): установите его один раз, куда захотите, и каждая игра с Neutrino будет брать его оттуда.'
+  STARTING THE DRIVES: ЗАПУСК НАКОПИТЕЛЕЙ
+  '%d games, on the started drives': '%d игр, на запущенных накопителях'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: НЕКОТОРЫЕ ФАЙЛЫ НЕ УДАЛОСЬ УДАЛИТЬ'
+  '%u partitions, all in order': '%u разделов, все в порядке'
+  ', %d art images': ', %d обложек'
+  ', and ': ', и '
+  ', its cheats': ', её читы'
+  ', its settings': ', её настройки'
+  1 game, on the started drives: 1 игра, на запущенных накопителях
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Игра PS1 отсюда удаляется в «Файлах памяти», где она отдельный файл.
+  A network catalogue's games are deleted on the PC that serves them.: Игры сетевого каталога удаляются на ПК, который их раздаёт.
+  DELETE FOR GOOD: УДАЛИТЬ НАВСЕГДА
+  DELETE IT: УДАЛИТЬ ЕЁ
+  'DELETED %s: %s FREED': '%s УДАЛЕНА: ОСВОБОЖДЕНО %s'
+  'Delete %s from %s? Goes: %s.': 'Удалить %s с %s? Уходит: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Удалить %s с %s? Уходит: %s. Остаётся: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Удалить также её сохранения и снимки RIPSHOT? «Нет» оставляет их.
+  HIDDEN GAMES: СКРЫТЫЕ ИГРЫ
+  'HIDDEN: %s': 'СКРЫТО: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Скрыть %s? Игра уйдёт из всех списков, из «Всех игр» и «Избранного» тоже. Настройки > Источники игр > Скрытые игры покажут её снова.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Последняя проверка. %s удаляется навсегда, и ничто её не вернёт. Нажмите START, чтобы удалить.
+  None. Hide Game, in a game's options, puts one here.: Нет. «Скрыть игру» в параметрах игры помещает её сюда.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Ничего не удалено: таблица разделов этого накопителя не подходит этому диску (%s). Возможно, она записана из образа диска другого размера. Сначала исправьте её на ПК.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 не может удалить игру с этой страницы.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 не нашёл файлы этой игры на её накопителе.
+  Reading the hidden lists: Чтение списков скрытых
+  SHOW AGAIN OR DELETE: ПОКАЗАТЬ СНОВА ИЛИ УДАЛИТЬ
+  SHOW IT AGAIN: ПОКАЗАТЬ СНОВА
+  That game is not on its drive any more.: Этой игры больше нет на её накопителе.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Список скрытых не удалось записать на накопитель игры. Он защищён от записи, или Операции записи выключены?
+  The partition could not be removed (%d). Nothing was deleted.: Раздел не удалось убрать (%d). Ничего не удалено.
+  This drive cannot keep a hidden list (a network catalogue).: Этот накопитель не может хранить список скрытых (сетевой каталог).
+  This game's drive has not answered yet. Wait for it, then try again.: Накопитель этой игры ещё не ответил. Дождитесь его и попробуйте снова.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Раздел этой игры из тех, что RIPPS2 не убирает (системный раздел или тот, где его настройки).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'раздел больше, чем допускает этот диск: таблица сделана для диска другого размера'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'раздел выходит за конец этого диска (сектор %u из %u): таблица сделана для диска побольше'
+  its RIPSHOT pictures: её снимки RIPSHOT
+  its drive: её накопитель
+  its saves: её сохранения
+  sector %u holds no partition header: в секторе %u нет заголовка раздела
+  the chain does not close at __mbr: цепочка не замыкается на __mbr
+  the chain skips from sector %u: цепочка перескакивает с сектора %u
+  the chain's links disagree at sector %u: звенья цепочки не сходятся в секторе %u
+  the drive's size could not be read: не удалось прочитать размер накопителя
+  the game (%s): игра (%s)
+  the game's folder and everything in it (%s): папка игры и всё в ней (%s)
+  the header at sector %u could not be read: не удалось прочитать заголовок в секторе %u
+  the header at sector %u fails its checksum: заголовок в секторе %u не проходит контрольную сумму
+  the partition at sector %u is not where or as large as APA puts one: раздел в секторе %u лежит не там или не такого размера, как его создаёт APA
+  the settings and art another copy of it uses: настройки и обложки, которые использует другая её копия
+  '%d FOLDERS': '%d ПАПОК'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s не удалось скопировать в %s. Накопитель полон или защищён от записи?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s нет там, где ищет RIPPS2. Поискать на накопителях, которые запустил RIPPS2? Найденное место запомнится для каждого следующего запуска.'
+  ? 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember нет в %s, рядом с играми, а он должен быть там. SEANCE нашёл его в %s: START копирует его туда (%d КБ) и запускает игру.'
+  Ember's BIOS: BIOS для Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'BIOS для Ember (bios.bin) нет в %s, рядом с Ember. SEANCE нашёл его в %s: START копирует его туда (%d КБ) и запускает игру.'
+  LOOKING FOR YOUR LAUNCHERS: ИЩУ ВАШИ ЗАГРУЗЧИКИ
+  The POPS files: Файлы POPS
+  '%s  MMCE card': '%s  карта MMCE'
+  INSTALL RIPPS2'S NEUTRINO: УСТАНОВИТЬ NEUTRINO ИЗ RIPPS2
+  'Internal HDD (APA): %s free of %s': 'Внутренний HDD (APA): свободно %s из %s'
+  LAUNCHERS: ЗАГРУЗЧИКИ
+  LOOK FOR THEM: НАЙТИ ИХ
+  'Memory card %d: %d KB free': 'Карта памяти %d: свободно %d КБ'
+  POPS files: Файлы POPS
+  START EVERY DRIVE: ЗАПУСТИТЬ ВСЕ НАКОПИТЕЛИ
+  'STATUS: looking at the drives and the homebrew': 'СОСТОЯНИЕ: смотрю накопители и homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Сначала запустить все накопители, чтобы поиск дошёл до каждого? («Нет» ищет на уже запущенных.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE и остальное
+  every started drive: каждый запущенный накопитель
+  found where you keep them: найдены там, где вы их держите
+  not found yet: пока не найдено
+  not on a started drive: не на запущенном накопителе
+  only if you have none: только если у вас его нет
+  starts every drive first: сначала запускает все накопители
 labels:
   DS34BT_MODE: DualShock3/4 по Bluetooth
   HINT_NEUTRINO_AUTO_ELF: Передаёт загрузочный ELF игры в Neutrino, чтобы найти настройки для этой игры. Включено по умолчанию; заданный вручную параметр Boot ELF важнее.
@@ -1400,3 +1489,9 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Как кадры, ждущие на плёнке каждой игры, становятся PNG.
   RIPPS2_SETTINGS_HOME: Сохранять настройки на
   HINT_RIPPS2_SETTINGS_HOME: 'Где RIPPS2 хранит настройки: в собственном сохранении на карте памяти, в папке RIPPS2 на накопителе (внутреннем HDD, USB, MX4SIO, iLink или MMCE) или в указанной вами папке.'
+  RIPPS2_LAUNCHERS: Загрузчики
+  RIPPS2_LOOK_NOW: Искать сейчас
+  HINT_RIPPS2_LOOK_NOW: SEANCE ищет на запущенных накопителях POPSTARTER, файлы POPS, Ember, BIOS для Ember и Neutrino и запоминает, где лежит каждый. Каждый запуск берёт их оттуда.
+  RIPPS2_HIDE_GAME: Скрыть игру
+  RIPPS2_HIDDEN_GAMES: Скрытые игры
+  HINT_RIPPS2_HIDDEN_GAMES: Игры, скрытые через «Скрыть игру», на запущенных накопителях. Покажите одну снова или удалите её. У каждого накопителя свой список.

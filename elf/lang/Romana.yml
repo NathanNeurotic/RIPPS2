@@ -91,7 +91,6 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Acesta este un joc PS2 cu patch ESR. Pune ESR (esr*.elf) în APPS, BOOT sau ESR pe un card de memorie sau un stick USB ca să îl pornești.
   '%s, BUILD %d': '%s, VERSIUNEA %d'
   '... and the anonymous ...': '... și cei anonimi ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 inclus nemodificat (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: O demontare și reconstruire a RiptOPL, fork-ul Open PS2 Loader,
   ABOUT: DESPRE
   'ACHIEVEMENTS: SPIRIT OF RA': 'REALIZĂRI: SPIRIT OF RA'
@@ -103,7 +102,6 @@ strings:
   BOOT LOCK AND BIBLE: BOOT LOCK ȘI BIBLE
   BOOT LOCK edits its config too: BOOT LOCK îi editează și configurația
   BUILD DETAILS: DETALII VERSIUNE
-  BUILT ON RIPTOPL: CONSTRUIT PE RIPTOPL
   BearSSL by Thomas Pornin: BearSSL de Thomas Pornin
   Built with Claude (Anthropic): Făcut cu Claude (Anthropic)
   CD PLAYER: PLAYER CD
@@ -172,7 +170,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z de NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF de echipa ps2homebrew
   what RIPPS2's card image writes are checked against: cu ce sunt verificate scrierile de imagini de card ale RIPPS2
-  with its own look, launchers, file browser and save tools.: cu propriul aspect, lansatoare, browser de fișiere și unelte de salvări.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora de hacan359, rcheevos de RetroAchievements
   your console's own, ripped from its BIOS: sunetele proprii ale consolei tale, extrase din BIOS-ul ei
   ' (no DNS answer)': ' (niciun răspuns DNS)'
@@ -558,8 +555,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: se scrie %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino nu a putut fi scris în %s. Verifică spațiul liber și să nu fie protejat la scriere, apoi încearcă din nou.
   THE GAME'S DRIVE  (%s/neutrino): UNITATEA JOCULUI  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Acest joc pornește prin Neutrino, iar acolo unde caută RIPPS2 (Setări, unitatea jocului, cardurile de memorie) nu există Neutrino. RIPPS2 are la el Neutrino 1.8.0 de rickgaiser (AFL-3.0). Îl instalezi acum? Apoi alegi unde.
   '%d / %d FILES': '%d / %d FIȘIERE'
   '%d FOLDERS AND CONTENTS': '%d FOLDERE ȘI CONȚINUT'
   '%d FOLDERS, %d FOUND': '%d DOSARE, %d GĂSITE'
@@ -847,8 +842,6 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Pe această consolă există un PS2BBL cu blocarea RIPPS2.
   AUDIO folder: folderul AUDIO
   DRIVES: UNITĂȚI
-  INSTALL RIPPS2'S COPY: INSTALEAZĂ COPIA RIPPS2
-  'Installed: ': 'Instalat: '
   MANAGE: GESTIONEAZĂ
   MANAGE shows what each memory card starts, and installs or repairs BIBLE.: GESTIONEAZĂ arată ce pornește fiecare card de memorie și instalează sau repară BIBLE.
   MEMORY CARD 0  (about 600 KB): CARDUL DE MEMORIE 0  (aproximativ 600 KB)
@@ -860,7 +853,6 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: driverul este încărcat, dar niciun card SD nu a răspuns (slotul mc1).'
   NEUTRINO SETTINGS: SETĂRI NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Încă niciunul: RIPPS2 nu are sunete proprii. Extrage-le pe ale acestei console sau fă-le în RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Neinstalat. Un joc care are nevoie de el oferă copia RIPPS2, sau instalează-l aici.
   POPSTARTER NETWORK: REȚEA POPSTARTER
   POPSTARTER and Ember: POPSTARTER și Ember
   PS1 SETTINGS: SETĂRI PS1
@@ -868,9 +860,7 @@ strings:
   RIP THIS CONSOLE'S SOUNDS: EXTRAGE SUNETELE ACESTEI CONSOLE
   RIPPS2's homebrew: homebrew-ul RIPPS2
   STATUS: STARE
-  'STATUS: looking for RIPPS2''s homebrew': 'STARE: se caută homebrew-ul RIPPS2'
   a drive of unknown kind: o unitate de tip necunoscut
-  a drive or a memory card: o unitate sau un card de memorie
   boot loader, card by card: încărcător de pornire, card cu card
   from its BIOS, into AUDIO: din BIOS-ul ei, în AUDIO
   internal HDD (exFAT): HDD intern (exFAT)
@@ -975,10 +965,109 @@ strings:
   Sidebar: Bară laterală
   your own copy, found on your drives and memory cards: copia ta proprie, găsită pe unitățile și cardurile tale de memorie
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'al tău, găsit și pornit: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Nu a fost găsit pe mass0: (%s). Pune ember.elf și bios.bin-ul tău în folderul său EMBER.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Nu a fost găsit. Pune propriul POPSTARTER.ELF în folderul POPS al unei unități.
   Launch Disc: Lansare disc
   Memory Files: Fișiere de memorie
+  SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there.: SEANCE a găsit %d din 5. Fiecare e ținut minte, și fiecare lansare îl citește de acolo.
+  not found on the started drives: negăsit pe unitățile pornite
+  not looked for yet: încă necăutat
+  '%s did not answer, so %s cannot start. Is it connected?': '%s nu a răspuns, deci %s nu poate porni. E conectat?'
+  '%s is not on %s any more, so it has left All Games.': '%s nu mai este pe %s, așa că a ieșit din Toate jocurile.'
+  STARTING %s: PORNESC %s
+  the SMB share: partajarea SMB
+  the drive: unitatea
+  the internal HDD (APA): HDD-ul intern (APA)
+  the internal HDD (exFAT): HDD-ul intern (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: CONSTRUIT PE RIPTOPL, CU NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Mulțumiri speciale și pentru toată dragostea de pe YouTube:'
+  and its own look, launchers, file browser and save tools.: și cu propriul aspect, lansatoare, explorator de fișiere și unelte pentru salvări.
+  glad to help however you reach me.: bucuros să ajut, oricum m-ați găsi.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): al doilea nucleu de joc, 1.8.0 inclus nemodificat (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: cu Neutrino de la rickgaiser înăuntru ca al doilea nucleu de joc,
+  ? RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same.
+  : RIPPS2 lite nu include BIBLE (PS2BBL). Pornește o dată RIPPS2.elf complet ca să-l instalezi; acesta pornește de pe el la fel.
+  ? 'This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or install it once from the full RIPPS2.elf''s STATUS.'
+  : 'Acest joc pornește prin Neutrino, iar RIPPS2 nu a găsit niciunul pe vreo unitate pornită sau card de memorie. RIPPS2 lite nu include Neutrino: pune Neutrino 1.8.0 (github.com/rickgaiser/neutrino) într-un dosar neutrino pe o unitate sau pe un card de memorie, sau instalează-l o dată din STARE în RIPPS2.elf complet.'
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Acest joc pornește prin Neutrino, iar RIPPS2 nu a găsit niciunul: nici la calea din Setări, nici pe unitatea jocului, nici pe cardurile de memorie, nici pe vreo unitate pornită. RIPPS2 include Neutrino 1.8.0 de la rickgaiser (AFL-3.0): instalează-l o dată, unde alegi, și fiecare joc Neutrino îl folosește de acolo.'
+  STARTING THE DRIVES: PORNESC UNITĂȚILE
+  '%d games, on the started drives': '%d jocuri, pe unitățile pornite'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: UNELE FIȘIERE NU AU PUTUT FI ȘTERSE'
+  '%u partitions, all in order': '%u partiții, toate în ordine'
+  ', %d art images': ', %d imagini de copertă'
+  ', and ': ', și '
+  ', its cheats': ', codurile lui'
+  ', its settings': ', setările lui'
+  1 game, on the started drives: 1 joc, pe unitățile pornite
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Un joc PS1 de aici se șterge în Fișierele de memorie, unde e un fișier separat.
+  A network catalogue's games are deleted on the PC that serves them.: Jocurile unui catalog de rețea se șterg pe PC-ul care le servește.
+  DELETE FOR GOOD: ȘTERGE DEFINITIV
+  DELETE IT: ȘTERGE-L
+  'DELETED %s: %s FREED': '%s ȘTERS: %s ELIBERAȚI'
+  'Delete %s from %s? Goes: %s.': 'Ștergi %s de pe %s? Pleacă: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Ștergi %s de pe %s? Pleacă: %s. Rămâne: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Ștergi și salvările și pozele RIPSHOT ale lui? Nu le păstrează.
+  HIDDEN GAMES: JOCURI ASCUNSE
+  'HIDDEN: %s': 'ASCUNS: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Ascunzi %s? Iese din toate listele, și din Toate jocurile și Favorite. Setări > Surse de jocuri > Jocuri ascunse îl arată din nou.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Ultima verificare. %s se șterge definitiv, și nimic nu-l mai poate aduce înapoi. Apasă START ca să-l ștergi.
+  None. Hide Game, in a game's options, puts one here.: Niciunul. Ascunde jocul, în opțiunile unui joc, pune unul aici.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Nu s-a șters nimic: tabela de partiții a acestei unități nu se potrivește cu acest disc (%s). Poate a fost scrisă dintr-o imagine a unui disc de altă mărime. Repar-o întâi pe un PC.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 nu poate șterge un joc din această pagină.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 nu a găsit fișierele acestui joc pe unitatea lui.
+  Reading the hidden lists: Citesc listele ascunse
+  SHOW AGAIN OR DELETE: ARATĂ DIN NOU SAU ȘTERGE
+  SHOW IT AGAIN: ARATĂ-L DIN NOU
+  That game is not on its drive any more.: Jocul acela nu mai este pe unitatea lui.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Lista ascunsă nu a putut fi scrisă pe unitatea jocului. E protejată la scriere, sau Operațiile de scriere sunt oprite?
+  The partition could not be removed (%d). Nothing was deleted.: Partiția nu a putut fi eliminată (%d). Nu s-a șters nimic.
+  This drive cannot keep a hidden list (a network catalogue).: Această unitate nu poate ține o listă ascunsă (un catalog de rețea).
+  This game's drive has not answered yet. Wait for it, then try again.: Unitatea acestui joc nu a răspuns încă. Așteaptă-o, apoi încearcă din nou.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Partiția acestui joc e una pe care RIPPS2 nu o elimină (o partiție de sistem, sau cea cu setările lui).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'o partiție e mai mare decât permite acest disc: tabela a fost făcută pentru un disc de altă mărime'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'o partiție trece de capătul acestui disc (sectorul %u din %u): tabela a fost făcută pentru un disc mai mare'
+  its RIPSHOT pictures: pozele RIPSHOT ale lui
+  its drive: unitatea lui
+  its saves: salvările lui
+  sector %u holds no partition header: sectorul %u nu are antet de partiție
+  the chain does not close at __mbr: lanțul nu se închide la __mbr
+  the chain skips from sector %u: lanțul sare de la sectorul %u
+  the chain's links disagree at sector %u: verigile lanțului nu se potrivesc la sectorul %u
+  the drive's size could not be read: mărimea unității nu a putut fi citită
+  the game (%s): jocul (%s)
+  the game's folder and everything in it (%s): dosarul jocului și tot ce e în el (%s)
+  the header at sector %u could not be read: antetul de la sectorul %u nu a putut fi citit
+  the header at sector %u fails its checksum: antetul de la sectorul %u nu trece suma de control
+  the partition at sector %u is not where or as large as APA puts one: partiția de la sectorul %u nu e unde, sau cât de mare, o pune APA
+  the settings and art another copy of it uses: setările și coperțile pe care le folosește altă copie a lui
+  '%d FOLDERS': '%d DOSARE'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s nu a putut fi copiat în %s. Unitatea e plină sau protejată la scriere?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s nu e unde caută RIPPS2. Îl caut pe unitățile pornite de RIPPS2? Locul unde e găsit e ținut minte pentru fiecare lansare de după.'
+  ? 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember nu e în %s, lângă jocuri, și trebuie să fie. SEANCE l-a găsit la %s: START îl copiază acolo (%d KB) și pornește jocul.'
+  Ember's BIOS: BIOS-ul lui Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'BIOS-ul lui Ember (bios.bin) nu e în %s, lângă Ember. SEANCE a găsit unul la %s: START îl copiază acolo (%d KB) și pornește jocul.'
+  LOOKING FOR YOUR LAUNCHERS: CAUT LANSATOARELE TALE
+  The POPS files: Fișierele POPS
+  '%s  MMCE card': '%s  card MMCE'
+  INSTALL RIPPS2'S NEUTRINO: INSTALEAZĂ NEUTRINO DIN RIPPS2
+  'Internal HDD (APA): %s free of %s': 'HDD intern (APA): %s liberi din %s'
+  LAUNCHERS: LANSATOARE
+  LOOK FOR THEM: CAUTĂ-LE
+  'Memory card %d: %d KB free': 'Card de memorie %d: %d KB liberi'
+  POPS files: Fișiere POPS
+  START EVERY DRIVE: PORNEȘTE TOATE UNITĂȚILE
+  'STATUS: looking at the drives and the homebrew': 'STARE: mă uit la unități și la homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Pornești întâi toate unitățile, ca să ajungă căutarea la toate? (Nu caută pe unitățile deja pornite.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE și restul
+  every started drive: fiecare unitate pornită
+  found where you keep them: găsite unde le ții
+  not found yet: încă negăsit
+  not on a started drive: nu e pe o unitate pornită
+  only if you have none: doar dacă nu ai niciunul
+  starts every drive first: pornește întâi toate unitățile
 labels:
   SETTINGS_SAVED: Setări salvate în %s
   REMOVE_ALL_SETTINGS: Elimină setările
@@ -1459,3 +1548,9 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Cum cadrele în așteptare pe rola fiecărui joc devin PNG.
   RIPPS2_SETTINGS_HOME: Salvează setările pe
   HINT_RIPPS2_SETTINGS_HOME: 'Unde își ține RIPPS2 setările: în salvarea proprie pe un card de memorie, într-un dosar RIPPS2 pe o unitate (HDD-ul intern, USB, MX4SIO, iLink sau MMCE) sau într-un dosar pe care îl scrii.'
+  RIPPS2_LAUNCHERS: Lansatoare
+  RIPPS2_LOOK_NOW: Caută acum
+  HINT_RIPPS2_LOOK_NOW: SEANCE caută pe unitățile pornite POPSTARTER, fișierele POPS, Ember, BIOS-ul lui Ember și Neutrino, și ține minte unde e fiecare. Fiecare lansare le citește de acolo.
+  RIPPS2_HIDE_GAME: Ascunde jocul
+  RIPPS2_HIDDEN_GAMES: Jocuri ascunse
+  HINT_RIPPS2_HIDDEN_GAMES: Jocurile ascunse cu Ascunde jocul, pe unitățile pornite. Arată unul din nou, sau șterge-l. Fiecare unitate își ține propria listă.

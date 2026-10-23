@@ -91,7 +91,6 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Dies ist ein mit ESR gepatchtes PS2-Spiel. Lege ESR (esr*.elf) in APPS, BOOT oder ESR auf einer Speicherkarte oder einem USB-Stick ab, um es zu starten.
   '%s, BUILD %d': '%s, BUILD %d'
   '... and the anonymous ...': '... und die Unbekannten ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 unverändert enthalten (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Ein Zerlegen und Neuaufbau von RiptOPL, dem Open-PS2-Loader-Fork,
   ABOUT: ÜBER
   'ACHIEVEMENTS: SPIRIT OF RA': 'ERFOLGE: SPIRIT OF RA'
@@ -103,7 +102,6 @@ strings:
   BOOT LOCK AND BIBLE: BOOT LOCK UND BIBLE
   BOOT LOCK edits its config too: BOOT LOCK bearbeitet auch seine Konfiguration
   BUILD DETAILS: BUILD-DETAILS
-  BUILT ON RIPTOPL: AUFGEBAUT AUF RIPTOPL
   BearSSL by Thomas Pornin: BearSSL von Thomas Pornin
   Built with Claude (Anthropic): Gebaut mit Claude (Anthropic)
   CD PLAYER: CD-PLAYER
@@ -172,7 +170,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z von NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF vom ps2homebrew-Team
   what RIPPS2's card image writes are checked against: womit RIPPS2s Schreibvorgänge in Kartenabbildern geprüft werden
-  with its own look, launchers, file browser and save tools.: mit eigenem Aussehen, Launchern, Dateibrowser und Spielstand-Werkzeugen.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora von hacan359, rcheevos von RetroAchievements
   your console's own, ripped from its BIOS: die deiner Konsole, aus ihrem BIOS gerippt
   ' (no DNS answer)': ' (keine DNS-Antwort)'
@@ -558,8 +555,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: schreibe %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino konnte nicht nach %s geschrieben werden. Prüfe den freien Platz und dass es nicht schreibgeschützt ist, und versuche es erneut.
   THE GAME'S DRIVE  (%s/neutrino): DAS LAUFWERK DES SPIELS  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Dieses Spiel startet über Neutrino, und dort, wo RIPPS2 sucht (Einstellungen, das Laufwerk des Spiels, die Speicherkarten), gibt es kein Neutrino. RIPPS2 bringt Neutrino 1.8.0 von rickgaiser mit (AFL-3.0). Jetzt installieren? Als Nächstes wählst du den Ort.
   '%d / %d FILES': '%d / %d DATEIEN'
   '%d FOLDERS AND CONTENTS': '%d ORDNER MIT INHALT'
   '%d FOLDERS, %d FOUND': '%d ORDNER, %d GEFUNDEN'
@@ -847,8 +842,6 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Auf dieser Konsole ist ein PS2BBL mit RIPPS2s Sperre.
   AUDIO folder: AUDIO-Ordner
   DRIVES: LAUFWERKE
-  INSTALL RIPPS2'S COPY: RIPPS2S KOPIE INSTALLIEREN
-  'Installed: ': 'Installiert: '
   MANAGE: VERWALTEN
   MANAGE shows what each memory card starts, and installs or repairs BIBLE.: VERWALTEN zeigt, was jede Speicherkarte startet, und installiert oder repariert BIBLE.
   MEMORY CARD 0  (about 600 KB): SPEICHERKARTE 0  (etwa 600 KB)
@@ -860,7 +853,6 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: Der Treiber ist geladen, aber keine SD-Karte antwortete (der mc1-Steckplatz).'
   NEUTRINO SETTINGS: NEUTRINO-EINSTELLUNGEN
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Noch keine: RIPPS2 hat keine eigenen Sounds. Rippe die dieser Konsole oder erstelle sie im RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Nicht installiert. Ein Spiel, das es braucht, bietet RIPPS2s Kopie an, oder installiere es hier.
   POPSTARTER NETWORK: POPSTARTER-NETZWERK
   POPSTARTER and Ember: POPSTARTER und Ember
   PS1 SETTINGS: PS1-EINSTELLUNGEN
@@ -868,9 +860,7 @@ strings:
   RIP THIS CONSOLE'S SOUNDS: SOUNDS DIESER KONSOLE RIPPEN
   RIPPS2's homebrew: RIPPS2s Homebrew
   STATUS: STATUS
-  'STATUS: looking for RIPPS2''s homebrew': 'STATUS: suche RIPPS2s Homebrew'
   a drive of unknown kind: ein Laufwerk unbekannter Art
-  a drive or a memory card: ein Laufwerk oder eine Speicherkarte
   boot loader, card by card: Bootloader, Karte für Karte
   from its BIOS, into AUDIO: aus ihrem BIOS, nach AUDIO
   internal HDD (exFAT): interne Festplatte (exFAT)
@@ -975,10 +965,109 @@ strings:
   Sidebar: Seitenleiste
   your own copy, found on your drives and memory cards: deine eigene Kopie, gefunden auf deinen Laufwerken und Memory Cards
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'dein eigenes, gefunden und gestartet: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Nicht gefunden auf mass0: (%s). Lege ember.elf und dein bios.bin in seinen EMBER-Ordner.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Nicht gefunden. Lege dein eigenes POPSTARTER.ELF in den POPS-Ordner eines Laufwerks.
   Launch Disc: Disc starten
   Memory Files: Speicherdateien
+  SEANCE found %d of the 5. Each one is remembered, and every launch reads it from there.: SEANCE hat %d von 5 gefunden. Jeder wird gemerkt, und jeder Start liest ihn von dort.
+  not found on the started drives: nicht auf den gestarteten Laufwerken
+  not looked for yet: noch nicht gesucht
+  '%s did not answer, so %s cannot start. Is it connected?': '%s hat nicht geantwortet, darum kann %s nicht starten. Ist es angeschlossen?'
+  '%s is not on %s any more, so it has left All Games.': '%s ist nicht mehr auf %s und hat darum Alle Spiele verlassen.'
+  STARTING %s: STARTE %s
+  the SMB share: die SMB-Freigabe
+  the drive: das Laufwerk
+  the internal HDD (APA): die interne Festplatte (APA)
+  the internal HDD (exFAT): die interne Festplatte (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: GEBAUT AUF RIPTOPL, MIT NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Besonderer Dank auch an all die Liebe auf YouTube:'
+  and its own look, launchers, file browser and save tools.: und mit eigenem Look, eigenen Startern, Dateibrowser und Speicherwerkzeugen.
+  glad to help however you reach me.: ich helfe gern, egal wie ihr mich erreicht.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): der zweite Spielkern, 1.8.0 unverändert mitgeliefert (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: mit rickgaisers Neutrino als zweitem Spielkern darin,
+  ? RIPPS2 lite does not carry BIBLE (PS2BBL). Start the full RIPPS2.elf once to install it; this one starts from it just the same.
+  : RIPPS2 lite bringt BIBLE (PS2BBL) nicht mit. Starte einmal die volle RIPPS2.elf, um es zu installieren; diese hier startet genauso davon.
+  ? 'This game starts through Neutrino, and RIPPS2 found none on any started drive or memory card. RIPPS2 lite carries no Neutrino: put Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in a neutrino folder on a drive or a memory card, or install it once from the full RIPPS2.elf''s STATUS.'
+  : 'Dieses Spiel startet über Neutrino, und RIPPS2 hat auf keinem gestarteten Laufwerk und keiner Speicherkarte eins gefunden. RIPPS2 lite bringt kein Neutrino mit: Lege Neutrino 1.8.0 (github.com/rickgaiser/neutrino) in einen Ordner neutrino auf einem Laufwerk oder einer Speicherkarte, oder installiere es einmal über STATUS der vollen RIPPS2.elf.'
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Dieses Spiel startet über Neutrino, und RIPPS2 hat keins gefunden: nicht am Pfad aus den Einstellungen, nicht auf dem Laufwerk des Spiels, nicht auf den Speicherkarten und auf keinem gestarteten Laufwerk. RIPPS2 bringt Neutrino 1.8.0 von rickgaiser mit (AFL-3.0): Installiere es einmal, wo du willst, und jedes Neutrino-Spiel nutzt es von dort.'
+  STARTING THE DRIVES: STARTE DIE LAUFWERKE
+  '%d games, on the started drives': '%d Spiele, auf den gestarteten Laufwerken'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: EINIGE DATEIEN KONNTEN NICHT GELÖSCHT WERDEN'
+  '%u partitions, all in order': '%u Partitionen, alle in Ordnung'
+  ', %d art images': ', %d Artwork-Bilder'
+  ', and ': ', und '
+  ', its cheats': ', seine Cheats'
+  ', its settings': ', seine Einstellungen'
+  1 game, on the started drives: 1 Spiel, auf den gestarteten Laufwerken
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Ein PS1-Spiel wird hier in Speicherdateien gelöscht, wo es eine eigene Datei ist.
+  A network catalogue's games are deleted on the PC that serves them.: Die Spiele eines Netzwerkkatalogs werden auf dem PC gelöscht, der sie bereitstellt.
+  DELETE FOR GOOD: ENDGÜLTIG LÖSCHEN
+  DELETE IT: ES LÖSCHEN
+  'DELETED %s: %s FREED': '%s GELÖSCHT: %s FREI'
+  'Delete %s from %s? Goes: %s.': '%s von %s löschen? Weg: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': '%s von %s löschen? Weg: %s. Bleibt: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Auch seine Spielstände und RIPSHOT-Bilder löschen? Nein behält sie.
+  HIDDEN GAMES: VERSTECKTE SPIELE
+  'HIDDEN: %s': 'VERSTECKT: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: '%s verstecken? Es verlässt jede Liste, auch Alle Spiele und Favoriten. Einstellungen > Spielquellen > Versteckte Spiele zeigt es wieder.'
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Letzte Prüfung. %s wird endgültig gelöscht, und nichts kann es zurückholen. Drücke START, um es zu löschen.
+  None. Hide Game, in a game's options, puts one here.: Keine. Spiel verstecken, in den Optionen eines Spiels, legt eins hierher.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Nichts wurde gelöscht: Die Partitionstabelle dieses Laufwerks passt nicht zu dieser Platte (%s). Sie wurde vielleicht aus dem Abbild einer Platte anderer Größe geschrieben. Repariere sie zuerst am PC.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 kann auf dieser Seite kein Spiel löschen.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 hat die Dateien dieses Spiels auf seinem Laufwerk nicht gefunden.
+  Reading the hidden lists: Lese die Listen versteckter Spiele
+  SHOW AGAIN OR DELETE: WIEDER ZEIGEN ODER LÖSCHEN
+  SHOW IT AGAIN: ES WIEDER ZEIGEN
+  That game is not on its drive any more.: Dieses Spiel ist nicht mehr auf seinem Laufwerk.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Die Liste versteckter Spiele konnte nicht auf das Laufwerk des Spiels geschrieben werden. Ist es schreibgeschützt, oder sind die Schreibvorgänge ausgeschaltet?
+  The partition could not be removed (%d). Nothing was deleted.: Die Partition konnte nicht entfernt werden (%d). Nichts wurde gelöscht.
+  This drive cannot keep a hidden list (a network catalogue).: Dieses Laufwerk kann keine Liste versteckter Spiele führen (ein Netzwerkkatalog).
+  This game's drive has not answered yet. Wait for it, then try again.: Das Laufwerk dieses Spiels hat noch nicht geantwortet. Warte darauf und versuche es dann erneut.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Die Partition dieses Spiels entfernt RIPPS2 nicht (eine Systempartition oder die mit seinen Einstellungen).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'eine Partition ist größer, als diese Platte erlaubt: Die Tabelle wurde für eine Platte anderer Größe gemacht'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'eine Partition reicht über das Ende dieser Platte hinaus (Sektor %u von %u): Die Tabelle wurde für eine größere Platte gemacht'
+  its RIPSHOT pictures: seine RIPSHOT-Bilder
+  its drive: sein Laufwerk
+  its saves: seine Spielstände
+  sector %u holds no partition header: Sektor %u enthält keinen Partitionskopf
+  the chain does not close at __mbr: die Kette schließt sich nicht bei __mbr
+  the chain skips from sector %u: die Kette springt ab Sektor %u
+  the chain's links disagree at sector %u: die Glieder der Kette passen bei Sektor %u nicht zusammen
+  the drive's size could not be read: die Größe des Laufwerks konnte nicht gelesen werden
+  the game (%s): das Spiel (%s)
+  the game's folder and everything in it (%s): der Ordner des Spiels mit allem darin (%s)
+  the header at sector %u could not be read: der Kopf bei Sektor %u konnte nicht gelesen werden
+  the header at sector %u fails its checksum: der Kopf bei Sektor %u fällt durch seine Prüfsumme
+  the partition at sector %u is not where or as large as APA puts one: die Partition bei Sektor %u liegt nicht dort oder ist nicht so groß, wie APA sie anlegt
+  the settings and art another copy of it uses: die Einstellungen und Bilder, die eine andere Kopie nutzt
+  '%d FOLDERS': '%d ORDNER'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s konnte nicht nach %s kopiert werden. Ist das Laufwerk voll oder schreibgeschützt?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s ist nicht dort, wo RIPPS2 sucht. Auf den von RIPPS2 gestarteten Laufwerken danach suchen? Der Fundort wird für jeden späteren Start gemerkt.'
+  ? 'Ember is not in %s, beside the games, and it has to be. SEANCE found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember ist nicht in %s, neben den Spielen, und muss dort sein. SEANCE hat es unter %s gefunden: START kopiert es dorthin (%d KB) und startet das Spiel.'
+  Ember's BIOS: Embers BIOS
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. SEANCE found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'Embers BIOS (bios.bin) ist nicht in %s, neben Ember. SEANCE hat eins unter %s gefunden: START kopiert es dorthin (%d KB) und startet das Spiel.'
+  LOOKING FOR YOUR LAUNCHERS: SUCHE DEINE STARTER
+  The POPS files: Die POPS-Dateien
+  '%s  MMCE card': '%s  MMCE-Karte'
+  INSTALL RIPPS2'S NEUTRINO: RIPPS2S NEUTRINO INSTALLIEREN
+  'Internal HDD (APA): %s free of %s': 'Interne Festplatte (APA): %s frei von %s'
+  LAUNCHERS: STARTER
+  LOOK FOR THEM: DANACH SUCHEN
+  'Memory card %d: %d KB free': 'Speicherkarte %d: %d KB frei'
+  POPS files: POPS-Dateien
+  START EVERY DRIVE: ALLE LAUFWERKE STARTEN
+  'STATUS: looking at the drives and the homebrew': 'STATUS: prüfe die Laufwerke und die Homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Zuerst alle Laufwerke starten, damit die Suche alle erreicht? (Nein durchsucht die schon gestarteten Laufwerke.)
+  USB, HDD, MMCE and the rest: USB, Festplatte, MMCE und der Rest
+  every started drive: jedes gestartete Laufwerk
+  found where you keep them: gefunden, wo du sie aufbewahrst
+  not found yet: noch nicht gefunden
+  not on a started drive: nicht auf einem gestarteten Laufwerk
+  only if you have none: nur wenn du keins hast
+  starts every drive first: startet zuerst alle Laufwerke
 labels:
   CFG_NOTIFICATION: Konfiguration geladen von %s
   THM_NOTIFICATION: Design geladen von %s
@@ -1403,3 +1492,9 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Wie die Bilder auf dem Film jedes Spiels zu PNGs werden.
   RIPPS2_SETTINGS_HOME: Einstellungen speichern auf
   HINT_RIPPS2_SETTINGS_HOME: 'Wo RIPPS2 seine Einstellungen ablegt: im eigenen Spielstand auf einer Speicherkarte, in einem RIPPS2-Ordner auf einem Laufwerk (interne Festplatte, USB, MX4SIO, iLink oder MMCE) oder in einem Ordner, den du eingibst.'
+  RIPPS2_LAUNCHERS: Starter
+  RIPPS2_LOOK_NOW: Jetzt suchen
+  HINT_RIPPS2_LOOK_NOW: SEANCE durchsucht die gestarteten Laufwerke nach POPSTARTER, den POPS-Dateien, Ember, Embers BIOS und Neutrino und merkt sich, wo jedes liegt. Jeder Start liest sie von dort.
+  RIPPS2_HIDE_GAME: Spiel verstecken
+  RIPPS2_HIDDEN_GAMES: Versteckte Spiele
+  HINT_RIPPS2_HIDDEN_GAMES: Die mit Spiel verstecken versteckten Spiele auf den gestarteten Laufwerken. Zeige eins wieder oder lösche es. Jedes Laufwerk führt seine eigene Liste.
