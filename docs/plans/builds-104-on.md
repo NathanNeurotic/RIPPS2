@@ -434,6 +434,55 @@ iLink fixes reach testers now); 5. RIPPS2-lite.elf beside the full ELF.
 - Boot with every source on Manual to a whole All Games, then Cross on a waiting row: the drive starts, the game launches.
 - MMCE with a big library (lukeatmynose's 180 games) for the master list's size and speed.
 
+## Build 115 (the user 10/23: fonts, settings without scrolling, FifthFox's reports): planned
+
+### Storage safety first (FifthFox, 10/22: "I crashed two .MCDs and my USB ... Maybe it was writing something in the
+background while I was trying to launch a game and had to restart?")
+His setup: SCPH-39001; slot 1 MMCE (its card images, .MCD, on its own SD card), slot 2 MX4SIO, USB, iLink (FAT32,
+slow to list), APA through a GameStar adapter; RIPPS2 started from USB, Neutrino and POPSTARTER on the memory card.
+Earlier: 10/12 (v1.0.0) POPSTARTER from MMCE crashed to wLE and the MMCE's boot card had to be restored; 10/14 the
+POPSTARTER BDMA equip put usbd.irx and usbhdfsd.irx on the card with the exFAT variant for a FAT32 iLink drive.
+
+What the code does (read 10/23, nothing run yet):
+- A launch's teardown (deinitEx) waits for the IO worker at most LAUNCH_IO_DRAIN_TICKS, about 10 s, then goes on;
+  ioEnd() only raises a flag. The worker keeps running the request in hand, and the queue behind it, while the
+  launch unmounts and resets the IOP.
+- A scan of a slow drive (MMCE libraries take minutes; FifthFox's USB, MX4SIO and iLink are slow) easily outlasts
+  10 s, and RIPPS2's scans END IN A WRITE when the list changed: RIPPS2.LST on the drive itself (on an MMCE that is
+  mmce0:/, the SD card holding the .MCD files) since builds 109 and 110, and in 114 allgames.bin beside the settings
+  (mc0: on his console, which is the MMCE). Upstream's worker mostly reads, and a cut read is harmless; a cut write
+  leaves FAT or exFAT half updated. A launch that then stalls and is power-cycled does the same.
+- recents.bin and conf_last.cfg are written at launch on the GUI thread and closed before the teardown: finished.
+- The PS1 launch copies POPSTARTER's files and the BDMA driver pair onto mc?:/POPSTARTER before POPSTARTER's own
+  IOP reset (upstream RiptOPL). The iLink variant is RiptOPL's #1018 (merged in 114).
+
+Plan:
+- [ ] A launch stops RIPPS2's background writes before anything else: a flag raised at the top of deinit and
+      deinitEx; RIPPS2.LST, allgames.bin, the hidden list, art and RIPSHOT writes check it and skip (each is a cache
+      or can wait for the next boot).
+- [ ] A write already started is waited for, whatever the 10 s drain does: a count of writes in flight, which the
+      teardown waits on (writes are short; bounded at 20 s with a log line if one never ends).
+- [ ] Scans give up when a launch begins, so the drain finishes and no worker is reading a drive into an IOP reset.
+- [ ] RIPPS2.LST written so that a cut write cannot hurt the drive's file table: a new file beside it, renamed over
+      it where the driver renames (USB, exFAT HDD, MX4SIO, iLink), and on the MMCE kept beside the settings rather
+      than on the MMCE's SD card next to its .MCD files.
+- [ ] Ask FifthFox: which build; what was launched, from which drive, by which core; did the launch stall; what
+      exactly was lost on the cards and the stick; MMCE firmware and per-game cards (GameID) on or off.
+- Until then he can turn Settings > Game Sources > Cache > Fast Cache off (no RIPPS2.LST writes) and let the lists
+  finish before launching.
+
+### Fonts (the user's answers to the font audit, 10/23)
+- [ ] A: one variable Roboto Condensed 3.015 (the newest) in the ELF for Settings and RIPFLOW, weights 400 to 700,
+      cut to Latin-1; Settings rows at 700 and 18 px.
+- [ ] B: default_font_weight and font1_weight ... font15_weight (100 to 900): a variable face at that weight, a
+      static face grown in code up to about 1 px.
+- [ ] C: Text Weight (Regular, Medium, Bold) in Colors and More. And no settings page should need scrolling:
+      rearrange the pages that do.
+- [ ] D: Adapt and Adapt Rx: b.ttf and c.ttf become the built-in variable Roboto by weight keys, d.ttf becomes
+      builtin:ripps2, and their conf_theme.cfg lists every built-in font in its comments so theme makers find them.
+- [ ] E: the language pack on Roboto Condensed 3.015 cut per language, in step with the ELF's.
+- F: all of it in 115; 114 ships with its reel, the forum post and the Discord post first.
+
 ## Skipped
 - **RIPCON** (format conversion, as OrbitOPL Toolbox does on a PC): not done on PS2 hardware yet, likely failure
   prone, and a smaller format can be less supported by the loaders. Skipped by the user (2026-10-18).
