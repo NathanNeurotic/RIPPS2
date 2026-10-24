@@ -31,7 +31,7 @@
 - **START NOW** on the guard panel: does the game start cleanly, and are your drives and cards fine after?
 - **Back** on the guard panel: back on the list where you were, nothing changed?
 - **A launch a few seconds after boot**: only the loading icon, then the game, no panel?
-- **Compress a test game** (one you have a copy of) on USB or the exFAT HDD: does it finish, does the ZSO start with the OPL core and keep its VMC save, and does Uncompress give the ISO back?
+- **Compress a test game** (one you have a copy of) on USB or the exFAT HDD: does it finish, does the ZSO start with the OPL core and keep its VMC save, and does Uncompress give the ISO back? How long did it take, and what did the panel say it would take?
 - **A nearly full drive**: try to compress a game bigger than the free space. Does it say how much it needs and leave the drive alone?
 - **A new VMC on USB** (a game's VMC settings, Create): made, and the game saves to it?
 - **Hold SELECT** on a game list: the theme list, your pick loaded? Cycle and Off in Settings > Interface?

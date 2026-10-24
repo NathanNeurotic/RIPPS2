@@ -129,7 +129,8 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
   your own, under the name you give it (up to four; left as it is, "Rainbow" becomes "Rainbow 2").
 - **Color Sweep, kinder**: a speed picked for one of RIPPS2's sweeps is kept as that sweep's own (no copy under a new
   name; a copy is made only when its colours change), and your own sweeps can be deleted (Sweep Colors > Delete This
-  Sweep). While a sweep is on, Color Theme greys out and says Sweep, your Color Theme kept until the sweep is Off.
+  Sweep). While a sweep is on, Color Theme greys out and says Sweep, and the Theme Color box beside it shows plain
+  grey; your Color Theme is kept and comes back when the sweep is Off.
 - **The notch panels line up**: RIPDISC, the launch guard and compression share one frame, the same width and place,
   with the same wheel.
 
@@ -150,7 +151,9 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
   say, and there the work stops cleanly if the drive fills.)
 - **Experimental, and asked twice**: a panel with RIPDISC's notches shows the game, its size, its drive and about how
   long it takes, and fills while you hold SELECT; then a second yes. A RIPPS2 progress bar runs the whole way
-  (COMPRESSING 1 OF 2, 2 OF 2, CHECKING EVERY PIECE) with CANCEL, which removes what was written.
+  (COMPRESSING 1 OF 2, 2 OF 2, CHECKING EVERY PIECE) with CANCEL, which removes what was written. In the lab a 1.2 GB
+  game on the internal exFAT HDD took about 10 minutes and came out 82% of its size; the first estimate is set from
+  that, and the bar's own estimate follows what it really gets.
 - **Nothing is lost.** The ISO stays until the ZSO has been read back and every piece checked against it, and only then
   does RIPPS2 ask before removing it. The lab showed why the check is there: written in pieces of any length, the
   driver now and then put a 32 KB cluster over the one before it, and the check caught it every time. The new image now
