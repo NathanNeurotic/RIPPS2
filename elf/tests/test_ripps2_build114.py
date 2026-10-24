@@ -157,6 +157,11 @@ gm_ = rd('src/ripps2games.c')
 need(gm_, (('void ripps2DrawProgress(const char *head, const char *name, long long done, long long total, const char *left, int cancel)', 'one progress panel'),
            ('ripps2DrawPanelGlass(30, 134, 580, 170, 0);', "on the notch panels' frame"), ('int ripps2CopyFile(const char *src, const char *dst, const char *name)', 'a copy with the bar'),
            ('ripps2DrawProgress("COPYING", name, done, total, NULL, 0);', 'drawn as it copies'), ('j->name, j->done, j->work, left, 1);', 'compression draws the same panel')), 'ripps2games.c progress')
+# Hidden Games offers compression too (the user, 10/23), its page under the panel and the bar
+need(gm_, (('hgRows[i].pack = ripps2PackKind(&view, id);', 'each hidden game knows if it can be compressed'),
+           ('pick = ripps2PickList(choices, !gEnableWrite ? 1 : hgRows[sel].pack ? 3 : 2);', 'a third choice for those that can'),
+           ('zpUnder = hgDrawPage; // the page stays under the panel and the bar', 'the page under the panel'),
+           ('"SHOW AGAIN, DELETE OR UNCOMPRESS"', 'the hint says so'), ('if (zpUnder != NULL) {\n        zpUnder();', 'zpPage draws it')), 'ripps2games.c Hidden Games')
 if 'static int seCopy(' in rd('src/ripps2seance.c') or 'ripps2CopyFile(src, dest, what == SEANCE_EMBER' not in rd('src/ripps2seance.c'):
     fail.append('ripps2seance.c: Ember and its BIOS are copied with the progress bar')
 if 'ripps2CopyFile != NULL ? ripps2CopyFile(src, path, files[i]) : vcdCopyFile(src, path)' not in rd('src/vcdsupport.c'):

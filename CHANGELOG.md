@@ -131,6 +131,8 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
 - **Nothing is lost.** The ISO stays until the ZSO has been read back and every piece checked against it, and only then
   does RIPPS2 ask before removing it. The ZSO starts with the OPL core (Neutrino does not read ZSO); its VMC, settings,
   art and cheats are the same game's. Uncompress makes the ISO again the same way.
+- **Hidden Games too**: Settings > Game Sources > Hidden Games offers Compress to ZSO (or Uncompress to ISO) beside
+  Show Again and Delete, and marks a compressed one PS2 ZSO. A hidden game stays hidden once compressed.
 
 ### Fonts
 - **One Roboto Condensed 3.015** (SIL OFL), variable from 400 to 700, replaces the 2011 Bold and 2014 Regular for

@@ -14,7 +14,7 @@
 - **All Games at once** at boot, from a saved list, even before the drives answer; a game on a drive still waking waits for it.
 - **Hide Game** (Triangle options): gone from every list until you show it again from Game Sources > Hidden Games.
 - **Delete, completely**: the image, its settings, art and cheats; its saves only if you say Yes. On the internal HDD (APA) the table is checked first and a damaged one is refused before anything changes.
-- **Compress to ZSO** (experimental, Triangle > Hide Game and Compression): hold SELECT, say yes again, watch the progress bar. The ISO stays until every piece of the ZSO is checked; the ZSO starts with the OPL core, saves and all, and can be made an ISO again.
+- **Compress to ZSO** (experimental, Triangle > Hide Game and Compression): hold SELECT, say yes again, watch the progress bar. The ISO stays until every piece of the ZSO is checked; the ZSO starts with the OPL core, saves and all, and can be made an ISO again. Hidden games can be compressed too (Game Sources > Hidden Games).
 - **Your launchers, found once**: POPSTARTER, the POPS files, Ember, its BIOS and Neutrino are searched for on your drives and remembered (Game Sources > Cache > Look now).
 
 ## Settings and looks

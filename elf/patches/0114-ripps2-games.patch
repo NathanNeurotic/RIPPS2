@@ -87690,10 +87690,10 @@ index 4bedb0c..5bcb226 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..75b6df2
+index 0000000..61f4161
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,1975 @@
+@@ -0,0 +1,2024 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -88709,13 +88709,18 @@ index 0000000..75b6df2
 +
 +typedef struct
 +{
-+    int mode, ps1;
++    int mode, ps1, pack; // pack: 1 an ISO that can be compressed, 2 a ZSO that can be made an ISO (ripps2PackKind)
 +    char name[164];
 +} hg_row_t;
 +
 +#define HG_ROWS 256
 +static hg_row_t hgRows[HG_ROWS];
-+static int hgCount;
++static int hgCount, hgSel, hgTop;
++
++// build 114: the page a compression was asked from when it is not a game list (Hidden Games), drawn under its panels
++static void (*zpUnder)(void) = NULL;
++
++static int hgFind(int mode, int ps1, const char *name);
 +
 +static void hgGather(void)
 +{
@@ -88730,10 +88735,20 @@ index 0000000..75b6df2
 +        for (i = 0; i < shList[mode].count && hgCount < HG_ROWS; i++) {
 +            hgRows[hgCount].mode = mode;
 +            hgRows[hgCount].ps1 = shList[mode].ps1[i];
++            hgRows[hgCount].pack = 0;
 +            snprintf(hgRows[hgCount++].name, sizeof(hgRows[0].name), "%s", shList[mode].names[i]);
 +        }
 +    }
 +    shUnlock();
++    for (i = 0; i < hgCount; i++) { // build 114: which can be compressed or made an ISO again
++        opl_io_module_t *mod = oplGetModule(hgRows[i].mode);
++        int id = hgRows[i].ps1 ? -1 : hgFind(hgRows[i].mode, 0, hgRows[i].name);
++        if (id >= 0 && mod != NULL && mod->support != NULL) {
++            item_list_t view = *mod->support;
++            view.viewOverride = ITEM_VIEW_FORCE_ISO;
++            hgRows[i].pack = ripps2PackKind(&view, id);
++        }
++    }
 +}
 +
 +// The game's id in its source's own list (forced view), by name; -1 when it is not there
@@ -88775,10 +88790,54 @@ index 0000000..75b6df2
 +    shRefresh(h->mode);
 +}
 +
++#define HG_PAGE_ROWS 9
++
++// the page as it stands (hgSel, hgTop), without its frame: its own loop draws it, and so do the compression panels
++static void hgDrawPage(void)
++{
++    int i, y = 104, x, sel = hgSel, top = hgTop, rows = HG_PAGE_ROWS;
++    char line[220];
++
++    ripps2DrawBackground();
++    ripps2DrawPagePanel();
++    fntRenderString(gTheme->fonts[4], 60, 44, ALIGN_VCENTER, 0, 0, _t("HIDDEN GAMES"), GS_SETREG_RGBA(0x7A, 0x66, 0x30, 0x80));
++    snprintf(line, sizeof(line), hgCount == 1 ? _t("1 game, on the started drives") : _t("%d games, on the started drives"), hgCount);
++    fntRenderString(gTheme->fonts[5], 60, 70, ALIGN_VCENTER, 0, 0, line, GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
++    rmDrawLine(60, 84, 580, 84, GS_SETREG_RGBAQ(0x4A, 0x72, 0xDC, 0x60, 0x00));
++    if (hgCount == 0)
++        fntRenderStringFit(gTheme->fonts[5], 320, 220, ALIGN_CENTER, 500, _t("None. Hide Game, in a game's options, puts one here."), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80), 0);
++    for (i = top; i < hgCount && i < top + rows; i++, y += 34) {
++        if (i == sel) {
++            rmDrawRect(52, y - 4, 536, 32, GS_SETREG_RGBAQ(0x1E, 0x3C, 0x96, 0x58, 0x00));
++            rmDrawRect(52, y - 4, 3, 32, GS_SETREG_RGBAQ(0x6A, 0x9A, 0xFF, 0x80, 0x00));
++        }
++        fntRenderStringFit(gTheme->fonts[8], 64, y + 8, ALIGN_VCENTER, 360, hgRows[i].name, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), i == sel);
++        snprintf(line, sizeof(line), "%s  %s", hgRows[i].ps1 ? "PS1" : hgRows[i].pack == 2 ? "PS2 ZSO" : "PS2", lrWhere(hgRows[i].mode));
++        fntRenderStringFit(gTheme->fonts[5], 430, y + 8, ALIGN_VCENTER, 150, line, GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80), 0);
++    }
++    x = 60;
++    if (hgCount > 0) {
++        GSTEXTURE *t = thmGetTexture(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON);
++        if (t != NULL)
++            rmDrawPixmap(t, x, 438, ALIGN_NONE, 20, 20, SCALING_RATIO, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
++        x = ripps2HintText(x + 24, 448,
++                           !gEnableWrite || hgRows[sel].pack == 0 ? _t("SHOW AGAIN OR DELETE") :
++                           hgRows[sel].pack == 1                  ? _t("SHOW AGAIN, DELETE OR COMPRESS") :
++                                                                    _t("SHOW AGAIN, DELETE OR UNCOMPRESS"),
++                           GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)) +
++            18;
++    }
++    {
++        GSTEXTURE *t = thmGetTexture(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON);
++        if (t != NULL)
++            rmDrawPixmap(t, x, 438, ALIGN_NONE, 20, 20, SCALING_RATIO, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
++        ripps2HintText(x + 24, 448, _t("BACK"), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
++    }
++}
++
 +void ripps2HiddenGames(void)
 +{
-+    int sel = 0, top = 0, rows = 9, okKey = gSelectButton, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
-+    char line[220];
++    int sel = 0, top = 0, rows = HG_PAGE_ROWS, okKey = gSelectButton, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
 +
 +    if (menuCheckParentalLock() != 0)
 +        return;
@@ -88786,38 +88845,10 @@ index 0000000..75b6df2
 +    hgGather();
 +    readPads();
 +    while (1) {
-+        int i, y = 104, x;
++        hgSel = sel;
++        hgTop = top;
 +        rmStartFrame();
-+        ripps2DrawBackground();
-+        ripps2DrawPagePanel();
-+        fntRenderString(gTheme->fonts[4], 60, 44, ALIGN_VCENTER, 0, 0, _t("HIDDEN GAMES"), GS_SETREG_RGBA(0x7A, 0x66, 0x30, 0x80));
-+        snprintf(line, sizeof(line), hgCount == 1 ? _t("1 game, on the started drives") : _t("%d games, on the started drives"), hgCount);
-+        fntRenderString(gTheme->fonts[5], 60, 70, ALIGN_VCENTER, 0, 0, line, GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
-+        rmDrawLine(60, 84, 580, 84, GS_SETREG_RGBAQ(0x4A, 0x72, 0xDC, 0x60, 0x00));
-+        if (hgCount == 0)
-+            fntRenderStringFit(gTheme->fonts[5], 320, 220, ALIGN_CENTER, 500, _t("None. Hide Game, in a game's options, puts one here."), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80), 0);
-+        for (i = top; i < hgCount && i < top + rows; i++, y += 34) {
-+            if (i == sel) {
-+                rmDrawRect(52, y - 4, 536, 32, GS_SETREG_RGBAQ(0x1E, 0x3C, 0x96, 0x58, 0x00));
-+                rmDrawRect(52, y - 4, 3, 32, GS_SETREG_RGBAQ(0x6A, 0x9A, 0xFF, 0x80, 0x00));
-+            }
-+            fntRenderStringFit(gTheme->fonts[8], 64, y + 8, ALIGN_VCENTER, 360, hgRows[i].name, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), i == sel);
-+            snprintf(line, sizeof(line), "%s  %s", hgRows[i].ps1 ? "PS1" : "PS2", lrWhere(hgRows[i].mode));
-+            fntRenderStringFit(gTheme->fonts[5], 430, y + 8, ALIGN_VCENTER, 150, line, GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80), 0);
-+        }
-+        x = 60;
-+        if (hgCount > 0) {
-+            GSTEXTURE *t = thmGetTexture(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON);
-+            if (t != NULL)
-+                rmDrawPixmap(t, x, 438, ALIGN_NONE, 20, 20, SCALING_RATIO, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
-+            x = ripps2HintText(x + 24, 448, _t("SHOW AGAIN OR DELETE"), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)) + 18;
-+        }
-+        {
-+            GSTEXTURE *t = thmGetTexture(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON);
-+            if (t != NULL)
-+                rmDrawPixmap(t, x, 438, ALIGN_NONE, 20, 20, SCALING_RATIO, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), 0);
-+            ripps2HintText(x + 24, 448, _t("BACK"), GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80));
-+        }
++        hgDrawPage();
 +        rmEndFrame();
 +
 +        readPads();
@@ -88828,13 +88859,27 @@ index 0000000..75b6df2
 +            sel++;
 +            sfxPlay(SFX_CURSOR);
 +        } else if (getKeyOn(okKey) && hgCount > 0) {
-+            const char *choices[2] = {_t("SHOW IT AGAIN"), _t("DELETE IT")};
++            // build 114: an ISO can be compressed here and a ZSO made an ISO again, as from a game's options
++            const char *choices[3] = {_t("SHOW IT AGAIN"), _t("DELETE IT"), hgRows[sel].pack == 2 ? _t("UNCOMPRESS TO ISO") : _t("COMPRESS TO ZSO")};
 +            int pick;
 +            sfxPlay(SFX_CONFIRM);
-+            pick = ripps2PickList(choices, gEnableWrite ? 2 : 1);
++            pick = ripps2PickList(choices, !gEnableWrite ? 1 : hgRows[sel].pack ? 3 : 2);
 +            if (pick == 0)
 +                hgShow(sel);
-+            else if (pick == 1) {
++            else if (pick == 2) {
++                opl_io_module_t *mod = oplGetModule(hgRows[sel].mode);
++                int id = hgFind(hgRows[sel].mode, 0, hgRows[sel].name);
++                if (mod == NULL || mod->support == NULL || id < 0) {
++                    guiMsgBoxSound(SFX_ERROR);
++                    guiMsgBox(_t("That game is not on its drive any more."), 0, NULL);
++                } else {
++                    item_list_t view = *mod->support;
++                    view.viewOverride = ITEM_VIEW_FORCE_ISO;
++                    zpUnder = hgDrawPage; // the page stays under the panel and the bar
++                    ripps2PackGame(&view, id);
++                    zpUnder = NULL;
++                }
++            } else if (pick == 1) {
 +                opl_io_module_t *mod = oplGetModule(hgRows[sel].mode);
 +                int id = hgFind(hgRows[sel].mode, hgRows[sel].ps1, hgRows[sel].name);
 +                if (mod == NULL || mod->support == NULL || id < 0) {
@@ -89015,6 +89060,10 @@ index 0000000..75b6df2
 +
 +static void zpPage(void)
 +{
++    if (zpUnder != NULL) {
++        zpUnder();
++        return;
++    }
 +    ripps2DrawBackground();
 +    thmDrawBackdrop();
 +    ripps2RenderCategoryBar();
