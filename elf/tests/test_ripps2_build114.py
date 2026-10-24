@@ -173,7 +173,7 @@ if '#define RIPPS2_DEVCTL_FREE_KB' not in rd('include/vmc_alloc.h'):
 # Hidden Games offers compression too (the user, 10/23), its page under the panel and the bar
 need(gm_, (('hgRows[i].pack = ripps2PackKind(&view, id);', 'each hidden game knows if it can be compressed'),
            ('pick = ripps2PickList(choices, !gEnableWrite ? 1 : hgRows[sel].pack ? 3 : 2);', 'a third choice for those that can'),
-           ('zpUnder = hgDrawPage; // the page stays under the panel and the bar', 'the page under the panel'),
+           ('zpUnder = hgDrawUnder; // the page stays under the panel and the bar', 'the page under the panel, without its hints'),
            ('"SHOW AGAIN, DELETE OR UNCOMPRESS"', 'the hint says so'), ('if (zpUnder != NULL) {\n        zpUnder();', 'zpPage draws it')), 'ripps2games.c Hidden Games')
 if 'static int seCopy(' in rd('src/ripps2seance.c') or 'ripps2CopyFile(src, dest, what == SEANCE_EMBER' not in rd('src/ripps2seance.c'):
     fail.append('ripps2seance.c: Ember and its BIOS are copied with the progress bar')

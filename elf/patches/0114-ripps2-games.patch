@@ -87720,10 +87720,10 @@ index 4bedb0c..5bcb226 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..ff1ce74
+index 0000000..662a6c5
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,2056 @@
+@@ -0,0 +1,2065 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -88823,8 +88823,9 @@ index 0000000..ff1ce74
 +
 +#define HG_PAGE_ROWS 9
 +
-+// the page as it stands (hgSel, hgTop), without its frame: its own loop draws it, and so do the compression panels
-+static void hgDrawPage(void)
++// the page as it stands (hgSel, hgTop), without its frame: its own loop draws it with its hints, the compression panels
++// without them (their own hints sit where the page's would: the lab, 10/23, CANCEL over "Show again, delete or compress")
++static void hgDrawPage(int hints)
 +{
 +    int i, y = 104, x, sel = hgSel, top = hgTop, rows = HG_PAGE_ROWS;
 +    char line[220];
@@ -88842,10 +88843,13 @@ index 0000000..ff1ce74
 +            rmDrawRect(52, y - 4, 536, 32, GS_SETREG_RGBAQ(0x1E, 0x3C, 0x96, 0x58, 0x00));
 +            rmDrawRect(52, y - 4, 3, 32, GS_SETREG_RGBAQ(0x6A, 0x9A, 0xFF, 0x80, 0x00));
 +        }
-+        fntRenderStringFit(gTheme->fonts[8], 64, y + 8, ALIGN_VCENTER, 360, hgRows[i].name, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), i == sel);
++        // (the drive's column wider: "the internal HDD (exFAT)" was cut to "THE INTER...")
++        fntRenderStringFit(gTheme->fonts[8], 64, y + 8, ALIGN_VCENTER, 290, hgRows[i].name, GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80), i == sel);
 +        snprintf(line, sizeof(line), "%s  %s", hgRows[i].ps1 ? "PS1" : hgRows[i].pack == 2 ? "PS2 ZSO" : "PS2", lrWhere(hgRows[i].mode));
-+        fntRenderStringFit(gTheme->fonts[5], 430, y + 8, ALIGN_VCENTER, 150, line, GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80), 0);
++        fntRenderStringFit(gTheme->fonts[5], 364, y + 8, ALIGN_VCENTER, 216, line, GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80), 0);
 +    }
++    if (!hints)
++        return;
 +    x = 60;
 +    if (hgCount > 0) {
 +        GSTEXTURE *t = thmGetTexture(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON);
@@ -88866,6 +88870,11 @@ index 0000000..ff1ce74
 +    }
 +}
 +
++static void hgDrawUnder(void)
++{
++    hgDrawPage(0);
++}
++
 +void ripps2HiddenGames(void)
 +{
 +    int sel = 0, top = 0, rows = HG_PAGE_ROWS, okKey = gSelectButton, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
@@ -88879,7 +88888,7 @@ index 0000000..ff1ce74
 +        hgSel = sel;
 +        hgTop = top;
 +        rmStartFrame();
-+        hgDrawPage();
++        hgDrawPage(1);
 +        rmEndFrame();
 +
 +        readPads();
@@ -88906,7 +88915,7 @@ index 0000000..ff1ce74
 +                } else {
 +                    item_list_t view = *mod->support;
 +                    view.viewOverride = ITEM_VIEW_FORCE_ISO;
-+                    zpUnder = hgDrawPage; // the page stays under the panel and the bar
++                    zpUnder = hgDrawUnder; // the page stays under the panel and the bar
 +                    ripps2PackGame(&view, id);
 +                    zpUnder = NULL;
 +                }
