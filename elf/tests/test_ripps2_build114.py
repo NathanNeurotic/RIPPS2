@@ -161,7 +161,7 @@ if '(*g)->format != GAME_FORMAT_ISO && (*g)->format != GAME_FORMAT_OLD_ISO' not 
     fail.append('ripps2games.c: a game named the old way (SCUS_XXX.XX.Name.iso) can be compressed too')
 # the lab (10/23, SCPS_150.13.POINIES POIN.zso.part studied on the PC): packed data written in writes of any length came out
 # a cluster off now and then inside one write; the new image goes to the drive in whole aligned stage pieces
-need(gm_, (('#define ZP_STAGE (256 * 1024)', 'the stage'), ('j.stage = memalign(64, ZP_STAGE);', 'an aligned buffer'),
+need(gm_, (('#define ZP_STAGE (256 * 1024)', 'the stage'), ('if ((j.stage = memalign(64, j.stageSize)) == NULL && j.stageSize > ZP_STAGE)', 'an aligned buffer'),
            ('if (rv == 1 && !zpOutFlush(&j)) {', 'the rest written last'), ('if (!zpOut(j, out, o)) {', 'the packed data through it'),
            ('if (!zpOut(j, in, cnt * 2048)) {', 'and the ISO made again')), 'ripps2games.c write stage')
 if 'zpWriteAll(j->fdOut, out' in gm_ or 'zpWriteAll(j->fdOut, ent' in gm_ or 'zpWriteAll(j->fdOut, head' in gm_ or 'zpWriteAll(j->fdOut, in,' in gm_:
@@ -186,17 +186,31 @@ if dc2_.count('close(rdFd);') != 1 or dc2_.count('rdClose()') < 7:  # the one le
     fail.append('ripps2disc.c: every close of a rip goes through rdClose')
 if 'setvbuf(f, NULL, _IOFBF, 256 * 1024);' not in rd('src/ripps2shot.c') or 'setvbuf(w.f, NULL, _IOFBF, 256 * 1024);' not in rd('src/ripps2biossnd.c'):
     fail.append('RIPSHOT and BIOS Music write through 256 KB stdio buffers')
-# room for the new image before compression starts (the user, 10/23): the driver RIPPS2 builds answers a free-space devctl
-need(gm_, (('static long long zpFreeKb(const char *path)', 'the drive asked for its free space'),
-           ('fileXioDevctl(dev, RIPPS2_DEVCTL_FREE_KB, NULL, 0, &kb, sizeof(kb)) == 0', 'through the driver'),
-           ('if ((freeKb = zpFreeKb(prefix)) >= 0 && freeKb * 1024 < need) {', 'refused before it starts when there is no room')), 'ripps2games.c room check')
-if gm_.find('freeKb = zpFreeKb(prefix)') > gm_.find('if (!zpAsk('):
+# the drive says its free and total space, cluster size and format (the user, 10/23: "detected smart and safe for rips and
+# any copy/writes"): the driver RIPPS2 builds answers RIPPS2_DEVCTL_VOLINFO
+need(gm_, (('int ripps2VolInfo(const char *path, ripps2_vol_t *v)', 'the drive asked'),
+           ('fileXioDevctl(dev, RIPPS2_DEVCTL_VOLINFO, NULL, 0, o, sizeof(o)) != 0', 'through the driver'), ('strncmp(path, "mass", 4) != 0', 'BDM drives only'),
+           ('if (known && (long long)vol.freeKb * 1024 < need) {', 'compression: refused before it starts when there is no room'),
+           ('if (known && vol.fsType != RIPPS2_FS_EXFAT && (j.pack ?', "compression: FAT's 4 GB"),
+           ('j.stageSize = ripps2StageFor(known ? vol.clusterBytes : 0, ZP_STAGE);', 'compression: whole clusters')), 'ripps2games.c drive info')
+if gm_.find('known = ripps2VolInfo(prefix, &vol);') > gm_.find('if (!zpAsk('):
     fail.append('ripps2games.c: the room is checked before the panel asks')
 sb_ = rd('.github/scripts/install_safe_bdmfs.py')
-if 'case RIPPS2_DEVCTL_FREE_KB: {' not in sb_ or 'f_getfree(root, &nclst, &vfs)' not in sb_ or "+ RIPPS2_FREE_KB + source[index:]" not in sb_:
-    fail.append('install_safe_bdmfs.py: the driver answers RIPPS2_DEVCTL_FREE_KB with f_getfree')
-if '#define RIPPS2_DEVCTL_FREE_KB' not in rd('include/vmc_alloc.h'):
-    fail.append('vmc_alloc.h: RIPPS2_DEVCTL_FREE_KB, shared by the driver and the EE')
+if 'case RIPPS2_DEVCTL_VOLINFO: {' not in sb_ or 'f_getfree(root, &nclst, &vfs)' not in sb_ or "+ RIPPS2_VOLINFO + source[index:]" not in sb_ or 'o[3] = vfs->fs_type;' not in sb_:
+    fail.append('install_safe_bdmfs.py: the driver answers RIPPS2_DEVCTL_VOLINFO (free, total, cluster, format) with f_getfree')
+if '#define RIPPS2_DEVCTL_VOLINFO' not in rd('include/vmc_alloc.h'):
+    fail.append('vmc_alloc.h: RIPPS2_DEVCTL_VOLINFO, shared by the driver and the EE')
+dc3_ = rd('src/ripps2disc.c')
+need(dc3_, (("rdBytes > RD_FAT32_MAX && rdSlotType[rdSlotSel] != BDM_TYPE_ATA && !rdIsExfat(prefix)", 'parts only on FAT or a drive that cannot say'),
+            ('if (!rdRoomFor(path, rdBytes))', 'room before a game rip'), ('if (!rdRoomFor(base, rdBytes)) {', 'room before a media rip'),
+            ('rdStageSize = ripps2StageFor(ripps2VolInfo(path, &v) ? v.clusterBytes : 0, RD_STAGE);', 'the rip stage in whole clusters')), 'ripps2disc.c drive info')
+fc3_ = rd('src/ripps2files.c')
+need(fc3_, (('u64 copied = 0;', 'a 64-bit count'), ('s64 size = chk >= 0 ? lseek64(chk, 0, SEEK_END) : -1;', 'a 64-bit check'),
+            ('if (vol.fsType != RIPPS2_FS_EXFAT && inSize > 0xFFFFFFFFLL)', "FAT's 4 GB before a copy"), ('else if ((s64)vol.freeKb * 1024 < inSize)', 'room before a copy')), 'ripps2files.c drive info')
+if 'ripps2VolInfo(dev, &v)' not in rd('src/ripps2status.c'):
+    fail.append("ripps2status.c: STATUS shows each BDM drive's format, cluster size and free space")
+if "MMCE_PIN=\"${MMCE_PIN:-de28936fdf45fe445554cfa0b8f058b05fa8212f}\"" not in rd('.github/scripts/install_coherent_mmce.sh'):
+    fail.append('install_coherent_mmce.sh: mmceman at de28936f (the sio2man hook no longer blocks the second card port)')
 # Hidden Games offers compression too (the user, 10/23), its page under the panel and the bar
 need(gm_, (('hgRows[i].pack = ripps2PackKind(&view, id);', 'each hidden game knows if it can be compressed'),
            ('pick = ripps2PickList(choices, !gEnableWrite ? 1 : hgRows[sel].pack ? 3 : 2);', 'a third choice for those that can'),

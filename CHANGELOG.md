@@ -79,6 +79,15 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
   a compressed game, studied on the PC). RIPPS2.LST, the list cache every started drive keeps since build 110, had that
   shape once a library's list passed one cluster: it is now one write from the file's start. Compression, RIPDISC's raw
   and audio rips, RIPSHOT's pictures and BIOS Music's WAV now write whole 256 KB pieces at multiples of it.
+- **Every drive known for what it is.** RiptOPL's exFAT/FAT driver, as RIPPS2 builds it, now says a drive's format,
+  cluster size and free space. STATUS shows them for every USB, MX4SIO, iLink and exFAT HDD drive. RIPDISC checks the
+  room before a rip, and a game over 4 GB goes in 1 GB parts only on a drive that really is FAT32: an exFAT stick takes
+  the ISO whole (before, the PS2 could not tell, so every drive but the internal HDD got parts). Memory Files checks the
+  room and FAT32's 4 GB a file before a copy, and copies files over 2 GB right (a 32-bit count failed its own check).
+  Compression, rips and copies write in whole clusters of the drive.
+- **MMCE: mmceman brought up to ps2-mmce's main** (de28936f): its hook no longer blocks the second memory card port,
+  which only MX4SIO needed. Compressing on an MMCE card renames the finished image into place, which sd2psXtd does from
+  firmware 1.4.0 on.
 - **One background write at a time.** RIPPS2's own background writes now wait for each other (about 3 seconds at most;
   one that cannot wait is simply written next time), and none starts while Memory Files pastes, unpacks or deletes,
   while RIPDISC rips, or while a game is compressed.

@@ -1616,6 +1616,9 @@ strings:
 - en: 'The rip stopped: the drive would not read the disc. Clean it, put it back and try again. Nothing was kept.'
   in:
   - ripps2disc.c
+- en: 'There is not room for this rip: it needs about %s, and the drive has %s free.'
+  in:
+  - ripps2disc.c
 - en: This game is already on the drive as split parts. Delete it in Storage first to rip it again.
   in:
   - ripps2disc.c
@@ -1988,6 +1991,9 @@ strings:
   - ripps2files.c
   - ripps2shot.c
 - en: ORBIT SETTINGS
+  in:
+  - ripps2files.c
+- en: OVER 4 GB FOR FAT32
   in:
   - ripps2files.c
 - en: On an MMCE card a game starts from the card's CD or DVD folder.
@@ -2371,6 +2377,9 @@ strings:
   in:
   - ripps2games.c
 - en: This drive cannot keep a hidden list (a network catalogue).
+  in:
+  - ripps2games.c
+- en: This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.
   in:
   - ripps2games.c
 - en: This game's drive has not answered yet. Wait for it, then try again.
@@ -2982,6 +2991,9 @@ strings:
   in:
   - ripps2status.c
 - en: '%s is installed in %s.'
+  in:
+  - ripps2status.c
+- en: '%s, %s clusters, %s free of %s'
   in:
   - ripps2status.c
 - en: ', some files could not be used'
