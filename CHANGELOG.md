@@ -74,10 +74,14 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
   reset. A launch now stops RIPPS2's background writes the moment the game is picked (RIPPS2.LST, allgames.bin, the
   hidden lists, art, RIPSHOT, the games list cache), waits for one already started, and stops a drive's list read at its
   next entry.
-- **One background write at a time.** In the lab, ps2sdk's exFAT driver lost whole 32 KB clusters of a file that grew
-  beside another file. RIPPS2's own background writes now wait for each other (about 3 seconds at most; one that cannot
-  wait is simply written next time), and none starts while Memory Files pastes, unpacks or deletes, while RIPDISC rips,
-  or while a game is compressed.
+- **Big writes start in step with the drive.** In the lab, a big write that started at an odd place in a file and ran
+  across a 32 KB cluster now and then landed a cluster too early on exFAT, and the file's chain broke after it (found on
+  a compressed game, studied on the PC). RIPPS2.LST, the list cache every started drive keeps since build 110, had that
+  shape once a library's list passed one cluster: it is now one write from the file's start. Compression, RIPDISC's raw
+  and audio rips, RIPSHOT's pictures and BIOS Music's WAV now write whole 256 KB pieces at multiples of it.
+- **One background write at a time.** RIPPS2's own background writes now wait for each other (about 3 seconds at most;
+  one that cannot wait is simply written next time), and none starts while Memory Files pastes, unpacks or deletes,
+  while RIPDISC rips, or while a game is compressed.
 - **RiptOPL's guarded exFAT driver.** RIPPS2 shipped the SDK's stock exFAT/FAT driver; it now ships the one RiptOPL's
   own releases build. A game on a damaged FAT chain is refused at launch (#986) instead of handing the game's
   driver wrong sectors to write its VMC to, and the merged RiptOPL's new VMC maker can reserve a card in one piece on
