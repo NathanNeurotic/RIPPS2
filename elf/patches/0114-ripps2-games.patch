@@ -87501,10 +87501,16 @@ index 688c06a..11d84ce 100644
          return 0;
      }
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
-index fa2ee5d..51e2034 100644
+index fa2ee5d..d437899 100644
 --- a/src/ripps2disc.c
 +++ b/src/ripps2disc.c
-@@ -424,7 +424,7 @@ static void rdUndo(void)
+@@ -420,11 +420,13 @@ static void rdMkdir(const char *path) // a folder made here is removed with the
+         rdMadeAdd(path, 1);
+ }
+ 
++static int rdClose(void); // build 114: the stage's rest written, then the file closed (below, with rdWrite)
++
+ static void rdUndo(void)
  {
      int i;
      if (rdFd >= 0) {
@@ -87513,7 +87519,7 @@ index fa2ee5d..51e2034 100644
          rdFd = -1;
      }
      for (i = rdMadeCount - 1; i >= 0; i--) { // files first (they were added after their folders), then the folders
-@@ -448,13 +448,57 @@ static int rdCreate(const char *path)
+@@ -448,13 +450,57 @@ static int rdCreate(const char *path)
  static int rdNextPart(void)
  {
      char path[220];
@@ -87573,7 +87579,7 @@ index fa2ee5d..51e2034 100644
  static int rdWrite(const void *data, u32 bytes)
  {
      const u8 *p = data;
-@@ -466,7 +510,7 @@ static int rdWrite(const void *data, u32 bytes)
+@@ -466,7 +512,7 @@ static int rdWrite(const void *data, u32 bytes)
              if (n > rdPartLeft)
                  n = rdPartLeft;
          }
@@ -87582,7 +87588,7 @@ index fa2ee5d..51e2034 100644
              return 0;
          p += n;
          bytes -= n;
-@@ -550,6 +594,39 @@ static void rdRing(int cx, int cy, float p, int a)
+@@ -550,6 +596,39 @@ static void rdRing(int cx, int cy, float p, int a)
      }
  }
  
@@ -87622,7 +87628,7 @@ index fa2ee5d..51e2034 100644
  static void rdPage(void) // the page under every RIPDISC step: the towers and the category bar
  {
      ripps2DrawBackground();
-@@ -561,7 +638,7 @@ void ripps2DiscRipRender(void)
+@@ -561,7 +640,7 @@ void ripps2DiscRipRender(void)
  {
      double now = ripps2Seconds();
      int kind = ripps2DiscInfo(NULL, 0, NULL, 0);
@@ -87631,7 +87637,7 @@ index fa2ee5d..51e2034 100644
      float t, a;
      const char *hold = _t("HOLD");
  
-@@ -589,11 +666,11 @@ void ripps2DiscRipRender(void)
+@@ -589,11 +668,11 @@ void ripps2DiscRipRender(void)
      // build 113: the ring has its own room, the button at its centre, HOLD after it, the pair centred
      hx = 320 - (RD_RING_W + 6 + ripps2HintWidth(hold)) / 2;
      float p = rdHolding ? (float)(now - rdHoldSince) / RD_HOLD_S : 0.0f;
@@ -87646,7 +87652,7 @@ index fa2ee5d..51e2034 100644
  }
  
  // The rip's screen, a few times a second: what, how far, how long is left; 0 when it is to stop (asked first)
-@@ -940,10 +1017,14 @@ static void rdBufFree(void)
+@@ -940,10 +1019,14 @@ static void rdBufFree(void)
  {
      free(rdBuf);
      rdBuf = NULL;
@@ -87661,7 +87667,7 @@ index fa2ee5d..51e2034 100644
      rdWhat = what;
      rdDone = 0;
      rdBytes = bytes;
-@@ -952,6 +1033,8 @@ static void rdBegin(const char *what, u64 bytes)
+@@ -952,6 +1035,8 @@ static void rdBegin(const char *what, u64 bytes)
      rdMadeCount = 0;
      rdFd = -1;
      rdSplit = 0;
@@ -87670,7 +87676,7 @@ index fa2ee5d..51e2034 100644
  }
  
  // The data sectors [from, to) into the open file (or split parts)
-@@ -1115,7 +1198,7 @@ static void rdRipGame(void)
+@@ -1115,7 +1200,7 @@ static void rdRipGame(void)
              r = rdCopyRaw(rdStart[t], rdStart[t + 1], rdAudio[t]);
          if (r == RD_OK) {
              char cue[300], bin[80];
@@ -87679,7 +87685,7 @@ index fa2ee5d..51e2034 100644
              rdFd = -1;
              snprintf(bin, sizeof(bin), "%s.bin", name);
              snprintf(cue, sizeof(cue), "%s/%s.cue", dir, name);
-@@ -1139,7 +1222,7 @@ static void rdRipGame(void)
+@@ -1139,7 +1224,7 @@ static void rdRipGame(void)
              r = rdCopyData(0, rdSectors);
              if (r == RD_OK) { // the parts are all there: now ul.cfg lists the game
                  int fd;
@@ -87688,7 +87694,7 @@ index fa2ee5d..51e2034 100644
                  rdFd = -1;
                  memset(&e, 0, sizeof(e));
                  memcpy(e.name, nm, nl);
-@@ -1164,12 +1247,14 @@ static void rdRipGame(void)
+@@ -1164,12 +1249,14 @@ static void rdRipGame(void)
                  r = rdCopyData(0, rdSectors);
          }
      }
@@ -87705,7 +87711,7 @@ index fa2ee5d..51e2034 100644
      rdFd = -1;
      sceCdStop();
      sceCdSync(0);
-@@ -1206,7 +1291,7 @@ static int rdRipAudio(const char *dir)
+@@ -1206,7 +1293,7 @@ static int rdRipAudio(const char *dir)
              return RD_WRITE_FAIL;
          rdDone += sizeof(head);
          r = rdCopyRaw(rdStart[t], rdStart[t + 1], 1);
@@ -87714,7 +87720,7 @@ index fa2ee5d..51e2034 100644
          rdFd = -1;
      }
      return r;
-@@ -1250,7 +1335,7 @@ static int rdRipVideo(const char *dir)
+@@ -1250,7 +1337,7 @@ static int rdRipVideo(const char *dir)
              if (!rdTick())
                  return RD_CANCEL;
          }
@@ -87723,7 +87729,7 @@ index fa2ee5d..51e2034 100644
          rdFd = -1;
      }
      if (r == RD_OK) { // players look for it, empty or not
-@@ -1325,12 +1410,14 @@ int ripps2DiscRipHere(const char *dir, char *made, int size)
+@@ -1325,12 +1412,14 @@ int ripps2DiscRipHere(const char *dir, char *made, int size)
      snprintf(base, sizeof(base), "%s%s", dir, folder);
      r = kind == RIPPS2_DISC_AUDIO ? rdRipAudio(base) : rdRipVideo(base);
      rdBufFree();
