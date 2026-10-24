@@ -83953,7 +83953,7 @@ index d59e71c..7a1b2b6 100644
          LOG("FNTSYS Error loading glyph - %d\n", error);
          return NULL;
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..9cc7059 100644
+index 2b110ad..2002585 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -12,10 +12,13 @@
@@ -84457,7 +84457,7 @@ index 2b110ad..9cc7059 100644
  
  // build 81: a row the user picks a value on becomes theirs; build 96: picking Theme (0) gives it back to the
  // theme, the setting back on its own default so the theme's value shows (ripps2ui.c themeDefault)
-@@ -2652,18 +2851,88 @@ static int guiRipps2Shown(int bit, int setting, int def)
+@@ -2652,18 +2851,97 @@ static int guiRipps2Shown(int bit, int setting, int def)
      return (gRipps2UserSet & bit) || setting != def ? setting + 1 : 0;
  }
  
@@ -84482,13 +84482,22 @@ index 2b110ad..9cc7059 100644
 +{
 +    int shown = ripps2ColorsShown(RIPPS2_SET_PALETTE), custom = shown == RIPPS2_PALETTE_CUSTOM;
 +    unsigned char c[3];
++    if (gRipps2Sweep > 0) {
++        // (the lab, 10/24) a plain grey under a sweep, so the box gives away no more than Color Theme does; never read
++        // back as the user's Custom, and the box set again when the sweep is Off
++        c[0] = c[1] = c[2] = 0x60;
++        diaSetColor(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, c);
++        diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, 0);
++        guiPaletteWasCustom = -1;
++        return;
++    }
 +    if (custom && guiPaletteWasCustom == 1)
 +        diaGetColor(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, gRipps2CustomColor); // picked: shown at once
 +    else {
 +        ripps2PaletteColor(shown, c); // a named theme's colour, or (just switched to Custom) the user's own
 +        diaSetColor(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, c);
 +    }
-+    diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, custom && gRipps2Sweep == 0); // build 114: not under a sweep
++    diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, custom);
 +    guiPaletteWasCustom = custom;
 +}
 +
@@ -84553,7 +84562,7 @@ index 2b110ad..9cc7059 100644
  }
  
  // build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
-@@ -2689,6 +2958,98 @@ static int guiRipps2SettingsUpdater(int modified)
+@@ -2689,6 +2967,98 @@ static int guiRipps2SettingsUpdater(int modified)
      return 0;
  }
  
@@ -84652,7 +84661,7 @@ index 2b110ad..9cc7059 100644
  static void guiRipps2SettingsSet(void)
  {
      int i;
-@@ -2696,20 +3057,17 @@ static void guiRipps2SettingsSet(void)
+@@ -2696,20 +3066,17 @@ static void guiRipps2SettingsSet(void)
      for (i = 0; i < RIPPS2_PALETTE_COUNT; i++)
          guiRipps2PaletteNames[i + 1] = ripps2PaletteName(i);
      guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1] = NULL;
@@ -84681,7 +84690,7 @@ index 2b110ad..9cc7059 100644
  }
  
  void guiShowColorsConfig(void)
-@@ -2720,8 +3078,10 @@ void guiShowColorsConfig(void)
+@@ -2720,8 +3087,10 @@ void guiShowColorsConfig(void)
      const char *own = editable ? NULL : thmColorName(themeID);
      unsigned char shown[6][3];
      int keep[8] = {gRipps2Glyphs, gRipps2Palette, gRipps2Hints, gRipps2CatBar, gRipps2CatSwap, gRipps2SrcName, gRipps2Recents, gRipps2UserSet};
@@ -84694,7 +84703,7 @@ index 2b110ad..9cc7059 100644
  
      guiRipps2SettingsSet();
  
-@@ -2756,7 +3116,11 @@ void guiShowColorsConfig(void)
+@@ -2756,7 +3125,11 @@ void guiShowColorsConfig(void)
      diaSetEnabled(diaColorsConfig, UICFG_PLASCOL, editable || own != NULL);
      diaSetEnabled(diaColorsConfig, UICFG_RESETCOL, editable || own != NULL);
  
@@ -84707,7 +84716,7 @@ index 2b110ad..9cc7059 100644
      if (ret)
          guiRipps2SettingsRead();
      else {
-@@ -2768,11 +3132,17 @@ void guiShowColorsConfig(void)
+@@ -2768,11 +3141,17 @@ void guiShowColorsConfig(void)
          gRipps2SrcName = keep[5];
          gRipps2Recents = keep[6];
          gRipps2UserSet = keep[7];
@@ -84728,7 +84737,7 @@ index 2b110ad..9cc7059 100644
          guiSettingsSavePending = 1;
      if (gRipps2Glyphs != keep[0] || gRipps2Palette != keep[1] || gRipps2Hints != keep[2] || gRipps2CatBar != keep[3] ||
          gRipps2CatSwap != keep[4] || gRipps2SrcName != keep[5] || gRipps2UserSet != keep[7])
-@@ -2879,7 +3249,10 @@ void guiShowCoverflowConfig(void)
+@@ -2879,7 +3258,10 @@ void guiShowCoverflowConfig(void)
      static const char *gridLayouts[] = {N_("Theme"), "4 x 2", "5 x 2", N_("3 x 2 Large"), N_("6 x 3 Compact"), NULL};
      static const char *launchDiscs[] = {N_("Theme"), N_("Off"), N_("Pop In"), N_("Spin"), NULL};
      int keepLayout = gRipps2GridLayout;
@@ -84739,7 +84748,7 @@ index 2b110ad..9cc7059 100644
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, gridLayouts);
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAUNCHDISC, launchDiscs);
      diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, gRipps2GridLayout);
-@@ -2913,7 +3286,22 @@ void guiShowCoverflowConfig(void)
+@@ -2913,7 +3295,22 @@ void guiShowCoverflowConfig(void)
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gridWideNames);
      diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gRipps2GridWide);
  
@@ -84763,7 +84772,7 @@ index 2b110ad..9cc7059 100644
      if (result) {
          if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_COUNT, &value))
              gCoverflowCount = (value == 1) ? 5 : 3;
-@@ -3349,13 +3737,6 @@ reshow_general:
+@@ -3349,13 +3746,6 @@ reshow_general:
  }
  
  
@@ -84777,7 +84786,7 @@ index 2b110ad..9cc7059 100644
  static int guiSettingsShowSources(void)
  {
      const struct UIItem *parts[] = {diaDeviceConfig};
-@@ -3365,6 +3746,7 @@ static int guiSettingsShowSources(void)
+@@ -3365,6 +3755,7 @@ static int guiSettingsShowSources(void)
      struct UIItem *ui = guiSettingsCompose(parts, 1, NULL, 0, -1, 0);
      int deviceModeIndex;
      int result;
@@ -84785,7 +84794,7 @@ index 2b110ad..9cc7059 100644
  
      if (ui == NULL)
          return 0;
-@@ -3384,13 +3766,6 @@ static int guiSettingsShowSources(void)
+@@ -3384,13 +3775,6 @@ static int guiSettingsShowSources(void)
      diaSetInt(ui, CFG_RIPPS2_STARSIDE, gRipps2StarSide);
      diaSetInt(ui, UICFG_RIPPS2_RECENTS, gRipps2Recents); // build 113: beside the Starred Games rows
      guiSetAdvancedSettings(ui);                         // build 113: the prefix paths, HDD Spindown
@@ -84799,7 +84808,7 @@ index 2b110ad..9cc7059 100644
      diaSetEnabled(ui, CFG_HDDMODE, 1);
      guiSourcesNetRowsBegin(ui, deviceModes);
      diaSetEnum(ui, CFG_MMCEMODE, deviceModes);
-@@ -3399,11 +3774,19 @@ static int guiSettingsShowSources(void)
+@@ -3399,11 +3783,19 @@ static int guiSettingsShowSources(void)
      guiSettingsBeginDialog(ui);
  
  reshow_sources:
@@ -84820,7 +84829,7 @@ index 2b110ad..9cc7059 100644
      if (result == MMCE_SETTINGS_BUTTON) {
          // MMCE uses a separate composition buffer. Confirming the child editor finishes the
          // Settings page and returns to the hub; Circle resumes Game Sources as the parent page.
-@@ -3417,29 +3800,21 @@ reshow_sources:
+@@ -3417,29 +3809,21 @@ reshow_sources:
          result = UIID_BTN_OK;
      }
  
@@ -84853,7 +84862,7 @@ index 2b110ad..9cc7059 100644
  
          bdmForceDeviceRefresh();
          applyConfig(-1, -1, 0);
-@@ -3507,9 +3882,11 @@ static int guiSettingsDisplayUpdater(int modified)
+@@ -3507,9 +3891,11 @@ static int guiSettingsDisplayUpdater(int modified)
      return 0;
  }
  
@@ -84867,7 +84876,7 @@ index 2b110ad..9cc7059 100644
      const char *vmodeNames[] = {_l(_STR_AUTO), "PAL 640x512i @50Hz 24bit", "NTSC 640x448i @60Hz 24bit",
                                  "EDTV 640x448p @60Hz 24bit", "EDTV 640x512p @50Hz 24bit", "VGA 640x480p @60Hz 24bit",
                                  "PAL 704x576i @50Hz 16bit", "NTSC 704x480i @60Hz 16bit",
-@@ -3517,12 +3894,62 @@ static int guiSettingsShowInterface(void)
+@@ -3517,12 +3903,62 @@ static int guiSettingsShowInterface(void)
                                  "HDTV 1280x720p @60Hz 16bit", "HDTV 1920x1080i @60Hz 16bit",
                                  "PAL 640x256p @50Hz 24bit", "NTSC 640x224p @60Hz 24bit",
                                  "PAL 640x512i @50Hz 24bit (FLICKER-FREE)", "NTSC 640x448i @60Hz 24bit (FLICKER-FREE)", NULL};
@@ -84934,7 +84943,7 @@ index 2b110ad..9cc7059 100644
      int gameViewChanged = 0;
      int cfgTitlesChanged = 0;
      int appsViewChanged = 0;
-@@ -3533,18 +3960,18 @@ static int guiSettingsShowInterface(void)
+@@ -3533,18 +3969,18 @@ static int guiSettingsShowInterface(void)
      showCfgPopup = 0;
      guiResetNotifications();
      previousTheme = thmGetGuiValue();
@@ -84957,7 +84966,7 @@ index 2b110ad..9cc7059 100644
      diaSetInt(ui, UICFG_LANG, lngGetGuiValue());
      diaSetInt(ui, UICFG_AUTOSORT, gAutosort);
      diaSetInt(ui, UICFG_AUTOREFRESH, gAutoRefresh);
-@@ -3554,19 +3981,17 @@ static int guiSettingsShowInterface(void)
+@@ -3554,19 +3990,17 @@ static int guiSettingsShowInterface(void)
      // Keep the editor reachable even when the current theme has no active Coverflow view; users
      // need to be able to configure it before enabling or switching to a Coverflow-capable theme.
      diaSetVisible(ui, UICFG_COVERFLOW_BUTTON, 1);
@@ -84982,7 +84991,7 @@ index 2b110ad..9cc7059 100644
      if (result == UICFG_ARTWORK_BUTTON) {
          guiShowArtworkConfig();
          goto reshow_interface;
-@@ -3584,15 +4009,13 @@ reshow_interface:
+@@ -3584,15 +4018,13 @@ reshow_interface:
              guiSettingsSavePending = 1;
          goto reshow_interface;
      }
@@ -85000,7 +85009,7 @@ index 2b110ad..9cc7059 100644
          diaGetInt(ui, UICFG_AUTOSORT, &gAutosort);
          diaGetInt(ui, UICFG_AUTOREFRESH, &gAutoRefresh);
          diaGetInt(ui, UICFG_NOTIFICATIONS, &gEnableNotifications);
-@@ -3604,11 +4027,6 @@ reshow_interface:
+@@ -3604,11 +4036,6 @@ reshow_interface:
          }
          gameViewChanged = guiReadGameViewPicker(ui);
          appsViewChanged = guiReadAppsViewPicker(ui);
@@ -85012,7 +85021,7 @@ index 2b110ad..9cc7059 100644
          {
              int gameIDMode;
              diaGetInt(ui, CFG_APPLYGAMEID, &gameIDMode);
-@@ -3617,8 +4035,6 @@ reshow_interface:
+@@ -3617,8 +4044,6 @@ reshow_interface:
  
          if (previousTheme != themeID && isBgmPlaying())
              bgmStop();
@@ -85021,7 +85030,7 @@ index 2b110ad..9cc7059 100644
          applyConfig(themeID, langID, 1);
          if (cfgTitlesChanged) {
              guiRefreshCfgTitles(); // rebuilds every game list, which also covers a view change
-@@ -3631,11 +4047,6 @@ reshow_interface:
+@@ -3631,11 +4056,6 @@ reshow_interface:
              sfxReload(-1);             // sound was the beep's moment); RIPPS2 build 95: on the IO worker
          if (gEnableBGM && !isBgmPlaying())
              bgmStart();
@@ -85033,7 +85042,7 @@ index 2b110ad..9cc7059 100644
      }
  
      guiFreeNameList(themeNamesSnap);
-@@ -3937,9 +4348,9 @@ static int guiSettingsShowIndex(int *page)
+@@ -3937,9 +4357,9 @@ static int guiSettingsShowIndex(int *page)
          _l(_STR_MENU_NETWORK),
          _l(_STR_INTERFACE_SETTINGS),
          _l(_STR_GAME_LAUNCHING),
@@ -85046,7 +85055,7 @@ index 2b110ad..9cc7059 100644
  #ifdef RETROACHIEVEMENTS
          _l(_STR_RIPPS2_ACHIEVEMENTS), // build 80: moved here from the main menu, last of the pages
  #endif
-@@ -5157,6 +5568,13 @@ static void guiShow()
+@@ -5157,6 +5577,13 @@ static void guiShow()
          screenHandler->renderScreen();
  }
  
@@ -85060,7 +85069,7 @@ index 2b110ad..9cc7059 100644
  void guiIntroLoop(void)
  {
      // RIPPS2: no boot splash, no fade and no boot jingle. The pillars play their boot swoop on
-@@ -5428,13 +5846,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5428,13 +5855,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
  
          if (ui)
              diaRenderUI(ui, screenHandler->inMenu, NULL, 0);

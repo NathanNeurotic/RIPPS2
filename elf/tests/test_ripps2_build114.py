@@ -173,7 +173,8 @@ need(gu_, (('static const char **guiCopyThemeNames(void)', 'the list shown, buil
            ('picked = ripps2ThemePanel(names, guiThemeShown(cur));', 'the panel'), ('themeID = guiThemeId(themeID);', 'Interface maps back'),
            ('next = n >= 2 ? guiThemeId((guiThemeShown(thmGetGuiValue()) + 1) % n) : -1;', 'Cycle in the order shown'),
            ('if (k == SWEEP_DELETE) {', 'a sweep deleted'), ('ripps2SweepSetSpeed(from, guiSweepEdit.speed);', 'a speed, no copy'),
-           ('static void guiRipps2PaletteSweepRow(void)', 'Color Theme under a sweep'), ('diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE, gRipps2Sweep == 0);', 'greyed')), 'gui.c 10/24')
+           ('static void guiRipps2PaletteSweepRow(void)', 'Color Theme under a sweep'), ('diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE, gRipps2Sweep == 0);', 'greyed'),
+           ('c[0] = c[1] = c[2] = 0x60;', 'Theme Color a plain grey under a sweep')), 'gui.c 10/24')
 if gu_.count('guiCopyThemeNames()') < 4:
     fail.append('gui.c: the panel, both Interface editors and Cycle use the order shown')
 ui_ = rd('src/ripps2ui.c')
