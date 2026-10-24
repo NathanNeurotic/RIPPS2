@@ -166,6 +166,24 @@ need(gm_, (('#define ZP_STAGE (256 * 1024)', 'the stage'), ('if ((j.stage = mema
            ('if (!zpOut(j, in, cnt * 2048)) {', 'and the ISO made again')), 'ripps2games.c write stage')
 if 'zpWriteAll(j->fdOut, out' in gm_ or 'zpWriteAll(j->fdOut, ent' in gm_ or 'zpWriteAll(j->fdOut, head' in gm_ or 'zpWriteAll(j->fdOut, in,' in gm_:
     fail.append('ripps2games.c: nothing reaches the new image except through the stage')
+# (the user, 10/24) the built-in themes together at the top of every theme list; Color Sweep: delete, speed kept on the
+# built-in sweep itself; Color Theme greyed and named Sweep under a sweep; BADGES Off by default and greyed without TELEMETRY
+gu_ = rd('src/gui.c')
+need(gu_, (('static const char **guiCopyThemeNames(void)', 'the list shown, built-ins first'), ("if (copy[i][0] == '<') {", "names in <> first"),
+           ('picked = ripps2ThemePanel(names, guiThemeShown(cur));', 'the panel'), ('themeID = guiThemeId(themeID);', 'Interface maps back'),
+           ('next = n >= 2 ? guiThemeId((guiThemeShown(thmGetGuiValue()) + 1) % n) : -1;', 'Cycle in the order shown'),
+           ('if (k == SWEEP_DELETE) {', 'a sweep deleted'), ('ripps2SweepSetSpeed(from, guiSweepEdit.speed);', 'a speed, no copy'),
+           ('static void guiRipps2PaletteSweepRow(void)', 'Color Theme under a sweep'), ('diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE, gRipps2Sweep == 0);', 'greyed')), 'gui.c 10/24')
+if gu_.count('guiCopyThemeNames()') < 4:
+    fail.append('gui.c: the panel, both Interface editors and Cycle use the order shown')
+ui_ = rd('src/ripps2ui.c')
+need(ui_, (('void ripps2SweepSetSpeed(int i, int speed)', 'a built-in sweep at a speed of its own'), ('int ripps2SweepDelete(int i, int cur)', 'delete'),
+           ('"ripps2_sweep_speeds"', 'kept in the settings')), 'ripps2ui.c sweeps')
+ra_ = rd('src/ripps2ra.c')
+need(ra_, (('raWrapLines(RIPPS2_CASE_FONT, RA_X, RA_Y + RA_ROW_COUNT * RA_ROW_H + 40, RA_W, 18,', 'the BADGES note wraps'),
+           ('int grey = i == RA_ROW_BADGES && !gRATelemetry;', 'greyed without TELEMETRY'), ('else if (gRATelemetry) // build 114: BADGES only once TELEMETRY is on', 'and cannot be turned on')), 'ripps2ra.c badges')
+if 'gRABadges = 0; // build 114' not in rd('src/opl.c'):
+    fail.append('opl.c: BADGES starts Off')
 # (the user, 10/23) compressing keeps a game visible; Hide and Compress hides it once the work is done and checked
 need(gm_, (('static int shAdd(const sh_row_t *rr)', 'one hidden-list write for both'), ('void ripps2PackGame(item_list_t *support, int id, int hideAfter)', 'the job told'),
            ('if (hideAfter && shAdd(&r) == 1) {', 'hidden only when asked, and only after success')), 'ripps2games.c Hide and Compress')

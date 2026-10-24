@@ -127,12 +127,16 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
   **Rainbow**, then a sweep made from each Color Theme (an all-pink Flamingo, a ghostly Moonlight). **Sweep Colors**
   opens its five pickers and its speed (Slow, Normal, Lively), seen live; change one of RIPPS2's and it is kept as
   your own, under the name you give it (up to four; left as it is, "Rainbow" becomes "Rainbow 2").
+- **Color Sweep, kinder**: a speed picked for one of RIPPS2's sweeps is kept as that sweep's own (no copy under a new
+  name; a copy is made only when its colours change), and your own sweeps can be deleted (Sweep Colors > Delete This
+  Sweep). While a sweep is on, Color Theme greys out and says Sweep, your Color Theme kept until the sweep is Off.
 - **The notch panels line up**: RIPDISC, the launch guard and compression share one frame, the same width and place,
   with the same wheel.
 
 ### The theme list
 - **Hold SELECT** on a game list opens your themes in a glass panel, eight to a page, in the Settings font: pick one and
-  the panel fades out and the theme loads (the one in use just refreshes the page). **Settings > Interface > Hold
+  the panel fades out and the theme loads (the one in use just refreshes the page). The built-in themes (RIPPS2, RIPFLOW,
+  RIPGRID) come first, together, then the themes on your drives, in every theme list. **Settings > Interface > Hold
   SELECT**: List (the default), Cycle (the next theme, as before) or Off.
 
 ### Hide Game and Compression
@@ -164,6 +168,10 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
 - **The language pack** carries the same Roboto, cut to each language's letters, for every Latin, Greek, Cyrillic and
   Vietnamese one, so Settings in Russian or Greek draw one typeface. RIPPS2-themes edition 114: Adapt and Adapt Rx
   use the built-in fonts (b.ttf, c.ttf and d.ttf gone), and the key glossary lists every built-in font.
+
+### Achievements
+- **BADGES starts Off**, and its note says what it gives: the games with achievements marked in your lists, with how
+  many you have unlocked. It needs TELEMETRY: while TELEMETRY is off the row is greyed out, and it comes back with it.
 
 ### Credits
 - **Neutrino beside RiptOPL** on the About page: rickgaiser's Neutrino named in the opening lines as the second

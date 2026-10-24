@@ -14073,7 +14073,7 @@ index 726c128..2cf6604 100644
  
  // Scan "<devPrefix><EmberFolder>/games/" for game SUBDIRECTORIES -- and a subdirectory only counts
 diff --git a/include/dialogs.h b/include/dialogs.h
-index f70771d..5f778be 100644
+index f70771d..4970d36 100644
 --- a/include/dialogs.h
 +++ b/include/dialogs.h
 @@ -326,6 +326,7 @@ enum UI_ITEMS {
@@ -14084,7 +14084,7 @@ index f70771d..5f778be 100644
  
      OSD_LANGUAGE_SOURCE,
      OSD_LANGUAGE_ENABLE,
-@@ -369,6 +370,28 @@ enum UI_ITEMS {
+@@ -369,6 +370,29 @@ enum UI_ITEMS {
      RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
      CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
      LAUNCH_GSM_DEFAULTS_BUTTON,
@@ -14109,11 +14109,12 @@ index f70771d..5f778be 100644
 +    SWEEP_COLOR3,
 +    SWEEP_COLOR4,
 +    SWEEP_SPEED,
++    SWEEP_DELETE, // build 114 (the user, 10/24): one of the user's own sweeps deleted
 +    UICFG_RIPPS2_SELECT_HOLD, // build 114: Interface > Hold SELECT (the theme list, the next theme, nothing)
  
  #ifdef PADEMU
      PADEMU_GLOBAL_BUTTON,
-@@ -453,6 +476,8 @@ extern struct UIItem diaOSDConfig[];
+@@ -453,6 +477,8 @@ extern struct UIItem diaOSDConfig[];
  extern struct UIItem diaCoverflowConfig[];
  extern struct UIItem diaNeutrinoArgs[];
  extern struct UIItem diaDeviceConfig[];
@@ -14527,7 +14528,7 @@ index ccda44b..3797788 100644
  void rmStartFrame(void);
  
 diff --git a/include/ripps2.h b/include/ripps2.h
-index a10c426..32d8eee 100644
+index a10c426..131f69c 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -87,7 +87,8 @@ enum { RIPPS2_SRC_POP = RIPPS2_SHOW_COUNT, RIPPS2_SRC_COUNT };
@@ -14574,7 +14575,7 @@ index a10c426..32d8eee 100644
  void ripps2DiscWatch(void);         // every frame: the drive read after boot and after the tray closes
  int ripps2DiscQuiet(void);
  struct UIItem;
-@@ -212,6 +233,26 @@ int ripps2KbdPoll(void);
+@@ -212,6 +233,28 @@ int ripps2KbdPoll(void);
  // The editor (ripps2edit.c): a text file, or a game's metadata as a form
  #include "include/config.h"
  void ripps2HintsLoadConfig(config_set_t *config); // build 90: the Hints and Glyphs rows, in the settings
@@ -14595,13 +14596,15 @@ index a10c426..32d8eee 100644
 +int ripps2SweepGet(int i, ripps2_sweep_t *out);
 +int ripps2SweepSave(int from, const ripps2_sweep_t *s); // where it is kept (the user's own), as a gRipps2Sweep value
 +void ripps2SweepPreview(const ripps2_sweep_t *s);     // shown live while its page is open; NULL ends it
++void ripps2SweepSetSpeed(int i, int speed);            // build 114: one of RIPPS2's sweeps at a speed of its own
++int ripps2SweepDelete(int i, int cur);                 // one of the user's own gone; the sweep in use, renumbered
 +void ripps2PaletteColor(int p, unsigned char out[3]); // the colour a Color Theme shows (Custom: the user's)
 +void ripps2ColorsLoadConfig(config_set_t *config);
 +void ripps2ColorsSaveConfig(config_set_t *config);
  void ripps2HintsSaveConfig(config_set_t *config);
  int ripps2EditFile(const char *path);                              // 1 when it saved
  int ripps2EditMetadata(config_set_t *config, const char *gameName); // 1 when SAVE was chosen (values set, not written)
-@@ -265,12 +306,21 @@ void ripps2PlayLaunchSequence(void); // pillars only, light-up and flash; the la
+@@ -265,12 +308,21 @@ void ripps2PlayLaunchSequence(void); // pillars only, light-up and flash; the la
  int ripps2LaunchScreenHeld(void);    // that frame is up: the teardown must not draw over it
  void ripps2LaunchPump(void);         // build 70: one more frame of it, with the loading mark, from the teardown's waits
  void ripps2LaunchAborted(void);      // the launch failed and returned to the menu
@@ -83134,7 +83137,7 @@ index 72b562e..2639ae1 100644
          return -1;
      }
 diff --git a/src/dialogs.c b/src/dialogs.c
-index 238686c..19a2ad9 100644
+index 238686c..6379d40 100644
 --- a/src/dialogs.c
 +++ b/src/dialogs.c
 @@ -221,9 +221,9 @@ struct UIItem diaNetConfig[] = {
@@ -83403,47 +83406,47 @@ index 238686c..19a2ad9 100644
      {UI_BREAK},
  
 -    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_CATEGORY_BAR}}},
+-    {UI_SPACER},
+-    {UI_ENUM, UICFG_RIPPS2_CATBAR, 1, 1, _STR_HINT_RIPPS2_CATEGORY_BAR, 0, 0, {.intvalue = {0, 0}}},
+-    {UI_BREAK},
+-
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_CATEGORY_ORDER}}},
 +    // build 80: the Color Theme heads the colour pickers
 +    {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_RIPPS2_COLOR_THEME}}},
      {UI_SPACER},
--    {UI_ENUM, UICFG_RIPPS2_CATBAR, 1, 1, _STR_HINT_RIPPS2_CATEGORY_BAR, 0, 0, {.intvalue = {0, 0}}},
-+    {UI_ENUM, UICFG_RIPPS2_PALETTE, 1, 1, _STR_HINT_RIPPS2_COLOR_THEME, 0, 0, {.intvalue = {0, 0}}},
-     {UI_BREAK},
- 
--    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_CATEGORY_ORDER}}},
-+    // build 114 (the user's colours): the theme's colour, shown for a named theme and the user's own on Custom; then
-+    // the Color Sweep, five colours the theme fades through, and its page
-+    {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {"Theme Color", -1}}},
-     {UI_SPACER},
 -    {UI_ENUM, UICFG_RIPPS2_CATSWAP, 1, 1, _STR_HINT_RIPPS2_CATEGORY_ORDER, 0, 0, {.intvalue = {0, 0}}},
-+    {UI_COLOUR, UICFG_RIPPS2_PALETTE_COLOR, 1, 1, _STR_HINT_RIPPS2_THEME_COLOR, -10, 17, {.colourvalue = {0, 0}}},
++    {UI_ENUM, UICFG_RIPPS2_PALETTE, 1, 1, _STR_HINT_RIPPS2_COLOR_THEME, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
 -    // build 92: how a new category's page comes in
 -    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_TRANSITION}}},
-+    {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {"Color Sweep", -1}}},
++    // build 114 (the user's colours): the theme's colour, shown for a named theme and the user's own on Custom; then
++    // the Color Sweep, five colours the theme fades through, and its page
++    {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {"Theme Color", -1}}},
      {UI_SPACER},
 -    {UI_ENUM, UICFG_RIPPS2_TRANSITION, 1, 1, _STR_HINT_RIPPS2_TRANSITION, 0, 0, {.intvalue = {0, 0}}},
-+    {UI_ENUM, UICFG_RIPPS2_SWEEP, 1, 1, _STR_HINT_RIPPS2_SWEEP, 0, 0, {.intvalue = {0, 0}}},
++    {UI_COLOUR, UICFG_RIPPS2_PALETTE_COLOR, 1, 1, _STR_HINT_RIPPS2_THEME_COLOR, -10, 17, {.colourvalue = {0, 0}}},
      {UI_BREAK},
  
 -    // build 71: the source's name over the game list
 -    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_SOURCE_NAME}}},
-+    {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {"Sweep Colors", -1}}},
++    {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {"Color Sweep", -1}}},
      {UI_SPACER},
 -    {UI_ENUM, UICFG_RIPPS2_SRCNAME, 1, 1, _STR_HINT_RIPPS2_SOURCE_NAME, 0, 0, {.intvalue = {0, 0}}},
--    {UI_BREAK},
++    {UI_ENUM, UICFG_RIPPS2_SWEEP, 1, 1, _STR_HINT_RIPPS2_SWEEP, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
 -    {UI_SPLITTER},
--
+ 
 -    // build 80: the Color Theme heads the colour pickers
 -    {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_RIPPS2_COLOR_THEME}}},
--    {UI_SPACER},
++    {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {"Sweep Colors", -1}}},
+     {UI_SPACER},
 -    {UI_ENUM, UICFG_RIPPS2_PALETTE, 1, 1, _STR_HINT_RIPPS2_COLOR_THEME, 0, 0, {.intvalue = {0, 0}}},
 +    {UI_BUTTON, UICFG_RIPPS2_SWEEP_BUTTON, 1, 1, _STR_HINT_RIPPS2_SWEEP_COLORS, 0, 0, {.label = {NULL, _STR_MODIFY}}},
      {UI_BREAK},
  
      {UI_LABEL, 0, 1, 1, -1, -30, 0, {.label = {NULL, _STR_TXTCOLOR}}},
-@@ -1042,11 +1067,52 @@ struct UIItem diaColorsConfig[] = {
+@@ -1042,11 +1067,54 @@ struct UIItem diaColorsConfig[] = {
      // end of dialog
      {UI_TERMINATOR}};
  
@@ -83483,6 +83486,8 @@ index 238686c..19a2ad9 100644
 +    {UI_SPACER},
 +    {UI_ENUM, SWEEP_SPEED, 1, 1, _STR_HINT_RIPPS2_SWEEP_SPEED, 0, 0, {.intvalue = {0, 0}}},
 +    {UI_BREAK},
++    {UI_BUTTON, SWEEP_DELETE, 1, 1, -1, 0, 0, {.label = {"Delete This Sweep", -1}}}, // build 114: the user's own only
++    {UI_BREAK},
 +
 +    {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
 +    {UI_BREAK},
@@ -83497,7 +83502,7 @@ index 238686c..19a2ad9 100644
      {UI_SPLITTER},
  
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_VMODE}}},
-@@ -1074,11 +1140,7 @@ struct UIItem diaDisplayConfig[] = {
+@@ -1074,11 +1142,7 @@ struct UIItem diaDisplayConfig[] = {
      {UI_INT, UICFG_OVERSCAN, 1, 1, _STR_HINT_MENU_OVERSCAN, 0, 0, {.intvalue = {0, 0, 0, 100}}},
      {UI_BREAK},
  
@@ -83510,7 +83515,7 @@ index 238686c..19a2ad9 100644
      // build 113: GSM Defaults (the video mode games launch in) lives on Game Launching alone
      // buttons
      {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
-@@ -1303,6 +1365,10 @@ struct UIItem diaCompatConfig[] = {
+@@ -1303,6 +1367,10 @@ struct UIItem diaCompatConfig[] = {
      {UI_LABEL, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_MODE7}}},
      {UI_SPACER},
      {UI_BOOL, COMPAT_MODE_BASE + 6, 1, 1, _STR_HINT_MODE7, -10, 0, {.intvalue = {0, 0}}},
@@ -83521,7 +83526,7 @@ index 238686c..19a2ad9 100644
      {UI_BREAK},
  
      {UI_SPACER},
-@@ -1398,6 +1464,8 @@ struct UIItem diaVMC[] = {
+@@ -1398,6 +1466,8 @@ struct UIItem diaVMC[] = {
      {UI_BUTTON, VMC_BUTTON_CREATE, 1, 1, _STR_HINT_VMC_CREATE, 0, 0, {.label = {NULL, -1}}},
      {UI_SPACER},
      {UI_BUTTON, VMC_BUTTON_DELETE, 1, 1, _STR_HINT_VMC_DELETE, 0, 0, {.label = {NULL, _STR_DELETE}}},
@@ -83530,7 +83535,7 @@ index 238686c..19a2ad9 100644
      {UI_BREAK},
  
      // end of dialog
-@@ -2030,6 +2098,24 @@ struct UIItem diaCacheConfig[] = {
+@@ -2030,6 +2100,24 @@ struct UIItem diaCacheConfig[] = {
      {UI_BOOL, UICFG_AUTOREFRESH, 1, 1, _STR_HINT_AUTOREFRESH, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -83555,7 +83560,7 @@ index 238686c..19a2ad9 100644
      // buttons
      {UI_OK, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_OK}}},
      {UI_BREAK},
-@@ -2132,7 +2218,36 @@ struct UIItem diaHintOrder[] = {
+@@ -2132,7 +2220,36 @@ struct UIItem diaHintOrder[] = {
      {UI_TERMINATOR}};
  
  struct UIItem diaCoverflowConfig[] = {
@@ -83593,7 +83598,7 @@ index 238686c..19a2ad9 100644
      {UI_SPLITTER},
  
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COVERFLOW_COUNT}}},
-@@ -2179,7 +2294,7 @@ struct UIItem diaCoverflowConfig[] = {
+@@ -2179,7 +2296,7 @@ struct UIItem diaCoverflowConfig[] = {
      {UI_TERMINATOR}};
  
  struct UIItem diaNeutrinoArgs[] = {
@@ -83602,7 +83607,7 @@ index 238686c..19a2ad9 100644
      {UI_SPLITTER},
  
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_NARGS_QB}}},
-@@ -2232,7 +2347,7 @@ struct UIItem diaNeutrinoArgs[] = {
+@@ -2232,7 +2349,7 @@ struct UIItem diaNeutrinoArgs[] = {
      {UI_STRING, NARGS_EXTRA, 1, 1, _STR_HINT_NARGS_EXTRA, 0, 0, {.stringvalue = {"", "", &guiNeutrinoArgsExtraHandler}}},
      {UI_BREAK},
  
@@ -83948,7 +83953,7 @@ index d59e71c..7a1b2b6 100644
          LOG("FNTSYS Error loading glyph - %d\n", error);
          return NULL;
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..4c39e9c 100644
+index 2b110ad..9cc7059 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -12,10 +12,13 @@
@@ -83965,7 +83970,17 @@ index 2b110ad..4c39e9c 100644
  #include "include/ripps2shot.h" // build 108: ripps2ShotTick
  #include "include/ripps2biossnd.h" // RIPPS2 build 88: Audio settings > BIOS Sounds
  #include "include/fntsys.h"
-@@ -886,34 +889,21 @@ static void guiNetProtocolApplied(int netProtocolWas)
+@@ -138,6 +141,9 @@ static void guiShow();
+ static void guiDrawOverlays(void);
+ static const char **guiCopyNameList(const char **src);
+ static void guiFreeNameList(const char **list);
++static const char **guiCopyThemeNames(void);
++static int guiThemeShown(int id);
++static int guiThemeId(int shown);
+ 
+ 
+ #ifdef __DEBUG
+@@ -886,34 +892,21 @@ static void guiNetProtocolApplied(int netProtocolWas)
          guiMsgBox(_l(_STR_NET_UDPBD_TAB_HINT), 0, NULL);
  }
  
@@ -84004,7 +84019,7 @@ index 2b110ad..4c39e9c 100644
      guiNetProtocolApplied(netProtocolWas);
  }
  
-@@ -924,26 +914,67 @@ static void guiSourcesNetRowsRead(struct UIItem *ui)
+@@ -924,26 +917,67 @@ static void guiSourcesNetRowsRead(struct UIItem *ui)
  // RIPPS2 build 106: Starred Games Star (gRipps2StarSide): Theme follows the list's <name>_star key
  static const char *guiStarSides[] = {N_("Theme"), N_("Left"), N_("Right"), N_("Hidden"), NULL};
  
@@ -84078,7 +84093,7 @@ index 2b110ad..4c39e9c 100644
          return;
      diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, &gRipps2FastCache);
      diaGetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, &gHDDGameListCache);
-@@ -988,19 +1019,11 @@ void guiShowDeviceConfig(void)
+@@ -988,19 +1022,11 @@ void guiShowDeviceConfig(void)
      diaSetInt(diaDeviceConfig, CFG_APPMODE, gAPPStartMode);
      diaSetInt(diaDeviceConfig, CFG_FAVMODE, gFAVStartMode);
  
@@ -84099,7 +84114,7 @@ index 2b110ad..4c39e9c 100644
      guiSourcesNetRowsBegin(diaDeviceConfig, deviceModes);
  
      // MMCE Start Mode
-@@ -1010,11 +1033,19 @@ void guiShowDeviceConfig(void)
+@@ -1010,11 +1036,19 @@ void guiShowDeviceConfig(void)
  
      int ret;
  reshow_device:
@@ -84120,7 +84135,7 @@ index 2b110ad..4c39e9c 100644
      if (ret == MMCE_SETTINGS_BUTTON) {
          guiShowMmceConfig();
          goto reshow_device;
-@@ -1026,25 +1057,14 @@ reshow_device:
+@@ -1026,25 +1060,14 @@ reshow_device:
              gDefaultDevice = guiDeviceTypeToIoMode(deviceModeIndex);
          diaGetInt(diaDeviceConfig, CFG_BDMMODE, &gBDMStartMode);
          diaGetInt(diaDeviceConfig, CFG_HDDMODE, &gHDDStartMode);
@@ -84148,7 +84163,7 @@ index 2b110ad..4c39e9c 100644
  
          // A BDM tab can be latched hidden (bdmNeedsUpdate short-circuits until the device generation
          // bumps). Re-evaluate device visibility now so re-enabling a device here brings its tab back
-@@ -1066,13 +1086,15 @@ int guiShowMmceConfig(void)
+@@ -1066,13 +1089,15 @@ int guiShowMmceConfig(void)
      static const char *deviceSlots[] = {"0", "1", NULL, NULL};
      static const char *deviceIGRSlots[] = {"NONE", "0", "1", "BOTH", NULL};
      static const char *deviceAckWaitCycles[] = {"0", "1", "2", "3", "4", "5", NULL};
@@ -84165,16 +84180,89 @@ index 2b110ad..4c39e9c 100644
      ui = guiSettingsComposeInto(guiMmceSettingsDialog, parts, 3, skipIDs, 2, -1, 1);
  
      if (ui == NULL)
-@@ -1289,6 +1311,8 @@ reshow_ui:
+@@ -1145,6 +1170,64 @@ static const char **guiCopyNameList(const char **src)
+     return copy;
+ }
+ 
++// build 114 (the user, 10/24): the three built-in themes together at the top of every theme list (the hold-SELECT panel,
++// Interface's Theme row, Cycle), then the themes found on the drives. The themes keep their ids (0 <RIPPS2>, 1..n the
++// drives', then <RIPFLOW> and <RIPGRID>); only what is shown is reordered: guiThemeOrder[shown] is the theme's id
++static int *guiThemeOrder = NULL, guiThemeOrderN = 0;
++
++// the theme names in the order shown; the caller holds guiLock, as for guiCopyNameList. On a failed copy NULL (and the
++// order is the ids' own)
++static const char **guiCopyThemeNames(void)
++{
++    const char **copy = guiCopyNameList((const char **)thmGetGuiList()), **shown;
++    int n = 0, i, k = 0, *order;
++
++    free(guiThemeOrder);
++    guiThemeOrder = NULL;
++    guiThemeOrderN = 0;
++    if (copy == NULL)
++        return NULL;
++    while (copy[n] != NULL)
++        n++;
++    shown = (const char **)malloc((n + 1) * sizeof(char *));
++    order = (int *)malloc((n > 0 ? n : 1) * sizeof(int));
++    if (shown == NULL || order == NULL) {
++        free((void *)shown);
++        free(order);
++        return copy; // the ids' own order
++    }
++    for (i = 0; i < n; i++)
++        if (copy[i][0] == '<') {
++            order[k] = i;
++            shown[k++] = copy[i];
++        }
++    for (i = 0; i < n; i++)
++        if (copy[i][0] != '<') {
++            order[k] = i;
++            shown[k++] = copy[i];
++        }
++    shown[n] = NULL;
++    free((void *)copy); // its strings now belong to shown
++    guiThemeOrder = order;
++    guiThemeOrderN = n;
++    return shown;
++}
++
++// a theme's place in the list shown, and back
++static int guiThemeShown(int id)
++{
++    int i;
++    for (i = 0; guiThemeOrder != NULL && i < guiThemeOrderN; i++)
++        if (guiThemeOrder[i] == id)
++            return i;
++    return id;
++}
++
++static int guiThemeId(int shown)
++{
++    return guiThemeOrder != NULL && shown >= 0 && shown < guiThemeOrderN ? guiThemeOrder[shown] : shown;
++}
++
+ static void guiFreeNameList(const char **list)
+ {
+     int i;
+@@ -1283,12 +1366,14 @@ reshow_ui:
+     guiFreeNameList(themeNamesSnap);
+     guiFreeNameList(langNamesSnap);
+     guiLock(); // must cover the getter FETCH too, not just the copy (Gemini review of #165)
+-    themeNamesSnap = guiCopyNameList((const char **)thmGetGuiList());
++    themeNamesSnap = guiCopyThemeNames(); // build 114: the built-in themes first
+     langNamesSnap = guiCopyNameList((const char **)lngGetGuiList());
+     guiUnlock();
      diaSetEnum(diaUIConfig, UICFG_THEME, themeNamesSnap != NULL ? themeNamesSnap : (const char **)thmGetGuiList());
      diaSetEnum(diaUIConfig, UICFG_LANG, langNamesSnap != NULL ? langNamesSnap : (const char **)lngGetGuiList());
-     diaSetInt(diaUIConfig, UICFG_THEME, thmGetGuiValue());
+-    diaSetInt(diaUIConfig, UICFG_THEME, thmGetGuiValue());
++    diaSetInt(diaUIConfig, UICFG_THEME, guiThemeShown(thmGetGuiValue()));
 +    diaSetEnum(diaUIConfig, UICFG_RIPPS2_SELECT_HOLD, guiHoldModes); // build 114
 +    diaSetInt(diaUIConfig, UICFG_RIPPS2_SELECT_HOLD, gRipps2SelectHold);
      diaSetInt(diaUIConfig, UICFG_LANG, lngGetGuiValue());
      diaSetInt(diaUIConfig, UICFG_AUTOSORT, gAutosort);
      diaSetInt(diaUIConfig, UICFG_AUTOREFRESH, gAutoRefresh);
-@@ -1303,6 +1327,10 @@ reshow_ui:
+@@ -1303,6 +1388,10 @@ reshow_ui:
  
      int ret = diaExecuteDialog(diaUIConfig, -1, 1, NULL);
  
@@ -84185,15 +84273,16 @@ index 2b110ad..4c39e9c 100644
      if (ret == UICFG_ARTWORK_BUTTON) {
          guiShowArtworkConfig();
          goto reshow_ui;
-@@ -1337,6 +1365,7 @@ reshow_ui:
+@@ -1337,6 +1426,8 @@ reshow_ui:
      if (ret) {
          diaGetInt(diaUIConfig, UICFG_LANG, &langID);
          diaGetInt(diaUIConfig, UICFG_THEME, &themeID);
++        themeID = guiThemeId(themeID);
 +        diaGetInt(diaUIConfig, UICFG_RIPPS2_SELECT_HOLD, &gRipps2SelectHold); // build 114
          diaGetInt(diaUIConfig, UICFG_AUTOSORT, &gAutosort);
          diaGetInt(diaUIConfig, UICFG_AUTOREFRESH, &gAutoRefresh);
          diaGetInt(diaUIConfig, UICFG_NOTIFICATIONS, &gEnableNotifications);
-@@ -1383,17 +1412,11 @@ reshow_ui:
+@@ -1383,17 +1474,11 @@ reshow_ui:
  // RIPPS2 build 79: SELECT held 4.2 s on the game list -- the next theme in the Theme list (the built-in
  // ones and every theme found on a drive), applied the way Settings applies one, without a device
  // refresh, and saved quietly so it is there next time
@@ -84213,20 +84302,24 @@ index 2b110ad..4c39e9c 100644
      padRumbleFlush();
      if (isBgmPlaying())
          bgmStop(); // a theme may bring its own music
-@@ -1408,6 +1431,40 @@ void guiCycleTheme(void)
+@@ -1408,6 +1493,45 @@ void guiCycleTheme(void)
      }
  }
  
 +void guiCycleTheme(void)
 +{
-+    const char **names = thmGetGuiList();
-+    int n = 0;
++    const char **names;
++    int n = 0, next;
 +
++    guiLock();
++    names = guiCopyThemeNames(); // build 114: in the order shown, the built-in themes first
++    guiUnlock();
 +    while (names != NULL && names[n] != NULL)
 +        n++;
-+    if (n < 2)
-+        return;
-+    guiQuickTheme((thmGetGuiValue() + 1) % n);
++    next = n >= 2 ? guiThemeId((guiThemeShown(thmGetGuiValue()) + 1) % n) : -1;
++    guiFreeNameList(names);
++    if (next >= 0)
++        guiQuickTheme(next);
 +}
 +
 +// build 114 (the user, 10/23): Hold SELECT on List: the themes in a panel. The one in use picked: 0, the caller refreshes
@@ -84237,14 +84330,15 @@ index 2b110ad..4c39e9c 100644
 +    int picked, cur = thmGetGuiValue();
 +
 +    guiLock(); // the list a theme rescan may replace (as the Interface page takes it)
-+    names = guiCopyNameList((const char **)thmGetGuiList());
++    names = guiCopyThemeNames(); // build 114: the built-in themes first
 +    guiUnlock();
 +    if (names == NULL)
 +        return 1;
-+    picked = ripps2ThemePanel(names, cur);
++    picked = ripps2ThemePanel(names, guiThemeShown(cur));
 +    guiFreeNameList(names);
 +    if (picked < 0)
 +        return 1;
++    picked = guiThemeId(picked);
 +    if (picked == cur)
 +        return 0;
 +    guiQuickTheme(picked);
@@ -84254,7 +84348,7 @@ index 2b110ad..4c39e9c 100644
  static int httpTestBusy;
  static int httpTestIp[4], httpTestPort;
  static char httpTestBase[HTTP_BASE_PATH_MAX], httpTestMessage[128];
-@@ -1908,6 +1965,79 @@ int guiShowVcdUsbMode(void)
+@@ -1908,6 +2032,79 @@ int guiShowVcdUsbMode(void)
      return diaExecuteDialog(diaVcdUsbMode, -1, 1, NULL);
  }
  
@@ -84334,7 +84428,7 @@ index 2b110ad..4c39e9c 100644
  static void guiSetBdmaSettings(struct UIItem *ui)
  {
      static const char *bdmaSourceStrs[] = {NULL, NULL, NULL, NULL, NULL, NULL};
-@@ -2281,7 +2411,7 @@ void guiShowPopsNetConfig(void)
+@@ -2281,7 +2478,7 @@ void guiShowPopsNetConfig(void)
          snprintf(popsNotice, sizeof(popsNotice), _l(_STR_POPS_LOADED_FROM), popsOriginal.home);
          diaSetLabel(diaPopsNetConfig, NETCFG_POPS_NOTICE, popsNotice);
      } else {
@@ -84343,7 +84437,7 @@ index 2b110ad..4c39e9c 100644
      }
  
      for (;;) {
-@@ -2580,7 +2710,9 @@ void guiShowArtworkConfig(void)
+@@ -2580,7 +2777,9 @@ void guiShowArtworkConfig(void)
      diaSetEnum(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, bgBlurNames);
      diaSetInt(diaArtworkConfig, UICFG_RIPPS2_BGBLUR, gRipps2BgBlur);
  
@@ -84354,12 +84448,35 @@ index 2b110ad..4c39e9c 100644
      if (ret) {
          diaGetInt(diaArtworkConfig, UICFG_COVERART, &gEnableArt);
          diaGetInt(diaArtworkConfig, UICFG_ENABLE_DISCART, &gEnableDiscArt);
-@@ -2652,18 +2784,70 @@ static int guiRipps2Shown(int bit, int setting, int def)
+@@ -2628,7 +2827,7 @@ static const char *guiRipps2ShowNames[] = {N_("Theme"), N_("Shown"), N_("Fade Wh
+ static const char *guiRipps2SrcNames[] = {N_("Theme"), N_("Shown"), N_("Fade When Idle"), N_("Hidden"), N_("Pop In"), NULL}; // build 80
+ static const char *guiRipps2OrderNames[] = {N_("Theme"), N_("Launch Disc First"), N_("Memory Files First"), NULL};
+ static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), NULL}; // build 113
+-static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 2];
++static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 3]; // build 114: and Sweep, shown while a sweep is on
+ 
+ // build 81: a row the user picks a value on becomes theirs; build 96: picking Theme (0) gives it back to the
+ // theme, the setting back on its own default so the theme's value shows (ripps2ui.c themeDefault)
+@@ -2652,18 +2851,88 @@ static int guiRipps2Shown(int bit, int setting, int def)
      return (gRipps2UserSet & bit) || setting != def ? setting + 1 : 0;
  }
  
 +// build 114 (the user's colours): the Theme Color picker shows the Color Theme's colour, and is the user's own on Custom
 +static int guiPaletteWasCustom = -1;
++
++// build 114 (the user, 10/24): while a sweep is on, Color Theme greys out and says Sweep, its own choice kept out of sight
++// until the sweep is Off, so it is clear which of the two is in charge
++static void guiRipps2PaletteSweepRow(void)
++{
++    if (gRipps2Sweep > 0) {
++        guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1] = N_("Sweep");
++        diaSetInt(diaColorsConfig, UICFG_RIPPS2_PALETTE, RIPPS2_PALETTE_COUNT + 1);
++    } else {
++        guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1] = NULL;
++        diaSetInt(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2Shown(RIPPS2_SET_PALETTE, gRipps2Palette, 0));
++    }
++    diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE, gRipps2Sweep == 0);
++}
 +
 +static void guiRipps2ThemeColorRow(void)
 +{
@@ -84371,20 +84488,20 @@ index 2b110ad..4c39e9c 100644
 +        ripps2PaletteColor(shown, c); // a named theme's colour, or (just switched to Custom) the user's own
 +        diaSetColor(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, c);
 +    }
-+    diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, custom);
++    diaSetEnabled(diaColorsConfig, UICFG_RIPPS2_PALETTE_COLOR, custom && gRipps2Sweep == 0); // build 114: not under a sweep
 +    guiPaletteWasCustom = custom;
 +}
 +
  static void guiRipps2SettingsRead(void)
- {
-     int v;
-     guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_PALETTE, RIPPS2_SET_PALETTE, RIPPS2_PALETTE_COUNT, &gRipps2Palette, 0);
--    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_CATBAR, RIPPS2_SET_CATBAR, RIPPS2_SHOW_COUNT, &gRipps2CatBar, RIPPS2_SHOW_ON);
--    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_CATSWAP, RIPPS2_SET_CATSWAP, 2, &gRipps2CatSwap, 0);
--    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
--    if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_TRANSITION, &v) && v >= 0 && v <= 3)
++{
++    int v, sweepWas = gRipps2Sweep;
 +    if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_SWEEP, &v) && v >= 0 && v <= ripps2SweepCount())
 +        gRipps2Sweep = v; // build 114: the Color Sweep, shown at once
++    // build 114: Color Theme is read only while no sweep is on (under one it says Sweep and keeps its choice)
++    if (gRipps2Sweep == 0 && sweepWas == 0)
++        guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_PALETTE, RIPPS2_SET_PALETTE, RIPPS2_PALETTE_COUNT, &gRipps2Palette, 0);
++    if ((gRipps2Sweep > 0) != (sweepWas > 0))
++        guiRipps2PaletteSweepRow();
 +    guiRipps2ThemeColorRow();
 +    if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, &v) && v >= 0 && v <= 2 && v != gRipps2TextWeight) {
 +        gRipps2TextWeight = v; // build 114: Text Weight, shown at once
@@ -84395,8 +84512,13 @@ index 2b110ad..4c39e9c 100644
 +
 +// build 114 (the settings audit): the category rows, on Layout (they were Colors and More's), shown live the same way
 +static void guiRipps2LayoutRead(void)
-+{
-+    int v;
+ {
+     int v;
+-    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_PALETTE, RIPPS2_SET_PALETTE, RIPPS2_PALETTE_COUNT, &gRipps2Palette, 0);
+-    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_CATBAR, RIPPS2_SET_CATBAR, RIPPS2_SHOW_COUNT, &gRipps2CatBar, RIPPS2_SHOW_ON);
+-    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_CATSWAP, RIPPS2_SET_CATSWAP, 2, &gRipps2CatSwap, 0);
+-    guiRipps2Take(diaColorsConfig, UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
+-    if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_TRANSITION, &v) && v >= 0 && v <= 3)
 +    guiRipps2Take(diaCoverflowConfig, UICFG_RIPPS2_CATBAR, RIPPS2_SET_CATBAR, RIPPS2_SHOW_COUNT, &gRipps2CatBar, RIPPS2_SHOW_ON);
 +    guiRipps2Take(diaCoverflowConfig, UICFG_RIPPS2_CATSWAP, RIPPS2_SET_CATSWAP, 2, &gRipps2CatSwap, 0);
 +    guiRipps2Take(diaCoverflowConfig, UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
@@ -84431,7 +84553,7 @@ index 2b110ad..4c39e9c 100644
  }
  
  // build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
-@@ -2689,6 +2873,84 @@ static int guiRipps2SettingsUpdater(int modified)
+@@ -2689,6 +2958,98 @@ static int guiRipps2SettingsUpdater(int modified)
      return 0;
  }
  
@@ -84496,16 +84618,30 @@ index 2b110ad..4c39e9c 100644
 +        diaSetColor(diaSweepConfig, SWEEP_COLOR0 + k, was.c[k]);
 +    diaSetEnum(diaSweepConfig, SWEEP_SPEED, speeds);
 +    diaSetInt(diaSweepConfig, SWEEP_SPEED, was.speed);
++    diaSetEnabled(diaSweepConfig, SWEEP_DELETE, from > RIPPS2_SWEEP_BUILTIN); // build 114: the user's own only
 +    ripps2SweepPreview(&guiSweepEdit);
 +    k = diaExecuteDialog(diaSweepConfig, -1, 1, &guiSweepUpdater);
 +    ripps2SweepPreview(NULL);
++    if (k == SWEEP_DELETE) { // build 114 (the user, 10/24)
++        char msg[160];
++        snprintf(msg, sizeof(msg), _t("Delete %s? RIPPS2's own sweeps stay as they are."), was.name);
++        guiMsgBoxSound(SFX_MESSAGE);
++        if (from > RIPPS2_SWEEP_BUILTIN && guiMsgBox(msg, 1, NULL)) {
++            gRipps2Sweep = ripps2SweepDelete(from, gRipps2Sweep > 0 ? gRipps2Sweep : from);
++            guiSettingsSavePending = 1;
++        }
++        return;
++    }
 +    if (!k)
 +        return;
 +    guiSweepRead();
 +    snprintf(guiSweepEdit.name, sizeof(guiSweepEdit.name), "%s", guiSweepName);
-+    if (from <= RIPPS2_SWEEP_BUILTIN && !memcmp(guiSweepEdit.c, was.c, sizeof(was.c)) && guiSweepEdit.speed == was.speed)
-+        gRipps2Sweep = from; // nothing changed: that sweep, as it is
-+    else {
++    if (from <= RIPPS2_SWEEP_BUILTIN && !memcmp(guiSweepEdit.c, was.c, sizeof(was.c))) {
++        // its colours as they are: that sweep, at the speed picked, under its own name (the user, 10/24: no copy for a speed)
++        if (guiSweepEdit.speed != was.speed)
++            ripps2SweepSetSpeed(from, guiSweepEdit.speed);
++        gRipps2Sweep = from;
++    } else {
 +        if (from <= RIPPS2_SWEEP_BUILTIN && !strcmp(guiSweepName, _t(was.name)))
 +            snprintf(guiSweepEdit.name, sizeof(guiSweepEdit.name), "%s 2", _t(was.name)); // the copy, beside the original
 +        gRipps2Sweep = ripps2SweepSave(from, &guiSweepEdit);
@@ -84516,9 +84652,11 @@ index 2b110ad..4c39e9c 100644
  static void guiRipps2SettingsSet(void)
  {
      int i;
-@@ -2697,19 +2959,14 @@ static void guiRipps2SettingsSet(void)
+@@ -2696,20 +3057,17 @@ static void guiRipps2SettingsSet(void)
+     for (i = 0; i < RIPPS2_PALETTE_COUNT; i++)
          guiRipps2PaletteNames[i + 1] = ripps2PaletteName(i);
      guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 1] = NULL;
++    guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 2] = NULL;
      diaSetEnum(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2PaletteNames);
 -    diaSetEnum(diaColorsConfig, UICFG_RIPPS2_CATBAR, guiRipps2ShowNames);
 -    diaSetEnum(diaColorsConfig, UICFG_RIPPS2_CATSWAP, guiRipps2OrderNames);
@@ -84537,12 +84675,13 @@ index 2b110ad..4c39e9c 100644
 +    diaSetEnum(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, weights);
 +    diaSetInt(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, gRipps2TextWeight);
 +    guiRipps2SweepRows();
++    guiRipps2PaletteSweepRow(); // build 114: greyed and named Sweep while a sweep is on
 +    guiPaletteWasCustom = -1;
 +    guiRipps2ThemeColorRow();
  }
  
  void guiShowColorsConfig(void)
-@@ -2720,8 +2977,10 @@ void guiShowColorsConfig(void)
+@@ -2720,8 +3078,10 @@ void guiShowColorsConfig(void)
      const char *own = editable ? NULL : thmColorName(themeID);
      unsigned char shown[6][3];
      int keep[8] = {gRipps2Glyphs, gRipps2Palette, gRipps2Hints, gRipps2CatBar, gRipps2CatSwap, gRipps2SrcName, gRipps2Recents, gRipps2UserSet};
@@ -84555,7 +84694,7 @@ index 2b110ad..4c39e9c 100644
  
      guiRipps2SettingsSet();
  
-@@ -2756,7 +3015,11 @@ void guiShowColorsConfig(void)
+@@ -2756,7 +3116,11 @@ void guiShowColorsConfig(void)
      diaSetEnabled(diaColorsConfig, UICFG_PLASCOL, editable || own != NULL);
      diaSetEnabled(diaColorsConfig, UICFG_RESETCOL, editable || own != NULL);
  
@@ -84568,7 +84707,7 @@ index 2b110ad..4c39e9c 100644
      if (ret)
          guiRipps2SettingsRead();
      else {
-@@ -2768,11 +3031,17 @@ void guiShowColorsConfig(void)
+@@ -2768,11 +3132,17 @@ void guiShowColorsConfig(void)
          gRipps2SrcName = keep[5];
          gRipps2Recents = keep[6];
          gRipps2UserSet = keep[7];
@@ -84589,7 +84728,7 @@ index 2b110ad..4c39e9c 100644
          guiSettingsSavePending = 1;
      if (gRipps2Glyphs != keep[0] || gRipps2Palette != keep[1] || gRipps2Hints != keep[2] || gRipps2CatBar != keep[3] ||
          gRipps2CatSwap != keep[4] || gRipps2SrcName != keep[5] || gRipps2UserSet != keep[7])
-@@ -2879,7 +3148,10 @@ void guiShowCoverflowConfig(void)
+@@ -2879,7 +3249,10 @@ void guiShowCoverflowConfig(void)
      static const char *gridLayouts[] = {N_("Theme"), "4 x 2", "5 x 2", N_("3 x 2 Large"), N_("6 x 3 Compact"), NULL};
      static const char *launchDiscs[] = {N_("Theme"), N_("Off"), N_("Pop In"), N_("Spin"), NULL};
      int keepLayout = gRipps2GridLayout;
@@ -84600,7 +84739,7 @@ index 2b110ad..4c39e9c 100644
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, gridLayouts);
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAUNCHDISC, launchDiscs);
      diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT, gRipps2GridLayout);
-@@ -2913,7 +3185,22 @@ void guiShowCoverflowConfig(void)
+@@ -2913,7 +3286,22 @@ void guiShowCoverflowConfig(void)
      diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gridWideNames);
      diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_LAYOUT_WIDE, gRipps2GridWide);
  
@@ -84624,7 +84763,7 @@ index 2b110ad..4c39e9c 100644
      if (result) {
          if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_COUNT, &value))
              gCoverflowCount = (value == 1) ? 5 : 3;
-@@ -3349,13 +3636,6 @@ reshow_general:
+@@ -3349,13 +3737,6 @@ reshow_general:
  }
  
  
@@ -84638,7 +84777,7 @@ index 2b110ad..4c39e9c 100644
  static int guiSettingsShowSources(void)
  {
      const struct UIItem *parts[] = {diaDeviceConfig};
-@@ -3365,6 +3645,7 @@ static int guiSettingsShowSources(void)
+@@ -3365,6 +3746,7 @@ static int guiSettingsShowSources(void)
      struct UIItem *ui = guiSettingsCompose(parts, 1, NULL, 0, -1, 0);
      int deviceModeIndex;
      int result;
@@ -84646,7 +84785,7 @@ index 2b110ad..4c39e9c 100644
  
      if (ui == NULL)
          return 0;
-@@ -3384,13 +3665,6 @@ static int guiSettingsShowSources(void)
+@@ -3384,13 +3766,6 @@ static int guiSettingsShowSources(void)
      diaSetInt(ui, CFG_RIPPS2_STARSIDE, gRipps2StarSide);
      diaSetInt(ui, UICFG_RIPPS2_RECENTS, gRipps2Recents); // build 113: beside the Starred Games rows
      guiSetAdvancedSettings(ui);                         // build 113: the prefix paths, HDD Spindown
@@ -84660,7 +84799,7 @@ index 2b110ad..4c39e9c 100644
      diaSetEnabled(ui, CFG_HDDMODE, 1);
      guiSourcesNetRowsBegin(ui, deviceModes);
      diaSetEnum(ui, CFG_MMCEMODE, deviceModes);
-@@ -3399,11 +3673,19 @@ static int guiSettingsShowSources(void)
+@@ -3399,11 +3774,19 @@ static int guiSettingsShowSources(void)
      guiSettingsBeginDialog(ui);
  
  reshow_sources:
@@ -84681,7 +84820,7 @@ index 2b110ad..4c39e9c 100644
      if (result == MMCE_SETTINGS_BUTTON) {
          // MMCE uses a separate composition buffer. Confirming the child editor finishes the
          // Settings page and returns to the hub; Circle resumes Game Sources as the parent page.
-@@ -3417,29 +3699,21 @@ reshow_sources:
+@@ -3417,29 +3800,21 @@ reshow_sources:
          result = UIID_BTN_OK;
      }
  
@@ -84714,7 +84853,7 @@ index 2b110ad..4c39e9c 100644
  
          bdmForceDeviceRefresh();
          applyConfig(-1, -1, 0);
-@@ -3507,9 +3781,11 @@ static int guiSettingsDisplayUpdater(int modified)
+@@ -3507,9 +3882,11 @@ static int guiSettingsDisplayUpdater(int modified)
      return 0;
  }
  
@@ -84728,7 +84867,7 @@ index 2b110ad..4c39e9c 100644
      const char *vmodeNames[] = {_l(_STR_AUTO), "PAL 640x512i @50Hz 24bit", "NTSC 640x448i @60Hz 24bit",
                                  "EDTV 640x448p @60Hz 24bit", "EDTV 640x512p @50Hz 24bit", "VGA 640x480p @60Hz 24bit",
                                  "PAL 704x576i @50Hz 16bit", "NTSC 704x480i @60Hz 16bit",
-@@ -3517,12 +3793,62 @@ static int guiSettingsShowInterface(void)
+@@ -3517,12 +3894,62 @@ static int guiSettingsShowInterface(void)
                                  "HDTV 1280x720p @60Hz 16bit", "HDTV 1920x1080i @60Hz 16bit",
                                  "PAL 640x256p @50Hz 24bit", "NTSC 640x224p @60Hz 24bit",
                                  "PAL 640x512i @50Hz 24bit (FLICKER-FREE)", "NTSC 640x448i @60Hz 24bit (FLICKER-FREE)", NULL};
@@ -84795,26 +84934,30 @@ index 2b110ad..4c39e9c 100644
      int gameViewChanged = 0;
      int cfgTitlesChanged = 0;
      int appsViewChanged = 0;
-@@ -3533,7 +3859,6 @@ static int guiSettingsShowInterface(void)
+@@ -3533,18 +3960,18 @@ static int guiSettingsShowInterface(void)
      showCfgPopup = 0;
      guiResetNotifications();
      previousTheme = thmGetGuiValue();
 -    previousVMode = gVMode;
  
      guiLock();
-     themeNamesSnap = guiCopyNameList((const char **)thmGetGuiList());
-@@ -3543,8 +3868,9 @@ static int guiSettingsShowInterface(void)
+-    themeNamesSnap = guiCopyNameList((const char **)thmGetGuiList());
++    themeNamesSnap = guiCopyThemeNames(); // build 114: the built-in themes first
+     langNamesSnap = guiCopyNameList((const char **)lngGetGuiList());
+     guiUnlock();
+     diaSetEnum(ui, UICFG_THEME, themeNamesSnap != NULL ? themeNamesSnap : (const char **)thmGetGuiList());
      diaSetEnum(ui, UICFG_LANG, langNamesSnap != NULL ? langNamesSnap : (const char **)lngGetGuiList());
      guiSetGameViewPicker(ui);
      guiSetAppsViewPicker(ui);
 -    diaSetEnum(ui, UICFG_VMODE, vmodeNames);
-     diaSetInt(ui, UICFG_THEME, thmGetGuiValue());
+-    diaSetInt(ui, UICFG_THEME, thmGetGuiValue());
++    diaSetInt(ui, UICFG_THEME, guiThemeShown(thmGetGuiValue()));
 +    diaSetEnum(ui, UICFG_RIPPS2_SELECT_HOLD, guiHoldModes); // build 114
 +    diaSetInt(ui, UICFG_RIPPS2_SELECT_HOLD, gRipps2SelectHold);
      diaSetInt(ui, UICFG_LANG, lngGetGuiValue());
      diaSetInt(ui, UICFG_AUTOSORT, gAutosort);
      diaSetInt(ui, UICFG_AUTOREFRESH, gAutoRefresh);
-@@ -3554,19 +3880,17 @@ static int guiSettingsShowInterface(void)
+@@ -3554,19 +3981,17 @@ static int guiSettingsShowInterface(void)
      // Keep the editor reachable even when the current theme has no active Coverflow view; users
      // need to be able to configure it before enabling or switching to a Coverflow-capable theme.
      diaSetVisible(ui, UICFG_COVERFLOW_BUTTON, 1);
@@ -84839,7 +84982,7 @@ index 2b110ad..4c39e9c 100644
      if (result == UICFG_ARTWORK_BUTTON) {
          guiShowArtworkConfig();
          goto reshow_interface;
-@@ -3584,15 +3908,12 @@ reshow_interface:
+@@ -3584,15 +4009,13 @@ reshow_interface:
              guiSettingsSavePending = 1;
          goto reshow_interface;
      }
@@ -84852,11 +84995,12 @@ index 2b110ad..4c39e9c 100644
      if (result != UIID_BTN_CANCEL && result != -1) {
          diaGetInt(ui, UICFG_LANG, &langID);
          diaGetInt(ui, UICFG_THEME, &themeID);
++        themeID = guiThemeId(themeID);
 +        diaGetInt(ui, UICFG_RIPPS2_SELECT_HOLD, &gRipps2SelectHold); // build 114
          diaGetInt(ui, UICFG_AUTOSORT, &gAutosort);
          diaGetInt(ui, UICFG_AUTOREFRESH, &gAutoRefresh);
          diaGetInt(ui, UICFG_NOTIFICATIONS, &gEnableNotifications);
-@@ -3604,11 +3925,6 @@ reshow_interface:
+@@ -3604,11 +4027,6 @@ reshow_interface:
          }
          gameViewChanged = guiReadGameViewPicker(ui);
          appsViewChanged = guiReadAppsViewPicker(ui);
@@ -84868,7 +85012,7 @@ index 2b110ad..4c39e9c 100644
          {
              int gameIDMode;
              diaGetInt(ui, CFG_APPLYGAMEID, &gameIDMode);
-@@ -3617,8 +3933,6 @@ reshow_interface:
+@@ -3617,8 +4035,6 @@ reshow_interface:
  
          if (previousTheme != themeID && isBgmPlaying())
              bgmStop();
@@ -84877,7 +85021,7 @@ index 2b110ad..4c39e9c 100644
          applyConfig(themeID, langID, 1);
          if (cfgTitlesChanged) {
              guiRefreshCfgTitles(); // rebuilds every game list, which also covers a view change
-@@ -3631,11 +3945,6 @@ reshow_interface:
+@@ -3631,11 +4047,6 @@ reshow_interface:
              sfxReload(-1);             // sound was the beep's moment); RIPPS2 build 95: on the IO worker
          if (gEnableBGM && !isBgmPlaying())
              bgmStart();
@@ -84889,7 +85033,7 @@ index 2b110ad..4c39e9c 100644
      }
  
      guiFreeNameList(themeNamesSnap);
-@@ -3937,9 +4246,9 @@ static int guiSettingsShowIndex(int *page)
+@@ -3937,9 +4348,9 @@ static int guiSettingsShowIndex(int *page)
          _l(_STR_MENU_NETWORK),
          _l(_STR_INTERFACE_SETTINGS),
          _l(_STR_GAME_LAUNCHING),
@@ -84902,7 +85046,7 @@ index 2b110ad..4c39e9c 100644
  #ifdef RETROACHIEVEMENTS
          _l(_STR_RIPPS2_ACHIEVEMENTS), // build 80: moved here from the main menu, last of the pages
  #endif
-@@ -5157,6 +5466,13 @@ static void guiShow()
+@@ -5157,6 +5568,13 @@ static void guiShow()
          screenHandler->renderScreen();
  }
  
@@ -84916,7 +85060,7 @@ index 2b110ad..4c39e9c 100644
  void guiIntroLoop(void)
  {
      // RIPPS2: no boot splash, no fade and no boot jingle. The pillars play their boot swoop on
-@@ -5428,13 +5744,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5428,13 +5846,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
  
          if (ui)
              diaRenderUI(ui, screenHandler->inMenu, NULL, 0);
@@ -87099,7 +87243,7 @@ index 4c28157..ba683b0 100644
  
  // Launch a PS1/.VCD entry BY NAME via POPSTARTER (view-independent entry point: the in-view menu
 diff --git a/src/opl.c b/src/opl.c
-index 13c78db..1baf7a5 100644
+index 13c78db..3b8cd19 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -50,6 +50,8 @@
@@ -87301,6 +87445,15 @@ index 13c78db..1baf7a5 100644
  
      // Drain is finished; now fade the status screen to black before device/GS teardown.
      guiFadeOutForHandoff(_l(_STR_PLEASE_WAIT));
+@@ -5580,7 +5629,7 @@ static void setDefaults(void)
+     gRAMode = RA_MODE_XERABORA;
+     memset(gRAHostIp, 0, sizeof(gRAHostIp));
+     gRATelemetry = 0; // opt in: telemetry puts SMAP on the NIC in every launch that has a .wl
+-    gRABadges = 1;    // free once telemetry is on -- raBadgeRefresh runs on the I/O thread
++    gRABadges = 0; // build 114 (the user, 10/24): off until the user turns it on (with TELEMETRY on first)
+     gRAExperimentalCards = 0;
+ #endif
+     gEnableArt = 1;
 @@ -5730,6 +5779,7 @@ static void init(void)
      ioNameAction((void *)&ripps2SaveSettingsWorker, "QUIET SETTINGS SAVE");
      ioNameAction((void *)&deferredInit, "STARTUP");
@@ -90289,6 +90442,55 @@ index ce09083..3b36c8e 100644
              } else {
                  char ask[300], size[24], name[33], path[48];
                  snprintf(name, sizeof(name), "%s", p->name); // the list is read again below: keep the name
+diff --git a/src/ripps2ra.c b/src/ripps2ra.c
+index cc9ccd9..4ddf14c 100644
+--- a/src/ripps2ra.c
++++ b/src/ripps2ra.c
+@@ -563,21 +563,24 @@ void ripps2Achievements(void)
+         // build 70: in the lowercase font, short enough for the page either way (the ON line ran off it)
+         fntRenderString(RIPPS2_CASE_FONT, RA_X, 98, ALIGN_VCENTER, RA_W, 0,
+                         gRATelemetry ? _t("On: tracked games report their unlocks to xeRAbora on your PC.") : _t("Off: games start just as they would without it."), RA_SOFT);
+-        // build 80: BADGES is on by default and costs nothing until TELEMETRY is on and xeRAbora answers
++        // build 114 (the user, 10/24): BADGES starts Off; its note says what it gives, wrapped to the page; it needs TELEMETRY
+         if (sel == RA_ROW_BADGES)
+-            fntRenderString(RIPPS2_CASE_FONT, RA_X, RA_Y + RA_ROW_COUNT * RA_ROW_H + 40, ALIGN_VCENTER, RA_W, 0,
+-                            _t("Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing."), RA_DIM);
++            raWrapLines(RIPPS2_CASE_FONT, RA_X, RA_Y + RA_ROW_COUNT * RA_ROW_H + 40, RA_W, 18,
++                        _t("Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on."),
++                        RA_DIM, 1);
+         for (i = 0; i < RA_ROW_COUNT; i++) {
+             int y = RA_Y + i * RA_ROW_H + (i >= RA_ROW_TEST ? 12 : 0) + (i >= RA_ROW_ACCOUNT ? 12 : 0), cur = i == sel;
+             if (cur) {
+                 rmDrawRect(RA_X - 8, y - 2, RA_W + 16, RA_ROW_H - 4, RA_PRIM(0x1E, 0x3C, 0x96, 0x58));
+                 rmDrawRect(RA_X - 8, y - 2, 3, RA_ROW_H - 4, RA_PRIM(0x6A, 0x9A, 0xFF, 0x80));
+             }
+-            fntRenderString(gTheme->fonts[8], RA_X + 6, y + 11, ALIGN_VCENTER, 0, 0, _t(raRowName[i]), cur ? RA_LIT : RA_SOFT);
++            // build 114: BADGES greys out while TELEMETRY is off (it cannot engage without it), and says OFF
++            int grey = i == RA_ROW_BADGES && !gRATelemetry;
++            fntRenderString(gTheme->fonts[8], RA_X + 6, y + 11, ALIGN_VCENTER, 0, 0, _t(raRowName[i]), grey ? RA_DIM : cur ? RA_LIT : RA_SOFT);
+             if (i == RA_ROW_TELEMETRY || i == RA_ROW_BADGES) {
+-                int on = i == RA_ROW_TELEMETRY ? gRATelemetry : gRABadges;
++                int on = i == RA_ROW_TELEMETRY ? gRATelemetry : gRABadges && gRATelemetry;
+                 const char *v = on ? _t("ON") : _t("OFF");
+-                fntRenderString(gTheme->fonts[5], RA_X + RA_W - fntCalcDimensions(gTheme->fonts[5], v), y + 11, ALIGN_VCENTER, 0, 0, v,
++                fntRenderString(gTheme->fonts[5], RA_X + RA_W - rmUnScaleX(fntCalcDimensions(gTheme->fonts[5], v)), y + 11, ALIGN_VCENTER, 0, 0, v,
+                                 on ? RA_GOLD : RA_DIM);
+             }
+         }
+@@ -608,8 +611,12 @@ void ripps2Achievements(void)
+         } else if ((sel == RA_ROW_TELEMETRY || sel == RA_ROW_BADGES) && (getKeyOn(openKey) || getKeyOn(KEY_LEFT) || getKeyOn(KEY_RIGHT))) {
+             if (sel == RA_ROW_TELEMETRY)
+                 gRATelemetry = !gRATelemetry;
+-            else
++            else if (gRATelemetry) // build 114: BADGES only once TELEMETRY is on
+                 gRABadges = !gRABadges;
++            else {
++                sfxPlay(SFX_ERROR);
++                continue;
++            }
+             changed = 1;
+             sfxPlay(SFX_CONFIRM);
+         } else if (sel == RA_ROW_ACCOUNT && (getKeyOn(openKey) || getKeyOn(KEY_START))) {
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
 new file mode 100644
 index 0000000..aeaa17a
@@ -91253,7 +91455,7 @@ index f2c48c4..c1bcf7f 100644
              if (rescan)
                  stScan();
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 02b03e6..ef865c0 100644
+index 02b03e6..03fe071 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -143,9 +143,12 @@ static int catSwapMode(void)
@@ -91312,7 +91514,7 @@ index 02b03e6..ef865c0 100644
      float h[9] = {0.213f + c * 0.787f - s * 0.213f, 0.715f - c * 0.715f - s * 0.715f, 0.072f - c * 0.072f + s * 0.928f,
                    0.213f - c * 0.213f + s * 0.143f, 0.715f + c * 0.285f + s * 0.140f, 0.072f - c * 0.072f - s * 0.283f,
                    0.213f - c * 0.213f - s * 0.787f, 0.715f - c * 0.715f + s * 0.715f, 0.072f + c * 0.928f + s * 0.072f};
-@@ -319,26 +332,323 @@ static void paletteBuild(int p)
+@@ -319,26 +332,371 @@ static void paletteBuild(int p)
              float v = 0.0f;
              for (k = 0; k < 3; k++)
                  v += ((i == k ? sat : 0.0f) + L[k] * (1.0f - sat)) * h[k * 3 + j];
@@ -91433,6 +91635,8 @@ index 02b03e6..ef865c0 100644
 +static const float sweepSecs[3] = {9.0f, 6.0f, 3.5f}; // Slow, Normal, Lively: a colour's time
 +static ripps2_sweep_t sweepUser[RIPPS2_SWEEP_USER];
 +static int sweepUserCount = 0;
++// build 114 (the user, 10/24): a speed picked for one of RIPPS2's sweeps, kept as its own (-1: as it comes); no copy
++static signed char sweepBuiltinSpeed[RIPPS2_SWEEP_BUILTIN] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 +static ripps2_sweep_t sweepPreview, sweepSolved;
 +static int sweepPreviewOn = 0, sweepSolvedValid = 0;
 +static float sweepP[5][3]; // each colour's tint (hue, sat, lift), worked out once per sweep
@@ -91444,9 +91648,11 @@ index 02b03e6..ef865c0 100644
 +
 +int ripps2SweepGet(int i, ripps2_sweep_t *out)
 +{
-+    if (i >= 1 && i <= RIPPS2_SWEEP_BUILTIN)
++    if (i >= 1 && i <= RIPPS2_SWEEP_BUILTIN) {
 +        *out = sweepBuiltin[i - 1];
-+    else if (i > RIPPS2_SWEEP_BUILTIN && i <= ripps2SweepCount())
++        if (sweepBuiltinSpeed[i - 1] >= 0)
++            out->speed = sweepBuiltinSpeed[i - 1];
++    } else if (i > RIPPS2_SWEEP_BUILTIN && i <= ripps2SweepCount())
 +        *out = sweepUser[i - 1 - RIPPS2_SWEEP_BUILTIN];
 +    else
 +        return 0;
@@ -91479,6 +91685,27 @@ index 02b03e6..ef865c0 100644
 +    if (sweepUser[k].speed < 0 || sweepUser[k].speed > 2)
 +        sweepUser[k].speed = 1;
 +    return RIPPS2_SWEEP_BUILTIN + 1 + k;
++}
++
++// build 114: one of RIPPS2's sweeps at the speed picked (its colours and name as they are)
++void ripps2SweepSetSpeed(int i, int speed)
++{
++    if (i >= 1 && i <= RIPPS2_SWEEP_BUILTIN && speed >= 0 && speed <= 2)
++        sweepBuiltinSpeed[i - 1] = (signed char)(speed == sweepBuiltin[i - 1].speed ? -1 : speed);
++    sweepSolvedValid = 0;
++}
++
++// build 114: one of the user's own sweeps gone; the sweep in use after it (cur, as gRipps2Sweep) as it now numbers: Off
++// when it was the one deleted
++int ripps2SweepDelete(int i, int cur)
++{
++    int k = i - 1 - RIPPS2_SWEEP_BUILTIN;
++    if (k < 0 || k >= sweepUserCount)
++        return cur;
++    memmove(&sweepUser[k], &sweepUser[k + 1], (sweepUserCount - k - 1) * sizeof(sweepUser[0]));
++    sweepUserCount--;
++    sweepSolvedValid = 0;
++    return cur == i ? 0 : cur > i ? cur - 1 : cur;
 +}
 +
 +void ripps2SweepPreview(const ripps2_sweep_t *s)
@@ -91616,6 +91843,18 @@ index 02b03e6..ef865c0 100644
 +    }
 +    if (configGetInt(config, "ripps2_sweep", &value) && value >= 0 && value <= ripps2SweepCount())
 +        gRipps2Sweep = value;
++    // build 114: the speeds picked for RIPPS2's own sweeps ("1,-1,2,..." in their order)
++    for (i = 0; i < RIPPS2_SWEEP_BUILTIN; i++)
++        sweepBuiltinSpeed[i] = -1;
++    if (configGetStr(config, "ripps2_sweep_speeds", &v) && v != NULL)
++        for (i = 0; i < RIPPS2_SWEEP_BUILTIN && *v; i++) {
++            int s = atoi(v);
++            sweepBuiltinSpeed[i] = (signed char)(s >= 0 && s <= 2 ? s : -1);
++            while (*v && *v != ',')
++                v++;
++            if (*v == ',')
++                v++;
++        }
 +}
 +
 +void ripps2ColorsSaveConfig(config_set_t *config)
@@ -91624,6 +91863,17 @@ index 02b03e6..ef865c0 100644
 +    int i, k;
 +    configSetColor(config, "ripps2_palette_custom", gRipps2CustomColor);
 +    configSetInt(config, "ripps2_sweep", gRipps2Sweep);
++    {
++        int n = 0, any = 0;
++        for (i = 0; i < RIPPS2_SWEEP_BUILTIN && n < (int)sizeof(line); i++) {
++            n += snprintf(line + n, sizeof(line) - n, "%s%d", i ? "," : "", sweepBuiltinSpeed[i]);
++            any |= sweepBuiltinSpeed[i] >= 0;
++        }
++        if (any)
++            configSetStr(config, "ripps2_sweep_speeds", line);
++        else
++            configRemoveKey(config, "ripps2_sweep_speeds");
++    }
 +    for (i = 0; i < RIPPS2_SWEEP_USER; i++) {
 +        snprintf(key, sizeof(key), "ripps2_sweep%d", i + 1);
 +        if (i >= sweepUserCount) {
@@ -91643,7 +91893,7 @@ index 02b03e6..ef865c0 100644
  // Category Order: Memory Files and Launch Disc trade places on the bar (Storage stays in the middle).
  // A category's place on the bar, and the category at a place: the same swap both ways.
  static int catSlot(int cat)
-@@ -2002,3 +2312,97 @@ int ripps2StickSide(void)
+@@ -2002,3 +2360,97 @@ int ripps2StickSide(void)
      padGetRightStick(&sx, &sy);
      return sx > 100 ? 1 : sx < -100 ? -1 : 0;
  }
