@@ -87720,10 +87720,10 @@ index 4bedb0c..5bcb226 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..662a6c5
+index 0000000..bc9c0a6
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,2065 @@
+@@ -0,0 +1,2066 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -89689,8 +89689,9 @@ index 0000000..662a6c5
 +        guiMsgBox(msg, 0, NULL);
 +        return;
 +    }
-+    // packing reads the ISO and writes about two thirds of it; the check reads that again
-+    mins = (int)((double)j.inBytes * (j.pack ? 2.4 : 2.7) / (zpSpeed(r.mode) * 1048576.0) / 60.0 + 0.5);
++    // packing reads the ISO twice (its sizes, then its data) and writes about two thirds of it; the check reads that again.
++    // Unpacking reads the ZSO, writes the ISO and reads it back (the lab, 10/23: 2.4 said 5 min for 11)
++    mins = (int)((double)j.inBytes * (j.pack ? 3.4 : 2.7) / (zpSpeed(r.mode) * 1048576.0) / 60.0 + 0.5);
 +    lrSize(j.inBytes, a, sizeof(a));
 +    snprintf(info, sizeof(info), _t("%s on %s"), a, where);
 +    if (mins < 1)
