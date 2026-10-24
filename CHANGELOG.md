@@ -124,12 +124,19 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
 
 ### Hide Game and Compression
 - A game's Triangle options say **Hide Game and Compression** for an ISO or ZSO (USB, MX4SIO, iLink, the exFAT HDD,
-  MMCE): **Hide Game** as before, **Compress to ZSO**, or for a ZSO **Uncompress to ISO**.
+  MMCE), named either way (Name.iso, or OPL Manager's SCUS_XXX.XX.Name.iso): **Hide Game** as before, **Compress to
+  ZSO**, or for a ZSO **Uncompress to ISO**.
+- **Room first.** Before anything starts, the drive is asked for its free space: the new image needs about the old one's
+  size beside it while it works (the original stays to the end). Short of room, it says how much is needed and how much
+  is free, and nothing changes. (RiptOPL's exFAT/FAT driver, as RIPPS2 builds it, now answers that question; MMCE cannot
+  say, and there the work stops cleanly if the drive fills.)
 - **Experimental, and asked twice**: a panel with RIPDISC's notches shows the game, its size, its drive and about how
   long it takes, and fills while you hold SELECT; then a second yes. A RIPPS2 progress bar runs the whole way
   (COMPRESSING 1 OF 2, 2 OF 2, CHECKING EVERY PIECE) with CANCEL, which removes what was written.
 - **Nothing is lost.** The ISO stays until the ZSO has been read back and every piece checked against it, and only then
-  does RIPPS2 ask before removing it. The ZSO starts with the OPL core (Neutrino does not read ZSO); its VMC, settings,
+  does RIPPS2 ask before removing it. The lab showed why the check is there: written in pieces of any length, the
+  driver now and then put a 32 KB cluster over the one before it, and the check caught it every time. The new image now
+  goes to the drive in whole aligned 256 KB pieces, as RIPDISC's rips and Memory Files' copies always did. The ZSO starts with the OPL core (Neutrino does not read ZSO); its VMC, settings,
   art and cheats are the same game's. Uncompress makes the ISO again the same way.
 - **Hidden Games too**: Settings > Game Sources > Hidden Games offers Compress to ZSO (or Uncompress to ISO) beside
   Show Again and Delete, and marks a compressed one PS2 ZSO. A hidden game stays hidden once compressed.
