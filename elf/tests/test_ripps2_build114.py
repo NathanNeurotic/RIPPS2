@@ -166,6 +166,18 @@ need(gm_, (('#define ZP_STAGE (256 * 1024)', 'the stage'), ('j.stage = memalign(
            ('if (!zpOut(j, in, cnt * 2048)) {', 'and the ISO made again')), 'ripps2games.c write stage')
 if 'zpWriteAll(j->fdOut, out' in gm_ or 'zpWriteAll(j->fdOut, ent' in gm_ or 'zpWriteAll(j->fdOut, head' in gm_ or 'zpWriteAll(j->fdOut, in,' in gm_:
     fail.append('ripps2games.c: nothing reaches the new image except through the stage')
+# the same shape elsewhere (a big write starting at an odd place): RIPPS2.LST in one write, RIPDISC's rips staged, the stdio
+# writers of big files with 256 KB buffers
+sb2_ = rd('src/supportbase.c')
+if 'if (write(fd, one, sizeof(h) + bytes) == (int)(sizeof(h) + bytes))' not in sb2_ or 'write(fd, &h, sizeof(h))' in sb2_:
+    fail.append('supportbase.c: RIPPS2.LST written in one write from its start')
+dc2_ = rd('src/ripps2disc.c')
+need(dc2_, (('#define RD_STAGE (256 * 1024)', "RIPDISC's stage"), ('if (!rdPut(p, n))', 'rips through it'), ('static int rdClose(void)', 'flushed on close'),
+            ('if (r == RD_OK && rdStageFail)', 'a last piece that could not be written fails the rip')), 'ripps2disc.c stage')
+if dc2_.count('close(rdFd);') != 1 or dc2_.count('rdClose()') < 7:  # the one left is rdClose's own
+    fail.append('ripps2disc.c: every close of a rip goes through rdClose')
+if 'setvbuf(f, NULL, _IOFBF, 256 * 1024);' not in rd('src/ripps2shot.c') or 'setvbuf(w.f, NULL, _IOFBF, 256 * 1024);' not in rd('src/ripps2biossnd.c'):
+    fail.append('RIPSHOT and BIOS Music write through 256 KB stdio buffers')
 # room for the new image before compression starts (the user, 10/23): the driver RIPPS2 builds answers a free-space devctl
 need(gm_, (('static long long zpFreeKb(const char *path)', 'the drive asked for its free space'),
            ('fileXioDevctl(dev, RIPPS2_DEVCTL_FREE_KB, NULL, 0, &kb, sizeof(kb)) == 0', 'through the driver'),

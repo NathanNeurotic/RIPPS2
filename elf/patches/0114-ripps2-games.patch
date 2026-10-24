@@ -87484,11 +87484,104 @@ index 4f99d23..668955a 100644
  }
  
  // ---------------------------------------------------------------- orbs
+diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
+index 688c06a..11d84ce 100644
+--- a/src/ripps2biossnd.c
++++ b/src/ripps2biossnd.c
+@@ -1338,7 +1338,9 @@ static int rbsRipPiece(const unsigned char *img, int imgSize, int piece, int sam
+ 
+     snprintf(mb, sizeof(mb), _t("%u.%u MB"), bytes / 1048576, bytes % 1048576 * 10 / 1048576);
+     snprintf(path, sizeof(path), "%s%s", dir, file);
+-    if ((w.f = fopen(path, "wb")) == NULL) {
++    if ((w.f = fopen(path, "wb")) != NULL) // build 114: stdio writes whole 256 KB buffers at multiples of it
++        setvbuf(w.f, NULL, _IOFBF, 256 * 1024);
++    if (w.f == NULL) {
+         snprintf(msg, msgSize, _t("%s could not be made. Is the drive write-protected?"), path);
+         return 0;
+     }
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
-index fa2ee5d..8a6a94d 100644
+index fa2ee5d..51e2034 100644
 --- a/src/ripps2disc.c
 +++ b/src/ripps2disc.c
-@@ -550,6 +550,39 @@ static void rdRing(int cx, int cy, float p, int a)
+@@ -424,7 +424,7 @@ static void rdUndo(void)
+ {
+     int i;
+     if (rdFd >= 0) {
+-        close(rdFd);
++        rdClose();
+         rdFd = -1;
+     }
+     for (i = rdMadeCount - 1; i >= 0; i--) { // files first (they were added after their folders), then the folders
+@@ -448,13 +448,57 @@ static int rdCreate(const char *path)
+ static int rdNextPart(void)
+ {
+     char path[220];
+-    if (rdFd >= 0)
+-        close(rdFd);
++    if (rdFd >= 0 && !rdClose())
++        return 0;
+     snprintf(path, sizeof(path), "%s%02x", rdPartBase, rdPart++);
+     rdPartLeft = RD_UL_PART;
+     return rdCreate(path);
+ }
+ 
++// build 114 (the lab, 10/23: on exFAT, a write that started at an odd place in a file and ran across a cluster slipped a
++// cluster now and then): a rip's file goes to the drive in whole RD_STAGE pieces at multiples of it, the rest when the
++// file closes (rdClose). A data rip's 2048-byte sectors were aligned already; a raw or audio rip's 2352-byte ones, after
++// a WAV header, were not
++#define RD_STAGE (256 * 1024)
++static u8 *rdStage;
++static u32 rdFill;
++static int rdStageFail; // the last piece of a file could not be written: the rip says so instead of finishing
++
++static int rdPut(const u8 *p, u32 n)
++{
++    if (rdStage == NULL && (rdStage = memalign(64, RD_STAGE)) == NULL)
++        return write(rdFd, p, n) == (int)n; // no room for the stage: as before
++    while (n > 0) {
++        u32 take = RD_STAGE - rdFill < n ? RD_STAGE - rdFill : n;
++        memcpy(rdStage + rdFill, p, take);
++        rdFill += take;
++        p += take;
++        n -= take;
++        if (rdFill == RD_STAGE) {
++            if (write(rdFd, rdStage, RD_STAGE) != RD_STAGE)
++                return 0;
++            rdFill = 0;
++        }
++    }
++    return 1;
++}
++
++// the stage's rest written, then the file closed; 0 when the rest could not be written
++static int rdClose(void)
++{
++    int ok = 1;
++    if (rdFd >= 0) {
++        if (rdFill > 0 && write(rdFd, rdStage, rdFill) != (int)rdFill) {
++            ok = 0;
++            rdStageFail = 1;
++        }
++        close(rdFd);
++    }
++    rdFd = -1;
++    rdFill = 0;
++    return ok;
++}
++
+ static int rdWrite(const void *data, u32 bytes)
+ {
+     const u8 *p = data;
+@@ -466,7 +510,7 @@ static int rdWrite(const void *data, u32 bytes)
+             if (n > rdPartLeft)
+                 n = rdPartLeft;
+         }
+-        if (write(rdFd, p, n) != (int)n)
++        if (!rdPut(p, n))
+             return 0;
+         p += n;
+         bytes -= n;
+@@ -550,6 +594,39 @@ static void rdRing(int cx, int cy, float p, int a)
      }
  }
  
@@ -87528,7 +87621,7 @@ index fa2ee5d..8a6a94d 100644
  static void rdPage(void) // the page under every RIPDISC step: the towers and the category bar
  {
      ripps2DrawBackground();
-@@ -561,7 +594,7 @@ void ripps2DiscRipRender(void)
+@@ -561,7 +638,7 @@ void ripps2DiscRipRender(void)
  {
      double now = ripps2Seconds();
      int kind = ripps2DiscInfo(NULL, 0, NULL, 0);
@@ -87537,7 +87630,7 @@ index fa2ee5d..8a6a94d 100644
      float t, a;
      const char *hold = _t("HOLD");
  
-@@ -589,11 +622,11 @@ void ripps2DiscRipRender(void)
+@@ -589,11 +666,11 @@ void ripps2DiscRipRender(void)
      // build 113: the ring has its own room, the button at its centre, HOLD after it, the pair centred
      hx = 320 - (RD_RING_W + 6 + ripps2HintWidth(hold)) / 2;
      float p = rdHolding ? (float)(now - rdHoldSince) / RD_HOLD_S : 0.0f;
@@ -87552,7 +87645,7 @@ index fa2ee5d..8a6a94d 100644
  }
  
  // The rip's screen, a few times a second: what, how far, how long is left; 0 when it is to stop (asked first)
-@@ -940,10 +973,14 @@ static void rdBufFree(void)
+@@ -940,10 +1017,14 @@ static void rdBufFree(void)
  {
      free(rdBuf);
      rdBuf = NULL;
@@ -87567,6 +87660,85 @@ index fa2ee5d..8a6a94d 100644
      rdWhat = what;
      rdDone = 0;
      rdBytes = bytes;
+@@ -952,6 +1033,8 @@ static void rdBegin(const char *what, u64 bytes)
+     rdMadeCount = 0;
+     rdFd = -1;
+     rdSplit = 0;
++    rdFill = 0;
++    rdStageFail = 0;
+ }
+ 
+ // The data sectors [from, to) into the open file (or split parts)
+@@ -1115,7 +1198,7 @@ static void rdRipGame(void)
+             r = rdCopyRaw(rdStart[t], rdStart[t + 1], rdAudio[t]);
+         if (r == RD_OK) {
+             char cue[300], bin[80];
+-            close(rdFd);
++            rdClose();
+             rdFd = -1;
+             snprintf(bin, sizeof(bin), "%s.bin", name);
+             snprintf(cue, sizeof(cue), "%s/%s.cue", dir, name);
+@@ -1139,7 +1222,7 @@ static void rdRipGame(void)
+             r = rdCopyData(0, rdSectors);
+             if (r == RD_OK) { // the parts are all there: now ul.cfg lists the game
+                 int fd;
+-                close(rdFd);
++                rdClose();
+                 rdFd = -1;
+                 memset(&e, 0, sizeof(e));
+                 memcpy(e.name, nm, nl);
+@@ -1164,12 +1247,14 @@ static void rdRipGame(void)
+                 r = rdCopyData(0, rdSectors);
+         }
+     }
++    if (rdFd >= 0)
++        rdClose();
++    if (r == RD_OK && rdStageFail)
++        r = RD_WRITE_FAIL;
+     if (r != RD_OK) {
+         rdFailed(r);
+         return;
+     }
+-    if (rdFd >= 0)
+-        close(rdFd);
+     rdFd = -1;
+     sceCdStop();
+     sceCdSync(0);
+@@ -1206,7 +1291,7 @@ static int rdRipAudio(const char *dir)
+             return RD_WRITE_FAIL;
+         rdDone += sizeof(head);
+         r = rdCopyRaw(rdStart[t], rdStart[t + 1], 1);
+-        close(rdFd);
++        rdClose();
+         rdFd = -1;
+     }
+     return r;
+@@ -1250,7 +1335,7 @@ static int rdRipVideo(const char *dir)
+             if (!rdTick())
+                 return RD_CANCEL;
+         }
+-        close(rdFd);
++        rdClose();
+         rdFd = -1;
+     }
+     if (r == RD_OK) { // players look for it, empty or not
+@@ -1325,12 +1410,14 @@ int ripps2DiscRipHere(const char *dir, char *made, int size)
+     snprintf(base, sizeof(base), "%s%s", dir, folder);
+     r = kind == RIPPS2_DISC_AUDIO ? rdRipAudio(base) : rdRipVideo(base);
+     rdBufFree();
++    if (rdFd >= 0)
++        rdClose();
++    if (r == RD_OK && rdStageFail)
++        r = RD_WRITE_FAIL;
+     if (r != RD_OK) {
+         rdFailed(r);
+         return 0;
+     }
+-    if (rdFd >= 0)
+-        close(rdFd);
+     rdFd = -1;
+     rdMadeCount = 0;
+     sceCdStop();
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
 index 459b24e..5651a19 100644
 --- a/src/ripps2ember.c
@@ -90494,10 +90666,10 @@ index 0000000..aeaa17a
 +    return 0;
 +}
 diff --git a/src/ripps2shot.c b/src/ripps2shot.c
-index a883b4b..324b0cd 100644
+index a883b4b..3d816a2 100644
 --- a/src/ripps2shot.c
 +++ b/src/ripps2shot.c
-@@ -516,8 +516,21 @@ void ripps2ShotFillConfig(struct EECoreConfig_t *config, const char *mode)
+@@ -516,10 +516,25 @@ void ripps2ShotFillConfig(struct EECoreConfig_t *config, const char *mode)
  
  // ---- developing (step 5): a kept shot to its PNGs
  
@@ -90519,7 +90691,11 @@ index a883b4b..324b0cd 100644
 +static int rsPngNow(const char *path, const u8 *idx, int w, int h, int twice, const u8 *pal, int n)
  {
      FILE *f = fopen(path, "wb");
++    if (f != NULL) // build 114: stdio writes whole 256 KB buffers at multiples of it (exFAT slipped odd-placed writes)
++        setvbuf(f, NULL, _IOFBF, 256 * 1024);
      png_structp png;
+     png_infop info;
+     png_color pc[256];
 diff --git a/src/ripps2status.c b/src/ripps2status.c
 index f2c48c4..6168630 100644
 --- a/src/ripps2status.c
@@ -91335,7 +91511,7 @@ index 43ed8bd..f4d22b4 100644
  /* MENU RUMBLE TIMING -- the RETROLauncher model, which is the reference for feedback that actually
     reads as feedback on hardware. Two shapes, and the split matters more than either value:
 diff --git a/src/supportbase.c b/src/supportbase.c
-index 0517e61..ed715d5 100644
+index 0517e61..04c5e85 100644
 --- a/src/supportbase.c
 +++ b/src/supportbase.c
 @@ -4,6 +4,7 @@
@@ -91387,7 +91563,15 @@ index 0517e61..ed715d5 100644
  
      return count;
  }
-@@ -784,16 +794,22 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+@@ -776,6 +786,7 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+     char path[256];
+     sb_snap_hdr_t h;
+     unsigned int sum;
++    unsigned char *one;
+     int fd, bytes;
+ 
+     snap->tried = 1;
+@@ -784,25 +795,42 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
          return;
      snprintf(path, sizeof(path), "%s%s", prefix, SB_SNAP_FILE);
      if (gamecount <= 0 || list == NULL) { // nothing there now: no list to show next time
@@ -91405,22 +91589,36 @@ index 0517e61..ed715d5 100644
 -    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
 +    if (!ioWriteBegin()) // build 114: a scan that outlasted a launch's drain writes nothing
 +        return;
++    // build 114 (the lab, 10/23): the header and the list in one write from the file's start. Written apart, the list began
++    // at byte 32 and ran across clusters, the shape that slipped a cluster on exFAT (compression's ZSO, studied on the PC)
++    bytes = gamecount * (int)sizeof(base_game_info_t);
++    if ((one = memalign(64, sizeof(h) + bytes)) == NULL) {
++        ioWriteEnd();
++        return;
++    }
 +    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0) {
++        free(one);
 +        ioWriteEnd();
          return;
 +    }
      memset(&h, 0, sizeof(h));
      memcpy(h.magic, SB_SNAP_MAGIC, 8);
      h.count = gamecount;
-@@ -803,6 +819,7 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
-     if (write(fd, &h, sizeof(h)) == (int)sizeof(h) && write(fd, list, bytes) == bytes)
+     h.fsize = fsize;
+     h.itemSize = (int)sizeof(base_game_info_t);
+-    bytes = gamecount * (int)sizeof(base_game_info_t);
+-    if (write(fd, &h, sizeof(h)) == (int)sizeof(h) && write(fd, list, bytes) == bytes)
++    memcpy(one, &h, sizeof(h));
++    memcpy(one + sizeof(h), list, bytes);
++    if (write(fd, one, sizeof(h) + bytes) == (int)(sizeof(h) + bytes))
          snap->sum = sum;
      close(fd);
++    free(one);
 +    ioWriteEnd();
  }
  
  void sbSnapForget(sb_snap_t *snap)
-@@ -924,10 +941,7 @@ static const struct
+@@ -924,10 +952,7 @@ static const struct
      int compatModes;
  } sbTitleCompatDefaults[] = {
      {"SLES_511.14", COMPAT_MODE_1}, // Pro Evolution Soccer 2 (Europe): streamed audio breaks without Accurate Reads (upstream OPL #1686)
@@ -91432,7 +91630,7 @@ index 0517e61..ed715d5 100644
  };
  
  int sbTitleCompatDefault(config_set_t *configSet)
-@@ -1081,6 +1095,11 @@ int sbPrepare(base_game_info_t *game, config_set_t *configSet, int size_cdvdman,
+@@ -1081,6 +1106,11 @@ int sbPrepare(base_game_info_t *game, config_set_t *configSet, int size_cdvdman,
          settings->flags |= IOPCORE_COMPAT_ACCU_READS;
      }
  
@@ -91444,7 +91642,7 @@ index 0517e61..ed715d5 100644
      if (compatmask & COMPAT_MODE_2) {
          settings->flags |= IOPCORE_COMPAT_ALT_READ;
      }
-@@ -1847,6 +1866,8 @@ static const char *sbNeutrinoResolved(const char *path)
+@@ -1847,6 +1877,8 @@ static const char *sbNeutrinoResolved(const char *path)
  {
      if (path == NULL)
          return NULL;
@@ -91453,7 +91651,7 @@ index 0517e61..ed715d5 100644
      const char *slash = sbLastPathSeparator(path);
      if (slash != NULL) {
          char vpath[320], ver[128]; // same headroom rationale as sbNeutrinoInstallComplete's probe
-@@ -2433,6 +2454,18 @@ const char *sbResolveNeutrinoPath(const char *activePrefix)
+@@ -2433,6 +2465,18 @@ const char *sbResolveNeutrinoPath(const char *activePrefix)
              return mcHit;
      }
  
