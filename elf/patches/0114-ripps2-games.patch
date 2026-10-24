@@ -88228,10 +88228,10 @@ index 4bedb0c..0225897 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..00d2024
+index 0000000..849a11e
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,2162 @@
+@@ -0,0 +1,2163 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -90279,8 +90279,9 @@ index 0000000..00d2024
 +        return;
 +    }
 +    // packing reads the ISO twice (its sizes, then its data) and writes about two thirds of it; the check reads that again.
-+    // Unpacking reads the ZSO, writes the ISO and reads it back (the lab, 10/23: 2.4 said 5 min for 11)
-+    mins = (int)((double)j.inBytes * (j.pack ? 3.4 : 2.7) / (zpSpeed(r.mode) * 1048576.0) / 60.0 + 0.5);
++    // Unpacking reads the ZSO, writes the ISO and reads it back (the lab, 10/23: 2.4 said 5 min for 11; 10/24: packing
++    // Poinie's Poin, 1.2 GB on the internal HDD, at 3.4 said 7 min and took 10.5, the bar's own estimate right from 8%)
++    mins = (int)((double)j.inBytes * (j.pack ? 4.8 : 2.7) / (zpSpeed(r.mode) * 1048576.0) / 60.0 + 0.5);
 +    lrSize(j.inBytes, a, sizeof(a));
 +    snprintf(info, sizeof(info), _t("%s on %s"), a, where);
 +    if (mins < 1)
