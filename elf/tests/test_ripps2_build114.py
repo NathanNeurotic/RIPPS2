@@ -336,7 +336,7 @@ need(pk_, (('#define ZP_MAGIC 0x4F53495A', 'the ZISO header'), ('#define ZP_HEAD
 if '(*g)->format != GAME_FORMAT_OLD_ISO) || (*g)->parts != 1' not in pk_:
     fail.append('ripps2games.c: only a whole ISO or ZSO (never a split UL game)')
 need(rd('src/menusys.c'), (('packable ? _STR_RIPPS2_HIDE_COMPRESS : _STR_RIPPS2_HIDE_GAME', 'the row says Compression where it applies'),
-                           ('ripps2PackGame(support, id);', 'the pick runs it')), 'menusys.c')
+                           ('ripps2PackGame(support, id, pick == 2);', 'the pick runs it')), 'menusys.c')
 # the lab (10/23): ps2sdk's exFAT driver lost whole clusters of a file written at two places or growing beside another.
 # A ZSO is written in one straight stream (the sizes first, in a side file that alone grows then), and RIPPS2's own
 # background writes are held off while a compression or a RIPDISC rip runs
