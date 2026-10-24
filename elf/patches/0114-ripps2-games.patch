@@ -87720,10 +87720,10 @@ index 4bedb0c..5bcb226 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..bc9c0a6
+index 0000000..0dae147
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,2066 @@
+@@ -0,0 +1,2106 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -87766,6 +87766,7 @@ index 0000000..bc9c0a6
 +#include <time.h>        // build 114: the launch guard's moment for a short job
 +#define NEWLIB_PORT_AWARE
 +#include <fileXio_rpc.h> // fileXioRemove on hdd0: (the partition), fileXioDevctl (a drive's free space)
++#include <malloc.h>        // memalign: compression's write stage
 +#include "include/vmc_alloc.h" // build 114: RIPPS2_DEVCTL_FREE_KB
 +
 +#include "include/opl.h"
@@ -88963,6 +88964,7 @@ index 0000000..bc9c0a6
 +#define ZP_RUN   64         // blocks read, packed and checked at a time (128 KB)
 +#define ZP_IDX   16384      // index entries held before they are written back in place
 +#define ZP_HOLD  4.2        // SELECT held to go on, as RIPDISC's
++#define ZP_STAGE (256 * 1024) // the new image is given to the drive this much at a time (zpOut)
 +
 +typedef struct
 +{
@@ -88971,6 +88973,8 @@ index 0000000..bc9c0a6
 +    s64 inBytes, outBytes, done, work; // work: every byte read on the way, for the bar
 +    double began, drawnAt;
 +    char name[160], why[96]; // why: where it stopped, for the message and a tester's report
++    unsigned char *stage;    // the new image's next piece (zpOut), 64-byte aligned
++    int fill;
 +} zp_job_t;
 +
 +static void zpWhy(zp_job_t *j, const char *what, s64 at)
@@ -89289,6 +89293,36 @@ index 0000000..bc9c0a6
 +    return 1;
 +}
 +
++// The new image goes to the drive in whole ZP_STAGE pieces, from a 64-byte-aligned buffer, at positions that are
++// multiples of it; the rest is the last write (zpOutFlush). The lab, 10/23 (SCPS_150.13.POINIES POIN.zso.part, studied on
++// the PC): written as packed, in writes of any length, the drive layer now and then put a cluster's data over the one
++// before it, inside a single write, and every cluster after landed one further back. RIPPS2's aligned writers (RIPDISC's
++// rips, Memory Files' copies) never did.
++static int zpOut(zp_job_t *j, const void *data, int n)
++{
++    const unsigned char *p = data;
++    while (n > 0) {
++        int take = ZP_STAGE - j->fill < n ? ZP_STAGE - j->fill : n;
++        memcpy(j->stage + j->fill, p, take);
++        j->fill += take;
++        p += take;
++        n -= take;
++        if (j->fill == ZP_STAGE) {
++            if (!zpWriteAll(j->fdOut, j->stage, ZP_STAGE))
++                return 0;
++            j->fill = 0;
++        }
++    }
++    return 1;
++}
++
++static int zpOutFlush(zp_job_t *j)
++{
++    int n = j->fill;
++    j->fill = 0;
++    return n == 0 || zpWriteAll(j->fdOut, j->stage, n);
++}
++
 +// a ZSO read straight through, two handles on it: the index from just after the header, the data from where it starts
 +// (no seek after the first: the lab found a read-back that seeked about between them going wrong on exFAT)
 +typedef struct
@@ -89383,7 +89417,7 @@ index 0000000..bc9c0a6
 +    *(u32 *)(head + 16) = 2048;
 +    head[20] = 1;
 +    head[21] = (unsigned char)j->align;
-+    if (!zpWriteAll(j->fdOut, head, ZP_HEAD)) {
++    if (!zpOut(j, head, ZP_HEAD)) {
 +        zpWhy(j, "writing the header", 0);
 +        return 0;
 +    }
@@ -89407,7 +89441,7 @@ index 0000000..bc9c0a6
 +            pos += sz[k] & 0x7FFF;
 +            pos += (unit - (pos & (unit - 1))) & (unit - 1);
 +        }
-+        if (!zpWriteAll(j->fdOut, ent, got * 4)) {
++        if (!zpOut(j, ent, got * 4)) {
 +            zpWhy(j, "writing the index", (s64)b * 2048);
 +            close(fdS);
 +            return 0;
@@ -89419,7 +89453,7 @@ index 0000000..bc9c0a6
 +    pos = ZP_HEAD + (s64)(j->blocks + 1) * 4;
 +    n = (int)((unit - (pos & (unit - 1))) & (unit - 1));
 +    memset(ent + 1, 0, 16);
-+    if (!zpWriteAll(j->fdOut, ent, 4) || (n && !zpWriteAll(j->fdOut, ent + 1, n))) {
++    if (!zpOut(j, ent, 4) || (n && !zpOut(j, ent + 1, n))) {
 +        zpWhy(j, "writing the index", j->inBytes);
 +        return 0;
 +    }
@@ -89458,7 +89492,7 @@ index 0000000..bc9c0a6
 +            memset(out + o, 0, pad);
 +            o += pad;
 +        }
-+        if (!zpWriteAll(j->fdOut, out, o)) {
++        if (!zpOut(j, out, o)) {
 +            zpWhy(j, "writing the ZSO", (s64)b * 2048);
 +            close(fdS);
 +            return 0;
@@ -89534,7 +89568,7 @@ index 0000000..bc9c0a6
 +            break;
 +        }
 +        j->crcs[b / ZP_RUN] = crc32(0L, in, cnt * 2048);
-+        if (!zpWriteAll(j->fdOut, in, cnt * 2048)) {
++        if (!zpOut(j, in, cnt * 2048)) {
 +            zpWhy(j, "writing the ISO", (s64)b * 2048);
 +            rv = 0;
 +            break;
@@ -89717,7 +89751,8 @@ index 0000000..bc9c0a6
 +    blk = malloc(2048 + 64);
 +    idx = malloc(ZP_IDX * 4);
 +    j.crcs = malloc((j.blocks / ZP_RUN + 1) * 4);
-+    if (in == NULL || out == NULL || blk == NULL || idx == NULL || j.crcs == NULL) {
++    j.stage = memalign(64, ZP_STAGE);
++    if (in == NULL || out == NULL || blk == NULL || idx == NULL || j.crcs == NULL || j.stage == NULL) {
 +        guiMsgBoxSound(SFX_ERROR);
 +        guiMsgBox(_t("There is not enough memory for this just now."), 0, NULL);
 +        goto end;
@@ -89735,6 +89770,10 @@ index 0000000..bc9c0a6
 +        zpWhy(&j, "making the new file", 0);
 +    else
 +        rv = j.pack ? zpPack(&j, idxPath, in, out, blk, idx) : zpUnpack(&j, src, in, out, cap);
++    if (rv == 1 && !zpOutFlush(&j)) { // the last piece of the stage
++        zpWhy(&j, "writing the last piece", j.inBytes);
++        rv = 0;
++    }
 +    unlink(idxPath); // the index's side file, made by packing
 +    if (j.fdOut >= 0 && close(j.fdOut) < 0 && rv == 1)
 +        rv = 0;
@@ -89789,6 +89828,7 @@ index 0000000..bc9c0a6
 +    free(blk);
 +    free(idx);
 +    free(j.crcs);
++    free(j.stage);
 +}
 diff --git a/src/ripps2hdd.c b/src/ripps2hdd.c
 index ce09083..3b36c8e 100644

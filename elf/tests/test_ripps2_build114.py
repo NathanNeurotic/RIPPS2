@@ -159,6 +159,13 @@ need(gm_, (('void ripps2DrawProgress(const char *head, const char *name, long lo
            ('ripps2DrawProgress("COPYING", name, done, total, NULL, 0);', 'drawn as it copies'), ('j->name, j->done, j->work, left, 1);', 'compression draws the same panel')), 'ripps2games.c progress')
 if '(*g)->format != GAME_FORMAT_ISO && (*g)->format != GAME_FORMAT_OLD_ISO' not in gm_:
     fail.append('ripps2games.c: a game named the old way (SCUS_XXX.XX.Name.iso) can be compressed too')
+# the lab (10/23, SCPS_150.13.POINIES POIN.zso.part studied on the PC): packed data written in writes of any length came out
+# a cluster off now and then inside one write; the new image goes to the drive in whole aligned stage pieces
+need(gm_, (('#define ZP_STAGE (256 * 1024)', 'the stage'), ('j.stage = memalign(64, ZP_STAGE);', 'an aligned buffer'),
+           ('if (rv == 1 && !zpOutFlush(&j)) {', 'the rest written last'), ('if (!zpOut(j, out, o)) {', 'the packed data through it'),
+           ('if (!zpOut(j, in, cnt * 2048)) {', 'and the ISO made again')), 'ripps2games.c write stage')
+if 'zpWriteAll(j->fdOut, out' in gm_ or 'zpWriteAll(j->fdOut, ent' in gm_ or 'zpWriteAll(j->fdOut, head' in gm_ or 'zpWriteAll(j->fdOut, in,' in gm_:
+    fail.append('ripps2games.c: nothing reaches the new image except through the stage')
 # room for the new image before compression starts (the user, 10/23): the driver RIPPS2 builds answers a free-space devctl
 need(gm_, (('static long long zpFreeKb(const char *path)', 'the drive asked for its free space'),
            ('fileXioDevctl(dev, RIPPS2_DEVCTL_FREE_KB, NULL, 0, &kb, sizeof(kb)) == 0', 'through the driver'),
