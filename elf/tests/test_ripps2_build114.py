@@ -166,6 +166,14 @@ need(gm_, (('#define ZP_STAGE (256 * 1024)', 'the stage'), ('j.stage = memalign(
            ('if (!zpOut(j, in, cnt * 2048)) {', 'and the ISO made again')), 'ripps2games.c write stage')
 if 'zpWriteAll(j->fdOut, out' in gm_ or 'zpWriteAll(j->fdOut, ent' in gm_ or 'zpWriteAll(j->fdOut, head' in gm_ or 'zpWriteAll(j->fdOut, in,' in gm_:
     fail.append('ripps2games.c: nothing reaches the new image except through the stage')
+# (the user, 10/23) compressing keeps a game visible; Hide and Compress hides it once the work is done and checked
+need(gm_, (('static int shAdd(const sh_row_t *rr)', 'one hidden-list write for both'), ('void ripps2PackGame(item_list_t *support, int id, int hideAfter)', 'the job told'),
+           ('if (hideAfter && shAdd(&r) == 1) {', 'hidden only when asked, and only after success')), 'ripps2games.c Hide and Compress')
+if gm_.find('if (hideAfter && shAdd(&r) == 1) {') < gm_.find('rv = zpCheck(&j, tmp, in, out, cap);'):
+    fail.append('ripps2games.c: Hide and Compress hides only after the check')
+ms_ = rd('src/menusys.c')
+if 'ripps2PackGame(support, id, pick == 2);' not in ms_ or 'ripps2PickList(items, kind == 1 ? 3 : 2)' not in ms_:
+    fail.append('menusys.c: Hide Game, Compress to ZSO, Hide and Compress (an ISO); Hide Game, Uncompress to ISO (a ZSO)')
 # the same shape elsewhere (a big write starting at an odd place): RIPPS2.LST in one write, RIPDISC's rips staged, the stdio
 # writers of big files with 256 KB buffers
 sb2_ = rd('src/supportbase.c')

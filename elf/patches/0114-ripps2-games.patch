@@ -14598,7 +14598,7 @@ index a10c426..e152366 100644
  void ripps2LaunchDiscArmGeneric(void);                             // a disc with no art (Launch Disc, DVD, a VCD)
 diff --git a/include/ripps2games.h b/include/ripps2games.h
 new file mode 100644
-index 0000000..600e345
+index 0000000..e031006
 --- /dev/null
 +++ b/include/ripps2games.h
 @@ -0,0 +1,20 @@
@@ -14619,7 +14619,7 @@ index 0000000..600e345
 +void ripps2LastRites(item_list_t *support, int id);         // the game options' Delete, every source but Apps
 +int ripps2ApaCheck(char *why, int whySize);                 // 1: the APA table fits this disk (why: what does not)
 +int ripps2PackKind(item_list_t *support, int id);           // build 114: 1 an ISO to compress, 2 a ZSO to make an ISO, 0 neither
-+void ripps2PackGame(item_list_t *support, int id);          // the game options' Compress to ZSO / Uncompress to ISO
++void ripps2PackGame(item_list_t *support, int id, int hideAfter);          // the game options' Compress to ZSO / Uncompress to ISO
 +
 +#endif
 diff --git a/include/ripps2seance.h b/include/ripps2seance.h
@@ -86122,7 +86122,7 @@ index 6bb34ce..2b0a704 100644
                      thmSetGuiValue(thmGetGuiValue(), 1);
                      bgmUnMute();
 diff --git a/src/menusys.c b/src/menusys.c
-index 879e0d7..4dab87e 100644
+index 879e0d7..1f08c7e 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -33,6 +33,7 @@
@@ -86156,7 +86156,7 @@ index 879e0d7..4dab87e 100644
  };
  
  // global menu variables
-@@ -246,6 +250,27 @@ static void menuRenameGame(submenu_list_t **submenu)
+@@ -246,6 +250,28 @@ static void menuRenameGame(submenu_list_t **submenu)
          guiMsgBox("NULL Support object. Please report", 0, NULL);
  }
  
@@ -86169,14 +86169,15 @@ index 879e0d7..4dab87e 100644
 +    int id = selected_item->item->current->item.id;
 +    int kind = ripps2PackKind(support, id), pick = 0; // build 114: Hide Game and Compression
 +    if (kind > 0) {
-+        const char *items[2] = {_l(_STR_RIPPS2_HIDE_GAME), kind == 1 ? _t("Compress to ZSO") : _t("Uncompress to ISO")};
-+        if ((pick = ripps2PickList(items, 2)) < 0)
++        // (the user, 10/23: compressing keeps the game visible; Hide and Compress hides it once it is done)
++        const char *items[3] = {_l(_STR_RIPPS2_HIDE_GAME), kind == 1 ? _t("Compress to ZSO") : _t("Uncompress to ISO"), _t("Hide and Compress")};
++        if ((pick = ripps2PickList(items, kind == 1 ? 3 : 2)) < 0)
 +            return; // backed out: the options stay open
 +    }
 +    guiSwitchScreen(GUI_SCREEN_MAIN);
 +    submenuDestroy(submenu);
-+    if (pick == 1)
-+        ripps2PackGame(support, id);
++    if (pick >= 1)
++        ripps2PackGame(support, id, pick == 2);
 +    else
 +        ripps2ShroudHide(support, id);
 +}
@@ -86184,7 +86185,7 @@ index 879e0d7..4dab87e 100644
  static void menuDeleteGame(submenu_list_t **submenu)
  {
      if (!selected_item->item->current)
-@@ -256,6 +281,17 @@ static void menuDeleteGame(submenu_list_t **submenu)
+@@ -256,6 +282,17 @@ static void menuDeleteGame(submenu_list_t **submenu)
  
      item_list_t *support = selected_item->item->userdata;
  
@@ -86202,7 +86203,7 @@ index 879e0d7..4dab87e 100644
      if (support && support->mode == FAV_MODE) {
          char text[128];
          snprintf(text, sizeof(text), _l(_STR_FAV_MSG), _l(_STR_DELETE));
-@@ -800,13 +836,17 @@ void menuInitGameMenu(item_list_t *support)
+@@ -800,13 +837,17 @@ void menuInitGameMenu(item_list_t *support)
          int fav = support != NULL && support->mode == FAV_MODE;
          if (fav || (support != NULL && support->itemRename != NULL && support->mode != HDD_MODE))
              submenuAppendItem(&gameMenu, -1, NULL, GAME_RENAME_GAME, _STR_RENAME);
@@ -86224,7 +86225,7 @@ index 879e0d7..4dab87e 100644
  #endif
  
      gameMenuCurrent = gameMenu;
-@@ -842,17 +882,30 @@ void menuInitVcdMenu(int isEmber)
+@@ -842,17 +883,30 @@ void menuInitVcdMenu(int isEmber)
      if (isEmber)
          submenuAppendItem(&appMenu, -1, NULL, APP_EMBER_GAME_SETTINGS, _STR_EMBER_GAME_SETTINGS);
      submenuAppendItem(&appMenu, -1, NULL, APP_RENAME, _STR_RENAME);
@@ -86260,7 +86261,7 @@ index 879e0d7..4dab87e 100644
  // -------------------------------------------------------------------------------------------
  // ---------------------------------------- Menu manipulation --------------------------------
  // -------------------------------------------------------------------------------------------
-@@ -1377,7 +1430,10 @@ static void menuFolderResetLeaving(struct menu_list *leaving)
+@@ -1377,7 +1431,10 @@ static void menuFolderResetLeaving(struct menu_list *leaving)
  
  static void menuNextH()
  {
@@ -86272,7 +86273,7 @@ index 879e0d7..4dab87e 100644
      while (next != NULL && next->item->visible == 0)
          next = next->next;
  
-@@ -1386,13 +1442,19 @@ static void menuNextH()
+@@ -1386,13 +1443,19 @@ static void menuNextH()
          menuFolderResetLeaving(selected_item);
          selected_item = next;
          itemConfigId = -1;
@@ -86294,7 +86295,7 @@ index 879e0d7..4dab87e 100644
      while (prev != NULL && prev->item->visible == 0)
          prev = prev->prev;
  
-@@ -1400,8 +1462,12 @@ static void menuPrevH()
+@@ -1400,8 +1463,12 @@ static void menuPrevH()
          menuFolderResetLeaving(selected_item);
          selected_item = prev;
          itemConfigId = -1;
@@ -86308,7 +86309,7 @@ index 879e0d7..4dab87e 100644
  }
  
  static void menuFirstPage()
-@@ -2150,29 +2216,84 @@ static menu_list_t *menuSourceAt(int i)
+@@ -2150,29 +2217,84 @@ static menu_list_t *menuSourceAt(int i)
      return NULL;
  }
  
@@ -86396,7 +86397,7 @@ index 879e0d7..4dab87e 100644
      menu_list_t *m = menuSourceAt(i);
      item_list_t *list = m != NULL ? m->item->userdata : NULL;
      return list != NULL ? list->mode : -1;
-@@ -2183,8 +2304,13 @@ int menuSourceCurrent(void)
+@@ -2183,8 +2305,13 @@ int menuSourceCurrent(void)
      int i = 0;
      menu_list_t *m;
      for (m = menu; m != NULL; m = m->next) {
@@ -86411,7 +86412,7 @@ index 879e0d7..4dab87e 100644
          i += m->item->visible != 0;
      }
      return 0;
-@@ -2192,6 +2318,8 @@ int menuSourceCurrent(void)
+@@ -2192,6 +2319,8 @@ int menuSourceCurrent(void)
  
  void menuSourceSelect(int i)
  {
@@ -86420,7 +86421,7 @@ index 879e0d7..4dab87e 100644
      menu_list_t *m = menuSourceAt(i);
      if (m == NULL || m == selected_item)
          return;
-@@ -2423,7 +2551,9 @@ void menuHandleInputMain()
+@@ -2423,7 +2552,9 @@ void menuHandleInputMain()
      }
  
      // RIPPS2 build 79: SELECT. A press refreshes the list when it is let go (within 4.2 s); held 4.2 s it
@@ -86431,7 +86432,7 @@ index 879e0d7..4dab87e 100644
      {
          static clock_t selectSince = 0;
          static int selectHeld = 0, selectCycled = 0;
-@@ -2432,9 +2562,12 @@ void menuHandleInputMain()
+@@ -2432,9 +2563,12 @@ void menuHandleInputMain()
              selectCycled = 0;
              selectSince = clock();
          } else if (selectHeld && getKeyPressed(KEY_SELECT)) {
@@ -86446,7 +86447,7 @@ index 879e0d7..4dab87e 100644
              }
          } else if (selectHeld) {
              selectHeld = 0;
-@@ -2718,6 +2851,10 @@ void menuHandleInputGameMenu()
+@@ -2718,6 +2852,10 @@ void menuHandleInputGameMenu()
          int menuID = gameMenuCurrent->item.id;
  
          sfxPlay(SFX_CONFIRM);
@@ -86457,7 +86458,7 @@ index 879e0d7..4dab87e 100644
  
  #ifdef RETROACHIEVEMENTS
          if (menuID == GAME_RA_CHECK) {
-@@ -2815,6 +2952,8 @@ void menuHandleInputGameMenu()
+@@ -2815,6 +2953,8 @@ void menuHandleInputGameMenu()
              menuRenameGame(&gameMenu);
          } else if (menuID == GAME_DELETE_GAME) {
              menuDeleteGame(&gameMenu);
@@ -86466,7 +86467,7 @@ index 879e0d7..4dab87e 100644
          }
          // so the exit press wont propagate twice
          readPads();
-@@ -2957,6 +3096,10 @@ void menuHandleInputAppMenu()
+@@ -2957,6 +3097,10 @@ void menuHandleInputAppMenu()
          int menuID = appMenuCurrent->item.id;
  
          sfxPlay(SFX_CONFIRM);
@@ -86477,7 +86478,7 @@ index 879e0d7..4dab87e 100644
  
          if (menuID == APP_CASE_SHAPE) { // build 102: PS1, PS2, Theme, round again
              thmAppCaseShapeSet(appCaseTitle(), (thmAppCaseShape(appCaseTitle()) + 1) % THM_APP_CASES_N);
-@@ -2966,6 +3109,8 @@ void menuHandleInputAppMenu()
+@@ -2966,6 +3110,8 @@ void menuHandleInputAppMenu()
              menuRenameGame(&appMenu);
          } else if (menuID == APP_DELETE) {
              menuDeleteGame(&appMenu);
@@ -87892,10 +87893,10 @@ index 4bedb0c..5bcb226 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..0dae147
+index 0000000..355be48
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,2106 @@
+@@ -0,0 +1,2122 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -88207,19 +88208,13 @@ index 0000000..0dae147
 +    return 1;
 +}
 +
-+void ripps2ShroudHide(item_list_t *support, int id)
++// a game onto its drive's hidden list: 1 done, 0 failed (said), -1 the drive keeps no list (said). Hide Game and
++// Hide and Compress (build 114) share it
++static int shAdd(const sh_row_t *rr)
 +{
-+    char msg[400];
-+    sh_row_t r;
++    sh_row_t r = *rr;
 +    shroud_t *s;
 +    int ok;
-+
-+    if (!shResolve(support, id, &r))
-+        return;
-+    snprintf(msg, sizeof(msg), _t("Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again."), r.name);
-+    guiMsgBoxSound(SFX_MESSAGE);
-+    if (guiMsgBox(msg, 1, NULL) != 1)
-+        return;
 +    // the lab, 10/22: written while the IO worker was reading the drive again, RIPPS2.HID was made and its data never
 +    // landed. Hold the worker off first (before the lock, which the worker's own scan takes), as LAST RITES does.
 +    ioBlockOps(1);
@@ -88231,7 +88226,7 @@ index 0000000..0dae147
 +        ioBlockOps(0);
 +        guiMsgBoxSound(SFX_ERROR);
 +        guiMsgBox(_t("This drive cannot keep a hidden list (a network catalogue)."), 0, NULL);
-+        return;
++        return -1;
 +    }
 +    if (s->names == NULL) {
 +        s->names = malloc(SH_MAX * sizeof(*s->names));
@@ -88250,9 +88245,25 @@ index 0000000..0dae147
 +    if (!ok) {
 +        guiMsgBoxSound(SFX_ERROR);
 +        guiMsgBox(_t("The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?"), 0, NULL);
-+        return;
++        return 0;
 +    }
 +    shRefresh(r.mode);
++    return 1;
++}
++
++void ripps2ShroudHide(item_list_t *support, int id)
++{
++    char msg[400];
++    sh_row_t r;
++
++    if (!shResolve(support, id, &r))
++        return;
++    snprintf(msg, sizeof(msg), _t("Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again."), r.name);
++    guiMsgBoxSound(SFX_MESSAGE);
++    if (guiMsgBox(msg, 1, NULL) != 1)
++        return;
++    if (shAdd(&r) != 1)
++        return;
 +    snprintf(msg, sizeof(msg), _t("HIDDEN: %s"), r.name);
 +    guiShowToast(msg);
 +}
@@ -89089,7 +89100,7 @@ index 0000000..0dae147
 +                    item_list_t view = *mod->support;
 +                    view.viewOverride = ITEM_VIEW_FORCE_ISO;
 +                    zpUnder = hgDrawUnder; // the page stays under the panel and the bar
-+                    ripps2PackGame(&view, id);
++                    ripps2PackGame(&view, id, 0);
 +                    zpUnder = NULL;
 +                }
 +            } else if (pick == 1) {
@@ -89813,7 +89824,7 @@ index 0000000..0dae147
 +    return ok;
 +}
 +
-+void ripps2PackGame(item_list_t *support, int id)
++void ripps2PackGame(item_list_t *support, int id, int hideAfter)
 +{
 +    char prefix[160], src[300], dst[300], tmp[310], idxPath[310], info[200], msg[400], a[24], b[64], *dot;
 +    sh_row_t r;
@@ -89989,6 +90000,12 @@ index 0000000..0dae147
 +    if (guiMsgBox(msg, 1, NULL) && unlink(src) == 0) {
 +        lrSize(j.pack ? j.inBytes - j.outBytes : 0, a, sizeof(a));
 +        snprintf(msg, sizeof(msg), j.pack ? _t("COMPRESSED %s: %s FREED") : _t("UNCOMPRESSED %s"), r.name, a);
++        guiShowToast(msg);
++    }
++    // build 114 (the user, 10/23): Hide and Compress hides it once the work is done and checked; Compress alone keeps it
++    // visible (the hidden list goes by the game's name, which a ZSO keeps)
++    if (hideAfter && shAdd(&r) == 1) {
++        snprintf(msg, sizeof(msg), _t("COMPRESSED AND HIDDEN: %s"), r.name);
 +        guiShowToast(msg);
 +    }
 +    shRefresh(r.mode);

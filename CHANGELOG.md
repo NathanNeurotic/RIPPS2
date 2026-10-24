@@ -129,7 +129,8 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
 ### Hide Game and Compression
 - A game's Triangle options say **Hide Game and Compression** for an ISO or ZSO (USB, MX4SIO, iLink, the exFAT HDD,
   MMCE), named either way (Name.iso, or OPL Manager's SCUS_XXX.XX.Name.iso): **Hide Game** as before, **Compress to
-  ZSO**, or for a ZSO **Uncompress to ISO**.
+  ZSO** (the game stays in your lists), **Hide and Compress** (hidden once the ZSO is made and checked; a cancel or a
+  failure hides nothing), or for a ZSO **Uncompress to ISO**.
 - **Room first.** Before anything starts, the drive is asked for its free space: the new image needs about the old one's
   size beside it while it works (the original stays to the end). Short of room, it says how much is needed and how much
   is free, and nothing changes. (RiptOPL's exFAT/FAT driver, as RIPPS2 builds it, now answers that question; MMCE cannot
