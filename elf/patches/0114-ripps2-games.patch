@@ -460,10 +460,10 @@ index 3dd5ace..5d8d947 100644
  mkdir -p "$WORK/mmceman/mmceman/obj"
 diff --git a/.github/scripts/install_safe_bdmfs.py b/.github/scripts/install_safe_bdmfs.py
 new file mode 100644
-index 0000000..b9773b4
+index 0000000..ccf27df
 --- /dev/null
 +++ b/.github/scripts/install_safe_bdmfs.py
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,180 @@
 +#!/usr/bin/env python3
 +"""Rebuild the installed SDK's own BDM driver with the reviewed VMC walker guard.
 +
@@ -521,6 +521,34 @@ index 0000000..b9773b4
 +    main.write_text(entry, encoding='utf-8')
 +
 +
++# RIPPS2 build 114: the volume's free space in KB, for compression's room check (f_getfree reads exFAT's bitmap once)
++RIPPS2_FREE_KB = '''        case RIPPS2_DEVCTL_FREE_KB: {
++            int vol = fs_driver_resolve_volume(fd->device->name, fd->unit);
++            char root[3] = {0, ':', 0};
++            DWORD nclst = 0;
++            FATFS *vfs = NULL;
++            unsigned long long kb;
++            if (vol < 0 || vol > 9 || buf == NULL || buflen < 4) {
++                ret = -EINVAL;
++                break;
++            }
++            root[0] = (char)('0' + vol);
++            if (f_getfree(root, &nclst, &vfs) != FR_OK || vfs == NULL) {
++                ret = -EIO;
++                break;
++            }
++#if FF_MAX_SS != FF_MIN_SS
++            kb = (unsigned long long)nclst * vfs->csize * vfs->ssize / 1024;
++#else
++            kb = (unsigned long long)nclst * vfs->csize * FF_MAX_SS / 1024;
++#endif
++            *(unsigned int *)buf = kb > 0xFFFFFFFFULL ? 0xFFFFFFFFu : (unsigned int)kb;
++            ret = 0;
++            break;
++        }
++'''
++
++
 +def stage_allocation(sdk_source, repo):
 +    driver = sdk_source / 'iop/fs/bdmfs_fatfs/src/fs_driver.c'
 +    source = driver.read_text(encoding='utf-8')
@@ -542,7 +570,7 @@ index 0000000..b9773b4
 +    source = source[:index] + cases + source[index:]
 +    start = source.index('static int fs_devctl(')
 +    index = source.index('        case USBMASS_DEVCTL_STOP_UNIT:', start)
-+    source = source[:index] + '        case VMC_ALLOC_CAPS:\n            ret = VMC_ALLOC_V1;\n            break;\n' + source[index:]
++    source = source[:index] + '        case VMC_ALLOC_CAPS:\n            ret = VMC_ALLOC_V1;\n            break;\n' + RIPPS2_FREE_KB + source[index:]
 +    source = '#include "vmc_alloc.h"\n' + source
 +    driver.write_text(source, encoding='utf-8')
 +    shutil.copyfile(repo / 'include/vmc_alloc.h', driver.with_name('vmc_alloc.h'))
@@ -14714,10 +14742,10 @@ index 3a53d87..0130819 100644
  // Interim BDM-UDPFS Assault configuration: the IRXs may come from any POPS source,
 diff --git a/include/vmc_alloc.h b/include/vmc_alloc.h
 new file mode 100644
-index 0000000..acea402
+index 0000000..5c8ab4c
 --- /dev/null
 +++ b/include/vmc_alloc.h
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,18 @@
 +/* Private, versioned RiptOPL BDM allocation contract. Shared by EE/IOP/driver.
 + * Success is a positive magic value; an unsupported ioctl returning zero fails.
 + */
@@ -14728,6 +14756,8 @@ index 0000000..acea402
 +#define VMC_ALLOC_VERIFY      0x564D4302
 +#define VMC_ALLOC_V1          0x564D0101
 +#define VMC_CREATE_CONTIGUOUS 1
++/* RIPPS2 build 114: a volume's free space in KB (a u32 into buf), asked before a game is compressed */
++#define RIPPS2_DEVCTL_FREE_KB 0x52500001
 +typedef struct
 +{
 +    unsigned int version;
@@ -87690,10 +87720,10 @@ index 4bedb0c..5bcb226 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..61f4161
+index 0000000..ff1ce74
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,2024 @@
+@@ -0,0 +1,2056 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -87735,7 +87765,8 @@ index 0000000..61f4161
 +#include <delaythread.h> // shResolve waits for a drive rereading its list
 +#include <time.h>        // build 114: the launch guard's moment for a short job
 +#define NEWLIB_PORT_AWARE
-+#include <fileXio_rpc.h> // fileXioRemove on hdd0: (the partition)
++#include <fileXio_rpc.h> // fileXioRemove on hdd0: (the partition), fileXioDevctl (a drive's free space)
++#include "include/vmc_alloc.h" // build 114: RIPPS2_DEVCTL_FREE_KB
 +
 +#include "include/opl.h"
 +#include "include/gui.h"
@@ -89021,7 +89052,9 @@ index 0000000..61f4161
 +    *view = *mod->support;
 +    view->viewOverride = ITEM_VIEW_FORCE_ISO;
 +    *g = (const base_game_info_t *)view->itemGet(view, r->id);
-+    if (*g == NULL || (*g)->format != GAME_FORMAT_ISO || (*g)->parts != 1)
++    // a plain Name.iso and the old SCUS_XXX.XX.Name.iso naming (OPL Manager's, most libraries') alike: OPL reads either as
++    // .iso or .zso (the lab, 10/23: SCPS_150.13.POINIES POIN.iso offered no compression)
++    if (*g == NULL || ((*g)->format != GAME_FORMAT_ISO && (*g)->format != GAME_FORMAT_OLD_ISO) || (*g)->parts != 1)
 +        return 0;
 +    snprintf(r->name, sizeof(r->name), "%s", (*g)->name);
 +    return 1;
@@ -89460,6 +89493,19 @@ index 0000000..61f4161
 +    return 1;
 +}
 +
++// build 114: the free space of the drive a path is on, in KB; -1 when the drive cannot say (RiptOPL's exFAT/FAT driver as
++// RIPPS2 builds it answers; MMCE and older drivers do not)
++static long long zpFreeKb(const char *path)
++{
++    char dev[16];
++    const char *c = strchr(path, ':');
++    unsigned int kb = 0;
++    if (c == NULL || c - path + 1 >= (int)sizeof(dev))
++        return -1;
++    snprintf(dev, sizeof(dev), "%.*s", (int)(c - path + 1), path);
++    return fileXioDevctl(dev, RIPPS2_DEVCTL_FREE_KB, NULL, 0, &kb, sizeof(kb)) == 0 ? (long long)kb : -1;
++}
++
 +// ZSO to ISO: 1 done, 0 failed, -1 stopped
 +static int zpUnpack(zp_job_t *j, const char *src, unsigned char *in, unsigned char *cbuf, int cap)
 +{
@@ -89562,6 +89608,7 @@ index 0000000..61f4161
 +    unsigned char *in = NULL, *out = NULL, *blk = NULL;
 +    u32 *idx = NULL;
 +    int kind, rv = 0, cap, mins, sep;
++    long long need, freeKb;
 +    const char *pfx, *where;
 +
 +    if (!zpRow(support, id, &r, &view, &g) || (kind = ripps2PackKind(support, id)) == 0)
@@ -89618,6 +89665,21 @@ index 0000000..61f4161
 +        return;
 +    }
 +    j.blocks = (u32)(j.inBytes / 2048);
++    // build 114 (the user, 10/23): room for the new image before anything starts, the original staying to the end. A ZSO
++    // can come out a little bigger than its ISO (a block LZ4 cannot shrink is kept whole, and the index comes first), and
++    // packing keeps a side file of sizes beside it; a few MB more for the lists and art written after. Where the drive
++    // cannot say, the work goes on and stops cleanly if it fills
++    need = (j.pack ? j.inBytes + (long long)(j.blocks + 1) * 6 + ZP_HEAD : j.inBytes) + 8LL * 1048576;
++    if ((freeKb = zpFreeKb(prefix)) >= 0 && freeKb * 1024 < need) {
++        close(j.fdIn);
++        lrSize(need, a, sizeof(a));
++        lrSize(freeKb * 1024, b, sizeof(b));
++        snprintf(msg, sizeof(msg), _t("%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free."),
++                 r.name, a, b);
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(msg, 0, NULL);
++        return;
++    }
 +    // packing reads the ISO and writes about two thirds of it; the check reads that again
 +    mins = (int)((double)j.inBytes * (j.pack ? 2.4 : 2.7) / (zpSpeed(r.mode) * 1048576.0) / 60.0 + 0.5);
 +    lrSize(j.inBytes, a, sizeof(a));

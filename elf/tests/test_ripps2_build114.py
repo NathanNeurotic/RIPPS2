@@ -157,6 +157,19 @@ gm_ = rd('src/ripps2games.c')
 need(gm_, (('void ripps2DrawProgress(const char *head, const char *name, long long done, long long total, const char *left, int cancel)', 'one progress panel'),
            ('ripps2DrawPanelGlass(30, 134, 580, 170, 0);', "on the notch panels' frame"), ('int ripps2CopyFile(const char *src, const char *dst, const char *name)', 'a copy with the bar'),
            ('ripps2DrawProgress("COPYING", name, done, total, NULL, 0);', 'drawn as it copies'), ('j->name, j->done, j->work, left, 1);', 'compression draws the same panel')), 'ripps2games.c progress')
+if '(*g)->format != GAME_FORMAT_ISO && (*g)->format != GAME_FORMAT_OLD_ISO' not in gm_:
+    fail.append('ripps2games.c: a game named the old way (SCUS_XXX.XX.Name.iso) can be compressed too')
+# room for the new image before compression starts (the user, 10/23): the driver RIPPS2 builds answers a free-space devctl
+need(gm_, (('static long long zpFreeKb(const char *path)', 'the drive asked for its free space'),
+           ('fileXioDevctl(dev, RIPPS2_DEVCTL_FREE_KB, NULL, 0, &kb, sizeof(kb)) == 0', 'through the driver'),
+           ('if ((freeKb = zpFreeKb(prefix)) >= 0 && freeKb * 1024 < need) {', 'refused before it starts when there is no room')), 'ripps2games.c room check')
+if gm_.find('freeKb = zpFreeKb(prefix)') > gm_.find('if (!zpAsk('):
+    fail.append('ripps2games.c: the room is checked before the panel asks')
+sb_ = rd('.github/scripts/install_safe_bdmfs.py')
+if 'case RIPPS2_DEVCTL_FREE_KB: {' not in sb_ or 'f_getfree(root, &nclst, &vfs)' not in sb_ or "+ RIPPS2_FREE_KB + source[index:]" not in sb_:
+    fail.append('install_safe_bdmfs.py: the driver answers RIPPS2_DEVCTL_FREE_KB with f_getfree')
+if '#define RIPPS2_DEVCTL_FREE_KB' not in rd('include/vmc_alloc.h'):
+    fail.append('vmc_alloc.h: RIPPS2_DEVCTL_FREE_KB, shared by the driver and the EE')
 # Hidden Games offers compression too (the user, 10/23), its page under the panel and the bar
 need(gm_, (('hgRows[i].pack = ripps2PackKind(&view, id);', 'each hidden game knows if it can be compressed'),
            ('pick = ripps2PickList(choices, !gEnableWrite ? 1 : hgRows[sel].pack ? 3 : 2);', 'a third choice for those that can'),
@@ -293,7 +306,7 @@ need(pk_, (('#define ZP_MAGIC 0x4F53495A', 'the ZISO header'), ('#define ZP_HEAD
            ('snprintf(tmp, sizeof(tmp), "%s.part", dst);', 'the work in a .part file'), ('if (rv == 1 && rename(tmp, dst) != 0)', 'named only once checked'),
            ('if (rv != 1)\n        unlink(tmp);', 'a cancel or failure removes it'), ('if (!zpAsk(', 'the panel: SELECT held'),
            ('if (!guiMsgBox(msg, 1, NULL)) {', 'then a last word'), ('if (guiMsgBox(msg, 1, NULL) && unlink(src) == 0)', 'the original goes only when asked')), 'ripps2games.c compression')
-if 'GAME_FORMAT_ISO || (*g)->parts != 1' not in pk_.replace('(*g)->format != GAME_FORMAT_ISO || (*g)->parts != 1', 'GAME_FORMAT_ISO || (*g)->parts != 1'):
+if '(*g)->format != GAME_FORMAT_OLD_ISO) || (*g)->parts != 1' not in pk_:
     fail.append('ripps2games.c: only a whole ISO or ZSO (never a split UL game)')
 need(rd('src/menusys.c'), (('packable ? _STR_RIPPS2_HIDE_COMPRESS : _STR_RIPPS2_HIDE_GAME', 'the row says Compression where it applies'),
                            ('ripps2PackGame(support, id);', 'the pick runs it')), 'menusys.c')
