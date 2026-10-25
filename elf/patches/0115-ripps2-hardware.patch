@@ -1,0 +1,738 @@
+diff --git a/.github/scripts/test_art_names.py b/.github/scripts/test_art_names.py
+new file mode 100644
+index 0000000..d32a97c
+--- /dev/null
++++ b/.github/scripts/test_art_names.py
+@@ -0,0 +1,188 @@
++"""RIPPS2 build 115: a game's art is found under every name it goes by.
++
++Compiles the real src/artindex.c against a real folder of art files, and the real texArtAliases (src/textures.c)
++with the real PS1 ID parser (src/vcdsupport.c), then checks:
++  - a lookup by name without extension finds the picture in any letter case, as .png, .jpg or .jpeg, a PNG first,
++    and hands back the name as the folder lists it (PFS minds case);
++  - a name that is not there is answered "absent" from RAM, and other threads and SMB get "go and look";
++  - OPL Manager's _BG_00 / _SCR_00 / _SCR_01 stand in for _BG / _SCR / _SCR2 and the other way round;
++  - a PS1 game's art is also looked for by its disc ID and by its POPStarter ELF name, only where misses are free.
++"""
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++
++ROOT = Path(__file__).resolve().parents[2]
++TEXTURES = (ROOT / "src/textures.c").read_text(encoding="utf-8")
++VCD = (ROOT / "src/vcdsupport.c").read_text(encoding="utf-8")
++failures = []
++
++
++def function(source, signature):
++    pos = source.find(signature)
++    if pos < 0:
++        raise AssertionError(f"Missing function: {signature}")
++    start = source.find("{", pos)
++    depth = 0
++    for i in range(start, len(source)):
++        if source[i] == "{":
++            depth += 1
++        elif source[i] == "}":
++            depth -= 1
++            if depth == 0:
++                return source[pos:i + 1]
++    raise AssertionError(f"Unterminated function: {signature}")
++
++
++def run(label, files, main_src, args=()):
++    with tempfile.TemporaryDirectory() as d:
++        d = Path(d)
++        for name, text in files.items():
++            (d / name).parent.mkdir(parents=True, exist_ok=True)
++            (d / name).write_text(text, encoding="utf-8")
++        (d / "main.c").write_text(main_src, encoding="utf-8")
++        exe = d / "test"
++        srcs = [str(d / "main.c")] + [str(d / n) for n in files if n.endswith(".c")]
++        build = subprocess.run(["cc", "-std=gnu99", "-O0", "-Wall", "-Wextra", "-Werror", "-Wno-unused-parameter",
++                                "-Wno-unused-function", "-I", str(d), "-I", str(ROOT), "-o", str(exe)] + srcs,
++                               capture_output=True, text=True, check=False)
++        if build.returncode:
++            failures.append(f"{label}: compile failed\n{build.stderr}")
++            return
++        r = subprocess.run([str(exe)] + list(args), capture_output=True, text=True, check=False)
++        print(r.stdout, end="")
++        if r.returncode:
++            failures.append(f"{label}: {r.stderr or r.stdout}")
++
++
++# ---- the real artindex.c, on a real folder ----
++stubs = {
++    "kernel.h": "#pragma once\nint GetThreadId(void);\n",
++    "include/opl.h": "#pragma once\n#include <string.h>\n#include <strings.h>\n",
++    "include/ioman.h": "#pragma once\n#define LOG(...) ((void)0)\n",
++    "artindex.c": (ROOT / "src/artindex.c").read_text(encoding="utf-8"),
++}
++index_main = r"""
++#include <stdio.h>
++#include <string.h>
++#include "include/artindex.h"
++static int tid = 7;
++int GetThreadId(void) { return tid; }
++static int fails;
++static void expect(const char *stem, int want, const char *wantName)
++{
++    char out[256] = "";
++    int r = artIndexFindPicture(stem, out, sizeof(out));
++    const char *got = strrchr(out, '/');
++    got = got ? got + 1 : out;
++    if (r != want || (wantName && strcmp(got, wantName))) {
++        fprintf(stderr, "%s: got %d '%s', want %d '%s'\n", stem, r, got, want, wantName ? wantName : "");
++        fails++;
++    }
++}
++int main(int argc, char **argv)
++{
++    char art[512], stem[600];
++    snprintf(art, sizeof(art), "%s/ART", argv[1]);
++    artIndexSetOwnerThread(7);
++#define AT(n) (snprintf(stem, sizeof(stem), "%s/%s", art, n), stem)
++    expect(AT("SLUS_210.50_BG"), 1, "slus_210.50_bg.PNG");       /* any case, real name back */
++    expect(AT("SLUS_210.50_COV"), 1, "SLUS_210.50_COV.png");     /* a PNG before a JPG */
++    expect(AT("Tekken 3_COV"), 1, "Tekken 3_COV.JPEG");          /* .jpeg too */
++    expect(AT("SLUS_210.50_ICO"), 1, "SLUS_210.50_ICO.jpg");
++    expect(AT("SLUS_999.99_COV"), 0, NULL);                       /* absent, from RAM */
++    expect(AT("SLUS_210.50_BG.old"), 1, "SLUS_210.50_BG.old.png");
++    expect(AT("README"), 0, NULL);                                /* not a picture */
++    expect("smb0:/ART/SLUS_210.50_COV", -1, NULL);                /* SMB: go and look */
++    tid = 8;
++    expect(AT("SLUS_210.50_COV"), -1, NULL);                      /* another thread: go and look */
++    tid = 7;
++    char full[600];
++    snprintf(full, sizeof(full), "%s/SLUS_210.50_COV.png", art);
++    if (!artIndexMayExist(full)) { fputs("MayExist lost a file\n", stderr); fails++; }
++    snprintf(full, sizeof(full), "%s/SLUS_999.99_COV.png", art);
++    if (artIndexMayExist(full)) { fputs("MayExist kept a missing file\n", stderr); fails++; }
++    if (!fails)
++        puts("ART names: case, .png/.jpg/.jpeg, PNG first, real names, absent from RAM");
++    return fails != 0;
++}
++"""
++with tempfile.TemporaryDirectory() as lib:
++    a = Path(lib) / "ART"
++    a.mkdir()
++    for n in ("slus_210.50_bg.PNG", "SLUS_210.50_COV.jpg", "SLUS_210.50_COV.png", "SLUS_210.50_ICO.jpg",
++              "Tekken 3_COV.JPEG", "README.txt", "SLUS_210.50_BG.old.png"):
++        (a / n).write_bytes(b"x")
++    run("art index", stubs, index_main, [lib.replace("\\", "/")])  # a Windows run: forward slashes, as on the PS2
++
++# ---- texArtAliases with the real PS1 ID parser ----
++aliases = function(TEXTURES, "static int texArtAliases(")
++skip = function(VCD, "static int vcdSkipPopstarterPrefix(")
++extract = function(VCD, "int vcdExtractGameId(")
++if "#define TEX_ART_ALIASES" not in TEXTURES:
++    failures.append("TEX_ART_ALIASES is gone")
++alias_main = r"""
++#include <stdio.h>
++#include <string.h>
++#include <strings.h>
++#define VCD_ID_MAX 16
++#define TEX_ART_ALIASES 7
++static const char *discId; /* what vcdDisplayIdCached knows */
++int vcdDisplayIdCached(const char *name, char *idOut, int idSize)
++{
++    if (!discId) return 0;
++    snprintf(idOut, idSize, "%s", discId);
++    return 1;
++}
++@SKIP@
++@EXTRACT@
++@ALIASES@
++static int fails;
++static void expect(const char *path, int listed, const char *const *want)
++{
++    char out[TEX_ART_ALIASES][256];
++    int n = texArtAliases(path, listed, out), i, w = 0;
++    while (want[w]) w++;
++    if (n != w) { fprintf(stderr, "%s: %d aliases, want %d\n", path, n, w); for (i = 0; i < n; i++) fprintf(stderr, "  %s\n", out[i]); fails++; return; }
++    for (i = 0; i < n; i++)
++        if (strcmp(out[i], want[i])) { fprintf(stderr, "%s [%d]: '%s', want '%s'\n", path, i, out[i], want[i]); fails++; }
++}
++int main(void)
++{
++    const char *bg[] = {"mass0:ART/SLUS_210.50_BG_00", NULL};
++    expect("mass0:ART/SLUS_210.50_BG", 1, bg);                   /* PS2: OPL Manager's name, no PS1 keys */
++    const char *bg00[] = {"mass0:/ART/SLUS_210.50_BG", NULL};
++    expect("mass0:/ART/SLUS_210.50_BG_00", 1, bg00);             /* a theme asking for _BG_00 */
++    const char *scr2[] = {"pfs0:/ART/SLUS_210.50_SCR_01", NULL};
++    expect("pfs0:/ART/SLUS_210.50_SCR2", 1, scr2);
++    const char *cov[] = {NULL};
++    expect("mass0:/ART/SLUS_210.50_COV", 1, cov);                /* a cover has one name */
++    const char *ps1[] = {"mass0:/ART/XX.Tekken 3.ELF_COV", NULL};
++    expect("mass0:/ART/Tekken 3_COV", 1, ps1);
++    discId = "SCUS_944.26";
++    const char *ps1id[] = {"mass0:/ART/SCUS_944.26_COV", "mass0:/ART/XX.Tekken 3.ELF_COV", NULL};
++    expect("mass0:/ART/Tekken 3_COV", 1, ps1id);                 /* the disc's ID once read */
++    discId = NULL;
++    const char *named[] = {"mass0:/ART/SLUS_005.94.Crash_SCR_00", "mass0:/ART/SLUS_005.94_SCR",
++                           "mass0:/ART/SLUS_005.94_SCR_00", "mass0:/ART/XX.SLUS_005.94.Crash.ELF_SCR",
++                           "mass0:/ART/XX.SLUS_005.94.Crash.ELF_SCR_00", NULL};
++    expect("mass0:/ART/SLUS_005.94.Crash_SCR", 1, named);        /* the ID at the front of the file name */
++    const char *unlisted[] = {"mass0:/ART/Tekken 3_BG_00", NULL};
++    expect("mass0:/ART/Tekken 3_BG", 0, unlisted);               /* no listing: only the kind's other name */
++    const char *app[] = {NULL};
++    expect("mass0:/ART/OPNPS2LD.ELF_COV", 1, app);               /* an app keeps its name */
++    expect("mass0:/THM/mine/bg_BG", 1, cov);                     /* theme files keep theirs */
++    expect("mass0:/SMART/x_BG", 1, cov);                         /* a folder merely ending in ART is not ART */
++    if (!fails)
++        puts("ART aliases: OPL Manager kinds both ways, PS1 disc ID and XX.ELF names, nothing for themes");
++    return fails != 0;
++}
++"""
++run("art aliases", {}, alias_main.replace("@SKIP@", skip).replace("@EXTRACT@", extract).replace("@ALIASES@", aliases))
++
++if failures:
++    print("ART name checks FAILED:")
++    for f in failures:
++        print(" - " + f)
++    sys.exit(1)
+diff --git a/.github/scripts/test_udpfs_art.py b/.github/scripts/test_udpfs_art.py
+index 7216752..37e1c4e 100644
+--- a/.github/scripts/test_udpfs_art.py
++++ b/.github/scripts/test_udpfs_art.py
+@@ -314,10 +314,16 @@ struct dirent { char d_name[128]; };
+ #define ART_INDEX_DIR_MAX 192
+ #define ART_INDEX_MAX_ENTRIES 4096
+ #define ART_INDEX_SLOTS 3
++#define ART_INDEX_NAMES_MAX (128 * 1024)
++typedef struct { unsigned int hash; int name; } art_index_pic_t;
+ typedef struct {
+     char dir[ART_INDEX_DIR_MAX];
+     unsigned int *hashes;
+-    int count, valid;
++    int count;
++    art_index_pic_t *pics;
++    int picCount;
++    char *names;
++    int valid;
+ } art_index_dir_t;
+ static art_index_dir_t gArtIndex[ART_INDEX_SLOTS];
+ static int gArtIndexNext;
+@@ -352,6 +358,7 @@ static int artIndexCmp(const void *a, const void *b)
+     unsigned int left = *(const unsigned int *)a, right = *(const unsigned int *)b;
+     return (left > right) - (left < right);
+ }
++@HELPERS@
+ @INDEX@
+ int main(void)
+ {
+@@ -371,7 +378,12 @@ int main(void)
+     return 0;
+ }
+ """
+-run_harness("ART negative index", index_harness.replace("@INDEX@", index_fn))
++helpers = "\n".join(function(INDEX, sig) for sig in (
++    "static unsigned int artIndexHashN(",
++    "static int artIndexPictureExt(",
++    "static int artIndexPicCmp(",
++))
++run_harness("ART negative index", index_harness.replace("@HELPERS@", "#include <strings.h>\n" + helpers).replace("@INDEX@", index_fn))
+ 
+ if failures:
+     print("UDPFS ART checks FAILED:")
+diff --git a/include/artindex.h b/include/artindex.h
+index 90fe9f6..8688937 100644
+--- a/include/artindex.h
++++ b/include/artindex.h
+@@ -47,6 +47,12 @@ void artIndexSetOwnerThread(int threadId);
+  */
+ int artIndexMayExist(const char *fullPath);
+ 
++/* RIPPS2 build 115: the picture for an art name given WITHOUT its extension, e.g. "mass0:/ART/SLUS_123.45_COV".
++ * 1 = found: its real path in out, the name as the device lists it (any letter case; .png, .jpg or .jpeg, a PNG
++ * first), so it opens on a drive where case matters too. 0 = definitely no such picture. -1 = cannot say (no listing,
++ * names not kept, SMB, another thread): probe the usual names. */
++int artIndexFindPicture(const char *stemPath, char *out, int outSize);
++
+ /* Drop every cached listing. Call wherever the "art may have appeared" epoch is bumped -- a device
+  * generation change or a deliberate settings apply -- so a stick with new art on it is picked up.
+  * Cheap, and safe from any thread. */
+diff --git a/src/artindex.c b/src/artindex.c
+index 51dd1df..6aa8d21 100644
+--- a/src/artindex.c
++++ b/src/artindex.c
+@@ -6,6 +6,7 @@
+ 
+ #include <stdio.h>
+ #include <string.h>
++#include <strings.h> // strcasecmp, strncasecmp
+ #include <stdlib.h>
+ #include <dirent.h>
+ #include <errno.h>
+@@ -31,11 +32,27 @@
+ 
+ #define ART_INDEX_DIR_MAX 192
+ 
++// RIPPS2 build 115: the most name text a slot keeps for its pictures. A 2000-file ART folder is ~60 KB; past
++// this the slot keeps its hashes and answers "don't know" to a picture lookup, as before.
++#define ART_INDEX_NAMES_MAX (128 * 1024)
++
++typedef struct
++{
++    unsigned int hash; // artIndexHash of the name without its extension
++    int name;          // where its real name starts in the slot's names
++} art_index_pic_t;
++
+ typedef struct
+ {
+     char dir[ART_INDEX_DIR_MAX];
+     unsigned int *hashes; // sorted, `count` of them
+     int count;
++    // RIPPS2 build 115: the pictures (.png, .jpg, .jpeg in any letter case) by their name without its
++    // extension, sorted, and the names as the device lists them, so a lookup can open the real file even on a drive
++    // where letter case matters (PFS). NULL: not kept (too many names, or no memory).
++    art_index_pic_t *pics;
++    int picCount;
++    char *names;
+     int valid; // 0 = this slot answers "don't know" for everything
+ } art_index_dir_t;
+ 
+@@ -82,11 +99,11 @@ void artIndexSetOwnerThread(int threadId)
+ // case-insensitive-preserving, so readdir can hand back "Slus_123.45_COV.PNG" for a path we build as
+ // "SLUS_123.45_COV.png". Hashing them differently would make the index answer "absent" for a file
+ // that exists -- the one failure this must never have.
+-static unsigned int artIndexHash(const char *s)
++static unsigned int artIndexHashN(const char *s, size_t n)
+ {
+     unsigned int h = 2166136261u;
+ 
+-    while (*s) {
++    while (n-- > 0 && *s) {
+         unsigned char c = (unsigned char)*s++;
+         if (c >= 'a' && c <= 'z')
+             c = (unsigned char)(c - 'a' + 'A');
+@@ -97,6 +114,34 @@ static unsigned int artIndexHash(const char *s)
+     return h;
+ }
+ 
++static unsigned int artIndexHash(const char *s)
++{
++    return artIndexHashN(s, (size_t)-1);
++}
++
++// RIPPS2 build 115: where a picture's extension starts (its last '.'), when it is .png, .jpg or .jpeg in any
++// letter case; -1 for anything else.
++static int artIndexPictureExt(const char *name)
++{
++    const char *dot = strrchr(name, '.');
++
++    if (dot == NULL || dot == name)
++        return -1;
++    if (strcasecmp(dot, ".png") && strcasecmp(dot, ".jpg") && strcasecmp(dot, ".jpeg"))
++        return -1;
++    return (int)(dot - name);
++}
++
++static int artIndexPicCmp(const void *a, const void *b)
++{
++    unsigned int x = ((const art_index_pic_t *)a)->hash;
++    unsigned int y = ((const art_index_pic_t *)b)->hash;
++
++    if (x < y)
++        return -1;
++    return (x > y) ? 1 : 0;
++}
++
+ static int artIndexCmp(const void *a, const void *b)
+ {
+     unsigned int x = *(const unsigned int *)a;
+@@ -147,11 +192,22 @@ static art_index_dir_t *artIndexBuild(const char *dir)
+ 
+     // Safe to free here and ONLY here: this runs on the owner thread, which is the only thread that
+     // ever reads these buffers. artIndexInvalidate deliberately does not free for exactly this reason.
++    slot->valid = 0;
+     if (slot->hashes != NULL) {
+         unsigned int *old = slot->hashes;
+         slot->hashes = NULL;
+         slot->count = 0;
+-        slot->valid = 0;
++        free(old);
++    }
++    if (slot->pics != NULL) {
++        art_index_pic_t *old = slot->pics;
++        slot->pics = NULL;
++        slot->picCount = 0;
++        free(old);
++    }
++    if (slot->names != NULL) {
++        char *old = slot->names;
++        slot->names = NULL;
+         free(old);
+     }
+ 
+@@ -196,6 +252,12 @@ static art_index_dir_t *artIndexBuild(const char *dir)
+         return slot;
+     }
+ 
++    // The pictures' names (RIPPS2 build 115). Best effort: when either buffer cannot be had or grows past
++    // ART_INDEX_NAMES_MAX, the slot simply keeps no names and picture lookups go and look, as before.
++    art_index_pic_t *pics = (art_index_pic_t *)malloc(ART_INDEX_MAX_ENTRIES * sizeof(art_index_pic_t));
++    int picCount = 0, namesUsed = 0, namesSize = 16 * 1024;
++    char *names = pics != NULL ? (char *)malloc(namesSize) : NULL;
++
+     int n = 0;
+     int overflowed = 0;
+     struct dirent *e;
+@@ -220,16 +282,43 @@ static art_index_dir_t *artIndexBuild(const char *dir)
+         }
+ 
+         hashes[n++] = artIndexHash(e->d_name);
++
++        int ext = names != NULL ? artIndexPictureExt(e->d_name) : -1;
++        if (ext > 0) {
++            int len = (int)strlen(e->d_name) + 1;
++            if (namesUsed + len > namesSize) {
++                char *grown = namesSize * 2 <= ART_INDEX_NAMES_MAX ? (char *)realloc(names, namesSize * 2) : NULL;
++                if (grown == NULL) {
++                    free(names); // too many names to keep: picture lookups will go and look
++                    names = NULL;
++                    continue;
++                }
++                names = grown;
++                namesSize *= 2;
++            }
++            memcpy(&names[namesUsed], e->d_name, len);
++            pics[picCount].hash = artIndexHashN(e->d_name, (size_t)ext);
++            pics[picCount].name = namesUsed;
++            picCount++;
++            namesUsed += len;
++        }
+     }
+ 
+     closedir(d);
+ 
++    if (names == NULL) {
++        free(pics);
++        pics = NULL;
++    }
++
+     if (readError != 0) {
+         // A failed sweep is unknown, not empty. Keep this slot invalid so subsequent
+         // image loads use the ordinary file-open path; healthy directories still index once.
+         gArtIndexSweepFailed++;
+         LOG("ARTINDEX: '%s' listing failed (errno %d) -- probing files directly\n", dir, readError);
+         free(hashes);
++        free(pics);
++        free(names);
+         return slot;
+     }
+ 
+@@ -238,18 +327,25 @@ static art_index_dir_t *artIndexBuild(const char *dir)
+         // exists. Throw it away rather than hold a truthful-looking half-index.
+         LOG("ARTINDEX: '%s' has more than %d entries -- not indexing\n", dir, ART_INDEX_MAX_ENTRIES);
+         free(hashes);
++        free(pics);
++        free(names);
+         return slot;
+     }
+ 
+     qsort(hashes, n, sizeof(unsigned int), &artIndexCmp);
++    if (pics != NULL)
++        qsort(pics, picCount, sizeof(art_index_pic_t), &artIndexPicCmp);
+ 
+     // Publish order matters even on one thread: valid LAST, so the slot is never readable with a
+     // count that does not match its buffer.
+     slot->hashes = hashes;
+     slot->count = n;
++    slot->pics = pics;
++    slot->picCount = picCount;
++    slot->names = names;
+     slot->valid = 1;
+ 
+-    LOG("ARTINDEX: '%s' indexed, %d entries\n", dir, n);
++    LOG("ARTINDEX: '%s' indexed, %d entries (%d pictures%s)\n", dir, n, picCount, pics != NULL ? "" : ", names not kept");
+     return slot;
+ }
+ 
+@@ -318,6 +414,63 @@ int artIndexMayExist(const char *fullPath)
+     return 0; // not in the listing, and the listing was complete: genuinely not there
+ }
+ 
++int artIndexFindPicture(const char *stemPath, char *out, int outSize)
++{
++    char dir[ART_INDEX_DIR_MAX];
++    const char *base = NULL;
++
++    if (stemPath == NULL || stemPath[0] == '\0' || out == NULL || outSize <= 0)
++        return -1;
++    // The same "go and look" cases as artIndexMayExist: SMB paths, and any thread but the owner.
++    if (strchr(stemPath, '\\') != NULL || !strncmp(stemPath, "smb", 3))
++        return -1;
++    if (gArtIndexOwnerThread < 0 || GetThreadId() != gArtIndexOwnerThread)
++        return -1;
++    if (!artIndexSplit(stemPath, dir, sizeof(dir), &base))
++        return -1;
++
++    unsigned int genBefore = gArtIndexGen;
++
++    art_index_dir_t *slot = artIndexSlotFor(dir);
++    if (slot == NULL || !slot->valid || slot->pics == NULL || slot->names == NULL)
++        return -1;
++
++    size_t baseLen = strlen(base);
++    unsigned int want = artIndexHashN(base, baseLen);
++    int lo = 0, hi = slot->picCount;
++
++    while (lo < hi) { // the first picture with this hash
++        int mid = lo + ((hi - lo) >> 1);
++        if (slot->pics[mid].hash < want)
++            lo = mid + 1;
++        else
++            hi = mid;
++    }
++
++    const char *best = NULL;
++    for (; lo < slot->picCount && slot->pics[lo].hash == want; lo++) {
++        const char *name = &slot->names[slot->pics[lo].name];
++        // A hash match is only a maybe: the name must be exactly base plus one picture extension.
++        if (strncasecmp(name, base, baseLen) != 0 || name[baseLen] != '.' || strchr(&name[baseLen + 1], '.') != NULL)
++            continue;
++        if (best == NULL || !strcasecmp(&name[baseLen], ".png")) // a PNG first, as the probes always went
++            best = name;
++    }
++
++    if (best != NULL) {
++        if (snprintf(out, outSize, "%s/%s", dir, best) >= outSize)
++            return -1;
++        return 1;
++    }
++
++    // As in artIndexMayExist: an invalidation mid-search downgrades "absent" to "go and look".
++    if (gArtIndexGen != genBefore)
++        return -1;
++
++    gArtIndexAbsentAnswered++;
++    return 0;
++}
++
+ void artIndexInvalidate(void)
+ {
+     int i;
+diff --git a/src/ripps2games.c b/src/ripps2games.c
+index 5a5580f..7933e8b 100644
+--- a/src/ripps2games.c
++++ b/src/ripps2games.c
+@@ -468,7 +468,8 @@ static void lrSize(long long bytes, char *out, int size)
+ // shared: another copy of the game on this drive keeps the CFG, art and cheats.
+ static void lrPlanExtras(item_list_t *view, int id, const char *prefix, char sep, const char *startup, const char *name, int shared)
+ {
+-    static const char *const art[] = {"COV", "COV2", "ICO", "LAB", "LGO", "BG", "SCR", "SCR2", "SCR3", "SCR4", "SCR5", "SCR6", "SCR7", "SCR8", "SCR9"};
++    static const char *const art[] = {"COV", "COV2", "ICO", "LAB", "LGO", "BG", "SCR", "SCR2", "SCR3", "SCR4", "SCR5", "SCR6", "SCR7", "SCR8", "SCR9",
++                                      "BG_00", "SCR_00", "SCR_01"}; // OPL Manager's names, which the art loader reads too
+     char path[256];
+     const char *vmc = NULL;
+     int i, k;
+diff --git a/src/textures.c b/src/textures.c
+index 2da860e..f337d6b 100644
+--- a/src/textures.c
++++ b/src/textures.c
+@@ -8,6 +8,8 @@
+ #include <kernel.h>
+ #include <png.h>
+ #include "include/ripps2.h" // RIPPS2 build 95: ripps2DecodePicture, game art as JPG
++#include "include/vcdsupport.h" // RIPPS2 build 115: a PS1 game's disc ID, for its art
++#include <strings.h>               // strcasecmp, strncasecmp
+ 
+ extern void *load0_png;
+ extern void *load1_png;
+@@ -1109,16 +1111,20 @@ void texSetProbe(char *out, int size)
+ }
+ 
+ // RIPPS2 build 95: game art as JPG. RiptOPL reads PNG only, and old OPL art packs are JPG, so every theme showed
+-// those games as text (FifthFox on RIPGRID). Tried only when the PNG is not there; read whole, then decoded at
+-// most 512 on a side (ripps2media.c).
+-#define TEX_JPG_MAX_FILE (4 * 1024 * 1024)
+-static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
++// those games as text (FifthFox on RIPGRID). Read whole, then decoded at most maxW x maxH (ripps2media.c), by what the
++// file holds rather than its name: build 115 sends here a .png that is really a JPG, and a PNG the
++// loader above refuses (16 bits a channel, or too big), which this shrinks instead.
++#define TEX_JPG_MAX_FILE (8 * 1024 * 1024)
++static int texLoadPicture(GSTEXTURE *texture, const char *filePath, int maxW, int maxH)
+ {
+     unsigned char *buf, *rgba;
+     int fd, size, got = 0, r, w, h, ow, oh;
+ 
++    if (texLoadAbortRequested())
++        return ERR_LOAD_ABORTED;
++    errno = 0;
+     if ((fd = open(filePath, O_RDONLY)) < 0)
+-        return ERR_BAD_FILE;
++        return texStagedOpenIsAbsence(filePath, errno) ? ERR_BAD_FILE : ERR_FILE_IO;
+     size = lseek(fd, 0, SEEK_END);
+     lseek(fd, 0, SEEK_SET);
+     if (size <= 0 || size > TEX_JPG_MAX_FILE || (buf = malloc(size)) == NULL) {
+@@ -1128,7 +1134,11 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
+     while (got < size && (r = read(fd, buf + got, size - got)) > 0)
+         got += r;
+     close(fd);
+-    if (got != size || !ripps2DecodePicture(buf, size, 512, 512, &rgba, &w, &h, &ow, &oh, NULL)) {
++    if (got != size) { // the device stopped short: try again later, the file is there
++        free(buf);
++        return ERR_FILE_IO;
++    }
++    if (!ripps2DecodePicture(buf, size, maxW, maxH, &rgba, &w, &h, &ow, &oh, NULL)) {
+         free(buf);
+         return ERR_BAD_FILE;
+     }
+@@ -1145,6 +1155,121 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
+     return 0;
+ }
+ 
++// RIPPS2 build 115: one picture file of a game's art, whatever it holds. A PNG goes to the streaming loader
++// above; anything it cannot take (a JPG named .png, 16 bits a channel, bigger than a texture may be) and every JPG
++// goes through the decoder that reads both and shrinks: backgrounds to 720 x 512 (a full screen), the rest to 512
++// on a side. ERR_BAD_FILE only when the file is missing or unreadable as either; a short read stays transient.
++static int texLoadArt(GSTEXTURE *texture, const char *filePath)
++{
++    const char *dot = strrchr(filePath, '.');
++    const char *slash = strrchr(filePath, '/');
++    const char *stemEnd = dot != NULL ? dot : filePath + strlen(filePath);
++    int bg = 0, result = ERR_BAD_FILE;
++
++    // a background is <key>_BG or OPL Manager's <key>_BG_00 to _BG_06
++    if (stemEnd - filePath >= 3 && !strncasecmp(stemEnd - 3, "_BG", 3))
++        bg = 1;
++    else if (stemEnd - filePath >= 6 && !strncasecmp(stemEnd - 6, "_BG_0", 5))
++        bg = 1;
++    if (slash != NULL && dot != NULL && dot < slash)
++        dot = NULL; // a dot in a folder name is not an extension
++
++    if (dot != NULL && !strcasecmp(dot, ".png")) {
++        result = texLoad(texture, filePath);
++        if (result >= 0)
++            return 0;
++        if (result == ERR_BAD_FILE || result == ERR_FILE_IO || result == ERR_LOAD_ABORTED)
++            return result;
++        LOG("texLoadArt: %s not taken as a PNG (%d), decoding it as a picture\n", filePath, result);
++    }
++    result = texLoadPicture(texture, filePath, bg ? 720 : 512, 512);
++    return (result >= 0) ? 0 : result;
++}
++
++// RIPPS2 build 115: one art name (no extension). The art worker holds the folder's listing with the real names,
++// so one look in RAM finds the picture by this name in any letter case and as .png, .jpg or .jpeg, and opens it by the
++// name the drive lists (PFS on the APA HDD minds case). Elsewhere (other threads, SMB, no listing) the two usual names
++// are tried on the device, as before; *listed says which it was.
++static int texFindArt(GSTEXTURE *texture, const char *path, int *listed)
++{
++    char filePath[256];
++    int result, found = artIndexFindPicture(path, filePath, sizeof(filePath));
++
++    *listed = found >= 0;
++    if (found == 0) {
++        LOG("texDiscoverLoad: '%s' absent per directory index (no device access)\n", path);
++        return ERR_BAD_FILE;
++    }
++    if (found == 1)
++        return texLoadArt(texture, filePath);
++    snprintf(filePath, sizeof(filePath), "%s.png", path);
++    result = artIndexMayExist(filePath) ? texLoadArt(texture, filePath) : ERR_BAD_FILE;
++    if (result != ERR_BAD_FILE || texLoadAbortRequested())
++        return result;
++    snprintf(filePath, sizeof(filePath), "%s.jpg", path); // RIPPS2 build 95: the same name as a JPG
++    return artIndexMayExist(filePath) ? texLoadArt(texture, filePath) : ERR_BAD_FILE;
++}
++
++// RIPPS2 build 115: the other names a piece of a game's art goes by, for a path in an ART folder,
++// "<dir>/ART/<key>_<kind>". Writes them to out in the order they are tried and returns how many.
++//   - OPL Manager's kinds: its art database calls a background _BG_00 (to _BG_06) and the screenshots _SCR_00 and
++//     _SCR_01, where RIPPS2's themes ask for _BG, _SCR and _SCR2; a theme made for those names asks the other way.
++//   - A PS1 game's other keys (listedKeys: only where the folder's listing makes a miss free): the disc ID at the
++//     front of a file named "SLUS_005.94.Title", the ID RIPPS2 has already read off the disc, and the POPStarter
++//     launcher's name XX.<key>.ELF, which is how OPL draws a PS1 game set up as an app.
++#define TEX_ART_ALIASES 7
++static int texArtAliases(const char *path, int listedKeys, char out[TEX_ART_ALIASES][256])
++{
++    static const char *const kinds[] = {"SCR_00", "SCR_01", "BG_00", "COV2", "SCR2", "COV", "ICO", "LAB", "LGO", "SCR", "BG"};
++    static const char *const swap[][2] = {{"BG", "BG_00"}, {"SCR", "SCR_00"}, {"SCR2", "SCR_01"}};
++    const char *base = strrchr(path, '/'), *kind = NULL, *altKind = NULL;
++    char key[160], keys[4][160];
++    int i, k, nKeys = 0, n = 0;
++    size_t baseLen, keyLen;
++
++    if (base == NULL || base - path < 3 || strncasecmp(base - 3, "ART", 3) != 0 ||
++        (base - path > 3 && base[-4] != '/' && base[-4] != ':'))
++        return 0; // not an ART folder: theme files keep their one name
++    base++;
++    baseLen = strlen(base);
++    for (i = 0; i < (int)(sizeof(kinds) / sizeof(kinds[0])) && kind == NULL; i++) {
++        size_t kl = strlen(kinds[i]);
++        if (baseLen > kl + 1 && base[baseLen - kl - 1] == '_' && !strcmp(&base[baseLen - kl], kinds[i]))
++            kind = kinds[i];
++    }
++    if (kind == NULL)
++        return 0;
++    keyLen = baseLen - strlen(kind) - 1;
++    if (keyLen >= sizeof(key))
++        return 0;
++    memcpy(key, base, keyLen);
++    key[keyLen] = '\0';
++    for (i = 0; i < (int)(sizeof(swap) / sizeof(swap[0])); i++)
++        for (k = 0; k < 2; k++)
++            if (!strcmp(kind, swap[i][k]))
++                altKind = swap[i][!k];
++
++    memcpy(keys[nKeys++], key, keyLen + 1);
++    if (listedKeys) {
++        char id[VCD_ID_MAX];
++        if (vcdExtractGameId(key, id, sizeof(id)) && strcasecmp(id, key))
++            memcpy(keys[nKeys++], id, strlen(id) + 1);
++        if (vcdDisplayIdCached(key, id, sizeof(id)) && strcasecmp(id, key) && (nKeys < 2 || strcasecmp(id, keys[1])))
++            memcpy(keys[nKeys++], id, strlen(id) + 1);
++        if (!(keyLen == 11 && key[4] == '_' && key[8] == '.') && (keyLen < 4 || strcasecmp(&key[keyLen - 4], ".ELF")) &&
++            snprintf(keys[nKeys], sizeof(keys[0]), "XX.%s.ELF", key) < (int)sizeof(keys[0]))
++            nKeys++;
++    }
++
++    for (i = 0; i < nKeys && n < TEX_ART_ALIASES; i++) {
++        if (i > 0 && snprintf(out[n], 256, "%.*s%s_%s", (int)(base - path), path, keys[i], kind) < 256)
++            n++; // a name too long for a path is skipped, never tried cut short
++        if (altKind != NULL && n < TEX_ART_ALIASES && snprintf(out[n], 256, "%.*s%s_%s", (int)(base - path), path, keys[i], altKind) < 256)
++            n++;
++    }
++    return n;
++}
++
+ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
+ {
+     char filePath[256];
+@@ -1171,15 +1296,28 @@ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
+     //
+     // Only ever skips work: artIndexMayExist returns 1 for anything it is not certain about, so the
+     // worst case is exactly the behaviour that was here before.
++    if (texId == -1) {
++        // RIPPS2 build 115: the name asked for, then the other names the same art goes by (texArtAliases),
++        // while each is simply not there; a picture found, an abort or a transient failure ends it.
++        char aliases[TEX_ART_ALIASES][256];
++        int listed, i, n;
++
++        result = texFindArt(texture, path, &listed);
++        if (result != ERR_BAD_FILE || texLoadAbortRequested())
++            return result;
++        n = texArtAliases(path, listed, aliases);
++        for (i = 0; i < n; i++) {
++            result = texFindArt(texture, aliases[i], &listed);
++            if (result != ERR_BAD_FILE || texLoadAbortRequested())
++                return result;
++        }
++        return ERR_BAD_FILE;
++    }
++
+     if (!artIndexMayExist(filePath)) {
+         LOG("texDiscoverLoad: '%s' absent per directory index (no device access)\n", filePath);
+         result = ERR_BAD_FILE;
+     } else
+         result = texLoad(texture, filePath);
+-    if (result < 0 && texId == -1 && !texLoadAbortRequested()) { // RIPPS2 build 95: the same name as a JPG
+-        snprintf(filePath, sizeof(filePath), "%s.jpg", path);
+-        if (artIndexMayExist(filePath) && texLoadJpg(texture, filePath) == 0)
+-            return 0;
+-    }
+     return (result >= 0) ? 0 : result;
+ }
