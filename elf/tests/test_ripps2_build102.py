@@ -130,9 +130,9 @@ for k, v in want.items():
 for name, keys in grid.items():
     if keys.get('font') in ('3', '4', '5', '6', '8', '11'):
         fail.append('RIPGRID %s draws with font%s, a slot RIPPS2\'s pages own' % (name, keys['font']))
-if grid['main4'].get('y') != '80':
+if grid['main2'].get('y') != '80':  # main2 since build 114 dropped the side bar (main2, main3)
     fail.append("RIPGRID's grid stands at 80")
-for a, b in (('info14', 'info15'),):
+for a, b in (('info12', 'info13'),):  # info12/13 since build 114 dropped the side bar (info2, info3)
     t, u = grid[a], grid[b]
     top, bottom = int(t['y']) - int(t['height']) // 2, int(u['y']) + int(u['height']) // 2
     if top != 160 or bottom != 415:
@@ -164,7 +164,7 @@ head = thm[ib:thm.find('snprintf(elemProp, sizeof(elemProp), "%s_x", name);', ib
 for f in ('elem->blur = 0;', 'elem->wideCrop = 0;', 'elem->artBottom = 0;'):
     if f not in head:
         fail.append('a new element must start with %s' % f)
-lg = grid['info5']
+lg = grid['info3']  # info3 since build 114
 if lg.get('valign') != 'bottom' or int(lg['y']) + int(lg['height']) // 2 >= 160:
     fail.append("RIPGRID's logo must stand on its box's foot, just above the glass (160)")
 

@@ -27103,6 +27103,243 @@ index 5bac71b..285e460 100644
  info1:
  	type=ItemCover
  	default=cover
+diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
+index 47a50c4..3f257e4 100644
+--- a/misc/theme_ripgrid.cfg
++++ b/misc/theme_ripgrid.cfg
+@@ -12,9 +12,10 @@ glyph_set=standard
+ # Theme Name: RIPGRID
+ # Made by: akilluminati47 (Adapt RiptOPL, 8/27/2026), RIPPS2 edition (build 83)
+ # [case.png] [case_overlay.png] RiptOPL's built-in case (b2); [SCR43.png] Adapt's screenshot frame at 4:3
+-# RIPPS2: each game's art under frosted glass (a full-screen Ripps2PanelGlass, blur=1), a frosted side
+-# bar, clear glass panels under the text, page morphs between the list and the info page, the pillars
+-# behind Settings (no settings_bg), right-stick tilt on the art. Art eases in; no stock disc or case.
++# RIPPS2: each game's art under frosted glass (a full-screen Ripps2PanelGlass, blur=1), clear glass panels
++# under the text (no side bar since build 114: RIPGRID has no sidebar, Circle picks the source), page
++# morphs between the list and the info page, the pillars behind Settings (no settings_bg), right-stick tilt
++# on the art. Art eases in; no stock disc or case.
+ 
+ bg_color=#050A1C
+ sel_text_color=#0064FF
+@@ -74,32 +75,10 @@ main1:
+ 	blur=1
+ 	tint=24
+ 	frame=0
+-main2:
+-	type=Ripps2PanelGlass
+-	aligned=0
+-	x=0
+-	y=0
+-	width=26
+-	height=480
+-	blur=1
+-	tint=88
+-	tint_color=#01040F
+-	frame=0
+-main3:
+-	type=Ripps2PanelGlass
+-	aligned=0
+-	x=28
+-	y=0
+-	width=12
+-	height=480
+-	blur=1
+-	tint=22
+-	tint_color=#28C5F9
+-	frame=0
+ # build 102 (user: "ripgrid should raise a touch so its padding on the upper row is equal to the bottom"): the grid's
+ # top at 80, so the PS2 mark's foot (63) to the first row and the last row (392) to the name under it (its letters'
+ # tops near 410) are both about 17
+-main4:
++main2:
+ 	type=Grid
+ 	pattern=COV
+ 	x=320
+@@ -117,7 +96,7 @@ main4:
+ 	title_y=416
+ 	title_font=7
+ 	wide_columns=6
+-main5:
++main3:
+ 	type=ItemsList
+ 	x=POS_MID
+ 	y=45
+@@ -126,17 +105,17 @@ main5:
+ 	aligned=1
+ 	font=12
+ 	hidden=1
+-main6:
++main4:
+ 	type=LoadingIcon
+ 	x=-60
+ 	y=-31
+-main7:
++main5:
+ 	type=HintText
+ 	aligned=1
+ 	x=POS_MID
+ 	y=-41
+ 	font=1
+-main8:
++main6:
+ 	type=MenuText
+ 	x=POS_MID
+ 	y=25
+@@ -158,28 +137,6 @@ info1:
+ 	tint=24
+ 	frame=0
+ info2:
+-	type=Ripps2PanelGlass
+-	aligned=0
+-	x=0
+-	y=0
+-	width=26
+-	height=480
+-	blur=1
+-	tint=88
+-	tint_color=#01040F
+-	frame=0
+-info3:
+-	type=Ripps2PanelGlass
+-	aligned=0
+-	x=28
+-	y=0
+-	width=12
+-	height=480
+-	blur=1
+-	tint=22
+-	tint_color=#28C5F9
+-	frame=0
+-info4:
+ 	type=Ripps2PanelGlass
+ 	aligned=0
+ 	x=45
+@@ -196,7 +153,7 @@ info4:
+ # build 102 (user: "the logos should not run into the info boxes on any theme, have them just above"): the logo's
+ # box ends at 158, 2 above the glass (160), and valign=bottom stands the logo's lowest visible row there, however
+ # much clear space its image has round it (at 100 some ran into the glass's frame and others floated high)
+-info5:
++info3:
+ 	type=GameImage
+ 	pattern=LGO
+ 	x=POS_MID
+@@ -209,7 +166,7 @@ info5:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info6:
++info4:
+ 	type=AttributeImage
+ 	attribute=Rating
+ 	default=rating/0_Rating
+@@ -222,7 +179,7 @@ info6:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info7:
++info5:
+ 	type=AttributeImage
+ 	attribute=Scan
+ 	aligned=0
+@@ -234,7 +191,7 @@ info7:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info8:
++info6:
+ 	type=AttributeImage
+ 	attribute=Players
+ 	aligned=0
+@@ -246,7 +203,7 @@ info8:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info9:
++info7:
+ 	type=AttributeText
+ 	attribute=Description
+ 	aligned=0
+@@ -262,7 +219,7 @@ info9:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info10:
++info8:
+ 	type=AttributeText
+ 	attribute=Developer
+ 	aligned=0
+@@ -276,7 +233,7 @@ info10:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info11:
++info9:
+ 	type=AttributeText
+ 	attribute=Release
+ 	aligned=0
+@@ -289,7 +246,7 @@ info11:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info12:
++info10:
+ 	type=AttributeText
+ 	attribute=Genre
+ 	display=2
+@@ -302,7 +259,7 @@ info12:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info13:
++info11:
+ 	type=InfoHintText
+ 	aligned=1
+ 	x=POS_MID
+@@ -312,7 +269,7 @@ info13:
+ # with the text's glass (160 to 415), 15 apart, centred in the room right of it (440 to 640, 20 each side). They
+ # were 170 x 128 about 532: 6 above the glass, 11 below it and 7 from it against 23 from the edge
+ # build 108: SCRn, the game's shots in turn (_SCR, _SCR2 .. _SCR9: RIPSHOT's ART shots), the second box one shot later
+-info14:
++info12:
+ 	type=GameImage
+ 	pattern=SCRn
+ 	scaled=1
+@@ -324,7 +281,7 @@ info14:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info15:
++info13:
+ 	type=GameImage
+ 	pattern=SCRn
+ 	scaled=1
+@@ -336,7 +293,7 @@ info15:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info16:
++info14:
+ 	type=AttributeImage
+ 	attribute=Parental
+ 	aligned=0
+@@ -347,7 +304,7 @@ info16:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info17:
++info15:
+ 	type=AttributeImage
+ 	attribute=Vmode
+ 	aligned=0
+@@ -359,7 +316,7 @@ info17:
+ 	tilt_x=320
+ 	tilt_y=260
+ 	tilt_scale=75
+-info18:
++info16:
+ 	type=AttributeImage
+ 	attribute=Aspect
+ 	aligned=0
 diff --git a/modules/bdm/src/part_driver_gpt.c b/modules/bdm/src/part_driver_gpt.c
 index 21e0189..4ea3585 100644
 --- a/modules/bdm/src/part_driver_gpt.c
