@@ -34,6 +34,24 @@ Status: plan, nothing built yet. Talk it over with the user first ("we can go ov
   on-screen or file log of the launch (core, mode, the MMCE slot, the switch result) and test the same game with each
   core. Also check sd2psXtd's own notes on MMCE game loading (settings for speed, known slow games).
 
+### A2b. What the SD showed (10/25, card back in the PC)
+- The microSD is not slow: through the PC's USB reader, random 2 KB reads 0.59 ms median (0.9 ms worst), sequential
+  31 MB/s, an 8 MB card written in 512-byte write-through pieces in 16.7 s (490 KB/s, worst write 24 ms). All 9
+  ISOs and the boot card are one extent each (no fragmentation).
+- GameID cards: MemoryCards/PS2/SLUS-21050 (Burnout 3) and SLUS-20642 (Auto Modellista) are 4.2 and 4.6 MB, not 8, and
+  Burnout 3 has two .crp files of ~88 KB (sd2psXtd renames a wrong-size card to .crp and makes it again). The
+  firmware writes a new card only while ps2_mmceman_fs_idle(), 512 B at a time with a flush per slice; a game
+  streaming over MMCE keeps it busy, so the card never finishes before power off. RIPPS2 has mmce_gameid=0, so these
+  came from the device's own history-file tracking. Test MMCE launches with the device's GameID off, to take the
+  switch and the card writes out of the picture.
+- BOOT/BootCard-8.mcd exists (a blank formatted card): boot channel 8 was selected at some point (channel down from 1
+  wraps to 8, and the device keeps the last boot channel). A power on on channel 8 has no PS2BBL: that is the likely
+  "the exploit fails sometimes".
+- The boot card (RIPPS2's settings live there): 3,811 KB free; RIPPS2/AUDIO was never made.
+- The user's settings_riptopl.cfg: exit_path=mc1:/APPS/RIPPS2.elf (a stale value from the old setup: the "hardcoded
+  mc1 path"), mmce_mode=0, mmce_slot=2, mmce_wait_cycles=5, mmce_use_alarms=1, default_core=0 (OPL core),
+  popstarter_path=usb:/POPS/POPSTARTER.ELF, enable_pccf=0, ripps2_recents=0, last device 15.
+
 ### A3. Other card items
 - BIOS Sounds rip: "The sounds could not be written to mc0:/RIPPS2/AUDIO/. Is the drive full or write protected?" on
   the BOOT card. sd2psXtd's card manager has no read-only BOOT card; the lean card had 3.98 MB free before RIPPS2's
@@ -68,6 +86,14 @@ Status: plan, nothing built yet. Talk it over with the user first ("we can go ov
 - Recent Games: show it in the sidebar like the drives, with its own on/off; one row with a count 1 to 99
   (today ripps2_recents 0..9). Ask: "manual start for drives of whatever game chosen is in the list" means a recent
   game's drive starts when you launch it, as All Games does.
+
+## D2. Art names from the OPL Manager database (issue akilluminati47/RIPPS2#2)
+- The OPL Manager GameArt database (and tools built on it) names backgrounds `<ID>_BG_00.png` to `_BG_06.png` and
+  screenshots `_SCR_00`, `_SCR_01`; RIPPS2 reads `<ID>_BG` and `_SCR`, `_SCR2`... only (png, then jpg). Fall back to
+  `_BG_00` when `_BG` is missing, and `_SCR_00`, `_SCR_01` for `_SCR`, `_SCR2`, through the same artIndexMayExist
+  check so a miss stays free.
+- PS1 art keys: VCD file name without .VCD, Ember's EMBER/games/ folder name, apps' ELF name with .ELF (as mapped in
+  Luden02/OrbitPS2-Manager#48, which OrbitPS2 Manager follows).
 
 ## E. Settings tooltips
 - When the selected row is low on the page, the tooltip slides up so the rows above and below stay visible.
