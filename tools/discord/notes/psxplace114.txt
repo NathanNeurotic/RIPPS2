@@ -1,0 +1,126 @@
+FIRST POST EDIT for v1.1.4 beta (build 114, 10/24/2026), replacing the v1.1.3 first post (psxplace113.txt).
+https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/
+
+Two placeholders before pasting: REEL_ID (the v1.1.4 reel's YouTube id, the part after youtu.be/) and SHORT_ID (the
+wheel Short's id, the part after youtube.com/shorts/). Both posts use them.
+
+What changed from the v1.1.3 post: the v1.1.4 reel as the video; Storage gains All Games from the first frame, Hide,
+Delete and Compress to ZSO, the launch guard; Themes gains the Color Themes, the Color Sweep and the theme list; On
+board gains the launcher search and STATUS's drives; the screenshots are the build 114 tour (a newcomer's order).
+
+TITLE (unchanged; add the version in front if you like):
+RIPPS2: a PS2 front end in one ELF (Launch Disc, Storage, Memory Files)
+
+BODY (XenForo BBCode: paste into the editor's BBCode mode, the [ ] toggle):
+
+[CENTER][MEDIA=youtube]REEL_ID[/MEDIA]
+
+[SIZE=6][B]RIPPS2[/B][/SIZE]
+[I]RIP PS2, the ELF killer. ELF-sufficient, never ELF-destructive.[/I]
+
+[URL=https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf][B]Download the latest RIPPS2.elf[/B][/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2/releases/latest]What's new[/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2-themes/releases/latest/download/RIPPS2-themes.zip]Theme pack[/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip]Languages[/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2]GitHub[/URL]  |  [URL=https://akilluminati47.github.io/RIPPS2/]Website[/URL]
+[SIZE=2]Current release: v1.1.4 beta (build 114)  |  [URL=https://github.com/akilluminati47/RIPPS2/blob/main/CHANGELOG.md]Changelog[/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2/releases]All releases[/URL]  |  [URL=https://youtube.com/shorts/SHORT_ID]The wheel Short[/URL][/SIZE][/CENTER]
+
+Hey everyone. RIPPS2 is in beta, and the download link above always gets the newest build.
+
+RIPPS2 is a PS2 front end in a single .elf (2.7 MB): a teardown and rebuild of [URL=https://github.com/NathanNeurotic/Open-PS2-Loader]RiptOPL[/URL], the Open PS2 Loader fork, with rickgaiser's [URL=https://github.com/rickgaiser/neutrino]Neutrino[/URL] inside as its second game core, and its own look, launchers, file browser and save tools. Glass towers stand behind your games and orbits behind your files, all drawn live by the PS2. The video is v1.1.4 running in PCSX2; the opening's menu music is a PS2's own, ripped from its BIOS by RIPPS2 itself.
+
+[SIZE=5][B]Launch Disc[/B][/SIZE]
+[LIST]
+[*]Boots PS2, PS1 and DVD video discs, and names the game in the tray before you start it.
+[*]Plays audio CDs right on the page, with the towers turned into a spectrum analyzer.
+[*][B]RIPDISC[/B]: hold SELECT to keep the disc in the drive. A PS2 game becomes an ISO in your games list, a PS1 game a BIN and CUE for Ember, an audio CD a folder of WAVs and a DVD video its VIDEO_TS files, with the time it will take said up front.
+[/LIST]
+
+[SIZE=5][B]Storage[/B][/SIZE]
+[LIST]
+[*]Every game on every drive in one list, [B]All Games[/B], whole from the first frame, before the drives even answer; or drive by drive: USB, the internal HDD (exFAT or APA, shown once), iLink, MX4SIO, MMCE and the network.
+[*]Art and an info page with the game's badges, five-star rating, genre, developer, release and size; the screenshots crossfade, and the right stick tips the page like a case in your hand.
+[*]Per game: [B]Hide Game[/B] (back any time from Game Sources > Hidden Games), [B]Delete[/B] completely (the image, its settings, art and cheats; its saves only if you say so; on APA the partition table is checked first), and [B]Compress to ZSO[/B] (experimental: every piece checked before the ISO goes, and Back keeps both), plus the loader core, cheats, VMCs, GSM, controller macros and achievements.
+[*][B]The launch guard[/B]: pick a game while a drive is still being read and a panel says what RIPPS2 is finishing, then starts the game by itself. Nothing is ever written half way through a launch.
+[*]R3 stars a game into Starred Games, L2 + R2 picks a random one. The in-game menu (L1 + L2 + R1 + R2 + SELECT + START): Resume, Exit Game, [B]RIPSHOT[/B] (the frame that was on screen, as your theme's screenshot art or full size), Achievements and Power Off.
+[*]Cover art fetched by the PS2 itself, and 720p and 1080i drawn at full detail.
+[/LIST]
+
+[SIZE=5][B]Memory Files[/B][/SIZE]
+[LIST]
+[*]A full file manager: copy, cut, paste and delete across memory cards, USB, HDD and MMCE, with a clean replace (it asks first, then erases, copies and checks the new file).
+[*]SEARCH FILES: type part of a name and every drive is searched; a result opens in its own folder.
+[*]OPL's VMC card images open like folders; PSU export and import; a text editor; pictures; XviD and DivX AVI video full screen; ISO, ZSO and PS1 VCD games start right from the browser.
+[*]3D save icons, textured, lit and animated, and RIP 3D ICON writes any icon out as OBJ, MTL and PNG for a PC.
+[*]Square on a memory card opens MCKILLA, the card manager: back a card up to a VMC, write saves back, erase, format.
+[/LIST]
+
+[SIZE=5][B]Themes[/B][/SIZE]
+[LIST]
+[*]RIPGRID (a cover grid whose cases turn over to their back covers) and RIPFLOW (a cover carousel) are built in; Adapt and Adapt Rx come in the theme pack, with the three categories as glyphs in their side bar. Hold SELECT on a game list for the [B]theme list[/B]: pick one and it loads.
+[*][B]Color Themes[/B] (RIPPS2, Ember, Blood, Ectoplasm, Amethyst, Bone, Tangerine, Flamingo, Turquoise, Moonlight, or Custom in your own color), and the [B]Color Sweep[/B]: five colors the theme fades through, never fast enough to flash, or a sweep of your own.
+[*]Themes made for OPL and RiptOPL work as they were made: Storage alone, with Launch Disc and Memory Files in the START menu.
+[*]Make your own with [URL=https://github.com/akilluminati47/RIPPS2-themes]RIPPS2-themes[/URL]: every key in one guide, a checker, no rebuild.
+[/LIST]
+
+[SIZE=5][B]On board, and found[/B][/SIZE]
+[LIST]
+[*][URL=https://github.com/rickgaiser/neutrino]Neutrino[/URL] 1.8.0 rides inside the .elf. Your own POPSTARTER, the POPS files, Ember and its BIOS are searched for on your drives and remembered (Settings > Game Sources > Cache > Look now). STATUS on the START menu opens on your drives, their format and free space, then the launchers it found.
+[*]BIBLE: PS2BBL 1.2.0 set up for RIPPS2 on a memory card or the internal HDD, so the console boots straight into it.
+[*]SpiritofRA: RetroAchievements through the xeRAbora client on your PC, with badges and YOUR ACCOUNT.
+[*]Settings in RIPPS2's own memory card save (mc0:/RIPPS2, with its own icon), apart from any other OPL, or on any drive you pick (Settings > General > Save Settings To). Every settings page fits one screen.
+[*]33 languages, Arabic and Persian right to left: copy [URL=https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip]RIPPS2-languages.zip[/URL]'s LNG folder to your drive and pick one in Settings > Interface > Language.
+[/LIST]
+
+[SIZE=5][B]Sound from your own console[/B][/SIZE]
+[LIST]
+[*]No one's sounds ship with RIPPS2. Audio Settings > BIOS Sounds rips your PS2's own browser sounds from its BIOS (under 1 MB), and BIOS Music renders its menu music (the clock's piece, 5:04, or the red screen's, or both) as a WAV, telling you the size first and letting you pick the folder.
+[*]Any WAV or Ogg in your AUDIO folder plays as music, on every theme.
+[*]On a PC, [URL=https://github.com/akilluminati47/RIPPS2/tree/main/tools/audio-studio]RIPPS2 Audio Studio[/URL] turns any sound or song into what RIPPS2 plays.
+[/LIST]
+
+[SIZE=5][B]How to run it[/B][/SIZE]
+[URL=https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf]Download the latest RIPPS2.elf[/URL], copy it to a USB stick or a memory card, and start it from FreeMcBoot, PS2BBL, wLaunchELF or whatever you already use for homebrew. In PCSX2: System > Start File. For the themes, unzip [URL=https://github.com/akilluminati47/RIPPS2-themes/releases/latest/download/RIPPS2-themes.zip]the latest pack[/URL] into a THM folder on your drive and pick one in Settings > Interface > Theme.
+
+[SPOILER="Screenshots"]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-01-storage.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-02-info-page.jpg[/IMG]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-03-adapt.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-04-ripgrid.jpg[/IMG]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-05-ripflow.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-06-launch-disc.jpg[/IMG]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-07-memory-files.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-08-in-game-menu.jpg[/IMG]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-09-status.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-10-game-sources.jpg[/IMG]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/tour-11-japanese.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-04-delete-plan.jpg[/IMG]
+[/SPOILER]
+
+[SIZE=5][B]Thanks[/B][/SIZE]
+To ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60 and lukeatmynose for the testing, and to Berion for the APA check. Special thanks to all the YouTube love as well: glad to help however you reach me. RIPPS2 is built on RiptOPL by NathanNeurotic and Open PS2 Loader, with [URL=https://github.com/rickgaiser/neutrino]Neutrino[/URL] by rickgaiser, POPSTARTER by krHACKen, Ember by Gageformer, PS2BBL by El_isra and xeRAbora by hacan359. Made by akilluminati47, built with Claude.
+
+It is a beta: keep your usual loader close by, and tell us what breaks, here, on [URL=https://github.com/akilluminati47/RIPPS2/issues]GitHub issues[/URL], or in #RIPPS2 on the developers' Discord ([URL=https://discord.gg/ggkCDWqhE]discord.gg/ggkCDWqhE[/URL]). Feedback is what makes RIPPS2.
+
+[I]Unofficial fan project. PlayStation and PS2 are trademarks of Sony Interactive Entertainment.[/I]
+
+
+REPLY TO BUMP THE THREAD for v1.1.4:
+
+[CENTER][SIZE=5][B]RIPPS2 v1.1.4 beta[/B][/SIZE]
+[URL=https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf][B]Download the latest RIPPS2.elf[/B][/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2/releases/latest]What's new[/URL]  |  [URL=https://github.com/akilluminati47/RIPPS2/blob/main/CHANGELOG.md]Changelog[/URL][/CENTER]
+
+Build 114 is the biggest one yet, so it gets a reel: Don't Stop Me Now into Money Longer, ending in Memory Files playing Moonlight as an AVI on the PS2, beside what builds 1 to 114 brought.
+
+[CENTER][MEDIA=youtube]REEL_ID[/MEDIA][/CENTER]
+
+[LIST]
+[*][B]All Games, whole from the first frame:[/B] every game at once at boot, before the drives answer; a game on a drive still waking waits for it.
+[*][B]Hide and delete:[/B] Hide Game takes a game out of every list until Game Sources > Hidden Games shows it again. Delete takes the image, its settings, art and cheats, its saves only if you say so; on the internal HDD (APA) the whole partition table is checked first, thanks to Berion, and a damaged one is refused before anything changes.
+[*][B]Compress to ZSO[/B] (experimental, OPL core): hold SELECT, say yes again, a progress bar the whole way. The ISO stays until every piece of the ZSO is read back and checked, then you are asked, and Back keeps both. A 1.2 GB game took about 10 minutes on the internal exFAT HDD and came out 82% of its size.
+[*][B]Safe launches:[/B] picking a game stops RIPPS2's own saving first, big writes go in whole aligned pieces, and RiptOPL's guarded exFAT driver ships with it. A game picked while a drive is still being read waits on the [B]launch guard[/B] panel and starts by itself (or Start now).
+[*][B]Your launchers, found once:[/B] POPSTARTER, the POPS files, Ember, its BIOS and Neutrino searched for and remembered (Game Sources > Cache > Look now); STATUS opens on your drives.
+[*][B]Looks:[/B] Color Themes Tangerine, Flamingo, Turquoise, Moonlight and Custom, the Color Sweep, a theme list on a held SELECT, every Settings page on one screen, one HDD, Text Weight and one newer Roboto. Theme pack edition 114.
+[*][B]RiptOPL brought up to date:[/B] i.LINK after an IOP reset (FifthFox's report) and Mode 8 (Slow Reads) for DVD games that fail on fast reads.
+[/LIST]
+
+And one wheel, four jobs, in a Short: [URL=https://youtube.com/shorts/SHORT_ID]RIPDISC, the launch guard, compression and the theme list[/URL].
+
+[SPOILER="What's new, in pictures"]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-01-all-games-at-once.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-03-cache-found.jpg[/IMG]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-04-delete-plan.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-06-compress-hold.jpg[/IMG]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-05-launch-guard.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-08-theme-list.jpg[/IMG]
+[IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-09-tangerine.jpg[/IMG] [IMG]https://raw.githubusercontent.com/akilluminati47/RIPPS2/main/media/b114/new-11-color-sweep.jpg[/IMG]
+[/SPOILER]
+
+Thanks to ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60 and lukeatmynose for the reports, and special thanks to all the YouTube love as well: glad to help however you reach me. This one wants consoles: launches right after boot, compression on your own drives (how long did it take, and what did the panel say?), and Delete on a test game. Tell us your console model, your drives and where RIPPS2 starts from.
