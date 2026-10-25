@@ -3,8 +3,8 @@
 # after a push fold into that build's patch. Usage: regen_patch.sh   (run from anywhere)
 set -e
 SP="${TMPDIR:-${TEMP:-/tmp}}"  # where the temporary git index goes
-R="/c/Users/Mini PC/Desktop/Webpages - Projects/RiptOPL"
-P="/c/Users/Mini PC/Desktop/Webpages - Projects/ps2-pillars/elf/patches"
+R="/b/Webpages - Projects/RiptOPL"
+P="/b/Webpages - Projects/ps2-pillars/elf/patches"
 PATCHES=("$P"/0*.patch)   # glob order is sorted
 LAST="${PATCHES[${#PATCHES[@]}-1]}"
 cd "$R"

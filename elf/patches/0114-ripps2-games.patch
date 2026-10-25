@@ -14137,10 +14137,10 @@ index 7e6c20a..917e3c4 100644
  /** Updates to the native display resolution and aspect ratio
   * @note Invalidates the whole glyph cache for all fonts! */
 diff --git a/include/gui.h b/include/gui.h
-index ad18867..9751a40 100644
+index ad18867..421bd63 100644
 --- a/include/gui.h
 +++ b/include/gui.h
-@@ -127,6 +127,10 @@ int guiShowKeyboard(char *value, int maxLength);
+@@ -127,7 +127,12 @@ int guiShowKeyboard(char *value, int maxLength);
  int guiMsgBox(const char *text, int addAccept, struct UIItem *ui);
  int guiIsActive(void);
  void guiCycleTheme(void); // build 79: the next theme (SELECT held 4.2 s)
@@ -14149,9 +14149,11 @@ index ad18867..9751a40 100644
 +void guiRenderPage(void); // build 114: the current page drawn once (under a panel)
 +int guiPickTheme(void);   // build 114: the theme list (SELECT held 4.2 s, Hold SELECT: List); 0: the one in use, refresh
  void guiMsgBoxStartOption(const char *label); // RIPPS2: the next guiMsgBox offers START (returns 2)
++void guiMsgBoxBackLabel(const char *label);   // build 114: the next guiMsgBox's Back hint reads this ("Back (keeps both)")
  void guiMsgBoxSound(int sfx); // RIPPS2: the next message box plays this sound (SFX_ERROR, SFX_SAVE)
  int guiPromptRebootIop(void);
-@@ -177,6 +181,7 @@ int guiPopstarterPathHandler(char *text, int maxLen);
+ // A missing-file message box naming the file that was looked for ("<message>\n<path>").
+@@ -177,6 +182,7 @@ int guiPopstarterPathHandler(char *text, int maxLen);
  int guiExitPathHandler(char *text, int maxLen);
  int guiShowNeutrinoArgsConfig(char *argsBuf, int bufSize); // 1 when the saved args changed
  int guiNeutrinoArgsCwdHandler(char *text, int maxLen);
@@ -14159,7 +14161,7 @@ index ad18867..9751a40 100644
  int guiNeutrinoArgsCfgHandler(char *text, int maxLen);
  int guiNeutrinoArgsElfHandler(char *text, int maxLen);
  int guiNeutrinoArgsAta0Handler(char *text, int maxLen);
-@@ -203,6 +208,8 @@ int guiNetProtocolNeedsRestart(void);
+@@ -203,6 +209,8 @@ int guiNetProtocolNeedsRestart(void);
  // One-shot POPSTARTER USB driver pick (FAT32 vs exFAT), shown on EVERY USB VCD launch
  // (maintainer directive 2026-08-01: the user picks per launch, never a sticky default).
  int guiShowVcdUsbMode(void);
@@ -83953,7 +83955,7 @@ index d59e71c..7a1b2b6 100644
          LOG("FNTSYS Error loading glyph - %d\n", error);
          return NULL;
 diff --git a/src/gui.c b/src/gui.c
-index 2b110ad..2002585 100644
+index 2b110ad..fef5147 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -12,10 +12,13 @@
@@ -85069,7 +85071,33 @@ index 2b110ad..2002585 100644
  void guiIntroLoop(void)
  {
      // RIPPS2: no boot splash, no fade and no boot jingle. The pillars play their boot swoop on
-@@ -5428,13 +5855,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5384,6 +5811,15 @@ void guiMsgBoxStartOption(const char *label)
+     msgBoxStartLabel = label;
+ }
+ 
++// build 114 (the user, 10/24): the next guiMsgBox names what Back does ("Back (keeps both)") instead of the plain BACK.
++// One box only, like the START choice.
++static const char *msgBoxBackLabel = NULL;
++
++void guiMsgBoxBackLabel(const char *label)
++{
++    msgBoxBackLabel = label;
++}
++
+ // 1 once the interactive menu is up; 0 on the autolaunch path, where miniInit never runs thmInit.
+ // The same test guiMsgBox and guiWarning use to stay quiet there, for callers that must not ASK a
+ // question nobody can answer (an unanswered guiMsgBox reads as "back").
+@@ -5396,7 +5832,9 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+ {
+     int terminate = 0;
+     const char *startLabel = msgBoxStartLabel; // RIPPS2
++    const char *backLabel = msgBoxBackLabel;   // build 114
+     msgBoxStartLabel = NULL;
++    msgBoxBackLabel = NULL;
+     // Wrapped once up front, not per frame: the result depends only on `text` and the screen width.
+     char wrapped[1024]; // RIPPS2: 512 cut the longer screens (BIBLE's) short
+ 
+@@ -5428,13 +5866,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
  
          if (ui)
              diaRenderUI(ui, screenHandler->inMenu, NULL, 0);
@@ -85085,6 +85113,28 @@ index 2b110ad..2002585 100644
          // RIPPS2: over a dialog a wash and the glass page panel; otherwise the pillars behind it
          if (ui) {
              rmDrawRect(0, 0, screenWidth, screenHeight, gColDarker);
+@@ -5470,6 +5905,9 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+             int first = addAccept ? 0 : 1;
+             int hx = guiAlignSubMenuHints(2 - first, hints + first, icons + first, RIPPS2_UI_FONT, 12, 2);
+             int hy = gTheme->usedHeight - 32;
++            if (backLabel != NULL) // build 114: right-aligned by its own words, not BACK's
++                hx -= rmUnScaleX(fntCalcDimensions(guiHintFont(RIPPS2_UI_FONT), backLabel)) -
++                      rmUnScaleX(fntCalcDimensions(guiHintFont(RIPPS2_UI_FONT), _l(_STR_BACK)));
+             if (startLabel != NULL) { // RIPPS2: START and its label, left of the others
+                 GSTEXTURE *st = thmGetTexture(START_ICON);
+                 int sw = st ? (st->Width * 20) / st->Height : 20;
+@@ -5478,7 +5916,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+             }
+             if (addAccept)
+                 hx = guiDrawIconAndText(icons[0], hints[0], RIPPS2_UI_FONT, hx, hy, gTheme->textColor) + 12;
+-            guiDrawIconAndText(icons[1], hints[1], RIPPS2_UI_FONT, hx, hy, gTheme->textColor);
++            if (backLabel != NULL)
++                guiDrawIconAndLiteralText(icons[1], backLabel, RIPPS2_UI_FONT, hx, hy, gTheme->textColor);
++            else
++                guiDrawIconAndText(icons[1], hints[1], RIPPS2_UI_FONT, hx, hy, gTheme->textColor);
+         }
+ 
+         guiEndFrame();
 diff --git a/src/guigame.c b/src/guigame.c
 index 0c77ec2..a7ff5de 100644
 --- a/src/guigame.c
@@ -88237,10 +88287,10 @@ index 4bedb0c..0225897 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..849a11e
+index 0000000..8f98a92
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,2163 @@
+@@ -0,0 +1,2164 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -90382,6 +90432,7 @@ index 0000000..849a11e
 +                    : _t("%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?"),
 +             r.name, j.pack ? a : b, j.pack ? b : a, (int)(j.outBytes * 100 / (j.inBytes > 0 ? j.inBytes : 1)));
 +    guiMsgBoxSound(SFX_SAVE);
++    guiMsgBoxBackLabel(_t("Back (keeps both)")); // the user, 10/24: say what Back does here
 +    if (guiMsgBox(msg, 1, NULL) && unlink(src) == 0) {
 +        lrSize(j.pack ? j.inBytes - j.outBytes : 0, a, sizeof(a));
 +        snprintf(msg, sizeof(msg), j.pack ? _t("COMPRESSED %s: %s FREED") : _t("UNCOMPRESSED %s"), r.name, a);
