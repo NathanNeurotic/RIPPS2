@@ -88287,10 +88287,10 @@ index 4bedb0c..0225897 100644
      if (fbCount == 0)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 new file mode 100644
-index 0000000..8f98a92
+index 0000000..5a5580f
 --- /dev/null
 +++ b/src/ripps2games.c
-@@ -0,0 +1,2164 @@
+@@ -0,0 +1,2194 @@
 +/*
 +  Copyright 2026, RIPPS2 contributors
 +  Licenced under Academic Free License version 3.0
@@ -89844,6 +89844,30 @@ index 0000000..8f98a92
 +    return 1;
 +}
 +
++// build 114 hotfix (the user, 10/24): compression's last step renames the checked .part into the game's place, and an
++// MMCE card renames only from sd2psXtd 1.4.0 on. The card is asked first, with a tiny file beside the game, so older
++// firmware is told in a second rather than after the whole work. 0 only when the rename itself is refused; a card that
++// cannot even take the file is left to the work, which says so in its own words
++static int zpCanRename(const char *dst)
++{
++    char a[310], b[310];
++    int fd, ok;
++
++    snprintf(a, sizeof(a), "%s.rn1", dst);
++    snprintf(b, sizeof(b), "%s.rn2", dst);
++    if ((fd = open(a, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
++        return 1;
++    ok = write(fd, "R", 1) == 1;
++    close(fd);
++    if (!ok) {
++        unlink(a);
++        return 1;
++    }
++    ok = rename(a, b) == 0;
++    unlink(ok ? b : a);
++    return ok;
++}
++
 +static int zpReadAll(int fd, void *buf, int n)
 +{
 +    unsigned char *p = buf;
@@ -90335,6 +90359,12 @@ index 0000000..8f98a92
 +                 r.name, a, b);
 +        guiMsgBoxSound(SFX_ERROR);
 +        guiMsgBox(msg, 0, NULL);
++        return;
++    }
++    if (r.mode == MMCE_MODE && !zpCanRename(dst)) {
++        close(j.fdIn);
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("This MMCE card cannot rename a file, which compression needs for its last step. Update its sd2psXtd firmware to 1.4.0 or newer (sd2psxtd.github.io/download), then try again. Nothing was changed."), 0, NULL);
 +        return;
 +    }
 +    // packing reads the ISO twice (its sizes, then its data) and writes about two thirds of it; the check reads that again.
