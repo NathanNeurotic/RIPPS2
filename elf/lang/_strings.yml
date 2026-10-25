@@ -456,6 +456,9 @@ strings:
   in:
   - mixsupport.c
   - ripps2games.c
+- en: The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done.
+  in:
+  - mmcesupport.c
 - en: ALL
   in:
   - opl.c
@@ -747,7 +750,7 @@ strings:
 - en: 'the save tool reference: PSU export and import, card images'
   in:
   - ripps2about.c
-- en: the second game core, 1.8.0 carried unmodified (AFL-3.0)
+- en: the second game core, its newest build carried unmodified (AFL-3.0)
   in:
   - ripps2about.c
 - en: wLaunchELF R3Z by NathanNeurotic
@@ -1749,7 +1752,7 @@ strings:
 - en: THE GAME'S DRIVE  (%s/neutrino)
   in:
   - ripps2ember.c
-- en: 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+- en: 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
   in:
   - ripps2ember.c
 - en: '%d / %d FILES'
@@ -3272,6 +3275,9 @@ strings:
 - en: USB Drive
   in:
   - ripps2ui.c
+- en: This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  in:
+  - system.c
 - en: '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
   in:
   - vcdsupport.c

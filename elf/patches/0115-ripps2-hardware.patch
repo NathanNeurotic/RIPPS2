@@ -192,6 +192,266 @@ index 0000000..d32a97c
 +    for f in failures:
 +        print(" - " + f)
 +    sys.exit(1)
+diff --git a/.github/scripts/test_bdm_scan_retry.py b/.github/scripts/test_bdm_scan_retry.py
+index ec32183..ebd7b53 100644
+--- a/.github/scripts/test_bdm_scan_retry.py
++++ b/.github/scripts/test_bdm_scan_retry.py
+@@ -97,6 +97,7 @@ typedef struct { unsigned char tried, shown; unsigned int sum; } sb_snap_t;
+ static int sbSnapShow(sb_snap_t *s, const char *p, base_game_info_t **l, int *c, int *f) { (void)p; (void)l; (void)c; (void)f; s->tried = 1; return 0; }
+ static void sbSnapScanned(sb_snap_t *s, const char *p, const base_game_info_t *l, int c, int f, int ok) { (void)p; (void)l; (void)c; (void)f; (void)ok; s->tried = 1; s->shown = 0; }
+ static void sbSnapForget(sb_snap_t *s) { s->tried = s->shown = 0; s->sum = 0; }
++static int sbSnapTrusted(const sb_snap_t *s) { (void)s; return 0; } /* build 115: Trust Cache (never trusted here) */
+ static void sbSetPadBreath(int on) { (void)on; }
+ 
+ typedef struct
+diff --git a/.github/scripts/test_neutrino_argv_budget.py b/.github/scripts/test_neutrino_argv_budget.py
+index b610b5c..7cde9c0 100644
+--- a/.github/scripts/test_neutrino_argv_budget.py
++++ b/.github/scripts/test_neutrino_argv_budget.py
+@@ -33,6 +33,10 @@ functions = "\n\n".join(function(sig) for sig in (
+     "int sysNeutrinoArgsPreflight(",
+ ))
+ 
++# build 115: the option probe and the unit-zero rule, as they are in system.c
++probe = source[source.index("#define NF_CFG"):source.index("// The -bsdfs Neutrino will actually run with")]
++functions = probe + "\n\n" + functions
++
+ declined = re.search(r"^#define NEUTRINO_LAUNCH_DECLINED .*$", source, re.M)
+ assert declined is not None, "missing NEUTRINO_LAUNCH_DECLINED"
+ functions = declined.group(0) + "\n\n" + functions
+@@ -50,6 +54,8 @@ harness = r'''
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <fcntl.h>
++#include <unistd.h>
+ 
+ #define LOG(...) ((void)0)
+ #define NET_BOOT_UDPFS 2
+diff --git a/.github/scripts/test_neutrino_bsdfs.py b/.github/scripts/test_neutrino_bsdfs.py
+index 238f1a7..1e68ab8 100644
+--- a/.github/scripts/test_neutrino_bsdfs.py
++++ b/.github/scripts/test_neutrino_bsdfs.py
+@@ -82,6 +82,15 @@ static const char *_l(int id) { lastWarning = id; return ""; }
+ static void guiMsgBoxMissing(const char *msg, const char *path) { (void)msg; (void)path; }
+ static void guiWarning(const char *msg, int secs) { (void)msg; (void)secs; }
+ static int sysSyncNeutrinoUdpfsToml(const char *path, const char *dev) { (void)path; (void)dev; return 0; }
++struct UIItem;
++static int guiMsgBox(const char *t, int a, struct UIItem *u) { (void)t; (void)a; (void)u; return 0; }
++/* build 115: the option probe, stubbed (every option understood: the behaviour these cases were written for) */
++#define NF_BSDFS 0x008
++#define SFX_ERROR 1
++#define _t(s) (s)
++static void sysNeutrinoReadFlags(const char *p) { (void)p; }
++static int sysNeutrinoTakes(const char *p, unsigned int b) { (void)p; (void)b; return 1; }
++static void guiMsgBoxSound(int s) { (void)s; }
+ 
+ @FUNCTIONS@
+ 
+diff --git a/.github/scripts/test_neutrino_dvr.py b/.github/scripts/test_neutrino_dvr.py
+index 4325518..51c4cd4 100644
+--- a/.github/scripts/test_neutrino_dvr.py
++++ b/.github/scripts/test_neutrino_dvr.py
+@@ -60,6 +60,15 @@ static const char *_l(int id) {warning=id;return "message";}
+ static void guiWarning(const char *msg,int seconds) {(void)msg;assert(seconds==6);warnings++;}
+ static void guiMsgBoxMissing(const char *msg,const char *path) {(void)msg;assert(path);warnings++;}
+ static int sysSyncNeutrinoUdpfsToml(const char *path,const char *device) {(void)path;(void)device;return 0;}
++struct UIItem;
++static int guiMsgBox(const char *t,int a,struct UIItem *u) {(void)t;(void)a;(void)u;return 0;}
++/* build 115: the option probe, stubbed (every option understood: the behaviour these cases were written for) */
++#define NF_BSDFS 0x008
++#define SFX_ERROR 1
++#define _t(s) (s)
++static void sysNeutrinoReadFlags(const char *p) { (void)p; }
++static int sysNeutrinoTakes(const char *p, unsigned int b) { (void)p; (void)b; return 1; }
++static void guiMsgBoxSound(int s) { (void)s; }
+ static int mockOpen(const char *path,int flags) {
+  assert(flags==O_RDONLY);opens++;
+  assert(strstr(path,"bsd-dvr.toml") || strstr(path,"modules/dvrdrv.irx") ||
+diff --git a/.github/scripts/test_neutrino_external.py b/.github/scripts/test_neutrino_external.py
+new file mode 100644
+index 0000000..258523c
+--- /dev/null
++++ b/.github/scripts/test_neutrino_external.py
+@@ -0,0 +1,178 @@
++"""RIPPS2 build 115: a Neutrino RIPPS2 did not install (XEB+'s, an older kit) gets only the options it knows, and a
++game opened after Neutrino's own IOP reset is named the way Neutrino names it then.
++
++Compiles the real reader and path rule from src/system.c (the block from the sysLastPathSeparator declaration to the
++-bsdfs helper) and runs them on synthetic Neutrino installs, each a folder with neutrino.elf:
++  - kits with version.txt (every kit since 1.6.1): 1.6.1 (no -dbc), the 1.8.0 development build;
++  - an unpacked ELF, its option strings as each tag's loader parses them (rickgaiser/neutrino ee/loader main.c);
++  - older kits known by their config files (1.5: bsd-mmce.toml, 1.3/1.4: bsdfs-*.toml, 1.2: rc-uya.toml);
++  - a packed ELF with nothing else to go on, and a missing one: every option, as before.
++Then checks the wiring in sysNeutrinoPreflight and sysRunNeutrinoLaunch.
++"""
++from pathlib import Path
++import re
++import subprocess
++import sys
++import tempfile
++
++root = Path(__file__).resolve().parents[2]
++source = (root / 'src/system.c').read_text(encoding='utf-8').replace('\r\n', '\n')
++fails = []
++
++probe = source[source.index('#define NF_CFG'):source.index('// The -bsdfs Neutrino will actually run with')]
++
++program = r'''
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <fcntl.h>
++#include <unistd.h>
++#define LOG(...) ((void)0)
++#ifdef _WIN32 /* a Windows run: binary reads (text mode stops at 0x1a); the PS2 has no text mode */
++#define open(p, f) open((p), (f) | O_BINARY)
++#endif
++@PROBE@
++static int fails;
++static char kit[512];
++static const char *at(const char *base, const char *name)
++{
++    snprintf(kit, sizeof(kit), "%s/%s/neutrino.elf", base, name);
++    sysNeutrinoReadFlags(kit);
++    return kit;
++}
++static void takes(unsigned int bit, int want, const char *what)
++{
++    if (sysNeutrinoTakes(kit, bit) != want) { printf("FAIL %s\n", what); fails++; }
++}
++static void version(const char *want, const char *what)
++{
++    if (strcmp(sysNeutrinoVersionOf(kit), want)) { printf("FAIL %s: '%s', want '%s'\n", what, sysNeutrinoVersionOf(kit), want); fails++; }
++}
++static void unit(const char *in, const char *want)
++{
++    char a[96];
++    snprintf(a, sizeof(a), "%s", in);
++    sysNeutrinoUnitZero(a);
++    if (strcmp(a, want)) { printf("FAIL unit zero: %s -> %s, want %s\n", in, a, want); fails++; }
++}
++int main(int argc, char **argv)
++{
++    const char *b = argv[1];
++    (void)argc;
++    at(b, "v161");
++    version("v1.6.1", "1.6.1 from version.txt");
++    takes(NF_GSM | NF_CWD | NF_QB | NF_BSDFS, 1, "1.6.1 has -gsm -cwd -qb -bsdfs");
++    takes(NF_DBC, 0, "1.6.1 has no -dbc");
++    at(b, "dev");
++    version("v1.8.0-61-g7be8de2", "the development build from version.txt");
++    takes(NF_ALL, 1, "the development build takes everything");
++    at(b, "unpacked131");
++    takes(NF_BSDFS | NF_ELF | NF_CFG, 1, "an unpacked 1.3.1 has -bsdfs -elf -cfg");
++    takes(NF_CWD, 0, "an unpacked 1.3.1 has no -cwd");
++    takes(NF_QB, 0, "an unpacked 1.3.1 has no -qb (its usage text naming it does not count)");
++    version("", "an unpacked 1.3.1 has no tag");
++    at(b, "unpacked180");
++    version("v1.8.0", "an unpacked 1.8.0 keeps its tag");
++    at(b, "kit15");
++    version("1.5", "a 1.5 kit by its config files");
++    takes(NF_GSM | NF_QB | NF_CWD, 1, "1.5 has -gsm -qb -cwd");
++    takes(NF_DBC, 0, "1.5 has no -dbc");
++    at(b, "kit13");
++    version("1.3 or 1.4", "a 1.3/1.4 kit by its config files");
++    takes(NF_BSDFS | NF_CFG | NF_LOGO, 1, "1.3 has -bsdfs -cfg -logo");
++    takes(NF_CWD, 0, "1.3 or 1.4 is taken as 1.3: no -cwd");
++    takes(NF_QB, 0, "1.3 or 1.4 is taken as 1.3: no -qb");
++    at(b, "kit12");
++    version("1.2", "a 1.2 kit by its config files");
++    takes(NF_BSDFS, 0, "1.2 has no -bsdfs");
++    takes(NF_LOGO, 1, "1.2 has -logo");
++    at(b, "packed");
++    takes(NF_ALL, 1, "a packed ELF with nothing else to go on is taken to know everything");
++    at(b, "none");
++    takes(NF_ALL, 1, "a missing ELF is taken to know everything");
++    if (sysNeutrinoTakes("mass0:/other/neutrino.elf", NF_GSM) != 1) { puts("FAIL a Neutrino not read is taken to know everything"); fails++; }
++    unit("-dvd=mass1:/DVD/Game.iso", "-dvd=mass:/DVD/Game.iso");
++    unit("-dvd=mass12:DVD/Game.iso", "-dvd=mass:DVD/Game.iso");
++    unit("-mc0=mass3:/VMC/slot.bin", "-mc0=mass:/VMC/slot.bin");
++    unit("-dvd=mass:/DVD/Game.iso", "-dvd=mass:/DVD/Game.iso");
++    unit("-dvd=hdl:Game", "-dvd=hdl:Game");
++    unit("-dvd=mmce0:/DVD/Game.iso", "-dvd=mmce0:/DVD/Game.iso");
++    unit("-dvd=bdfs:ata0p0", "-dvd=bdfs:ata0p0");
++    unit("-dvd=massive:/x", "-dvd=massive:/x");
++    if (!fails) puts("Neutrino by version.txt, its strings or its config files; packed and missing ones; mass: after the IOP reset OK");
++    return fails != 0;
++}
++'''
++
++# What each tag's loader parses (from its main.c), as NUL-ended strings among other bytes
++TAGS = {
++    'v1.3.1': ['-bsd=', '-bsdfs=', '-dvd=', '-ata0=', '-ata0id=', '-ata1=', '-mc0=', '-mc1=', '-elf=', '-gc=', '-mt=',
++               '-cfg=', '-dbc', '-logo'],
++    'v1.8.0': ['-bsd=', '-bsdfs=', '-dvd=', '-ata0=', '-ata0id=', '-ata1=', '-mc0=', '-mc1=', '-elf=', '-gc=', '-gsm=',
++               '-cfg=', '-cwd=', '-dbc', '-logo', '-qb', '- Version: %s\n', 'v1.8.0'],
++}
++PACKED = b'\x7fELF' + bytes((i * 37) & 0xff for i in range(200000))
++
++
++def unpacked(strings, pad=40000):
++    blob = bytearray(b'\x7fELF' + bytes(range(256)) * 10)
++    for i, s in enumerate(strings):
++        blob += b'\0' + s.encode() + b'\0' + bytes([i]) * (pad // max(1, len(strings)))
++    # usage text names options too, without the NUL straight after: it must not count
++    blob += b'\0  -qb               Quick-Boot directly into load environment\n'
++    return bytes(blob)
++
++
++KITS = {  # folder: (neutrino.elf, version.txt or None, config files)
++    'v161': (PACKED, 'v1.6.1\n', ['bsd-mmce.toml', 'bsdfs-exfat.toml']),
++    'dev': (PACKED, 'v1.8.0-61-g7be8de2\r\n', ['bsd-udpfs.toml', 'compat.toml']),
++    'unpacked131': (unpacked(TAGS['v1.3.1']), None, []),
++    'unpacked180': (unpacked(TAGS['v1.8.0']), None, []),
++    'kit15': (PACKED, None, ['bsd-mmce.toml', 'bsdfs-exfat.toml', 'bsd-usb.toml']),
++    'kit13': (PACKED, None, ['bsdfs-exfat.toml', 'bsdfs-hdl.toml', 'bsd-usb.toml', 'rc-uya.toml']),
++    'kit12': (PACKED, None, ['bsd-ata-hdl.toml', 'rc-uya.toml', 'bsd-usb.toml']),
++    'packed': (PACKED, None, []),
++}
++
++with tempfile.TemporaryDirectory() as d:
++    d = Path(d)
++    for name, (elf, ver, configs) in KITS.items():
++        (d / name / 'config').mkdir(parents=True)
++        (d / name / 'neutrino.elf').write_bytes(elf)
++        if ver is not None:
++            (d / name / 'version.txt').write_text(ver, encoding='ascii', newline='')
++        for c in configs:
++            (d / name / 'config' / c).write_text('# toml\n', encoding='ascii')
++    c = d / 'probe.c'
++    c.write_text(program.replace('@PROBE@', probe), encoding='utf-8')
++    exe = d / 'probe'
++    b = subprocess.run(['cc', '-std=gnu99', '-Wall', '-Wextra', '-Werror', '-Wno-unused-function', '-o', str(exe), str(c)],
++                       capture_output=True, text=True)
++    if b.returncode:
++        fails.append('the reader does not compile:\n' + b.stderr[-2000:])
++    else:
++        r = subprocess.run([str(exe), str(d).replace('\\', '/')], capture_output=True, text=True)
++        print(r.stdout, end='')
++        if r.returncode:
++            fails.append('reader checks failed')
++
++# Wiring: read before the teardown, every automatic option asked first, and mass: only without -qb
++pre = source[source.index('int sysNeutrinoPreflight('):]
++pre = pre[:pre.index('\n}\n')]
++if 'sysNeutrinoReadFlags(neutrinoPath);' not in pre:
++    fails.append('sysNeutrinoPreflight must read the Neutrino before the teardown')
++launch = source[source.index('static int sysRunNeutrinoLaunch('):]
++launch = launch[:launch.index('\nint sysNeutrinoArgsPreflight(')]
++for bit in ('NF_LOGO', 'NF_QB', 'NF_GC', 'NF_DBC', 'NF_GSM', 'NF_ELF', 'NF_MC', 'NF_CWD', 'NF_CFG', 'NF_BSDFS'):
++    if 'sysNeutrinoTakes(neutrinoPath, %s)' % bit not in launch:
++        fails.append('sysRunNeutrinoLaunch never asks for %s' % bit)
++if not re.search(r'if \(!quick\)\s*sysNeutrinoUnitZero\(filePath\);', launch):
++    fails.append('-dvd must take mass: only when no -qb goes out')
++if not re.search(r'if \(!quick\)\s*sysNeutrinoUnitZero\(vmcArg\[slot\]\);', launch):
++    fails.append('the VMC paths must take mass: only when no -qb goes out')
++if 'sysNeutrinoUnitZero(cwdArg)' in launch:
++    fails.append('-cwd is read before the reset, through our mounts: it keeps our unit number')
++
++if fails:
++    print('\n'.join(fails))
++    sys.exit(1)
 diff --git a/.github/scripts/test_udpfs_art.py b/.github/scripts/test_udpfs_art.py
 index 7216752..37e1c4e 100644
 --- a/.github/scripts/test_udpfs_art.py
@@ -280,6 +540,19 @@ index 2574003..7cd9f18 100644
  void sbSetPadBreath(int on);        // build 110: pause every scan (an MX4SIO drive shares SIO2 with the pads, as MMCE does)
  // errno of the last CD/DVD folder the latest sbReadList could not open (0 = both opened).
  int sbGetReadListError(void);
+diff --git a/include/system.h b/include/system.h
+index 1e8421d..ae7f253 100644
+--- a/include/system.h
++++ b/include/system.h
+@@ -56,6 +56,8 @@ void sysLaunchNeutrino(const char *driver, const char *path, const char *startup
+ // same neutrinoBsdfs/extraArgs/bdDevNr it will pass to sysLaunchNeutrino. Returns 0 = proceed;
+ // <0 = abort the launch (a toast has already been shown).
+ int sysNeutrinoPreflight(const char *driver, const char *neutrinoPath, int neutrinoBsdfs, const char *extraArgs, int bdDevNr);
++// RIPPS2 build 115: the version tag of the Neutrino the last preflight read ("v1.8.0"; "" for one older than 1.8)
++const char *sysNeutrinoVersionOf(const char *neutrinoPath);
+ void sysNeutrinoWarnPadEmu(config_set_t *configSet);
+ 
+ // Compose the exact launch argv while the GUI is still live. Refuses a launch that would exceed
 diff --git a/src/artindex.c b/src/artindex.c
 index 51dd1df..6aa8d21 100644
 --- a/src/artindex.c
@@ -838,6 +1111,54 @@ index c488407..c437192 100644
      // Rumble decay, plus the bounded re-send tail (see RUMBLE_CMD_REPEATS). Edge-driven: the RPC
      // stream stops after a few polls instead of running for the pulse's whole life, but a single
      // dropped padSetActDirect no longer decides whether the pulse happens -- or whether it ends.
+diff --git a/src/ripps2about.c b/src/ripps2about.c
+index cc7b9bf..7b953e4 100644
+--- a/src/ripps2about.c
++++ b/src/ripps2about.c
+@@ -151,7 +151,7 @@ static const ab_row_t abRows[] = {
+     {'T', N_("RiptOPL by NathanNeurotic")},
+     {'S', N_("and the Open PS2 Loader team, whose credits follow")},
+     {'T', N_("Neutrino by rickgaiser")},
+-    {'S', N_("the second game core, 1.8.0 carried unmodified (AFL-3.0)")},
++    {'S', N_("the second game core, its newest build carried unmodified (AFL-3.0)")},
+     {'S', N_("github.com/rickgaiser/neutrino")},
+     {'G', NULL},
+     {'H', N_("OPEN PS2 LOADER DEVELOPERS")},
+diff --git a/src/ripps2ember.c b/src/ripps2ember.c
+index 5651a19..8b2e109 100644
+--- a/src/ripps2ember.c
++++ b/src/ripps2ember.c
+@@ -27,7 +27,7 @@
+ /*
+   RIPPS2 build 77: Neutrino on board.
+ 
+-  Neutrino 1.8.0 (rickgaiser, AFL-3.0) rides inside RIPPS2.ELF as a gzip'd tar of its release
++  Neutrino (rickgaiser, AFL-3.0; build 115: its development build v1.8.0-61-g7be8de2) rides inside RIPPS2.ELF as a gzip'd tar of its release
+   folder (neutrino.elf, config/, modules/, its README, version and licence; the PC-side udpfs_server
+   stays out). A Neutrino launch that finds no install of the user's own (the path in Settings, the
+   game's drive, the memory cards) asks where to put this one -- the game's drive or a memory card --
+@@ -36,10 +36,10 @@
+ */
+ 
+ 
+-extern void *neutrino_tgz; // misc/neutrino.tar.gz: elf/neutrino/neutrino-1.8.0.tar.gz
++extern void *neutrino_tgz; // misc/neutrino.tar.gz: elf/neutrino/neutrino-1.8.0-61-g7be8de2.tar.gz (build 115)
+ extern int size_neutrino_tgz;
+ 
+-#define NEUTRINO_TAR_SIZE 593920 // the tar the build carries, as packed (elf/neutrino/README.md)
++#define NEUTRINO_TAR_SIZE 573440 // the tar the build carries, as packed (elf/neutrino/README.md; build 115: v1.8.0-61-g7be8de2)
+ #define NEUTRINO_LAST     "config/system.toml"
+ 
+ static void ntMkdirs(const char *dir)
+@@ -175,7 +175,7 @@ int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize)
+         return 0;
+     snprintf(msg, sizeof(msg),
+              _t("This game starts through Neutrino, and RIPPS2 found none: not at Settings' path, on the game's drive, on the memory cards "
+-             "or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every "
++             "or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every "
+              "Neutrino game uses it from there."));
+     guiMsgBoxSound(SFX_MESSAGE);
+     if (guiMsgBox(msg, 1, NULL) != 1)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 index 5a5580f..7933e8b 100644
 --- a/src/ripps2games.c
@@ -852,6 +1173,37 @@ index 5a5580f..7933e8b 100644
      char path[256];
      const char *vmc = NULL;
      int i, k;
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index c1bcf7f..a3c319a 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -14,7 +14,7 @@
+   looks), and the settings for it that live elsewhere in the menus, gathered here so nobody has to know
+   which page holds what.
+ 
+-    NEUTRINO 1.8.0      rickgaiser, AFL-3.0 (elf/neutrino), carried
++    NEUTRINO            rickgaiser, AFL-3.0 (elf/neutrino), carried (build 115: v1.8.0-61-g7be8de2)
+     POPSTARTER          krHACKen (elf/popstarter), found
+     EMBER               Gageformer (elf/ember), found
+     BIBLE               PS2BBL 1.2.0 set up for RIPPS2 (elf/bible), carried
+@@ -230,7 +230,7 @@ static void stScan(void)
+             snprintf(custom, sizeof(custom), "%s", gNeutrinoPath);
+             p[0] = custom;
+         }
+-        stLauncher(SEANCE_NEUTRINO, "Neutrino 1.8.0", p, 4);
++        stLauncher(SEANCE_NEUTRINO, "Neutrino", p, 4); // build 115: the carried one is a development build of 1.8
+     }
+     {
+         const char *p[4] = {gPopstarterPath, "mass0:/POPS/POPSTARTER.ELF", "mc0:/POPS/POPSTARTER.ELF", "mc1:/POPS/POPSTARTER.ELF"};
+@@ -356,7 +356,7 @@ static void stInstallNeutrino(void)
+     }
+     if ((pick = ripps2PickList(labels, n)) < 0)
+         return;
+-    stTell(ripps2NeutrinoInstallTo(dirs[pick]), "Neutrino 1.8.0", dirs[pick]);
++    stTell(ripps2NeutrinoInstallTo(dirs[pick]), "Neutrino", dirs[pick]);
+ }
+ 
+ void ripps2Status(void)
 diff --git a/src/supportbase.c b/src/supportbase.c
 index 04c5e85..9185900 100644
 --- a/src/supportbase.c
@@ -873,6 +1225,391 @@ index 04c5e85..9185900 100644
  void sbSnapForget(sb_snap_t *snap)
  {
      snap->tried = snap->shown = 0;
+diff --git a/src/system.c b/src/system.c
+index 1bea4b2..242d79f 100644
+--- a/src/system.c
++++ b/src/system.c
+@@ -21,6 +21,8 @@
+ #define SYS_DISC_NODISC_MS   2000
+ #include "include/opl.h"
+ #include "include/gui.h"
++#include "include/sound.h"    // RIPPS2 build 115: SFX_ERROR, for a Neutrino too old for the APA HDD
++#include "include/ripps2tr.h" // RIPPS2 build 115: _t
+ #include "include/lang.h"       // _l(_STR_...) -- Neutrino preflight abort toasts
+ #include "include/launchdiag.h" // UDPBD hang-triage stage markers (gated on gLaunchDiag)
+ #include "include/ethsupport.h"
+@@ -1433,6 +1435,210 @@ static int neutrinoArgHasActiveFlag(const char *args, const char *flag)
+     return 0;
+ }
+ 
++// RIPPS2 build 115: what the Neutrino about to start understands. Neutrino stops at the first option it does not know
++// ("ERROR: unknown argv", then back to the browser: the console seems to reboot), and its options came over the years
++// (its loader's parse, rickgaiser/neutrino tags): -cfg -dbc -logo in 1.2, -bsdfs in 1.3, -cwd and -qb in 1.4, -gsm in
++// 1.5; -dbc is missing again from 1.5 and 1.6. A Neutrino set up for another launcher (XEB+, an older NHDDL kit) may be
++// any of them, and RIPPS2 sent every option it uses. Each version keeps the options it reads as strings in its ELF,
++// so the ELF is read once before the teardown (sysNeutrinoPreflight) and only those options are sent. An ELF that
++// does not show "-dvd=" (packed, or not Neutrino) is taken to know them all, as before.
++#define NF_CFG   0x001
++#define NF_DBC   0x002
++#define NF_LOGO  0x004
++#define NF_BSDFS 0x008
++#define NF_CWD   0x010
++#define NF_QB    0x020
++#define NF_GSM   0x040
++#define NF_MC    0x080
++#define NF_ELF   0x100
++#define NF_GC    0x200
++#define NF_ALL   0x3ff
++static unsigned int sysNeutrinoFlagSet = NF_ALL;
++static char sysNeutrinoFlagsFor[256] = "";
++static char sysNeutrinoVersion[32] = "";
++
++// Where a Neutrino's folder ends: its last '/' or '\\' (sysLastPathSeparator's rule; that one is further down)
++static const char *sysNeutrinoDirEnd(const char *path)
++{
++    const char *slash = strrchr(path, '/'), *backslash = strrchr(path, '\\');
++    return (backslash != NULL && (slash == NULL || backslash > slash)) ? backslash : slash;
++}
++
++// The options of a Neutrino release (its loader's parse, per tag)
++static unsigned int sysNeutrinoFlagsOf(int major, int minor)
++{
++    unsigned int f = NF_ELF | NF_GC;
++    if (major > 1 || minor >= 1)
++        f |= NF_MC;
++    if (major > 1 || minor >= 2)
++        f |= NF_CFG | NF_DBC | NF_LOGO;
++    if (major > 1 || minor >= 3)
++        f |= NF_BSDFS;
++    if (major > 1 || minor >= 4)
++        f |= NF_CWD | NF_QB;
++    if (major > 1 || minor >= 5)
++        f |= NF_GSM;
++    if (major == 1 && (minor == 5 || minor == 6))
++        f &= ~NF_DBC; // not in 1.5's or 1.6's parse
++    return f;
++}
++
++// The ELF's own option strings, for a Neutrino that is not packed. Each literal is taken with the NUL that ends it, so
++// a word in the usage text does not count; the last 16 bytes of a piece are kept in front of the next. 1: readable
++static int sysNeutrinoProbeElf(const char *neutrinoPath, unsigned int *flags)
++{
++    static const struct
++    {
++        const char *lit;
++        unsigned int bit;
++    } opts[] = {{"-cfg=", NF_CFG}, {"-dbc", NF_DBC}, {"-logo", NF_LOGO}, {"-bsdfs=", NF_BSDFS}, {"-cwd=", NF_CWD},
++                {"-qb", NF_QB}, {"-gsm=", NF_GSM}, {"-mc0=", NF_MC}, {"-elf=", NF_ELF}, {"-gc=", NF_GC}};
++    unsigned char *buf;
++    unsigned int found = 0;
++    int fd, got, keep = 0, total = 0, dvd = 0, i, j;
++    const int chunk = 32 * 1024, tail = 16;
++
++    if ((fd = open(neutrinoPath, O_RDONLY)) < 0)
++        return 0;
++    if ((buf = malloc(chunk + tail)) == NULL) {
++        close(fd);
++        return 0;
++    }
++    while (total < 8 * 1024 * 1024 && (got = read(fd, buf + keep, chunk)) > 0) {
++        int len = keep + got;
++        total += got;
++        for (i = 0; i + 4 <= len; i++) {
++            if (buf[i] == 'v') { // a version tag, "v1.8.0", as 1.8 keeps it (GIT_TAG)
++                if (!sysNeutrinoVersion[0] && i > 0 && buf[i - 1] == '\0' && buf[i + 1] >= '0' && buf[i + 1] <= '9' && buf[i + 2] == '.') {
++                    for (j = i + 1; j < len && j - i < 24 && buf[j] > ' ' && buf[j] < 0x7f; j++)
++                        ;
++                    if (j < len && buf[j] == '\0' && j - i >= 5)
++                        snprintf(sysNeutrinoVersion, sizeof(sysNeutrinoVersion), "%.*s", j - i, (const char *)&buf[i]);
++                }
++                continue;
++            }
++            if (buf[i] != '-')
++                continue;
++            if (i + 6 <= len && !memcmp(&buf[i], "-dvd=", 6))
++                dvd = 1;
++            for (j = 0; j < (int)(sizeof(opts) / sizeof(opts[0])); j++) {
++                int n = (int)strlen(opts[j].lit) + 1;
++                if (i + n <= len && !memcmp(&buf[i], opts[j].lit, n))
++                    found |= opts[j].bit;
++            }
++        }
++        keep = len < tail ? len : tail;
++        memmove(buf, buf + len - keep, keep);
++    }
++    free(buf);
++    close(fd);
++    if (dvd)
++        *flags = found;
++    return dvd;
++}
++
++static int sysNeutrinoHas(const char *dir, char sep, const char *file)
++{
++    char path[320];
++    int fd;
++    if (snprintf(path, sizeof(path), "%.256sconfig%c%.40s", dir, sep, file) >= (int)sizeof(path))
++        return 0;
++    if ((fd = open(path, O_RDONLY)) < 0)
++        return 0;
++    close(fd);
++    return 1;
++}
++
++// RIPPS2 build 115: what the Neutrino about to start understands, read before the teardown (sysNeutrinoPreflight).
++// Its release kit says which it is: version.txt (every kit since 1.6.1, "v1.8.0", "v1.8.0-61-g7be8de2"); a Neutrino
++// built unpacked shows its options as strings; an older kit (an XEB+ or NHDDL one) is known by its config files --
++// bsd-mmce.toml came in 1.5, the bsdfs-*.toml in 1.3, rc-uya.toml in 1.2 -- and is taken as the oldest it may be
++// (1.3 and 1.4 share their files, so as 1.3: no -cwd, no -qb). Nothing to go on (a hand-made folder): everything.
++static void sysNeutrinoReadFlags(const char *neutrinoPath)
++{
++    const char *slash = sysNeutrinoDirEnd(neutrinoPath);
++    char dir[256], path[320], line[32];
++    unsigned int flags = NF_ALL;
++    int fd, n, major, minor;
++
++    snprintf(sysNeutrinoFlagsFor, sizeof(sysNeutrinoFlagsFor), "%s", neutrinoPath);
++    sysNeutrinoFlagSet = NF_ALL;
++    sysNeutrinoVersion[0] = '\0';
++    if (slash == NULL || slash - neutrinoPath + 1 >= (int)sizeof(dir) - 16)
++        return;
++    snprintf(dir, sizeof(dir), "%.*s", (int)(slash - neutrinoPath) + 1, neutrinoPath);
++
++    snprintf(path, sizeof(path), "%sversion.txt", dir);
++    if ((fd = open(path, O_RDONLY)) >= 0) {
++        n = read(fd, line, sizeof(line) - 1);
++        close(fd);
++        line[n > 0 ? n : 0] = '\0';
++        line[strcspn(line, "\r\n \t")] = '\0';
++        if (sscanf(line[0] == 'v' ? line + 1 : line, "%d.%d", &major, &minor) == 2) {
++            snprintf(sysNeutrinoVersion, sizeof(sysNeutrinoVersion), "%s", line);
++            sysNeutrinoFlagSet = sysNeutrinoFlagsOf(major, minor);
++            LOG("[NEUTRINO] %s: %s (version.txt), options 0x%03x\n", neutrinoPath, line, sysNeutrinoFlagSet);
++            return;
++        }
++    }
++    if (sysNeutrinoProbeElf(neutrinoPath, &flags)) {
++        sysNeutrinoFlagSet = flags;
++        LOG("[NEUTRINO] %s: %s, options 0x%03x (its strings)\n", neutrinoPath, sysNeutrinoVersion[0] ? sysNeutrinoVersion : "no tag", flags);
++        return;
++    }
++    {
++        static const struct
++        {
++            const char *file, *name;
++            int minor;
++        } kits[] = {{"bsd-mmce.toml", "1.5", 5}, {"bsdfs-exfat.toml", "1.3 or 1.4", 3}, {"rc-uya.toml", "1.2", 2}, {"bsd-usb.toml", "1.0 or 1.1", 0}};
++        int k;
++        for (k = 0; k < (int)(sizeof(kits) / sizeof(kits[0])); k++) {
++            if (sysNeutrinoHas(dir, *slash, kits[k].file)) {
++                flags = sysNeutrinoFlagsOf(1, kits[k].minor);
++                snprintf(sysNeutrinoVersion, sizeof(sysNeutrinoVersion), "%s", kits[k].name);
++                break;
++            }
++        }
++    }
++    sysNeutrinoFlagSet = flags;
++    LOG("[NEUTRINO] %s: %s, options 0x%03x (its config files)\n", neutrinoPath, sysNeutrinoVersion[0] ? sysNeutrinoVersion : "unknown", flags);
++}
++
++// 1 when the Neutrino at neutrinoPath (read by sysNeutrinoReadFlags) takes this option; a path not read: yes
++static int sysNeutrinoTakes(const char *neutrinoPath, unsigned int bit)
++{
++    if (neutrinoPath == NULL || strcmp(neutrinoPath, sysNeutrinoFlagsFor) != 0)
++        return 1;
++    return (sysNeutrinoFlagSet & bit) != 0;
++}
++
++// The version tag of the Neutrino read last ("v1.8.0"), or "" (an older one keeps none)
++const char *sysNeutrinoVersionOf(const char *neutrinoPath)
++{
++    return (neutrinoPath != NULL && !strcmp(neutrinoPath, sysNeutrinoFlagsFor)) ? sysNeutrinoVersion : "";
++}
++
++// RIPPS2 build 115: a file Neutrino opens after its own IOP reset, in the form it has then. Without -qb Neutrino
++// reboots the IOP into its load environment with only its -bsd driver, which is "mass:" (unit 0), and opens the game
++// and the VMCs there. RIPPS2 names a drive by its place in RIPPS2's session ("mass1:" for an internal HDD when a USB
++// stick came first), and Neutrino could not open "mass1:/DVD/..." and went back to the browser (ahavasi, exFAT HDD,
++// RIPPS2 started from USB as XEB+ is). "-dvd=mass1:/DVD/x.iso" becomes "-dvd=mass:/DVD/x.iso"; anything else is kept.
++static void sysNeutrinoUnitZero(char *arg)
++{
++    char *eq = strchr(arg, '='), *p;
++    if (eq == NULL || strncmp(eq + 1, "mass", 4) != 0)
++        return;
++    p = eq + 5;
++    if (*p < '0' || *p > '9')
++        return;
++    while (*p >= '0' && *p <= '9')
++        p++;
++    if (*p != ':')
++        return;
++    memmove(eq + 5, p, strlen(p) + 1);
++}
++
+ // The -bsdfs Neutrino will actually run with, so the preflight and the argv builder agree on it.
+ // Read the user tokens the way Neutrino parses them: the global args, then the per-game args (the
+ // order appendArgTokens adds them), last one wins, a $-prefixed token is switched off, and --b
+@@ -2038,6 +2244,13 @@ int sysNeutrinoPreflight(const char *driver, const char *neutrinoPath, int neutr
+         return -1;
+ 
+     const char *deviceName = getDeviceName(driver);
++    // build 115: what this Neutrino understands, read while its drive is mounted (sysNeutrinoReadFlags)
++    sysNeutrinoReadFlags(neutrinoPath);
++    if (!strcmp(deviceName, "apa") && !sysNeutrinoTakes(neutrinoPath, NF_BSDFS)) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries."), 0, NULL);
++        return -1;
++    }
+     if (!strcmp(deviceName, "unsupported")) {
+         LOG("[NEUTRINO] preflight: unsupported device '%s'\n", driver);
+         guiWarning(_l(_STR_NEUTRINO_DEV_UNSUPPORTED), 6);
+@@ -2220,6 +2433,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+     // makes the kernel read string bytes as argv pointers). Hop 1 prepends the elfldr child's load
+     // path, spending one slot, so the target argv must stay <= 14 entries.
+     const int argvMax = sizeof(argv) / sizeof(argv[0]);
++    int quick = 0; // build 115: -qb goes out (Neutrino keeps our IOP and its mounts), so paths keep our unit numbers
+ 
+     // Target argv[0] = neutrino.elf's own path (NHDDL convention). sysLoadELFKeepIOP forwards
+     // argv verbatim -- argv[0] included -- so this must be supplied explicitly here (POPSTARTER
+@@ -2234,6 +2448,10 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+     int autoLogo = EnablePS2Logo && !neutrinoArgHasActiveFlag(gNeutrinoArgs, "-logo") && !neutrinoArgHasActiveFlag(extraArgs, "-logo");
+ 
+     if (!strcmp(deviceName, "apa")) {
++        if (!sysNeutrinoTakes(neutrinoPath, NF_BSDFS)) { // build 115: before 1.3 Neutrino cannot read the APA HDD
++            LOG("[NEUTRINO] %s has no -bsdfs: it cannot start an APA game\n", neutrinoPath);
++            return -1;
++        }
+         snprintf(bsd, sizeof(bsd), "-bsd=ata");
+         if (argc < argvMax)
+             argv[argc++] = bsd;
+@@ -2241,7 +2459,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+         if (argc < argvMax)
+             argv[argc++] = bsdfs;
+         snprintf(filePath, sizeof(filePath), "-dvd=hdl:%s", path);
+-        if (autoLogo && argc < argvMax)
++        if (autoLogo && sysNeutrinoTakes(neutrinoPath, NF_LOGO) && argc < argvMax)
+             argv[argc++] = "-logo";
+         if (argc < argvMax)
+             argv[argc++] = filePath;
+@@ -2266,6 +2484,12 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+         static const char *const bsdfsTokens[] = {"", "exfat", "hdl", "bd"};
+         static const char *const bsdfsDvdPrefix[] = {"", "", "hdl:", "bdfs:"};
+         int fsOverride = neutrinoEffectiveBsdfs(deviceName, neutrinoBsdfs, extraArgs);
++        if (fsOverride > 1 && !sysNeutrinoTakes(neutrinoPath, NF_BSDFS)) {
++            LOG("[NEUTRINO] %s has no -bsdfs: it cannot use -bsdfs=%d\n", neutrinoPath, fsOverride);
++            return -1; // build 115: hdl or bd needs it; exfat is the default anyway
++        }
++        if (fsOverride == 1 && !sysNeutrinoTakes(neutrinoPath, NF_BSDFS))
++            fsOverride = 0;
+         if (fsOverride) {
+             snprintf(bsdfs, sizeof(bsdfs), "-bsdfs=%s", bsdfsTokens[fsOverride]);
+             if (argc < argvMax)
+@@ -2283,7 +2507,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+         } else {
+             snprintf(filePath, sizeof(filePath), "-dvd=%s%s", bsdfsDvdPrefix[fsOverride], path);
+         }
+-        if (autoLogo && argc < argvMax)
++        if (autoLogo && sysNeutrinoTakes(neutrinoPath, NF_LOGO) && argc < argvMax)
+             argv[argc++] = "-logo";
+         if (argc < argvMax)
+             argv[argc++] = filePath;
+@@ -2314,16 +2538,23 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+            losing -qb and reproducing the black screen. */
+         if ((!strcmp(deviceName, "usb") || !strcmp(deviceName, "ilink") ||
+              !strcmp(deviceName, "udpfs") || !strcmp(deviceName, "udpfsbd") || !strcmp(deviceName, "udpbd")) &&
+-            argc < argvMax &&
+-            !neutrinoArgHasActiveFlag(gNeutrinoArgs, "-qb") && !neutrinoArgHasActiveFlag(extraArgs, "-qb"))
++            argc < argvMax && sysNeutrinoTakes(neutrinoPath, NF_QB) &&
++            !neutrinoArgHasActiveFlag(gNeutrinoArgs, "-qb") && !neutrinoArgHasActiveFlag(extraArgs, "-qb")) {
+             argv[argc++] = "-qb";
++            quick = 1;
++        }
++        if (neutrinoArgHasActiveFlag(gNeutrinoArgs, "-qb") || neutrinoArgHasActiveFlag(extraArgs, "-qb"))
++            quick = 1;
++        // build 115: without -qb the game is opened after Neutrino's own IOP reset, on "mass:" (sysNeutrinoUnitZero)
++        if (!quick)
++            sysNeutrinoUnitZero(filePath);
+     }
+ 
+     // Only forward -gc when at least one compat mode is set: Neutrino treats
+     // -gc=0 as an explicit mode (IOP fast reads), NOT a no-op, so passing it for
+     // a game with no OPL modes selected would force unwanted behavior (B1).
+     int gcModes = convertCompatmaskToModes(compatmask);
+-    if (gcModes > 0) {
++    if (gcModes > 0 && sysNeutrinoTakes(neutrinoPath, NF_GC)) {
+         snprintf(compatModes, sizeof(compatModes), "-gc=%d", gcModes);
+         if (argc < argvMax)
+             argv[argc++] = compatModes;
+@@ -2332,7 +2563,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+     // Global toggles auto-emit -dbc/-logo; the per-game/global args screens now carry them as
+     // structured bools too (forwarded via the tokenizer below), so suppress the auto-emit when the
+     // user's args already hold an active (non-$-disabled) copy -- one flag, emitted once.
+-    if (gEnableDebug && argc < argvMax &&
++    if (gEnableDebug && argc < argvMax && sysNeutrinoTakes(neutrinoPath, NF_DBC) &&
+         !neutrinoArgHasActiveFlag(gNeutrinoArgs, "-dbc") && !neutrinoArgHasActiveFlag(extraArgs, "-dbc"))
+         argv[argc++] = "-dbc";
+ 
+@@ -2342,7 +2573,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+     // letting that explicit value win (precedence confirmed vs rickgaiser/neutrino ee/loader/src/main.c).
+     int userHasGsm = neutrinoArgHasActiveFlag(gNeutrinoArgs, "-gsm=") ||
+                      neutrinoArgHasActiveFlag(extraArgs, "-gsm=");
+-    if (neutrinoVideo >= 1 && neutrinoVideo <= 5 && !userHasGsm && argc < argvMax) {
++    if (neutrinoVideo >= 1 && neutrinoVideo <= 5 && !userHasGsm && argc < argvMax && sysNeutrinoTakes(neutrinoPath, NF_GSM)) {
+         // -gsm=v:c grammar (neutrino main.c parse_gsm_flags): v in {fp1, fp2, 1080ix1, 1080ix2,
+         // 1080ix3}, optional :c in {1,2,3} = field-flipping compatibility type. NEVER emit a bare
+         // ":c" -- an unrecognized -gsm value aborts the whole neutrino boot -- so the comp half is
+@@ -2362,7 +2593,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+     // startups and skipped when the user already forwards an -elf= (structured field or free
+     // text) -- neutrino must see exactly one.
+     static char elfArg[40]; // outlives argv[] until the ExecPS2 handoff
+-    if (gNeutrinoElfArg && sysStartupShapeOk(startup) && argc < argvMax &&
++    if (gNeutrinoElfArg && sysStartupShapeOk(startup) && argc < argvMax && sysNeutrinoTakes(neutrinoPath, NF_ELF) &&
+         !neutrinoArgHasActiveFlag(gNeutrinoArgs, "-elf=") && !neutrinoArgHasActiveFlag(extraArgs, "-elf=")) {
+         snprintf(elfArg, sizeof(elfArg), "-elf=cdrom0:\\%s;1", startup);
+         argv[argc++] = elfArg;
+@@ -2373,11 +2604,16 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+     // sbBuildVmcNeutrinoArgs (caller storage, alive across the launch) and must NOT pass through the
+     // whitespace tokenizer below -- a VMC name with a space would otherwise be split into two args
+     // and Neutrino would receive a truncated, unopenable card path (silent no-mount).
+-    if (vmcArgs != NULL) {
++    if (vmcArgs != NULL && sysNeutrinoTakes(neutrinoPath, NF_MC)) {
++        static char vmcArg[NEUTRINO_VMC_SLOTS][sizeof(vmcArgs->arg[0])]; // build 115: in Neutrino's form (outlives argv)
+         int slot;
+         for (slot = 0; slot < NEUTRINO_VMC_SLOTS; slot++) {
+-            if (vmcArgs->arg[slot][0] != '\0' && argc < argvMax)
+-                argv[argc++] = (char *)vmcArgs->arg[slot];
++            if (vmcArgs->arg[slot][0] != '\0' && argc < argvMax) {
++                snprintf(vmcArg[slot], sizeof(vmcArg[slot]), "%s", vmcArgs->arg[slot]);
++                if (!quick)
++                    sysNeutrinoUnitZero(vmcArg[slot]);
++                argv[argc++] = vmcArg[slot];
++            }
+         }
+     }
+ 
+@@ -2388,7 +2624,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+     // for memory-card installs too.
+     int userHasCwd = neutrinoArgHasActiveFlag(gNeutrinoArgs, "-cwd=") ||
+                      neutrinoArgHasActiveFlag(extraArgs, "-cwd=");
+-    if (!userHasCwd) {
++    if (!userHasCwd && sysNeutrinoTakes(neutrinoPath, NF_CWD)) {
+         const char *slash = sysLastPathSeparator(neutrinoPath);
+         if (slash != NULL) {
+             int dirLen = (int)(slash - neutrinoPath) + 1; // keep the device's native trailing separator
+@@ -2409,10 +2645,11 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+     argc = appendArgTokens(argv, argc, argvMax, extraArgsBuf, sizeof(extraArgsBuf), extraArgs, 0, &gameBreak);
+     // Cheats (sysNeutrinoHandCheats): after the user's own options, so the -cfg Neutrino keeps -- its
+     // last -- is ours, which loads theirs through `depends`. Only for the game the file was written for.
+-    if (sysNeutrinoCheatArg[0] != '\0' && startup != NULL && !strcmp(startup, sysNeutrinoCheatStartup) && argc < argvMax)
++    if (sysNeutrinoCheatArg[0] != '\0' && startup != NULL && !strcmp(startup, sysNeutrinoCheatStartup) && argc < argvMax &&
++        sysNeutrinoTakes(neutrinoPath, NF_CFG))
+         argv[argc++] = sysNeutrinoCheatArg;
+ #ifdef RETROACHIEVEMENTS
+-    if (sysNeutrinoRAArg[0] && startup != NULL && !strcmp(startup, sysNeutrinoRAStartup)) {
++    if (sysNeutrinoRAArg[0] && startup != NULL && !strcmp(startup, sysNeutrinoRAStartup) && sysNeutrinoTakes(neutrinoPath, NF_CFG)) {
+         if (argc + 2 > argvMax)
+             return -1;
+         argv[argc++] = "-cfg=ript-ra";
 diff --git a/src/textures.c b/src/textures.c
 index 2da860e..f337d6b 100644
 --- a/src/textures.c
