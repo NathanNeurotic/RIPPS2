@@ -5,10 +5,6 @@ language: Bulgarian
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER ПОТВЪРЖДАВА, ESC ОТКАЗВА. ВСЕКИ БУТОН ПОКАЗВА КЛАВИШИТЕ.
   USB KEYBOARD: USB КЛАВИАТУРА
-  '      DESR DVR ISOs (experimental)': '      DESR DVR ISO файлове (експериментално)'
-  '      Internal HDD (exFAT)': '      Вътрешен HDD (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (експериментално)'
-  '      Protocol': '      Протокол'
   Access: Достъп
   Applications Page Start Mode: Режим на стартиране на страницата с приложения
   Art Delay: Забавяне на изображенията
@@ -22,7 +18,6 @@ strings:
   Fifth: Пети
   First: Първи
   Fourth: Четвърти
-  HDD (APA) Start Mode: Режим на стартиране на HDD (APA)
   HDD Cache: HDD кеш
   HDD Spindown: Заспиване на HDD
   MMCE Settings: Настройки на MMCE
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Това е PS2 игра с ESR кръпка. Сложете ESR (esr*.elf) в APPS, BOOT или ESR на карта с памет или USB флашка, за да я стартирате.
   '%s, BUILD %d': '%s, КОМПИЛАЦИЯ %d'
   '... and the anonymous ...': '... и анонимните ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 приложен без промени (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Разглобяване и сглобяване наново на RiptOPL, разклонението на Open PS2 Loader,
   ABOUT: ОТНОСНО
   'ACHIEVEMENTS: SPIRIT OF RA': 'ПОСТИЖЕНИЯ: SPIRIT OF RA'
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): AVI видео във Файловете в паметта, разклонение на RIPPS2 (AFL 2.0)
   Apollo Save Tool by bucanero: Apollo Save Tool от bucanero
   BACK: НАЗАД
+  Back (keeps both): Назад (запазва и двата)
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): BIBLE е PS2BBL 1.2.0, подписаните компилации на El Isra (карта и HDD), без промени (GPL-3)
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: BIOS звуци > Извличане ги възпроизвежда като SPU2; не се прилага BIOS
   BOOT LOCK AND BIBLE: BOOT LOCK И BIBLE
   BOOT LOCK edits its config too: BOOT LOCK редактира и неговата конфигурация
   BUILD DETAILS: ПОДРОБНОСТИ ЗА КОМПИЛАЦИЯТА
-  BUILT ON RIPTOPL: ИЗГРАДЕНО ВЪРХУ RIPTOPL
   BearSSL by Thomas Pornin: BearSSL от Thomas Pornin
   Built with Claude (Anthropic): Направено с Claude (Anthropic)
   CD PLAYER: CD ПЛЕЙЪР
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek и Sleek Bold, нарисувани за RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements на конзолата от hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL от NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed от Google (Apache-2.0)
   SOUNDS: ЗВУЦИ
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: Инсталаторът на FMCB от SP193 и OSDMenu от pcm720, следвани стъпка по стъпка
   SUPPORT: ПОДДРЪЖКА
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z от NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF от екипа на ps2homebrew
   what RIPPS2's card image writes are checked against: спрямо какво се проверява записът на образи на карти от RIPPS2
-  with its own look, launchers, file browser and save tools.: със собствен вид, стартери, файлов браузър и инструменти за записи.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora от hacan359, rcheevos от RetroAchievements
   your console's own, ripped from its BIOS: собствените звуци на вашата конзола, извлечени от нейния BIOS
   ' (no DNS answer)': ' (няма DNS отговор)'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: записване на %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino не можа да се запише в %s. Проверете свободното място и дали не е защитено срещу запис, и опитайте отново.
   THE GAME'S DRIVE  (%s/neutrino): УСТРОЙСТВОТО НА ИГРАТА  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Тази игра стартира чрез Neutrino, а там, където търси RIPPS2 (Настройки, устройството на играта, картите с памет), няма Neutrino. RIPPS2 носи Neutrino 1.8.0 от rickgaiser (AFL-3.0). Да се инсталира ли сега? След това избирате къде.
   '%d / %d FILES': '%d / %d ФАЙЛА'
   '%d FOLDERS AND CONTENTS': '%d ПАПКИ И СЪДЪРЖАНИЕ'
   '%d FOLDERS, %d FOUND': '%d ПАПКИ, НАМЕРЕНИ %d'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d от %d все още заключени'
   '%s   on %s': '%s   на %s'
   BADGES: ЗНАЧКИ
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: Значките работят само с включена ТЕЛЕМЕТРИЯ и пуснат xeRAbora на вашия компютър; дотогава не струват нищо.
   CHECK THE DISC: ПРОВЕРКА НА ДИСКА
   From this game's last CHECK GAME SUPPORT.: От последната ПРОВЕРКА НА ПОДДРЪЖКАТА НА ИГРАТА за тази игра.
   HOW IT WORKS: КАК РАБОТИ
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: На тази конзола има PS2BBL със заключването на RIPPS2.
   AUDIO folder: папката AUDIO
   DRIVES: УСТРОЙСТВА
-  INSTALL RIPPS2'S COPY: ИНСТАЛИРАНЕ НА КОПИЕТО НА RIPPS2
-  'Installed: ': 'Инсталирано: '
   MANAGE: УПРАВЛЕНИЕ
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: УПРАВЛЕНИЕ показва какво стартира всяка карта с памет и инсталира или поправя BIBLE.
   MEMORY CARD 0  (about 600 KB): КАРТА С ПАМЕТ 0  (около 600 KB)
   MEMORY CARD 1  (about 600 KB): КАРТА С ПАМЕТ 1  (около 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: драйверът му не се зареди (код %d).'
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: драйверът е зареден, но никоя SD карта не отговори (слот mc1).'
   NEUTRINO SETTINGS: НАСТРОЙКИ НА NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Още няма: RIPPS2 няма собствени звуци. Извлечете тези на конзолата или ги направете в RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Не е инсталирано. Игра, която има нужда от него, предлага копието на RIPPS2, или го инсталирайте тук.
   POPSTARTER NETWORK: МРЕЖА НА POPSTARTER
   POPSTARTER and Ember: POPSTARTER и Ember
   PS1 SETTINGS: PS1 НАСТРОЙКИ
   PS2BBL 1.2.0 for RIPPS2: PS2BBL 1.2.0 за RIPPS2
   RIP THIS CONSOLE'S SOUNDS: ИЗВЛИЧАНЕ НА ЗВУЦИТЕ НА ТАЗИ КОНЗОЛА
-  RIPPS2's homebrew: homebrew програмите на RIPPS2
   STATUS: СЪСТОЯНИЕ
-  'STATUS: looking for RIPPS2''s homebrew': 'СЪСТОЯНИЕ: търсене на homebrew програмите на RIPPS2'
   a drive of unknown kind: устройство от неизвестен вид
-  a drive or a memory card: устройство или карта с памет
   boot loader, card by card: зареждащ модул, карта по карта
   from its BIOS, into AUDIO: от нейния BIOS, в AUDIO
   internal HDD (exFAT): вътрешен HDD (exFAT)
@@ -975,10 +957,194 @@ strings:
   Sidebar: Странична лента
   your own copy, found on your drives and memory cards: вашето собствено копие, намерено на устройствата и картите памет
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'вашето собствено, намерено и стартирано: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Не е намерен на mass0: (%s). Сложете ember.elf и своя bios.bin в папката му EMBER.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Не е намерен. Сложете своя POPSTARTER.ELF в папка POPS на устройство.
   Launch Disc: Стартиране на диск
   Memory Files: Файлове в паметта
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: RIPPS2 намери %d от 5. Всеки се запомня и всяко стартиране го чете оттам.
+  not found on the started drives: не е намерено на стартираните устройства
+  not looked for yet: още не е търсено
+  '%s did not answer, so %s cannot start. Is it connected?': '%s не отговори, затова %s не може да стартира. Свързан ли е?'
+  '%s is not on %s any more, so it has left All Games.': '%s вече не е на %s, затова напусна Всички игри.'
+  STARTING %s: СТАРТИРАНЕ НА %s
+  the SMB share: SMB споделянето
+  the drive: устройството
+  the internal HDD (APA): вътрешния HDD (APA)
+  the internal HDD (exFAT): вътрешния HDD (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: ИЗГРАДЕН ВЪРХУ RIPTOPL, С NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Специални благодарности и за цялата любов от YouTube:'
+  and its own look, launchers, file browser and save tools.: и със собствен облик, стартери, файлов браузър и инструменти за записи.
+  glad to help however you reach me.: с радост помагам, както и да ме намерите.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): второто игрово ядро, 1.8.0 включено без промени (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: с Neutrino на rickgaiser вътре като второ игрово ядро,
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Тази игра стартира чрез Neutrino, а RIPPS2 не намери такъв: нито в пътя от Настройки, нито на устройството на играта, нито на картите с памет, нито на стартирано устройство. RIPPS2 носи Neutrino 1.8.0 от rickgaiser (AFL-3.0): инсталирайте го веднъж, където изберете, и всяка игра с Neutrino го ползва оттам.'
+  STARTING THE DRIVES: СТАРТИРАНЕ НА УСТРОЙСТВАТА
+  '%d games, on the started drives': '%d игри, на стартираните устройства'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: НЯКОИ ФАЙЛОВЕ НЕ МОЖАХА ДА БЪДАТ ИЗТРИТИ'
+  '%u partitions, all in order': '%u дяла, всички в ред'
+  ', %d art images': ', %d изображения на обложки'
+  ', and ': ', и '
+  ', its cheats': ', нейните кодове'
+  ', its settings': ', нейните настройки'
+  1 game, on the started drives: 1 игра, на стартираните устройства
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: PS1 игра оттук се изтрива във Файлове в паметта, където е отделен файл.
+  A network catalogue's games are deleted on the PC that serves them.: Игрите от мрежов каталог се изтриват на компютъра, който ги предоставя.
+  DELETE FOR GOOD: ИЗТРИЙ ЗАВИНАГИ
+  DELETE IT: ИЗТРИЙ Я
+  'DELETED %s: %s FREED': '%s ИЗТРИТА: ОСВОБОДЕНИ %s'
+  'Delete %s from %s? Goes: %s.': 'Да се изтрие ли %s от %s? Заминава: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Да се изтрие ли %s от %s? Заминава: %s. Остава: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Да се изтрият ли и нейните записи и снимки RIPSHOT? Не ги запазва.
+  HIDDEN GAMES: СКРИТИ ИГРИ
+  'HIDDEN: %s': 'СКРИТА: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Да се скрие ли %s? Тя напуска всеки списък, също Всички игри и Любими. Настройки > Източници на игри > Скрити игри я показва отново.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Последна проверка. %s се изтрива завинаги и нищо не може да я върне. Натиснете START, за да я изтриете.
+  None. Hide Game, in a game's options, puts one here.: Няма. Скрий играта, в опциите на игра, слага една тук.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Нищо не беше изтрито: таблицата на дяловете на това устройство не пасва на този диск (%s). Може да е записана от образ на диск с друг размер. Първо я поправете на компютър.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 не може да изтрие игра от тази страница.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 не намери файловете на тази игра на нейното устройство.
+  Reading the hidden lists: Четене на скритите списъци
+  SHOW AGAIN OR DELETE: ПОКАЖИ ОТНОВО ИЛИ ИЗТРИЙ
+  SHOW IT AGAIN: ПОКАЖИ Я ОТНОВО
+  That game is not on its drive any more.: Тази игра вече не е на своето устройство.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Скритият списък не можа да се запише на устройството на играта. Защитено ли е от запис, или Операциите за запис са изключени?
+  The partition could not be removed (%d). Nothing was deleted.: Дялът не можа да бъде премахнат (%d). Нищо не беше изтрито.
+  This drive cannot keep a hidden list (a network catalogue).: Това устройство не може да пази скрит списък (мрежов каталог).
+  This game's drive has not answered yet. Wait for it, then try again.: Устройството на тази игра още не е отговорило. Изчакайте го и опитайте отново.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Дялът на тази игра е от тези, които RIPPS2 не премахва (системен дял или този с неговите настройки).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'един дял е по-голям, отколкото позволява този диск: таблицата е направена за диск с друг размер'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'един дял минава отвъд края на този диск (сектор %u от %u): таблицата е направена за по-голям диск'
+  its RIPSHOT pictures: нейните снимки RIPSHOT
+  its drive: нейното устройство
+  its saves: нейните записи
+  sector %u holds no partition header: сектор %u няма заглавие на дял
+  the chain does not close at __mbr: веригата не се затваря при __mbr
+  the chain skips from sector %u: веригата прескача от сектор %u
+  the chain's links disagree at sector %u: звената на веригата не съвпадат при сектор %u
+  the drive's size could not be read: размерът на устройството не можа да се прочете
+  the game (%s): играта (%s)
+  the game's folder and everything in it (%s): папката на играта и всичко в нея (%s)
+  the header at sector %u could not be read: заглавието при сектор %u не можа да се прочете
+  the header at sector %u fails its checksum: заглавието при сектор %u не минава контролната сума
+  the partition at sector %u is not where or as large as APA puts one: дялът при сектор %u не е там, където, или колкото голям, APA слага един
+  the settings and art another copy of it uses: настройките и обложките, които ползва друго нейно копие
+  '%d FOLDERS': '%d ПАПКИ'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s не можа да се копира в %s. Устройството пълно ли е или защитено от запис?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s не е там, където търси RIPPS2. Да се потърси ли на устройствата, стартирани от RIPPS2? Мястото, където бъде намерен, се запомня за всяко следващо стартиране.'
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember не е в %s, до игрите, а трябва да е там. RIPPS2 го намери в %s: START го копира там (%d KB) и стартира играта.'
+  Ember's BIOS: BIOS на Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'BIOS на Ember (bios.bin) не е в %s, до Ember. RIPPS2 намери един в %s: START го копира там (%d KB) и стартира играта.'
+  LOOKING FOR YOUR LAUNCHERS: ТЪРСЕНЕ НА ВАШИТЕ СТАРТЕРИ
+  The POPS files: Файловете на POPS
+  '%s  MMCE card': '%s  MMCE карта'
+  INSTALL RIPPS2'S NEUTRINO: ИНСТАЛИРАЙ NEUTRINO НА RIPPS2
+  'Internal HDD (APA): %s free of %s': 'Вътрешен HDD (APA): свободни %s от %s'
+  LAUNCHERS: СТАРТЕРИ
+  LOOK FOR THEM: ПОТЪРСИ ГИ
+  'Memory card %d: %d KB free': 'Карта с памет %d: свободни %d KB'
+  POPS files: Файлове на POPS
+  START EVERY DRIVE: СТАРТИРАЙ ВСИЧКИ УСТРОЙСТВА
+  'STATUS: looking at the drives and the homebrew': 'СЪСТОЯНИЕ: преглед на устройствата и homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Първо да се стартират всички устройства, за да стигне търсенето до всички? (Не търси на вече стартираните.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE и останалото
+  every started drive: всяко стартирано устройство
+  found where you keep them: намерени там, където ги държите
+  not found yet: още не е намерено
+  not on a started drive: не е на стартирано устройство
+  only if you have none: само ако нямате такъв
+  starts every drive first: първо стартира всички устройства
+  Drives, launchers and homebrew: Устройства, стартери и homebrew
+  BDM Devices: BDM устройства
+  Color Sweep: Цветова смяна
+  Colors and Text: Цветове и текст
+  HDD POPS partitions: POPS дялове на HDD
+  Layout: Подредба
+  Missing Covers: Липсващи обложки
+  Name: Име
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Още не е намерена SMB настройка на POPSTARTER. Попълнете редовете по-долу.
+  POPSTARTER Network: Мрежа на POPSTARTER
+  POPSTARTER SMB Network: SMB мрежа на POPSTARTER
+  POPSTARTER UDPFS Network: UDPFS мрежа на POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 сам добавя устройството, ISO, VMC и видеорежима.
+  Screen: Екран
+  Speed: Скорост
+  Sweep Colors: Цветове на смяната
+  Text Weight: Дебелина на текста
+  Theme Color: Основен цвят
+  Audio: Аудио
+  Bold: Удебелен
+  Controllers: Контролери
+  Lively: Живо
+  Medium: Среден
+  PS Emulation: PS емулация
+  Regular: Обикновен
+  Slow: Бавно
+  A MOMENT: МИГ
+  A TASK IN THE BACKGROUND: ЗАДАЧА НА ЗАДЕН ПЛАН
+  ABOUT %d S: ОКОЛО %d С
+  ANY MOMENT: ВСЕКИ МИГ
+  READING THE GAME LIST OF %s: ЧЕТЕ СПИСЪКА С ИГРИ НА %s
+  SAVING A LIST: ЗАПИСВА СПИСЪК
+  START NOW: ПУСНИ СЕГА
+  STARTING: СТАРТИРА
+  STARTS NEXT: СТАРТИРА СЛЕД ТОВА
+  STOPPING IT SAFELY: СПИРА БЕЗОПАСНО
+  THE LAST OF THE QUEUE: КРАЯТ НА ОПАШКАТА
+  WHEN IT FINISHES: КОГАТО ПРИКЛЮЧИ
+  What each card starts; install or repair BIBLE.: Какво стартира всяка карта; инсталирайте или поправете BIBLE.
+  Rainbow: Дъга
+  Custom: Собствен
+  DESR DVR ISOs (experimental): DESR DVR ISO файлове (експериментално)
+  PC CARD CF (experimental): PC CARD CF (експериментално)
+  HDD Start Mode: Режим на стартиране на HDD
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed от The Roboto Project Authors (SIL OFL 1.1)
+  '%s on %s': '%s на %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s стана %s (%d%%), всяка част е проверена. Да се премахне ли ISO и да се запази ZSO?'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s отново стана %s, всяка част е проверена. Да се премахне ли ZSO и да се запази ISO?'
+  A ZSO of this game is already beside it. Remove one of the two first.: До нея вече има ZSO на тази игра. Първо премахнете едната от двете.
+  About %d min, then checked: Около %d мин, после проверка
+  An ISO of this game is already beside it. Remove one of the two first.: До нея вече има ISO на тази игра. Първо премахнете едната от двете.
+  CHECKING EVERY PIECE: ПРОВЕРКА НА ВСЯКА ЧАСТ
+  COMPRESS TO ZSO: КОМПРЕСИРАЙ В ZSO
+  'COMPRESSED %s: %s FREED': 'КОМПРЕСИРАНА %s: ОСВОБОДЕНИ %s'
+  COMPRESSING 1 OF 2: КОМПРЕСИРАНЕ 1 ОТ 2
+  COMPRESSING 2 OF 2: КОМПРЕСИРАНЕ 2 ОТ 2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : Да се компресира ли %s? ISO остава, докато ZSO бъде прочетен обратно и проверен, след това RIPPS2 пита, преди да премахне ISO. Устройството има нужда от място и за двата файла по време на работа; оставете конзолата включена, докато приключи. ZSO се стартира само с ядрото OPL (не Neutrino); записите, настройките, изображенията и кодовете остават с нея и тя може отново да стане ISO по всяко време.
+  Compress to ZSO: Компресирай в ZSO
+  Cycle: Редуване
+  'Experimental: OPL core only (not Neutrino)': 'Експериментално: само ядрото OPL (не Neutrino)'
+  Hold SELECT: Задържан SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: Не можа да бъде завършено (%s). Записаното е премахнато; играта е както беше.
+  List: Списък
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : Да стане ли %s отново ISO? ZSO остава, докато ISO бъде прочетен обратно и проверен, след това RIPPS2 пита, преди да премахне ZSO. Устройството има нужда от място и за двата файла по време на работа; оставете конзолата включена, докато приключи. Записите, настройките, изображенията и кодовете остават с нея.
+  Stop? What it has written so far is removed; the game stays as it was.: Спиране? Записаното досега се премахва; играта остава както беше.
+  THEMES: ТЕМИ
+  There is not enough memory for this just now.: В момента няма достатъчно памет за това.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: Този образ не е такъв, който RIPPS2 може да компресира или декомпресира (размерът му не е цели блокове от 2 KB).
+  UNCOMPRESS TO ISO: ДЕКОМПРЕСИРАЙ В ISO
+  UNCOMPRESSED %s: ДЕКОМПРЕСИРАНА %s
+  UNCOMPRESSING: ДЕКОМПРЕСИРАНЕ
+  Uncompress to ISO: Декомпресирай в ISO
+  Under a minute, then checked: Под минута, после проверка
+  COPYING: КОПИРАНЕ
+  SHOW AGAIN, DELETE OR COMPRESS: ПОКАЖИ ОТНОВО, ИЗТРИЙ ИЛИ КОМПРЕСИРАЙ
+  SHOW AGAIN, DELETE OR UNCOMPRESS: ПОКАЖИ ОТНОВО, ИЗТРИЙ ИЛИ ДЕКОМПРЕСИРАЙ
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': '%s се нуждае от около %s свободно място на устройството си по време на работа (оригиналът остава до края), а устройството има %s свободни.'
+  Hide and Compress: Скрий и компресирай
+  'COMPRESSED AND HIDDEN: %s': 'КОМПРЕСИРАНА И СКРИТА: %s'
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 'Няма място за това копиране: нужни са около %s, а устройството има %s свободни.'
+  OVER 4 GB FOR FAT32: НАД 4 GB ЗА FAT32
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: Това устройство е %s, което не държи файл от 4 GB или повече, а новият образ би бил %s.
+  '%s, %s clusters, %s free of %s': '%s, клъстери %s, %s свободни от %s'
+  Delete This Sweep: Изтрий тази смяна
+  Delete %s? RIPPS2's own sweeps stay as they are.: Да се изтрие ли %s? Смените на самия RIPPS2 остават както са.
+  Sweep: Смяна
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Значките отбелязват игрите с постижения в списъците ви и колко сте отключили. Нужна е включена ТЕЛЕМЕТРИЯ.
 labels:
   BDMMODE: Режим на стартиране на BDM
   GAME_ID: ID на играта
@@ -1204,7 +1370,7 @@ labels:
   SAVE_ICONS: 3D икони на записите
   HINT_SAVE_ICONS: Показва иконата на записа на избраната игра, въртяща се, там, където темата има място за нея. Първо чете собствения VMC на играта, после картите с памет.
   NETBOOT_RESTART_NOW: Мрежовият протокол се сменя след рестартиране. Да се запазят ли настройките и да се рестартира ли OPL сега?
-  HINT_NET_PROTOCOL: 'Коя мрежова услуга използва RiptOPL: SMB споделяне, UDPFS, UDPBD или HTTP. Същата настройка като в Източници на игри. Смяната от вече работеща услуга изисква рестартиране.'
+  HINT_NET_PROTOCOL: 'Коя мрежова услуга използва RiptOPL: SMB споделяне, UDPFS, UDPBD или HTTP. Смяната от вече работеща услуга изисква рестартиране.'
   HINT_UDPFS_ACCESS: Само UDPFS. Файлове чете отделни ISO файлове от папката с игри на сървъра; IMG чете образ на диск като устройство. SMB и HTTP винаги използват Файлове, UDPBD винаги IMG.
   HINT_SMB_VERSION: С коя версия на SMB да се говори със споделянето на компютъра.
   HINT_NET_ADVANCED: Отключва за редактиране режима на Ethernet връзката и SMB порта.
@@ -1405,3 +1571,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Как кадрите, чакащи на лентата на всяка игра, стават PNG.
   RIPPS2_SETTINGS_HOME: Запис на настройките в
   HINT_RIPPS2_SETTINGS_HOME: 'Къде RIPPS2 пази настройките си: в собствения си запис на карта с памет, в папка RIPPS2 на устройство (вътрешния HDD, USB, MX4SIO, iLink или MMCE) или в папка, която въведеш.'
+  RIPPS2_LAUNCHERS: Стартери
+  RIPPS2_LOOK_NOW: Търси сега
+  HINT_RIPPS2_LOOK_NOW: RIPPS2 търси на стартираните устройства POPSTARTER, файловете на POPS, Ember, BIOS на Ember и Neutrino и запомня къде е всеки. Всяко стартиране ги чете оттам.
+  RIPPS2_HIDE_GAME: Скрий играта
+  RIPPS2_HIDDEN_GAMES: Скрити игри
+  HINT_RIPPS2_HIDDEN_GAMES: Игрите, скрити със Скрий играта, на стартираните устройства. Покажете някоя отново или я изтрийте. Всяко устройство пази свой списък.
+  HINT_RIPPS2_BDM_DEVICES: 'Устройствата, от които BDM чете игри: USB, MX4SIO, PC Card CF, DVR устройството на DESR и iLink. Вграденият HDD следва режима на стартиране на HDD.'
+  HINT_RIPPS2_SCREEN: 'Картината на менюто: видеорежим, широк екран, мястото ѝ на телевизора (H-POS, V-POS) и overscan.'
+  HINT_RIPPS2_LAYOUT: Къде стоят категориите и как влиза страницата, после обложките на RIPFLOW и мрежата на RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Дебелина на текста, цветовата тема, цветовата смяна и всеки цвят.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Колко плътен е собственият текст на RIPPS2: подсказките в настройките, СЪСТОЯНИЕ и Относно. Обикновен е както преди; Среден и Удебелен се четат по-добре на мека картина.'
+  HINT_RIPPS2_HDD_START: 'Вграденият HDD, APA или exFAT: RIPPS2 го чете какъвто и да е и го показва веднъж, като игри на HDD. Изключено го оставя на мира.'
+  HINT_RIPPS2_THEME_COLOR: Собственият цвят на цветовата тема. Изберете Собствен като цветова тема, за да го изберете сами, както цветовете на текста.
+  HINT_RIPPS2_SWEEP: Пет цвята, през които темата преминава бавно и плавно. Дъга, смяна от всяка цветова тема или ваша собствена. Изключено държи темата неподвижна.
+  HINT_RIPPS2_SWEEP_COLORS: Петте цвята на смяната и скоростта ѝ. Промените ли една от тези на RIPPS2, тя се пази като ваша, с името, което ѝ дадете.
+  HINT_RIPPS2_SWEEP_NAME: Как се казва вашата смяна в списъка Цветова смяна.
+  HINT_RIPPS2_SWEEP_COLOR: Един от петте цвята, през които минава смяната, по ред.
+  HINT_RIPPS2_SWEEP_SPEED: 'Колко трае всеки цвят, преди да се появи следващият. Дори Живо остава плавно: цветовете никога не мигат.'
+  RIPPS2_HIDE_COMPRESS: Скриване на игра и компресиране
+  HINT_RIPPS2_SELECT_HOLD: 'SELECT, задържан 4.2 s в списък с игри. Списък: темите в панел, изберете една. Редуване: следващата тема. Изкл.: нищо (натискане пак опреснява).'

@@ -5,10 +5,6 @@ language: French
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTRÉE VALIDE, ÉCHAP ANNULE. UN BOUTON AFFICHE LES TOUCHES.
   USB KEYBOARD: CLAVIER USB
-  '      DESR DVR ISOs (experimental)': '      ISO DESR DVR (expérimental)'
-  '      Internal HDD (exFAT)': '      Disque dur interne (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (expérimental)'
-  '      Protocol': '      Protocole'
   Access: Accès
   Applications Page Start Mode: Démarrage de la page Applications
   Art Delay: Délai des illustrations
@@ -22,7 +18,6 @@ strings:
   Fifth: Cinquième
   First: Premier
   Fourth: Quatrième
-  HDD (APA) Start Mode: Démarrage du disque dur (APA)
   HDD Cache: Cache du disque dur
   HDD Spindown: Mise en veille du disque dur
   MMCE Settings: Paramètres MMCE
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: C'est un jeu PS2 patché pour ESR. Placez ESR (esr*.elf) dans APPS, BOOT ou ESR sur une carte mémoire ou une clé USB pour le lancer.
   '%s, BUILD %d': '%s, BUILD %d'
   '... and the anonymous ...': '... et les anonymes ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 inclus sans modification (AFL-3.0) : github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Une refonte de fond en comble de RiptOPL, le fork d'Open PS2 Loader,
   ABOUT: À PROPOS
   'ACHIEVEMENTS: SPIRIT OF RA': 'SUCCÈS : SPIRIT OF RA'
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): Vidéo AVI dans Fichiers mémoire, le fork de RIPPS2 (AFL 2.0)
   Apollo Save Tool by bucanero: Apollo Save Tool par bucanero
   BACK: RETOUR
+  Back (keeps both): Retour (garde les deux)
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): BIBLE est PS2BBL 1.2.0, les versions signées d'El Isra (carte et disque dur), sans modification (GPL-3)
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: Sons du BIOS > Extraire les joue comme le SPU2 ; aucun BIOS n'est fourni
   BOOT LOCK AND BIBLE: BOOT LOCK ET BIBLE
   BOOT LOCK edits its config too: BOOT LOCK modifie aussi sa configuration
   BUILD DETAILS: DÉTAILS DU BUILD
-  BUILT ON RIPTOPL: BASÉ SUR RIPTOPL
   BearSSL by Thomas Pornin: BearSSL par Thomas Pornin
   Built with Claude (Anthropic): Conçu avec Claude (Anthropic)
   CD PLAYER: LECTEUR CD
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek et Sleek Bold, dessinées pour RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements sur la console par hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL par NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed par Google (Apache-2.0)
   SOUNDS: SONS
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: l'installateur FMCB de SP193 et l'OSDMenu de pcm720, suivis pas à pas
   SUPPORT: ASSISTANCE
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z par NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF par l'équipe ps2homebrew
   what RIPPS2's card image writes are checked against: ce par rapport à quoi les écritures d'images de carte de RIPPS2 sont vérifiées
-  with its own look, launchers, file browser and save tools.: avec son propre style, ses lanceurs, son navigateur de fichiers et ses outils de sauvegarde.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora par hacan359, rcheevos par RetroAchievements
   your console's own, ripped from its BIOS: ceux de votre console, extraits de son BIOS
   ' (no DNS answer)': ' (pas de réponse DNS)'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO : écriture de %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino n'a pas pu être écrit dans %s. Vérifiez son espace libre et l'absence de protection en écriture, puis réessayez.
   THE GAME'S DRIVE  (%s/neutrino): LE PÉRIPHÉRIQUE DU JEU  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Ce jeu démarre via Neutrino, et il n'y a pas de Neutrino là où RIPPS2 regarde (Paramètres, le périphérique du jeu, les cartes mémoire). RIPPS2 inclut Neutrino 1.8.0 par rickgaiser (AFL-3.0). L'installer maintenant ? Vous choisissez ensuite où.
   '%d / %d FILES': '%d / %d FICHIERS'
   '%d FOLDERS AND CONTENTS': '%d DOSSIERS ET CONTENU'
   '%d FOLDERS, %d FOUND': '%d DOSSIERS, %d TROUVÉS'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d sur %d encore verrouillés'
   '%s   on %s': '%s   sur %s'
   BADGES: BADGES
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: Les badges ne s'activent qu'avec la TÉLÉMÉTRIE activée et xeRAbora lancé sur votre PC ; d'ici là, ils ne coûtent rien.
   CHECK THE DISC: VÉRIFIER LE DISQUE
   From this game's last CHECK GAME SUPPORT.: D'après la dernière VÉRIFICATION DU SUPPORT DU JEU.
   HOW IT WORKS: COMMENT ÇA MARCHE
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Un PS2BBL avec le verrou de RIPPS2 est sur cette console.
   AUDIO folder: dossier AUDIO
   DRIVES: PÉRIPHÉRIQUES
-  INSTALL RIPPS2'S COPY: INSTALLER LA COPIE DE RIPPS2
-  'Installed: ': 'Installé : '
   MANAGE: GÉRER
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: GÉRER montre ce que lance chaque carte mémoire, et installe ou répare BIBLE.
   MEMORY CARD 0  (about 600 KB): CARTE MÉMOIRE 0  (environ 600 Ko)
   MEMORY CARD 1  (about 600 KB): CARTE MÉMOIRE 1  (environ 600 Ko)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO : son pilote n''a pas pu se charger (code %d).'
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO : le pilote est chargé, mais aucune carte SD n''a répondu (l''emplacement mc1).'
   NEUTRINO SETTINGS: PARAMÈTRES DE NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Aucun pour l''instant : RIPPS2 n''a aucun son à lui. Extrayez ceux de cette console, ou créez-les dans RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Non installé. Un jeu qui en a besoin propose la copie de RIPPS2, ou installez-le ici.
   POPSTARTER NETWORK: RÉSEAU POPSTARTER
   POPSTARTER and Ember: POPSTARTER et Ember
   PS1 SETTINGS: PARAMÈTRES PS1
   PS2BBL 1.2.0 for RIPPS2: PS2BBL 1.2.0 pour RIPPS2
   RIP THIS CONSOLE'S SOUNDS: EXTRAIRE LES SONS DE CETTE CONSOLE
-  RIPPS2's homebrew: Les homebrews de RIPPS2
   STATUS: ÉTAT
-  'STATUS: looking for RIPPS2''s homebrew': 'ÉTAT : recherche des homebrews de RIPPS2'
   a drive of unknown kind: un périphérique de type inconnu
-  a drive or a memory card: un périphérique ou une carte mémoire
   boot loader, card by card: chargeur de démarrage, carte par carte
   from its BIOS, into AUDIO: depuis son BIOS, dans AUDIO
   internal HDD (exFAT): disque dur interne (exFAT)
@@ -975,10 +957,193 @@ strings:
   Sidebar: Barre latérale
   your own copy, found on your drives and memory cards: votre propre copie, trouvée sur vos disques et cartes mémoire
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'la vôtre, trouvée et lancée : github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Introuvable sur mass0: (%s). Placez ember.elf et votre bios.bin dans son dossier EMBER.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Introuvable. Placez votre propre POPSTARTER.ELF dans le dossier POPS d'un disque.
   Launch Disc: Lancer le disque
   Memory Files: Fichiers mémoire
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: RIPPS2 en a trouvé %d sur 5. Chacun est retenu, et chaque lancement le lit à cet endroit.
+  not found on the started drives: introuvable sur les périphériques démarrés
+  not looked for yet: pas encore cherché
+  '%s did not answer, so %s cannot start. Is it connected?': '%s n''a pas répondu, donc %s ne peut pas démarrer. Est-il branché ?'
+  '%s is not on %s any more, so it has left All Games.': '%s n''est plus sur %s, il a donc quitté Tous les jeux.'
+  STARTING %s: DÉMARRAGE DE %s
+  the SMB share: le partage SMB
+  the drive: le périphérique
+  the internal HDD (APA): le disque dur interne (APA)
+  the internal HDD (exFAT): le disque dur interne (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: BÂTI SUR RIPTOPL, AVEC NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Merci aussi à tout l''amour de YouTube :'
+  and its own look, launchers, file browser and save tools.: et son propre look, ses lanceurs, son explorateur et ses outils de sauvegarde.
+  glad to help however you reach me.: heureux d'aider, quelle que soit la façon de me joindre.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): le second cœur de jeu, 1.8.0 intégré sans modification (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: avec Neutrino de rickgaiser à l'intérieur comme second cœur de jeu,
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Ce jeu démarre avec Neutrino, et RIPPS2 n''en a trouvé aucun : ni au chemin des Paramètres, ni sur le périphérique du jeu, ni sur les cartes mémoire, ni sur un périphérique démarré. RIPPS2 embarque Neutrino 1.8.0 de rickgaiser (AFL-3.0) : installez-le une fois, où vous voulez, et chaque jeu Neutrino l''utilise depuis là.'
+  STARTING THE DRIVES: DÉMARRAGE DES PÉRIPHÉRIQUES
+  '%d games, on the started drives': '%d jeux, sur les périphériques démarrés'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s : CERTAINS FICHIERS N''ONT PAS PU ÊTRE SUPPRIMÉS'
+  '%u partitions, all in order': '%u partitions, toutes en ordre'
+  ', %d art images': ', %d illustrations'
+  ', and ': ', et '
+  ', its cheats': ', ses codes de triche'
+  ', its settings': ', ses paramètres'
+  1 game, on the started drives: 1 jeu, sur les périphériques démarrés
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Un jeu PS1 se supprime ici dans Fichiers mémoire, où c'est un fichier à part entière.
+  A network catalogue's games are deleted on the PC that serves them.: Les jeux d'un catalogue réseau se suppriment sur le PC qui les sert.
+  DELETE FOR GOOD: SUPPRIMER POUR DE BON
+  DELETE IT: LE SUPPRIMER
+  'DELETED %s: %s FREED': '%s SUPPRIMÉ : %s LIBÉRÉS'
+  'Delete %s from %s? Goes: %s.': 'Supprimer %s de %s ? Part : %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Supprimer %s de %s ? Part : %s. Reste : %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Supprimer aussi ses sauvegardes et ses images RIPSHOT ? Non les garde.
+  HIDDEN GAMES: JEUX MASQUÉS
+  'HIDDEN: %s': 'MASQUÉ : %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Masquer %s ? Il quitte toutes les listes, Tous les jeux et Jeux favoris aussi. Paramètres > Sources de jeux > Jeux masqués le fait revenir.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Dernière vérification. %s est supprimé pour de bon, et rien ne pourra le ramener. Appuyez sur START pour le supprimer.
+  None. Hide Game, in a game's options, puts one here.: Aucun. Masquer le jeu, dans les options d'un jeu, en place un ici.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Rien n''a été supprimé : la table des partitions de ce périphérique ne correspond pas à ce disque (%s). Elle a peut-être été écrite depuis l''image d''un disque d''une autre taille. Réparez-la d''abord sur un PC.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 ne peut pas supprimer un jeu depuis cette page.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 n'a pas trouvé les fichiers de ce jeu sur son périphérique.
+  Reading the hidden lists: Lecture des listes masquées
+  SHOW AGAIN OR DELETE: AFFICHER À NOUVEAU OU SUPPRIMER
+  SHOW IT AGAIN: L'AFFICHER À NOUVEAU
+  That game is not on its drive any more.: Ce jeu n'est plus sur son périphérique.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: La liste masquée n'a pas pu être écrite sur le périphérique du jeu. Est-il protégé en écriture, ou les Opérations d'écriture sont-elles désactivées ?
+  The partition could not be removed (%d). Nothing was deleted.: La partition n'a pas pu être supprimée (%d). Rien n'a été supprimé.
+  This drive cannot keep a hidden list (a network catalogue).: Ce périphérique ne peut pas garder de liste masquée (un catalogue réseau).
+  This game's drive has not answered yet. Wait for it, then try again.: Le périphérique de ce jeu n'a pas encore répondu. Attendez-le, puis réessayez.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: La partition de ce jeu est une de celles que RIPPS2 ne supprime pas (une partition système, ou celle où sont ses paramètres).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'une partition est plus grande que ce disque ne le permet : la table a été faite pour un disque d''une autre taille'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'une partition dépasse la fin de ce disque (secteur %u sur %u) : la table a été faite pour un disque plus grand'
+  its RIPSHOT pictures: ses images RIPSHOT
+  its drive: son périphérique
+  its saves: ses sauvegardes
+  sector %u holds no partition header: le secteur %u ne contient aucun en-tête de partition
+  the chain does not close at __mbr: la chaîne ne se referme pas sur __mbr
+  the chain skips from sector %u: la chaîne saute depuis le secteur %u
+  the chain's links disagree at sector %u: les liens de la chaîne ne concordent pas au secteur %u
+  the drive's size could not be read: la taille du périphérique n'a pas pu être lue
+  the game (%s): le jeu (%s)
+  the game's folder and everything in it (%s): le dossier du jeu et tout son contenu (%s)
+  the header at sector %u could not be read: l'en-tête au secteur %u n'a pas pu être lu
+  the header at sector %u fails its checksum: l'en-tête au secteur %u échoue à sa somme de contrôle
+  the partition at sector %u is not where or as large as APA puts one: la partition au secteur %u n'est pas là où APA en place une, ou pas de cette taille
+  the settings and art another copy of it uses: les paramètres et illustrations qu'une autre copie utilise
+  '%d FOLDERS': '%d DOSSIERS'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s n''a pas pu être copié vers %s. Le périphérique est-il plein ou protégé en écriture ?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s n''est pas là où RIPPS2 cherche. Chercher sur les périphériques démarrés par RIPPS2 ? L''endroit trouvé est retenu pour chaque lancement suivant.'
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember n''est pas dans %s, à côté des jeux, et il doit y être. RIPPS2 l''a trouvé à %s : START l''y copie (%d Ko) et lance le jeu.'
+  Ember's BIOS: BIOS d'Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'Le BIOS d''Ember (bios.bin) n''est pas dans %s, à côté d''Ember. RIPPS2 en a trouvé un à %s : START l''y copie (%d Ko) et lance le jeu.'
+  LOOKING FOR YOUR LAUNCHERS: RECHERCHE DE VOS LANCEURS
+  The POPS files: Les fichiers POPS
+  '%s  MMCE card': '%s  carte MMCE'
+  INSTALL RIPPS2'S NEUTRINO: INSTALLER LE NEUTRINO DE RIPPS2
+  'Internal HDD (APA): %s free of %s': 'Disque dur interne (APA) : %s libres sur %s'
+  LAUNCHERS: LANCEURS
+  LOOK FOR THEM: LES CHERCHER
+  'Memory card %d: %d KB free': 'Carte mémoire %d : %d Ko libres'
+  POPS files: Fichiers POPS
+  START EVERY DRIVE: DÉMARRER TOUS LES PÉRIPHÉRIQUES
+  'STATUS: looking at the drives and the homebrew': 'ÉTAT : examen des périphériques et des homebrews'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Démarrer d'abord tous les périphériques, pour que la recherche les atteigne tous ? (Non cherche sur les périphériques déjà démarrés.)
+  USB, HDD, MMCE and the rest: USB, disque dur, MMCE et le reste
+  every started drive: chaque périphérique démarré
+  found where you keep them: trouvés là où vous les gardez
+  not found yet: pas encore trouvé
+  not on a started drive: pas sur un périphérique démarré
+  only if you have none: seulement si vous n'en avez pas
+  starts every drive first: démarre d'abord tous les périphériques
+  Drives, launchers and homebrew: Périphériques, lanceurs et homebrews
+  BDM Devices: Périphériques BDM
+  Color Sweep: Fondu de couleurs
+  Colors and Text: Couleurs et texte
+  HDD POPS partitions: Partitions POPS du disque dur
+  Layout: Disposition
+  Missing Covers: Jaquettes manquantes
+  Name: Nom
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Aucune configuration SMB de POPSTARTER trouvée. Remplissez les lignes ci-dessous.
+  POPSTARTER Network: Réseau POPSTARTER
+  POPSTARTER SMB Network: Réseau SMB de POPSTARTER
+  POPSTARTER UDPFS Network: Réseau UDPFS de POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 ajoute lui-même le périphérique, l'ISO, les VMC et le mode vidéo.
+  Screen: Écran
+  Speed: Vitesse
+  Sweep Colors: Couleurs du fondu
+  Text Weight: Graisse du texte
+  Theme Color: Couleur principale
+  Bold: Gras
+  Controllers: Manettes
+  Lively: Vif
+  Medium: Moyen
+  PS Emulation: Émulation PS
+  Regular: Normal
+  Slow: Lent
+  A MOMENT: UN INSTANT
+  A TASK IN THE BACKGROUND: UNE TÂCHE EN ARRIÈRE-PLAN
+  ABOUT %d S: ENVIRON %d S
+  ANY MOMENT: D'UN INSTANT À L'AUTRE
+  READING THE GAME LIST OF %s: LECTURE DE LA LISTE DES JEUX DE %s
+  SAVING A LIST: ENREGISTREMENT D'UNE LISTE
+  START NOW: DÉMARRER MAINTENANT
+  STARTING: DÉMARRAGE
+  STARTS NEXT: DÉMARRE ENSUITE
+  STOPPING IT SAFELY: ARRÊT EN SÉCURITÉ
+  THE LAST OF THE QUEUE: LA FIN DE LA FILE
+  WHEN IT FINISHES: QUAND CE SERA FINI
+  What each card starts; install or repair BIBLE.: Ce que lance chaque carte ; installer ou réparer BIBLE.
+  Rainbow: Arc-en-ciel
+  Custom: Personnalisée
+  DESR DVR ISOs (experimental): ISO DESR DVR (expérimental)
+  PC CARD CF (experimental): PC CARD CF (expérimental)
+  HDD Start Mode: Démarrage du disque dur
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed par The Roboto Project Authors (SIL OFL 1.1)
+  '%s on %s': '%s sur %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s : %s est devenu %s (%d%%), chaque morceau vérifié. Supprimer l''ISO et garder le ZSO ?'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s : %s est redevenu %s, chaque morceau vérifié. Supprimer le ZSO et garder l''ISO ?'
+  A ZSO of this game is already beside it. Remove one of the two first.: Un ZSO de ce jeu est déjà à côté. Supprimez d'abord l'un des deux.
+  About %d min, then checked: Environ %d min, puis vérifié
+  An ISO of this game is already beside it. Remove one of the two first.: Un ISO de ce jeu est déjà à côté. Supprimez d'abord l'un des deux.
+  CHECKING EVERY PIECE: VÉRIFICATION DE CHAQUE MORCEAU
+  COMPRESS TO ZSO: COMPRESSER EN ZSO
+  'COMPRESSED %s: %s FREED': '%s COMPRESSÉ : %s LIBÉRÉS'
+  COMPRESSING 1 OF 2: COMPRESSION 1 SUR 2
+  COMPRESSING 2 OF 2: COMPRESSION 2 SUR 2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : Compresser %s ? L'ISO reste jusqu'à ce que le ZSO ait été relu et vérifié, puis RIPPS2 demande avant de supprimer l'ISO. Le disque a besoin de place pour les deux pendant le travail ; laissez la console allumée jusqu'à la fin. Un ZSO ne démarre qu'avec le cœur OPL (pas Neutrino) ; ses sauvegardes, réglages, images et codes restent avec lui, et il peut redevenir un ISO à tout moment.
+  Compress to ZSO: Compresser en ZSO
+  Cycle: Défilement
+  'Experimental: OPL core only (not Neutrino)': 'Expérimental : cœur OPL seulement (pas Neutrino)'
+  Hold SELECT: SELECT maintenu
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: Impossible de terminer (%s). Ce qui a été écrit a été supprimé ; le jeu est comme avant.
+  List: Liste
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : Refaire de %s un ISO ? Le ZSO reste jusqu'à ce que l'ISO ait été relu et vérifié, puis RIPPS2 demande avant de supprimer le ZSO. Le disque a besoin de place pour les deux pendant le travail ; laissez la console allumée jusqu'à la fin. Ses sauvegardes, réglages, images et codes restent avec lui.
+  Stop? What it has written so far is removed; the game stays as it was.: Arrêter ? Ce qui a été écrit jusqu'ici est supprimé ; le jeu reste comme avant.
+  THEMES: THÈMES
+  There is not enough memory for this just now.: Pas assez de mémoire pour cela pour le moment.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: RIPPS2 ne peut pas compresser ni décompresser cette image (sa taille n'est pas un nombre entier de blocs de 2 KB).
+  UNCOMPRESS TO ISO: DÉCOMPRESSER EN ISO
+  UNCOMPRESSED %s: '%s DÉCOMPRESSÉ'
+  UNCOMPRESSING: DÉCOMPRESSION
+  Uncompress to ISO: Décompresser en ISO
+  Under a minute, then checked: Moins d'une minute, puis vérifié
+  COPYING: COPIE
+  SHOW AGAIN, DELETE OR COMPRESS: AFFICHER, SUPPRIMER OU COMPRESSER
+  SHOW AGAIN, DELETE OR UNCOMPRESS: AFFICHER, SUPPRIMER OU DÉCOMPRESSER
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': '%s a besoin d''environ %s d''espace libre sur son disque pendant le travail (l''original reste jusqu''à la fin), et le disque a %s de libre.'
+  Hide and Compress: Masquer et compresser
+  'COMPRESSED AND HIDDEN: %s': 'COMPRESSÉ ET MASQUÉ : %s'
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 'Pas assez de place pour cette copie : il faut environ %s, et le disque a %s de libre.'
+  OVER 4 GB FOR FAT32: PLUS DE 4 GB POUR FAT32
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: Ce disque est en %s, qui ne garde aucun fichier de 4 GB ou plus, et la nouvelle image ferait %s.
+  '%s, %s clusters, %s free of %s': '%s, clusters de %s, %s libres sur %s'
+  Delete This Sweep: Supprimer ce fondu
+  Delete %s? RIPPS2's own sweeps stay as they are.: Supprimer %s ? Les fondus de RIPPS2 restent tels quels.
+  Sweep: Fondu
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Les badges marquent les jeux à succès dans vos listes, avec combien vous en avez débloqué. Il faut la TÉLÉMÉTRIE activée.
 labels:
   HINT_NEUTRINO_AUTO_ELF: Transmet l'ELF de démarrage du jeu à Neutrino pour chercher sa configuration par titre. Activé par défaut ; une option Boot ELF réglée à la main a la priorité.
   HINT_POPSTARTER_PATH: Emplacement de POPSTARTER.ELF. Laissé vide, RIPPS2 en renseigne un qu'il trouve sur un périphérique ; écrivez par-dessus pour en utiliser un autre, comme usb:/POPS/POPSTARTER.ELF
@@ -1200,7 +1365,7 @@ labels:
   SAVE_ICONS: Icônes de sauvegarde 3D
   HINT_SAVE_ICONS: Affiche l'icône de sauvegarde du jeu choisi, en rotation, là où le thème lui prévoit une place. Lit d'abord la VMC du jeu, puis les cartes mémoire.
   NETBOOT_RESTART_NOW: Le protocole réseau change après un redémarrage. Enregistrer les paramètres et redémarrer OPL maintenant ?
-  HINT_NET_PROTOCOL: 'Le service réseau qu''utilise RiptOPL : un partage SMB, UDPFS, UDPBD ou HTTP. Le même réglage que dans Sources de jeux. Quitter un service déjà en marche demande un redémarrage.'
+  HINT_NET_PROTOCOL: 'Le service réseau qu''utilise RiptOPL : un partage SMB, UDPFS, UDPBD ou HTTP. Quitter un service déjà en marche demande un redémarrage.'
   HINT_UDPFS_ACCESS: UDPFS seulement. Fichiers lit les ISO isolées du dossier des jeux du serveur ; IMG lit une image disque comme un périphérique. SMB et HTTP utilisent toujours Fichiers, UDPBD toujours IMG.
   HINT_SMB_VERSION: La version de SMB à utiliser avec le partage du PC.
   HINT_NET_ADVANCED: Débloque la modification du mode de liaison Ethernet et du port SMB.
@@ -1399,3 +1564,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Comment les clichés en attente sur la pellicule de chaque jeu deviennent des PNG.
   RIPPS2_SETTINGS_HOME: Enregistrer les paramètres sur
   HINT_RIPPS2_SETTINGS_HOME: 'Où RIPPS2 garde ses paramètres : sa propre sauvegarde sur une carte mémoire, un dossier RIPPS2 sur un lecteur (le disque dur interne, USB, MX4SIO, iLink ou MMCE), ou un dossier que vous saisissez.'
+  RIPPS2_LAUNCHERS: Lanceurs
+  RIPPS2_LOOK_NOW: Chercher maintenant
+  HINT_RIPPS2_LOOK_NOW: RIPPS2 cherche sur les périphériques démarrés POPSTARTER, les fichiers POPS, Ember, le BIOS d'Ember et Neutrino, et retient où se trouve chacun. Chaque lancement les lit à cet endroit.
+  RIPPS2_HIDE_GAME: Masquer le jeu
+  RIPPS2_HIDDEN_GAMES: Jeux masqués
+  HINT_RIPPS2_HIDDEN_GAMES: Les jeux masqués avec Masquer le jeu, sur les périphériques démarrés. Affichez-en un à nouveau, ou supprimez-le. Chaque périphérique garde sa propre liste.
+  HINT_RIPPS2_BDM_DEVICES: 'Les périphériques où BDM lit les jeux : USB, MX4SIO, une carte PC Card CF, le disque DVR d''un DESR et iLink. Le disque dur interne suit le démarrage du disque dur.'
+  HINT_RIPPS2_SCREEN: 'L''image du menu : mode vidéo, écran large, sa place sur le téléviseur (H-POS, V-POS) et overscan.'
+  HINT_RIPPS2_LAYOUT: Où se placent les catégories et comment une page arrive, puis les jaquettes de RIPFLOW et la grille de RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Graisse du texte, la couleur du thème, le fondu de couleurs et chaque couleur.
+  HINT_RIPPS2_TEXT_WEIGHT: 'L''épaisseur du texte de RIPPS2 lui-même : les infobulles des paramètres, ÉTAT et À propos. Normal est comme avant ; Moyen et Gras se lisent mieux sur une image douce.'
+  HINT_RIPPS2_HDD_START: 'Le disque dur interne, APA ou exFAT : RIPPS2 le lit quel qu''il soit et l''affiche une seule fois, comme Jeux du disque dur. Désactivé le laisse tranquille.'
+  HINT_RIPPS2_THEME_COLOR: La couleur propre au thème. Choisissez Personnalisée comme couleur du thème pour la choisir vous-même, comme les couleurs du texte.
+  HINT_RIPPS2_SWEEP: Cinq couleurs que le thème traverse, lentement et en douceur. Arc-en-ciel, un fondu tiré de chaque couleur de thème, ou le vôtre. Désactivé garde le thème immobile.
+  HINT_RIPPS2_SWEEP_COLORS: Les cinq couleurs du fondu et sa vitesse. Modifiez-en un de RIPPS2 et il est gardé comme le vôtre, sous le nom que vous lui donnez.
+  HINT_RIPPS2_SWEEP_NAME: Le nom de votre fondu dans la liste Fondu de couleurs.
+  HINT_RIPPS2_SWEEP_COLOR: L'une des cinq couleurs que traverse le fondu, dans l'ordre.
+  HINT_RIPPS2_SWEEP_SPEED: 'La durée de chaque couleur avant que la suivante n''apparaisse. Même Vif reste doux : les couleurs ne clignotent jamais.'
+  RIPPS2_HIDE_COMPRESS: Masquer le jeu et compression
+  HINT_RIPPS2_SELECT_HOLD: 'SELECT maintenu 4.2 s sur une liste de jeux. Liste : les thèmes dans un panneau, choisissez-en un. Défilement : le thème suivant. Désactivé : rien (un appui actualise toujours).'

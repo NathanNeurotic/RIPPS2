@@ -64,8 +64,9 @@ need(rd('src/dialogs.c'), (('{UI_ENUM, UICFG_RIPPS2_CATLAYOUT, 1, 1, _STR_HINT_R
 gui = rd('src/gui.c')
 need(gui, (('static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), NULL};', 'its three choices'),
            ('        gRipps2CatLayout = v; // build 113', 'it is read as it changes (the page behind shows it)'),
-           ('        gRipps2CatLayout = keepLayout;', 'Cancel puts it back'),
-           ('gRipps2CatLayout != keepLayout)\n        guiSettingsSavePending = 1;', 'a change is saved')), 'gui.c')
+           # build 114 (the settings audit): the category rows are Layout's; Back there puts them back, a change is saved
+           ('        gRipps2CatLayout = keepCat[4];', 'Cancel puts it back'),
+           ('gRipps2CatLayout != keepCat[4]', 'a change is saved')), 'gui.c')
 need(rd('lng_tmpl/_base.yml'), (('- label: RIPPS2_CATEGORY_LAYOUT\n  string: Category Layout\n', 'its label'),), '_base.yml')
 # The legacy key (the user): categories=three; a theme made for OPL shows Storage alone, Launch Disc and Memory Files in
 # the START menu; a RIPPS2 theme from before the key (any RIPPS2 key) keeps the three
@@ -126,7 +127,7 @@ cache = table('diaCacheConfig')
 for want in ('CFG_RIPPS2_FASTCACHE', 'CFG_HDDGAMELISTCACHE', 'UICFG_AUTOREFRESH'):
     if want not in cache:
         fail.append('dialogs.c: Game Sources > Cache needs %s' % want)
-need(gui, (('struct UIItem *ui = guiSettingsCompose(parts, 2, NULL, 0, -1, 1);', "Video Mode shows in Interface's Display section"),
+need(gui, (('ret = diaExecuteDialog(diaDisplayConfig, -1, 1, &guiSettingsDisplayUpdater);', "Video Mode shows on the Display section (build 114: Interface's Screen page)"),
            ('if (lock && !bootLockWas && gExitPath[0] == \'\\0\')', 'BOOT LOCK fills an empty IGR Path itself'),
            ('static void guiShowCacheConfig(void)', 'the Cache page'), ('guiSaveAdvancedSettings(ui); // build 113: the read-ahead caches', 'Game Launching keeps the caches')), 'gui.c')
 if gui.count('guiShowCacheConfig();') != 2:
@@ -142,7 +143,7 @@ disc = rd('src/ripps2disc.c')
 need(disc, (('#define RD_NOTCHES 12', 'the hold fills notches'),
             ('float fill = p * RD_NOTCHES - i; // 1: lit, 0..1: filling, below 0: still to come', 'the one filling fades in'),
             ('hx = 320 - (RD_RING_W + 6 + ripps2HintWidth(hold)) / 2;', 'the ring has its own room in the hint'),
-            ('ripps2HintText(hx + RD_RING_W + 6, y + 88, hold, rdAlpha(RD_SOFT, ia));', 'HOLD starts after the ring')), 'ripps2disc.c')
+            ('ripps2HintText(hx + RD_RING_W + 6, y + 90, hold, rdAlpha(RD_SOFT, ia));', 'HOLD starts after the ring (build 114: on the launch guard frame)')), 'ripps2disc.c')
 if 'rmDrawLine(cx + (int)(r * cosf(a0))' in disc:
     fail.append('ripps2disc.c: the old 1 px ring is still drawn')
 
@@ -159,7 +160,10 @@ for gone, where, text in (('ember_elf.o', 'Makefile', mk), ('popstarter_elf.o', 
     if gone in text:
         fail.append('%s: %s is still there (the trim)' % (where, gone))
 need(mk, (('neutrino_tgz.o', 'Neutrino stays carried'), ('bible_xlf.o', 'BIBLE stays carried')), 'Makefile')
-need(rd('src/cuesupport.c'), (('    return cueResolveEmber(devPrefix, out, outSize);\n}', 'a launch uses the drive\'s own Ember'),), 'cuesupport.c')
+# build 114: the launch legs call RiptOPL's cueResolveEmber themselves (113's cueEnsureEmber was only its alias)
+need(rd('src/bdmsupport.c'), (('if (!cueResolveEmber(ps1Prefix, emberElf, sizeof(emberElf)))', 'a launch uses the drive\'s own Ember'),), 'bdmsupport.c')
+if 'cueEnsureEmber' in rd('src/cuesupport.c') + rd('include/cuesupport.h'):
+    fail.append('cuesupport: the cueEnsureEmber alias is back')
 need(rd('src/ripps2about.c'), (('N_("Ember by Gageformer")', 'Ember stays credited'), ('github.com/Gageformer/Ember/releases', 'with its release page'),
                                ('N_("POPSTARTER by krHACKen")', 'POPSTARTER stays credited')), 'ripps2about.c')
 readme = (repo / 'README.md').read_text(encoding='utf-8')

@@ -8,27 +8,6 @@ strings:
 - en: USB KEYBOARD
   in:
   - dia.c
-- en: '      DESR DVR ISOs (experimental)'
-  in:
-  - dialogs.c
-- en: '      Internal HDD (exFAT)'
-  in:
-  - dialogs.c
-- en: '      MX4SIO'
-  in:
-  - dialogs.c
-- en: '      PC CARD CF (experimental)'
-  in:
-  - dialogs.c
-- en: '      Protocol'
-  in:
-  - dialogs.c
-- en: '      USB'
-  in:
-  - dialogs.c
-- en: '      iLink'
-  in:
-  - dialogs.c
 - en: Access
   in:
   - dialogs.c
@@ -44,6 +23,9 @@ strings:
 - en: BDM Cache
   in:
   - dialogs.c
+- en: BDM Devices
+  in:
+  - dialogs.c
 - en: BDM Devices Start Mode
   in:
   - dialogs.c
@@ -57,6 +39,18 @@ strings:
   in:
   - dialogs.c
 - en: BatRastard - bbsan2k - belek666 - crazyc - dlanor - doctorxyz - hacan359
+  in:
+  - dialogs.c
+- en: Color Sweep
+  in:
+  - dialogs.c
+- en: Colors and Text
+  in:
+  - dialogs.c
+- en: DESR DVR ISOs (experimental)
+  in:
+  - dialogs.c
+- en: Delete This Sweep
   in:
   - dialogs.c
 - en: Disc Artwork
@@ -77,19 +71,28 @@ strings:
 - en: Fourth
   in:
   - dialogs.c
-- en: HDD (APA) Start Mode
-  in:
-  - dialogs.c
 - en: HDD Cache
   in:
   - dialogs.c
+- en: HDD POPS partitions
+  in:
+  - dialogs.c
 - en: HDD Spindown
+  in:
+  - dialogs.c
+- en: HDD Start Mode
+  in:
+  - dialogs.c
+- en: Hold SELECT
   in:
   - dialogs.c
 - en: 'LX:'
   in:
   - dialogs.c
 - en: 'LY:'
+  in:
+  - dialogs.c
+- en: Layout
   in:
   - dialogs.c
 - en: LocalH, RandQalan, ShaolinAssassin, yoshi314, zero35, zackcage6
@@ -101,19 +104,47 @@ strings:
 - en: MMCE Start Mode
   in:
   - dialogs.c
+- en: MX4SIO
+  in:
+  - dialogs.c
+- en: Missing Covers
+  in:
+  - dialogs.c
+- en: Name
+  in:
+  - dialogs.c
 - en: Network Connectivity
   in:
   - dialogs.c
 - en: Neutrino Advanced Arguments
   in:
   - dialogs.c
+- en: No POPSTARTER SMB setup found yet. Fill in the rows below.
+  in:
+  - dialogs.c
+  - gui.c
+- en: PC CARD CF (experimental)
+  in:
+  - dialogs.c
 - en: 'PID:'
+  in:
+  - dialogs.c
+- en: POPSTARTER Network
+  in:
+  - dialogs.c
+- en: POPSTARTER SMB Network
+  in:
+  - dialogs.c
+- en: POPSTARTER UDPFS Network
   in:
   - dialogs.c
 - en: Protocol
   in:
   - dialogs.c
 - en: 'REV:'
+  in:
+  - dialogs.c
+- en: RIPPS2 adds the drive, ISO, VMCs and video mode itself.
   in:
   - dialogs.c
 - en: 'RX:'
@@ -126,6 +157,9 @@ strings:
   in:
   - dialogs.c
 - en: SMB Version
+  in:
+  - dialogs.c
+- en: Screen
   in:
   - dialogs.c
 - en: Second
@@ -143,13 +177,28 @@ strings:
 - en: Sixth
   in:
   - dialogs.c
+- en: Speed
+  in:
+  - dialogs.c
 - en: Starred Games Page Start Mode
   in:
   - dialogs.c
 - en: Starred Games Star
   in:
   - dialogs.c
+- en: Sweep Colors
+  in:
+  - dialogs.c
+- en: Text Weight
+  in:
+  - dialogs.c
+- en: Theme Color
+  in:
+  - dialogs.c
 - en: Third
+  in:
+  - dialogs.c
+- en: USB
   in:
   - dialogs.c
 - en: VCD Games List Settings
@@ -165,6 +214,9 @@ strings:
   in:
   - dialogs.c
 - en: hominem.te.esse - ifcaro - izdubar - jimmikaelkael - KrahJohlito
+  in:
+  - dialogs.c
+- en: iLink
   in:
   - dialogs.c
 - en: icyson55
@@ -203,7 +255,22 @@ strings:
 - en: Apps / PS1ELF (L3)
   in:
   - gui.c
+- en: Audio
+  in:
+  - gui.c
+- en: Bold
+  in:
+  - gui.c
 - en: Boot
+  in:
+  - gui.c
+- en: Controllers
+  in:
+  - gui.c
+- en: Cycle
+  in:
+  - gui.c
+- en: Delete %s? RIPPS2's own sweeps stay as they are.
   in:
   - gui.c
 - en: Fade
@@ -234,6 +301,15 @@ strings:
 - en: Left
   in:
   - gui.c
+- en: List
+  in:
+  - gui.c
+- en: Lively
+  in:
+  - gui.c
+- en: Medium
+  in:
+  - gui.c
 - en: Memory Files First
   in:
   - gui.c
@@ -259,6 +335,9 @@ strings:
 - en: On RiptOPL %s
   in:
   - gui.c
+- en: PS Emulation
+  in:
+  - gui.c
 - en: Pop In
   in:
   - gui.c
@@ -266,6 +345,13 @@ strings:
   in:
   - gui.c
 - en: RIPPS2 %s (build %d) on RiptOPL %s
+  in:
+  - gui.c
+- en: RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.
+  in:
+  - gui.c
+  - ripps2status.c
+- en: Regular
   in:
   - gui.c
 - en: Right
@@ -281,10 +367,16 @@ strings:
 - en: Sidebar
   in:
   - gui.c
+- en: Slow
+  in:
+  - gui.c
 - en: Spin
   in:
   - gui.c
 - en: Strong
+  in:
+  - gui.c
+- en: Sweep
   in:
   - gui.c
 - en: Theme
@@ -298,7 +390,19 @@ strings:
 - en: 'Yes'
   in:
   - gui.c
+- en: not found on the started drives
+  in:
+  - gui.c
+- en: not looked for yet
+  in:
+  - gui.c
 - en: 'Case Shape: %s'
+  in:
+  - menusys.c
+- en: Compress to ZSO
+  in:
+  - menusys.c
+- en: Hide and Compress
   in:
   - menusys.c
 - en: Launch Disc
@@ -313,6 +417,45 @@ strings:
 - en: PS2 (tall)
   in:
   - menusys.c
+- en: Uncompress to ISO
+  in:
+  - menusys.c
+- en: '%s did not answer, so %s cannot start. Is it connected?'
+  in:
+  - mixsupport.c
+- en: '%s is not on %s any more, so it has left All Games.'
+  in:
+  - mixsupport.c
+- en: CANCEL
+  in:
+  - mixsupport.c
+  - ripps2cd.c
+  - ripps2disc.c
+  - ripps2games.c
+- en: STARTING %s
+  in:
+  - mixsupport.c
+- en: the SMB share
+  in:
+  - mixsupport.c
+  - ripps2games.c
+- en: the USB drive
+  in:
+  - mixsupport.c
+  - ripps2boot.c
+  - ripps2games.c
+- en: the drive
+  in:
+  - mixsupport.c
+  - ripps2games.c
+- en: the internal HDD (APA)
+  in:
+  - mixsupport.c
+  - ripps2games.c
+- en: the internal HDD (exFAT)
+  in:
+  - mixsupport.c
+  - ripps2games.c
 - en: ALL
   in:
   - opl.c
@@ -343,9 +486,6 @@ strings:
 - en: '... and the anonymous ...'
   in:
   - ripps2about.c
-- en: '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino'
-  in:
-  - ripps2about.c
 - en: A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,
   in:
   - ripps2about.c
@@ -369,11 +509,13 @@ strings:
   - ripps2disc.c
   - ripps2edit.c
   - ripps2files.c
+  - ripps2games.c
   - ripps2hdd.c
   - ripps2media.c
   - ripps2ra.c
   - ripps2shot.c
   - ripps2status.c
+  - ripps2ui.c
 - en: BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3)
   in:
   - ripps2about.c
@@ -389,7 +531,7 @@ strings:
 - en: BUILD DETAILS
   in:
   - ripps2about.c
-- en: BUILT ON RIPTOPL
+- en: BUILT ON RIPTOPL, WITH NEUTRINO
   in:
   - ripps2about.c
 - en: BearSSL by Thomas Pornin
@@ -493,7 +635,7 @@ strings:
 - en: RiptOPL by NathanNeurotic
   in:
   - ripps2about.c
-- en: Roboto Condensed by Google (Apache-2.0)
+- en: Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1)
   in:
   - ripps2about.c
 - en: SOUNDS
@@ -506,6 +648,9 @@ strings:
 - en: SUPPORT
   in:
   - ripps2about.c
+- en: 'Special thanks to all the YouTube love as well:'
+  in:
+  - ripps2about.c
 - en: TESTERS
   in:
   - ripps2about.c
@@ -513,6 +658,9 @@ strings:
   in:
   - ripps2about.c
 - en: 'an MC annihilator: Square on a memory card'
+  in:
+  - ripps2about.c
+- en: and its own look, launchers, file browser and save tools.
   in:
   - ripps2about.c
 - en: and the Open PS2 Loader team, whose credits follow
@@ -528,6 +676,12 @@ strings:
   in:
   - ripps2about.c
 - en: game hashes and memory telemetry, made solid on hardware by oMrRexD
+  in:
+  - ripps2about.c
+- en: github.com/rickgaiser/neutrino
+  in:
+  - ripps2about.c
+- en: glad to help however you reach me.
   in:
   - ripps2about.c
 - en: 'its MPEG-4 and MP3 decoders: ffmpeg, mpg123 (LGPL 2.1)'
@@ -593,6 +747,9 @@ strings:
 - en: 'the save tool reference: PSU export and import, card images'
   in:
   - ripps2about.c
+- en: the second game core, 1.8.0 carried unmodified (AFL-3.0)
+  in:
+  - ripps2about.c
 - en: wLaunchELF R3Z by NathanNeurotic
   in:
   - ripps2about.c
@@ -602,7 +759,7 @@ strings:
 - en: what RIPPS2's card image writes are checked against
   in:
   - ripps2about.c
-- en: with its own look, launchers, file browser and save tools.
+- en: with rickgaiser's Neutrino inside as its second game core,
   in:
   - ripps2about.c
 - en: xeRAbora by hacan359, rcheevos by RetroAchievements
@@ -714,6 +871,7 @@ strings:
   - ripps2biossnd.c
   - ripps2edit.c
   - ripps2files.c
+  - ripps2ui.c
 - en: RIP
   in:
   - ripps2biossnd.c
@@ -1063,9 +1221,6 @@ strings:
 - en: the HDD
   in:
   - ripps2boot.c
-- en: the USB drive
-  in:
-  - ripps2boot.c
 - en: '%d OF %d COPIED TO %s'
   in:
   - ripps2card.c
@@ -1134,6 +1289,7 @@ strings:
   in:
   - ripps2card.c
   - ripps2files.c
+  - ripps2games.c
 - en: Delete the save %s from %s? It cannot be brought back.
   in:
   - ripps2card.c
@@ -1250,10 +1406,6 @@ strings:
   in:
   - ripps2cd.c
   - ripps2disc.c
-- en: CANCEL
-  in:
-  - ripps2cd.c
-  - ripps2disc.c
 - en: CLOSE
   in:
   - ripps2cd.c
@@ -1304,6 +1456,7 @@ strings:
   in:
   - ripps2cd.c
   - ripps2files.c
+  - ripps2seance.c
 - en: STOPPED
   in:
   - ripps2cd.c
@@ -1334,6 +1487,7 @@ strings:
 - en: '%s OF %s   %d%%'
   in:
   - ripps2disc.c
+  - ripps2games.c
 - en: '%s is already there. Replace it?'
   in:
   - ripps2disc.c
@@ -1365,6 +1519,7 @@ strings:
 - en: ABOUT %d MIN
   in:
   - ripps2disc.c
+  - ripps2games.c
 - en: ABOUT %d MIN LEFT
   in:
   - ripps2disc.c
@@ -1399,9 +1554,11 @@ strings:
 - en: HOLD
   in:
   - ripps2disc.c
+  - ripps2games.c
 - en: LESS THAN A MINUTE LEFT
   in:
   - ripps2disc.c
+  - ripps2games.c
 - en: Media rips to a USB drive, the HDD or an MMCE card, and none is started. Connect one, then open Storage once.
   in:
   - ripps2disc.c
@@ -1466,6 +1623,9 @@ strings:
   in:
   - ripps2disc.c
 - en: 'The rip stopped: the drive would not read the disc. Clean it, put it back and try again. Nothing was kept.'
+  in:
+  - ripps2disc.c
+- en: 'There is not room for this rip: it needs about %s, and the drive has %s free.'
   in:
   - ripps2disc.c
 - en: This game is already on the drive as split parts. Delete it in Storage first to rip it again.
@@ -1589,7 +1749,7 @@ strings:
 - en: THE GAME'S DRIVE  (%s/neutrino)
   in:
   - ripps2ember.c
-- en: This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
+- en: 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
   in:
   - ripps2ember.c
 - en: '%d / %d FILES'
@@ -1757,6 +1917,7 @@ strings:
 - en: IN USE
   in:
   - ripps2files.c
+  - ripps2ui.c
 - en: IS ALREADY HERE (%d MORE TO GO). REPLACE IT?
   in:
   - ripps2files.c
@@ -1839,6 +2000,9 @@ strings:
   - ripps2files.c
   - ripps2shot.c
 - en: ORBIT SETTINGS
+  in:
+  - ripps2files.c
+- en: OVER 4 GB FOR FAT32
   in:
   - ripps2files.c
 - en: On an MMCE card a game starts from the card's CD or DVD folder.
@@ -1958,6 +2122,9 @@ strings:
 - en: START DRIVES
   in:
   - ripps2files.c
+- en: STARTING THE DRIVES
+  in:
+  - ripps2files.c
 - en: STARTING...
   in:
   - ripps2files.c
@@ -2024,6 +2191,281 @@ strings:
 - en: onto this memory card
   in:
   - ripps2files.c
+- en: ' and '
+  in:
+  - ripps2games.c
+  - vcdsupport.c
+- en: '%d games, on the started drives'
+  in:
+  - ripps2games.c
+- en: '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.'
+  in:
+  - ripps2games.c
+- en: '%s on %s'
+  in:
+  - ripps2games.c
+- en: '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?'
+  in:
+  - ripps2games.c
+- en: '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?'
+  in:
+  - ripps2games.c
+- en: '%s: SOME FILES COULD NOT BE DELETED'
+  in:
+  - ripps2games.c
+- en: '%u partitions, all in order'
+  in:
+  - ripps2games.c
+- en: ', %d art images'
+  in:
+  - ripps2games.c
+- en: ', and '
+  in:
+  - ripps2games.c
+- en: ', its cheats'
+  in:
+  - ripps2games.c
+- en: ', its settings'
+  in:
+  - ripps2games.c
+- en: 1 game, on the started drives
+  in:
+  - ripps2games.c
+- en: A MOMENT
+  in:
+  - ripps2games.c
+- en: A PS1 game here is deleted in Memory Files, where it is a file of its own.
+  in:
+  - ripps2games.c
+- en: A TASK IN THE BACKGROUND
+  in:
+  - ripps2games.c
+- en: A ZSO of this game is already beside it. Remove one of the two first.
+  in:
+  - ripps2games.c
+- en: A network catalogue's games are deleted on the PC that serves them.
+  in:
+  - ripps2games.c
+- en: ABOUT %d S
+  in:
+  - ripps2games.c
+- en: ANY MOMENT
+  in:
+  - ripps2games.c
+- en: About %d min, then checked
+  in:
+  - ripps2games.c
+- en: An ISO of this game is already beside it. Remove one of the two first.
+  in:
+  - ripps2games.c
+- en: Back (keeps both)
+  in:
+  - ripps2games.c
+- en: CHECKING EVERY PIECE
+  in:
+  - ripps2games.c
+- en: COMPRESS TO ZSO
+  in:
+  - ripps2games.c
+- en: 'COMPRESSED %s: %s FREED'
+  in:
+  - ripps2games.c
+- en: 'COMPRESSED AND HIDDEN: %s'
+  in:
+  - ripps2games.c
+- en: COMPRESSING 1 OF 2
+  in:
+  - ripps2games.c
+- en: COMPRESSING 2 OF 2
+  in:
+  - ripps2games.c
+- en: COPYING
+  in:
+  - ripps2games.c
+- en: Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  in:
+  - ripps2games.c
+- en: DELETE FOR GOOD
+  in:
+  - ripps2games.c
+- en: DELETE IT
+  in:
+  - ripps2games.c
+- en: 'DELETED %s: %s FREED'
+  in:
+  - ripps2games.c
+- en: 'Delete %s from %s? Goes: %s.'
+  in:
+  - ripps2games.c
+- en: 'Delete %s from %s? Goes: %s. Kept: %s.'
+  in:
+  - ripps2games.c
+- en: Delete its saves and RIPSHOT pictures too? No keeps them.
+  in:
+  - ripps2games.c
+- en: 'Experimental: OPL core only (not Neutrino)'
+  in:
+  - ripps2games.c
+- en: HIDDEN GAMES
+  in:
+  - ripps2games.c
+- en: 'HIDDEN: %s'
+  in:
+  - ripps2games.c
+- en: Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.
+  in:
+  - ripps2games.c
+- en: It could not be finished (%s). What it wrote was removed; the game is as it was.
+  in:
+  - ripps2games.c
+- en: Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.
+  in:
+  - ripps2games.c
+- en: Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  in:
+  - ripps2games.c
+- en: None. Hide Game, in a game's options, puts one here.
+  in:
+  - ripps2games.c
+- en: 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  in:
+  - ripps2games.c
+  - ripps2hdd.c
+- en: READING THE GAME LIST OF %s
+  in:
+  - ripps2games.c
+- en: RIPPS2 cannot delete a game from this page.
+  in:
+  - ripps2games.c
+- en: RIPPS2 could not find this game's files on its drive.
+  in:
+  - ripps2games.c
+- en: Reading the hidden lists
+  in:
+  - ripps2games.c
+- en: SAVING A LIST
+  in:
+  - ripps2games.c
+- en: SHOW AGAIN OR DELETE
+  in:
+  - ripps2games.c
+- en: SHOW AGAIN, DELETE OR COMPRESS
+  in:
+  - ripps2games.c
+- en: SHOW AGAIN, DELETE OR UNCOMPRESS
+  in:
+  - ripps2games.c
+- en: SHOW IT AGAIN
+  in:
+  - ripps2games.c
+- en: START NOW
+  in:
+  - ripps2games.c
+- en: STARTING
+  in:
+  - ripps2games.c
+- en: STARTS NEXT
+  in:
+  - ripps2games.c
+- en: STOPPING IT SAFELY
+  in:
+  - ripps2games.c
+- en: Stop? What it has written so far is removed; the game stays as it was.
+  in:
+  - ripps2games.c
+- en: THE LAST OF THE QUEUE
+  in:
+  - ripps2games.c
+- en: That game is not on its drive any more.
+  in:
+  - ripps2games.c
+- en: The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?
+  in:
+  - ripps2games.c
+- en: The partition could not be removed (%d). Nothing was deleted.
+  in:
+  - ripps2games.c
+- en: There is not enough memory for this just now.
+  in:
+  - ripps2games.c
+- en: This drive cannot keep a hidden list (a network catalogue).
+  in:
+  - ripps2games.c
+- en: This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.
+  in:
+  - ripps2games.c
+- en: This game's drive has not answered yet. Wait for it, then try again.
+  in:
+  - ripps2games.c
+- en: This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).
+  in:
+  - ripps2games.c
+- en: This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).
+  in:
+  - ripps2games.c
+- en: UNCOMPRESS TO ISO
+  in:
+  - ripps2games.c
+- en: UNCOMPRESSED %s
+  in:
+  - ripps2games.c
+- en: UNCOMPRESSING
+  in:
+  - ripps2games.c
+- en: Under a minute, then checked
+  in:
+  - ripps2games.c
+- en: WHEN IT FINISHES
+  in:
+  - ripps2games.c
+- en: 'a partition is larger than this disk allows: the table was made for a disk of another size'
+  in:
+  - ripps2games.c
+- en: 'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk'
+  in:
+  - ripps2games.c
+- en: its RIPSHOT pictures
+  in:
+  - ripps2games.c
+- en: its drive
+  in:
+  - ripps2games.c
+- en: its saves
+  in:
+  - ripps2games.c
+- en: sector %u holds no partition header
+  in:
+  - ripps2games.c
+- en: the chain does not close at __mbr
+  in:
+  - ripps2games.c
+- en: the chain skips from sector %u
+  in:
+  - ripps2games.c
+- en: the chain's links disagree at sector %u
+  in:
+  - ripps2games.c
+- en: the drive's size could not be read
+  in:
+  - ripps2games.c
+- en: the game (%s)
+  in:
+  - ripps2games.c
+- en: the game's folder and everything in it (%s)
+  in:
+  - ripps2games.c
+- en: the header at sector %u could not be read
+  in:
+  - ripps2games.c
+- en: the header at sector %u fails its checksum
+  in:
+  - ripps2games.c
+- en: the partition at sector %u is not where or as large as APA puts one
+  in:
+  - ripps2games.c
+- en: the settings and art another copy of it uses
+  in:
+  - ripps2games.c
 - en: '%d PARTITIONS   %s FREE OF %s'
   in:
   - ripps2hdd.c
@@ -2256,7 +2698,7 @@ strings:
 - en: BADGES
   in:
   - ripps2ra.c
-- en: Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.
+- en: Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.
   in:
   - ripps2ra.c
 - en: CHECK THE DISC
@@ -2430,6 +2872,39 @@ strings:
 - en: UNKNOWN CARD LAYOUT
   in:
   - ripps2saves.c
+- en: '%d FOLDERS'
+  in:
+  - ripps2seance.c
+- en: '%s could not be copied to %s. Is the drive full or write-protected?'
+  in:
+  - ripps2seance.c
+- en: '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  in:
+  - ripps2seance.c
+- en: COPY AND START
+  in:
+  - ripps2seance.c
+  - vcdsupport.c
+- en: Copying %s
+  in:
+  - ripps2seance.c
+  - vcdsupport.c
+- en: 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  in:
+  - ripps2seance.c
+- en: Ember's BIOS
+  in:
+  - ripps2seance.c
+  - ripps2status.c
+- en: 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  in:
+  - ripps2seance.c
+- en: LOOKING FOR YOUR LAUNCHERS
+  in:
+  - ripps2seance.c
+- en: The POPS files
+  in:
+  - ripps2seance.c
 - en: '%d NOT SAVED: DRIVE FULL'
   in:
   - ripps2shot.c
@@ -2521,10 +2996,16 @@ strings:
 - en: '%d sounds from %sAUDIO%s'
   in:
   - ripps2status.c
+- en: '%s  MMCE card'
+  in:
+  - ripps2status.c
 - en: '%s could not be written to %s. Check its free space and that it is not write protected.'
   in:
   - ripps2status.c
 - en: '%s is installed in %s.'
+  in:
+  - ripps2status.c
+- en: '%s, %s clusters, %s free of %s'
   in:
   - ripps2status.c
 - en: ', some files could not be used'
@@ -2539,16 +3020,22 @@ strings:
 - en: DRIVES
   in:
   - ripps2status.c
-- en: INSTALL RIPPS2'S COPY
+- en: Drives, launchers and homebrew
   in:
   - ripps2status.c
-- en: 'Installed: '
+- en: INSTALL RIPPS2'S NEUTRINO
+  in:
+  - ripps2status.c
+- en: 'Internal HDD (APA): %s free of %s'
+  in:
+  - ripps2status.c
+- en: LAUNCHERS
+  in:
+  - ripps2status.c
+- en: LOOK FOR THEM
   in:
   - ripps2status.c
 - en: MANAGE
-  in:
-  - ripps2status.c
-- en: MANAGE shows what each memory card starts, and installs or repairs BIBLE.
   in:
   - ripps2status.c
 - en: MEMORY CARD 0  (about 600 KB)
@@ -2572,19 +3059,16 @@ strings:
 - en: 'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).'
   in:
   - ripps2status.c
+- en: 'Memory card %d: %d KB free'
+  in:
+  - ripps2status.c
 - en: NEUTRINO SETTINGS
   in:
   - ripps2status.c
 - en: 'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.'
   in:
   - ripps2status.c
-- en: 'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.'
-  in:
-  - ripps2status.c
-- en: Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.
-  in:
-  - ripps2status.c
-- en: Not installed. A game that needs it offers RIPPS2's copy, or install it here.
+- en: POPS files
   in:
   - ripps2status.c
 - en: POPSTARTER NETWORK
@@ -2602,22 +3086,34 @@ strings:
 - en: RIP THIS CONSOLE'S SOUNDS
   in:
   - ripps2status.c
-- en: RIPPS2's homebrew
+- en: START EVERY DRIVE
   in:
   - ripps2status.c
 - en: STATUS
   in:
   - ripps2status.c
-- en: 'STATUS: looking for RIPPS2''s homebrew'
+- en: 'STATUS: looking at the drives and the homebrew'
+  in:
+  - ripps2status.c
+- en: Start every drive first, so the search reaches all of them? (No searches the drives already started.)
+  in:
+  - ripps2status.c
+- en: USB, HDD, MMCE and the rest
+  in:
+  - ripps2status.c
+- en: What each card starts; install or repair BIBLE.
   in:
   - ripps2status.c
 - en: a drive of unknown kind
   in:
   - ripps2status.c
-- en: a drive or a memory card
+- en: boot loader, card by card
   in:
   - ripps2status.c
-- en: boot loader, card by card
+- en: every started drive
+  in:
+  - ripps2status.c
+- en: found where you keep them
   in:
   - ripps2status.c
 - en: from its BIOS, into AUDIO
@@ -2629,7 +3125,19 @@ strings:
 - en: its own IP and SMB files
   in:
   - ripps2status.c
+- en: not found yet
+  in:
+  - ripps2status.c
+- en: not on a started drive
+  in:
+  - ripps2status.c
+- en: only if you have none
+  in:
+  - ripps2status.c
 - en: path, video, arguments
+  in:
+  - ripps2status.c
+- en: starts every drive first
   in:
   - ripps2status.c
 - en: what RIPPS2 sees
@@ -2654,6 +3162,9 @@ strings:
   in:
   - ripps2ui.c
 - en: 'CD WITH 1 SOUND TRACK: START LASER PLAYS IT'
+  in:
+  - ripps2ui.c
+- en: Custom
   in:
   - ripps2ui.c
 - en: Custom Path
@@ -2704,6 +3215,9 @@ strings:
 - en: PS2 GAME   %s   %s
   in:
   - ripps2ui.c
+- en: Rainbow
+  in:
+  - ripps2ui.c
 - en: SEVEN-POINT STAR
   in:
   - ripps2ui.c
@@ -2740,6 +3254,9 @@ strings:
 - en: 'THAT DRIVE IS NOT CONNECTED: SETTINGS STAY WHERE THEY ARE'
   in:
   - ripps2ui.c
+- en: THEMES
+  in:
+  - ripps2ui.c
 - en: TORUS ORBIT
   in:
   - ripps2ui.c
@@ -2752,9 +3269,6 @@ strings:
 - en: USB Drive
   in:
   - ripps2ui.c
-- en: ' and '
-  in:
-  - vcdsupport.c
 - en: '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
   in:
   - vcdsupport.c
@@ -2768,12 +3282,6 @@ strings:
   in:
   - vcdsupport.c
 - en: '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  in:
-  - vcdsupport.c
-- en: COPY AND START
-  in:
-  - vcdsupport.c
-- en: Copying %s
   in:
   - vcdsupport.c
 - en: LAUNCH ANYWAY

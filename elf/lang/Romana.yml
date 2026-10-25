@@ -5,10 +5,6 @@ language: Romana
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER CONFIRMĂ, ESC ANULEAZĂ. ORICE BUTON ARATĂ TASTELE.
   USB KEYBOARD: TASTATURĂ USB
-  '      DESR DVR ISOs (experimental)': '      ISO-uri DESR DVR (experimental)'
-  '      Internal HDD (exFAT)': '      HDD intern (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (experimental)'
-  '      Protocol': '      Protocol'
   Access: Acces
   Applications Page Start Mode: Mod de pornire pagină aplicații
   Art Delay: Întârziere imagini
@@ -22,7 +18,6 @@ strings:
   Fifth: Al cincilea
   First: Primul
   Fourth: Al patrulea
-  HDD (APA) Start Mode: Mod de pornire HDD (APA)
   HDD Cache: Cache HDD
   HDD Spindown: Oprire HDD
   MMCE Settings: Setări MMCE
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Acesta este un joc PS2 cu patch ESR. Pune ESR (esr*.elf) în APPS, BOOT sau ESR pe un card de memorie sau un stick USB ca să îl pornești.
   '%s, BUILD %d': '%s, VERSIUNEA %d'
   '... and the anonymous ...': '... și cei anonimi ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 inclus nemodificat (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: O demontare și reconstruire a RiptOPL, fork-ul Open PS2 Loader,
   ABOUT: DESPRE
   'ACHIEVEMENTS: SPIRIT OF RA': 'REALIZĂRI: SPIRIT OF RA'
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): Video AVI în Fișierele de memorie, fork-ul RIPPS2 (AFL 2.0)
   Apollo Save Tool by bucanero: Apollo Save Tool de bucanero
   BACK: ÎNAPOI
+  Back (keeps both): Înapoi (le păstrează pe amândouă)
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): BIBLE este PS2BBL 1.2.0, versiunile semnate de El Isra (card și HDD), nemodificat (GPL-3)
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: Sunete BIOS > Extrage le redă așa cum o face SPU2; nu se include niciun BIOS
   BOOT LOCK AND BIBLE: BOOT LOCK ȘI BIBLE
   BOOT LOCK edits its config too: BOOT LOCK îi editează și configurația
   BUILD DETAILS: DETALII VERSIUNE
-  BUILT ON RIPTOPL: CONSTRUIT PE RIPTOPL
   BearSSL by Thomas Pornin: BearSSL de Thomas Pornin
   Built with Claude (Anthropic): Făcut cu Claude (Anthropic)
   CD PLAYER: PLAYER CD
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek și Sleek Bold, desenate pentru RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements pe consolă de hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL de NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed de Google (Apache-2.0)
   SOUNDS: SUNETE
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: Instalatorul FMCB al lui SP193 și OSDMenu al lui pcm720, urmate pas cu pas
   SUPPORT: SUPORT
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z de NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF de echipa ps2homebrew
   what RIPPS2's card image writes are checked against: cu ce sunt verificate scrierile de imagini de card ale RIPPS2
-  with its own look, launchers, file browser and save tools.: cu propriul aspect, lansatoare, browser de fișiere și unelte de salvări.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora de hacan359, rcheevos de RetroAchievements
   your console's own, ripped from its BIOS: sunetele proprii ale consolei tale, extrase din BIOS-ul ei
   ' (no DNS answer)': ' (niciun răspuns DNS)'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: se scrie %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino nu a putut fi scris în %s. Verifică spațiul liber și să nu fie protejat la scriere, apoi încearcă din nou.
   THE GAME'S DRIVE  (%s/neutrino): UNITATEA JOCULUI  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Acest joc pornește prin Neutrino, iar acolo unde caută RIPPS2 (Setări, unitatea jocului, cardurile de memorie) nu există Neutrino. RIPPS2 are la el Neutrino 1.8.0 de rickgaiser (AFL-3.0). Îl instalezi acum? Apoi alegi unde.
   '%d / %d FILES': '%d / %d FIȘIERE'
   '%d FOLDERS AND CONTENTS': '%d FOLDERE ȘI CONȚINUT'
   '%d FOLDERS, %d FOUND': '%d DOSARE, %d GĂSITE'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d din %d încă blocate'
   '%s   on %s': '%s   pe %s'
   BADGES: INSIGNE
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: Insignele funcționează doar cu TELEMETRIA pornită și xeRAbora rulând pe PC-ul tău; până atunci nu costă nimic.
   CHECK THE DISC: VERIFICĂ DISCUL
   From this game's last CHECK GAME SUPPORT.: Din ultima VERIFICARE A SUPORTULUI JOCULUI pentru acest joc.
   HOW IT WORKS: CUM FUNCȚIONEAZĂ
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Pe această consolă există un PS2BBL cu blocarea RIPPS2.
   AUDIO folder: folderul AUDIO
   DRIVES: UNITĂȚI
-  INSTALL RIPPS2'S COPY: INSTALEAZĂ COPIA RIPPS2
-  'Installed: ': 'Instalat: '
   MANAGE: GESTIONEAZĂ
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: GESTIONEAZĂ arată ce pornește fiecare card de memorie și instalează sau repară BIBLE.
   MEMORY CARD 0  (about 600 KB): CARDUL DE MEMORIE 0  (aproximativ 600 KB)
   MEMORY CARD 1  (about 600 KB): CARDUL DE MEMORIE 1  (aproximativ 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: driverul nu s-a putut încărca (cod %d).'
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: driverul este încărcat, dar niciun card SD nu a răspuns (slotul mc1).'
   NEUTRINO SETTINGS: SETĂRI NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Încă niciunul: RIPPS2 nu are sunete proprii. Extrage-le pe ale acestei console sau fă-le în RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Neinstalat. Un joc care are nevoie de el oferă copia RIPPS2, sau instalează-l aici.
   POPSTARTER NETWORK: REȚEA POPSTARTER
   POPSTARTER and Ember: POPSTARTER și Ember
   PS1 SETTINGS: SETĂRI PS1
   PS2BBL 1.2.0 for RIPPS2: PS2BBL 1.2.0 pentru RIPPS2
   RIP THIS CONSOLE'S SOUNDS: EXTRAGE SUNETELE ACESTEI CONSOLE
-  RIPPS2's homebrew: homebrew-ul RIPPS2
   STATUS: STARE
-  'STATUS: looking for RIPPS2''s homebrew': 'STARE: se caută homebrew-ul RIPPS2'
   a drive of unknown kind: o unitate de tip necunoscut
-  a drive or a memory card: o unitate sau un card de memorie
   boot loader, card by card: încărcător de pornire, card cu card
   from its BIOS, into AUDIO: din BIOS-ul ei, în AUDIO
   internal HDD (exFAT): HDD intern (exFAT)
@@ -975,10 +957,192 @@ strings:
   Sidebar: Bară laterală
   your own copy, found on your drives and memory cards: copia ta proprie, găsită pe unitățile și cardurile tale de memorie
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'al tău, găsit și pornit: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Nu a fost găsit pe mass0: (%s). Pune ember.elf și bios.bin-ul tău în folderul său EMBER.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Nu a fost găsit. Pune propriul POPSTARTER.ELF în folderul POPS al unei unități.
   Launch Disc: Lansare disc
   Memory Files: Fișiere de memorie
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: RIPPS2 a găsit %d din 5. Fiecare e ținut minte, și fiecare lansare îl citește de acolo.
+  not found on the started drives: negăsit pe unitățile pornite
+  not looked for yet: încă necăutat
+  '%s did not answer, so %s cannot start. Is it connected?': '%s nu a răspuns, deci %s nu poate porni. E conectat?'
+  '%s is not on %s any more, so it has left All Games.': '%s nu mai este pe %s, așa că a ieșit din Toate jocurile.'
+  STARTING %s: PORNESC %s
+  the SMB share: partajarea SMB
+  the drive: unitatea
+  the internal HDD (APA): HDD-ul intern (APA)
+  the internal HDD (exFAT): HDD-ul intern (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: CONSTRUIT PE RIPTOPL, CU NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Mulțumiri speciale și pentru toată dragostea de pe YouTube:'
+  and its own look, launchers, file browser and save tools.: și cu propriul aspect, lansatoare, explorator de fișiere și unelte pentru salvări.
+  glad to help however you reach me.: bucuros să ajut, oricum m-ați găsi.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): al doilea nucleu de joc, 1.8.0 inclus nemodificat (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: cu Neutrino de la rickgaiser înăuntru ca al doilea nucleu de joc,
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Acest joc pornește prin Neutrino, iar RIPPS2 nu a găsit niciunul: nici la calea din Setări, nici pe unitatea jocului, nici pe cardurile de memorie, nici pe vreo unitate pornită. RIPPS2 include Neutrino 1.8.0 de la rickgaiser (AFL-3.0): instalează-l o dată, unde alegi, și fiecare joc Neutrino îl folosește de acolo.'
+  STARTING THE DRIVES: PORNESC UNITĂȚILE
+  '%d games, on the started drives': '%d jocuri, pe unitățile pornite'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: UNELE FIȘIERE NU AU PUTUT FI ȘTERSE'
+  '%u partitions, all in order': '%u partiții, toate în ordine'
+  ', %d art images': ', %d imagini de copertă'
+  ', and ': ', și '
+  ', its cheats': ', codurile lui'
+  ', its settings': ', setările lui'
+  1 game, on the started drives: 1 joc, pe unitățile pornite
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Un joc PS1 de aici se șterge în Fișierele de memorie, unde e un fișier separat.
+  A network catalogue's games are deleted on the PC that serves them.: Jocurile unui catalog de rețea se șterg pe PC-ul care le servește.
+  DELETE FOR GOOD: ȘTERGE DEFINITIV
+  DELETE IT: ȘTERGE-L
+  'DELETED %s: %s FREED': '%s ȘTERS: %s ELIBERAȚI'
+  'Delete %s from %s? Goes: %s.': 'Ștergi %s de pe %s? Pleacă: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Ștergi %s de pe %s? Pleacă: %s. Rămâne: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Ștergi și salvările și pozele RIPSHOT ale lui? Nu le păstrează.
+  HIDDEN GAMES: JOCURI ASCUNSE
+  'HIDDEN: %s': 'ASCUNS: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Ascunzi %s? Iese din toate listele, și din Toate jocurile și Favorite. Setări > Surse de jocuri > Jocuri ascunse îl arată din nou.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Ultima verificare. %s se șterge definitiv, și nimic nu-l mai poate aduce înapoi. Apasă START ca să-l ștergi.
+  None. Hide Game, in a game's options, puts one here.: Niciunul. Ascunde jocul, în opțiunile unui joc, pune unul aici.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Nu s-a șters nimic: tabela de partiții a acestei unități nu se potrivește cu acest disc (%s). Poate a fost scrisă dintr-o imagine a unui disc de altă mărime. Repar-o întâi pe un PC.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 nu poate șterge un joc din această pagină.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 nu a găsit fișierele acestui joc pe unitatea lui.
+  Reading the hidden lists: Citesc listele ascunse
+  SHOW AGAIN OR DELETE: ARATĂ DIN NOU SAU ȘTERGE
+  SHOW IT AGAIN: ARATĂ-L DIN NOU
+  That game is not on its drive any more.: Jocul acela nu mai este pe unitatea lui.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Lista ascunsă nu a putut fi scrisă pe unitatea jocului. E protejată la scriere, sau Operațiile de scriere sunt oprite?
+  The partition could not be removed (%d). Nothing was deleted.: Partiția nu a putut fi eliminată (%d). Nu s-a șters nimic.
+  This drive cannot keep a hidden list (a network catalogue).: Această unitate nu poate ține o listă ascunsă (un catalog de rețea).
+  This game's drive has not answered yet. Wait for it, then try again.: Unitatea acestui joc nu a răspuns încă. Așteaptă-o, apoi încearcă din nou.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Partiția acestui joc e una pe care RIPPS2 nu o elimină (o partiție de sistem, sau cea cu setările lui).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'o partiție e mai mare decât permite acest disc: tabela a fost făcută pentru un disc de altă mărime'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'o partiție trece de capătul acestui disc (sectorul %u din %u): tabela a fost făcută pentru un disc mai mare'
+  its RIPSHOT pictures: pozele RIPSHOT ale lui
+  its drive: unitatea lui
+  its saves: salvările lui
+  sector %u holds no partition header: sectorul %u nu are antet de partiție
+  the chain does not close at __mbr: lanțul nu se închide la __mbr
+  the chain skips from sector %u: lanțul sare de la sectorul %u
+  the chain's links disagree at sector %u: verigile lanțului nu se potrivesc la sectorul %u
+  the drive's size could not be read: mărimea unității nu a putut fi citită
+  the game (%s): jocul (%s)
+  the game's folder and everything in it (%s): dosarul jocului și tot ce e în el (%s)
+  the header at sector %u could not be read: antetul de la sectorul %u nu a putut fi citit
+  the header at sector %u fails its checksum: antetul de la sectorul %u nu trece suma de control
+  the partition at sector %u is not where or as large as APA puts one: partiția de la sectorul %u nu e unde, sau cât de mare, o pune APA
+  the settings and art another copy of it uses: setările și coperțile pe care le folosește altă copie a lui
+  '%d FOLDERS': '%d DOSARE'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s nu a putut fi copiat în %s. Unitatea e plină sau protejată la scriere?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s nu e unde caută RIPPS2. Îl caut pe unitățile pornite de RIPPS2? Locul unde e găsit e ținut minte pentru fiecare lansare de după.'
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember nu e în %s, lângă jocuri, și trebuie să fie. RIPPS2 l-a găsit la %s: START îl copiază acolo (%d KB) și pornește jocul.'
+  Ember's BIOS: BIOS-ul lui Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'BIOS-ul lui Ember (bios.bin) nu e în %s, lângă Ember. RIPPS2 a găsit unul la %s: START îl copiază acolo (%d KB) și pornește jocul.'
+  LOOKING FOR YOUR LAUNCHERS: CAUT LANSATOARELE TALE
+  The POPS files: Fișierele POPS
+  '%s  MMCE card': '%s  card MMCE'
+  INSTALL RIPPS2'S NEUTRINO: INSTALEAZĂ NEUTRINO DIN RIPPS2
+  'Internal HDD (APA): %s free of %s': 'HDD intern (APA): %s liberi din %s'
+  LAUNCHERS: LANSATOARE
+  LOOK FOR THEM: CAUTĂ-LE
+  'Memory card %d: %d KB free': 'Card de memorie %d: %d KB liberi'
+  POPS files: Fișiere POPS
+  START EVERY DRIVE: PORNEȘTE TOATE UNITĂȚILE
+  'STATUS: looking at the drives and the homebrew': 'STARE: mă uit la unități și la homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Pornești întâi toate unitățile, ca să ajungă căutarea la toate? (Nu caută pe unitățile deja pornite.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE și restul
+  every started drive: fiecare unitate pornită
+  found where you keep them: găsite unde le ții
+  not found yet: încă negăsit
+  not on a started drive: nu e pe o unitate pornită
+  only if you have none: doar dacă nu ai niciunul
+  starts every drive first: pornește întâi toate unitățile
+  Drives, launchers and homebrew: Unități, lansatoare și homebrew
+  BDM Devices: Dispozitive BDM
+  Color Sweep: Trecere de culori
+  Colors and Text: Culori și text
+  HDD POPS partitions: Partiții POPS pe HDD
+  Layout: Aranjare
+  Missing Covers: Coperți lipsă
+  Name: Nume
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Nu s-a găsit încă o configurare SMB pentru POPSTARTER. Completați rândurile de mai jos.
+  POPSTARTER Network: Rețeaua POPSTARTER
+  POPSTARTER SMB Network: Rețeaua SMB a POPSTARTER
+  POPSTARTER UDPFS Network: Rețeaua UDPFS a POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 adaugă singur unitatea, ISO-ul, VMC-urile și modul video.
+  Screen: Ecran
+  Speed: Viteză
+  Sweep Colors: Culorile trecerii
+  Text Weight: Grosimea textului
+  Theme Color: Culoare principală
+  Bold: Aldin
+  Controllers: Controlere
+  Lively: Vioi
+  Medium: Mediu
+  PS Emulation: Emulare PS
+  Regular: Obișnuit
+  Slow: Lent
+  A MOMENT: O CLIPĂ
+  A TASK IN THE BACKGROUND: O SARCINĂ ÎN FUNDAL
+  ABOUT %d S: CAM %d S
+  ANY MOMENT: DIN CLIPĂ ÎN CLIPĂ
+  READING THE GAME LIST OF %s: SE CITEȘTE LISTA DE JOCURI DE PE %s
+  SAVING A LIST: SE SALVEAZĂ O LISTĂ
+  START NOW: PORNEȘTE ACUM
+  STARTING: PORNEȘTE
+  STARTS NEXT: PORNEȘTE ÎN CONTINUARE
+  STOPPING IT SAFELY: SE OPREȘTE ÎN SIGURANȚĂ
+  THE LAST OF THE QUEUE: CAPĂTUL COZII
+  WHEN IT FINISHES: CÂND TERMINĂ
+  What each card starts; install or repair BIBLE.: Ce pornește fiecare card; instalați sau reparați BIBLE.
+  Rainbow: Curcubeu
+  Custom: Personalizat
+  DESR DVR ISOs (experimental): ISO-uri DESR DVR (experimental)
+  HDD Start Mode: Mod de pornire HDD
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed de The Roboto Project Authors (SIL OFL 1.1)
+  '%s on %s': '%s pe %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s a devenit %s (%d%%), fiecare bucată verificată. Ștergi ISO și păstrezi ZSO?'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s a redevenit %s, fiecare bucată verificată. Ștergi ZSO și păstrezi ISO?'
+  A ZSO of this game is already beside it. Remove one of the two first.: Lângă el există deja un ZSO al acestui joc. Șterge mai întâi unul dintre cele două.
+  About %d min, then checked: Circa %d min, apoi verificat
+  An ISO of this game is already beside it. Remove one of the two first.: Lângă el există deja un ISO al acestui joc. Șterge mai întâi unul dintre cele două.
+  CHECKING EVERY PIECE: SE VERIFICĂ FIECARE BUCATĂ
+  COMPRESS TO ZSO: COMPRIMĂ ÎN ZSO
+  'COMPRESSED %s: %s FREED': '%s COMPRIMAT: %s ELIBERAȚI'
+  COMPRESSING 1 OF 2: SE COMPRIMĂ 1 DIN 2
+  COMPRESSING 2 OF 2: SE COMPRIMĂ 2 DIN 2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : Comprimi %s? ISO rămâne până când ZSO este recitit și verificat, apoi RIPPS2 întreabă înainte să șteargă ISO. Unitatea are nevoie de loc pentru amândouă cât lucrează; lasă consola pornită până termină. Un ZSO pornește doar cu nucleul OPL (nu Neutrino); salvările, setările, imaginile și codurile lui rămân cu el și poate redeveni ISO oricând.
+  Compress to ZSO: Comprimă în ZSO
+  Cycle: Pe rând
+  'Experimental: OPL core only (not Neutrino)': 'Experimental: doar nucleul OPL (nu Neutrino)'
+  Hold SELECT: Ține SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: Nu s-a putut termina (%s). Ce a scris a fost șters; jocul e cum era.
+  List: Listă
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : Faci din %s din nou un ISO? ZSO rămâne până când ISO este recitit și verificat, apoi RIPPS2 întreabă înainte să șteargă ZSO. Unitatea are nevoie de loc pentru amândouă cât lucrează; lasă consola pornită până termină. Salvările, setările, imaginile și codurile lui rămân cu el.
+  Stop? What it has written so far is removed; the game stays as it was.: Oprești? Ce s-a scris până acum se șterge; jocul rămâne cum era.
+  THEMES: TEME
+  There is not enough memory for this just now.: Acum nu e destulă memorie pentru asta.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: RIPPS2 nu poate comprima sau decomprima această imagine (mărimea ei nu e în blocuri întregi de 2 KB).
+  UNCOMPRESS TO ISO: DECOMPRIMĂ ÎN ISO
+  UNCOMPRESSED %s: '%s DECOMPRIMAT'
+  UNCOMPRESSING: SE DECOMPRIMĂ
+  Uncompress to ISO: Decomprimă în ISO
+  Under a minute, then checked: Sub un minut, apoi verificat
+  COPYING: SE COPIAZĂ
+  SHOW AGAIN, DELETE OR COMPRESS: ARATĂ DIN NOU, ȘTERGE SAU COMPRIMĂ
+  SHOW AGAIN, DELETE OR UNCOMPRESS: ARATĂ DIN NOU, ȘTERGE SAU DECOMPRIMĂ
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': '%s are nevoie de circa %s liberi pe unitatea sa cât lucrează (originalul rămâne până la sfârșit), iar unitatea are %s liberi.'
+  Hide and Compress: Ascunde și comprimă
+  'COMPRESSED AND HIDDEN: %s': 'COMPRIMAT ȘI ASCUNS: %s'
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 'Nu este loc pentru această copiere: are nevoie de circa %s, iar unitatea are %s liberi.'
+  OVER 4 GB FOR FAT32: PESTE 4 GB PENTRU FAT32
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: Această unitate este %s, care nu ține fișiere de 4 GB sau mai mari, iar noua imagine ar avea %s.
+  '%s, %s clusters, %s free of %s': '%s, clustere de %s, %s liberi din %s'
+  Delete This Sweep: Șterge această trecere
+  Delete %s? RIPPS2's own sweeps stay as they are.: Ștergi %s? Trecerile proprii ale RIPPS2 rămân cum sunt.
+  Sweep: Trecere
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Insignele marchează jocurile cu realizări din listele tale și câte ai deblocat. Au nevoie de TELEMETRIE pornită.
 labels:
   SETTINGS_SAVED: Setări salvate în %s
   REMOVE_ALL_SETTINGS: Elimină setările
@@ -1258,7 +1422,7 @@ labels:
   SAVE_ICONS: Pictograme de salvare 3D
   HINT_SAVE_ICONS: Arată pictograma de salvare a jocului ales, rotindu-se, acolo unde tema are loc pentru ea. Citește întâi VMC-ul jocului, apoi cardurile de memorie.
   NETBOOT_RESTART_NOW: Protocolul de rețea se schimbă după repornire. Salvezi setările și repornești OPL acum?
-  HINT_NET_PROTOCOL: 'Ce serviciu de rețea folosește RiptOPL: o partajare SMB, UDPFS, UDPBD sau HTTP. Aceeași setare ca în Surse de jocuri. Trecerea de la unul care rulează deja cere repornire.'
+  HINT_NET_PROTOCOL: 'Ce serviciu de rețea folosește RiptOPL: o partajare SMB, UDPFS, UDPBD sau HTTP. Trecerea de la unul care rulează deja cere repornire.'
   HINT_UDPFS_ACCESS: Doar UDPFS. Fișiere citește ISO-uri separate din folderul de jocuri al serverului; IMG citește o imagine de disc ca unitate. SMB și HTTP folosesc mereu Fișiere, UDPBD mereu IMG.
   HINT_SMB_VERSION: Ce versiune SMB să folosească pentru partajarea de pe PC.
   HINT_NET_ADVANCED: Deblochează editarea modului de legătură Ethernet și a portului SMB.
@@ -1459,3 +1623,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Cum cadrele în așteptare pe rola fiecărui joc devin PNG.
   RIPPS2_SETTINGS_HOME: Salvează setările pe
   HINT_RIPPS2_SETTINGS_HOME: 'Unde își ține RIPPS2 setările: în salvarea proprie pe un card de memorie, într-un dosar RIPPS2 pe o unitate (HDD-ul intern, USB, MX4SIO, iLink sau MMCE) sau într-un dosar pe care îl scrii.'
+  RIPPS2_LAUNCHERS: Lansatoare
+  RIPPS2_LOOK_NOW: Caută acum
+  HINT_RIPPS2_LOOK_NOW: RIPPS2 caută pe unitățile pornite POPSTARTER, fișierele POPS, Ember, BIOS-ul lui Ember și Neutrino, și ține minte unde e fiecare. Fiecare lansare le citește de acolo.
+  RIPPS2_HIDE_GAME: Ascunde jocul
+  RIPPS2_HIDDEN_GAMES: Jocuri ascunse
+  HINT_RIPPS2_HIDDEN_GAMES: Jocurile ascunse cu Ascunde jocul, pe unitățile pornite. Arată unul din nou, sau șterge-l. Fiecare unitate își ține propria listă.
+  HINT_RIPPS2_BDM_DEVICES: 'Unitățile de pe care BDM citește jocuri: USB, MX4SIO, un PC Card CF, unitatea DVR a unui DESR și iLink. HDD-ul intern urmează modul de pornire HDD.'
+  HINT_RIPPS2_SCREEN: 'Imaginea meniului: modul video, ecranul lat, locul ei pe televizor (H-POS, V-POS) și overscan.'
+  HINT_RIPPS2_LAYOUT: Unde stau categoriile și cum intră o pagină, apoi coperțile RIPFLOW și grila RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Grosimea textului, tema de culoare, trecerea de culori și fiecare culoare.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Cât de gros este textul propriu al RIPPS2: sfaturile din setări, STARE și Despre. Obișnuit este ca înainte; Mediu și Aldin se citesc mai bine pe o imagine moale.'
+  HINT_RIPPS2_HDD_START: 'HDD-ul intern, APA sau exFAT: RIPPS2 îl citește oricum ar fi și îl arată o dată, ca jocuri HDD. Oprit îl lasă în pace.'
+  HINT_RIPPS2_THEME_COLOR: Culoarea proprie a temei. Alegeți Personalizat ca temă de culoare ca s-o alegeți singur, ca pe culorile textului.
+  HINT_RIPPS2_SWEEP: Cinci culori prin care trece tema, încet și lin. Curcubeu, o trecere făcută din fiecare temă de culoare sau a dumneavoastră. Oprit ține tema nemișcată.
+  HINT_RIPPS2_SWEEP_COLORS: Cele cinci culori ale trecerii și viteza ei. Schimbați una de-a RIPPS2 și se păstrează ca a dumneavoastră, cu numele dat.
+  HINT_RIPPS2_SWEEP_NAME: Cum se numește trecerea dumneavoastră în lista Trecere de culori.
+  HINT_RIPPS2_SWEEP_COLOR: Una dintre cele cinci culori prin care trece trecerea, în ordine.
+  HINT_RIPPS2_SWEEP_SPEED: 'Cât durează fiecare culoare până intră următoarea. Chiar și Vioi rămâne lin: culorile nu clipesc niciodată.'
+  RIPPS2_HIDE_COMPRESS: Ascunde jocul și compresie
+  HINT_RIPPS2_SELECT_HOLD: 'SELECT ținut 4.2 s pe o listă de jocuri. Listă: temele într-un panou, alege una. Pe rând: tema următoare. Oprit: nimic (o apăsare tot reîmprospătează).'

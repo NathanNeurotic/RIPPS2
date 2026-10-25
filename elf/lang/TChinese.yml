@@ -5,10 +5,6 @@ language: TChinese
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER 確認，ESC 取消。按任意按鈕顯示按鍵。
   USB KEYBOARD: USB 鍵盤
-  '      DESR DVR ISOs (experimental)': '      DESR DVR ISO（實驗性）'
-  '      Internal HDD (exFAT)': '      內建硬碟（exFAT）'
-  '      PC CARD CF (experimental)': '      PC CARD CF（實驗性）'
-  '      Protocol': '      協定'
   Access: 存取方式
   Applications Page Start Mode: 應用程式頁面啟動模式
   Art Delay: 圖片延遲
@@ -22,7 +18,6 @@ strings:
   Fifth: 第五
   First: 第一
   Fourth: 第四
-  HDD (APA) Start Mode: 硬碟（APA）啟動模式
   HDD Cache: 硬碟快取
   HDD Spindown: 硬碟休眠
   MMCE Settings: MMCE 設定
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: 這是打過 ESR 修補的 PS2 遊戲。請把 ESR（esr*.elf）放到記憶卡或隨身碟上的 APPS、BOOT 或 ESR 資料夾來啟動它。
   '%s, BUILD %d': '%s，組建 %d'
   '... and the anonymous ...': ……以及匿名的各位……
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': 1.8.0 原樣附帶（AFL-3.0）：github.com/rickgaiser/neutrino
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: RiptOPL（Open PS2 Loader 的分支）的拆解與重建，
   ABOUT: 關於
   'ACHIEVEMENTS: SPIRIT OF RA': 成就：SPIRIT OF RA
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): 記憶檔案中的 AVI 影片，RIPPS2 的分支（AFL 2.0）
   Apollo Save Tool by bucanero: bucanero 的 Apollo Save Tool
   BACK: 返回
+  Back (keeps both): 返回（兩個都保留）
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): BIBLE 是 PS2BBL 1.2.0，El Isra 簽署的版本（記憶卡與硬碟），未經修改（GPL-3）
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: BIOS 音效 > 擷取會像 SPU2 一樣播放它們；不附帶任何 BIOS
   BOOT LOCK AND BIBLE: BOOT LOCK 與 BIBLE
   BOOT LOCK edits its config too: BOOT LOCK 也會編輯它的設定
   BUILD DETAILS: 組建詳情
-  BUILT ON RIPTOPL: 基於 RIPTOPL
   BearSSL by Thomas Pornin: Thomas Pornin 的 BearSSL
   Built with Claude (Anthropic): 借助 Claude（Anthropic）製作
   CD PLAYER: CD 播放器
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek 與 Sleek Bold，為 RIPPS2 繪製
   RetroAchievements on the console by hacan359 (yoba): hacan359（yoba）的主機端 RetroAchievements
   RiptOPL by NathanNeurotic: NathanNeurotic 的 RiptOPL
-  Roboto Condensed by Google (Apache-2.0): Google 的 Roboto Condensed（Apache-2.0）
   SOUNDS: 音效
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: SP193 的 FMCB 安裝程式與 pcm720 的 OSDMenu，逐步遵循
   SUPPORT: 支援
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: NathanNeurotic 的 wLaunchELF R3Z
   wLaunchELF by the ps2homebrew team: ps2homebrew 團隊的 wLaunchELF
   what RIPPS2's card image writes are checked against: 用來核對 RIPPS2 寫入記憶卡映像的工具
-  with its own look, launchers, file browser and save tools.: 擁有自己的外觀、啟動器、檔案瀏覽器與存檔工具。
   xeRAbora by hacan359, rcheevos by RetroAchievements: hacan359 的 xeRAbora，RetroAchievements 的 rcheevos
   your console's own, ripped from its BIOS: 你主機自己的音效，從它的 BIOS 擷取
   ' (no DNS answer)': ' （DNS 無回應）'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': NEUTRINO：正在寫入 %.60s
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: 無法把 Neutrino 寫入 %s。請檢查可用空間以及是否防寫，然後重試。
   THE GAME'S DRIVE  (%s/neutrino): 遊戲所在磁碟機  （%s/neutrino）
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : 這個遊戲透過 Neutrino 啟動，而 RIPPS2 尋找的位置（設定、遊戲所在磁碟機、記憶卡）都沒有 Neutrino。RIPPS2 附帶 rickgaiser 的 Neutrino 1.8.0（AFL-3.0）。現在安裝嗎？接下來選擇位置。
   '%d / %d FILES': '%d / %d 個檔案'
   '%d FOLDERS AND CONTENTS': '%d 個資料夾及內容'
   '%d FOLDERS, %d FOUND': '%d 個資料夾，找到 %d 個'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d / %d 仍鎖定'
   '%s   on %s': '%s   於 %s'
   BADGES: 徽章
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: 只有在開啟遙測且你的電腦上執行著 xeRAbora 時徽章才會生效；在此之前它們不佔用任何資源。
   CHECK THE DISC: 檢查光碟
   From this game's last CHECK GAME SUPPORT.: 來自這個遊戲上一次的「檢查遊戲支援」。
   HOW IT WORKS: 使用說明
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: 這台主機上有帶 RIPPS2 鎖定的 PS2BBL。
   AUDIO folder: AUDIO 資料夾
   DRIVES: 磁碟機
-  INSTALL RIPPS2'S COPY: 安裝 RIPPS2 的副本
-  'Installed: ': '已安裝： '
   MANAGE: 管理
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: 「管理」會顯示每張記憶卡啟動的內容，並安裝或修復 BIBLE。
   MEMORY CARD 0  (about 600 KB): 記憶卡 0  （約 600 KB）
   MEMORY CARD 1  (about 600 KB): 記憶卡 1  （約 600 KB）
   'MX4SIO: its driver would not load (code %d).': MX4SIO：驅動程式無法載入（代碼 %d）。
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': MX4SIO：驅動程式已載入，但沒有 SD 卡回應（mc1 插槽）。
   NEUTRINO SETTINGS: NEUTRINO 設定
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 還沒有：RIPPS2 沒有內建音效。請擷取這台主機的音效，或在 RIPPS2 Audio Studio 中製作。
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: 未安裝。需要它的遊戲會提供 RIPPS2 的副本，或在這裡安裝。
   POPSTARTER NETWORK: POPSTARTER 網路
   POPSTARTER and Ember: POPSTARTER 與 Ember
   PS1 SETTINGS: PS1 設定
   PS2BBL 1.2.0 for RIPPS2: 供 RIPPS2 使用的 PS2BBL 1.2.0
   RIP THIS CONSOLE'S SOUNDS: 擷取這台主機的音效
-  RIPPS2's homebrew: RIPPS2 的自製程式
   STATUS: 狀態
-  'STATUS: looking for RIPPS2''s homebrew': 狀態：正在尋找 RIPPS2 的自製程式
   a drive of unknown kind: 未知類型的磁碟機
-  a drive or a memory card: 磁碟機或記憶卡
   boot loader, card by card: 開機程式，逐卡查看
   from its BIOS, into AUDIO: 來自其 BIOS，存入 AUDIO
   internal HDD (exFAT): 內建硬碟（exFAT）
@@ -975,10 +957,194 @@ strings:
   Sidebar: 側邊欄
   your own copy, found on your drives and memory cards: 你自己的副本，在你的磁碟機和記憶卡上找到
   'your own, found and launched: github.com/Gageformer/Ember/releases': 你自己的，找到並啟動：github.com/Gageformer/Ember/releases
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 在 mass0:（%s）上找不到。請把 ember.elf 和你自己的 bios.bin 放進它的 EMBER 資料夾。
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: 找不到。請把你自己的 POPSTARTER.ELF 放進某個磁碟機的 POPS 資料夾。
   Launch Disc: 啟動光碟
   Memory Files: 記憶檔案
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: RIPPS2 找到了 5 個中的 %d 個。每一個都會被記住，每次啟動都從那裡讀取。
+  not found on the started drives: 在已啟動的磁碟機上找不到
+  not looked for yet: 尚未尋找
+  '%s did not answer, so %s cannot start. Is it connected?': '%s 沒有回應，所以 %s 無法啟動。它有連接嗎？'
+  '%s is not on %s any more, so it has left All Games.': '%s 已不在 %s 上，所以已離開全部遊戲。'
+  STARTING %s: 正在啟動 %s
+  the SMB share: SMB 共用資料夾
+  the drive: 磁碟機
+  the internal HDD (APA): 內建硬碟（APA）
+  the internal HDD (exFAT): 內建硬碟（exFAT）
+  BUILT ON RIPTOPL, WITH NEUTRINO: 建立在 RIPTOPL 之上，搭載 NEUTRINO
+  'Special thanks to all the YouTube love as well:': 也特別感謝來自 YouTube 的所有喜愛：
+  and its own look, launchers, file browser and save tools.: 並有自己的外觀、啟動器、檔案瀏覽器和存檔工具。
+  glad to help however you reach me.: 不論你怎麼聯絡我，都樂意幫忙。
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): 第二個遊戲核心，1.8.0 原樣附帶（AFL-3.0）
+  with rickgaiser's Neutrino inside as its second game core,: 內含 rickgaiser 的 Neutrino 作為第二個遊戲核心，
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 這個遊戲透過 Neutrino 啟動，而 RIPPS2 沒有找到：設定裡的路徑、遊戲所在的磁碟機、記憶卡和任何已啟動的磁碟機上都沒有。RIPPS2 附帶 rickgaiser 的 Neutrino 1.8.0（AFL-3.0）：在你選的地方安裝一次，之後每個 Neutrino 遊戲都從那裡使用它。
+  STARTING THE DRIVES: 正在啟動磁碟機
+  '%d games, on the started drives': '%d 個遊戲，在已啟動的磁碟機上'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s：有些檔案無法刪除'
+  '%u partitions, all in order': '%u 個分割區，全部正常'
+  ', %d art images': 、%d 張封面圖片
+  ', and ': ，以及
+  ', its cheats': 、它的金手指
+  ', its settings': 、它的設定
+  1 game, on the started drives: 1 個遊戲，在已啟動的磁碟機上
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: 這裡的 PS1 遊戲要在記憶檔案中刪除，在那裡它是獨立的檔案。
+  A network catalogue's games are deleted on the PC that serves them.: 網路目錄的遊戲要在提供它們的電腦上刪除。
+  DELETE FOR GOOD: 永久刪除
+  DELETE IT: 刪除它
+  'DELETED %s: %s FREED': 已刪除 %s：釋放 %s
+  'Delete %s from %s? Goes: %s.': 刪除 %s（在 %s 上）？刪除：%s。
+  'Delete %s from %s? Goes: %s. Kept: %s.': 刪除 %s（在 %s 上）？刪除：%s。保留：%s。
+  Delete its saves and RIPSHOT pictures too? No keeps them.: 也刪除它的存檔和 RIPSHOT 照片嗎？選「否」則保留。
+  HIDDEN GAMES: 隱藏的遊戲
+  'HIDDEN: %s': 已隱藏：%s
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: 隱藏 %s？它會離開所有清單，包括全部遊戲和最愛。設定 > 遊戲來源 > 隱藏的遊戲 可以再顯示它。
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: 最後確認。%s 將被永久刪除，任何方法都無法復原。按 START 刪除。
+  None. Hide Game, in a game's options, puts one here.: 沒有。在遊戲選項中選擇「隱藏遊戲」即可放到這裡。
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 未刪除任何內容：這個磁碟機的分割表與這顆硬碟不符（%s）。它可能是從其他容量硬碟的映像寫入的。請先在電腦上修復。
+  RIPPS2 cannot delete a game from this page.: RIPPS2 無法在此頁面刪除遊戲。
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 在遊戲所在的磁碟機上找不到它的檔案。
+  Reading the hidden lists: 正在讀取隱藏清單
+  SHOW AGAIN OR DELETE: 重新顯示或刪除
+  SHOW IT AGAIN: 重新顯示
+  That game is not on its drive any more.: 該遊戲已不在它的磁碟機上。
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: 無法把隱藏清單寫入遊戲所在的磁碟機。它是否有寫入保護，或寫入操作已關閉？
+  The partition could not be removed (%d). Nothing was deleted.: 無法移除分割區（%d）。未刪除任何內容。
+  This drive cannot keep a hidden list (a network catalogue).: 這個磁碟機無法保存隱藏清單（網路目錄）。
+  This game's drive has not answered yet. Wait for it, then try again.: 這個遊戲的磁碟機還沒有回應。請等它就緒後再試。
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: 這個遊戲的分割區屬於 RIPPS2 不會移除的分割區（系統分割區，或存放其設定的分割區）。
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 有個分割區比這顆硬碟允許的更大：分割表是為另一容量的硬碟製作的
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 有個分割區超出了這顆硬碟的結尾（磁區 %u / %u）：分割表是為更大的硬碟製作的
+  its RIPSHOT pictures: 它的 RIPSHOT 照片
+  its drive: 它的磁碟機
+  its saves: 它的存檔
+  sector %u holds no partition header: 磁區 %u 沒有分割區標頭
+  the chain does not close at __mbr: 鏈沒有在 __mbr 處閉合
+  the chain skips from sector %u: 鏈從磁區 %u 處跳躍
+  the chain's links disagree at sector %u: 鏈的環節在磁區 %u 處不一致
+  the drive's size could not be read: 無法讀取磁碟機的容量
+  the game (%s): 遊戲本體（%s）
+  the game's folder and everything in it (%s): 遊戲資料夾及其中的一切（%s）
+  the header at sector %u could not be read: 無法讀取磁區 %u 的標頭
+  the header at sector %u fails its checksum: 磁區 %u 的標頭檢查碼不通過
+  the partition at sector %u is not where or as large as APA puts one: 磁區 %u 的分割區不在 APA 放置分割區的位置，或大小不符
+  the settings and art another copy of it uses: 它的另一份副本使用的設定和封面
+  '%d FOLDERS': '%d 個資料夾'
+  '%s could not be copied to %s. Is the drive full or write-protected?': 無法把 %s 複製到 %s。磁碟機是否已滿或有寫入保護？
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s 不在 RIPPS2 尋找的位置。要在 RIPPS2 已啟動的磁碟機上搜尋它嗎？找到的位置會在之後每次啟動時記住。'
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : Ember 不在遊戲旁邊的 %s 中，但它必須在那裡。RIPPS2 在 %s 找到了它：START 會把它複製過去（%d KB）並啟動遊戲。
+  Ember's BIOS: Ember 的 BIOS
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : Ember 的 BIOS（bios.bin）不在 Ember 旁邊的 %s 中。RIPPS2 在 %s 找到了一個：START 會把它複製過去（%d KB）並啟動遊戲。
+  LOOKING FOR YOUR LAUNCHERS: 正在尋找你的啟動器
+  The POPS files: POPS 檔案
+  '%s  MMCE card': '%s  MMCE 卡'
+  INSTALL RIPPS2'S NEUTRINO: 安裝 RIPPS2 的 NEUTRINO
+  'Internal HDD (APA): %s free of %s': 內建硬碟（APA）：可用 %s / 共 %s
+  LAUNCHERS: 啟動器
+  LOOK FOR THEM: 尋找它們
+  'Memory card %d: %d KB free': 記憶卡 %d：可用 %d KB
+  POPS files: POPS 檔案
+  START EVERY DRIVE: 啟動所有磁碟機
+  'STATUS: looking at the drives and the homebrew': 狀態：正在查看磁碟機和自製程式
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): 先啟動所有磁碟機，讓搜尋涵蓋全部嗎？（選「否」則只搜尋已啟動的磁碟機。）
+  USB, HDD, MMCE and the rest: USB、硬碟、MMCE 等
+  every started drive: 每個已啟動的磁碟機
+  found where you keep them: 在你存放的位置找到
+  not found yet: 尚未找到
+  not on a started drive: 不在已啟動的磁碟機上
+  only if you have none: 僅在你沒有時
+  starts every drive first: 先啟動所有磁碟機
+  Drives, launchers and homebrew: 磁碟機、啟動器和自製程式
+  BDM Devices: BDM 裝置
+  Color Sweep: 顏色漸變
+  Colors and Text: 顏色與文字
+  HDD POPS partitions: 硬碟的 POPS 分割區
+  Layout: 版面
+  Missing Covers: 缺少的封面
+  Name: 名稱
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: 尚未找到 POPSTARTER 的 SMB 設定。請填寫下方各列。
+  POPSTARTER Network: POPSTARTER 網路
+  POPSTARTER SMB Network: POPSTARTER SMB 網路
+  POPSTARTER UDPFS Network: POPSTARTER UDPFS 網路
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: 磁碟機、ISO、VMC 與影像模式由 RIPPS2 自行加上。
+  Screen: 畫面
+  Speed: 速度
+  Sweep Colors: 漸變顏色
+  Text Weight: 文字粗細
+  Theme Color: 主色
+  Audio: 音訊
+  Bold: 粗體
+  Controllers: 控制器
+  Lively: 活潑
+  Medium: 中等
+  PS Emulation: PS 模擬
+  Regular: 一般
+  Slow: 緩慢
+  A MOMENT: 稍等
+  A TASK IN THE BACKGROUND: 背景工作
+  ABOUT %d S: 約 %d 秒
+  ANY MOMENT: 馬上
+  READING THE GAME LIST OF %s: 正在讀取 %s 的遊戲清單
+  SAVING A LIST: 正在儲存清單
+  START NOW: 立即開始
+  STARTING: 正在開始
+  STARTS NEXT: 接著開始
+  STOPPING IT SAFELY: 正在安全停止
+  THE LAST OF THE QUEUE: 佇列末尾
+  WHEN IT FINISHES: 完成之後
+  What each card starts; install or repair BIBLE.: 每張卡啟動什麼；安裝或修復 BIBLE。
+  Rainbow: 彩虹
+  Custom: 自訂
+  DESR DVR ISOs (experimental): DESR DVR ISO（實驗性）
+  PC CARD CF (experimental): PC CARD CF（實驗性）
+  HDD Start Mode: 硬碟 啟動模式
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): The Roboto Project Authors 的 Roboto Condensed（SIL OFL 1.1）
+  '%s on %s': '%s，位於 %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s：%s 變為 %s (%d%%)，每一塊皆已檢查。刪除 ISO 並保留 ZSO？'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s：%s 又變回 %s，每一塊皆已檢查。刪除 ZSO 並保留 ISO？'
+  A ZSO of this game is already beside it. Remove one of the two first.: 旁邊已有此遊戲的 ZSO。請先刪除其中一個。
+  About %d min, then checked: 約 %d 分鐘，然後檢查
+  An ISO of this game is already beside it. Remove one of the two first.: 旁邊已有此遊戲的 ISO。請先刪除其中一個。
+  CHECKING EVERY PIECE: 正在檢查每一塊
+  COMPRESS TO ZSO: 壓縮為 ZSO
+  'COMPRESSED %s: %s FREED': 已壓縮 %s：釋放 %s
+  COMPRESSING 1 OF 2: 壓縮中 1/2
+  COMPRESSING 2 OF 2: 壓縮中 2/2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : 壓縮 %s？在 ZSO 讀回並檢查之前 ISO 會保留，之後 RIPPS2 會在刪除 ISO 前詢問。作業期間磁碟需要同時容納兩者的空間；完成前請勿關閉主機。ZSO 只能用 OPL 核心啟動（不支援 Neutrino）；它的存檔、設定、圖片與金手指都會跟著它，並可隨時轉回 ISO。
+  Compress to ZSO: 壓縮為 ZSO
+  Cycle: 輪替
+  'Experimental: OPL core only (not Neutrino)': 實驗性：僅 OPL 核心（不支援 Neutrino）
+  Hold SELECT: 按住 SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: 無法完成（%s）。已寫入的內容已刪除；遊戲維持原樣。
+  List: 清單
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : 將 %s 轉回 ISO？在 ISO 讀回並檢查之前 ZSO 會保留，之後 RIPPS2 會在刪除 ZSO 前詢問。作業期間磁碟需要同時容納兩者的空間；完成前請勿關閉主機。它的存檔、設定、圖片與金手指都會跟著它。
+  Stop? What it has written so far is removed; the game stays as it was.: 停止？目前已寫入的內容會被刪除；遊戲維持原樣。
+  THEMES: 主題
+  There is not enough memory for this just now.: 目前記憶體不足，無法執行此操作。
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: RIPPS2 無法壓縮或解壓此映像檔（其大小不是完整的 2 KB 區塊）。
+  UNCOMPRESS TO ISO: 解壓為 ISO
+  UNCOMPRESSED %s: 已解壓 %s
+  UNCOMPRESSING: 解壓中
+  Uncompress to ISO: 解壓為 ISO
+  Under a minute, then checked: 不到一分鐘，然後檢查
+  COPYING: 正在複製
+  SHOW AGAIN, DELETE OR COMPRESS: 重新顯示、刪除或壓縮
+  SHOW AGAIN, DELETE OR UNCOMPRESS: 重新顯示、刪除或解壓
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': '%s 處理期間需要其所在磁碟約 %s 的可用空間（原檔案會保留到最後），而磁碟只有 %s 可用。'
+  Hide and Compress: 隱藏並壓縮
+  'COMPRESSED AND HIDDEN: %s': 已壓縮並隱藏：%s
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 沒有足夠空間進行此次擷取：大約需要 %s，磁碟剩餘 %s。
+  OVER 4 GB FOR FAT32: FAT32 超過 4 GB
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: 此磁碟為 %s，無法儲存 4 GB 或更大的檔案，而新映像檔將為 %s。
+  '%s, %s clusters, %s free of %s': '%s，叢集 %s，可用 %s / %s'
+  Delete This Sweep: 刪除此漸變
+  Delete %s? RIPPS2's own sweeps stay as they are.: 刪除 %s？RIPPS2 內建的漸變保持不變。
+  Sweep: 漸變
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: 徽章會在清單中標出有成就的遊戲，以及你已解鎖的數量。需要開啟遙測。
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色
@@ -1211,7 +1377,7 @@ labels:
   SAVE_ICONS: 3D 存檔圖示
   HINT_SAVE_ICONS: 在主題留有位置的地方顯示所選遊戲的旋轉存檔圖示。先讀取遊戲自己的 VMC，再讀取記憶卡。
   NETBOOT_RESTART_NOW: 網路協定會在重新啟動後變更。現在儲存設定並重新啟動 OPL 嗎？
-  HINT_NET_PROTOCOL: RiptOPL 使用哪種網路服務：SMB 共用、UDPFS、UDPBD 或 HTTP。與「遊戲來源」中的設定相同。從已在執行的服務切換走需要重新啟動。
+  HINT_NET_PROTOCOL: RiptOPL 使用哪種網路服務：SMB 共用、UDPFS、UDPBD 或 HTTP。從已在執行的服務切換走需要重新啟動。
   HINT_UDPFS_ACCESS: 僅 UDPFS。「檔案」從伺服器的遊戲資料夾讀取個別的 ISO；IMG 把磁碟映像當作磁碟機讀取。SMB 與 HTTP 一律使用「檔案」，UDPBD 一律使用 IMG。
   HINT_SMB_VERSION: 與電腦共用資料夾通訊時使用的 SMB 版本。
   HINT_NET_ADVANCED: 解鎖乙太網路連線模式與 SMB 連接埠的編輯。
@@ -1410,3 +1576,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: 各遊戲底片上等待中的照片如何變成 PNG。
   RIPPS2_SETTINGS_HOME: 設定儲存至
   HINT_RIPPS2_SETTINGS_HOME: RIPPS2 存放設定的位置：記憶卡上它自己的存檔、磁碟機（內建硬碟、USB、MX4SIO、iLink 或 MMCE）上的 RIPPS2 資料夾，或你輸入的資料夾。
+  RIPPS2_LAUNCHERS: 啟動器
+  RIPPS2_LOOK_NOW: 立即尋找
+  HINT_RIPPS2_LOOK_NOW: RIPPS2 會在已啟動的磁碟機上尋找 POPSTARTER、POPS 檔案、Ember、Ember 的 BIOS 和 Neutrino，並記住每一個的位置。每次啟動都從那裡讀取。
+  RIPPS2_HIDE_GAME: 隱藏遊戲
+  RIPPS2_HIDDEN_GAMES: 隱藏的遊戲
+  HINT_RIPPS2_HIDDEN_GAMES: 用「隱藏遊戲」隱藏的遊戲，在已啟動的磁碟機上。可以重新顯示其中一個，或刪除它。每個磁碟機各有自己的清單。
+  HINT_RIPPS2_BDM_DEVICES: BDM 讀取遊戲的磁碟機：USB、MX4SIO、PC Card CF、DESR 的 DVR 磁碟機與 iLink。內建硬碟跟隨硬碟啟動模式。
+  HINT_RIPPS2_SCREEN: 選單的畫面：影像模式、寬螢幕、在電視上的位置（H-POS、V-POS）與過掃描。
+  HINT_RIPPS2_LAYOUT: 分類所在的位置與頁面進入的方式，接著是 RIPFLOW 的封面與 RIPGRID 的格線。
+  HINT_RIPPS2_COLORS_TEXT: 文字粗細、配色、顏色漸變與每種顏色。
+  HINT_RIPPS2_TEXT_WEIGHT: RIPPS2 自己文字的粗細：設定的提示、狀態與關於。一般和以前一樣；中等與粗體在柔和的畫面上更好讀。
+  HINT_RIPPS2_HDD_START: 內建硬碟，無論 APA 或 exFAT，RIPPS2 都會讀取並只顯示一次，作為硬碟遊戲。關閉則不碰它。
+  HINT_RIPPS2_THEME_COLOR: 配色本身的顏色。把配色選為自訂，就能像文字顏色一樣自己挑選。
+  HINT_RIPPS2_SWEEP: 主題緩慢平順地經過的五種顏色。彩虹、由每種配色做成的漸變，或你自己的。關閉讓配色保持不動。
+  HINT_RIPPS2_SWEEP_COLORS: 漸變的五種顏色與速度。改動 RIPPS2 的某個漸變，它會以你取的名字作為你自己的保存下來。
+  HINT_RIPPS2_SWEEP_NAME: 你的漸變在顏色漸變清單中的名字。
+  HINT_RIPPS2_SWEEP_COLOR: 漸變依序經過的五種顏色之一。
+  HINT_RIPPS2_SWEEP_SPEED: 每種顏色停留多久後下一種淡入。即使活潑也很平順：顏色從不閃爍。
+  RIPPS2_HIDE_COMPRESS: 隱藏遊戲與壓縮
+  HINT_RIPPS2_SELECT_HOLD: 在遊戲清單上按住 SELECT 4.2 秒。清單：在面板中列出主題，選一個。輪替：下一個主題。關閉：不做任何事（按一下仍會重新整理）。

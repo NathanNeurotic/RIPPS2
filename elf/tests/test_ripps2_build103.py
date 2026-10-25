@@ -25,12 +25,14 @@ if 'static const char *guiRipps2Version(void)' not in gui or gui.count('guiRipps
 if '"%s, BUILD %d", RIPPS2_VERSION, RIPPS2_BUILD' not in about:
     fail.append("About's release line must give the version and the build")
 
-# 2. the in-game menu kept inside upstream's reworked IGR thread (RA builds use the VBLANK handler)
+# 2. the in-game menu kept inside upstream's reworked IGR thread (build 114: the VBLANK handler in every build, #984;
+# the thread waits for the handler's latch or the menu)
 pad = rd('ee_core/src/padhook.c')
 thread = pad[pad.index('static void IGR_Thread(void *arg)'):]
-if thread.index('#ifdef IGR_VBLANK_HANDLER') > thread.index('choice = IGR_MenuRun(IGR_PadButtons);') or \
+wait = 'while (Pad_Data.combo_type == 0x00 && !IGR_MenuOpen)'
+if wait not in thread or thread.index(wait) > thread.index('choice = IGR_MenuRun(IGR_PadButtons);') or \
         pad.count('static void IGR_StopDmaAndGs(void)') != 1:
-    fail.append('the in-game menu loop must sit in the VBLANK-handler branch, with one IGR_StopDmaAndGs')
+    fail.append('the in-game menu loop must wait on the handler latch or the menu, with one IGR_StopDmaAndGs')
 if 'ra_count_unlocks(e); /* RIPPS2 build 87 */' not in rd('ee_core/src/ra_overlay.c'):
     fail.append("the in-game menu's unlock count must read every RA event before upstream's overlay branch")
 

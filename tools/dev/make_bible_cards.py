@@ -14,8 +14,8 @@ OLD = os.path.dirname(os.path.abspath(__file__))  # make_mc_image.py sits beside
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, 'bible-cards')
 WORK = os.path.join(OUT, 'work')
-ICON_SYS = 'C:/Users/Mini PC/Desktop/Webpages - Projects/RiptOPL/misc/icon.sys'
-ICN = 'C:/Users/Mini PC/Desktop/Webpages - Projects/RiptOPL/misc/list.icn'
+ICON_SYS = 'B:/Webpages - Projects/RiptOPL/misc/icon.sys'
+ICN = 'B:/Webpages - Projects/RiptOPL/misc/list.icn'
 os.makedirs(WORK, exist_ok=True)
 
 

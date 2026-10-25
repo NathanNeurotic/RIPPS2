@@ -5,10 +5,6 @@ language: Japanese
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER で確定、ESC で取消。いずれかのボタンでキーを表示。
   USB KEYBOARD: USB キーボード
-  '      DESR DVR ISOs (experimental)': '      DESR DVR ISO（実験的）'
-  '      Internal HDD (exFAT)': '      内蔵 HDD（exFAT）'
-  '      PC CARD CF (experimental)': '      PC CARD CF（実験的）'
-  '      Protocol': '      プロトコル'
   Access: アクセス方式
   Applications Page Start Mode: アプリページの起動モード
   Art Delay: アートの遅延
@@ -22,7 +18,6 @@ strings:
   Fifth: 5 番目
   First: 1 番目
   Fourth: 4 番目
-  HDD (APA) Start Mode: HDD（APA）の起動モード
   HDD Cache: HDD キャッシュ
   HDD Spindown: HDD スピンダウン
   MMCE Settings: MMCE 設定
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: これは ESR パッチ済みの PS2 ゲームです。起動するには、メモリーカードか USB メモリの APPS、BOOT または ESR に ESR（esr*.elf）を置いてください。
   '%s, BUILD %d': '%s、ビルド %d'
   '... and the anonymous ...': ……そして名もなき皆さん……
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': 1.8.0 を無改変で同梱（AFL-3.0）：github.com/rickgaiser/neutrino
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Open PS2 Loader のフォーク RiptOPL を分解して作り直したもの。
   ABOUT: 情報
   'ACHIEVEMENTS: SPIRIT OF RA': 実績：SPIRIT OF RA
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): メモリーファイルの AVI 動画、RIPPS2 のフォーク（AFL 2.0）
   Apollo Save Tool by bucanero: bucanero による Apollo Save Tool
   BACK: 戻る
+  Back (keeps both): 戻る（両方残す）
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): BIBLE は PS2BBL 1.2.0、El Isra の署名済みビルド（メモリーカードと HDD）を無改変で使用（GPL-3）
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: BIOS サウンド > 抽出 は SPU2 と同じように再生します。BIOS は同梱しません
   BOOT LOCK AND BIBLE: BOOT LOCK と BIBLE
   BOOT LOCK edits its config too: BOOT LOCK はその設定も編集します
   BUILD DETAILS: ビルドの詳細
-  BUILT ON RIPTOPL: RIPTOPL ベース
   BearSSL by Thomas Pornin: Thomas Pornin による BearSSL
   Built with Claude (Anthropic): Claude（Anthropic）と共に制作
   CD PLAYER: CD プレーヤー
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek と Sleek Bold、RIPPS2 のために描いたもの
   RetroAchievements on the console by hacan359 (yoba): hacan359（yoba）による本体上の RetroAchievements
   RiptOPL by NathanNeurotic: NathanNeurotic による RiptOPL
-  Roboto Condensed by Google (Apache-2.0): Google による Roboto Condensed（Apache-2.0）
   SOUNDS: サウンド
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: SP193 の FMCB インストーラーと pcm720 の OSDMenu に一歩ずつ従ったもの
   SUPPORT: サポート
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: NathanNeurotic による wLaunchELF R3Z
   wLaunchELF by the ps2homebrew team: ps2homebrew チームによる wLaunchELF
   what RIPPS2's card image writes are checked against: RIPPS2 のカードイメージ書き込みを照合する相手
-  with its own look, launchers, file browser and save tools.: 独自の見た目、ランチャー、ファイルブラウザー、セーブツールを備えています。
   xeRAbora by hacan359, rcheevos by RetroAchievements: hacan359 による xeRAbora、RetroAchievements による rcheevos
   your console's own, ripped from its BIOS: 本体自身のサウンド、BIOS から抽出
   ' (no DNS answer)': ' （DNS の応答なし）'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': NEUTRINO：%.60s を書き込み中
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino を %s に書き込めませんでした。空き容量と書き込み禁止になっていないかを確認して、もう一度お試しください。
   THE GAME'S DRIVE  (%s/neutrino): ゲームのドライブ  （%s/neutrino）
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : このゲームは Neutrino で起動しますが、RIPPS2 が探す場所（設定、ゲームのドライブ、メモリーカード）に Neutrino がありません。RIPPS2 は rickgaiser の Neutrino 1.8.0（AFL-3.0）を同梱しています。今インストールしますか？次に場所を選びます。
   '%d / %d FILES': '%d / %d ファイル'
   '%d FOLDERS AND CONTENTS': '%d フォルダと中身'
   '%d FOLDERS, %d FOUND': '%d フォルダー、%d 件見つかりました'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d / %d がまだロック中'
   '%s   on %s': '%s   %s で'
   BADGES: バッジ
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: バッジはテレメトリーがオンで、PC で xeRAbora が動いているときにだけ働きます。それまでは何の負担もありません。
   CHECK THE DISC: ディスクを確認
   From this game's last CHECK GAME SUPPORT.: このゲームの最後の「ゲームの対応を確認」から。
   HOW IT WORKS: しくみ
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: この本体には RIPPS2 のロック付きの PS2BBL があります。
   AUDIO folder: AUDIO フォルダ
   DRIVES: ドライブ
-  INSTALL RIPPS2'S COPY: RIPPS2 のコピーをインストール
-  'Installed: ': 'インストール済み： '
   MANAGE: 管理
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: 「管理」では各メモリーカードが何を起動するかを表示し、BIBLE をインストールまたは修復します。
   MEMORY CARD 0  (about 600 KB): メモリーカード 0  （約 600 KB）
   MEMORY CARD 1  (about 600 KB): メモリーカード 1  （約 600 KB）
   'MX4SIO: its driver would not load (code %d).': MX4SIO：ドライバーを読み込めませんでした（コード %d）。
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': MX4SIO：ドライバーは入っていますが、SD カードが応答しません（mc1 スロット）。
   NEUTRINO SETTINGS: NEUTRINO 設定
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': まだありません：RIPPS2 には独自のサウンドがありません。この本体のものを抽出するか、RIPPS2 Audio Studio で作ってください。
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: インストールされていません。必要なゲームが RIPPS2 のコピーを提案します。ここでインストールすることもできます。
   POPSTARTER NETWORK: POPSTARTER ネットワーク
   POPSTARTER and Ember: POPSTARTER と Ember
   PS1 SETTINGS: PS1 設定
   PS2BBL 1.2.0 for RIPPS2: RIPPS2 用の PS2BBL 1.2.0
   RIP THIS CONSOLE'S SOUNDS: この本体のサウンドを抽出
-  RIPPS2's homebrew: RIPPS2 の自作ソフト
   STATUS: ステータス
-  'STATUS: looking for RIPPS2''s homebrew': ステータス：RIPPS2 の自作ソフトを探しています
   a drive of unknown kind: 種類不明のドライブ
-  a drive or a memory card: ドライブまたはメモリーカード
   boot loader, card by card: ブートローダー、カードごと
   from its BIOS, into AUDIO: BIOS から AUDIO へ
   internal HDD (exFAT): 内蔵 HDD（exFAT）
@@ -975,10 +957,194 @@ strings:
   Sidebar: サイドバー
   your own copy, found on your drives and memory cards: あなた自身のコピー（ドライブとメモリーカードから見つけます）
   'your own, found and launched: github.com/Gageformer/Ember/releases': あなた自身のものを見つけて起動：github.com/Gageformer/Ember/releases
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': mass0:（%s）に見つかりません。ember.elf とお持ちの bios.bin をその EMBER フォルダーに入れてください。
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: 見つかりません。お持ちの POPSTARTER.ELF をドライブの POPS フォルダーに入れてください。
   Launch Disc: ディスク起動
   Memory Files: メモリーファイル
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: RIPPS2 は 5 つのうち %d つを見つけました。それぞれを記憶し、起動のたびにそこから読み込みます。
+  not found on the started drives: 開始済みのドライブに見つかりません
+  not looked for yet: まだ探していません
+  '%s did not answer, so %s cannot start. Is it connected?': '%s が応答しないため、%s を開始できません。接続されていますか？'
+  '%s is not on %s any more, so it has left All Games.': '%s は %s にもうないため、すべてのゲームから外れました。'
+  STARTING %s: '%s を開始中'
+  the SMB share: SMB 共有
+  the drive: ドライブ
+  the internal HDD (APA): 内蔵 HDD（APA）
+  the internal HDD (exFAT): 内蔵 HDD（exFAT）
+  BUILT ON RIPTOPL, WITH NEUTRINO: RIPTOPL を土台に、NEUTRINO とともに
+  'Special thanks to all the YouTube love as well:': YouTube でのたくさんの応援にも特別な感謝を：
+  and its own look, launchers, file browser and save tools.: そして独自の見た目、ランチャー、ファイルブラウザー、セーブツールを備えています。
+  glad to help however you reach me.: どこから連絡をくれても、喜んで手伝います。
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): 2 つ目のゲームコア、1.8.0 を改変せずに同梱（AFL-3.0）
+  with rickgaiser's Neutrino inside as its second game core,: rickgaiser の Neutrino を 2 つ目のゲームコアとして内蔵し、
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : このゲームは Neutrino で起動しますが、RIPPS2 は見つけられませんでした。設定のパスにも、ゲームのドライブにも、メモリーカードにも、開始済みのドライブにもありません。RIPPS2 には rickgaiser の Neutrino 1.8.0（AFL-3.0）が入っています。好きな場所に一度インストールすれば、Neutrino のゲームはすべてそこから使います。
+  STARTING THE DRIVES: ドライブを開始中
+  '%d games, on the started drives': '%d 本のゲーム（開始済みのドライブ）'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s：一部のファイルを削除できませんでした'
+  '%u partitions, all in order': '%u 個のパーティション、すべて正常'
+  ', %d art images': 、アート画像 %d 枚
+  ', and ': 、
+  ', its cheats': 、チート
+  ', its settings': 、設定
+  1 game, on the started drives: 1 本のゲーム（開始済みのドライブ）
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: ここの PS1 ゲームは、独立したファイルになっているメモリーファイルで削除します。
+  A network catalogue's games are deleted on the PC that serves them.: ネットワークカタログのゲームは、それを配信している PC で削除します。
+  DELETE FOR GOOD: 完全に削除
+  DELETE IT: 削除する
+  'DELETED %s: %s FREED': '%s を削除：%s 解放'
+  'Delete %s from %s? Goes: %s.': '%s を %s から削除しますか？消えるもの：%s。'
+  'Delete %s from %s? Goes: %s. Kept: %s.': '%s を %s から削除しますか？消えるもの：%s。残るもの：%s。'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: セーブと RIPSHOT の写真も削除しますか？いいえで残します。
+  HIDDEN GAMES: 非表示のゲーム
+  'HIDDEN: %s': 非表示：%s
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: '%s を非表示にしますか？すべてのリストから、すべてのゲームとお気に入りからも外れます。設定 > ゲームの読み込み元 > 非表示のゲーム で再表示できます。'
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: 最終確認。%s は完全に削除され、元に戻せません。削除するには START を押してください。
+  None. Hide Game, in a game's options, puts one here.: ありません。ゲームのオプションの「ゲームを非表示」でここに入ります。
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 何も削除していません：このドライブのパーティションテーブルがこのディスクに合いません（%s）。別の容量のディスクのイメージから書き込まれた可能性があります。先に PC で修復してください。
+  RIPPS2 cannot delete a game from this page.: RIPPS2 はこのページからゲームを削除できません。
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 はこのゲームのファイルをそのドライブで見つけられませんでした。
+  Reading the hidden lists: 非表示リストを読み込み中
+  SHOW AGAIN OR DELETE: 再表示または削除
+  SHOW IT AGAIN: 再表示する
+  That game is not on its drive any more.: そのゲームはもうドライブにありません。
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: 非表示リストをゲームのドライブに書き込めませんでした。書き込み禁止になっているか、書き込み操作がオフになっていませんか？
+  The partition could not be removed (%d). Nothing was deleted.: パーティションを削除できませんでした（%d）。何も削除していません。
+  This drive cannot keep a hidden list (a network catalogue).: このドライブは非表示リストを保存できません（ネットワークカタログ）。
+  This game's drive has not answered yet. Wait for it, then try again.: このゲームのドライブがまだ応答していません。待ってから、もう一度お試しください。
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: このゲームのパーティションは RIPPS2 が削除しないもの（システムパーティション、または設定のあるパーティション）です。
+  'a partition is larger than this disk allows: the table was made for a disk of another size': パーティションがこのディスクの許す大きさを超えています：テーブルは別の容量のディスク用に作られています
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': パーティションがこのディスクの終端を越えています（セクター %u / %u）：テーブルはもっと大きなディスク用に作られています
+  its RIPSHOT pictures: RIPSHOT の写真
+  its drive: そのドライブ
+  its saves: セーブ
+  sector %u holds no partition header: セクター %u にパーティションヘッダーがありません
+  the chain does not close at __mbr: チェーンが __mbr で閉じていません
+  the chain skips from sector %u: チェーンがセクター %u から飛んでいます
+  the chain's links disagree at sector %u: チェーンのリンクがセクター %u で食い違っています
+  the drive's size could not be read: ドライブの容量を読み取れませんでした
+  the game (%s): ゲーム本体（%s）
+  the game's folder and everything in it (%s): ゲームのフォルダーとその中身すべて（%s）
+  the header at sector %u could not be read: セクター %u のヘッダーを読み取れませんでした
+  the header at sector %u fails its checksum: セクター %u のヘッダーがチェックサムに合いません
+  the partition at sector %u is not where or as large as APA puts one: セクター %u のパーティションが、APA が置く位置や大きさと違います
+  the settings and art another copy of it uses: 別のコピーが使っている設定とアート
+  '%d FOLDERS': '%d 個のフォルダー'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s を %s にコピーできませんでした。ドライブがいっぱいか、書き込み禁止になっていませんか？'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s が RIPPS2 の探す場所にありません。RIPPS2 が開始したドライブで探しますか？見つかった場所は以後の起動のたびに使われます。'
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : Ember がゲームの隣の %s にありませんが、そこに必要です。RIPPS2 が %s で見つけました。START でそこへコピーし（%d KB）、ゲームを起動します。
+  Ember's BIOS: Ember の BIOS
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : Ember の BIOS（bios.bin）が Ember の隣の %s にありません。RIPPS2 が %s で見つけました。START でそこへコピーし（%d KB）、ゲームを起動します。
+  LOOKING FOR YOUR LAUNCHERS: ランチャーを探しています
+  The POPS files: POPS ファイル
+  '%s  MMCE card': '%s  MMCE カード'
+  INSTALL RIPPS2'S NEUTRINO: RIPPS2 の NEUTRINO をインストール
+  'Internal HDD (APA): %s free of %s': 内蔵 HDD（APA）：空き %s / %s
+  LAUNCHERS: ランチャー
+  LOOK FOR THEM: 探す
+  'Memory card %d: %d KB free': メモリーカード %d：空き %d KB
+  POPS files: POPS ファイル
+  START EVERY DRIVE: すべてのドライブを開始
+  'STATUS: looking at the drives and the homebrew': ステータス：ドライブと homebrew を確認中
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): 検索がすべてに届くよう、先にすべてのドライブを開始しますか？（いいえで開始済みのドライブを検索します。）
+  USB, HDD, MMCE and the rest: USB、HDD、MMCE ほか
+  every started drive: 開始済みのすべてのドライブ
+  found where you keep them: 置いてある場所で見つかりました
+  not found yet: まだ見つかっていません
+  not on a started drive: 開始済みのドライブにありません
+  only if you have none: 持っていない場合のみ
+  starts every drive first: 先にすべてのドライブを開始します
+  Drives, launchers and homebrew: ドライブ、ランチャー、自作ソフト
+  BDM Devices: BDM デバイス
+  Color Sweep: カラースイープ
+  Colors and Text: 色とテキスト
+  HDD POPS partitions: HDD の POPS パーティション
+  Layout: レイアウト
+  Missing Covers: 足りないカバー
+  Name: 名前
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: POPSTARTER の SMB 設定はまだありません。下の行を入力してください。
+  POPSTARTER Network: POPSTARTER ネットワーク
+  POPSTARTER SMB Network: POPSTARTER SMB ネットワーク
+  POPSTARTER UDPFS Network: POPSTARTER UDPFS ネットワーク
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: ドライブ、ISO、VMC、ビデオモードは RIPPS2 が自分で加えます。
+  Screen: 画面
+  Speed: 速さ
+  Sweep Colors: スイープの色
+  Text Weight: 文字の太さ
+  Theme Color: テーマの色
+  Audio: オーディオ
+  Bold: 太字
+  Controllers: コントローラー
+  Lively: 軽快
+  Medium: 中くらい
+  PS Emulation: PS エミュレーション
+  Regular: 標準
+  Slow: ゆっくり
+  A MOMENT: 少々お待ちください
+  A TASK IN THE BACKGROUND: バックグラウンドの作業
+  ABOUT %d S: あと約 %d 秒
+  ANY MOMENT: まもなく
+  READING THE GAME LIST OF %s: '%s のゲームリストを読み込み中'
+  SAVING A LIST: リストを保存中
+  START NOW: 今すぐ開始
+  STARTING: 開始中
+  STARTS NEXT: 次に開始
+  STOPPING IT SAFELY: 安全に停止中
+  THE LAST OF THE QUEUE: キューの最後
+  WHEN IT FINISHES: 終わりしだい
+  What each card starts; install or repair BIBLE.: 各カードが起動するもの。BIBLE をインストールまたは修復。
+  Rainbow: レインボー
+  Custom: カスタム
+  DESR DVR ISOs (experimental): DESR DVR ISO（実験的）
+  PC CARD CF (experimental): PC CARD CF（実験的）
+  HDD Start Mode: HDD の起動モード
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): The Roboto Project Authors による Roboto Condensed（SIL OFL 1.1）
+  '%s on %s': '%s、%s上'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s が %s になりました (%d%%)。すべての断片を確認済み。ISO を削除して ZSO を残しますか？'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s が再び %s になりました。すべての断片を確認済み。ZSO を削除して ISO を残しますか？'
+  A ZSO of this game is already beside it. Remove one of the two first.: このゲームの ZSO がすでに隣にあります。先にどちらかを削除してください。
+  About %d min, then checked: 約 %d 分、その後確認
+  An ISO of this game is already beside it. Remove one of the two first.: このゲームの ISO がすでに隣にあります。先にどちらかを削除してください。
+  CHECKING EVERY PIECE: すべての断片を確認中
+  COMPRESS TO ZSO: ZSO に圧縮
+  'COMPRESSED %s: %s FREED': '%s を圧縮: %s 空きました'
+  COMPRESSING 1 OF 2: 圧縮中 1/2
+  COMPRESSING 2 OF 2: 圧縮中 2/2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : '%s を圧縮しますか？ ZSO を読み戻して確認するまで ISO は残り、その後 RIPPS2 が ISO を削除する前に確認します。作業中はドライブに両方の空きが必要です。終わるまで本体の電源を切らないでください。ZSO は OPL コアでのみ起動します (Neutrino は不可)。セーブ、設定、画像、チートはそのまま使え、いつでも ISO に戻せます。'
+  Compress to ZSO: ZSO に圧縮
+  Cycle: 順送り
+  'Experimental: OPL core only (not Neutrino)': '実験的: OPL コアのみ (Neutrino は不可)'
+  Hold SELECT: SELECT 長押し
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: 完了できませんでした (%s)。書き込んだものは削除され、ゲームは元のままです。
+  List: リスト
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : '%s を ISO に戻しますか？ ISO を読み戻して確認するまで ZSO は残り、その後 RIPPS2 が ZSO を削除する前に確認します。作業中はドライブに両方の空きが必要です。終わるまで本体の電源を切らないでください。セーブ、設定、画像、チートはそのまま使えます。'
+  Stop? What it has written so far is removed; the game stays as it was.: 中止しますか？ これまでに書き込んだものは削除され、ゲームは元のままです。
+  THEMES: テーマ
+  There is not enough memory for this just now.: 今はこれに使えるメモリが足りません。
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: このイメージは RIPPS2 で圧縮も展開もできません (サイズが 2 KB ブロックの整数倍ではありません)。
+  UNCOMPRESS TO ISO: ISO に展開
+  UNCOMPRESSED %s: '%s を展開しました'
+  UNCOMPRESSING: 展開中
+  Uncompress to ISO: ISO に展開
+  Under a minute, then checked: 1 分未満、その後確認
+  COPYING: コピー中
+  SHOW AGAIN, DELETE OR COMPRESS: 再表示、削除、圧縮
+  SHOW AGAIN, DELETE OR UNCOMPRESS: 再表示、削除、展開
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': '%s の作業中はドライブに約 %s の空きが必要です (元のファイルは最後まで残ります)。ドライブの空きは %s です。'
+  Hide and Compress: 非表示にして圧縮
+  'COMPRESSED AND HIDDEN: %s': '圧縮して非表示: %s'
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 'このリッピングに必要な空きがありません: 約 %s 必要で、ドライブの空きは %s です。'
+  OVER 4 GB FOR FAT32: FAT32 では 4 GB 超
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: このドライブは %s で、4 GB 以上のファイルを保存できません。新しいイメージは %s になります。
+  '%s, %s clusters, %s free of %s': '%s、クラスタ %s、空き %s / %s'
+  Delete This Sweep: このスイープを削除
+  Delete %s? RIPPS2's own sweeps stay as they are.: '%s を削除しますか？ RIPPS2 自身のスイープはそのまま残ります。'
+  Sweep: スイープ
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: バッジはリスト内の実績があるゲームと、解除した数を表示します。テレメトリーをオンにする必要があります。
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。
@@ -1201,7 +1367,7 @@ labels:
   SAVE_ICONS: 3D セーブアイコン
   HINT_SAVE_ICONS: テーマに場所があれば、選んだゲームのセーブアイコンを回転させて表示します。まずゲーム自身の VMC を、次にメモリーカードを読みます。
   NETBOOT_RESTART_NOW: ネットワークプロトコルは再起動後に変わります。今設定を保存して OPL を再起動しますか？
-  HINT_NET_PROTOCOL: RiptOPL が使うネットワークサービス：SMB 共有、UDPFS、UDPBD、HTTP。ゲームソースの設定と同じです。動作中のものから切り替えるには再起動が必要です。
+  HINT_NET_PROTOCOL: RiptOPL が使うネットワークサービス：SMB 共有、UDPFS、UDPBD、HTTP。動作中のものから切り替えるには再起動が必要です。
   HINT_UDPFS_ACCESS: UDPFS のみ。「ファイル」はサーバーのゲームフォルダから個別の ISO を読み、IMG はディスクイメージをドライブとして読みます。SMB と HTTP は常に「ファイル」、UDPBD は常に IMG です。
   HINT_SMB_VERSION: PC の共有と話す SMB のバージョン。
   HINT_NET_ADVANCED: イーサネットのリンクモードと SMB ポートを編集できるようにします。
@@ -1400,3 +1566,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: 各ゲームのフィルムで待っている写真を PNG にする方法。
   RIPPS2_SETTINGS_HOME: 設定の保存先
   HINT_RIPPS2_SETTINGS_HOME: RIPPS2 が設定を置く場所：メモリーカード上の自身のセーブ、ドライブ（内蔵 HDD、USB、MX4SIO、iLink、MMCE）の RIPPS2 フォルダ、または入力したフォルダ。
+  RIPPS2_LAUNCHERS: ランチャー
+  RIPPS2_LOOK_NOW: 今すぐ探す
+  HINT_RIPPS2_LOOK_NOW: RIPPS2 は開始済みのドライブで POPSTARTER、POPS ファイル、Ember、Ember の BIOS、Neutrino を探し、それぞれの場所を記憶します。起動のたびにそこから読み込みます。
+  RIPPS2_HIDE_GAME: ゲームを非表示
+  RIPPS2_HIDDEN_GAMES: 非表示のゲーム
+  HINT_RIPPS2_HIDDEN_GAMES: 「ゲームを非表示」で隠した、開始済みのドライブのゲームです。再表示するか、削除できます。ドライブごとに自分のリストを持っています。
+  HINT_RIPPS2_BDM_DEVICES: 'BDM がゲームを読むドライブ: USB、MX4SIO、PC Card CF、DESR の DVR ドライブ、iLink。内蔵 HDD は HDD の起動モードに従います。'
+  HINT_RIPPS2_SCREEN: 'メニューの映像: ビデオモード、ワイド画面、テレビ上の位置（H-POS、V-POS）とオーバースキャン。'
+  HINT_RIPPS2_LAYOUT: カテゴリーの位置とページの入り方、そして RIPFLOW のカバーと RIPGRID のグリッド。
+  HINT_RIPPS2_COLORS_TEXT: 文字の太さ、カラーテーマ、カラースイープ、そしてすべての色。
+  HINT_RIPPS2_TEXT_WEIGHT: 'RIPPS2 自身の文字の太さ: 設定のヒント、ステータス、情報。標準はこれまでどおり。中くらいと太字はやわらかい映像で読みやすくなります。'
+  HINT_RIPPS2_HDD_START: 内蔵 HDD は APA でも exFAT でも、RIPPS2 がどちらか読み取り、HDD ゲームとして一度だけ表示します。オフにすると触れません。
+  HINT_RIPPS2_THEME_COLOR: カラーテーマそのものの色。カラーテーマでカスタムを選ぶと、文字の色と同じように自分で選べます。
+  HINT_RIPPS2_SWEEP: テーマがゆっくりなめらかに移り変わる 5 色。レインボー、各カラーテーマから作ったスイープ、または自分のもの。オフならカラーテーマは動きません。
+  HINT_RIPPS2_SWEEP_COLORS: スイープの 5 色と速さ。RIPPS2 のものを変えると、付けた名前で自分のものとして残ります。
+  HINT_RIPPS2_SWEEP_NAME: カラースイープの一覧でのスイープの名前。
+  HINT_RIPPS2_SWEEP_COLOR: スイープが順に移り変わる 5 色のひとつ。
+  HINT_RIPPS2_SWEEP_SPEED: 次の色に移るまで各色が続く長さ。軽快でもなめらかで、色が点滅することはありません。
+  RIPPS2_HIDE_COMPRESS: ゲームを非表示と圧縮
+  HINT_RIPPS2_SELECT_HOLD: 'ゲームリストで SELECT を 4.2 秒長押し。リスト: パネルにテーマを並べて選ぶ。順送り: 次のテーマ。オフ: 何もしない (押すと更新はします)。'

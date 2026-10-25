@@ -5,10 +5,6 @@ language: Cebuano
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER ALANG MODAWAT, ESC ALANG MOKANSEL. BISAN UNSANG BUTTON MOPAKITA SA MGA KEY.
   USB KEYBOARD: USB KEYBOARD
-  '      DESR DVR ISOs (experimental)': '      DESR DVR ISO (eksperimental)'
-  '      Internal HDD (exFAT)': '      Internal HDD (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (eksperimental)'
-  '      Protocol': '      Protocol'
   Access: Access
   Applications Page Start Mode: Start mode sa Applications page
   Art Delay: Langan sa mga hulagway
@@ -22,7 +18,6 @@ strings:
   Fifth: Ikalima
   First: Una
   Fourth: Ikaupat
-  HDD (APA) Start Mode: Start mode sa HDD (APA)
   HDD Cache: HDD cache
   HDD Spindown: Pag-spindown sa HDD
   MMCE Settings: Mga setting sa MMCE
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: PS2 nga dula kini nga adunay ESR patch. Ibutang ang ESR (esr*.elf) sa APPS, BOOT o ESR sa memory card o USB drive aron masugdan kini.
   '%s, BUILD %d': '%s, BUILD %d'
   '... and the anonymous ...': '... ug ang mga wala mailhi ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 nga gidala nga walay giusab (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Usa ka pagbungkag ug pagtukod pag-usab sa RiptOPL, ang fork sa Open PS2 Loader,
   ABOUT: MAHITUNGOD
   'ACHIEVEMENTS: SPIRIT OF RA': 'MGA ACHIEVEMENT: SPIRIT OF RA'
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): AVI video sa Memory Files, fork sa RIPPS2 (AFL 2.0)
   Apollo Save Tool by bucanero: Apollo Save Tool ni bucanero
   BACK: BALIK
+  Back (keeps both): Balik (tipigan ang duha)
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): Ang BIBLE mao ang PS2BBL 1.2.0, ang mga signed build ni El Isra (card ug HDD), walay giusab (GPL-3)
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: Gipatugtog sila sa BIOS Sounds > Rip sama sa SPU2; walay BIOS nga apil
   BOOT LOCK AND BIBLE: BOOT LOCK UG BIBLE
   BOOT LOCK edits its config too: Giusab usab sa BOOT LOCK ang config niini
   BUILD DETAILS: MGA DETALYE SA BUILD
-  BUILT ON RIPTOPL: GITUKOD SA RIPTOPL
   BearSSL by Thomas Pornin: BearSSL ni Thomas Pornin
   Built with Claude (Anthropic): Gihimo uban ni Claude (Anthropic)
   CD PLAYER: CD PLAYER
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek ug Sleek Bold, gidrowing alang sa RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements sa console ni hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL ni NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed sa Google (Apache-2.0)
   SOUNDS: MGA TUNOG
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: FMCB installer ni SP193 ug OSDMenu ni pcm720, gisundan sa matag lakang
   SUPPORT: SUPORTA
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z ni NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF sa ps2homebrew team
   what RIPPS2's card image writes are checked against: ang gipasikaran sa pagsusi sa mga card image nga gisulat sa RIPPS2
-  with its own look, launchers, file browser and save tools.: nga adunay kaugalingong dagway, mga launcher, file browser ug mga save tool.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora ni hacan359, rcheevos sa RetroAchievements
   your console's own, ripped from its BIOS: ang kaugalingong tunog sa imong console, gikuha gikan sa BIOS niini
   ' (no DNS answer)': ' (walay tubag ang DNS)'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: gisulat ang %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Dili masulat ang Neutrino sa %s. Susiha ang libreng lugar niini ug nga dili kini naka-write-protect, unya sulayi pag-usab.
   THE GAME'S DRIVE  (%s/neutrino): ANG DRIVE SA DULA  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Pinaagi sa Neutrino mosugod kining dula, ug walay Neutrino kung asa mangita ang RIPPS2 (Settings, ang drive sa dula, ang mga memory card). Gidala sa RIPPS2 ang Neutrino 1.8.0 ni rickgaiser (AFL-3.0). I-install kini karon? Sunod, ikaw ang mopili kung asa.
   '%d / %d FILES': '%d / %d KA FILE'
   '%d FOLDERS AND CONTENTS': '%d KA FOLDER UG SULOD'
   '%d FOLDERS, %d FOUND': '%d KA FOLDER, %d NAKIT-AN'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d sa %d ang naka-lock pa'
   '%s   on %s': '%s   sa %s'
   BADGES: MGA BADGE
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: Molihok lang ang mga badge kung naka-on ang TELEMETRY ug nagdagan ang xeRAbora sa imong PC; hangtod niana, walay gasto kini.
   CHECK THE DISC: SUSIHA ANG DISC
   From this game's last CHECK GAME SUPPORT.: Gikan sa katapusang CHECK GAME SUPPORT niining dula.
   HOW IT WORKS: GIUNSA KINI PAGLIHOK
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Adunay PS2BBL nga may lock sa RIPPS2 niining console.
   AUDIO folder: AUDIO folder
   DRIVES: MGA DRIVE
-  INSTALL RIPPS2'S COPY: I-INSTALL ANG KOPYA SA RIPPS2
-  'Installed: ': 'Naka-install: '
   MANAGE: DUMALAHA
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: Gipakita sa DUMALAHA kung unsa ang gisugdan sa matag memory card, ug nag-install o nag-ayo sa BIBLE.
   MEMORY CARD 0  (about 600 KB): MEMORY CARD 0  (mga 600 KB)
   MEMORY CARD 1  (about 600 KB): MEMORY CARD 1  (mga 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: dili mo-load ang driver niini (code %d).'
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: naka-load ang driver, apan walay SD card nga mitubag (ang mc1 slot).'
   NEUTRINO SETTINGS: MGA SETTING SA NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Wala pa: walay kaugalingong tunog ang RIPPS2. I-rip ang sa console, o himoa sa RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Wala na-install. Ang dula nga nagkinahanglan niini motanyag sa kopya sa RIPPS2, o i-install kini dinhi.
   POPSTARTER NETWORK: NETWORK SA POPSTARTER
   POPSTARTER and Ember: POPSTARTER ug Ember
   PS1 SETTINGS: MGA SETTING SA PS1
   PS2BBL 1.2.0 for RIPPS2: PS2BBL 1.2.0 alang sa RIPPS2
   RIP THIS CONSOLE'S SOUNDS: I-RIP ANG MGA TUNOG NIINING CONSOLE
-  RIPPS2's homebrew: Homebrew sa RIPPS2
   STATUS: STATUS
-  'STATUS: looking for RIPPS2''s homebrew': 'STATUS: gipangita ang homebrew sa RIPPS2'
   a drive of unknown kind: drive nga wala mailhi ang klase
-  a drive or a memory card: drive o memory card
   boot loader, card by card: boot loader, matag card
   from its BIOS, into AUDIO: gikan sa BIOS niini, ngadto sa AUDIO
   internal HDD (exFAT): internal HDD (exFAT)
@@ -975,10 +957,188 @@ strings:
   Sidebar: Sidebar
   your own copy, found on your drives and memory cards: imong kaugalingong kopya, makit-an sa imong mga drive ug memory card
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'imong kaugalingon, makit-an ug ilunsad: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Wala makit-i sa mass0: (%s). Ibutang ang ember.elf ug ang imong bios.bin sa EMBER folder niini.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Wala makit-i. Ibutang ang imong kaugalingong POPSTARTER.ELF sa POPS folder sa usa ka drive.
   Launch Disc: Sugdi ang disc
   Memory Files: Memory files
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: Nakakita ang RIPPS2 og %d sa 5. Ginahinumdoman ang matag usa, ug didto kini basahon sa matag launch.
+  not found on the started drives: wala makit-i sa mga nasugdang drive
+  not looked for yet: wala pa pangitaa
+  '%s did not answer, so %s cannot start. Is it connected?': Wala motubag ang %s, busa dili makasugod ang %s. Nakakonektar ba kini?
+  '%s is not on %s any more, so it has left All Games.': Wala na ang %s sa %s, busa mibiya na kini sa Tanang dula.
+  STARTING %s: GISUGDAN ANG %s
+  the SMB share: ang SMB share
+  the drive: ang drive
+  the internal HDD (APA): ang internal HDD (APA)
+  the internal HDD (exFAT): ang internal HDD (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: GITUKOD SA RIPTOPL, UBAN ANG NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Espesyal nga pasalamat usab sa tanang gugma gikan sa YouTube:'
+  and its own look, launchers, file browser and save tools.: ug adunay kaugalingong dagway, launcher, file browser ug save tools.
+  glad to help however you reach me.: malipayon nga motabang, bisan unsaon nimo ako pagkontak.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): ang ikaduhang game core, 1.8.0 nga gidala nga walay giusab (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: nga adunay Neutrino ni rickgaiser sa sulod isip ikaduhang game core,
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Kini nga dula mosugod pinaagi sa Neutrino, ug walay nakit-an ang RIPPS2: wala sa path sa Settings, sa drive sa dula, sa mga memory card o sa bisan unsang nasugdang drive. Gidala sa RIPPS2 ang Neutrino 1.8.0 ni rickgaiser (AFL-3.0): i-install kini kausa, bisan asa nimo gusto, ug didto kini gamiton sa matag dula sa Neutrino.'
+  STARTING THE DRIVES: GISUGDAN ANG MGA DRIVE
+  '%d games, on the started drives': '%d ka dula, sa mga nasugdang drive'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: ADUNAY MGA FILE NGA WALA MAPAPAS'
+  '%u partitions, all in order': '%u ka partition, tanan hapsay'
+  ', %d art images': ', %d ka art image'
+  ', and ': ', ug '
+  ', its cheats': ', ang mga cheat niini'
+  ', its settings': ', ang settings niini'
+  1 game, on the started drives: 1 ka dula, sa mga nasugdang drive
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Ang PS1 nga dula dinhi papason sa Memory files, diin kini usa ka kaugalingong file.
+  A network catalogue's games are deleted on the PC that serves them.: Ang mga dula sa network catalogue papason sa PC nga nag-serve niini.
+  DELETE FOR GOOD: PAPASA SA HINGPIT
+  DELETE IT: PAPASA KINI
+  'DELETED %s: %s FREED': 'NAPAPAS ANG %s: %s ANG NAHAW-AN'
+  'Delete %s from %s? Goes: %s.': 'Papason ang %s gikan sa %s? Mawala: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Papason ang %s gikan sa %s? Mawala: %s. Magpabilin: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Papason usab ang mga save ug RIPSHOT nga hulagway niini? Ang No magtipig niini.
+  HIDDEN GAMES: MGA GITAGONG DULA
+  'HIDDEN: %s': 'GITAGO: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Itago ang %s? Mobiya kini sa matag lista, apil ang Tanang dula ug Mga Paborito. Ang Setting > Mga Tinubdan sa Dula > Mga gitagong dula mopakita niini pag-usab.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Katapusang check. Mapapas sa hingpit ang %s, ug walay makabalik niini. Pindota ang START aron papason kini.
+  None. Hide Game, in a game's options, puts one here.: Wala. Ang Itago ang dula, sa options sa usa ka dula, mobutang og usa dinhi.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Walay napapas: ang partition table niining drive dili mohaum niining disk (%s). Basin gisulat kini gikan sa image sa disk nga lahi ang gidak-on. Ayoha una kini sa PC.'
+  RIPPS2 cannot delete a game from this page.: Dili makapapas og dula ang RIPPS2 gikan niining page.
+  RIPPS2 could not find this game's files on its drive.: Wala makit-i sa RIPPS2 ang mga file niining dula sa drive niini.
+  Reading the hidden lists: Gibasa ang mga gitagong lista
+  SHOW AGAIN OR DELETE: IPAKITA PAG-USAB O PAPASA
+  SHOW IT AGAIN: IPAKITA PAG-USAB
+  That game is not on its drive any more.: Wala na ang maong dula sa drive niini.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Dili masulat ang gitagong lista sa drive sa dula. Write-protected ba kini, o naka-off ang Write Operations?
+  The partition could not be removed (%d). Nothing was deleted.: Dili matangtang ang partition (%d). Walay napapas.
+  This drive cannot keep a hidden list (a network catalogue).: Dili makahupot og gitagong lista kining drive (usa ka network catalogue).
+  This game's drive has not answered yet. Wait for it, then try again.: Wala pa motubag ang drive niining dula. Hulata kini, unya sulayi pag-usab.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Ang partition niining dula usa sa dili tangtangon sa RIPPS2 (usa ka system partition, o ang naay settings niini).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'mas dako ang usa ka partition kaysa gitugot niining disk: gihimo ang table para sa disk nga lahi ang gidak-on'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'milapas ang usa ka partition sa tumoy niining disk (sector %u sa %u): gihimo ang table para sa mas dakong disk'
+  its RIPSHOT pictures: ang mga RIPSHOT nga hulagway niini
+  its drive: ang drive niini
+  its saves: ang mga save niini
+  sector %u holds no partition header: walay partition header ang sector %u
+  the chain does not close at __mbr: dili mosira ang chain sa __mbr
+  the chain skips from sector %u: molukso ang chain gikan sa sector %u
+  the chain's links disagree at sector %u: dili magkauyon ang mga link sa chain sa sector %u
+  the drive's size could not be read: dili mabasa ang gidak-on sa drive
+  the game (%s): ang dula (%s)
+  the game's folder and everything in it (%s): ang folder sa dula ug tanan nga sulod niini (%s)
+  the header at sector %u could not be read: dili mabasa ang header sa sector %u
+  the header at sector %u fails its checksum: mapakyas sa checksum ang header sa sector %u
+  the partition at sector %u is not where or as large as APA puts one: wala ang partition sa sector %u sa dapit o sa gidak-on nga ibutang sa APA
+  the settings and art another copy of it uses: ang settings ug art nga gigamit sa laing kopya niini
+  '%d FOLDERS': '%d KA FOLDER'
+  '%s could not be copied to %s. Is the drive full or write-protected?': Dili makopya ang %s ngadto sa %s. Puno ba ang drive o write-protected?
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : Wala ang %s diin nangita ang RIPPS2. Pangitaon kini sa mga drive nga gisugdan sa RIPPS2? Hinumdoman kung asa kini makit-an para sa matag sunod nga launch.
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Wala ang Ember sa %s, tupad sa mga dula, ug kinahanglan nga anaa kini didto. Nakit-an kini sa RIPPS2 sa %s: kopyahon kini sa START didto (%d KB) ug sugdan ang dula.'
+  Ember's BIOS: BIOS sa Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'Wala ang BIOS sa Ember (bios.bin) sa %s, tupad sa Ember. Nakakita ang RIPPS2 og usa sa %s: kopyahon kini sa START didto (%d KB) ug sugdan ang dula.'
+  LOOKING FOR YOUR LAUNCHERS: GIPANGITA ANG IMONG MGA LAUNCHER
+  The POPS files: Ang mga POPS file
+  '%s  MMCE card': '%s  MMCE card'
+  INSTALL RIPPS2'S NEUTRINO: I-INSTALL ANG NEUTRINO SA RIPPS2
+  'Internal HDD (APA): %s free of %s': 'Internal HDD (APA): %s ang libre sa %s'
+  LAUNCHERS: MGA LAUNCHER
+  LOOK FOR THEM: PANGITAA SILA
+  'Memory card %d: %d KB free': 'Memory card %d: %d KB ang libre'
+  POPS files: Mga POPS file
+  START EVERY DRIVE: SUGDI ANG MATAG DRIVE
+  'STATUS: looking at the drives and the homebrew': 'STATUS: gitan-aw ang mga drive ug ang homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Sugdan una ang matag drive, aron maabot sa pagpangita ang tanan? (Ang No mangita sa mga nasugdan na nga drive.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE ug ang uban pa
+  every started drive: matag nasugdang drive
+  found where you keep them: nakit-an diin nimo sila gitipigan
+  not found yet: wala pa makit-i
+  not on a started drive: wala sa nasugdang drive
+  only if you have none: kung wala ka lang
+  starts every drive first: sugdan una ang matag drive
+  Drives, launchers and homebrew: Mga drive, launcher ug homebrew
+  BDM Devices: Mga device sa BDM
+  Color Sweep: Pagbalhin sa kolor
+  Colors and Text: Kolor ug teksto
+  HDD POPS partitions: Mga POPS partition sa HDD
+  Missing Covers: Nawala nga mga cover
+  Name: Ngalan
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Wala pay nakit-an nga SMB setup sa POPSTARTER. Pun-a ang mga laray sa ubos.
+  POPSTARTER Network: Network sa POPSTARTER
+  POPSTARTER SMB Network: SMB network sa POPSTARTER
+  POPSTARTER UDPFS Network: UDPFS network sa POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: Ang RIPPS2 mismo ang modugang sa drive, ISO, mga VMC ug video mode.
+  Speed: Kakusog
+  Sweep Colors: Mga kolor sa pagbalhin
+  Text Weight: Kabug-at sa teksto
+  Theme Color: Kolor sa tema mismo
+  Controllers: Mga controller
+  Lively: Buhi
+  PS Emulation: PS emulation
+  Slow: Hinay
+  A MOMENT: KADIYOT
+  A TASK IN THE BACKGROUND: USA KA BULUHATON SA LUYO
+  ABOUT %d S: MGA %d S
+  ANY MOMENT: BISAN KANUS-A
+  READING THE GAME LIST OF %s: GIBASA ANG LISTAHAN SA DULA SA %s
+  SAVING A LIST: GITIPIGAN ANG LISTAHAN
+  START NOW: SUGDI KARON
+  STARTING: NAGSUGOD
+  STARTS NEXT: SUNOD NGA MOSUGOD
+  STOPPING IT SAFELY: GIHUNONG NGA LUWAS
+  THE LAST OF THE QUEUE: ANG KATAPUSAN SA PILA
+  WHEN IT FINISHES: KON MAHUMAN NA
+  What each card starts; install or repair BIBLE.: Unsa ang sugdan sa matag card; i-install o ayuha ang BIBLE.
+  Rainbow: Balangaw
+  Custom: Kaugalingon
+  DESR DVR ISOs (experimental): DESR DVR ISO (eksperimental)
+  PC CARD CF (experimental): PC CARD CF (eksperimental)
+  HDD Start Mode: Start mode sa HDD
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed sa The Roboto Project Authors (SIL OFL 1.1)
+  '%s on %s': '%s sa %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: ang %s nahimong %s (%d%%), gisusi ang matag piraso. Tangtangon ang ISO ug tipigan ang ZSO?'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: ang %s nahimong %s pag-usab, gisusi ang matag piraso. Tangtangon ang ZSO ug tipigan ang ISO?'
+  A ZSO of this game is already beside it. Remove one of the two first.: Aduna nay ZSO niining dulaa tupad niini. Tangtanga una ang usa sa duha.
+  About %d min, then checked: Mga %d min, dayon susihon
+  An ISO of this game is already beside it. Remove one of the two first.: Aduna nay ISO niining dulaa tupad niini. Tangtanga una ang usa sa duha.
+  CHECKING EVERY PIECE: GISUSI ANG MATAG PIRASO
+  COMPRESS TO ZSO: I-COMPRESS NGADTO SA ZSO
+  'COMPRESSED %s: %s FREED': 'NA-COMPRESS ANG %s: %s ANG NAHAW-AN'
+  COMPRESSING 1 OF 2: NAG-COMPRESS 1 SA 2
+  COMPRESSING 2 OF 2: NAG-COMPRESS 2 SA 2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : I-compress ang %s? Magpabilin ang ISO hangtod mabasa pag-usab ug masusi ang ZSO, dayon mangutana ang RIPPS2 sa dili pa niini tangtangon ang ISO. Kinahanglan sa drive ang luna para sa duha samtang nagtrabaho; ayaw palonga ang console hangtod mahuman. Ang ZSO mosugod lang sa OPL core (dili sa Neutrino); ang mga save, setting, hulagway ug cheat niini magpabilin uban niini, ug mahimo kining ISO pag-usab bisan kanus-a.
+  Compress to ZSO: I-compress ngadto sa ZSO
+  Cycle: Sunod-sunod
+  'Experimental: OPL core only (not Neutrino)': 'Eksperimental: OPL core lang (dili Neutrino)'
+  Hold SELECT: Kupti ang SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: Dili kini mahuman (%s). Gitangtang ang gisulat niini; ang dula sama sa kaniadto.
+  List: Lista
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : Himoon ang %s nga ISO pag-usab? Magpabilin ang ZSO hangtod mabasa pag-usab ug masusi ang ISO, dayon mangutana ang RIPPS2 sa dili pa niini tangtangon ang ZSO. Kinahanglan sa drive ang luna para sa duha samtang nagtrabaho; ayaw palonga ang console hangtod mahuman. Ang mga save, setting, hulagway ug cheat niini magpabilin uban niini.
+  Stop? What it has written so far is removed; the game stays as it was.: Hunongon? Tangtangon ang nasulat na; ang dula magpabilin sama sa kaniadto.
+  THEMES: MGA TEMA
+  There is not enough memory for this just now.: Kulang ang memorya para niini karon.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: Kini nga image dili mahimong i-compress o i-uncompress sa RIPPS2 (ang gidak-on niini dili tibuok nga 2 KB nga mga block).
+  UNCOMPRESS TO ISO: I-UNCOMPRESS NGADTO SA ISO
+  UNCOMPRESSED %s: NA-UNCOMPRESS ANG %s
+  UNCOMPRESSING: NAG-UNCOMPRESS
+  Uncompress to ISO: I-uncompress ngadto sa ISO
+  Under a minute, then checked: Ubos sa usa ka minuto, dayon susihon
+  COPYING: GIKOPYA
+  SHOW AGAIN, DELETE OR COMPRESS: IPAKITA PAG-USAB, PAPASA O I-COMPRESS
+  SHOW AGAIN, DELETE OR UNCOMPRESS: IPAKITA PAG-USAB, PAPASA O I-UNCOMPRESS
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': Ang %s nagkinahanglan og mga %s nga bakanteng luna sa drive niini samtang nagtrabaho (ang orihinal magpabilin hangtod sa katapusan), ug ang drive adunay %s nga bakante.
+  Hide and Compress: Itago ug i-compress
+  'COMPRESSED AND HIDDEN: %s': 'NA-COMPRESS UG NATAGO: %s'
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 'Walay luna para niini nga rip: nagkinahanglan og mga %s, ug ang drive adunay %s nga bakante.'
+  OVER 4 GB FOR FAT32: LABAW SA 4 GB PARA SA FAT32
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: Kini nga drive kay %s, nga dili makatipig og file nga 4 GB o labaw pa, ug ang bag-ong image mahimong %s.
+  '%s, %s clusters, %s free of %s': '%s, %s nga cluster, %s bakante sa %s'
+  Delete This Sweep: Papasa kini nga pagbalhin
+  Delete %s? RIPPS2's own sweeps stay as they are.: Papasa ang %s? Ang kaugalingong mga pagbalhin sa RIPPS2 magpabilin.
+  Sweep: Pagbalhin
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Ang mga badge nagtimaan sa mga dula nga adunay achievement sa imong mga lista, ug pila ang imong na-unlock. Kinahanglan nga on ang TELEMETRY.
 labels:
   MEDIUM: Tunga-tunga
   BDMMODE: BDM Start Mode
@@ -1230,7 +1390,7 @@ labels:
   SAVE_ICONS: Mga 3D save icon
   HINT_SAVE_ICONS: Ipakita ang nagtuyok nga save icon sa gipiling dula, kung asa adunay lugar ang tema alang niini. Basahon una ang kaugalingong VMC sa dula, unya ang mga memory card.
   NETBOOT_RESTART_NOW: Mausab ang network protocol human sa restart. I-save ang settings ug i-restart ang OPL karon?
-  HINT_NET_PROTOCOL: 'Unsang network service ang gigamit sa RiptOPL: SMB share, UDPFS, UDPBD o HTTP. Pareho nga setting sa Game Sources. Kinahanglan og restart aron mobalhin gikan sa nagdagan na.'
+  HINT_NET_PROTOCOL: 'Unsang network service ang gigamit sa RiptOPL: SMB share, UDPFS, UDPBD o HTTP. Kinahanglan og restart aron mobalhin gikan sa nagdagan na.'
   HINT_UDPFS_ACCESS: UDPFS ra. Gibasa sa Files ang bulag nga mga ISO gikan sa games folder sa server; gibasa sa IMG ang disk image isip drive. Kanunay Files ang SMB ug HTTP, kanunay IMG ang UDPBD.
   HINT_SMB_VERSION: Unsang bersyon sa SMB ang gamiton sa PC share.
   HINT_NET_ADVANCED: I-unlock ang Ethernet Link Mode ug ang SMB Port aron ma-edit.
@@ -1431,3 +1591,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Kung giunsa nga ang mga kuha nga naghulat sa rolyo sa matag dula mahimong PNG.
   RIPPS2_SETTINGS_HOME: I-save ang settings sa
   HINT_RIPPS2_SETTINGS_HOME: 'Asa gitago sa RIPPS2 ang settings niini: kaugalingong save sa usa ka memory card, usa ka RIPPS2 folder sa usa ka drive (internal HDD, USB, MX4SIO, iLink o MMCE), o usa ka folder nga imong isulat.'
+  RIPPS2_LAUNCHERS: Mga launcher
+  RIPPS2_LOOK_NOW: Pangitaa karon
+  HINT_RIPPS2_LOOK_NOW: Pangitaon sa RIPPS2 sa mga nasugdang drive ang POPSTARTER, ang mga POPS file, ang Ember, ang BIOS sa Ember ug ang Neutrino, ug hinumdoman kung asa ang matag usa. Didto sila basahon sa matag launch.
+  RIPPS2_HIDE_GAME: Itago ang dula
+  RIPPS2_HIDDEN_GAMES: Mga gitagong dula
+  HINT_RIPPS2_HIDDEN_GAMES: Ang mga dula nga gitago gamit ang Itago ang dula, sa mga nasugdang drive. Ipakita pag-usab ang usa, o papasa kini. Ang matag drive adunay kaugalingong lista.
+  HINT_RIPPS2_BDM_DEVICES: 'Ang mga drive nga basahan sa BDM og dula: USB, MX4SIO, PC Card CF, ang DVR drive sa DESR ug iLink. Ang internal HDD mosunod sa start mode sa HDD.'
+  HINT_RIPPS2_SCREEN: 'Ang hulagway sa menu: video mode, widescreen, asa kini sa TV (H-POS, V-POS) ug overscan.'
+  HINT_RIPPS2_LAYOUT: Asa ang mga kategorya ug giunsa pagsulod sa panid, dayon ang mga cover sa RIPFLOW ug ang grid sa RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Kabug-at sa teksto, ang kolor sa tema, ang pagbalhin sa kolor ug matag kolor.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Unsa kabug-at ang kaugalingong teksto sa RIPPS2: ang mga tip sa Settings, STATUS ug About. Ang Regular sama sa kaniadto; ang Medium ug Bold mas klaro sa humok nga hulagway.'
+  HINT_RIPPS2_HDD_START: 'Ang internal HDD, APA o exFAT: basahon kini sa RIPPS2 bisan unsa pa kini ug ipakita kausa, isip mga dula sa HDD. Ang Off dili mohilabot niini.'
+  HINT_RIPPS2_THEME_COLOR: Ang kaugalingong kolor sa tema. Pilia ang Kaugalingon isip kolor sa tema aron ikaw ang mopili niini, sama sa mga kolor sa teksto.
+  HINT_RIPPS2_SWEEP: Lima ka kolor nga agian sa tema, hinay ug hamis. Balangaw, usa ka pagbalhin gikan sa matag kolor sa tema, o imong kaugalingon. Ang Off magpabilin sa tema nga dili molihok.
+  HINT_RIPPS2_SWEEP_COLORS: Ang lima ka kolor sa pagbalhin ug ang kakusog niini. Usba ang usa sa RIPPS2 ug tipigan kini isip imo, sa ngalan nga imong ihatag.
+  HINT_RIPPS2_SWEEP_NAME: Unsa ang ngalan sa imong pagbalhin sa listahan sa Pagbalhin sa kolor.
+  HINT_RIPPS2_SWEEP_COLOR: Usa sa lima ka kolor nga agian sa pagbalhin, sumala sa han-ay.
+  HINT_RIPPS2_SWEEP_SPEED: 'Unsa kadugay ang matag kolor sa dili pa mogawas ang sunod. Bisan ang Buhi nagpabiling hamis: ang mga kolor dili gyud mokidlap.'
+  RIPPS2_HIDE_COMPRESS: Itago ang dula ug compression
+  HINT_RIPPS2_SELECT_HOLD: 'SELECT gikuptan 4.2 s sa lista sa dula. Lista: ang mga tema sa usa ka panel, pili og usa. Sunod-sunod: ang sunod nga tema. Gipalong: walay mahitabo (ang pagpindot mo-refresh gihapon).'

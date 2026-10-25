@@ -5,10 +5,6 @@ language: Hungarian
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: AZ ENTER ELFOGAD, AZ ESC MÉGSE. BÁRMELYIK GOMB MEGMUTATJA A BILLENTYŰKET.
   USB KEYBOARD: USB BILLENTYŰZET
-  '      DESR DVR ISOs (experimental)': '      DESR DVR ISO-k (kísérleti)'
-  '      Internal HDD (exFAT)': '      Belső HDD (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (kísérleti)'
-  '      Protocol': '      Protokoll'
   Access: Hozzáférés
   Applications Page Start Mode: Alkalmazások oldal indítási módja
   Art Delay: Képek késleltetése
@@ -22,7 +18,6 @@ strings:
   Fifth: Ötödik
   First: Első
   Fourth: Negyedik
-  HDD (APA) Start Mode: HDD (APA) indítási mód
   HDD Cache: HDD gyorsítótár
   HDD Spindown: HDD leállítás
   MMCE Settings: MMCE beállítások
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Ez egy ESR-rel javított PS2 játék. Az indításához tedd az ESR-t (esr*.elf) memóriakártyán vagy USB meghajtón az APPS, BOOT vagy ESR mappába.
   '%s, BUILD %d': '%s, %d. BUILD'
   '... and the anonymous ...': '... és a névtelenek ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': 'Az 1.8.0 változatlanul mellékelve (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: A RiptOPL, az Open PS2 Loader forkjának szétszedése és újraépítése,
   ABOUT: NÉVJEGY
   'ACHIEVEMENTS: SPIRIT OF RA': 'TELJESÍTMÉNYEK: SPIRIT OF RA'
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): AVI videó a Memóriafájlokban, a RIPPS2 forkja (AFL 2.0)
   Apollo Save Tool by bucanero: Apollo Save Tool, bucanero munkája
   BACK: VISSZA
+  Back (keeps both): Vissza (mindkettő marad)
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): A BIBLE a PS2BBL 1.2.0, El Isra aláírt buildjei (kártya és HDD), változatlanul (GPL-3)
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: A BIOS hangok > Kinyerés úgy játssza le őket, ahogy az SPU2; BIOS nincs mellékelve
   BOOT LOCK AND BIBLE: BOOT LOCK ÉS BIBLE
   BOOT LOCK edits its config too: A BOOT LOCK a beállításait is szerkeszti
   BUILD DETAILS: BUILD RÉSZLETEI
-  BUILT ON RIPTOPL: A RIPTOPL ALAPJÁN
   BearSSL by Thomas Pornin: BearSSL, Thomas Pornin munkája
   Built with Claude (Anthropic): Claude (Anthropic) segítségével készült
   CD PLAYER: CD LEJÁTSZÓ
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek és Sleek Bold, a RIPPS2-hoz rajzolva
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements a konzolon, hacan359 (yoba) munkája
   RiptOPL by NathanNeurotic: RiptOPL, NathanNeurotic munkája
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed, a Google munkája (Apache-2.0)
   SOUNDS: HANGOK
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: SP193 FMCB telepítője és pcm720 OSDMenu-je, lépésről lépésre követve
   SUPPORT: TÁMOGATÁS
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z, NathanNeurotic munkája
   wLaunchELF by the ps2homebrew team: wLaunchELF, a ps2homebrew csapat munkája
   what RIPPS2's card image writes are checked against: amihez a RIPPS2 kártyakép-írásait ellenőrizzük
-  with its own look, launchers, file browser and save tools.: saját megjelenéssel, indítókkal, fájlböngészővel és mentéskezelő eszközökkel.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora, hacan359 munkája; rcheevos, a RetroAchievements munkája
   your console's own, ripped from its BIOS: a konzolod saját hangjai, a BIOS-ából kinyerve
   ' (no DNS answer)': ' (nincs DNS-válasz)'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: írás: %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: 'A Neutrinót nem sikerült ide írni: %s. Ellenőrizd a szabad helyet és az írásvédelmet, aztán próbáld újra.'
   THE GAME'S DRIVE  (%s/neutrino): A JÁTÉK MEGHAJTÓJA  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Ez a játék a Neutrinón keresztül indul, és ott, ahol a RIPPS2 keres (Beállítások, a játék meghajtója, a memóriakártyák), nincs Neutrino. A RIPPS2 magával hozza rickgaiser Neutrino 1.8.0-ját (AFL-3.0). Telepíted most? Ezután kiválasztod a helyét.
   '%d / %d FILES': '%d / %d FÁJL'
   '%d FOLDERS AND CONTENTS': '%d MAPPA ÉS TARTALMA'
   '%d FOLDERS, %d FOUND': '%d MAPPA, %d TALÁLAT'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d / %d még zárolva'
   '%s   on %s': '%s   itt: %s'
   BADGES: JELVÉNYEK
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: A jelvények csak bekapcsolt TELEMETRIA és a PC-den futó xeRAbora mellett működnek; addig semmibe sem kerülnek.
   CHECK THE DISC: LEMEZ ELLENŐRZÉSE
   From this game's last CHECK GAME SUPPORT.: A játék legutóbbi JÁTÉKTÁMOGATÁS ELLENŐRZÉSE alapján.
   HOW IT WORKS: HOGYAN MŰKÖDIK
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Ezen a konzolon van egy RIPPS2-zárral ellátott PS2BBL.
   AUDIO folder: AUDIO mappa
   DRIVES: MEGHAJTÓK
-  INSTALL RIPPS2'S COPY: A RIPPS2 PÉLDÁNYÁNAK TELEPÍTÉSE
-  'Installed: ': 'Telepítve: '
   MANAGE: KEZELÉS
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: A KEZELÉS megmutatja, melyik memóriakártya mit indít, és telepíti vagy javítja a BIBLE-t.
   MEMORY CARD 0  (about 600 KB): 0. MEMÓRIAKÁRTYA  (kb. 600 KB)
   MEMORY CARD 1  (about 600 KB): 1. MEMÓRIAKÁRTYA  (kb. 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: az illesztőprogramja nem töltődött be (kód: %d).'
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: az illesztőprogram betöltve, de egyetlen SD kártya sem válaszolt (mc1 foglalat).'
   NEUTRINO SETTINGS: NEUTRINO BEÁLLÍTÁSAI
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Még nincs: a RIPPS2-nek nincsenek saját hangjai. Nyerd ki a konzol hangjait, vagy készítsd el őket a RIPPS2 Audio Studióban.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Nincs telepítve. Egy játék, amelynek szüksége van rá, felajánlja a RIPPS2 példányát, vagy telepítsd itt.
   POPSTARTER NETWORK: POPSTARTER HÁLÓZAT
   POPSTARTER and Ember: POPSTARTER és Ember
   PS1 SETTINGS: PS1 BEÁLLÍTÁSOK
   PS2BBL 1.2.0 for RIPPS2: PS2BBL 1.2.0 a RIPPS2-höz
   RIP THIS CONSOLE'S SOUNDS: A KONZOL HANGJAINAK KINYERÉSE
-  RIPPS2's homebrew: a RIPPS2 homebrew programjai
   STATUS: ÁLLAPOT
-  'STATUS: looking for RIPPS2''s homebrew': 'ÁLLAPOT: a RIPPS2 homebrew programjainak keresése'
   a drive of unknown kind: ismeretlen fajtájú meghajtó
-  a drive or a memory card: meghajtó vagy memóriakártya
   boot loader, card by card: rendszerbetöltő, kártyánként
   from its BIOS, into AUDIO: a BIOS-ából, az AUDIO mappába
   internal HDD (exFAT): belső HDD (exFAT)
@@ -975,10 +957,194 @@ strings:
   Sidebar: Oldalsáv
   your own copy, found on your drives and memory cards: a saját példányod, a meghajtóidon és memóriakártyáidon megtalálva
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'a sajátod, megtalálva és elindítva: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Nem található a mass0: meghajtón (%s). Tedd az ember.elf fájlt és a saját bios.bin fájlodat az EMBER mappájába.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Nem található. Tedd a saját POPSTARTER.ELF fájlodat egy meghajtó POPS mappájába.
   Launch Disc: Lemez indítása
   Memory Files: Memóriafájlok
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: A RIPPS2 %d darabot talált az 5-ből. Mindegyiket megjegyzi, és minden indítás onnan olvassa.
+  not found on the started drives: nem található az elindított meghajtókon
+  not looked for yet: még nem kereste
+  '%s did not answer, so %s cannot start. Is it connected?': '%s nem válaszolt, így %s nem tud elindulni. Csatlakoztatva van?'
+  '%s is not on %s any more, so it has left All Games.': '%s már nincs ezen: %s, ezért kikerült a Minden játék listából.'
+  STARTING %s: '%s INDÍTÁSA'
+  the SMB share: az SMB-megosztás
+  the drive: a meghajtó
+  the internal HDD (APA): a belső HDD (APA)
+  the internal HDD (exFAT): a belső HDD (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: A RIPTOPL-RA ÉPÜL, NEUTRINÓVAL
+  'Special thanks to all the YouTube love as well:': 'Külön köszönet a YouTube-on kapott szeretetért is:'
+  and its own look, launchers, file browser and save tools.: és saját kinézettel, indítókkal, fájlböngészővel és mentéskezelő eszközökkel.
+  glad to help however you reach me.: szívesen segítek, bárhogy is értek el.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): a második játékmag, 1.8.0 változatlanul mellékelve (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: benne rickgaiser Neutrinójával mint második játékmaggal,
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Ez a játék a Neutrinón keresztül indul, és a RIPPS2 egyet sem talált: sem a Beállítások útvonalán, sem a játék meghajtóján, sem a memóriakártyákon, sem elindított meghajtón. A RIPPS2 tartalmazza rickgaiser Neutrino 1.8.0-ját (AFL-3.0): telepítsd egyszer, ahová szeretnéd, és minden Neutrino-játék onnan használja.'
+  STARTING THE DRIVES: A MEGHAJTÓK INDÍTÁSA
+  '%d games, on the started drives': '%d játék, az elindított meghajtókon'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: NÉHÁNY FÁJLT NEM SIKERÜLT TÖRÖLNI'
+  '%u partitions, all in order': '%u partíció, mind rendben'
+  ', %d art images': ', %d borítókép'
+  ', and ': ', és '
+  ', its cheats': ', a csalásai'
+  ', its settings': ', a beállításai'
+  1 game, on the started drives: 1 játék, az elindított meghajtókon
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Egy itteni PS1-játékot a Memóriafájlokban lehet törölni, ahol külön fájl.
+  A network catalogue's games are deleted on the PC that serves them.: Egy hálózati katalógus játékait azon a PC-n kell törölni, amely kiszolgálja őket.
+  DELETE FOR GOOD: TÖRLÉS VÉGLEG
+  DELETE IT: TÖRÖLD
+  'DELETED %s: %s FREED': '%s TÖRÖLVE: %s FELSZABADULT'
+  'Delete %s from %s? Goes: %s.': 'Törlöd ezt: %s, innen: %s? Megy: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Törlöd ezt: %s, innen: %s? Megy: %s. Marad: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: A mentéseit és RIPSHOT-képeit is törlöd? A Nem megtartja őket.
+  HIDDEN GAMES: REJTETT JÁTÉKOK
+  'HIDDEN: %s': 'ELREJTVE: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: 'Elrejted ezt: %s? Minden listából kikerül, a Minden játék és a Kedvencek listából is. Beállítások > Játékforrások > Rejtett játékok újra megmutatja.'
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Utolsó ellenőrzés. %s végleg törlődik, és semmi sem hozhatja vissza. Nyomd meg a START gombot a törléshez.
+  None. Hide Game, in a game's options, puts one here.: Nincs. A Játék elrejtése egy játék beállításaiban ide tesz egyet.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Semmi sem törlődött: ennek a meghajtónak a partíciós táblája nem illik ehhez a lemezhez (%s). Lehet, hogy egy más méretű lemez képéből írták. Előbb javítsd ki egy PC-n.'
+  RIPPS2 cannot delete a game from this page.: A RIPPS2 nem tud játékot törölni erről az oldalról.
+  RIPPS2 could not find this game's files on its drive.: A RIPPS2 nem találta a játék fájljait a meghajtóján.
+  Reading the hidden lists: A rejtett listák olvasása
+  SHOW AGAIN OR DELETE: ÚJRA MUTAT VAGY TÖRÖL
+  SHOW IT AGAIN: MUTASD ÚJRA
+  That game is not on its drive any more.: Az a játék már nincs a meghajtóján.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: A rejtett listát nem sikerült a játék meghajtójára írni. Írásvédett, vagy ki vannak kapcsolva az Írásműveletek?
+  The partition could not be removed (%d). Nothing was deleted.: A partíciót nem sikerült eltávolítani (%d). Semmi sem törlődött.
+  This drive cannot keep a hidden list (a network catalogue).: Ez a meghajtó nem tárolhat rejtett listát (hálózati katalógus).
+  This game's drive has not answered yet. Wait for it, then try again.: A játék meghajtója még nem válaszolt. Várd meg, aztán próbáld újra.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: A játék partíciója azok közé tartozik, amelyeket a RIPPS2 nem távolít el (rendszerpartíció, vagy az, amelyiken a beállításai vannak).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'egy partíció nagyobb, mint amit ez a lemez megenged: a tábla egy más méretű lemezhez készült'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'egy partíció túlnyúlik a lemez végén (%u. szektor ennyiből: %u): a tábla egy nagyobb lemezhez készült'
+  its RIPSHOT pictures: a RIPSHOT-képei
+  its drive: a meghajtója
+  its saves: a mentései
+  sector %u holds no partition header: a(z) %u. szektorban nincs partíciófejléc
+  the chain does not close at __mbr: a lánc nem zárul a __mbr-nél
+  the chain skips from sector %u: a lánc ugrik a(z) %u. szektortól
+  the chain's links disagree at sector %u: a lánc szemei nem egyeznek a(z) %u. szektornál
+  the drive's size could not be read: a meghajtó méretét nem sikerült beolvasni
+  the game (%s): a játék (%s)
+  the game's folder and everything in it (%s): a játék mappája és minden benne (%s)
+  the header at sector %u could not be read: a(z) %u. szektor fejlécét nem sikerült beolvasni
+  the header at sector %u fails its checksum: a(z) %u. szektor fejléce elbukik az ellenőrzőösszegen
+  the partition at sector %u is not where or as large as APA puts one: a(z) %u. szektor partíciója nem ott van, vagy nem akkora, ahol és amekkorát az APA létrehoz
+  the settings and art another copy of it uses: a beállítások és képek, amelyeket egy másik példánya használ
+  '%d FOLDERS': '%d MAPPA'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s nem másolható ide: %s. Megtelt vagy írásvédett a meghajtó?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s nincs ott, ahol a RIPPS2 keresi. Keressem a RIPPS2 által elindított meghajtókon? A megtalált helyet minden későbbi indításhoz megjegyzi.'
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Az Ember nincs itt: %s, a játékok mellett, pedig ott kell lennie. A RIPPS2 megtalálta itt: %s; a START odamásolja (%d KB) és elindítja a játékot.'
+  Ember's BIOS: Az Ember BIOS-a
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'Az Ember BIOS-a (bios.bin) nincs itt: %s, az Ember mellett. A RIPPS2 talált egyet itt: %s; a START odamásolja (%d KB) és elindítja a játékot.'
+  LOOKING FOR YOUR LAUNCHERS: AZ INDÍTÓID KERESÉSE
+  The POPS files: A POPS-fájlok
+  '%s  MMCE card': '%s  MMCE-kártya'
+  INSTALL RIPPS2'S NEUTRINO: A RIPPS2 NEUTRINÓJÁNAK TELEPÍTÉSE
+  'Internal HDD (APA): %s free of %s': 'Belső HDD (APA): %s szabad ennyiből: %s'
+  LAUNCHERS: INDÍTÓK
+  LOOK FOR THEM: KERESD MEG ŐKET
+  'Memory card %d: %d KB free': '%d. memóriakártya: %d KB szabad'
+  POPS files: POPS-fájlok
+  START EVERY DRIVE: MINDEN MEGHAJTÓ INDÍTÁSA
+  'STATUS: looking at the drives and the homebrew': 'ÁLLAPOT: a meghajtók és a homebrew áttekintése'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Előbb elindítod az összes meghajtót, hogy a keresés mindegyiket elérje? (A Nem a már elindított meghajtókon keres.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE és a többi
+  every started drive: minden elindított meghajtó
+  found where you keep them: megtalálva ott, ahol tartod őket
+  not found yet: még nincs meg
+  not on a started drive: nincs elindított meghajtón
+  only if you have none: csak ha nincs egy sem
+  starts every drive first: előbb minden meghajtót elindít
+  Drives, launchers and homebrew: Meghajtók, indítók és homebrew programok
+  BDM Devices: BDM-eszközök
+  Color Sweep: Színváltás
+  Colors and Text: Színek és szöveg
+  HDD POPS partitions: A HDD POPS-partíciói
+  Layout: Elrendezés
+  Missing Covers: Hiányzó borítók
+  Name: Név
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Még nincs POPSTARTER SMB-beállítás. Töltsd ki az alábbi sorokat.
+  POPSTARTER Network: POPSTARTER hálózat
+  POPSTARTER SMB Network: POPSTARTER SMB-hálózat
+  POPSTARTER UDPFS Network: POPSTARTER UDPFS-hálózat
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: A RIPPS2 maga adja hozzá a meghajtót, az ISO-t, a VMC-ket és a videómódot.
+  Screen: Képernyő
+  Speed: Sebesség
+  Sweep Colors: A váltás színei
+  Text Weight: Szövegvastagság
+  Theme Color: Fő szín
+  Audio: Hang
+  Bold: Félkövér
+  Controllers: Kontrollerek
+  Lively: Élénk
+  Medium: Közepes
+  PS Emulation: PS-emuláció
+  Regular: Normál
+  Slow: Lassú
+  A MOMENT: EGY PILLANAT
+  A TASK IN THE BACKGROUND: EGY HÁTTÉRFELADAT
+  ABOUT %d S: KB. %d MP
+  ANY MOMENT: BÁRMELYIK PILLANATBAN
+  READING THE GAME LIST OF %s: OLVASSA A(Z) %s JÁTÉKLISTÁJÁT
+  SAVING A LIST: LISTÁT MENT
+  START NOW: INDÍTÁS MOST
+  STARTING: INDUL
+  STARTS NEXT: KÖVETKEZŐKÉNT INDUL
+  STOPPING IT SAFELY: BIZTONSÁGOSAN LEÁLLÍT
+  THE LAST OF THE QUEUE: A SOR VÉGE
+  WHEN IT FINISHES: HA VÉGZETT
+  What each card starts; install or repair BIBLE.: Mit indít az egyes kártyák; a BIBLE telepítése vagy javítása.
+  Rainbow: Szivárvány
+  Custom: Egyéni
+  DESR DVR ISOs (experimental): DESR DVR ISO-k (kísérleti)
+  PC CARD CF (experimental): PC CARD CF (kísérleti)
+  HDD Start Mode: HDD indítási mód
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed, a The Roboto Project Authors munkája (SIL OFL 1.1)
+  '%s on %s': '%s itt: %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s helyett %s (%d%%), minden darab ellenőrizve. Eltávolítod az ISO-t és megtartod a ZSO-t?'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s helyett ismét %s, minden darab ellenőrizve. Eltávolítod a ZSO-t és megtartod az ISO-t?'
+  A ZSO of this game is already beside it. Remove one of the two first.: Mellette már van egy ZSO ebből a játékból. Előbb távolítsd el a kettő egyikét.
+  About %d min, then checked: Kb. %d perc, aztán ellenőrzés
+  An ISO of this game is already beside it. Remove one of the two first.: Mellette már van egy ISO ebből a játékból. Előbb távolítsd el a kettő egyikét.
+  CHECKING EVERY PIECE: MINDEN DARAB ELLENŐRZÉSE
+  COMPRESS TO ZSO: TÖMÖRÍTÉS ZSO-BA
+  'COMPRESSED %s: %s FREED': '%s TÖMÖRÍTVE: %s FELSZABADULT'
+  COMPRESSING 1 OF 2: TÖMÖRÍTÉS 1/2
+  COMPRESSING 2 OF 2: TÖMÖRÍTÉS 2/2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : 'Tömöríted: %s? Az ISO megmarad, amíg a ZSO-t vissza nem olvassa és ellenőrzi, aztán a RIPPS2 rákérdez, mielőtt eltávolítja az ISO-t. A meghajtónak munka közben mindkettőhöz kell hely; hagyd bekapcsolva a konzolt, amíg végez. A ZSO csak az OPL maggal indul (Neutrinóval nem); mentései, beállításai, képei és csalásai vele maradnak, és bármikor újra ISO lehet belőle.'
+  Compress to ZSO: Tömörítés ZSO-ba
+  Cycle: Léptetés
+  'Experimental: OPL core only (not Neutrino)': 'Kísérleti: csak OPL mag (nem Neutrino)'
+  Hold SELECT: SELECT nyomva tartása
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: Nem sikerült befejezni (%s). Amit írt, törölve lett; a játék olyan, mint volt.
+  List: Lista
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : 'Újra ISO legyen ebből: %s? A ZSO megmarad, amíg az ISO-t vissza nem olvassa és ellenőrzi, aztán a RIPPS2 rákérdez, mielőtt eltávolítja a ZSO-t. A meghajtónak munka közben mindkettőhöz kell hely; hagyd bekapcsolva a konzolt, amíg végez. Mentései, beállításai, képei és csalásai vele maradnak.'
+  Stop? What it has written so far is removed; the game stays as it was.: Leállítod? Az eddig megírt rész törlődik; a játék olyan marad, mint volt.
+  THEMES: TÉMÁK
+  There is not enough memory for this just now.: Most nincs ehhez elég memória.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: Ezt a képfájlt a RIPPS2 nem tudja tömöríteni vagy kibontani (a mérete nem egész 2 KB-os blokkokból áll).
+  UNCOMPRESS TO ISO: KIBONTÁS ISO-BA
+  UNCOMPRESSED %s: '%s KIBONTVA'
+  UNCOMPRESSING: KIBONTÁS
+  Uncompress to ISO: Kibontás ISO-ba
+  Under a minute, then checked: Kevesebb mint egy perc, aztán ellenőrzés
+  COPYING: MÁSOLÁS
+  SHOW AGAIN, DELETE OR COMPRESS: ÚJRA MUTAT, TÖRÖL VAGY TÖMÖRÍT
+  SHOW AGAIN, DELETE OR UNCOMPRESS: ÚJRA MUTAT, TÖRÖL VAGY KIBONT
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': '%s munka közben kb. %s szabad helyet igényel a meghajtóján (az eredeti a végéig megmarad), a meghajtón pedig %s szabad.'
+  Hide and Compress: Elrejtés és tömörítés
+  'COMPRESSED AND HIDDEN: %s': 'TÖMÖRÍTVE ÉS ELREJTVE: %s'
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 'Nincs hely ehhez a mentéshez: kb. %s kell, a meghajtón pedig %s szabad.'
+  OVER 4 GB FOR FAT32: 4 GB FELETT FAT32-HÖZ
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: Ez a meghajtó %s, amely nem tárol 4 GB-os vagy nagyobb fájlt, az új képfájl pedig %s lenne.
+  '%s, %s clusters, %s free of %s': '%s, %s fürtök, %s szabad ebből: %s'
+  Delete This Sweep: Ennek a színváltásnak a törlése
+  Delete %s? RIPPS2's own sweeps stay as they are.: 'Törlöd ezt: %s? A RIPPS2 saját színváltásai maradnak.'
+  Sweep: Színváltás
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: A jelvények megjelölik a listáidban a teljesítményes játékokat, és hogy mennyit oldottál fel. Bekapcsolt TELEMETRIA kell hozzájuk.
 labels:
   OK: OK
   BACKSPACE: Visszatörlés
@@ -1211,7 +1377,7 @@ labels:
   SAVE_ICONS: 3D mentésikonok
   HINT_SAVE_ICONS: A kiválasztott játék mentésikonját forogva mutatja ott, ahol a téma helyet ad neki. Előbb a játék saját VMC-jét olvassa, aztán a memóriakártyákat.
   NETBOOT_RESTART_NOW: A hálózati protokoll újraindítás után változik. Mented a beállításokat, és most újraindítod az OPL-t?
-  HINT_NET_PROTOCOL: 'Melyik hálózati szolgáltatást használja a RiptOPL: SMB megosztás, UDPFS, UDPBD vagy HTTP. Ugyanaz a beállítás, mint a Játékforrásokban. Egy már futóról váltáshoz újraindítás kell.'
+  HINT_NET_PROTOCOL: 'Melyik hálózati szolgáltatást használja a RiptOPL: SMB megosztás, UDPFS, UDPBD vagy HTTP. Egy már futóról váltáshoz újraindítás kell.'
   HINT_UDPFS_ACCESS: Csak UDPFS. A Fájlok a szerver játékmappájából olvas különálló ISO-kat; az IMG egy lemezképet meghajtóként olvas. Az SMB és a HTTP mindig Fájlokat, az UDPBD mindig IMG-t használ.
   HINT_SMB_VERSION: Melyik SMB verzióval beszéljen a PC megosztásával.
   HINT_NET_ADVANCED: Szerkeszthetővé teszi az Ethernet kapcsolati módot és az SMB portot.
@@ -1412,3 +1578,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Hogyan lesznek PNG-k a minden játék tekercsén várakozó képekből.
   RIPPS2_SETTINGS_HOME: Beállítások mentése ide
   HINT_RIPPS2_SETTINGS_HOME: 'Hol tartja a RIPPS2 a beállításait: saját mentésében egy memóriakártyán, egy RIPPS2 mappában egy meghajtón (a belső HDD-n, USB-n, MX4SIO-n, iLinken vagy MMCE-n), vagy egy általad beírt mappában.'
+  RIPPS2_LAUNCHERS: Indítók
+  RIPPS2_LOOK_NOW: Keresés most
+  HINT_RIPPS2_LOOK_NOW: A RIPPS2 az elindított meghajtókon megkeresi a POPSTARTER-t, a POPS-fájlokat, az Embert, az Ember BIOS-át és a Neutrinót, és megjegyzi, hol van mindegyik. Minden indítás onnan olvassa őket.
+  RIPPS2_HIDE_GAME: Játék elrejtése
+  RIPPS2_HIDDEN_GAMES: Rejtett játékok
+  HINT_RIPPS2_HIDDEN_GAMES: A Játék elrejtésével elrejtett játékok az elindított meghajtókon. Mutass meg egyet újra, vagy töröld. Minden meghajtó saját listát vezet.
+  HINT_RIPPS2_BDM_DEVICES: 'A meghajtók, amelyekről a BDM játékokat olvas: USB, MX4SIO, PC Card CF, egy DESR DVR-meghajtója és iLink. A belső HDD a HDD indítási módját követi.'
+  HINT_RIPPS2_SCREEN: 'A menü képe: videómód, szélesvászon, a helye a tévén (H-POS, V-POS) és overscan.'
+  HINT_RIPPS2_LAYOUT: Hol vannak a kategóriák és hogyan jön be egy oldal, aztán a RIPFLOW borítói és a RIPGRID rácsa.
+  HINT_RIPPS2_COLORS_TEXT: Szövegvastagság, a színtéma, a színváltás és minden szín.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Milyen vastag a RIPPS2 saját szövege: a beállítások tippjei, az ÁLLAPOT és a Névjegy. A Normál olyan, mint korábban; a Közepes és a Félkövér lágy képen jobban olvasható.'
+  HINT_RIPPS2_HDD_START: 'A belső HDD, APA vagy exFAT: a RIPPS2 beolvassa, akármilyen is, és egyszer mutatja, HDD-játékokként. A Ki békén hagyja.'
+  HINT_RIPPS2_THEME_COLOR: A színtéma saját színe. Válaszd az Egyéni színtémát, hogy magad válaszd meg, ahogy a szöveg színeit.
+  HINT_RIPPS2_SWEEP: Öt szín, amelyeken a téma lassan és simán végigmegy. Szivárvány, minden színtémából egy váltás, vagy a sajátod. A Ki mozdulatlanul hagyja a témát.
+  HINT_RIPPS2_SWEEP_COLORS: A váltás öt színe és sebessége. Változtass meg egyet a RIPPS2-éiből, és sajátodként marad meg, a neked tetsző néven.
+  HINT_RIPPS2_SWEEP_NAME: Mi a váltásod neve a Színváltás listában.
+  HINT_RIPPS2_SWEEP_COLOR: Az öt szín egyike, amelyeken a váltás sorban végigmegy.
+  HINT_RIPPS2_SWEEP_SPEED: 'Meddig tart minden szín, mielőtt a következő beúszik. Még az Élénk is sima marad: a színek sosem villognak.'
+  RIPPS2_HIDE_COMPRESS: Játék elrejtése és tömörítés
+  HINT_RIPPS2_SELECT_HOLD: 'SELECT 4.2 mp-ig nyomva egy játéklistán. Lista: a témák egy panelen, válassz egyet. Léptetés: a következő téma. Ki: semmi (egy nyomás továbbra is frissít).'

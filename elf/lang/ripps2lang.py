@@ -274,6 +274,11 @@ FONT_FROM = {'Persian': 'Arabic', 'Romana': 'Croatian', 'Japanese': 'SChinese', 
              'Ryukyuan': 'SChinese', 'Serbian': 'Bulgarian', 'Albanian': 'Croatian', 'Galician': 'Croatian',
              'Laotian': 'Laotian'}
 FONT_ANY = ('Croatian', 'Bulgarian', 'Arabic', 'SChinese')  # the last resort, in order
+# build 114 (the font audit): RIPPS2's Roboto Condensed 3.015, variable (weights 400 to 700; Latin, Greek, Cyrillic and
+# Vietnamese), made like the ELF's (elf/theme/tools/make_roboto.py with the wide letter set): every language it covers
+# gets it, cut to that language's letters, so Settings in Russian or Greek draw one typeface at the rows' own weight
+ROBOTO = ('RobotoCondensed-RIPPS2.ttf', 'OFL-Roboto.txt')
+ROBOTO_WHY = 'SIL Open Font License 1.1 (github.com/googlefonts/roboto-classic)'
 # a language with no RIPPS2 file of its own fills its gaps from one its readers all read (every Ryukyuan reader reads
 # Japanese): that language's labels where upstream's file has none, then its RIPPS2 strings
 STRINGS_FROM = {'Ryukyuan': 'Japanese'}
@@ -321,6 +326,11 @@ def pick_font(tree, lang, need):
     """(file name in the pack, bytes, family, licence note, letters it still lacks) for a language, or None."""
     tried = [lang, FONT_FROM.get(lang)] + list(FONT_ANY)
     best = None
+    if lang not in OWN_FONTS:
+        data = open(os.path.join(HERE, 'fonts', ROBOTO[0]), 'rb').read()
+        have = font_cmap(data)
+        if all(ord(c) in have for c in need):
+            return ('font_%s.ttf' % lang, data, 'Roboto Condensed', ROBOTO_WHY, [])
     if lang in OWN_FONTS:
         p = os.path.join(HERE, 'fonts', OWN_FONTS[lang][0])
         data = open(p, 'rb').read()
@@ -463,7 +473,8 @@ def pack(tree, out):
                 else:
                     name, data, family, why, lack = got
                     size = len(data)
-                    if size > SUBSET_OVER:
+                    roboto = why == ROBOTO_WHY  # build 114: always cut to the language's letters
+                    if size > SUBSET_OVER or roboto:
                         cut = font_subset(data, chars)
                         if cut is not None:
                             data = cut
@@ -474,11 +485,13 @@ def pack(tree, out):
                                                       ', lacks %d: %s' % (len(lack), ''.join(lack[:20])) if lack else '')
                     licence_file = ''
                     own = OWN_FONTS.get(lang)
-                    if own is not None and data == open(os.path.join(HERE, 'fonts', own[0]), 'rb').read():
+                    if roboto:
+                        licence_file = ROBOTO[1]  # build 114: RIPPS2's Roboto, cut: its licence goes beside it, once
+                    elif own is not None and data == open(os.path.join(HERE, 'fonts', own[0]), 'rb').read():
                         licence_file = own[1]  # RIPPS2's own: its licence text goes beside it, once
-                        if licence_file not in written:
-                            z.writestr('LNG/' + licence_file, open(os.path.join(HERE, 'fonts', licence_file), 'rb').read())
-                            written.add(licence_file)
+                    if licence_file and licence_file not in written:
+                        z.writestr('LNG/' + licence_file, open(os.path.join(HERE, 'fonts', licence_file), 'rb').read())
+                        written.add(licence_file)
                     licences.append('%s: %s\n  %s\n  the font says: %s\n%s' % (
                         name, family, why, (names.get(0, '') or '').strip()[:200],
                         '  from RIPPS2 (elf/lang/fonts); its licence in full: %s\n' % licence_file if licence_file else ''))
@@ -487,7 +500,8 @@ def pack(tree, out):
         z.writestr('LNG/README.txt', README_PACK.encode('utf-8'))
         if licences:
             z.writestr('LNG/FONTS.txt', ('The fonts in this folder come from Open PS2 Loader\'s language pack\n'
-                                         '(github.com/ps2homebrew/Open-PS2-Loader-lang, thirdparty/), except Arabic, Persian and\n'
+                                         '(github.com/ps2homebrew/Open-PS2-Loader-lang, thirdparty/), except Roboto Condensed (RIPPS2\'s, for\n'
+                                         'every language it covers, SIL OFL 1.1: OFL-Roboto.txt) and Arabic, Persian and\n'
                                          'Laotian\'s, which RIPPS2 carries (DejaVu Sans with every joined Arabic letter, Noto Sans\n'
                                          'Lao); a big one is cut to the letters its language uses. Each is free to pass on under\n'
                                          'its own licence:\n\n'

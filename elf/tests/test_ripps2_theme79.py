@@ -30,6 +30,12 @@ static clock_t clock(void) { return now; }
 static int getKeyOn(int k) { return down && !was; }
 static int getKeyPressed(int k) { return down; }
 static void guiCycleTheme(void) { cycles++; }
+// build 114: Hold SELECT (List by default); played here as Cycle, the step this harness counts
+#define RIPPS2_HOLD_LIST 0
+#define RIPPS2_HOLD_CYCLE 1
+#define RIPPS2_HOLD_OFF 2
+static int gRipps2SelectHold = RIPPS2_HOLD_CYCLE;
+static int guiPickTheme(void) { return 1; }
 struct item { void (*refresh)(struct item *); };
 static void doRefresh(struct item *it) { refreshes++; }
 static struct item it = { doRefresh };

@@ -5,10 +5,6 @@ language: Arabic
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER للقبول، ESC للإلغاء. أي زر يعرض المفاتيح.
   USB KEYBOARD: لوحة مفاتيح USB
-  '      DESR DVR ISOs (experimental)': '      ملفات DESR DVR ISO (تجريبي)'
-  '      Internal HDD (exFAT)': '      القرص الصلب الداخلي (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (تجريبي)'
-  '      Protocol': '      البروتوكول'
   Access: الوصول
   Applications Page Start Mode: وضع تشغيل صفحة البرامج
   Art Delay: تأخير الصور
@@ -22,7 +18,6 @@ strings:
   Fifth: الخامس
   First: الأول
   Fourth: الرابع
-  HDD (APA) Start Mode: وضع تشغيل القرص الصلب (APA)
   HDD Cache: ذاكرة القرص الصلب المؤقتة
   HDD Spindown: إيقاف دوران القرص الصلب
   MMCE Settings: إعدادات MMCE
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: هذه لعبة PS2 معدّلة بـ ESR. ضع ESR (esr*.elf) في APPS أو BOOT أو ESR على بطاقة ذاكرة أو ذاكرة USB لتشغيلها.
   '%s, BUILD %d': '%s، البناء %d'
   '... and the anonymous ...': '... والمجهولون ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': 'الإصدار 1.8.0 مرفق دون تعديل (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: تفكيك وإعادة بناء لـ RiptOPL، نسخة Open PS2 Loader المتفرعة،
   ABOUT: حول
   'ACHIEVEMENTS: SPIRIT OF RA': 'الإنجازات: SPIRIT OF RA'
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): فيديو AVI في ملفات الذاكرة، نسخة RIPPS2 المتفرعة (AFL 2.0)
   Apollo Save Tool by bucanero: Apollo Save Tool من bucanero
   BACK: رجوع
+  Back (keeps both): رجوع (يحتفظ بالاثنين)
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): BIBLE هو PS2BBL 1.2.0، إصدارات El Isra الموقّعة (البطاقة والقرص الصلب)، دون تغيير (GPL-3)
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: يشغّلها خيار أصوات BIOS > استخراج كما يفعل SPU2؛ لا يُرفق أي BIOS
   BOOT LOCK AND BIBLE: BOOT LOCK وBIBLE
   BOOT LOCK edits its config too: يعدّل BOOT LOCK إعداداته أيضاً
   BUILD DETAILS: تفاصيل البناء
-  BUILT ON RIPTOPL: مبني على RIPTOPL
   BearSSL by Thomas Pornin: BearSSL من Thomas Pornin
   Built with Claude (Anthropic): بُني بمساعدة Claude (Anthropic)
   CD PLAYER: مشغل الأقراص المدمجة
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek وSleek Bold، مرسومان لـ RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements على الجهاز من hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL من NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed من Google (Apache-2.0)
   SOUNDS: الأصوات
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: مثبّت FMCB من SP193 وOSDMenu من pcm720، مُتّبعان خطوة بخطوة
   SUPPORT: الدعم
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z من NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF من فريق ps2homebrew
   what RIPPS2's card image writes are checked against: ما تُقارن به صور البطاقات التي يكتبها RIPPS2
-  with its own look, launchers, file browser and save tools.: بمظهره الخاص ومشغّلاته ومتصفح الملفات وأدوات الحفظ.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora من hacan359، وrcheevos من RetroAchievements
   your console's own, ripped from its BIOS: أصوات جهازك نفسه، مستخرجة من BIOS الخاص به
   ' (no DNS answer)': ' (لا يوجد رد من DNS)'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: جارٍ كتابة %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: تعذّرت كتابة Neutrino في %s. افحص مساحته الحرة وتأكد أنه غير محمي من الكتابة، ثم حاول مرة أخرى.
   THE GAME'S DRIVE  (%s/neutrino): محرك اللعبة  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : تبدأ هذه اللعبة عبر Neutrino، ولا يوجد Neutrino حيث يبحث RIPPS2 (الإعدادات، ومحرك اللعبة، وبطاقات الذاكرة). يحمل RIPPS2 الإصدار Neutrino 1.8.0 من rickgaiser (AFL-3.0). هل تريد تثبيته الآن؟ بعد ذلك تختار المكان.
   '%d / %d FILES': '%d / %d ملف'
   '%d FOLDERS AND CONTENTS': '%d مجلد ومحتوياتها'
   '%d FOLDERS, %d FOUND': '%d مجلد، وُجد %d'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d من %d لا يزال مقفلاً'
   '%s   on %s': '%s   على %s'
   BADGES: الشارات
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: لا تعمل الشارات إلا مع تفعيل القياس عن بُعد وتشغيل xeRAbora على حاسوبك؛ وحتى ذلك الحين لا تكلّف شيئاً.
   CHECK THE DISC: فحص القرص
   From this game's last CHECK GAME SUPPORT.: من آخر فحص لدعم اللعبة لهذه اللعبة.
   HOW IT WORKS: كيف يعمل
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: يوجد على هذا الجهاز PS2BBL مع قفل RIPPS2.
   AUDIO folder: مجلد AUDIO
   DRIVES: المحركات
-  INSTALL RIPPS2'S COPY: تثبيت نسخة RIPPS2
-  'Installed: ': 'مثبّت: '
   MANAGE: إدارة
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: تعرض إدارة ما تشغّله كل بطاقة ذاكرة، وتثبّت BIBLE أو تصلحه.
   MEMORY CARD 0  (about 600 KB): بطاقة الذاكرة 0  (نحو 600 كيلوبايت)
   MEMORY CARD 1  (about 600 KB): بطاقة الذاكرة 1  (نحو 600 كيلوبايت)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: تعذّر تحميل برنامج تشغيله (الرمز %d).'
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: برنامج التشغيل محمّل، لكن لم تستجب أي بطاقة SD (منفذ mc1).'
   NEUTRINO SETTINGS: إعدادات NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'لا شيء بعد: ليس لـ RIPPS2 أصوات خاصة به. استخرج أصوات هذا الجهاز، أو اصنعها في RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: غير مثبّت. اللعبة التي تحتاجه تعرض نسخة RIPPS2، أو ثبّته هنا.
   POPSTARTER NETWORK: شبكة POPSTARTER
   POPSTARTER and Ember: POPSTARTER وEmber
   PS1 SETTINGS: إعدادات PS1
   PS2BBL 1.2.0 for RIPPS2: PS2BBL 1.2.0 لـ RIPPS2
   RIP THIS CONSOLE'S SOUNDS: استخراج أصوات هذا الجهاز
-  RIPPS2's homebrew: برامج RIPPS2 المنزلية
   STATUS: الحالة
-  'STATUS: looking for RIPPS2''s homebrew': 'الحالة: جارٍ البحث عن برامج RIPPS2 المنزلية'
   a drive of unknown kind: محرك من نوع غير معروف
-  a drive or a memory card: محرك أو بطاقة ذاكرة
   boot loader, card by card: محمّل الإقلاع، بطاقة تلو الأخرى
   from its BIOS, into AUDIO: من BIOS الخاص به، إلى AUDIO
   internal HDD (exFAT): القرص الصلب الداخلي (exFAT)
@@ -975,10 +957,194 @@ strings:
   Sidebar: شريط جانبي
   your own copy, found on your drives and memory cards: نسختك الخاصة، يُعثر عليها في محركاتك وبطاقات الذاكرة
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'نسختك، يُعثر عليها وتُشغَّل: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'غير موجود على mass0: (%s). ضع ember.elf وملف bios.bin الخاص بك في مجلد EMBER فيه.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: غير موجود. ضع POPSTARTER.ELF الخاص بك في مجلد POPS على أحد المحركات.
   Launch Disc: تشغيل القرص
   Memory Files: ملفات الذاكرة
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: وجد RIPPS2 %d من 5. يحفظ كل واحد منها، ويقرؤه كل تشغيل من هناك.
+  not found on the started drives: غير موجود على المحركات المشغّلة
+  not looked for yet: لم يتم البحث عنه بعد
+  '%s did not answer, so %s cannot start. Is it connected?': '%s لم يستجب، لذا لا يمكن تشغيل %s. هل هو موصول؟'
+  '%s is not on %s any more, so it has left All Games.': '%s لم يعد على %s، لذا خرج من كل الألعاب.'
+  STARTING %s: تشغيل %s
+  the SMB share: مشاركة SMB
+  the drive: المحرك
+  the internal HDD (APA): القرص الصلب الداخلي (APA)
+  the internal HDD (exFAT): القرص الصلب الداخلي (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: مبني على RIPTOPL، مع NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'شكر خاص أيضاً لكل الحب على YouTube:'
+  and its own look, launchers, file browser and save tools.: وبمظهره ومشغّلاته ومتصفح ملفاته وأدوات الحفظ الخاصة به.
+  glad to help however you reach me.: يسعدني أن أساعد، أياً كانت طريقة وصولك إلي.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): نواة الألعاب الثانية، 1.8.0 مضمّنة دون تعديل (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: مع Neutrino من rickgaiser بداخله نواة ثانية للألعاب،
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'هذه اللعبة تبدأ عبر Neutrino، ولم يجد RIPPS2 أي نسخة منه: لا في مسار الإعدادات، ولا على محرك اللعبة، ولا على بطاقات الذاكرة، ولا على أي محرك مشغّل. يحمل RIPPS2 النسخة 1.8.0 من Neutrino من rickgaiser (AFL-3.0): ثبّته مرة واحدة، حيث تختار، وكل لعبة Neutrino تستخدمه من هناك.'
+  STARTING THE DRIVES: تشغيل المحركات
+  '%d games, on the started drives': '%d لعبة، على المحركات المشغّلة'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: تعذّر حذف بعض الملفات'
+  '%u partitions, all in order': '%u أقسام، كلها سليمة'
+  ', %d art images': ، %d صور غلاف
+  ', and ': ، و
+  ', its cheats': ، أكواد الغش الخاصة بها
+  ', its settings': ، إعداداتها
+  1 game, on the started drives: لعبة واحدة، على المحركات المشغّلة
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: لعبة PS1 هنا تحذف من ملفات الذاكرة، حيث هي ملف مستقل.
+  A network catalogue's games are deleted on the PC that serves them.: ألعاب كتالوج الشبكة تحذف على الحاسوب الذي يقدّمها.
+  DELETE FOR GOOD: حذف نهائي
+  DELETE IT: احذفها
+  'DELETED %s: %s FREED': 'تم حذف %s: تحرير %s'
+  'Delete %s from %s? Goes: %s.': 'حذف %s من %s؟ يذهب: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'حذف %s من %s؟ يذهب: %s. يبقى: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: حذف حفظاتها وصور RIPSHOT أيضاً؟ لا يبقيها.
+  HIDDEN GAMES: ألعاب مخفية
+  'HIDDEN: %s': 'مخفية: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: إخفاء %s؟ تخرج من كل قائمة، ومن كل الألعاب والمفضلة أيضاً. الإعدادات > مصادر الألعاب > الألعاب المخفية تظهرها مجدداً.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: فحص أخير. %s سيحذف نهائياً، ولا شيء يمكنه إعادته. اضغط START لحذفه.
+  None. Hide Game, in a game's options, puts one here.: لا شيء. إخفاء اللعبة، في خيارات أي لعبة، يضع واحدة هنا.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'لم يحذف شيء: جدول أقسام هذا المحرك لا يناسب هذا القرص (%s). ربما كتب من صورة قرص بحجم آخر. أصلحه على حاسوب أولاً.'
+  RIPPS2 cannot delete a game from this page.: لا يستطيع RIPPS2 حذف لعبة من هذه الصفحة.
+  RIPPS2 could not find this game's files on its drive.: لم يجد RIPPS2 ملفات هذه اللعبة على محركها.
+  Reading the hidden lists: قراءة القوائم المخفية
+  SHOW AGAIN OR DELETE: أظهر مجدداً أو احذف
+  SHOW IT AGAIN: أظهرها مجدداً
+  That game is not on its drive any more.: تلك اللعبة لم تعد على محركها.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: تعذّرت كتابة القائمة المخفية على محرك اللعبة. هل هو محمي من الكتابة، أم أن عمليات الكتابة متوقفة؟
+  The partition could not be removed (%d). Nothing was deleted.: تعذّرت إزالة القسم (%d). لم يحذف شيء.
+  This drive cannot keep a hidden list (a network catalogue).: هذا المحرك لا يمكنه حفظ قائمة مخفية (كتالوج شبكة).
+  This game's drive has not answered yet. Wait for it, then try again.: محرك هذه اللعبة لم يستجب بعد. انتظره، ثم حاول مرة أخرى.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: قسم هذه اللعبة من الأقسام التي لا يزيلها RIPPS2 (قسم نظام، أو القسم الذي عليه إعداداته).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'أحد الأقسام أكبر مما يسمح به هذا القرص: الجدول صنع لقرص بحجم آخر'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'أحد الأقسام يتجاوز نهاية هذا القرص (القطاع %u من %u): الجدول صنع لقرص أكبر'
+  its RIPSHOT pictures: صور RIPSHOT الخاصة بها
+  its drive: محركها
+  its saves: حفظاتها
+  sector %u holds no partition header: القطاع %u لا يحوي رأس قسم
+  the chain does not close at __mbr: السلسلة لا تنغلق عند __mbr
+  the chain skips from sector %u: السلسلة تقفز من القطاع %u
+  the chain's links disagree at sector %u: حلقات السلسلة لا تتفق عند القطاع %u
+  the drive's size could not be read: تعذّرت قراءة حجم المحرك
+  the game (%s): اللعبة (%s)
+  the game's folder and everything in it (%s): مجلد اللعبة وكل ما فيه (%s)
+  the header at sector %u could not be read: تعذّرت قراءة الرأس عند القطاع %u
+  the header at sector %u fails its checksum: الرأس عند القطاع %u يفشل في مجموع التحقق
+  the partition at sector %u is not where or as large as APA puts one: القسم عند القطاع %u ليس حيث يضع APA قسماً ولا بحجمه
+  the settings and art another copy of it uses: الإعدادات والصور التي تستخدمها نسخة أخرى منها
+  '%d FOLDERS': '%d مجلدات'
+  '%s could not be copied to %s. Is the drive full or write-protected?': تعذّر نسخ %s إلى %s. هل المحرك ممتلئ أو محمي من الكتابة؟
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s ليس حيث يبحث RIPPS2. هل تبحث عنه في المحركات التي شغّلها RIPPS2؟ مكان العثور عليه يحفظ لكل تشغيل بعده.'
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember ليس في %s، بجانب الألعاب، ويجب أن يكون هناك. وجده RIPPS2 في %s: زر START ينسخه إلى هناك (%d كيلوبايت) ويبدأ اللعبة.'
+  Ember's BIOS: BIOS الخاص بمحاكي Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'BIOS الخاص بمحاكي Ember (bios.bin) ليس في %s، بجانب Ember. وجد RIPPS2 واحداً في %s: زر START ينسخه إلى هناك (%d كيلوبايت) ويبدأ اللعبة.'
+  LOOKING FOR YOUR LAUNCHERS: البحث عن مشغّلاتك
+  The POPS files: ملفات POPS
+  '%s  MMCE card': '%s  بطاقة MMCE'
+  INSTALL RIPPS2'S NEUTRINO: تثبيت نسخة RIPPS2 من NEUTRINO
+  'Internal HDD (APA): %s free of %s': 'القرص الصلب الداخلي (APA): %s حرة من %s'
+  LAUNCHERS: المشغّلات
+  LOOK FOR THEM: ابحث عنها
+  'Memory card %d: %d KB free': 'بطاقة الذاكرة %d: %d كيلوبايت حرة'
+  POPS files: ملفات POPS
+  START EVERY DRIVE: شغّل كل المحركات
+  'STATUS: looking at the drives and the homebrew': 'الحالة: فحص المحركات والبرامج المنزلية'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): تشغيل كل المحركات أولاً، ليصل البحث إليها كلها؟ (لا يبحث في المحركات المشغّلة بالفعل.)
+  USB, HDD, MMCE and the rest: USB، HDD، MMCE والبقية
+  every started drive: كل محرك مشغّل
+  found where you keep them: وجدت حيث تحفظها
+  not found yet: لم يعثر عليه بعد
+  not on a started drive: ليس على محرك مشغّل
+  only if you have none: فقط إن لم يكن لديك واحد
+  starts every drive first: يشغّل كل المحركات أولاً
+  Drives, launchers and homebrew: المحركات والمشغّلات والبرامج المنزلية
+  BDM Devices: أجهزة BDM
+  Color Sweep: تدرج الألوان
+  Colors and Text: الألوان والنص
+  HDD POPS partitions: أقسام POPS على القرص الصلب
+  Layout: التخطيط
+  Missing Covers: الأغلفة الناقصة
+  Name: الاسم
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: لم يُعثر بعد على إعداد SMB لـ POPSTARTER. املأ الصفوف أدناه.
+  POPSTARTER Network: شبكة POPSTARTER
+  POPSTARTER SMB Network: شبكة SMB لـ POPSTARTER
+  POPSTARTER UDPFS Network: شبكة UDPFS لـ POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: يضيف RIPPS2 بنفسه القرص وملف ISO وبطاقات VMC ووضع الفيديو.
+  Screen: الشاشة
+  Speed: السرعة
+  Sweep Colors: ألوان التدرج
+  Text Weight: سماكة النص
+  Theme Color: اللون الأساسي
+  Audio: الصوت
+  Bold: عريض
+  Controllers: أذرع التحكم
+  Lively: حيوي
+  Medium: متوسط
+  PS Emulation: محاكاة PS
+  Regular: عادي
+  Slow: بطيء
+  A MOMENT: لحظة
+  A TASK IN THE BACKGROUND: مهمة في الخلفية
+  ABOUT %d S: نحو %d ث
+  ANY MOMENT: في أي لحظة
+  READING THE GAME LIST OF %s: قراءة قائمة ألعاب %s
+  SAVING A LIST: حفظ قائمة
+  START NOW: ابدأ الآن
+  STARTING: جارٍ البدء
+  STARTS NEXT: يبدأ بعد ذلك
+  STOPPING IT SAFELY: إيقاف آمن
+  THE LAST OF THE QUEUE: آخر الطابور
+  WHEN IT FINISHES: عندما ينتهي
+  What each card starts; install or repair BIBLE.: ما تشغّله كل بطاقة؛ ثبّت BIBLE أو أصلحه.
+  Rainbow: قوس قزح
+  Custom: مخصص
+  DESR DVR ISOs (experimental): ملفات DESR DVR ISO (تجريبي)
+  PC CARD CF (experimental): PC CARD CF (تجريبي)
+  HDD Start Mode: وضع تشغيل القرص الصلب
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed من The Roboto Project Authors (SIL OFL 1.1)
+  '%s on %s': '%s على %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s أصبح %s (%d%%)، وفُحص كل جزء. هل تحذف ملف ISO وتبقي ZSO؟'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s أصبح %s من جديد، وفُحص كل جزء. هل تحذف ملف ZSO وتبقي ISO؟'
+  A ZSO of this game is already beside it. Remove one of the two first.: يوجد بجانبها ملف ZSO لهذه اللعبة. احذف أحدهما أولًا.
+  About %d min, then checked: نحو %d دقيقة، ثم الفحص
+  An ISO of this game is already beside it. Remove one of the two first.: يوجد بجانبها ملف ISO لهذه اللعبة. احذف أحدهما أولًا.
+  CHECKING EVERY PIECE: فحص كل جزء
+  COMPRESS TO ZSO: ضغط إلى ZSO
+  'COMPRESSED %s: %s FREED': 'ضُغط %s: تحرر %s'
+  COMPRESSING 1 OF 2: الضغط 1 من 2
+  COMPRESSING 2 OF 2: الضغط 2 من 2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : هل تضغط %s؟ يبقى ملف ISO حتى يُقرأ ملف ZSO مرة أخرى ويُفحص، ثم يسأل RIPPS2 قبل أن يحذف ملف ISO. يحتاج القرص إلى مساحة للاثنين أثناء العمل؛ أبقِ الجهاز يعمل حتى ينتهي. يعمل ملف ZSO مع نواة OPL فقط (وليس Neutrino)؛ تبقى معه حفظاته وإعداداته وصوره وغشاته، ويمكن إعادته ISO في أي وقت.
+  Compress to ZSO: ضغط إلى ZSO
+  Cycle: تدوير
+  'Experimental: OPL core only (not Neutrino)': 'تجريبي: نواة OPL فقط (وليس Neutrino)'
+  Hold SELECT: إمساك SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: تعذّر إكماله (%s). حُذف ما كتبه؛ اللعبة كما كانت.
+  List: قائمة
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : هل تعيد %s ملف ISO؟ يبقى ملف ZSO حتى يُقرأ ملف ISO مرة أخرى ويُفحص، ثم يسأل RIPPS2 قبل أن يحذف ملف ZSO. يحتاج القرص إلى مساحة للاثنين أثناء العمل؛ أبقِ الجهاز يعمل حتى ينتهي. تبقى معه حفظاته وإعداداته وصوره وغشاته.
+  Stop? What it has written so far is removed; the game stays as it was.: إيقاف؟ يُحذف ما كُتب حتى الآن؛ تبقى اللعبة كما كانت.
+  THEMES: السمات
+  There is not enough memory for this just now.: لا توجد ذاكرة كافية لهذا الآن.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: هذه الصورة ليست مما يستطيع RIPPS2 ضغطه أو فك ضغطه (حجمها ليس كتلًا كاملة من 2 KB).
+  UNCOMPRESS TO ISO: فك الضغط إلى ISO
+  UNCOMPRESSED %s: فُك ضغط %s
+  UNCOMPRESSING: فك الضغط
+  Uncompress to ISO: فك الضغط إلى ISO
+  Under a minute, then checked: أقل من دقيقة، ثم الفحص
+  COPYING: جارٍ النسخ
+  SHOW AGAIN, DELETE OR COMPRESS: أظهر مجدداً أو احذف أو اضغط
+  SHOW AGAIN, DELETE OR UNCOMPRESS: أظهر مجدداً أو احذف أو فك الضغط
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': تحتاج %s إلى نحو %s من المساحة الحرة على قرصها أثناء العمل (يبقى الأصل حتى النهاية)، وفي القرص %s حرة.
+  Hide and Compress: إخفاء وضغط
+  'COMPRESSED AND HIDDEN: %s': 'ضُغطت وأُخفيت: %s'
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 'لا توجد مساحة لهذا النسخ: يحتاج إلى نحو %s، وفي القرص %s حرة.'
+  OVER 4 GB FOR FAT32: أكثر من 4 GB لـ FAT32
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: هذا القرص %s، ولا يحفظ ملفًا بحجم 4 GB أو أكثر، والصورة الجديدة ستكون %s.
+  '%s, %s clusters, %s free of %s': '%s، كتل %s، %s حرة من %s'
+  Delete This Sweep: حذف هذا التدرج
+  Delete %s? RIPPS2's own sweeps stay as they are.: هل تحذف %s؟ تدرجات RIPPS2 نفسها تبقى كما هي.
+  Sweep: تدرج
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: تميّز الشارات الألعاب التي فيها إنجازات في قوائمك، مع عدد ما فتحته. تحتاج إلى تشغيل القياس عن بُعد.
 labels:
   SETTINGS_SAVED: حُفظت الإعدادات في %s
   CONFIRMATION_EXIT: الخروج إلى المتصفح؟
@@ -1257,7 +1423,7 @@ labels:
   SAVE_ICONS: أيقونات الحفظ ثلاثية الأبعاد
   HINT_SAVE_ICONS: يعرض أيقونة حفظ اللعبة المختارة وهي تدور، حيث يكون للسمة مكان لها. يقرأ VMC الخاص باللعبة أولاً، ثم بطاقات الذاكرة.
   NETBOOT_RESTART_NOW: يتغير بروتوكول الشبكة بعد إعادة التشغيل. حفظ الإعدادات وإعادة تشغيل OPL الآن؟
-  HINT_NET_PROTOCOL: 'أي خدمة شبكة يستخدمها RiptOPL: مشاركة SMB، أو UDPFS، أو UDPBD، أو HTTP. الإعداد نفسه الموجود في مصادر الألعاب. الانتقال من خدمة تعمل بالفعل يتطلب إعادة تشغيل.'
+  HINT_NET_PROTOCOL: 'أي خدمة شبكة يستخدمها RiptOPL: مشاركة SMB، أو UDPFS، أو UDPBD، أو HTTP. الانتقال من خدمة تعمل بالفعل يتطلب إعادة تشغيل.'
   HINT_UDPFS_ACCESS: UDPFS فقط. الملفات يقرأ ملفات ISO المنفردة من مجلد ألعاب الخادم؛ وIMG يقرأ صورة قرص كمحرك. SMB وHTTP يستخدمان الملفات دائماً، وUDPBD يستخدم IMG دائماً.
   HINT_SMB_VERSION: أي إصدار من SMB يُستخدم للتخاطب مع مشاركة الحاسوب.
   HINT_NET_ADVANCED: يفتح وضع ارتباط Ethernet ومنفذ SMB للتحرير.
@@ -1458,3 +1624,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: كيف تصبح اللقطات المنتظرة على بكرة كل لعبة ملفات PNG.
   RIPPS2_SETTINGS_HOME: حفظ الإعدادات في
   HINT_RIPPS2_SETTINGS_HOME: 'أين يحفظ RIPPS2 إعداداته: في حفظه الخاص على بطاقة ذاكرة، أو في مجلد RIPPS2 على وحدة تخزين (القرص الصلب الداخلي أو USB أو MX4SIO أو iLink أو MMCE)، أو في مجلد تكتبه.'
+  RIPPS2_LAUNCHERS: المشغّلات
+  RIPPS2_LOOK_NOW: ابحث الآن
+  HINT_RIPPS2_LOOK_NOW: يبحث RIPPS2 في المحركات المشغّلة عن POPSTARTER، ملفات POPS، Ember، BIOS الخاص بمحاكي Ember، و Neutrino، ويحفظ مكان كل منها. كل تشغيل يقرؤها من هناك.
+  RIPPS2_HIDE_GAME: إخفاء اللعبة
+  RIPPS2_HIDDEN_GAMES: الألعاب المخفية
+  HINT_RIPPS2_HIDDEN_GAMES: الألعاب المخفية بأمر إخفاء اللعبة، على المحركات المشغّلة. أظهر واحدة مجدداً، أو احذفها. كل محرك يحتفظ بقائمته الخاصة.
+  HINT_RIPPS2_BDM_DEVICES: 'الأقراص التي يقرأ منها BDM الألعاب: USB وMX4SIO وبطاقة PC Card CF وقرص DVR في جهاز DESR وiLink. يتبع القرص الصلب الداخلي وضع تشغيل القرص الصلب.'
+  HINT_RIPPS2_SCREEN: 'صورة القائمة: وضع الفيديو والشاشة العريضة وموضعها على التلفاز (H-POS وV-POS) وoverscan.'
+  HINT_RIPPS2_LAYOUT: أين تقع الفئات وكيف تدخل الصفحة، ثم أغلفة RIPFLOW وشبكة RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: سماكة النص ولون السمة وتدرج الألوان وكل لون.
+  HINT_RIPPS2_TEXT_WEIGHT: 'مدى سماكة نص RIPPS2 نفسه: تلميحات الإعدادات والحالة وحول. عادي كما كان؛ متوسط وعريض يُقرآن أفضل على صورة ناعمة.'
+  HINT_RIPPS2_HDD_START: 'القرص الصلب الداخلي، APA أو exFAT: يقرأه RIPPS2 أيًّا كان ويعرضه مرة واحدة كألعاب القرص الصلب. إيقاف يتركه وشأنه.'
+  HINT_RIPPS2_THEME_COLOR: لون السمة نفسه. اختر مخصص كلون للسمة لتختاره بنفسك كما تُختار ألوان النص.
+  HINT_RIPPS2_SWEEP: خمسة ألوان تتدرج عبرها السمة ببطء وسلاسة. قوس قزح، أو تدرج من كل لون سمة، أو تدرجك الخاص. إيقاف يبقي لون السمة ثابتًا.
+  HINT_RIPPS2_SWEEP_COLORS: ألوان التدرج الخمسة وسرعته. غيّر أحد تدرجات RIPPS2 فيُحفظ كتدرجك الخاص بالاسم الذي تعطيه.
+  HINT_RIPPS2_SWEEP_NAME: اسم تدرجك في قائمة تدرج الألوان.
+  HINT_RIPPS2_SWEEP_COLOR: أحد الألوان الخمسة التي يتدرج عبرها، بالترتيب.
+  HINT_RIPPS2_SWEEP_SPEED: 'مدة بقاء كل لون قبل أن يظهر التالي. حتى حيوي يبقى سلسًا: الألوان لا تومض أبدًا.'
+  RIPPS2_HIDE_COMPRESS: إخفاء اللعبة والضغط
+  HINT_RIPPS2_SELECT_HOLD: 'SELECT ممسوك 4.2 ث في قائمة ألعاب. قائمة: السمات في لوحة، اختر واحدة. تدوير: السمة التالية. إيقاف: لا شيء (الضغطة ما زالت تحدّث).'

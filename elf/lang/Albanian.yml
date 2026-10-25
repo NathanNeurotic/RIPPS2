@@ -5,10 +5,6 @@ language: Albanian
 strings:
   ENTER ACCEPTS, ESC CANCELS. ANY BUTTON SHOWS THE KEYS.: ENTER PRANON, ESC ANULON. ÇDO BUTON SHFAQ TASTET.
   USB KEYBOARD: TASTIERË USB
-  '      DESR DVR ISOs (experimental)': '      ISO të DESR DVR (eksperimentale)'
-  '      Internal HDD (exFAT)': '      HDD i brendshëm (exFAT)'
-  '      PC CARD CF (experimental)': '      PC CARD CF (eksperimentale)'
-  '      Protocol': '      Protokolli'
   Access: Qasja
   Applications Page Start Mode: Mënyra e nisjes së faqes së aplikacioneve
   Art Delay: Vonesa e imazheve
@@ -22,7 +18,6 @@ strings:
   Fifth: I pesti
   First: I pari
   Fourth: I katërti
-  HDD (APA) Start Mode: Mënyra e nisjes së HDD (APA)
   HDD Cache: Memoria e përkohshme e HDD
   HDD Spindown: Ndalimi i HDD
   MMCE Settings: Cilësimet e MMCE
@@ -91,19 +86,18 @@ strings:
   This is an ESR-patched PS2 game. Put ESR (esr*.elf) in APPS, BOOT or ESR on a memory card or USB drive to start it.: Kjo është lojë PS2 e arnuar me ESR. Vendos ESR (esr*.elf) në APPS, BOOT ose ESR në një kartë memorieje ose USB për ta nisur.
   '%s, BUILD %d': '%s, NDËRTIMI %d'
   '... and the anonymous ...': '... dhe të panjohurit ...'
-  '1.8.0 carried unmodified (AFL-3.0): github.com/rickgaiser/neutrino': '1.8.0 i përfshirë pa ndryshime (AFL-3.0): github.com/rickgaiser/neutrino'
   A teardown and rebuild of RiptOPL, the Open PS2 Loader fork,: Një çmontim dhe rindërtim i RiptOPL, degëzimit të Open PS2 Loader,
   ABOUT: RRETH
   'ACHIEVEMENTS: SPIRIT OF RA': 'ARRITJET: SPIRIT OF RA'
   AVI video in Memory Files, RIPPS2's fork (AFL 2.0): Video AVI në Skedarët e memories, degëzimi i RIPPS2 (AFL 2.0)
   Apollo Save Tool by bucanero: Apollo Save Tool nga bucanero
   BACK: PRAPA
+  Back (keeps both): Prapa (i mban të dyja)
   BIBLE is PS2BBL 1.2.0, El Isra's signed builds (card and HDD), unchanged (GPL-3): BIBLE është PS2BBL 1.2.0, ndërtimet e nënshkruara të El Isra (kartë dhe HDD), pa ndryshime (GPL-3)
   BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships: Tingujt e BIOS > Nxirr i luan siç bën SPU2; asnjë BIOS nuk përfshihet
   BOOT LOCK AND BIBLE: BOOT LOCK DHE BIBLE
   BOOT LOCK edits its config too: BOOT LOCK ndryshon edhe konfigurimin e tij
   BUILD DETAILS: DETAJET E NDËRTIMIT
-  BUILT ON RIPTOPL: NDËRTUAR MBI RIPTOPL
   BearSSL by Thomas Pornin: BearSSL nga Thomas Pornin
   Built with Claude (Anthropic): Ndërtuar me Claude (Anthropic)
   CD PLAYER: LUAJTËSI I CD
@@ -136,7 +130,6 @@ strings:
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek dhe Sleek Bold, vizatuar për RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements në konsolë nga hacan359 (yoba)
   RiptOPL by NathanNeurotic: RiptOPL nga NathanNeurotic
-  Roboto Condensed by Google (Apache-2.0): Roboto Condensed nga Google (Apache-2.0)
   SOUNDS: TINGUJT
   SP193's FMCB installer and pcm720's OSDMenu, followed step by step: Instaluesi FMCB i SP193 dhe OSDMenu i pcm720, ndjekur hap pas hapi
   SUPPORT: MBËSHTETJA
@@ -172,7 +165,6 @@ strings:
   wLaunchELF R3Z by NathanNeurotic: wLaunchELF R3Z nga NathanNeurotic
   wLaunchELF by the ps2homebrew team: wLaunchELF nga ekipi ps2homebrew
   what RIPPS2's card image writes are checked against: me çfarë kontrollohen imazhet e kartave që shkruan RIPPS2
-  with its own look, launchers, file browser and save tools.: me pamjen, lëshuesit, shfletuesin e skedarëve dhe mjetet e ruajtjeve të veta.
   xeRAbora by hacan359, rcheevos by RetroAchievements: xeRAbora nga hacan359, rcheevos nga RetroAchievements
   your console's own, ripped from its BIOS: tingujt e vetë konsolës tënde, nxjerrë nga BIOS-i i saj
   ' (no DNS answer)': ' (asnjë përgjigje DNS)'
@@ -558,8 +550,6 @@ strings:
   'NEUTRINO: writing %.60s': 'NEUTRINO: duke shkruar %.60s'
   Neutrino could not be written to %s. Check its free space and that it is not write protected, then try again.: Neutrino nuk u shkrua dot në %s. Kontrollo hapësirën e lirë dhe që të mos jetë i mbrojtur nga shkrimi, pastaj provo përsëri.
   THE GAME'S DRIVE  (%s/neutrino): NJËSIA E LOJËS  (%s/neutrino)
-  ? This game starts through Neutrino, and there is no Neutrino where RIPPS2 looks (Settings, the game's drive, the memory cards). RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0). Install it now? Next you pick where.
-  : Kjo lojë niset përmes Neutrino, dhe nuk ka Neutrino aty ku kërkon RIPPS2 (Cilësimet, njësia e lojës, kartat e memories). RIPPS2 mbart Neutrino 1.8.0 nga rickgaiser (AFL-3.0). Ta instaloj tani? Më pas zgjedh ku.
   '%d / %d FILES': '%d / %d SKEDARË'
   '%d FOLDERS AND CONTENTS': '%d DOSJE DHE PËRMBAJTJA'
   '%d FOLDERS, %d FOUND': '%d DOSJE, %d TË GJETURA'
@@ -780,7 +770,6 @@ strings:
   '%s   %d of %d still locked': '%s   %d nga %d ende të kyçura'
   '%s   on %s': '%s   në %s'
   BADGES: DISTINKTIVËT
-  Badges only engage with TELEMETRY on and xeRAbora running on your PC; until then they cost nothing.: Distinktivët punojnë vetëm me TELEMETRINË ndezur dhe xeRAbora në punë në kompjuterin tënd; deri atëherë nuk kushtojnë asgjë.
   CHECK THE DISC: KONTROLLO DISKUN
   From this game's last CHECK GAME SUPPORT.: Nga KONTROLLI I FUNDIT I MBËSHTETJES SË LOJËS për këtë lojë.
   HOW IT WORKS: SI FUNKSIONON
@@ -847,10 +836,7 @@ strings:
   A PS2BBL with RIPPS2's lock is on this console.: Në këtë konsolë është një PS2BBL me kyçin e RIPPS2.
   AUDIO folder: dosja AUDIO
   DRIVES: NJËSITË
-  INSTALL RIPPS2'S COPY: INSTALO KOPJEN E RIPPS2
-  'Installed: ': 'Instaluar: '
   MANAGE: MENAXHO
-  MANAGE shows what each memory card starts, and installs or repairs BIBLE.: MENAXHO tregon çfarë nis çdo kartë memorieje, dhe instalon ose riparon BIBLE.
   MEMORY CARD 0  (about 600 KB): KARTA E MEMORIES 0  (rreth 600 KB)
   MEMORY CARD 1  (about 600 KB): KARTA E MEMORIES 1  (rreth 600 KB)
   'MX4SIO: its driver would not load (code %d).': 'MX4SIO: drajveri i tij nuk u ngarkua (kodi %d).'
@@ -860,17 +846,13 @@ strings:
   'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).': 'MX4SIO: drajveri është ngarkuar, por asnjë kartë SD nuk u përgjigj (foleja mc1).'
   NEUTRINO SETTINGS: CILËSIMET E NEUTRINO
   'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.': 'Ende asnjë: RIPPS2 nuk ka tinguj të vetët. Nxirr ata të kësaj konsole, ose bëji në RIPPS2 Audio Studio.'
-  Not installed. A game that needs it offers RIPPS2's copy, or install it here.: Nuk është instaluar. Një lojë që ka nevojë për të ofron kopjen e RIPPS2, ose instaloje këtu.
   POPSTARTER NETWORK: RRJETI I POPSTARTER
   POPSTARTER and Ember: POPSTARTER dhe Ember
   PS1 SETTINGS: CILËSIMET E PS1
   PS2BBL 1.2.0 for RIPPS2: PS2BBL 1.2.0 për RIPPS2
   RIP THIS CONSOLE'S SOUNDS: NXIRR TINGUJT E KËSAJ KONSOLE
-  RIPPS2's homebrew: Homebrew i RIPPS2
   STATUS: GJENDJA
-  'STATUS: looking for RIPPS2''s homebrew': 'GJENDJA: duke kërkuar homebrew-n e RIPPS2'
   a drive of unknown kind: një njësi e llojit të panjohur
-  a drive or a memory card: një njësi ose një kartë memorieje
   boot loader, card by card: ngarkuesi i nisjes, kartë pas karte
   from its BIOS, into AUDIO: nga BIOS-i i saj, në AUDIO
   internal HDD (exFAT): HDD i brendshëm (exFAT)
@@ -975,10 +957,193 @@ strings:
   Sidebar: Shiriti anësor
   your own copy, found on your drives and memory cards: kopja jote, e gjetur në njësitë dhe kartat e tua të kujtesës
   'your own, found and launched: github.com/Gageformer/Ember/releases': 'e jotja, e gjetur dhe e nisur: github.com/Gageformer/Ember/releases'
-  'Not found on mass0: (%s). Put ember.elf and your bios.bin in its EMBER folder.': 'Nuk u gjet në mass0: (%s). Vendos ember.elf dhe bios.bin-in tënd në dosjen e tij EMBER.'
-  Not found. Put your own POPSTARTER.ELF in a drive's POPS folder.: Nuk u gjet. Vendos POPSTARTER.ELF-in tënd në dosjen POPS të një njësie.
   Launch Disc: Nis diskun
   Memory Files: Skedarët e memories
+  RIPPS2 found %d of the 5. Each one is remembered, and every launch reads it from there.: RIPPS2 gjeti %d nga 5. Secili mbahet mend, dhe çdo nisje e lexon prej andej.
+  not found on the started drives: nuk u gjet në njësitë e nisura
+  not looked for yet: ende nuk është kërkuar
+  '%s did not answer, so %s cannot start. Is it connected?': '%s nuk u përgjigj, ndaj %s nuk mund të niset. A është lidhur?'
+  '%s is not on %s any more, so it has left All Games.': '%s nuk është më në %s, ndaj doli nga Të gjitha lojërat.'
+  STARTING %s: PO NIS %s
+  the SMB share: ndarja SMB
+  the drive: njësia
+  the internal HDD (APA): HDD i brendshëm (APA)
+  the internal HDD (exFAT): HDD i brendshëm (exFAT)
+  BUILT ON RIPTOPL, WITH NEUTRINO: NDËRTUAR MBI RIPTOPL, ME NEUTRINO
+  'Special thanks to all the YouTube love as well:': 'Falënderime të veçanta edhe për gjithë dashurinë nga YouTube:'
+  and its own look, launchers, file browser and save tools.: dhe me pamjen, nisësit, shfletuesin e skedarëve dhe mjetet e ruajtjeve të veta.
+  glad to help however you reach me.: i lumtur të ndihmoj, si do që të më gjeni.
+  the second game core, 1.8.0 carried unmodified (AFL-3.0): bërthama e dytë e lojërave, 1.8.0 e pandryshuar (AFL-3.0)
+  with rickgaiser's Neutrino inside as its second game core,: me Neutrino të rickgaiser brenda si bërthamë e dytë e lojërave,
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Kjo lojë niset përmes Neutrino, dhe RIPPS2 nuk gjeti asnjë: as te shtegu i Cilësimeve, as në njësinë e lojës, as në kartat e memories, as në ndonjë njësi të nisur. RIPPS2 mbart Neutrino 1.8.0 nga rickgaiser (AFL-3.0): instaloje një herë, ku të duash, dhe çdo lojë Neutrino e përdor prej andej.'
+  STARTING THE DRIVES: PO NIS NJËSITË
+  '%d games, on the started drives': '%d lojëra, në njësitë e nisura'
+  '%s: SOME FILES COULD NOT BE DELETED': '%s: DISA SKEDARË NUK U FSHINË DOT'
+  '%u partitions, all in order': '%u ndarje, të gjitha në rregull'
+  ', %d art images': ', %d imazhe kopertinash'
+  ', and ': ', dhe '
+  ', its cheats': ', kodet e saj'
+  ', its settings': ', cilësimet e saj'
+  1 game, on the started drives: 1 lojë, në njësitë e nisura
+  A PS1 game here is deleted in Memory Files, where it is a file of its own.: Një lojë PS1 këtu fshihet te Skedarët e memories, ku është skedar më vete.
+  A network catalogue's games are deleted on the PC that serves them.: Lojërat e një katalogu rrjeti fshihen në PC-në që i shërben.
+  DELETE FOR GOOD: FSHIJE PËRGJITHMONË
+  DELETE IT: FSHIJE
+  'DELETED %s: %s FREED': 'U FSHI %s: U LIRUAN %s'
+  'Delete %s from %s? Goes: %s.': 'Të fshihet %s nga %s? Ikën: %s.'
+  'Delete %s from %s? Goes: %s. Kept: %s.': 'Të fshihet %s nga %s? Ikën: %s. Mbetet: %s.'
+  Delete its saves and RIPSHOT pictures too? No keeps them.: Të fshihen edhe ruajtjet dhe fotot RIPSHOT të saj? Jo i mban.
+  HIDDEN GAMES: LOJËRA TË FSHEHURA
+  'HIDDEN: %s': 'U FSHEH: %s'
+  Hide %s? It leaves every list, All Games and Starred Games too. Settings > Game Sources > Hidden Games shows it again.: Të fshehet %s? Del nga çdo listë, edhe nga Të gjitha lojërat dhe Të Preferuarat. Cilësimet > Burimet e lojërave > Lojëra të fshehura e shfaq përsëri.
+  Last check. %s is deleted for good, and nothing can bring it back. Press START to delete it.: Kontrolli i fundit. %s fshihet përgjithmonë, dhe asgjë nuk e kthen dot. Shtyp START për ta fshirë.
+  None. Hide Game, in a game's options, puts one here.: Asnjë. Fshih lojën, te opsionet e një loje, vendos një këtu.
+  ? 'Nothing was deleted: this drive''s partition table does not fit this disk (%s). It may have been written from an image of a disk of another size. Repair it on a PC first.'
+  : 'Asgjë nuk u fshi: tabela e ndarjeve e kësaj njësie nuk i përshtatet këtij disku (%s). Mund të jetë shkruar nga imazhi i një disku me madhësi tjetër. Riparoje së pari në një PC.'
+  RIPPS2 cannot delete a game from this page.: RIPPS2 nuk mund të fshijë një lojë nga kjo faqe.
+  RIPPS2 could not find this game's files on its drive.: RIPPS2 nuk i gjeti skedarët e kësaj loje në njësinë e saj.
+  Reading the hidden lists: Po lexoj listat e fshehura
+  SHOW AGAIN OR DELETE: SHFAQE PËRSËRI OSE FSHIJE
+  SHOW IT AGAIN: SHFAQE PËRSËRI
+  That game is not on its drive any more.: Ajo lojë nuk është më në njësinë e saj.
+  The hidden list could not be written to the game's drive. Is it write-protected, or are Write Operations off?: Lista e fshehur nuk u shkrua dot në njësinë e lojës. A është e mbrojtur nga shkrimi, apo Operacionet e Shkrimit janë fikur?
+  The partition could not be removed (%d). Nothing was deleted.: Ndarja nuk u hoq dot (%d). Asgjë nuk u fshi.
+  This drive cannot keep a hidden list (a network catalogue).: Kjo njësi nuk mund të mbajë listë të fshehur (katalog rrjeti).
+  This game's drive has not answered yet. Wait for it, then try again.: Njësia e kësaj loje nuk është përgjigjur ende. Prite, pastaj provo përsëri.
+  This game's partition is one RIPPS2 does not remove (a system partition, or the one its settings are on).: Ndarja e kësaj loje është nga ato që RIPPS2 nuk i heq (ndarje sistemi, ose ajo me cilësimet e tij).
+  'a partition is larger than this disk allows: the table was made for a disk of another size': 'një ndarje është më e madhe se sa lejon ky disk: tabela u bë për një disk me madhësi tjetër'
+  'a partition runs past the end of this disk (sector %u of %u): the table was made for a bigger disk': 'një ndarje kalon fundin e këtij disku (sektori %u nga %u): tabela u bë për një disk më të madh'
+  its RIPSHOT pictures: fotot RIPSHOT të saj
+  its drive: njësia e saj
+  its saves: ruajtjet e saj
+  sector %u holds no partition header: sektori %u nuk ka kokë ndarjeje
+  the chain does not close at __mbr: zinxhiri nuk mbyllet te __mbr
+  the chain skips from sector %u: zinxhiri kërcen nga sektori %u
+  the chain's links disagree at sector %u: hallkat e zinxhirit nuk përputhen te sektori %u
+  the drive's size could not be read: madhësia e njësisë nuk u lexua dot
+  the game (%s): loja (%s)
+  the game's folder and everything in it (%s): dosja e lojës dhe gjithçka në të (%s)
+  the header at sector %u could not be read: koka te sektori %u nuk u lexua dot
+  the header at sector %u fails its checksum: koka te sektori %u nuk e kalon shumën e kontrollit
+  the partition at sector %u is not where or as large as APA puts one: ndarja te sektori %u nuk është aty ku, as aq e madhe sa, e vendos APA
+  the settings and art another copy of it uses: cilësimet dhe kopertinat që përdor një kopje tjetër e saj
+  '%d FOLDERS': '%d DOSJE'
+  '%s could not be copied to %s. Is the drive full or write-protected?': '%s nuk u kopjua dot në %s. A është njësia plot apo e mbrojtur nga shkrimi?'
+  ? '%s is not where RIPPS2 looks. Search the drives RIPPS2 has started for it? Where it is found is remembered for every launch after.'
+  : '%s nuk është aty ku kërkon RIPPS2. Ta kërkoj në njësitë që ka nisur RIPPS2? Vendi ku gjendet mbahet mend për çdo nisje pas saj.'
+  ? 'Ember is not in %s, beside the games, and it has to be. RIPPS2 found it at %s: START copies it there (%d KB) and starts the game.'
+  : 'Ember nuk është në %s, pranë lojërave, dhe duhet të jetë. RIPPS2 e gjeti te %s: START e kopjon atje (%d KB) dhe nis lojën.'
+  Ember's BIOS: BIOS-i i Ember
+  ? 'Ember''s BIOS (bios.bin) is not in %s, beside Ember. RIPPS2 found one at %s: START copies it there (%d KB) and starts the game.'
+  : 'BIOS-i i Ember (bios.bin) nuk është në %s, pranë Ember. RIPPS2 gjeti një te %s: START e kopjon atje (%d KB) dhe nis lojën.'
+  LOOKING FOR YOUR LAUNCHERS: PO KËRKOJ NISËSIT E TU
+  The POPS files: Skedarët POPS
+  '%s  MMCE card': '%s  kartë MMCE'
+  INSTALL RIPPS2'S NEUTRINO: INSTALO NEUTRINO-N E RIPPS2
+  'Internal HDD (APA): %s free of %s': 'HDD i brendshëm (APA): %s të lira nga %s'
+  LAUNCHERS: NISËSIT
+  LOOK FOR THEM: KËRKOJI
+  'Memory card %d: %d KB free': 'Karta e memories %d: %d KB të lira'
+  POPS files: Skedarë POPS
+  START EVERY DRIVE: NIS ÇDO NJËSI
+  'STATUS: looking at the drives and the homebrew': 'GJENDJA: po shoh njësitë dhe homebrew'
+  Start every drive first, so the search reaches all of them? (No searches the drives already started.): Të nisen së pari të gjitha njësitë, që kërkimi të arrijë te të gjitha? (Jo kërkon në njësitë e nisura tashmë.)
+  USB, HDD, MMCE and the rest: USB, HDD, MMCE dhe të tjerat
+  every started drive: çdo njësi e nisur
+  found where you keep them: u gjetën aty ku i mban
+  not found yet: ende nuk u gjet
+  not on a started drive: jo në një njësi të nisur
+  only if you have none: vetëm nëse nuk ke asnjë
+  starts every drive first: nis së pari çdo njësi
+  Drives, launchers and homebrew: Njësitë, nisësit dhe homebrew
+  BDM Devices: Pajisjet BDM
+  Color Sweep: Kalimi i ngjyrave
+  Colors and Text: Ngjyrat dhe teksti
+  HDD POPS partitions: Ndarjet POPS të HDD
+  Layout: Paraqitja
+  Missing Covers: Kopertina që mungojnë
+  Name: Emri
+  No POPSTARTER SMB setup found yet. Fill in the rows below.: Ende nuk u gjet asnjë konfigurim SMB i POPSTARTER. Plotëso rreshtat më poshtë.
+  POPSTARTER Network: Rrjeti i POPSTARTER
+  POPSTARTER SMB Network: Rrjeti SMB i POPSTARTER
+  POPSTARTER UDPFS Network: Rrjeti UDPFS i POPSTARTER
+  RIPPS2 adds the drive, ISO, VMCs and video mode itself.: RIPPS2 shton vetë diskun, ISO-n, VMC-të dhe mënyrën e videos.
+  Screen: Ekrani
+  Speed: Shpejtësia
+  Sweep Colors: Ngjyrat e kalimit
+  Text Weight: Trashësia e tekstit
+  Theme Color: Ngjyra kryesore
+  Bold: Të trasha
+  Controllers: Kontrolluesit
+  Lively: E gjallë
+  Medium: Mesatare
+  PS Emulation: Emulimi PS
+  Regular: E rregullt
+  Slow: E ngadaltë
+  A MOMENT: NJË ÇAST
+  A TASK IN THE BACKGROUND: NJË DETYRË NË SFOND
+  ABOUT %d S: RRETH %d S
+  ANY MOMENT: ÇDO ÇAST
+  READING THE GAME LIST OF %s: PO LEXOHET LISTA E LOJËRAVE E %s
+  SAVING A LIST: PO RUHET NJË LISTË
+  START NOW: NIS TANI
+  STARTING: PO NIS
+  STARTS NEXT: NIS MË PAS
+  STOPPING IT SAFELY: PO NDALET ME SIGURI
+  THE LAST OF THE QUEUE: FUNDI I RADHËS
+  WHEN IT FINISHES: KUR TË MBAROJË
+  What each card starts; install or repair BIBLE.: Çfarë nis secila kartë; instalo ose riparo BIBLE.
+  Rainbow: Ylber
+  Custom: E personalizuar
+  DESR DVR ISOs (experimental): ISO të DESR DVR (eksperimentale)
+  PC CARD CF (experimental): PC CARD CF (eksperimentale)
+  HDD Start Mode: Mënyra e nisjes së HDD
+  Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1): Roboto Condensed nga The Roboto Project Authors (SIL OFL 1.1)
+  '%s on %s': '%s në %s'
+  '%s: %s made %s (%d%%), every piece checked. Remove the ISO and keep the ZSO?': '%s: %s u bë %s (%d%%), çdo pjesë u kontrollua. Të hiqet ISO dhe të mbahet ZSO?'
+  '%s: %s made %s again, every piece checked. Remove the ZSO and keep the ISO?': '%s: %s u bë sërish %s, çdo pjesë u kontrollua. Të hiqet ZSO dhe të mbahet ISO?'
+  A ZSO of this game is already beside it. Remove one of the two first.: Pranë saj ka tashmë një ZSO të kësaj loje. Hiq njërën nga të dyja më parë.
+  About %d min, then checked: Rreth %d min, pastaj kontrollohet
+  An ISO of this game is already beside it. Remove one of the two first.: Pranë saj ka tashmë një ISO të kësaj loje. Hiq njërën nga të dyja më parë.
+  CHECKING EVERY PIECE: PO KONTROLLOHET ÇDO PJESË
+  COMPRESS TO ZSO: NGJESH NË ZSO
+  'COMPRESSED %s: %s FREED': 'U NGJESH %s: U LIRUAN %s'
+  COMPRESSING 1 OF 2: PO NGJESHET 1 NGA 2
+  COMPRESSING 2 OF 2: PO NGJESHET 2 NGA 2
+  ? Compress %s? The ISO stays until the ZSO has been read back and checked, then RIPPS2 asks before it removes the ISO. The drive needs room for both while it works; leave the console on until it finishes. A ZSO starts with the OPL core only (not Neutrino); its saves, settings, art and cheats stay with it, and it can be made an ISO again at any time.
+  : Të ngjeshet %s? ISO mbetet derisa ZSO të lexohet sërish dhe të kontrollohet, pastaj RIPPS2 pyet para se të heqë ISO-n. Disku ka nevojë për vend për të dyja gjatë punës; mbaje konsolën ndezur derisa të mbarojë. Një ZSO niset vetëm me bërthamën OPL (jo Neutrino); ruajtjet, cilësimet, figurat dhe mashtrimet e saj mbeten me të, dhe mund të bëhet sërish ISO në çdo kohë.
+  Compress to ZSO: Ngjesh në ZSO
+  Cycle: Me radhë
+  'Experimental: OPL core only (not Neutrino)': 'Eksperimentale: vetëm bërthama OPL (jo Neutrino)'
+  Hold SELECT: Mbaj SELECT
+  It could not be finished (%s). What it wrote was removed; the game is as it was.: Nuk u përfundua dot (%s). Ajo që shkroi u hoq; loja është si ishte.
+  List: Listë
+  ? Make %s an ISO again? The ZSO stays until the ISO has been read back and checked, then RIPPS2 asks before it removes the ZSO. The drive needs room for both while it works; leave the console on until it finishes. Its saves, settings, art and cheats stay with it.
+  : Të bëhet %s sërish ISO? ZSO mbetet derisa ISO të lexohet sërish dhe të kontrollohet, pastaj RIPPS2 pyet para se të heqë ZSO-n. Disku ka nevojë për vend për të dyja gjatë punës; mbaje konsolën ndezur derisa të mbarojë. Ruajtjet, cilësimet, figurat dhe mashtrimet e saj mbeten me të.
+  Stop? What it has written so far is removed; the game stays as it was.: Të ndalet? Ajo që është shkruar deri tani hiqet; loja mbetet si ishte.
+  THEMES: TEMAT
+  There is not enough memory for this just now.: Tani për tani nuk ka memorie të mjaftueshme për këtë.
+  This image is not one RIPPS2 can compress or uncompress (its size is not whole 2 KB blocks).: Ky imazh nuk është një që RIPPS2 mund ta ngjeshë ose ta zbërthejë (madhësia e tij nuk është në blloqe të plota 2 KB).
+  UNCOMPRESS TO ISO: ZBËRTHE NË ISO
+  UNCOMPRESSED %s: U ZBËRTHYE %s
+  UNCOMPRESSING: PO ZBËRTHEHET
+  Uncompress to ISO: Zbërthe në ISO
+  Under a minute, then checked: Nën një minutë, pastaj kontrollohet
+  COPYING: PO KOPJOHET
+  SHOW AGAIN, DELETE OR COMPRESS: SHFAQE PËRSËRI, FSHIJE OSE NGJESHE
+  SHOW AGAIN, DELETE OR UNCOMPRESS: SHFAQE PËRSËRI, FSHIJE OSE ZBËRTHEJE
+  '%s needs about %s free on its drive while it works (the original stays until the end), and the drive has %s free.': '%s ka nevojë për rreth %s vend të lirë në diskun e vet gjatë punës (origjinali mbetet deri në fund), dhe disku ka %s të lirë.'
+  Hide and Compress: Fshih dhe ngjesh
+  'COMPRESSED AND HIDDEN: %s': 'U NGJESH DHE U FSHEH: %s'
+  'There is not room for this rip: it needs about %s, and the drive has %s free.': 'Nuk ka vend për këtë kopjim: duhen rreth %s, dhe disku ka %s të lirë.'
+  OVER 4 GB FOR FAT32: MBI 4 GB PËR FAT32
+  This drive is %s, which keeps no file of 4 GB or more, and the new image would be %s.: Ky disk është %s, që nuk mban skedarë 4 GB ose më shumë, dhe imazhi i ri do të ishte %s.
+  '%s, %s clusters, %s free of %s': '%s, grupime %s, %s të lira nga %s'
+  Delete This Sweep: Fshi këtë kalim
+  Delete %s? RIPPS2's own sweeps stay as they are.: Të fshihet %s? Kalimet e vetë RIPPS2 mbeten siç janë.
+  Sweep: Kalim
+  Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Distinktivët shënojnë lojërat me arritje në listat e tua, me sa ke zhbllokuar. Duan TELEMETRIA të ndezur.
 labels:
   OK: OK
   EXITTO: Shtegu IGR
@@ -1224,7 +1389,7 @@ labels:
   SAVE_ICONS: Ikonat 3D të ruajtjeve
   HINT_SAVE_ICONS: Shfaq ikonën e ruajtjes së lojës së zgjedhur, duke u rrotulluar, aty ku tema ka vend për të. Lexon së pari VMC-në e vetë lojës, pastaj kartat e memories.
   NETBOOT_RESTART_NOW: Protokolli i rrjetit ndryshon pas një rinisjeje. Të ruhen cilësimet dhe të riniset OPL tani?
-  HINT_NET_PROTOCOL: 'Cilin shërbim rrjeti përdor RiptOPL: një dosje të ndarë SMB, UDPFS, UDPBD ose HTTP. I njëjti cilësim si te Burimet e lojërave. Largimi nga një që është tashmë në punë kërkon rinisje.'
+  HINT_NET_PROTOCOL: 'Cilin shërbim rrjeti përdor RiptOPL: një dosje të ndarë SMB, UDPFS, UDPBD ose HTTP. Largimi nga një që është tashmë në punë kërkon rinisje.'
   HINT_UDPFS_ACCESS: Vetëm UDPFS. Skedarët lexon ISO të veçanta nga dosja e lojërave të serverit; IMG lexon një imazh disku si njësi. SMB dhe HTTP përdorin gjithmonë Skedarët, UDPBD gjithmonë IMG.
   HINT_SMB_VERSION: Me cilin version SMB të flitet me dosjen e ndarë të kompjuterit.
   HINT_NET_ADVANCED: Zhbllokon për ndryshim mënyrën e lidhjes Ethernet dhe portën SMB.
@@ -1425,3 +1590,23 @@ labels:
   HINT_RIPPS2_DEVELOP_SHOTS: Si pamjet që presin në filmin e çdo loje bëhen PNG.
   RIPPS2_SETTINGS_HOME: Ruaj cilësimet në
   HINT_RIPPS2_SETTINGS_HOME: 'Ku i mban RIPPS2 cilësimet: në ruajtjen e vet në një kartë memorieje, në një dosje RIPPS2 në një disk (HDD-ja e brendshme, USB, MX4SIO, iLink ose MMCE) ose në një dosje që shkruan ti.'
+  RIPPS2_LAUNCHERS: Nisësit
+  RIPPS2_LOOK_NOW: Kërko tani
+  HINT_RIPPS2_LOOK_NOW: RIPPS2 kërkon në njësitë e nisura POPSTARTER, skedarët POPS, Ember, BIOS-in e Ember dhe Neutrino, dhe mban mend ku është secili. Çdo nisje i lexon prej andej.
+  RIPPS2_HIDE_GAME: Fshih lojën
+  RIPPS2_HIDDEN_GAMES: Lojëra të fshehura
+  HINT_RIPPS2_HIDDEN_GAMES: Lojërat e fshehura me Fshih lojën, në njësitë e nisura. Shfaq përsëri njërën, ose fshije. Çdo njësi mban listën e vet.
+  HINT_RIPPS2_BDM_DEVICES: 'Disqet nga të cilat BDM lexon lojëra: USB, MX4SIO, një PC Card CF, disku DVR i një DESR dhe iLink. HDD i brendshëm ndjek mënyrën e nisjes së HDD.'
+  HINT_RIPPS2_SCREEN: 'Pamja e menysë: mënyra e videos, ekrani i gjerë, vendi në televizor (H-POS, V-POS) dhe overscan.'
+  HINT_RIPPS2_LAYOUT: Ku qëndrojnë kategoritë dhe si hyn një faqe, pastaj kopertinat e RIPFLOW dhe rrjeta e RIPGRID.
+  HINT_RIPPS2_COLORS_TEXT: Trashësia e tekstit, ngjyra e temës, kalimi i ngjyrave dhe çdo ngjyrë.
+  HINT_RIPPS2_TEXT_WEIGHT: 'Sa i trashë është teksti i RIPPS2: këshillat e cilësimeve, GJENDJA dhe Rreth. E rregullt është si më parë; Mesatare dhe Të trasha lexohen më mirë në një figurë të butë.'
+  HINT_RIPPS2_HDD_START: 'HDD i brendshëm, APA ose exFAT: RIPPS2 lexon atë që është dhe e shfaq një herë, si Lojëra HDD. Joaktiv e lë të qetë.'
+  HINT_RIPPS2_THEME_COLOR: Ngjyra e vetë temës. Zgjidh E personalizuar si ngjyrë teme për ta zgjedhur vetë, si ngjyrat e tekstit.
+  HINT_RIPPS2_SWEEP: Pesë ngjyra nëpër të cilat kalon tema, ngadalë dhe butë. Ylber, një kalim nga çdo temë ngjyre, ose i yti. Joaktiv e mban temën të palëvizur.
+  HINT_RIPPS2_SWEEP_COLORS: Pesë ngjyrat e kalimit dhe shpejtësia e tij. Ndrysho një të RIPPS2 dhe ruhet si i yti, me emrin që i jep.
+  HINT_RIPPS2_SWEEP_NAME: Si quhet kalimi yt në listën Kalimi i ngjyrave.
+  HINT_RIPPS2_SWEEP_COLOR: Një nga pesë ngjyrat nëpër të cilat kalon kalimi, me radhë.
+  HINT_RIPPS2_SWEEP_SPEED: 'Sa zgjat çdo ngjyrë para se të shfaqet tjetra. Edhe E gjallë mbetet e butë: ngjyrat nuk ndezin kurrë.'
+  RIPPS2_HIDE_COMPRESS: Fshih lojën dhe ngjeshja
+  HINT_RIPPS2_SELECT_HOLD: 'SELECT i mbajtur 4.2 s në një listë lojërash. Listë: temat në një panel, zgjidh një. Me radhë: tema tjetër. Fikur: asgjë (një shtypje ende rifreskon).'

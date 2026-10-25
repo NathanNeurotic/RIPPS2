@@ -49,9 +49,13 @@ cp -f "$HERE/theme/fonts/ripps2_sleek.ttf" "$SRC/misc/ripps2_sleek.ttf"
 cp -f "$HERE/theme/fonts/ripps2_sleek_bold.ttf" "$SRC/misc/ripps2_sleekbold.ttf"
 cp -f "$HERE/theme/fonts/ripps2_sleek_case.ttf" "$SRC/misc/ripps2_sleekcase.ttf"
 cp -f "$HERE/theme/fonts/ripps2_one.ttf" "$SRC/misc/ripps2_one.ttf"
-# RIPFLOW's fonts (build 70): Roboto Condensed and Bold Condensed, Apache-2.0 (theme/fonts/ROBOTO-LICENSE.txt)
-cp -f "$HERE/theme/fonts/ripflow.ttf" "$SRC/misc/ripflow.ttf"
-cp -f "$HERE/theme/fonts/ripflow_bold.ttf" "$SRC/misc/ripflowbold.ttf"
+# RIPFLOW's and Settings' font (build 114): Roboto Condensed 3.015, variable (weights 400 to 700), cut to Latin-1,
+# SIL OFL 1.1 (theme/fonts/ROBOTO-OFL.txt); made by theme/tools/make_roboto.py
+cp -f "$HERE/theme/fonts/ripps2_roboto.ttf" "$SRC/misc/ripps2roboto.ttf"
+# build 114: the compiled-in fonts without what FreeType never reads (glyph names, extra name records, signatures,
+# substitution tables); outlines, hinting and kerning stay, and a font whose outlines would change is left whole
+python3 -c "import fontTools" 2>/dev/null || pip3 install --quiet --break-system-packages fonttools || true
+python3 "$HERE/theme/tools/strip_fonts.py" "$SRC"/misc/ripps2_font.ttf "$SRC"/misc/ripps2_sleek*.ttf "$SRC"/misc/ripps2_one.ttf "$SRC"/misc/ripps2roboto.ttf || true
 # The Memory Files ELF, compiled in and launched from RAM (patch 0004)
 # Built-in textures: glass info panel and PS2 selector mark (patch 0006)
 cp -f "$HERE"/theme/gfx/*.png "$SRC/gfx/"
@@ -129,6 +133,10 @@ fi
 
 cd "$SRC"
 sh .github/scripts/install_coherent_mmce.sh
+# build 114: RiptOPL's own releases rebuild the SDK's exFAT/FAT driver with its fragment walker guard (#986: a corrupt
+# chain fails the launch instead of handing the game's driver wrong sectors to write a VMC to) and the contiguous VMC
+# reserve genvmc asks for. RIPPS2 shipped the stock driver until now (FifthFox's corrupted drives, 10/22)
+python3 .github/scripts/install_safe_bdmfs.py
 make clean
 # DIRTY= : the tree is RiptOPL plus our patches by design, so the version never says -dirty
 # RIPPS2_MAKE_FLAGS: extra make flags, e.g. DEBUG=1 EESIO_DEBUG=1 for a build that logs over EE SIO
@@ -162,4 +170,5 @@ python3 "$HERE/lang/ripps2lang.py" extract "$SRC" --check || echo "::warning::el
 # fontTools cuts the big CJK font down to the letters a language uses (without it the pack carries it whole)
 python3 -c "import fontTools" 2>/dev/null || pip3 install --quiet --break-system-packages fonttools || true
 python3 "$HERE/lang/ripps2lang.py" pack "$SRC" "$OUT"
+
 ls -la "$OUT"
