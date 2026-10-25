@@ -14183,7 +14183,7 @@ index ef571e9..e385c63 100644
  typedef struct
  {
 diff --git a/include/hddsupport.h b/include/hddsupport.h
-index b3e36fb..f924a19 100644
+index b3e36fb..7064020 100644
 --- a/include/hddsupport.h
 +++ b/include/hddsupport.h
 @@ -60,6 +60,14 @@ typedef struct
@@ -14209,6 +14209,15 @@ index b3e36fb..f924a19 100644
  int hddLoadModules(void);
  // Pure residency check: unlike hddLoadModulesReady(), never tries to load the ATA
  // stack. Both checks are non-acquiring once the modules are resident (one DEV9 owner).
+@@ -128,6 +137,8 @@ static inline int hddLoadModulesReady(void)
+ // Diagnostic wrapper used by the visible DEV9/ATAD/XHDD boot bracket. It preserves the exact
+ // hddLoadModulesReady() decision while enabling nested, source-level startup stages beneath it.
+ int hddDiagLoadModulesReady(void);
++// build 114: 1 around a background HDD check, so a console with no HDD interface gets no 400 box from it
++void hddSetQuietProbe(int on);
+ void hddLoadSupportModules(void);
+ // Mount the EXISTING APA data home only to read it: never creates __common/OPL/. For a look that may
+ // end in "not needed", such as the APA+exFAT hybrid boot deciding its settings home.
 diff --git a/include/ioman.h b/include/ioman.h
 index 8bf8fcf..21aa548 100644
 --- a/include/ioman.h
@@ -82854,7 +82863,7 @@ index 0000000..2887304
 +C:/Users/natha/Github/Open-PS2-Loader/build/psbbn-flow|codex/psbbn-flow-theme
 +C:/Users/natha/Github/Open-PS2-Loader/build/vmc-sdk-guard-integration-986|codex/vmc-sdk-guard-integration-986
 diff --git a/src/bdmsupport.c b/src/bdmsupport.c
-index ecfafb2..bf1197f 100644
+index ecfafb2..7894802 100644
 --- a/src/bdmsupport.c
 +++ b/src/bdmsupport.c
 @@ -21,6 +21,8 @@
@@ -82883,7 +82892,17 @@ index ecfafb2..bf1197f 100644
  }
  
  int bdmModeIsPCCF(int mode)
-@@ -1369,6 +1372,8 @@ static void bdmLoadBlockDeviceModules(void)
+@@ -1267,7 +1270,9 @@ static void bdmLoadBlockDeviceModules(void)
+         // suppress future retries via bdmShouldQueueModuleLoad() (matches the
+         // conditional pattern used for USB/MX4SIO and opl.c's hddLoadModules gate).
+         bdmDiagBootStageBegin("DEV9/ATAD/XHDD");
++        hddSetQuietProbe(1); // build 114: a look for an exFAT HDD; no HDD interface is no error to show
+         int hddResult = hddDiagLoadModulesReady();
++        hddSetQuietProbe(0);
+         bdmDiagBootStageEnd("DEV9/ATAD/XHDD", hddResult);
+         if (hddResult) {
+             // Module residency does not imply that ATAD's boot-time IDENTIFY succeeded. The
+@@ -1369,6 +1374,8 @@ static void bdmLoadBlockDeviceModules(void)
      if (modsNow != modsWere && !wasFirstPass)
          bdmForceDeviceRefresh();
  
@@ -82892,7 +82911,7 @@ index ecfafb2..bf1197f 100644
      // MX4SIO initial discovery ("double tap"): the SIO2 SD card may still be completing its
      // internal power-up / SPI handshake after mx4sio_bd_irx links. If MX4SIO is enabled and loaded,
      // check if it was immediately found. If not, perform one bounded settle (~600ms) on this IO worker
-@@ -1376,7 +1381,7 @@ static void bdmLoadBlockDeviceModules(void)
+@@ -1376,7 +1383,7 @@ static void bdmLoadBlockDeviceModules(void)
      static int mx4sioSecondProbeDone = 0;
      if (!gEnableMX4SIO)
          mx4sioSecondProbeDone = 0;
@@ -82901,7 +82920,7 @@ index ecfafb2..bf1197f 100644
          char sdcRoot[16];
          if (!bdmGetDeviceRootByType(BDM_TYPE_SDC, sdcRoot, sizeof(sdcRoot))) {
              mx4sioSecondProbeDone = 1;
-@@ -1421,7 +1426,7 @@ static void bdmLoadBlockDeviceModules(void)
+@@ -1421,7 +1428,7 @@ static void bdmLoadBlockDeviceModules(void)
       * remaining fault is something other than "not enough time", and adding delay only hides how
       * little is understood about it. */
      static int usbSecondProbeDone = 0;
@@ -82910,7 +82929,7 @@ index ecfafb2..bf1197f 100644
          usbSecondProbeDone = 1;
          DelayThread(600 * 1000);               // bounded settle for USB enumeration + FAT mount
          bdmProbeMassSlots("after-usb-settle"); // forces FatFs's lazy mount on every slot
-@@ -1438,9 +1443,12 @@ static void bdmLoadBlockDeviceModules(void)
+@@ -1438,9 +1445,12 @@ static void bdmLoadBlockDeviceModules(void)
      // still published by the bdmevent handler as usual; the single forced refresh covers a mount
      // whose event was spent before the menu could act on it.
      static int ilinkProbeDone = 0;
@@ -82924,7 +82943,7 @@ index ecfafb2..bf1197f 100644
          char ilkRoot[16];
          int waitedMs;
  
-@@ -1507,6 +1515,13 @@ static void bdmLoadCoreModules(int forceUsb)
+@@ -1507,6 +1517,13 @@ static void bdmLoadCoreModules(int forceUsb)
      LOG("BDMSUPPORT Modules loaded\n");
  }
  
@@ -82938,7 +82957,7 @@ index ecfafb2..bf1197f 100644
  void bdmLoadModules(void)
  {
      bdmLoadCoreModules(0); // normal enumeration: USB residency follows gEnableUSB
-@@ -1562,6 +1577,10 @@ int bdmEffectiveStartMode(void)
+@@ -1562,6 +1579,10 @@ int bdmEffectiveStartMode(void)
      // RIPPS2 build 96: Default Menu > Last Used, last on a drive page: the drives start with the boot
      if (gRipps2StartLast && gBDMStartMode == START_MODE_MANUAL && gRipps2LastDevice >= BDM_MODE && gRipps2LastDevice < ETH_MODE)
          return START_MODE_AUTO;
@@ -82949,7 +82968,7 @@ index ecfafb2..bf1197f 100644
      return gBDMStartMode;
  }
  
-@@ -2013,7 +2032,7 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+@@ -2013,7 +2034,7 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
      bdmBuildPs1Prefix(ps1Prefix, sizeof(ps1Prefix), itemList->mode); // device ROOT: EMBER/ lives there
  
      // The resolvers leave the path they tried in their buffer, so the message can name it.
@@ -82958,7 +82977,7 @@ index ecfafb2..bf1197f 100644
          guiMsgBoxMissing(_l(_STR_EMBER_NOT_FOUND), emberElf);
          return;
      }
-@@ -2023,6 +2042,8 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+@@ -2023,6 +2044,8 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
          guiMsgBoxMissing(_l(_STR_EMBER_BIOS_MISSING), biosPath);
          return;
      }
@@ -82967,7 +82986,7 @@ index ecfafb2..bf1197f 100644
      // The scan lists folders without reading inside them -- that would be a directory read per row
      // on every refresh. Pay for it once, HERE, while a dialog can still be drawn: an empty or
      // mis-filled folder otherwise drops the user into the PS1 BIOS shell with no explanation.
-@@ -2043,13 +2064,10 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
+@@ -2043,13 +2066,10 @@ static void bdmLaunchCue(item_list_t *itemList, const char *cueName, config_set_
          }
      }
  
@@ -82983,7 +83002,7 @@ index ecfafb2..bf1197f 100644
  
      // UNMOUNT_EXCEPTION is load-bearing here, not defensive: Ember never resets the IOP, so the
      // device it reads its game from must still be mounted when it starts.
-@@ -2223,8 +2241,10 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
+@@ -2223,8 +2243,10 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
      if (fd >= 0) {
          isoFrags = fileXioIoctl2(ps2sdk_get_iop_fd(fd), USBMASS_IOCTL_GET_FRAGLIST, NULL, 0, NULL, 0);
          close(fd);
@@ -82996,7 +83015,7 @@ index ecfafb2..bf1197f 100644
      }
      total = isoFrags;
  
-@@ -2236,6 +2256,10 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
+@@ -2236,6 +2258,10 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
              if (fd >= 0) {
                  int frags = fileXioIoctl2(ps2sdk_get_iop_fd(fd), USBMASS_IOCTL_GET_FRAGLIST, NULL, 0, NULL, 0);
                  close(fd);
@@ -83007,7 +83026,7 @@ index ecfafb2..bf1197f 100644
                  if (frags > 0)
                      vmcFrags[i] = frags;
              }
-@@ -2265,7 +2289,7 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
+@@ -2265,7 +2291,7 @@ static int bdmNeutrinoFragBudgetOk(const char *isoPath, neutrino_vmc_args_t *vmc
  
                      if (gAutoLaunchBDMGame == NULL && guiIsActive()) {
                          char error[256];
@@ -83016,7 +83035,7 @@ index ecfafb2..bf1197f 100644
                          if (!guiMsgBox(error, 1, NULL))
                              return -1; // Abort launch to menu
                      }
-@@ -2473,6 +2497,36 @@ void bdmLaunchIsoAt(item_list_t *itemList, const char *path, const char *startup
+@@ -2473,6 +2499,36 @@ void bdmLaunchIsoAt(item_list_t *itemList, const char *path, const char *startup
      sbSetPathOverride(NULL);
  }
  
@@ -83053,7 +83072,7 @@ index ecfafb2..bf1197f 100644
  void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
  {
  #ifdef RETROACHIEVEMENTS
-@@ -2487,8 +2541,6 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2487,8 +2543,6 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
      int result;
      u64 isoTotalBytes = 0;
      int isoSizeKnown = 1;
@@ -83062,7 +83081,7 @@ index ecfafb2..bf1197f 100644
      char partname[256], filename[32];
      base_game_info_t *game;
      struct cdvdman_settings_bdm *settings;
-@@ -2612,16 +2664,17 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2612,16 +2666,17 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
          return;
      }
  
@@ -83083,7 +83102,7 @@ index ecfafb2..bf1197f 100644
              int vmcSizeInMb = sysCheckVMC(pDeviceData->bdmPrefix, "/", vmc_name, 0, &vmc_superblock);
              if (vmcSizeInMb > 0) {
                  bdm_vmc_infos.flags = vmc_superblock.mc_flag & 0xFF;
-@@ -2630,31 +2683,19 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2630,31 +2685,19 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
                  bdm_vmc_infos.specs.block_size = vmc_superblock.pages_per_block;
                  bdm_vmc_infos.specs.card_size = vmc_superblock.pages_per_cluster * vmc_superblock.clusters_per_card;
  
@@ -83124,7 +83143,7 @@ index ecfafb2..bf1197f 100644
                      }
  
                      close(fd);
-@@ -2665,8 +2706,12 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2665,8 +2708,12 @@ void bdmLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
          if (gAutoLaunchBDMGame == NULL) {
              if (have_error) {
                  char error[256];
@@ -83138,7 +83157,7 @@ index ecfafb2..bf1197f 100644
                  else
                      snprintf(error, sizeof(error), _l(_STR_ERR_VMC_CONTINUE), vmc_name, (vmc_id + 1));
                  if (!guiMsgBox(error, 1, NULL)) {
-@@ -3044,6 +3089,14 @@ static int bdmCheckVMC(item_list_t *itemList, char *name, int createSize)
+@@ -3044,6 +3091,14 @@ static int bdmCheckVMC(item_list_t *itemList, char *name, int createSize)
      return pDeviceData != NULL ? sysCheckVMC(pDeviceData->bdmPrefix, "/", name, createSize, NULL) : -1;
  }
  
@@ -83153,7 +83172,7 @@ index ecfafb2..bf1197f 100644
  static char *bdmGetPrefix(item_list_t *itemList)
  {
      bdm_device_data_t *pDeviceData = (bdm_device_data_t *)itemList->priv;
-@@ -3077,7 +3130,7 @@ static item_list_t bdmGameList = {
+@@ -3077,7 +3132,7 @@ static item_list_t bdmGameList = {
      BDM_MODE, 2, 0, 0, MENU_MIN_INACTIVE_FRAMES, BDM_MODE_UPDATE_DELAY, NULL, NULL, &bdmGetTextId, &bdmGetPrefix, &bdmInit, &bdmNeedsUpdate,
      &bdmUpdateGameList, &bdmGetGameCount, &bdmGetGame, &bdmGetGameName, &bdmGetGameNameLength, &bdmGetGameStartup, &bdmDeleteGame, &bdmRenameGame,
      &bdmLaunchGame, &bdmGetConfig, &bdmGetImage, &bdmCleanUp, &bdmShutdown, &bdmCheckVMC, &bdmGetIconId, &bdmLaunchVcd,
@@ -83162,6 +83181,21 @@ index ecfafb2..bf1197f 100644
  
  // RIPPS2 build 98: what became of MX4SIO, for STATUS: -3 off in Game Sources, -2 its driver not asked for yet, -1 the
  // driver would not load (*err: its code), 0 loaded with no SD card answering, 1 mounted (root: where)
+@@ -3524,8 +3579,12 @@ static int bdmEnsureTransportLoaded(int bdmType)
+             }
+             return iLinkModLoaded;
+         case BDM_TYPE_ATA:
+-            if (!hddModLoaded && hddLoadModulesReady())
+-                hddModLoaded = 1;
++            if (!hddModLoaded) {
++                hddSetQuietProbe(1); // build 114: the boot folder search's last step; no HDD here is no error to show
++                if (hddLoadModulesReady())
++                    hddModLoaded = 1;
++                hddSetQuietProbe(0);
++            }
+             return hddModLoaded;
+         default:
+             return 0;
 diff --git a/src/cuesupport.c b/src/cuesupport.c
 index 72b562e..2639ae1 100644
 --- a/src/cuesupport.c
@@ -85604,7 +85638,7 @@ index 3bae90c..59bde89 100644
                  result = inode->number_data;
              } else
 diff --git a/src/hddsupport.c b/src/hddsupport.c
-index a1027e5..71b63cf 100644
+index a1027e5..c825958 100644
 --- a/src/hddsupport.c
 +++ b/src/hddsupport.c
 @@ -18,12 +18,14 @@
@@ -85622,7 +85656,46 @@ index a1027e5..71b63cf 100644
  
  #define NEWLIB_PORT_AWARE
  #include <fileXio_rpc.h> // fileXioFormat, fileXioMount, fileXioUmount, fileXioDevctl
-@@ -948,6 +950,24 @@ int hddIsApaMbrHybrid(void)
+@@ -670,6 +672,18 @@ static void hddFindOPLPartition(void)
+     LOG("HDD: no existing PFS data partition is available; refusing to create one\n");
+ }
+ 
++// build 114 hotfix (the user, 10/25: "error 400 no hdd on boot"): the BDM side's look for an internal exFAT HDD
++// and the boot folder search's ATA step are background checks. On a console with no HDD interface (a slim, a fat
++// without the network adapter) their failure is no error to show, yet it posted 400 as a box on every boot, HDD
++// Start Mode Manual included (the lab, no HDD: builds 113 and 114 alike). Set around those checks only; an HDD
++// page you start still says the drive is missing.
++static int hddQuietProbe = 0;
++
++void hddSetQuietProbe(int on)
++{
++    hddQuietProbe = on;
++}
++
+ int hddLoadModules(void)
+ {
+     int retLoadModule = HDD_PFS_DIAG_NOT_RUN;
+@@ -698,7 +712,8 @@ int hddLoadModules(void)
+         if (!dev9Ready) {
+             sysShutdownDev9();
+             hddModulesLoadCount = 0;
+-            setErrorMessageWithCode(_STR_HDD_NOT_CONNECTED_ERROR, ERROR_HDD_IF_NOT_DETECTED);
++            if (!hddQuietProbe)
++                setErrorMessageWithCode(_STR_HDD_NOT_CONNECTED_ERROR, ERROR_HDD_IF_NOT_DETECTED);
+             return HDD_LOADMODULES_STATUS_ERROR;
+         }
+ 
+@@ -733,7 +748,8 @@ int hddLoadModules(void)
+ 
+         if (retLoadModule < 0) {
+             LOG("HDD: No HardDisk Drive detected.\n");
+-            setErrorMessageWithCode(_STR_HDD_NOT_CONNECTED_ERROR, ERROR_HDD_IF_NOT_DETECTED);
++            if (!hddQuietProbe)
++                setErrorMessageWithCode(_STR_HDD_NOT_CONNECTED_ERROR, ERROR_HDD_IF_NOT_DETECTED);
+             retStatus = HDD_LOADMODULES_STATUS_ERROR;
+             // Make the failure RETRYABLE. Leaving the count consumed turned one bad first probe into a
+             // whole-session poison: every later call took the else branch and returned BUSYLOADING(2),
+@@ -948,6 +964,24 @@ int hddIsApaMbrHybrid(void)
  // Bring up only the APA/PFS support needed for a read-only pfs1: probe. This intentionally does
  // not discover, mount, or create the persistent pfs0: OPL data home: Settings uses it to validate
  // an already-existing selector target without changing the live data-home state.
@@ -85647,7 +85720,7 @@ index a1027e5..71b63cf 100644
  static int hddLoadCoreSupportModules(void)
  {
      static char hddarg[] = "-o"
-@@ -1018,6 +1038,7 @@ static int hddLoadCoreSupportModules(void)
+@@ -1018,6 +1052,7 @@ static int hddLoadCoreSupportModules(void)
              // failure. It also proves a prior transient APA probe error is stale.
              hddSupportErrToasted = 0;
              hddClearRecoveredErrors();
@@ -85655,7 +85728,7 @@ index a1027e5..71b63cf 100644
          }
          return 0;
      }
-@@ -2215,6 +2236,7 @@ static void hddShowEmberMissing(int msgId, const char *mountSrc, const char *pfs
+@@ -2215,6 +2250,7 @@ static void hddShowEmberMissing(int msgId, const char *mountSrc, const char *pfs
  static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char *part, config_set_t *configSet)
  {
      char emberElf[256], biosPath[288], mountSrc[APA_IDMAX + 6];
@@ -85663,7 +85736,7 @@ index a1027e5..71b63cf 100644
  
      if (name == NULL || name[0] == '\0' || part == NULL || part[0] == '\0')
          return;
-@@ -2249,7 +2271,7 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
+@@ -2249,7 +2285,7 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
  
      // Verify against the partition as it is mounted RIGHT NOW, not against what the scan saw: the
      // scan read this partition read-only through pfs1: and may be minutes old.
@@ -85672,7 +85745,7 @@ index a1027e5..71b63cf 100644
          hddRestoreDataHome();
          ioBlockOps(0);
          hddShowEmberMissing(_STR_EMBER_NOT_FOUND, mountSrc, emberElf);
-@@ -2261,6 +2283,11 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
+@@ -2261,6 +2297,11 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
          hddShowEmberMissing(_STR_EMBER_BIOS_MISSING, mountSrc, biosPath);
          return;
      }
@@ -85684,7 +85757,7 @@ index a1027e5..71b63cf 100644
      if (!cueGameHasImage("pfs0:/", name)) {
          hddRestoreDataHome();
          ioBlockOps(0);
-@@ -2272,7 +2299,7 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
+@@ -2272,7 +2313,7 @@ static void hddDoLaunchEmber(item_list_t *itemList, const char *name, const char
  
      // Past this point pfs0: stays where it is and IO stays blocked; deinit re-blocks anyway.
      deinit(UNMOUNT_EXCEPTION | KEEPIOP_EXCEPTION, itemList->mode);
@@ -85693,7 +85766,7 @@ index a1027e5..71b63cf 100644
  }
  
  // Shared POPSTARTER handoff for an HDD VCD. argv[0] differs by partition shape: PP.<name> / __.<name>
-@@ -2550,6 +2577,87 @@ static void hddLaunchDvrIso(int id, config_set_t *configSet)
+@@ -2550,6 +2591,87 @@ static void hddLaunchDvrIso(int id, config_set_t *configSet)
      sysLaunchNeutrino("dvr", dvdPath, startup, compat, 0, neutrinoPath, args, video, gsmComp, 0, -1, NULL);
  }
  
@@ -85781,7 +85854,7 @@ index a1027e5..71b63cf 100644
  void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
  {
  #ifdef RETROACHIEVEMENTS
-@@ -2612,7 +2720,9 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2612,7 +2734,9 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
          // An ISO row cannot ever be used as a raw HDL APA partition. The
          // automatic loader currently carries only HDL game metadata, not
          // the DVRP mount identity: fail safely until DESR auto-boot is tested.
@@ -85792,7 +85865,7 @@ index a1027e5..71b63cf 100644
              LOG("[DVR] auto launch requires a proven APA/HDL partition; refusing\n");
              return;
          }
-@@ -2649,11 +2759,13 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2649,11 +2773,13 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
          char vmc_path[256];
          int vmc_id, have_error = 0;
          vmc_superblock_t vmc_superblock;
@@ -85808,7 +85881,7 @@ index a1027e5..71b63cf 100644
                  hdd_vmc_infos.active = 0;
                  if (sysCheckVMC(gHDDPrefix, "/", vmc_name[vmc_id], 0, &vmc_superblock) > 0) {
                      hdd_vmc_infos.flags = vmc_superblock.mc_flag & 0xFF;
-@@ -2664,8 +2776,8 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2664,8 +2790,8 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
  
                      // Check vmc inode block chain (write operation can cause damage)
                      snprintf(vmc_path, sizeof(vmc_path), "%sVMC/%s.bin", gHDDPrefix, vmc_name[vmc_id]);
@@ -85819,7 +85892,7 @@ index a1027e5..71b63cf 100644
                          hdd_vmc_infos.active = 1;
                          for (i = 0; i < nparts - 1; i++) {
                              hdd_vmc_infos.blocks[i].number = blocks[i + 1].number;
-@@ -2675,17 +2787,17 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -2675,17 +2801,17 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
                              LOG("HDDSUPPORT hdd_vmc_infos.blocks[%d].subpart    : 0x%X\n", i, hdd_vmc_infos.blocks[i].subpart);
                              LOG("HDDSUPPORT hdd_vmc_infos.blocks[%d].count      : 0x%X\n", i, hdd_vmc_infos.blocks[i].count);
                          }
@@ -85843,7 +85916,7 @@ index a1027e5..71b63cf 100644
                          else
                              snprintf(error, sizeof(error), _l(_STR_ERR_VMC_CONTINUE), vmc_name[vmc_id], (vmc_id + 1));
                          if (!guiMsgBox(error, 1, NULL))
-@@ -2965,7 +3077,9 @@ static void hddCleanUp(item_list_t *itemList, int exception)
+@@ -2965,7 +3091,9 @@ static void hddCleanUp(item_list_t *itemList, int exception)
  
  static int hddCheckVMC(item_list_t *itemList, char *name, int createSize)
  {
