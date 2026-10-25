@@ -58,7 +58,7 @@ if 'jpeg_stdio_src' in media or 'static jmp_buf' in media:
     fail.append('pictures decode from memory, with no decoder state kept between calls')
 if 'viewReadAll' not in media or 'jpeg_mem_src' not in media:
     fail.append('a picture is read whole before it is decoded')
-if 'static int texLoadJpg' not in tex or '"%s.jpg", path' not in tex:
+if 'static int texLoadPicture' not in tex or '"%s.jpg", path' not in tex:  # build 115: texLoadJpg reads PNG too, by content
     fail.append('game art must fall back to a JPG of the same name')
 
 # ---- the .adp header's length on the PC

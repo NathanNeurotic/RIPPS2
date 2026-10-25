@@ -104,3 +104,20 @@ Status: plan, nothing built yet. Talk it over with the user first ("we can go ov
   foreground driver work, did the hidden desktop change, NVIDIA overlay or Xbox app focus).
 - The 1080i info-page captures for the thumbnail (all 9 games, RIPPS2 theme) are still to do; t114-sdmirror.raw is a
   lab drive with the card's games, art and CFGs.
+
+## Progress (10/25, end of session: usage limit reached)
+Done in patch 0115 (pushed, CI building, NOT lab-tested yet as a whole):
+- Art read under every name (index keeps real names: any case, .png/.jpg/.jpeg; decode by content, shrink big
+  pictures; OPL Manager _BG_00/_SCR_00/_SCR_01 both ways; PS1 disc ID and XX.<name>.ELF keys). Host tests
+  test_art_names.py + test_udpfs_art.py pass locally; issue #2 answered.
+- Pad: DualShock mode asked for again in a quiet second when a pad is left digital (dead right stick).
+- MMCE: nothing read while the card says busy (mmceCardBusy, devctl 0x2); OPL-core MMCE launch writes the play history
+  first and waits (on screen) while the card makes the game's memory card (mmceReadyGameCard).
+- SELECT refreshes coalesce (ioPutRequestUnlessWaiting); Trust Cache (gRipps2TrustCache=1, sbSnapTrusted) in MMCE,
+  SMB, BDM: a cached list stands until a refresh.
+- All Games starts at boot even when every source is Manual (lab repro on 1.1.4: empty "Start Device" for 45 s).
+- Lab: ps2bg.ps1 closes PCSX2's hidden Error dialogs (the PC's audio device was gone).
+Left: Trust Cache row + its strings on the Cache page (config key ripps2_trust_cache), exit path following the boot
+path, PC Card CF fold, Recent Games source 1-99, tooltip slide, BIOS sounds space check, STATUS<->Cache link and the
+STATUS loading section, translations for new _t strings, lab rounds, release v1.1.5-beta, the Short, Discord post,
+the 1.1.5 ELF into the SD's boot cards (BootCard-1/2/4/6/8). SD card hash result: scratchpad isohash-card.tsv.

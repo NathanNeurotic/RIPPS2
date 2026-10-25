@@ -253,6 +253,33 @@ index 90fe9f6..8688937 100644
  /* Drop every cached listing. Call wherever the "art may have appeared" epoch is bumped -- a device
   * generation change or a deliberate settings apply -- so a stick with new art on it is picked up.
   * Cheap, and safe from any thread. */
+diff --git a/include/mmcesupport.h b/include/mmcesupport.h
+index abd65f5..dafc73d 100644
+--- a/include/mmcesupport.h
++++ b/include/mmcesupport.h
+@@ -30,6 +30,8 @@ int mmceSendGameID(const char *startup, const char *protectMcPath, int vmcSlotMa
+ // Bounded post-GameID settle for cross-device launches sharing SIO2 with the MMCE (MX4SIO, batch S7).
+ // Polls the device the last send targeted; 0 = settled, -1 = expired. Caller warns + proceeds.
+ int mmceGameIdSettle(int timeoutMs);
++// RIPPS2 build 115: 1 while the MMCE card says it is busy (copying or making a memory card); nothing is read from it then
++int mmceCardBusy(void);
+ // Arm the GameID transport at menu/settings time (idempotent; no-op when the feature is off).
+ void mmceArmGameIDTransport(void);
+ // Reset present MMCE cards (SD2PSX/MemCard PRO2) to default channel (Card 1 / Channel 1) and clear GameID.
+diff --git a/include/supportbase.h b/include/supportbase.h
+index 2574003..7cd9f18 100644
+--- a/include/supportbase.h
++++ b/include/supportbase.h
+@@ -64,6 +64,9 @@ int sbSnapShow(sb_snap_t *snap, const char *prefix, base_game_info_t **list, int
+ // After a root scan: the list kept for next time (only when it changed); readOk 0 keeps the last one
+ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *list, int gamecount, int fsize, int readOk);
+ void sbSnapForget(sb_snap_t *snap); // a source gone or changed: its list is looked for again
++// build 115: 1 while the games on screen came from the source's cache and Trust Cache keeps them: no background read
++int sbSnapTrusted(const sb_snap_t *snap);
++extern int gRipps2TrustCache;
+ void sbSetPadBreath(int on);        // build 110: pause every scan (an MX4SIO drive shares SIO2 with the pads, as MMCE does)
+ // errno of the last CD/DVD folder the latest sbReadList could not open (0 = both opened).
+ int sbGetReadListError(void);
 diff --git a/src/artindex.c b/src/artindex.c
 index 51dd1df..6aa8d21 100644
 --- a/src/artindex.c
@@ -514,6 +541,303 @@ index 51dd1df..6aa8d21 100644
  void artIndexInvalidate(void)
  {
      int i;
+diff --git a/src/bdmsupport.c b/src/bdmsupport.c
+index 7894802..f345c14 100644
+--- a/src/bdmsupport.c
++++ b/src/bdmsupport.c
+@@ -1675,13 +1675,6 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+         return 1;
+     }
+ 
+-    // RIPPS2 build 110: the games on screen came from the drive's last list: read the drive once (this pass comes on the
+-    // next idle poll, which every connected drive gets)
+-    if (pDeviceData->bdmSnap.shown) {
+-        pDeviceData->bdmSnap.shown = 0;
+-        return 1;
+-    }
+-
+     // If the device menu is visible double check the device type and if support for this device type is enabled. If the user switches device support
+     // to off for a bdm device we want to hide the menu even though the drivers are still loaded and the device is being detected by bdm.
+     opl_io_module_t *pOwner = (opl_io_module_t *)itemList->owner;
+@@ -1709,6 +1702,16 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+     if (folderConsumeDirty(itemList->mode))
+         return 1;
+ 
++    // RIPPS2 build 110: the games on screen came from the drive's last list: read the drive once (this pass comes on the
++    // next idle poll, which every connected drive gets). Build 115: below the refresh checks above, so a refresh always
++    // reads the drive, and with Trust Cache the list stands until one
++    if (sbSnapTrusted(&pDeviceData->bdmSnap))
++        return 0;
++    if (pDeviceData->bdmSnap.shown) {
++        pDeviceData->bdmSnap.shown = 0;
++        return 1;
++    }
++
+     if (pDeviceData->bdmDeviceTick != BdmGeneration)
+         pDeviceData->bdmPs1RetryCount = pDeviceData->bdmPs1RetryPending = 0;
+     // At most two extra scans on the normal idle-refresh cadence. This does
+diff --git a/src/ethsupport.c b/src/ethsupport.c
+index 642b1ff..0b2a923 100644
+--- a/src/ethsupport.c
++++ b/src/ethsupport.c
+@@ -454,6 +454,8 @@ static int ethNeedsUpdate(item_list_t *itemList)
+     if (gPCShareName[0] && (libListViewActive(itemList) == LIB_VIEW_PS1))
+         return 0;
+ 
++    if (sbSnapTrusted(&ethSnap)) // build 115: Trust Cache: the share's list stands until a refresh
++        return 0;
+     // RIPPS2 build 110: the games on screen came from the share's last list: read the share once
+     if (ethSnap.shown) {
+         ethSnap.shown = 0;
+diff --git a/src/mmcesupport.c b/src/mmcesupport.c
+index ba683b0..0f62892 100644
+--- a/src/mmcesupport.c
++++ b/src/mmcesupport.c
+@@ -20,6 +20,8 @@
+ #include "include/extern_irx.h"
+ #include "include/cheatman.h"
+ #include "include/sound.h" // RIPPS2 build 100: bgmAddMusicHome
++#include "include/OSDHistory.h" // RIPPS2 build 115: the play history goes in before a launch from the card
++#include "include/ripps2tr.h"   // RIPPS2 build 115: _t
+ #include "modules/iopcore/common/cdvd_config.h"
+ #include "../ee_core/include/coreconfig.h"
+ #include <usbhdfsd-common.h>
+@@ -29,6 +31,7 @@
+ #define NEWLIB_PORT_AWARE
+ #include <fileXio_rpc.h> // fileXioIoctl, fileXioDevctl
+ #include <delaythread.h> // DelayThread() -- real-sleep gap in the MMCE card-switch wait
++#include <time.h>        // RIPPS2 build 115: clock, for the card's busy check
+ #include <unistd.h>
+ #include <fcntl.h>
+ 
+@@ -103,6 +106,7 @@ static unsigned char mmceEverResolved = 0;
+ // forward declaration
+ static item_list_t mmceGameList;
+ static void mmceGetDeviceRoot(char *root, size_t size);
++static void mmceSettleAfterSwitch(void);
+ 
+ // RIPPS2 build 109: a fast MMCE boot. The card's game list is kept on the card (RIPPS2.LST beside its CD and DVD
+ // folders): at boot the games show from it at once, then the card is read again in the background (sbReadList, which
+@@ -253,6 +257,87 @@ int mmceGameIdSettle(int timeoutMs)
+     return -1;
+ }
+ 
++// RIPPS2 build 115: 1 while the card says it is busy: copying a memory card into its RAM (every power-on; 8 MB took ~9 s
++// on the user's SD, in 30 ms slices that hold each MMCE request back) or writing a new one for a game. One short status
++// exchange, asked at most every 250 ms; a card busy past MMCE_BUSY_GIVEUP_S is read anyway, as before this check.
++#define MMCE_BUSY_GIVEUP_S 90
++int mmceCardBusy(void)
++{
++    static clock_t askedAt = 0, busySince = 0;
++    static int busy = 0;
++    char root[sizeof(mmcePrefix)];
++    clock_t now = clock();
++    int status;
++
++    if (!mmceModLoaded)
++        return 0;
++    if (askedAt != 0 && now - askedAt < CLOCKS_PER_SEC / 4)
++        return busy;
++    askedAt = now;
++    mmceGetDeviceRoot(root, sizeof(root));
++    status = root[0] != '\0' ? fileXioDevctl(root, 0x2, NULL, 0, NULL, 0) : -1;
++    if (status < 0 || (status & 1) == 0) {
++        busy = 0;
++        busySince = 0;
++        return 0;
++    }
++    if (busySince == 0)
++        busySince = now;
++    busy = (now - busySince) < (clock_t)MMCE_BUSY_GIVEUP_S * CLOCKS_PER_SEC;
++    if (!busy)
++        LOG("MMCE: the card has said busy for %d s; reading it anyway\n", MMCE_BUSY_GIVEUP_S);
++    return busy;
++}
++
++// RIPPS2 build 115: a game ON the card waits for its own memory card. The OPL core's launch writes the game into the
++// PS2's play history (sysLaunchLoaderElf), and an sd2psXtd with Game ID on switches cards on that write; the first time
++// for a game it then writes the new 8 MB card to its SD, the SD the game streams from, and only while the card's file
++// access is idle -- which game streaming is. Started that way, Burnout 3 took over 5 minutes to the PS2 logo, hung and
++// went white, and the game's card was left half written (the user's SD2PSXTD, 10/25). So the history goes in here,
++// before the launch, and the launch waits, on screen, while the card says busy. sent: RIPPS2's own Game ID send went
++// out and was not confirmed within its ~3 s.
++static void mmceReadyGameCard(config_set_t *configSet, const char *startup, int sent)
++{
++    char root[sizeof(mmcePrefix)], name[32], line[256];
++    clock_t start;
++    int status, waited, s;
++
++    mmceGetDeviceRoot(root, sizeof(root));
++    if (root[0] == '\0' || fileXioDevctl(root, 0x2, NULL, 0, NULL, 0) < 0)
++        return; // no status to read: launch as before
++    if (!sent) {
++#if (!defined(__DEBUG) && !defined(_DTL_T10000))
++        // the same name the launch writes (sysLaunchLoaderElf), so its own write changes nothing
++        if (configGetStrCopy(configSet, CONFIG_ITEM_ALTSTARTUP, name, sizeof(name)) == 0)
++            snprintf(name, sizeof(name), "%s", startup);
++        AddHistoryRecordUsingFullPath(name);
++        for (waited = 0; waited < 1500; waited += 100) {
++            status = fileXioDevctl(root, 0x2, NULL, 0, NULL, 0);
++            if (status >= 0 && (status & 1))
++                break;
++            DelayThread(100 * 1000);
++        }
++        if (waited >= 1500)
++            return; // the card stayed as it was: Game ID is off on it, or this game's card is in already
++#else
++        return; // these builds write no history at launch
++#endif
++    }
++    start = clock();
++    while ((status = fileXioDevctl(root, 0x2, NULL, 0, NULL, 0)) >= 0 && (status & 1)) {
++        s = (int)((clock() - start) / CLOCKS_PER_SEC);
++        if (s >= 180) {
++            LOG("MMCE: the game's memory card was still busy after %d s; launching\n", s);
++            break;
++        }
++        snprintf(line, sizeof(line), _t("The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done."), s);
++        guiRenderTextScreen(line);
++        DelayThread(250 * 1000);
++    }
++    LOG("MMCE: the game's memory card is ready after %d s\n", (int)((clock() - start) / CLOCKS_PER_SEC));
++    mmceSettleAfterSwitch();
++}
++
+ static void mmceGetDeviceRoot(char *root, size_t size)
+ {
+     const char *separator = strstr(mmcePrefix, ":/");
+@@ -566,6 +651,15 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+         return (mmceGameCount > 0 || mmcePs1GameCount > 0);
+     }
+ 
++    // RIPPS2 build 115: nothing is read while the card says it is busy (copying a memory card into its RAM at every
++    // power-on, or making a new one for a game). Each read then waits on the card with the bus held, and the pads
++    // share that bus: the user's controller lagged, dropped presses and lost analog mode while RIPPS2 listed the card
++    // at power-on (10/25). The pass comes back when the card is free; the list on screen stays meanwhile.
++    if (mmceCardBusy()) {
++        mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
++        return 0;
++    }
++
+     mmceGameList.updateDelay = MENU_UPD_DELAY_NOUPDATE;
+ 
+     // Register the card's THM/LNG dirs BEFORE the VCD-view early returns (#152, AndrewBento). These
+@@ -612,6 +706,8 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+             return result;
+     }
+ 
++    if (sbSnapTrusted(&mmceSnap)) // build 115: Trust Cache: the card's list stands until a refresh
++        return result;
+     if (mmceSnap.shown) { // build 109: the games on screen came from the card's list: read the card once, in the background
+         mmceSnap.shown = 0;
+         mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
+@@ -1066,8 +1162,11 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+             }
+             // protectMcPath=NULL: the native path loads no ELF from mcN: mid-launch (ee_core is
+             // embedded; sysLaunchLoaderElf reads rom0: only).
+-            if (mmceSendGameID(game->startup, NULL, vmcMask))
++            int sent = mmceSendGameID(game->startup, NULL, vmcMask);
++            if (sent > 0)
+                 mmceSettleAfterSwitch();
++            else // build 115: the card's own switch (the play history) or an unconfirmed send: wait for the game's card
++                mmceReadyGameCard(configSet, game->startup, sent < 0);
+         }
+     }
+ 
+@@ -1395,6 +1494,8 @@ static config_set_t *mmceGetConfig(item_list_t *itemList, int id)
+ 
+ static int mmceGetImage(item_list_t *itemList, char *folder, int isRelative, char *value, char *suffix, GSTEXTURE *resultTex, short psm)
+ {
++    if (isRelative && mmceCardBusy())
++        return ERR_FILE_IO; // build 115: the card is busy: not now (transient, so the cover is asked for again)
+     int r = mmceTryLoadImage(mmceArtPrimary, folder, isRelative, value, suffix, resultTex);
+     // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
+     // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
+diff --git a/src/opl.c b/src/opl.c
+index 3b8cd19..733dcbe 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -582,7 +582,7 @@ static void itemExecRefresh(struct menu_item *curMenu)
+                 if (i == HDD_MODE)
+                     hddVcdInvalidateCache();
+                 libViewMarkDirty(i);
+-                ioPutRequest(IO_MENU_UPDATE_DEFFERED, &source->mode);
++                ioPutRequestUnlessWaiting(IO_MENU_UPDATE_DEFFERED, &source->mode); // build 115: presses do not stack scans
+             }
+             mixRequestUpdate();
+         } else if (support->mode == ETH_MODE && gNetworkProtocol == NET_PROTO_SMB) {
+@@ -597,7 +597,10 @@ static void itemExecRefresh(struct menu_item *curMenu)
+             // Explicit Refresh must bypass per-device scan caches. This also ensures a Mixed list
+             // refreshes both of its backing stores instead of merely rebuilding the same rows.
+             libViewMarkDirty(support->mode);
+-            ioPutRequest(IO_MENU_UPDATE_DEFFERED, &support->mode);
++            // build 115: a refresh already waiting covers this press too. Pressed again and again while a slow source
++            // (MMCE at power-on) was still answering, each press queued one more full scan, run back to back on the
++            // bus the pads share long after the presses ended
++            ioPutRequestUnlessWaiting(IO_MENU_UPDATE_DEFFERED, &support->mode);
+         }
+         sfxPlay(SFX_CONFIRM);
+     }
+@@ -1063,6 +1066,14 @@ void initSupport(item_list_t *itemList, int mode, int force_reinit)
+     // Set the start mode flag based on device type.
+     int startMode = modeStartMode(mode);
+ 
++    // RIPPS2 build 115: All Games starts at boot whenever it is on. It reads no device -- its saved list (allgames.bin,
++    // beside the settings) and the lists its sources already hold -- so Manual (every source Manual or off) only left
++    // the page empty with "Start Device" until something else started: the user's master list never showed, and the
++    // HDD's games came only after a trip to the HDD page and back (10/25). A source on Manual still waits for a start:
++    // its saved games are waiting rows, and Cross on one starts it (mixWaitForRow).
++    if (mode == MIX_MODE && startMode == START_MODE_MANUAL)
++        startMode = START_MODE_AUTO;
++
+     if (startMode) {
+         if (!mod->support) {
+             mod->support = itemList;
+diff --git a/src/pad.c b/src/pad.c
+index c488407..c437192 100644
+--- a/src/pad.c
++++ b/src/pad.c
+@@ -162,6 +162,8 @@ static int padIdleForCommand(struct pad_data_t *pad)
+ #define PAD_SELF_HEAL_IDLE_MS     1000
+ #define PAD_IDLE_MAX_CLEAN_GAP_MS 100
+ static u32 padIdleMs = 0;
++#define PAD_ANALOG_RETRY_MAX 6 // RIPPS2 build 115: DualShock mode asked for again, at most this many times a session
++static int padAnalogRetries = 0;
+ 
+ /*
+  * waitPadReady()
+@@ -820,6 +822,31 @@ int readPads()
+         }
+     }
+ 
++    // RIPPS2 build 115: a DualShock left in digital mode. initializePad asks for analog once, at boot or on a reconnect,
++    // and nothing asked again when that request did not take: the bus was busy at that moment (the user's SD2PSXTD,
++    // 10/25, answering MMCE slowly while it copied its card at power-on), and the pad stayed digital for the session,
++    // the right stick reading nothing in every view that tilts with it. In a quiet second the request goes out again,
++    // only to an idle pad whose mode table has DualShock (EE-local reads), a few times a session at most.
++    if (pollClean && !paddata && padIdleMs >= PAD_SELF_HEAL_IDLE_MS && padAnalogRetries < PAD_ANALOG_RETRY_MAX) {
++        for (i = 0; i < pad_count; ++i) {
++            struct pad_data_t *pad = &pad_data[i];
++            int modes, m;
++            if (pad->state != PAD_STATE_STABLE || (pad->buttons.mode >> 4) == 0x07 || !padIdleForCommand(pad))
++                continue;
++            modes = padInfoMode(pad->port, pad->slot, PAD_MODETABLE, -1);
++            for (m = 0; m < modes; m++)
++                if (padInfoMode(pad->port, pad->slot, PAD_MODETABLE, m) == PAD_TYPE_DUALSHOCK)
++                    break;
++            if (modes <= 0 || m >= modes)
++                continue; // a digital pad: nothing to restore
++            padAnalogRetries++;
++            padIdleMs = 0;
++            LOG("PAD %d,%d in digital mode (0x%02x): asking for DualShock again (%d)\n", pad->port, pad->slot, pad->buttons.mode, padAnalogRetries);
++            padSetMainMode(pad->port, pad->slot, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
++            break;
++        }
++    }
++
+     // Rumble decay, plus the bounded re-send tail (see RUMBLE_CMD_REPEATS). Edge-driven: the RPC
+     // stream stops after a few polls instead of running for the pulse's whole life, but a single
+     // dropped padSetActDirect no longer decides whether the pulse happens -- or whether it ends.
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 index 5a5580f..7933e8b 100644
 --- a/src/ripps2games.c
@@ -528,6 +852,27 @@ index 5a5580f..7933e8b 100644
      char path[256];
      const char *vmc = NULL;
      int i, k;
+diff --git a/src/supportbase.c b/src/supportbase.c
+index 04c5e85..9185900 100644
+--- a/src/supportbase.c
++++ b/src/supportbase.c
+@@ -833,6 +833,16 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+     ioWriteEnd();
+ }
+ 
++// RIPPS2 build 115: Trust Cache (Game Sources > Cache, on unless turned off). A list shown from its cache stays as it is
++// until the user refreshes (SELECT) or RIPPS2 changes the source itself; the source is not read again in the background.
++// That second read was the hitch the user saw on every boot (10/25), and on an MMCE card the bus the pads share.
++int gRipps2TrustCache = 1;
++
++int sbSnapTrusted(const sb_snap_t *snap)
++{
++    return gRipps2TrustCache && gRipps2FastCache && snap->shown;
++}
++
+ void sbSnapForget(sb_snap_t *snap)
+ {
+     snap->tried = snap->shown = 0;
 diff --git a/src/textures.c b/src/textures.c
 index 2da860e..f337d6b 100644
 --- a/src/textures.c
