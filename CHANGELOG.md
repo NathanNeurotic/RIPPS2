@@ -155,7 +155,7 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
   game on the internal exFAT HDD took about 10 minutes and came out 82% of its size; the first estimate is set from
   that, and the bar's own estimate follows what it really gets.
 - **Nothing is lost.** The ISO stays until the ZSO has been read back and every piece checked against it, and only then
-  does RIPPS2 ask before removing it. The lab showed why the check is there: written in pieces of any length, the
+  does RIPPS2 ask before removing it (Circle reads **Back (keeps both)** there: the ISO and the ZSO both stay). The lab showed why the check is there: written in pieces of any length, the
   driver now and then put a 32 KB cluster over the one before it, and the check caught it every time. The new image now
   goes to the drive in whole aligned 256 KB pieces, as RIPDISC's rips and Memory Files' copies always did. The ZSO starts with the OPL core (Neutrino does not read ZSO); its VMC, settings,
   art and cheats are the same game's. Uncompress makes the ISO again the same way.

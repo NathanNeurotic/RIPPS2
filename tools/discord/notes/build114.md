@@ -15,7 +15,7 @@
 - **All Games at once** at boot, from a saved list, even before the drives answer; a game on a drive still waking waits for it.
 - **Hide Game** (Triangle options): gone from every list until you show it again from Game Sources > Hidden Games.
 - **Delete, completely**: the image, its settings, art and cheats; its saves only if you say Yes. On the internal HDD (APA) the table is checked first and a damaged one is refused before anything changes.
-- **Compress to ZSO** (experimental, Triangle > Hide Game and Compression): hold SELECT, say yes again, watch the progress bar. The ISO stays until every piece of the ZSO is checked; the ZSO starts with the OPL core, saves and all, and can be made an ISO again. Hidden games can be compressed too (Game Sources > Hidden Games). It checks the drive has room first, and works on OPL Manager's SCUS_XXX.XX.Name.iso names as well.
+- **Compress to ZSO** (experimental, Triangle > Hide Game and Compression): hold SELECT, say yes again, watch the progress bar. The ISO stays until every piece of the ZSO is checked, then you are asked before it goes (Back keeps both); the ZSO starts with the OPL core, saves and all, and can be made an ISO again. Hidden games can be compressed too (Game Sources > Hidden Games). It checks the drive has room first, and works on OPL Manager's SCUS_XXX.XX.Name.iso names as well.
 - **Your launchers, found once**: POPSTARTER, the POPS files, Ember, its BIOS and Neutrino are searched for on your drives and remembered (Game Sources > Cache > Look now).
 
 ## Settings and looks
@@ -48,4 +48,4 @@
 - **Your language**: Settings in one typeface (Russian, Greek, Polish, Vietnamese...)?
 
 ## Report
-Post in the [psx-place thread](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/) or here with your **console model**, your drives, where RIPPS2 starts from, and a **photo** of anything odd. Thanks to ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60 and lukeatmynose for the reports that got us here.
+Post in the [psx-place thread](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/) or here with your **console model**, your drives, where RIPPS2 starts from, and a **photo** of anything odd. Thanks to ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60 and lukeatmynose for the reports that got us here. Special thanks to all the YouTube love as well: glad to help however you reach me.
