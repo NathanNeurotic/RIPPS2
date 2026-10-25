@@ -129,8 +129,8 @@ for want in ('CFG_RIPPS2_FASTCACHE', 'CFG_HDDGAMELISTCACHE', 'UICFG_AUTOREFRESH'
         fail.append('dialogs.c: Game Sources > Cache needs %s' % want)
 need(gui, (('ret = diaExecuteDialog(diaDisplayConfig, -1, 1, &guiSettingsDisplayUpdater);', "Video Mode shows on the Display section (build 114: Interface's Screen page)"),
            ('if (lock && !bootLockWas && gExitPath[0] == \'\\0\')', 'BOOT LOCK fills an empty IGR Path itself'),
-           ('static void guiShowCacheConfig(void)', 'the Cache page'), ('guiSaveAdvancedSettings(ui); // build 113: the read-ahead caches', 'Game Launching keeps the caches')), 'gui.c')
-if gui.count('guiShowCacheConfig();') != 2:
+           ('static int guiShowCacheConfig(void)', 'the Cache page (build 115: says whether a setting changed, for STATUS)'), ('guiSaveAdvancedSettings(ui); // build 113: the read-ahead caches', 'Game Launching keeps the caches')), 'gui.c')
+if gui.count('        guiShowCacheConfig();') != 2:  # build 115: guiShowCacheSettings (STATUS) calls it too
     fail.append('gui.c: both Game Sources pages open the Cache page')
 need(rd('src/ripps2shot.c'), (('guiExitPathBegin(diaIgrConfig);', 'the In-Game Menu page shows IGR Path'), ('guiExitPathEnd();', 'and keeps it')), 'ripps2shot.c')
 sb = rd('src/supportbase.c')

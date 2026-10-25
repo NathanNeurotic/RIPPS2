@@ -861,6 +861,12 @@ strings:
 - en: '%s could not be made. Is the drive write-protected?'
   in:
   - ripps2biossnd.c
+- en: '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?'
+  in:
+  - ripps2biossnd.c
+- en: '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?'
+  in:
+  - ripps2biossnd.c
 - en: '%u.%u MB'
   in:
   - ripps2biossnd.c
@@ -927,6 +933,9 @@ strings:
 - en: THE RED SCREEN MUSIC (DISC WARNING)
   in:
   - ripps2biossnd.c
+- en: The folder %s could not be made. Is the drive full or write-protected? Nothing was written.
+  in:
+  - ripps2biossnd.c
 - en: The menu music (%s) is in %s as %s. Audio settings > Music lists it as Menu; it plays when no other track is picked.
   in:
   - ripps2biossnd.c
@@ -939,7 +948,13 @@ strings:
 - en: The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.
   in:
   - ripps2biossnd.c
-- en: The sounds could not be written to %s. Is the drive full or write-protected?
+- en: 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  in:
+  - ripps2biossnd.c
+- en: The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  in:
+  - ripps2biossnd.c
+- en: There was not enough memory to make the sounds. Nothing was written.
   in:
   - ripps2biossnd.c
 - en: This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.
@@ -3020,13 +3035,46 @@ strings:
 - en: A PS2BBL with RIPPS2's lock is on this console.
   in:
   - ripps2status.c
+- en: 'A game''s EXIT: %s'
+  in:
+  - ripps2status.c
+- en: 'A game''s EXIT: the browser'
+  in:
+  - ripps2status.c
 - en: AUDIO folder
+  in:
+  - ripps2status.c
+- en: 'All Games: %d games kept in %s, listed at boot before any drive answers'
+  in:
+  - ripps2status.c
+- en: 'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)'
+  in:
+  - ripps2status.c
+- en: CACHE SETTINGS
+  in:
+  - ripps2status.c
+- en: Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.
   in:
   - ripps2status.c
 - en: DRIVES
   in:
   - ripps2status.c
-- en: Drives, launchers and homebrew
+- en: Drives, loading, launchers and homebrew
+  in:
+  - ripps2status.c
+- en: Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  in:
+  - ripps2status.c
+- en: Fast Cache, Trust Cache
+  in:
+  - ripps2status.c
+- en: 'Game lists: Fast Cache off, so each one is read from its drive at boot'
+  in:
+  - ripps2status.c
+- en: 'Game lists: each shows at once from its cache and stands until SELECT'
+  in:
+  - ripps2status.c
+- en: 'Game lists: each shows at once from its cache, then is read again'
   in:
   - ripps2status.c
 - en: INSTALL RIPPS2'S NEUTRINO
@@ -3036,6 +3084,9 @@ strings:
   in:
   - ripps2status.c
 - en: LAUNCHERS
+  in:
+  - ripps2status.c
+- en: LOADING
   in:
   - ripps2status.c
 - en: LOOK FOR THEM
@@ -3063,6 +3114,9 @@ strings:
   in:
   - ripps2status.c
 - en: 'MX4SIO: the driver is in, but no SD card answered (the mc1 slot).'
+  in:
+  - ripps2status.c
+- en: Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.
   in:
   - ripps2status.c
 - en: 'Memory card %d: %d KB free'
@@ -3101,7 +3155,22 @@ strings:
 - en: 'STATUS: looking at the drives and the homebrew'
   in:
   - ripps2status.c
+- en: Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.
+  in:
+  - ripps2status.c
+- en: 'Settings: %s, on a drive the boot waits for (a memory card is quicker)'
+  in:
+  - ripps2status.c
+- en: 'Settings: %s, read first (the quickest place)'
+  in:
+  - ripps2status.c
 - en: Start every drive first, so the search reaches all of them? (No searches the drives already started.)
+  in:
+  - ripps2status.c
+- en: Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.
+  in:
+  - ripps2status.c
+- en: The IP and SMB share POPSTARTER uses for PS1 games over the network.
   in:
   - ripps2status.c
 - en: USB, HDD, MMCE and the rest
@@ -3110,7 +3179,19 @@ strings:
 - en: What each card starts; install or repair BIBLE.
   in:
   - ripps2status.c
+- en: What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.
+  in:
+  - ripps2status.c
+- en: Where POPSTARTER and Ember are, and how PS1 games start.
+  in:
+  - ripps2status.c
+- en: Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.
+  in:
+  - ripps2status.c
 - en: a drive of unknown kind
+  in:
+  - ripps2status.c
+- en: back to Cache
   in:
   - ripps2status.c
 - en: boot loader, card by card
@@ -3147,6 +3228,9 @@ strings:
   in:
   - ripps2status.c
 - en: what RIPPS2 sees
+  in:
+  - ripps2status.c
+- en: what boot reads first
   in:
   - ripps2status.c
 - en: A DISC RIPPS2 CANNOT START
