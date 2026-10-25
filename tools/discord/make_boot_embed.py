@@ -31,7 +31,6 @@ GIF_ALT = ('The RIPPS2 towers rise into an empty All Games list, pause on the St
 def make_payload(gif_url):
     """Return the website-unfurl schema documented by Discord's Component Embeds reference."""
     header = f'# **[{WEBSITE_TITLE}]({WEBSITE})**'
-    about = '**About RIPPS2**\n' + '\n'.join('- ' + line for line in INTRO)
     return {
         'component': {
             'type': 17,
@@ -53,7 +52,8 @@ def make_payload(gif_url):
                     'type': 12,
                     'items': [{'media': {'url': gif_url}, 'description': GIF_ALT}],
                 },
-                {'type': 10, 'content': about},
+                {'type': 10, 'content': '**About RIPPS2**'},
+                *[{'type': 10, 'content': '• ' + line} for line in INTRO],
                 {
                     'type': 1,
                     'components': [
