@@ -452,6 +452,18 @@ index 0000000..258523c
 +if fails:
 +    print('\n'.join(fails))
 +    sys.exit(1)
+diff --git a/.github/scripts/test_pccf.py b/.github/scripts/test_pccf.py
+index 4f2630e..869b1e1 100644
+--- a/.github/scripts/test_pccf.py
++++ b/.github/scripts/test_pccf.py
+@@ -46,6 +46,7 @@ static int sysLoadModuleBuffer(void *p,int n,int argc,char *argv) {
+ static int gEnablePCCF = 1, pccfModLoaded, pccf_bd_irx, size_pccf_bd_irx, probeLoads, probeFailure = 1, errors;
+ static unsigned int pccfProbeGeneration = 1, pccfAttemptGeneration, BdmGeneration;
+ static int requestDuringProbe;
++static int bdmPccfOn(void) {return gEnablePCCF;} /* build 115: the switch is derived (a PC Card model with the HDD on) */
+ static void bdmRequestPccfProbe(void);
+ #define _STR_PCCF_UNAVAILABLE 1
+ static int bdmLoadOptionalModule(const char *name,void *p,int size) {
 diff --git a/.github/scripts/test_udpfs_art.py b/.github/scripts/test_udpfs_art.py
 index 7216752..37e1c4e 100644
 --- a/.github/scripts/test_udpfs_art.py
@@ -496,6 +508,24 @@ index 7216752..37e1c4e 100644
  
  if failures:
      print("UDPFS ART checks FAILED:")
+diff --git a/docs/PC-CARD-CF.md b/docs/PC-CARD-CF.md
+index fdc0901..31b2d30 100644
+--- a/docs/PC-CARD-CF.md
++++ b/docs/PC-CARD-CF.md
+@@ -5,9 +5,10 @@ consoles with compatible CF/ATA adapters. RiptOPL hardware testing is outstandin
+ PS2CF's own observations do not establish that this integration boots correctly.
+ Expansion-bay PS2, Slim and DESR machines are excluded.
+ 
+-Enable **PC CARD CF (experimental)** in Game Sources. It is off by default.
+-The CF toggle permits the BDM page to start without changing the saved BDM start
+-mode. ROM versions 0100/0101/0120 with Japanese region are eligibility hints only:
++RIPPS2 build 115: there is no switch of its own any more. On these three models CF is part of the internal
++drive's detection: with the HDD source (Game Sources) not Off, RIPPS2 looks for a CF card in the PC CARD slot;
++on every other console it never does, and the row is gone from BDM Devices. The CF page still starts without
++changing the saved BDM start mode. ROM versions 0100/0101/0120 with Japanese region are eligibility hints only:
+ the IOP driver also checks controller revision 0x20, idle/present card, CF CIS,
+ ATA identity/capacity, and bounded MBR partitions before publishing a block device.
+ 
 diff --git a/include/artindex.h b/include/artindex.h
 index 90fe9f6..8688937 100644
 --- a/include/artindex.h
@@ -514,10 +544,18 @@ index 90fe9f6..8688937 100644
   * generation change or a deliberate settings apply -- so a stick with new art on it is picked up.
   * Cheap, and safe from any thread. */
 diff --git a/include/dialogs.h b/include/dialogs.h
-index 4970d36..8915576 100644
+index 4970d36..0407a25 100644
 --- a/include/dialogs.h
 +++ b/include/dialogs.h
-@@ -366,6 +366,7 @@ enum UI_ITEMS {
+@@ -97,6 +97,7 @@ enum UI_ITEMS {
+     CFG_ENABLEILK,
+     CFG_ENABLEMX4SIO,
+     CFG_ENABLEPCCF,
++    CFG_LBL_ENABLEPCCF, // build 115: hidden, PC Card CF follows the HDD (bdmPccfOn)
+     CFG_ENABLEDVR,
+     CFG_ENABLEBDMHDD,
+     CFG_ENABLEUDPBD,     // legacy: kept as an unused placeholder (superseded by CFG_NETPROTOCOL)
+@@ -366,6 +367,7 @@ enum UI_ITEMS {
      RIPPS2_HINTS_BUTTON,      // RIPPS2 build 90: Hints and Glyphs (Interface from build 113)
      RIPPS2_CACHE_BUTTON,      // RIPPS2 build 113: Game Sources > Cache
      CFG_RIPPS2_FASTCACHE,     // RIPPS2 build 113: Cache > Fast Cache (each source's saved list)
@@ -525,6 +563,80 @@ index 4970d36..8915576 100644
      RIPPS2_HINT_ORDER_BUTTON, // and its Hint Order
      RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
      CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
+diff --git a/include/favsupport.h b/include/favsupport.h
+index e75f52a..6e6a64d 100644
+--- a/include/favsupport.h
++++ b/include/favsupport.h
+@@ -5,6 +5,9 @@
+ 
+ #define FAV_MODE_UPDATE_DELAY 240
+ #define FAV_TEXT_MAX          256        // cap on a stored favourite's text length (incl. NUL)
++#define RIPPS2_RECENTS_MAX    99         // build 115: the most recents.bin keeps (Game Sources > Recent Games, 1 to 99)
++// build 115: the recents (recents.bin), newest first: each one's name and FAV_KIND_*; returns how many (at most max)
++int favReadRecents(char (*text)[FAV_TEXT_MAX], int *kind, int max);
+ #define FAV_MAX_ITEMS         512        // cap on records read from favourites.bin
+ #define FAV_MAGIC             0x4641464F // 'OFAV' (little-endian on the EE)
+ #define FAV_VERSION           3          // v3 widens v2's isVcd byte to a KIND (see FAV_KIND_*)
+diff --git a/include/iosupport.h b/include/iosupport.h
+index 633b8fd..ccc0412 100644
+--- a/include/iosupport.h
++++ b/include/iosupport.h
+@@ -24,10 +24,14 @@ enum IO_MODES {
+     UDPFS_MODE, // reserved (item 6); appended last so existing mode values don't shift
+     HTTP_MODE,  // games.csv catalog + byte-range ISO reads; appended for the same reason
+     MIX_MODE,   // RIPPS2: All Games, every game source in one list (mixsupport.c); appended likewise
++    RECENT_MODE, // RIPPS2 build 115: Recent Games, the games played last, a second list from All Games' (mixsupport.c)
+ 
+     MODE_COUNT
+ };
+ 
++// build 115: All Games or Recent Games, the two lists mixsupport.c builds (their rows proxy other sources)
++#define MODE_IS_MIX(m) ((m) == MIX_MODE || (m) == RECENT_MODE)
++
+ #define BDM_MODE_LAST  BDM_MODE7
+ #define BDM_MODE_COUNT (BDM_MODE_LAST - BDM_MODE + 1)
+ 
+diff --git a/include/mixsupport.h b/include/mixsupport.h
+index 837615b..b8682e5 100644
+--- a/include/mixsupport.h
++++ b/include/mixsupport.h
+@@ -6,6 +6,7 @@
+ // RIPPS2 All Games (MIX_MODE): every game on every started game source in one list. See mixsupport.c.
+ 
+ item_list_t *mixGetObject(int initOnly);
++item_list_t *recentGetObject(int initOnly); // build 115: Recent Games
+ 
+ // A game source's list changed: rebuild All Games (one queued pass however many sources change)
+ void mixRequestUpdate(void);
+@@ -14,7 +15,7 @@ void mixRequestUpdate(void);
+ // a row from the saved list whose source has not answered; Cross on one (start, wait, then the usual launch); how
+ // many games the kept list holds
+ void mixSourceAnswered(int mode);
+-int mixIsWaiting(int id);
++int mixIsWaiting(int list, int id); // build 115: list = MIX_MODE or RECENT_MODE, as below
+ struct menu_item;
+ int mixWaitForRow(struct menu_item *menu);
+ int mixMasterGames(void);
+@@ -22,15 +23,15 @@ int ripps2ModeStartMode(int mode); // opl.c: a page's start mode (START_MODE_*)
+ 
+ // The source of one All Games row: its device mode, the id in that device's PS2 or PS1 list (found
+ // again by name if the device has rescanned since), and its FAV_KIND_*. -1 when id is invalid.
+-int mixGetItemSourceMode(int id);
+-int mixGetItemSourceId(int id);
+-int mixGetItemKind(int id);
++int mixGetItemSourceMode(int list, int id);
++int mixGetItemSourceId(int list, int id);
++int mixGetItemKind(int list, int id);
+ 
+ // The selected row's source flags (Options menu, DMA rows), like favGetFlags
+ unsigned char mixGetFlags(item_list_t *itemList);
+ 
+ // Source device mode of the row whose art-cache value matches, or -1. GUI thread, like favGetArtMode.
+-int mixGetArtMode(const char *value);
++int mixGetArtMode(int list, const char *value);
+ 
+ // Favourite stars on All Games rows, kept by the Favourites rebuild (favsupport.c)
+ void mixClearStars(void);
 diff --git a/include/mmcesupport.h b/include/mmcesupport.h
 index abd65f5..dafc73d 100644
 --- a/include/mmcesupport.h
@@ -539,7 +651,7 @@ index abd65f5..dafc73d 100644
  void mmceArmGameIDTransport(void);
  // Reset present MMCE cards (SD2PSX/MemCard PRO2) to default channel (Card 1 / Channel 1) and clear GameID.
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 131f69c..9e419a0 100644
+index 131f69c..8d6432d 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -39,6 +39,8 @@ void ripps2PillarMusic(int on); // ripps2bg.c: the towers settle and light up to
@@ -551,6 +663,15 @@ index 131f69c..9e419a0 100644
  void ripps2BibleManage(void);               // BOOT LOADER > MANAGE: what each card starts; BIBLE (PS2BBL 1.2.0) to install or repair
  int ripps2RebootIopWith(const void *ioprp, int size); // opl.c: the IOP rebooted from an IOPRP image, the menu taken down and back
  int ripps2GetBootPath(char *out, int size); // opl.c: the path RIPPS2 was started from; 0 when unknown
+@@ -103,7 +105,7 @@ extern int gRipps2Hints;   // the button hints along the bottom of the three tab
+ extern int gRipps2CatBar;  // LAUNCH DISC | STORAGE | MEMORY FILES along the top
+ extern int gRipps2CatSwap; // 1: Memory Files first and Launch Disc last
+ extern int gRipps2SrcName; // build 71: the source's name over the game list, RIPPS2_SHOW_*
+-extern int gRipps2Recents; // build 71: Show Recents, 0 (off) to 9 recently launched games on Favorites
++extern int gRipps2Recents; // build 71: Show Recents; build 115: Recent Games, 0 (off) or how many it keeps, up to 99
+ float ripps2SourceNameAlpha(void);
+ const char *ripps2PaletteName(int p);
+ void ripps2NoteInput(void);         // every frame, once the pads are read: the idle time the fades follow
 @@ -148,6 +150,7 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
  
  // ---- build 113: the category sidebar (ripps2side.c) ----
@@ -587,7 +708,7 @@ index 1e8421d..ae7f253 100644
  
  // Compose the exact launch argv while the GUI is still live. Refuses a launch that would exceed
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index aef6bd1..be4c6b5 100644
+index aef6bd1..4103db3 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -305,7 +305,7 @@ gui_strings:
@@ -599,7 +720,28 @@ index aef6bd1..be4c6b5 100644
  - label: HINT_SPINDOWN
    string: Value in minute(s), 0 to disable spin down.
  - label: HDD_SPINDOWN
-@@ -1582,7 +1582,11 @@ gui_strings:
+@@ -1403,6 +1403,8 @@ gui_strings:
+   string: "L2 and R2 together jump to a random game. Boot also opens each list on a random game."
+ - label: RIPPS2_ALL_GAMES
+   string: All Games
++- label: RIPPS2_RECENT_GAMES
++  string: Recent Games
+ - label: RIPPS2_SET_METADATA
+   string: Set Metadata
+ - label: RIPPS2_BOOT_LOCK
+@@ -1512,9 +1514,9 @@ gui_strings:
+ - label: HINT_RIPPS2_SOURCE_NAME
+   string: "The source's name over the games (ALL GAMES, HDD GAMES and so on). Fade When Idle fades it with the category bar; Pop In shows it big in the middle of the page instead, the way L3 names the list, on the first list after boot and whenever the source changes, then fades. Themes can make Pop In their Shown. Theme: the theme decides."
+ - label: RIPPS2_RECENTS
+-  string: Show Recents
++  string: Recent Games
+ - label: HINT_RIPPS2_RECENTS
+-  string: "Up to this many of your last launched games at the top of Starred Games, newest first. 0 turns it off."
++  string: "Recent Games, a page in the side bar with your last launched games, newest first: how many it keeps, 1 to 99 (Triangle types the number). A game whose drive is on Manual starts it when you pick it. 0 turns the page off."
+ - label: RIPPS2_CATEGORY_ORDER
+   string: Category Order
+ - label: HINT_RIPPS2_CATEGORY_ORDER
+@@ -1582,7 +1584,11 @@ gui_strings:
  - label: RIPPS2_FAST_CACHE
    string: Fast Cache
  - label: HINT_RIPPS2_FAST_CACHE
@@ -874,10 +1016,126 @@ index 51dd1df..6aa8d21 100644
  {
      int i;
 diff --git a/src/bdmsupport.c b/src/bdmsupport.c
-index 7894802..f345c14 100644
+index 7894802..5dd8ca8 100644
 --- a/src/bdmsupport.c
 +++ b/src/bdmsupport.c
-@@ -1675,13 +1675,6 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+@@ -875,6 +875,36 @@ static void bdmDiagRequestIopSnapshot(const char *reason, int mode, int openResu
+         BdmDiagSnapshotRequestCount, reason, BdmGeneration, mode, openResult, result);
+ }
+ 
++/* ROM version is eligibility only; the IOP driver still validates revision,
++   idle/present card, CIS, ATA capacity, and the mounted filesystem. */
++static int bdmPccfCandidate(void)
++{
++    static int eligible = -1;
++    if (eligible < 0) {
++        char romver[16] = {0};
++        int fd = open("rom0:ROMVER", O_RDONLY);
++        int size = fd >= 0 ? read(fd, romver, sizeof(romver) - 1) : -1;
++        if (fd >= 0)
++            close(fd);
++        eligible = size >= 6 && romver[4] == 'J' &&
++                   (!strncmp(romver, "0100", 4) || !strncmp(romver, "0101", 4) || !strncmp(romver, "0120", 4));
++        fd = open("rom0:PSXVER", O_RDONLY);
++        if (fd >= 0) {
++            close(fd);
++            eligible = 0;
++        }
++    }
++    return eligible;
++}
++
++// RIPPS2 build 115: PC Card CF has no switch of its own any more. It is the drive of the SCPH-10000, 15000 and 18000
++// (their PC Card slot), so it follows the internal HDD's: on those three, with the HDD source not Off; never elsewhere,
++// where its row only puzzled people (the user, 10/25: "whats pc card cf games doing there"). enable_pccf is no longer read.
++static int bdmPccfOn(void)
++{
++    return gHDDStartMode != START_MODE_DISABLED && bdmPccfCandidate();
++}
++
+ static void bdmDiagFlushPendingIopState(item_list_t *itemList)
+ {
+     if (BdmDiagEventPending) {
+@@ -911,7 +941,7 @@ static void bdmDiagFlushPendingIopState(item_list_t *itemList)
+ // without needing a physical replug.
+ void bdmRequestPccfProbe(void)
+ {
+-    if (!gEnablePCCF || pccfModLoaded)
++    if (!bdmPccfOn() || pccfModLoaded)
+         return;
+     // A separate generation prevents hotplug/automatic refresh from retrying hardware init.
+     // A request during an in-flight attempt remains pending for the next worker pass.
+@@ -1163,7 +1193,7 @@ static int bdmShouldQueueModuleLoad(void)
+         return 1;
+     if (gEnableMX4SIO && !mx4sioModLoaded)
+         return 1;
+-    if (gEnablePCCF && !pccfModLoaded && pccfAttemptGeneration != pccfProbeGeneration)
++    if (bdmPccfOn() && !pccfModLoaded && pccfAttemptGeneration != pccfProbeGeneration)
+         return 1;
+     if (gEnableBdmHDD && !hddModLoaded)
+         return 1;
+@@ -1173,32 +1203,10 @@ static int bdmShouldQueueModuleLoad(void)
+     return 0;
+ }
+ 
+-/* ROM version is eligibility only; the IOP driver still validates revision,
+-   idle/present card, CIS, ATA capacity, and the mounted filesystem. */
+-static int bdmPccfCandidate(void)
+-{
+-    static int eligible = -1;
+-    if (eligible < 0) {
+-        char romver[16] = {0};
+-        int fd = open("rom0:ROMVER", O_RDONLY);
+-        int size = fd >= 0 ? read(fd, romver, sizeof(romver) - 1) : -1;
+-        if (fd >= 0)
+-            close(fd);
+-        eligible = size >= 6 && romver[4] == 'J' &&
+-                   (!strncmp(romver, "0100", 4) || !strncmp(romver, "0101", 4) || !strncmp(romver, "0120", 4));
+-        fd = open("rom0:PSXVER", O_RDONLY);
+-        if (fd >= 0) {
+-            close(fd);
+-            eligible = 0;
+-        }
+-    }
+-    return eligible;
+-}
+-
+ static int bdmStartModeAllowsDevice(int type)
+ {
+     return gBDMStartMode != START_MODE_DISABLED || type == BDM_TYPE_UDPBD ||
+-           (type == BDM_TYPE_PCCF && gEnablePCCF) || (type == BDM_TYPE_ATA && gEnableBdmHDD); // build 114: one HDD
++           (type == BDM_TYPE_PCCF && bdmPccfOn()) || (type == BDM_TYPE_ATA && gEnableBdmHDD); // build 114: one HDD
+ }
+ 
+ int bdmModeIsPCCF(int mode)
+@@ -1211,7 +1219,7 @@ int bdmModeIsPCCF(int mode)
+ 
+ static void bdmLoadPccfModule(void)
+ {
+-    if (gEnablePCCF && !pccfModLoaded && pccfAttemptGeneration != pccfProbeGeneration) {
++    if (bdmPccfOn() && !pccfModLoaded && pccfAttemptGeneration != pccfProbeGeneration) {
+         pccfAttemptGeneration = pccfProbeGeneration;
+         if (bdmPccfCandidate() && sysTryClaimPccf()) {
+             if (bdmLoadOptionalModule("PCCF_BD", &pccf_bd_irx, size_pccf_bd_irx) >= 0)
+@@ -1574,7 +1582,7 @@ static void bdmInit(item_list_t *itemList)
+ // the UDPFS_MODE derivation; the user's saved gBDMStartMode is never modified or persisted.
+ int bdmEffectiveStartMode(void)
+ {
+-    if ((gEnableUDPBD || gEnablePCCF) && gBDMStartMode != START_MODE_AUTO)
++    if ((gEnableUDPBD || bdmPccfOn()) && gBDMStartMode != START_MODE_AUTO)
+         return START_MODE_AUTO;
+     // RIPPS2 build 96: Default Menu > Last Used, last on a drive page: the drives start with the boot
+     if (gRipps2StartLast && gBDMStartMode == START_MODE_MANUAL && gRipps2LastDevice >= BDM_MODE && gRipps2LastDevice < ETH_MODE)
+@@ -1598,7 +1606,7 @@ static int bdmTransportEnabled(int bdmDeviceType)
+         case BDM_TYPE_SDC:
+             return gEnableMX4SIO ? 1 : 0;
+         case BDM_TYPE_PCCF:
+-            return gEnablePCCF ? 1 : 0;
++            return bdmPccfOn() ? 1 : 0;
+         case BDM_TYPE_ATA:
+             return gEnableBdmHDD ? 1 : 0;
+         case BDM_TYPE_UDPBD:
+@@ -1675,13 +1683,6 @@ static int bdmNeedsUpdate(item_list_t *itemList)
          return 1;
      }
  
@@ -891,7 +1149,7 @@ index 7894802..f345c14 100644
      // If the device menu is visible double check the device type and if support for this device type is enabled. If the user switches device support
      // to off for a bdm device we want to hide the menu even though the drivers are still loaded and the device is being detected by bdm.
      opl_io_module_t *pOwner = (opl_io_module_t *)itemList->owner;
-@@ -1709,6 +1702,16 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+@@ -1709,6 +1710,16 @@ static int bdmNeedsUpdate(item_list_t *itemList)
      if (folderConsumeDirty(itemList->mode))
          return 1;
  
@@ -909,10 +1167,41 @@ index 7894802..f345c14 100644
          pDeviceData->bdmPs1RetryCount = pDeviceData->bdmPs1RetryPending = 0;
      // At most two extra scans on the normal idle-refresh cadence. This does
 diff --git a/src/dialogs.c b/src/dialogs.c
-index 6379d40..c9f14b6 100644
+index 6379d40..dd0ed37 100644
 --- a/src/dialogs.c
 +++ b/src/dialogs.c
-@@ -2090,6 +2090,11 @@ struct UIItem diaCacheConfig[] = {
+@@ -4,6 +4,7 @@
+ #include "include/lang.h"
+ #include "include/gui.h"
+ #include "include/guigame.h"
++#include "include/favsupport.h" // build 115: RIPPS2_RECENTS_MAX, the Recent Games row
+ 
+ #include <stdio.h>
+ 
+@@ -474,10 +475,11 @@ struct UIItem diaDeviceConfig[] = {
+     {UI_ENUM, CFG_RIPPS2_STARSIDE, 1, 1, _STR_HINT_RIPPS2_STARSIDE, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    // build 113: Show Recents, the recently launched games on Starred Games, from Colors and More
++    // build 113: Show Recents, the recently launched games on Starred Games, from Colors and More. Build 115: Recent
++    // Games, a page of its own in the side bar: 0 (Off) or how many it keeps, 1 to 99 (Triangle types the number)
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_RECENTS}}},
+     {UI_SPACER},
+-    {UI_INT, UICFG_RIPPS2_RECENTS, 1, 1, _STR_HINT_RIPPS2_RECENTS, 0, 0, {.intvalue = {0, 0, 0, 9}}},
++    {UI_INT, UICFG_RIPPS2_RECENTS, 1, 1, _STR_HINT_RIPPS2_RECENTS, 0, 0, {.intvalue = {0, 0, 0, RIPPS2_RECENTS_MAX}}},
+     {UI_BREAK},
+ 
+     // build 113: where the games are on the drives, from Advanced, and the Cache page (how the lists are kept)
+@@ -530,7 +532,7 @@ struct UIItem diaBdmDevicesConfig[] = {
+     {UI_BOOL, CFG_ENABLEMX4SIO, 1, 1, _STR_HINT_ENABLE_MX4SIO, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
+-    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {"PC CARD CF (experimental)", -1}}},
++    {UI_LABEL, CFG_LBL_ENABLEPCCF, 1, 1, -1, -40, 0, {.label = {"PC CARD CF (experimental)", -1}}},
+     {UI_SPACER},
+     {UI_BOOL, CFG_ENABLEPCCF, 1, 1, _STR_HINT_ENABLE_PCCF, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+@@ -2090,6 +2092,11 @@ struct UIItem diaCacheConfig[] = {
      {UI_BOOL, CFG_RIPPS2_FASTCACHE, 1, 1, _STR_HINT_RIPPS2_FAST_CACHE, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -937,8 +1226,55 @@ index 642b1ff..0b2a923 100644
      // RIPPS2 build 110: the games on screen came from the share's last list: read the share once
      if (ethSnap.shown) {
          ethSnap.shown = 0;
+diff --git a/src/favsupport.c b/src/favsupport.c
+index 12722ca..f63224f 100644
+--- a/src/favsupport.c
++++ b/src/favsupport.c
+@@ -873,9 +873,7 @@ static int favUpdateItemList(item_list_t *itemList)
+     int rawCount = 0, recentCount = 0, favRaw = 0, i, j;
+     fav_raw_t *favs = favReadFile(&favRaw);
+     // RIPPS2 build 71: Show Recents puts the last launched games, newest first, above the favourites
+-    fav_raw_t *recents = gRipps2Recents > 0 ? favReadNamed("recents.bin", &recentCount) : NULL;
+-    if (recentCount > gRipps2Recents)
+-        recentCount = gRipps2Recents;
++    fav_raw_t *recents = NULL; // build 115: the recents have a page of their own, Recent Games (mixsupport.c)
+     rawCount = recentCount + favRaw;
+     if (rawCount == 0) {
+         free(favs);
+@@ -1448,8 +1446,8 @@ int favRemoveByIndex(int favIndex)
+ }
+ 
+ // RIPPS2 build 71: Show Recents. The game about to launch goes to the top of recents.bin (it is
+-// moved there if it is already in it), which keeps the nine most recent.
+-#define FAV_RECENTS_MAX 9
++// moved there if it is already in it), which keeps the most recent. Build 115: 99 of them, for Recent Games
++#define FAV_RECENTS_MAX RIPPS2_RECENTS_MAX
+ void favPushRecent(int mode, int id, int icon_id, int text_id, const char *text, int kind)
+ {
+     int count = 0, n = 1, i;
+@@ -1477,6 +1475,20 @@ void favPushRecent(int mode, int id, int icon_id, int text_id, const char *text,
+     free(recs);
+ }
+ 
++int favReadRecents(char (*text)[FAV_TEXT_MAX], int *kind, int max)
++{
++    int count = 0, i;
++    fav_raw_t *recs = favReadNamed("recents.bin", &count);
++    if (recs == NULL)
++        return 0;
++    for (i = 0; i < count && i < max; i++) {
++        snprintf(text[i], FAV_TEXT_MAX, "%s", recs[i].text);
++        kind[i] = recs[i].kind;
++    }
++    free(recs);
++    return i;
++}
++
+ void loadFavourites(void)
+ {
+     // Mark the FAV list stale and schedule its single canonical rebuild. The clear + re-append
 diff --git a/src/gui.c b/src/gui.c
-index fef5147..2ef0567 100644
+index fef5147..111b999 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -674,6 +674,7 @@ void guiExitPathBegin(struct UIItem *ui)
@@ -949,7 +1285,18 @@ index fef5147..2ef0567 100644
  }
  
  // RIPPS2: BOOT LOCK (ripps2boot.c). Turning it on fills an empty IGR Path with RIPPS2's own path; a
-@@ -953,9 +954,10 @@ static void guiSaveAdvancedSettings(struct UIItem *ui);
+@@ -927,6 +928,10 @@ static int guiShowBdmDevicesConfig(void)
+ {
+     int was[5] = {gEnableUSB, gEnableMX4SIO, gEnablePCCF, gEnableDVR, gEnableILK};
+ 
++    // build 115: PC Card CF follows the internal HDD on the consoles that have the slot (bdmsupport.c, bdmPccfOn)
++    diaSetVisible(diaBdmDevicesConfig, CFG_LBL_ENABLEPCCF, 0);
++    diaSetVisible(diaBdmDevicesConfig, CFG_ENABLEPCCF, 0);
++
+     diaSetInt(diaBdmDevicesConfig, CFG_ENABLEUSB, gEnableUSB);
+     diaSetInt(diaBdmDevicesConfig, CFG_ENABLEMX4SIO, gEnableMX4SIO);
+     diaSetInt(diaBdmDevicesConfig, CFG_ENABLEPCCF, gEnablePCCF);
+@@ -953,9 +958,10 @@ static void guiSaveAdvancedSettings(struct UIItem *ui);
  static void guiShowCacheConfig(void)
  {
      static char seanceRows[SEANCE_COUNT][200]; // build 114: Launchers, a line each (the page keeps the pointers)
@@ -961,7 +1308,7 @@ index fef5147..2ef0567 100644
      diaSetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, gHDDGameListCache);
      diaSetInt(diaCacheConfig, UICFG_AUTOREFRESH, gAutoRefresh);
      for (;;) {
-@@ -980,9 +982,10 @@ static void guiShowCacheConfig(void)
+@@ -980,21 +986,23 @@ static void guiShowCacheConfig(void)
      if (!result)
          return;
      diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, &gRipps2FastCache);
@@ -973,6 +1320,691 @@ index fef5147..2ef0567 100644
          guiSettingsSavePending = 1; // saved with the rest when Settings closes
  }
  
+-// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's);
+-// a change fills Starred Games again so it shows at once, and is saved when Settings closes
++// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's).
++// Build 115: Recent Games, its own page (0 hides it, else how many, up to 99); the change shows when Game Sources
++// applies (initAllSupport starts or hides the page) and is saved when Settings closes
+ static void guiRipps2RecentsRead(struct UIItem *dia)
+ {
+     int v;
+-    if (diaGetInt(dia, UICFG_RIPPS2_RECENTS, &v) && v >= 0 && v <= 9 && v != gRipps2Recents) {
++    if (diaGetInt(dia, UICFG_RIPPS2_RECENTS, &v) && v >= 0 && v <= RIPPS2_RECENTS_MAX && v != gRipps2Recents) {
+         gRipps2Recents = v;
+         guiSettingsSavePending = 1;
+-        ioPutRequest(IO_CUSTOM_SIMPLEACTION, &loadFavourites);
++        mixRequestUpdate(); // its rows, as many as now kept
+     }
+ }
+ 
+@@ -2807,8 +2815,8 @@ void guiShowArtworkConfig(void)
+         diaGetInt(diaArtworkConfig, UICFG_ART_DELAY, &artDelayIdx);
+         if (artDelayIdx >= 0 && artDelayIdx < 4) {
+             gArtDelay = artDelayValues[artDelayIdx];
+-            item_list_t *lists[] = {appGetObject(1), hddGetObject(1), ethGetObject(1), mmceGetObject(1), udpfsGetObject(1), favGetObject(1), mixGetObject(1)};
+-            for (int i = 0; i < 7; i++) {
++            item_list_t *lists[] = {appGetObject(1), hddGetObject(1), ethGetObject(1), mmceGetObject(1), udpfsGetObject(1), favGetObject(1), mixGetObject(1), recentGetObject(1)};
++            for (int i = 0; i < 8; i++) {
+                 if (lists[i] != NULL)
+                     lists[i]->delay = gArtDelay;
+             }
+diff --git a/src/guigame.c b/src/guigame.c
+index a7ff5de..9e3b714 100644
+--- a/src/guigame.c
++++ b/src/guigame.c
+@@ -586,7 +586,7 @@ void guiGameShowVMCMenu(int id, item_list_t *support, config_set_t *configSet)
+     // this menu is reachable from Favourites too, where the per-device compat lock cannot see it.
+     int sourceMode = support == NULL           ? -1 :
+                      support->mode == FAV_MODE ? favGetItemSourceMode(id) :
+-                     support->mode == MIX_MODE ? mixGetItemSourceMode(id) :
++                     MODE_IS_MIX(support->mode) ? mixGetItemSourceMode(support->mode, id) :
+                                                  support->mode;
+     if (sourceMode == HTTP_MODE) {
+         guiMsgBox(_l(_STR_HTTP_NO_VMC), 0, NULL);
+@@ -1330,7 +1330,7 @@ static unsigned char gameEffectiveFlags(item_list_t *support)
+ {
+     if (support == NULL)
+         return 0;
+-    return (support->mode == FAV_MODE) ? favGetFlags(support) : (support->mode == MIX_MODE) ? mixGetFlags(support) : support->flags;
++    return (support->mode == FAV_MODE) ? favGetFlags(support) : MODE_IS_MIX(support->mode) ? mixGetFlags(support) : support->flags;
+ }
+ 
+ // Core-aware per-game settings: grey the rows the *other* core ignores, so the
+@@ -1453,7 +1453,7 @@ void guiGameShowCompatConfig(int id, item_list_t *support, config_set_t *configS
+     int i;
+     int sourceMode = support == NULL           ? -1 :
+                      support->mode == FAV_MODE ? favGetItemSourceMode(id) :
+-                     support->mode == MIX_MODE ? mixGetItemSourceMode(id) :
++                     MODE_IS_MIX(support->mode) ? mixGetItemSourceMode(support->mode, id) :
+                                                  support->mode;
+ 
+     // static, NOT block-scoped: diaSetEnum stores the raw pointer and diaCompatConfig keeps
+@@ -1496,7 +1496,7 @@ void guiGameShowCompatConfig(int id, item_list_t *support, config_set_t *configS
+     // stays enabled and the launch-side guard arbitrates.
+     bsdfsDeviceCapable = (support == NULL) ||
+                          ((support->mode >= BDM_MODE && support->mode <= BDM_MODE6 && libViewActive(support->mode) != LIB_VIEW_PS1) ||
+-                          support->mode == FAV_MODE || support->mode == MIX_MODE);
++                          support->mode == FAV_MODE || MODE_IS_MIX(support->mode));
+     // VCD games launch through POPSTARTER only, so the Loader Core is inert for them -- keep every
+     // Neutrino-only row greyed even under a Neutrino global default (guiGameSetCoreAwareState reads
+     // this). SMB likewise: ethsupport has no Neutrino launch leg, the effective core is always <OPL>.
+diff --git a/src/menusys.c b/src/menusys.c
+index 1f08c7e..dc59a25 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -1022,6 +1022,8 @@ static int menuDevicePageRank(const menu_item_t *item)
+ 
+     if (support->mode == MIX_MODE)
+         return -1; // RIPPS2: All Games leads
++    if (support->mode == RECENT_MODE)
++        return 5; // build 115: Recent Games with Starred Games (the sort keeps the order they came in)
+     if (support->mode >= BDM_MODE && support->mode <= BDM_MODE_LAST)
+         return 0;
+     if (support->mode == MMCE_MODE)
+@@ -2219,13 +2221,13 @@ static menu_list_t *menuSourceAt(int i)
+ 
+ #ifdef RIPPS2_GUARD_TEST
+ // the reel's test build (build 114; the user, 10/23: every drive a viewer might own, in the side bar): the lab has only the
+-// exFAT HDD, so USB, MX4SIO, iLink and PC Card rows join the Storage drawer after the HDD's (their names and glyphs; there
++// exFAT HDD, so USB, MX4SIO and iLink rows join the Storage drawer after the HDD's (their names and glyphs; there
+ // is nothing to open) while BDM Devices Start Mode is not Off
+ static const struct
+ {
+     int text, icon;
+-} menuSims[] = {{_STR_USB_GAMES, USB_ICON}, {_STR_MX4SIO_GAMES, MX4SIO_ICON}, {_STR_ILINK_GAMES, ILINK_ICON}, {_STR_PCCF_GAMES, BDM_ICON}};
+-#define MENU_SIMS 4
++} menuSims[] = {{_STR_USB_GAMES, USB_ICON}, {_STR_MX4SIO_GAMES, MX4SIO_ICON}, {_STR_ILINK_GAMES, ILINK_ICON}}; // build 115: no PC Card row
++#define MENU_SIMS 3
+ 
+ static int menuSimAt(void) // the row the drives come after; -1 while BDM Devices is Off
+ {
+diff --git a/src/mixsupport.c b/src/mixsupport.c
+index 3eb2114..1a11f48 100644
+--- a/src/mixsupport.c
++++ b/src/mixsupport.c
+@@ -28,6 +28,11 @@
+   usual (opl.c, mixWaitForRow). A source that is off, or started and silent for MIX_WAIT_S, drops its
+   saved games. Only with Fast Cache on; written only when a source's list changed it, never while a
+   started source is still to answer.
++
++  RIPPS2 build 115: Recent Games (RECENT_MODE) is a second list from the same gathering: the games in recents.bin, newest
++  first, as many as Game Sources > Recent Games keeps (1 to 99). Its rows are All Games' rows, waiting ones included, so
++  a recent game whose source is on Manual starts that source when it is picked, as on All Games. Each list keeps its own
++  rows (mix_set_t); both are guarded by mixSema.
+ */
+ 
+ #include <stdio.h>
+@@ -78,10 +83,15 @@ typedef struct
+     int family;         // build 114: MIX_FAM_*, the kind of source (a waiting row has no owner yet)
+ } mix_rec_t;
+ 
+-static mix_rec_t *mixArray = NULL;
+-static int mixCount = 0;
+-static int mixForceUpdate = 1; // the first deferred pass builds the list
+-static item_list_t mixItemList;
++typedef struct
++{
++    mix_rec_t *arr;  // the rows, published whole under mixSema
++    int count;
++    int forceUpdate; // the first deferred pass builds the list
++} mix_set_t;
++static mix_set_t mixSets[2] = {{NULL, 0, 1}, {NULL, 0, 1}}; // All Games, Recent Games
++#define MIX_SET(mode) (&mixSets[(mode) == RECENT_MODE])
++static item_list_t mixItemList, recentItemList;
+ static int mixSema = -1;
+ 
+ static void mixLock(void)
+@@ -379,15 +389,15 @@ static void mixFreeRecords(mix_rec_t *arr, int count)
+     free(arr);
+ }
+ 
+-static void mixFreeArray(void)
++static void mixFreeArray(mix_set_t *set)
+ {
+     mixLock();
+-    mix_rec_t *arr = mixArray;
+-    int count = mixCount;
++    mix_rec_t *arr = set->arr;
++    int count = set->count;
+ 
+     // readers see an empty list before anything is freed, and the art worker is not inside it
+-    mixArray = NULL;
+-    mixCount = 0;
++    set->arr = NULL;
++    set->count = 0;
+     mixUnlock();
+     mixFreeRecords(arr, count);
+ }
+@@ -505,7 +515,7 @@ static int mixCompare(const void *a, const void *b)
+ 
+ // ---- item_list_t callbacks ----
+ 
+-static int mixGetTextId(item_list_t *itemList) { return _STR_RIPPS2_ALL_GAMES; }
++static int mixGetTextId(item_list_t *itemList) { return itemList->mode == RECENT_MODE ? _STR_RIPPS2_RECENT_GAMES : _STR_RIPPS2_ALL_GAMES; }
+ static int mixGetIconId(item_list_t *itemList) { return BDM_ICON; }
+ 
+ static void mixInit(item_list_t *itemList)
+@@ -516,9 +526,10 @@ static void mixInit(item_list_t *itemList)
+ static int mixNeedsUpdate(item_list_t *itemList)
+ {
+     // the L3 dirty flag is consumed first and always, so a forced rebuild clears it too (as favNeedsUpdate)
+-    int viewToggled = libViewConsumeDirty(MIX_MODE), fam;
+-    if (mixForceUpdate) {
+-        mixForceUpdate = 0;
++    mix_set_t *set = MIX_SET(itemList->mode);
++    int viewToggled = libViewConsumeDirty(itemList->mode), fam;
++    if (set->forceUpdate) {
++        set->forceUpdate = 0;
+         return 1;
+     }
+     // build 114: polled only while saved games wait (updateDelay): a started source silent past MIX_WAIT_S drops them
+@@ -530,12 +541,16 @@ static int mixNeedsUpdate(item_list_t *itemList)
+ 
+ // One pass: gather every source, sort, drop the second copy of a title, keep the rows the current
+ // view shows (ALL, PS1 or PS2). updateMenuFromGameList appends the submenu from the count returned.
++static int mixKeepRecents(mix_rec_t *arr, int kept);
++
+ static int mixUpdateItemList(item_list_t *itemList)
+ {
+     mix_build_t b = {NULL, 0, 0};
+-    int i, kept = 0, shown = 0, waiting = 0, settling = 0, view = libViewActive(MIX_MODE);
++    mix_set_t *set = MIX_SET(itemList->mode);
++    int recent = itemList->mode == RECENT_MODE;
++    int i, kept = 0, shown = 0, waiting = 0, settling = 0, view = recent ? LIB_VIEW_ALL : libViewActive(MIX_MODE);
+ 
+-    mixFreeArray();
++    mixFreeArray(set);
+     for (i = 0; i < MIX_SOURCE_COUNT; i++)
+         mixCollect(&b, mixSourceModes[i], i);
+     // build 114: the saved games of every source still to answer (rank 100 and up, so a live row of the same title wins)
+@@ -550,7 +565,7 @@ static int mixUpdateItemList(item_list_t *itemList)
+         mixFamWaiting[m->family] = 1;
+         waiting++;
+     }
+-    mixItemList.updateDelay = waiting ? MENU_UPD_DELAY_GENREFRESH : MENU_UPD_DELAY_NOUPDATE;
++    itemList->updateDelay = waiting ? MENU_UPD_DELAY_GENREFRESH : MENU_UPD_DELAY_NOUPDATE;
+     if (b.count == 0) {
+         free(b.arr);
+         return 0;
+@@ -568,8 +583,11 @@ static int mixUpdateItemList(item_list_t *itemList)
+         b.arr[kept++] = *r;
+     }
+     // build 114: kept as the master list (every kind, whatever the view), once no started source is still to answer
+-    if (!settling)
++    if (!settling && !recent)
+         mixMasterSave(b.arr, kept);
++    // build 115: Recent Games keeps the recent ones, in the order they were played
++    if (recent)
++        kept = mixKeepRecents(b.arr, kept);
+     // the rows the view shows (ALL, PS1 or PS2)
+     for (i = 0; i < kept; i++) {
+         mix_rec_t *r = &b.arr[i];
+@@ -580,31 +598,63 @@ static int mixUpdateItemList(item_list_t *itemList)
+         }
+         b.arr[shown++] = *r;
+     }
+-    LOG("mixUpdateItemList: %d gathered, %d kept, %d shown, %d saved games waiting (view %d)\n", b.count, kept, shown, waiting, view);
++    LOG("mixUpdateItemList(%d): %d gathered, %d kept, %d shown, %d saved games waiting (view %d)\n", itemList->mode, b.count, kept, shown, waiting, view);
+     mixLock();
+-    mixArray = b.arr; // published whole, after it is complete
+-    mixCount = shown;
++    set->arr = b.arr; // published whole, after it is complete
++    set->count = shown;
+     mixUnlock();
+     return shown;
+ }
+ 
+-static int mixGetItemCount(item_list_t *itemList) { return mixCount; }
++// build 115: the rows of games in recents.bin, newest first, at most gRipps2Recents of them; the rest freed. A recent is
++// matched by its name and whether it is a PS1 game, as one title is one row here
++static int mixKeepRecents(mix_rec_t *arr, int kept)
++{
++    char(*texts)[FAV_TEXT_MAX] = malloc(RIPPS2_RECENTS_MAX * FAV_TEXT_MAX);
++    int kinds[RIPPS2_RECENTS_MAX];
++    unsigned char *taken = calloc(kept > 0 ? kept : 1, 1);
++    mix_rec_t *out = malloc((kept > 0 ? kept : 1) * sizeof(mix_rec_t));
++    int n = 0, shown = 0, r, j;
++
++    if (texts != NULL && taken != NULL && out != NULL)
++        n = favReadRecents(texts, kinds, RIPPS2_RECENTS_MAX);
++    for (r = 0; r < n && shown < gRipps2Recents; r++)
++        for (j = 0; j < kept; j++)
++            if (!taken[j] && mixKindIsPs1(arr[j].kind) == mixKindIsPs1(kinds[r]) && !strcmp(arr[j].text, texts[r])) {
++                taken[j] = 1;
++                out[shown++] = arr[j];
++                break;
++            }
++    for (j = 0; j < kept; j++)
++        if (taken == NULL || !taken[j]) {
++            free(arr[j].text);
++            free(arr[j].startup);
++        }
++    if (out != NULL)
++        memcpy(arr, out, shown * sizeof(mix_rec_t));
++    free(out);
++    free(taken);
++    free(texts);
++    return shown;
++}
++
++static int mixGetItemCount(item_list_t *itemList) { return MIX_SET(itemList->mode)->count; }
+ 
+-static int mixValidIndex(int id) { return mixArray != NULL && id >= 0 && id < mixCount; }
++static int mixValidIndex(const mix_set_t *set, int id) { return set->arr != NULL && id >= 0 && id < set->count; }
+ 
+ // A stack copy of a row's source, forced to the list the row came from
+-static item_list_t *mixOwnerView(int id, item_list_t *view)
++static item_list_t *mixOwnerView(const mix_set_t *set, int id, item_list_t *view)
+ {
+-    if (!mixValidIndex(id) || view == NULL || mixArray[id].owner == NULL)
++    if (!mixValidIndex(set, id) || view == NULL || set->arr[id].owner == NULL)
+         return NULL;
+-    *view = *mixArray[id].owner;
+-    view->viewOverride = mixKindIsPs1(mixArray[id].kind) ? ITEM_VIEW_FORCE_PS1 : ITEM_VIEW_FORCE_ISO;
++    *view = *set->arr[id].owner;
++    view->viewOverride = mixKindIsPs1(set->arr[id].kind) ? ITEM_VIEW_FORCE_PS1 : ITEM_VIEW_FORCE_ISO;
+     return view;
+ }
+ 
+ // RIPPS2 build 74: a row as it stands, copied out under mixSema. The GUI thread asks about the row
+ // on screen (the info page: its flags, its source, its kind) while the IO worker may be rebuilding
+-// this list -- which frees the array first. Reading mixArray outside the lock could read a freed
++// this list -- which frees the array first. Reading a list's rows outside the lock could read a freed
+ // record, the info page hang testers hit on All Games as the disc and cover came in.
+ typedef struct
+ {
+@@ -613,15 +663,15 @@ typedef struct
+     char text[256];
+ } mix_row_t;
+ 
+-static int mixRow(int id, mix_row_t *r)
++static int mixRow(const mix_set_t *set, int id, mix_row_t *r)
+ {
+     int ok = 0;
+     mixLock();
+-    if (mixOwnerView(id, &r->view) != NULL) {
+-        r->kind = mixArray[id].kind;
+-        r->mode = mixArray[id].mode;
+-        r->id = mixArray[id].id;
+-        snprintf(r->text, sizeof(r->text), "%s", mixArray[id].text);
++    if (mixOwnerView(set, id, &r->view) != NULL) {
++        r->kind = set->arr[id].kind;
++        r->mode = set->arr[id].mode;
++        r->id = set->arr[id].id;
++        snprintf(r->text, sizeof(r->text), "%s", set->arr[id].text);
+         ok = 1;
+     }
+     mixUnlock();
+@@ -656,34 +706,37 @@ static int mixOwnerId(mix_row_t *r)
+ 
+ static int mixGetRowView(item_list_t *itemList, int id)
+ {
++    mix_set_t *set = MIX_SET(itemList->mode);
+     int kind = -1;
+-    (void)itemList;
+     mixLock();
+-    if (mixValidIndex(id))
+-        kind = mixArray[id].kind;
++    if (mixValidIndex(set, id))
++        kind = set->arr[id].kind;
+     mixUnlock();
+     return kind >= 0 ? favKindView(kind) : -1;
+ }
+ 
+ static char *mixGetItemName(item_list_t *itemList, int id)
+ {
+-    return mixValidIndex(id) ? mixArray[id].text : "";
++    mix_set_t *set = MIX_SET(itemList->mode);
++    return mixValidIndex(set, id) ? set->arr[id].text : "";
+ }
+ 
+ static int mixGetItemNameLength(item_list_t *itemList, int id)
+ {
+-    return mixValidIndex(id) ? (int)strlen(mixArray[id].text) + 1 : 0;
++    mix_set_t *set = MIX_SET(itemList->mode);
++    return mixValidIndex(set, id) ? (int)strlen(set->arr[id].text) + 1 : 0;
+ }
+ 
+ static char *mixGetItemStartup(item_list_t *itemList, int id)
+ {
+-    return mixValidIndex(id) ? mixArray[id].startup : "";
++    mix_set_t *set = MIX_SET(itemList->mode);
++    return mixValidIndex(set, id) ? set->arr[id].startup : "";
+ }
+ 
+ static config_set_t *mixGetConfig(item_list_t *itemList, int id)
+ {
+     mix_row_t r;
+-    if (!mixRow(id, &r))
++    if (!mixRow(MIX_SET(itemList->mode), id, &r))
+         return NULL;
+     item_list_t *o = &r.view;
+     // A PS1 row's config is keyed by its name under the source's prefix, as on a device page and as
+@@ -711,7 +764,7 @@ static config_set_t *mixGetConfig(item_list_t *itemList, int id)
+ static void mixLaunchItem(item_list_t *itemList, int id, config_set_t *configSet)
+ {
+     mix_row_t r;
+-    if (!mixRow(id, &r))
++    if (!mixRow(MIX_SET(itemList->mode), id, &r))
+         return;
+     item_list_t *o = &r.view;
+     if (mixKindIsPs1(r.kind)) { // PS1 titles launch by name, through the row's own core
+@@ -738,22 +791,23 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
+     item_list_t asks[MIX_SOURCE_COUNT + 1];
+     int askPs1[MIX_SOURCE_COUNT + 1];
+     int n = 0, i, k;
++    mix_set_t *set = MIX_SET(itemList->mode);
+ 
+     if (value == NULL)
+         return -1;
+     mixLock();
+-    for (i = 0; i < mixCount && n < MIX_SOURCE_COUNT; i++) {
+-        item_list_t ownerView, *o = mixOwnerView(i, &ownerView);
++    for (i = 0; i < set->count && n < MIX_SOURCE_COUNT; i++) {
++        item_list_t ownerView, *o = mixOwnerView(set, i, &ownerView);
+         if (o == NULL || o->itemGetImage == NULL)
+             continue;
+-        int ps1 = mixKindIsPs1(mixArray[i].kind);
++        int ps1 = mixKindIsPs1(set->arr[i].kind);
+         if (ps1) {
+-            if (strcmp(mixArray[i].text, value) != 0) {
++            if (strcmp(set->arr[i].text, value) != 0) {
+                 char key[VCD_ID_MAX];
+-                if (!vcdExtractGameId(mixArray[i].text, key, sizeof(key)) || strcmp(key, value) != 0)
++                if (!vcdExtractGameId(set->arr[i].text, key, sizeof(key)) || strcmp(key, value) != 0)
+                     continue;
+             }
+-        } else if (strcmp(mixArray[i].startup, value) != 0)
++        } else if (strcmp(set->arr[i].startup, value) != 0)
+             continue;
+         asks[n] = *o;
+         askPs1[n++] = ps1;
+@@ -762,8 +816,8 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
+     }
+     int matched = n;
+     if (!isRelative) { // theme images: any source may serve them
+-        for (i = 0; i < mixCount && n < MIX_SOURCE_COUNT + 1; i++) {
+-            item_list_t ownerView, *o = mixOwnerView(i, &ownerView);
++        for (i = 0; i < set->count && n < MIX_SOURCE_COUNT + 1; i++) {
++            item_list_t ownerView, *o = mixOwnerView(set, i, &ownerView);
+             if (o == NULL || o->itemGetImage == NULL)
+                 continue;
+             for (k = 0; k < n && asks[k].mode != o->mode; k++)
+@@ -786,25 +840,26 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
+     return -1;
+ }
+ 
+-int mixGetArtMode(const char *value)
++int mixGetArtMode(int list, const char *value)
+ {
++    mix_set_t *set = MIX_SET(list);
+     int i, mode = -1;
+ 
+     if (value == NULL)
+         return -1;
+     mixLock();
+-    for (i = 0; i < mixCount && mode < 0; i++) {
+-        if (mixArray[i].owner == NULL) // build 114: a waiting row
++    for (i = 0; i < set->count && mode < 0; i++) {
++        if (set->arr[i].owner == NULL) // build 114: a waiting row
+             continue;
+-        if (mixKindIsPs1(mixArray[i].kind)) {
+-            if (strcmp(mixArray[i].text, value) != 0) {
++        if (mixKindIsPs1(set->arr[i].kind)) {
++            if (strcmp(set->arr[i].text, value) != 0) {
+                 char key[VCD_ID_MAX];
+-                if (!vcdExtractGameId(mixArray[i].text, key, sizeof(key)) || strcmp(key, value) != 0)
++                if (!vcdExtractGameId(set->arr[i].text, key, sizeof(key)) || strcmp(key, value) != 0)
+                     continue;
+             }
+-            mode = mixArray[i].mode;
+-        } else if (strcmp(mixArray[i].startup, value) == 0)
+-            mode = mixArray[i].mode;
++            mode = set->arr[i].mode;
++        } else if (strcmp(set->arr[i].startup, value) == 0)
++            mode = set->arr[i].mode;
+     }
+     mixUnlock();
+     return mode;
+@@ -819,12 +874,12 @@ static void mixCleanUp(item_list_t *itemList, int exception)
+ 
+ static void mixShutdown(item_list_t *itemList)
+ {
+-    mixFreeArray();
++    mixFreeArray(MIX_SET(itemList->mode));
+ }
+ 
+-static int mixSelectedId(void)
++static int mixSelectedId(int list)
+ {
+-    opl_io_module_t *mod = oplGetModule(MIX_MODE);
++    opl_io_module_t *mod = oplGetModule(list);
+     if (mod == NULL || mod->menuItem.current == NULL)
+         return -1;
+     return mod->menuItem.current->item.id;
+@@ -833,41 +888,43 @@ static int mixSelectedId(void)
+ unsigned char mixGetFlags(item_list_t *itemList)
+ {
+     mix_row_t r;
+-    return mixRow(mixSelectedId(), &r) ? r.view.flags : 0;
++    return mixRow(MIX_SET(itemList->mode), mixSelectedId(itemList->mode), &r) ? r.view.flags : 0;
+ }
+ 
+ static int mixCheckVMC(item_list_t *itemList, char *name, int createSize)
+ {
+     mix_row_t r;
+-    if (!mixRow(mixSelectedId(), &r) || r.view.itemCheckVMC == NULL)
++    if (!mixRow(MIX_SET(itemList->mode), mixSelectedId(itemList->mode), &r) || r.view.itemCheckVMC == NULL)
+         return -1;
+     return r.view.itemCheckVMC(&r.view, name, createSize);
+ }
+ 
+ // ---- public ----
+ 
+-int mixGetItemSourceMode(int id)
++int mixGetItemSourceMode(int list, int id)
+ {
++    mix_set_t *set = MIX_SET(list);
+     int mode = -1;
+     mixLock();
+-    if (mixValidIndex(id))
+-        mode = mixArray[id].mode;
++    if (mixValidIndex(set, id))
++        mode = set->arr[id].mode;
+     mixUnlock();
+     return mode;
+ }
+ 
+-int mixGetItemSourceId(int id)
++int mixGetItemSourceId(int list, int id)
+ {
+     mix_row_t r;
+-    return mixRow(id, &r) ? mixOwnerId(&r) : -1;
++    return mixRow(MIX_SET(list), id, &r) ? mixOwnerId(&r) : -1;
+ }
+ 
+-int mixGetItemKind(int id)
++int mixGetItemKind(int list, int id)
+ {
++    mix_set_t *set = MIX_SET(list);
+     int kind = -1;
+     mixLock();
+-    if (mixValidIndex(id))
+-        kind = mixArray[id].kind;
++    if (mixValidIndex(set, id))
++        kind = set->arr[id].kind;
+     mixUnlock();
+     return kind;
+ }
+@@ -881,11 +938,12 @@ void mixSourceAnswered(int mode)
+     mixRequestUpdate();
+ }
+ 
+-int mixIsWaiting(int id)
++int mixIsWaiting(int list, int id)
+ {
++    mix_set_t *set = MIX_SET(list);
+     int waiting;
+     mixLock();
+-    waiting = mixValidIndex(id) && mixArray[id].owner == NULL;
++    waiting = mixValidIndex(set, id) && set->arr[id].owner == NULL;
+     mixUnlock();
+     return waiting;
+ }
+@@ -895,12 +953,12 @@ int mixMasterGames(void)
+     return mixMasterSaved > 0 ? mixMasterSaved : 0;
+ }
+ 
+-static int mixLiveHas(const char *text, int kind)
++static int mixLiveHas(const mix_set_t *set, const char *text, int kind)
+ {
+     int i, found = 0;
+     mixLock();
+-    for (i = 0; i < mixCount && !found; i++)
+-        found = mixArray[i].owner != NULL && mixArray[i].kind == kind && !strcmp(mixArray[i].text, text);
++    for (i = 0; i < set->count && !found; i++)
++        found = set->arr[i].owner != NULL && set->arr[i].kind == kind && !strcmp(set->arr[i].text, text);
+     mixUnlock();
+     return found;
+ }
+@@ -911,21 +969,24 @@ static int mixLiveHas(const char *text, int kind)
+ int mixWaitForRow(struct menu_item *menu)
+ {
+     char name[256], startup[64], line[300];
+-    int kind, fam, id, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    int kind, fam, id, list, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
+     double since;
++    mix_set_t *set;
+ 
+     if (menu == NULL || menu->current == NULL)
+         return 0;
++    list = menu->userdata != NULL ? ((item_list_t *)menu->userdata)->mode : MIX_MODE; // build 115: All Games or Recent Games
++    set = MIX_SET(list);
+     id = menu->current->item.id;
+     mixLock();
+-    if (!mixValidIndex(id) || mixArray[id].owner != NULL) {
++    if (!mixValidIndex(set, id) || set->arr[id].owner != NULL) {
+         mixUnlock();
+         return 1;
+     }
+-    snprintf(name, sizeof(name), "%s", mixArray[id].text);
+-    snprintf(startup, sizeof(startup), "%s", mixArray[id].startup);
+-    kind = mixArray[id].kind;
+-    fam = mixArray[id].family;
++    snprintf(name, sizeof(name), "%s", set->arr[id].text);
++    snprintf(startup, sizeof(startup), "%s", set->arr[id].startup);
++    kind = set->arr[id].kind;
++    fam = set->arr[id].family;
+     mixUnlock();
+     if (fam < 0 || fam >= MIX_FAM_COUNT)
+         fam = MIX_FAM_BDM;
+@@ -935,12 +996,12 @@ int mixWaitForRow(struct menu_item *menu)
+     readPads();
+     while (1) {
+         guiExecDeferredOps(); // the rebuilt list reaches the menu
+-        if (menu->current != NULL && !mixIsWaiting(menu->current->item.id) && mixLiveHas(name, kind)) {
++        if (menu->current != NULL && !mixIsWaiting(list, menu->current->item.id) && mixLiveHas(set, name, kind)) {
+             const char *now = menu->current->item.text;
+             if (now != NULL && !strcmp(now, name))
+                 return 1;
+         }
+-        if (mixAnswered[fam] && !mixLiveHas(name, kind)) {
++        if (mixAnswered[fam] && !mixLiveHas(set, name, kind)) {
+             snprintf(line, sizeof(line), _t("%s is not on %s any more, so it has left All Games."), name, _t(mixFamName[fam]));
+             guiMsgBoxSound(SFX_ERROR);
+             guiMsgBox(line, 0, NULL);
+@@ -976,19 +1037,25 @@ int mixWaitForRow(struct menu_item *menu)
+ 
+ void mixRequestUpdate(void)
+ {
+-    mixForceUpdate = 1;
++    mixSets[0].forceUpdate = mixSets[1].forceUpdate = 1;
+     if (mixItemList.enabled)
+         ioPutRequestUnlessWaiting(IO_MENU_UPDATE_DEFFERED, &mixItemList.mode);
++    if (recentItemList.enabled) // build 115: and Recent Games, built from the same sources
++        ioPutRequestUnlessWaiting(IO_MENU_UPDATE_DEFFERED, &recentItemList.mode);
+ }
+ 
+ void mixClearStars(void)
+ {
+-    opl_io_module_t *mod = oplGetModule(MIX_MODE);
++    static const int lists[2] = {MIX_MODE, RECENT_MODE};
+     submenu_list_t *cur;
+-    if (mod == NULL)
+-        return;
+-    for (cur = mod->subMenu; cur != NULL; cur = cur->next)
+-        cur->item.favourited = 0;
++    int l;
++    for (l = 0; l < 2; l++) {
++        opl_io_module_t *mod = oplGetModule(lists[l]);
++        if (mod == NULL)
++            continue;
++        for (cur = mod->subMenu; cur != NULL; cur = cur->next)
++            cur->item.favourited = 0;
++    }
+ }
+ 
+ // Two modes are one source for a favourite when equal or both BDM (a stick can change slots)
+@@ -1001,20 +1068,27 @@ static int mixModesMatch(int a, int b)
+ 
+ void mixMarkStar(int mode, int id, int kind, const char *text)
+ {
+-    opl_io_module_t *mod = oplGetModule(MIX_MODE);
++    static const int lists[2] = {MIX_MODE, RECENT_MODE}; // build 115: Recent Games' rows show the star too
+     submenu_list_t *cur;
++    int l;
+ 
+-    if (mod == NULL || text == NULL)
++    if (text == NULL)
+         return;
+     mixLock();
+-    for (cur = mod->subMenu; cur != NULL; cur = cur->next) {
+-        int r = cur->item.id;
+-        if (!mixValidIndex(r) || mixArray[r].kind != kind || strcmp(mixArray[r].text, text) != 0)
++    for (l = 0; l < 2; l++) {
++        opl_io_module_t *mod = oplGetModule(lists[l]);
++        mix_set_t *set = MIX_SET(lists[l]);
++        if (mod == NULL)
+             continue;
+-        // a PS1 favourite is its name; a PS2 one is that row on that source
+-        if (!mixKindIsPs1(kind) && !(mixModesMatch(mixArray[r].mode, mode) && mixArray[r].id == id))
+-            continue;
+-        cur->item.favourited = 1;
++        for (cur = mod->subMenu; cur != NULL; cur = cur->next) {
++            int r = cur->item.id;
++            if (!mixValidIndex(set, r) || set->arr[r].kind != kind || strcmp(set->arr[r].text, text) != 0)
++                continue;
++            // a PS1 favourite is its name; a PS2 one is that row on that source
++            if (!mixKindIsPs1(kind) && !(mixModesMatch(set->arr[r].mode, mode) && set->arr[r].id == id))
++                continue;
++            cur->item.favourited = 1;
++        }
+     }
+     mixUnlock();
+ }
+@@ -1026,8 +1100,22 @@ item_list_t *mixGetObject(int initOnly)
+     return &mixItemList;
+ }
+ 
++item_list_t *recentGetObject(int initOnly)
++{
++    if (initOnly && !recentItemList.enabled)
++        return NULL;
++    return &recentItemList;
++}
++
+ static item_list_t mixItemList = {
+     MIX_MODE, -1, 0, 0, MENU_MIN_INACTIVE_FRAMES, MENU_UPD_DELAY_NOUPDATE, NULL, NULL, &mixGetTextId, NULL, &mixInit, &mixNeedsUpdate, &mixUpdateItemList,
+     &mixGetItemCount, NULL, &mixGetItemName, &mixGetItemNameLength, &mixGetItemStartup, NULL, NULL, &mixLaunchItem,
+     &mixGetConfig, &mixGetImage, &mixCleanUp, &mixShutdown, &mixCheckVMC, &mixGetIconId,
+     NULL, ITEM_VIEW_NATIVE, NULL, NULL, &mixGetRowView, NULL};
++
++// build 115: Recent Games, the same callbacks on its own rows (MIX_SET by mode)
++static item_list_t recentItemList = {
++    RECENT_MODE, -1, 0, 0, MENU_MIN_INACTIVE_FRAMES, MENU_UPD_DELAY_NOUPDATE, NULL, NULL, &mixGetTextId, NULL, &mixInit, &mixNeedsUpdate, &mixUpdateItemList,
++    &mixGetItemCount, NULL, &mixGetItemName, &mixGetItemNameLength, &mixGetItemStartup, NULL, NULL, &mixLaunchItem,
++    &mixGetConfig, &mixGetImage, &mixCleanUp, &mixShutdown, &mixCheckVMC, &mixGetIconId,
++    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &mixGetRowView, NULL};
 diff --git a/src/mmcesupport.c b/src/mmcesupport.c
 index ba683b0..0f62892 100644
 --- a/src/mmcesupport.c
@@ -1138,10 +2170,57 @@ index ba683b0..0f62892 100644
      // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
      // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
 diff --git a/src/opl.c b/src/opl.c
-index 3b8cd19..da51090 100644
+index 3b8cd19..53fe5e7 100644
 --- a/src/opl.c
 +++ b/src/opl.c
-@@ -582,7 +582,7 @@ static void itemExecRefresh(struct menu_item *curMenu)
+@@ -361,7 +361,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
+             menuAddHint(&mod->menuItem, _STR_INFO, SQUARE_ICON);
+ 
+         unsigned char flags = (mod->support->mode == FAV_MODE) ? favGetFlags(mod->support) :
+-                              (mod->support->mode == MIX_MODE) ? mixGetFlags(mod->support) :
++                              MODE_IS_MIX(mod->support->mode) ? mixGetFlags(mod->support) :
+                                                                  mod->support->flags;
+         if (!(flags & MODE_FLAG_NO_COMPAT) || gEnableWrite || mod->support->mode == APP_MODE) // build 102: Case Shape
+             menuAddHint(&mod->menuItem, _STR_OPTIONS, TRIANGLE_ICON);
+@@ -430,7 +430,7 @@ void ripps2StartSources(void)
+ {
+     for (int i = 0; i < MODE_COUNT; i++) {
+         item_list_t *source = list_support[i].support;
+-        if (i == APP_MODE || i == FAV_MODE || i == MIX_MODE || source == NULL || source->enabled ||
++        if (i == APP_MODE || i == FAV_MODE || MODE_IS_MIX(i) || source == NULL || source->enabled ||
+             modeStartMode(i) == START_MODE_DISABLED)
+             continue;
+         itemInitSupport(source);
+@@ -468,7 +468,7 @@ static void itemExecSelect(struct menu_item *curMenu)
+                 }
+                 // RIPPS2 build 114: an All Games row from the master list whose source has not answered yet: start it, wait
+                 // for its list (the cursor follows the game onto its real row), then launch as usual
+-                if (support->mode == MIX_MODE && mixIsWaiting(curMenu->current->item.id) && !mixWaitForRow(curMenu))
++                if (MODE_IS_MIX(support->mode) && mixIsWaiting(support->mode, curMenu->current->item.id) && !mixWaitForRow(curMenu))
+                     return;
+                 config_set_t *configSet = menuLoadConfig();
+                 if (configSet == NULL)
+@@ -539,7 +539,7 @@ static void itemExecSelect(struct menu_item *curMenu)
+             }
+         } else {
+             // If we're trying to enable BDM support we need to enable it for all BDM menu slots.
+-            if (support->mode == MIX_MODE) {
++            if (MODE_IS_MIX(support->mode)) {
+                 // RIPPS2: starting All Games starts every game source that waits for a start
+                 ripps2StartSources();
+                 itemInitSupport(support);
+@@ -573,16 +573,16 @@ static void itemExecRefresh(struct menu_item *curMenu)
+         // explicit user Refresh must invalidate that cache before posting the deferred update.
+         if (support->mode == FAV_MODE) {
+             loadFavourites();
+-        } else if (support->mode == MIX_MODE) {
++        } else if (MODE_IS_MIX(support->mode)) {
+             // RIPPS2: All Games refreshes every started source; each rebuild queues its own after it
+             for (int i = 0; i < MODE_COUNT; i++) {
+                 item_list_t *source = list_support[i].support;
+-                if (i == APP_MODE || i == FAV_MODE || i == MIX_MODE || source == NULL || !source->enabled)
++                if (i == APP_MODE || i == FAV_MODE || MODE_IS_MIX(i) || source == NULL || !source->enabled)
+                     continue;
                  if (i == HDD_MODE)
                      hddVcdInvalidateCache();
                  libViewMarkDirty(i);
@@ -1162,7 +2241,70 @@ index 3b8cd19..da51090 100644
          }
          sfxPlay(SFX_CONFIRM);
      }
-@@ -1063,6 +1066,14 @@ void initSupport(item_list_t *itemList, int mode, int force_reinit)
+@@ -792,10 +795,10 @@ static void itemPushRecent(struct menu_item *curMenu, item_list_t *support)
+     if (gRipps2Recents <= 0 || curMenu == NULL || curMenu->current == NULL || support == NULL)
+         return;
+     it = &curMenu->current->item;
+-    if (support->mode == MIX_MODE) {
+-        mode = mixGetItemSourceMode(it->id);
+-        id = mixGetItemSourceId(it->id);
+-        kind = mixGetItemKind(it->id);
++    if (MODE_IS_MIX(support->mode)) {
++        mode = mixGetItemSourceMode(support->mode, it->id);
++        id = mixGetItemSourceId(support->mode, it->id);
++        kind = mixGetItemKind(support->mode, it->id);
+     } else if (support->mode == FAV_MODE) {
+         mode = favGetItemSourceMode(it->id);
+         id = favGetItemSourceId(it->id);
+@@ -834,9 +837,9 @@ static void itemExecFav(struct menu_item *curMenu)
+     if (support->mode != FAV_MODE && (it->isFolder || folderDepth(support->mode) > 0))
+         return;
+ 
+-    if (support->mode == MIX_MODE) {
++    if (MODE_IS_MIX(support->mode)) {
+         // RIPPS2: an All Games row is favourited as the game on its own source
+-        int srcMode = mixGetItemSourceMode(it->id), srcId = mixGetItemSourceId(it->id), kind = mixGetItemKind(it->id);
++        int srcMode = mixGetItemSourceMode(support->mode, it->id), srcId = mixGetItemSourceId(support->mode, it->id), kind = mixGetItemKind(support->mode, it->id);
+         if (srcMode < 0 || srcId < 0 || kind < 0)
+             return;
+         if (it->favourited) {
+@@ -913,7 +916,7 @@ static void itemExecTriangle(struct menu_item *curMenu)
+             if (menuCheckParentalLock() == 0) {
+                 // The row names its core: a favourite by its stored kind, a device row by its extension.
+                 int kind = (support->mode == FAV_MODE) ? favGetItemKind(curMenu->current->item.id) :
+-                           (support->mode == MIX_MODE) ? mixGetItemKind(curMenu->current->item.id) :
++                           MODE_IS_MIX(support->mode) ? mixGetItemKind(support->mode, curMenu->current->item.id) :
+                                                          itemFavKind(support, curMenu->current->item.id, curMenu->current->item.text);
+                 menuInitVcdMenu(kind == FAV_KIND_CUE);
+                 guiSwitchScreen(GUI_SCREEN_APP_MENU);
+@@ -922,7 +925,7 @@ static void itemExecTriangle(struct menu_item *curMenu)
+         }
+ 
+         unsigned char flags = (support->mode == FAV_MODE) ? favGetFlags(support) :
+-                              (support->mode == MIX_MODE) ? mixGetFlags(support) :
++                              MODE_IS_MIX(support->mode) ? mixGetFlags(support) :
+                                                             support->flags;
+ 
+         if (!(flags & MODE_FLAG_NO_COMPAT)) {
+@@ -1029,6 +1032,8 @@ static int modeStartMode(int mode)
+         startMode = gMMCEStartMode;
+     else if (mode == MIX_MODE)
+         startMode = mixStartMode();
++    else if (mode == RECENT_MODE) // build 115: Recent Games, while Game Sources keeps some (and All Games is on)
++        startMode = gRipps2Recents > 0 ? mixStartMode() : START_MODE_DISABLED;
+     // RIPPS2 build 96: Last Used starts the last page's device too, even when it waits for a press
+     if (gRipps2StartLast && startMode == START_MODE_MANUAL && mode == gRipps2LastDevice)
+         startMode = START_MODE_AUTO;
+@@ -1047,7 +1052,7 @@ static int mixStartMode(void)
+ {
+     int mode, best = START_MODE_DISABLED;
+     for (mode = 0; mode < MODE_COUNT; mode++) {
+-        if (mode == APP_MODE || mode == FAV_MODE || mode == MIX_MODE)
++        if (mode == APP_MODE || mode == FAV_MODE || MODE_IS_MIX(mode))
+             continue;
+         int s = modeStartMode(mode);
+         if (s > best)
+@@ -1063,6 +1068,14 @@ void initSupport(item_list_t *itemList, int mode, int force_reinit)
      // Set the start mode flag based on device type.
      int startMode = modeStartMode(mode);
  
@@ -1171,13 +2313,39 @@ index 3b8cd19..da51090 100644
 +    // the page empty with "Start Device" until something else started: the user's master list never showed, and the
 +    // HDD's games came only after a trip to the HDD page and back (10/25). A source on Manual still waits for a start:
 +    // its saved games are waiting rows, and Cross on one starts it (mixWaitForRow).
-+    if (mode == MIX_MODE && startMode == START_MODE_MANUAL)
++    if (MODE_IS_MIX(mode) && startMode == START_MODE_MANUAL)
 +        startMode = START_MODE_AUTO;
 +
      if (startMode) {
          if (!mod->support) {
              mod->support = itemList;
-@@ -3739,6 +3750,8 @@ static void _loadConfig()
+@@ -1152,6 +1165,7 @@ static void initAllSupport(int force_reinit)
+     initSupport(mmceGetObject(0), MMCE_MODE, force_reinit);
+     LOG("BOOT scan: MMCE initSupport done\n");
+     initSupport(mixGetObject(0), MIX_MODE, force_reinit); // RIPPS2: All Games, after every source
++    initSupport(recentGetObject(0), RECENT_MODE, force_reinit); // build 115: Recent Games, beside it
+ 
+     // Arm the MMCE GameID transport at boot and on every settings apply -- instead
+     // of deferring it to itemLaunchMMCE.
+@@ -1650,7 +1664,7 @@ void menuDeferredUpdate(void *data)
+         // If other modes have been updated, then the apps list should be updated too.
+         // Exclude FAV: a FAV rebuild marking apps dirty would re-trigger the FAV resync below
+         // (an apps refresh calls loadFavourites), looping forever once favNeedsUpdate fires.
+-        if (mod->support->mode != APP_MODE && mod->support->mode != FAV_MODE && mod->support->mode != MIX_MODE && !viewFlip) {
++        if (mod->support->mode != APP_MODE && mod->support->mode != FAV_MODE && !MODE_IS_MIX(mod->support->mode) && !viewFlip) {
+             shouldAppsUpdate = 1;
+ 
+             // ...and SCHEDULE the pass that consumes that flag. Raising it is not enough: APPS has
+@@ -1687,7 +1701,7 @@ void menuDeferredUpdate(void *data)
+ 
+         // RIPPS2: a game source changed, or filled a list it never scanned: All Games rebuilds after it (build 114: and its
+         // saved games give way to its list)
+-        if (mod->support->mode != APP_MODE && mod->support->mode != FAV_MODE && mod->support->mode != MIX_MODE)
++        if (mod->support->mode != APP_MODE && mod->support->mode != FAV_MODE && !MODE_IS_MIX(mod->support->mode))
+             mixSourceAnswered(mod->support->mode);
+     } else if (libViewPending(mod->support->mode)) {
+         // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
+@@ -3739,14 +3753,20 @@ static void _loadConfig()
                  gRipps2CatBar = value;
              if (configGetInt(configOPL, "ripps2_fastcache", &value))
                  gRipps2FastCache = value != 0; // build 113: Fast Cache (on unless turned off)
@@ -1186,7 +2354,20 @@ index 3b8cd19..da51090 100644
              if (configGetInt(configOPL, "ripps2_catlayout", &value) && value >= 0 && value <= 2)
                  gRipps2CatLayout = value; // build 113: Category Layout (0 Theme, 1 Across the Top, 2 Sidebar)
              if (configGetInt(configOPL, "ripps2_catswap", &value) && (value == 0 || value == 1))
-@@ -3832,7 +3845,8 @@ static void _loadConfig()
+                 gRipps2CatSwap = value;
+             if (configGetInt(configOPL, "ripps2_srcname", &value) && value >= 0 && value < RIPPS2_SRC_COUNT)
+                 gRipps2SrcName = value; // build 71
+-            if (configGetInt(configOPL, "ripps2_recents", &value) && value >= 0 && value <= 9)
++            if (configGetInt(configOPL, "ripps2_recents", &value) && value >= 0 && value <= RIPPS2_RECENTS_MAX)
+                 gRipps2Recents = value;
++            // build 115: Recent Games is a page now; a config from before it, which kept Show Recents at 0 (its default,
++            // as recents on Starred Games), gets the page once, at 10 (the user, 10/25: "wheres recent games in the sidebar")
++            if ((!configGetInt(configOPL, "ripps2_recents_v", &value) || value < 115) && gRipps2Recents == 0)
++                gRipps2Recents = 10;
+             if (configGetInt(configOPL, "ripps2_userset", &value) && value >= 0)
+                 gRipps2UserSet = value; // build 81: the rows a theme's defaults never touch
+             ripps2HintsLoadConfig(configOPL); // build 90: Hints and Glyphs
+@@ -3832,7 +3852,8 @@ static void _loadConfig()
              configGetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, &gHDDGameListCache);
              if (!configGetInt(configOPL, "ripps2_hddcache_v", &value) || value < 110)
                  gHDDGameListCache = 1; // build 110: on by default (checked in the background now); once for older configs
@@ -1196,7 +2377,7 @@ index 3b8cd19..da51090 100644
              configGetStrCopy(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
              configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
              configGetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, &gAutoRefresh);
-@@ -4468,6 +4482,7 @@ static void _saveConfig()
+@@ -4468,9 +4489,11 @@ static void _saveConfig()
          configSetInt(configOPL, "ripps2_catbar", gRipps2CatBar);
          configSetInt(configOPL, "ripps2_catlayout", gRipps2CatLayout); // build 113
          configSetInt(configOPL, "ripps2_fastcache", gRipps2FastCache);
@@ -1204,7 +2385,11 @@ index 3b8cd19..da51090 100644
          configSetInt(configOPL, "ripps2_catswap", gRipps2CatSwap);
          configSetInt(configOPL, "ripps2_srcname", gRipps2SrcName); // build 71
          configSetInt(configOPL, "ripps2_recents", gRipps2Recents);
-@@ -5988,7 +6003,8 @@ static void miniInit(int mode)
++        configSetInt(configOPL, "ripps2_recents_v", 115); // build 115: the one-time switch to the page has run
+         configSetInt(configOPL, "ripps2_userset", gRipps2UserSet); // build 81
+         ripps2HintsSaveConfig(configOPL);                          // build 90: Hints and Glyphs
+         ripps2ColorsSaveConfig(configOPL);                         // build 114: Custom's colour, the Color Sweep
+@@ -5988,7 +6011,8 @@ static void miniInit(int mode)
              config_set_t *configOPL = configGetByType(CONFIG_OPL);
  
              configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
@@ -1272,6 +2457,19 @@ index cc7b9bf..7b953e4 100644
      {'S', N_("github.com/rickgaiser/neutrino")},
      {'G', NULL},
      {'H', N_("OPEN PS2 LOADER DEVELOPERS")},
+diff --git a/src/ripps2art.c b/src/ripps2art.c
+index 68b685e..110ea59 100644
+--- a/src/ripps2art.c
++++ b/src/ripps2art.c
+@@ -161,7 +161,7 @@ static void artCollect(void)
+ 
+     artCount = 0;
+     for (mode = 0; mode < MODE_COUNT && artCount < ART_MAX_GAMES; mode++) {
+-        if (mode == APP_MODE || mode == FAV_MODE || mode == MIX_MODE)
++        if (mode == APP_MODE || mode == FAV_MODE || MODE_IS_MIX(mode))
+             continue; // apps have no covers here; Favorites and All Games repeat other lists
+         opl_io_module_t *mod = oplGetModule(mode);
+         item_list_t *list = mod != NULL ? mod->support : NULL;
 diff --git a/src/ripps2boot.c b/src/ripps2boot.c
 index a191468..67e986b 100644
 --- a/src/ripps2boot.c
@@ -1346,9 +2544,54 @@ index 5651a19..8b2e109 100644
      guiMsgBoxSound(SFX_MESSAGE);
      if (guiMsgBox(msg, 1, NULL) != 1)
 diff --git a/src/ripps2games.c b/src/ripps2games.c
-index 5a5580f..7933e8b 100644
+index 5a5580f..386b7d3 100644
 --- a/src/ripps2games.c
 +++ b/src/ripps2games.c
+@@ -200,7 +200,7 @@ static int shSave(int mode)
+ 
+ void ripps2ShroudReload(int mode)
+ {
+-    if (mode < 0 || mode >= MODE_COUNT || mode == APP_MODE || mode == FAV_MODE || mode == MIX_MODE)
++    if (mode < 0 || mode >= MODE_COUNT || mode == APP_MODE || mode == FAV_MODE || MODE_IS_MIX(mode))
+         return;
+     shLock();
+     shLoad(mode, 1);
+@@ -230,7 +230,7 @@ int ripps2ShroudRow(item_list_t *support, int id)
+     int mode, ps1;
+     const char *name;
+ 
+-    if (support == NULL || support->mode == APP_MODE || support->mode == MIX_MODE) // All Games leaves them out as it gathers
++    if (support == NULL || support->mode == APP_MODE || MODE_IS_MIX(support->mode)) // All Games leaves them out as it gathers
+         return 0;
+     name = support->itemGetName != NULL ? support->itemGetName(support, id) : NULL;
+     if (support->mode == FAV_MODE) {
+@@ -268,20 +268,20 @@ static int shResolve(item_list_t *support, int id, sh_row_t *r)
+     int tries;
+     if (support == NULL)
+         return 0;
+-    if (support->mode == MIX_MODE || support->mode == FAV_MODE) {
+-        int mix = support->mode == MIX_MODE;
+-        if (mix && mixIsWaiting(id)) {
++    if (MODE_IS_MIX(support->mode) || support->mode == FAV_MODE) {
++        int mix = MODE_IS_MIX(support->mode);
++        if (mix && mixIsWaiting(support->mode, id)) {
+             guiMsgBoxSound(SFX_ERROR);
+             guiMsgBox(_t("This game's drive has not answered yet. Wait for it, then try again."), 0, NULL);
+             return 0;
+         }
+-        r->mode = mix ? mixGetItemSourceMode(id) : favGetItemSourceMode(id);
+-        r->kind = mix ? mixGetItemKind(id) : favGetItemKind(id);
++        r->mode = mix ? mixGetItemSourceMode(support->mode, id) : favGetItemSourceMode(id);
++        r->kind = mix ? mixGetItemKind(support->mode, id) : favGetItemKind(id);
+         // the lab, 10/22: a drive reads its list again behind the saved one (Fast Cache), and while it does the
+         // game is not in that list for a moment, so Hide Game and Delete did nothing at all. Wait for it a little,
+         // then say so rather than stay silent.
+         for (tries = 0; tries < 15; tries++) {
+-            r->id = mix ? mixGetItemSourceId(id) : favGetItemSourceId(id);
++            r->id = mix ? mixGetItemSourceId(support->mode, id) : favGetItemSourceId(id);
+             if (r->id >= 0 || r->mode < 0)
+                 break;
+             DelayThread(100 * 1000);
 @@ -468,7 +468,8 @@ static void lrSize(long long bytes, char *out, int size)
  // shared: another copy of the game on this drive keeps the CFG, art and cheats.
  static void lrPlanExtras(item_list_t *view, int id, const char *prefix, char sep, const char *startup, const char *name, int shared)
@@ -1359,6 +2602,82 @@ index 5a5580f..7933e8b 100644
      char path[256];
      const char *vmc = NULL;
      int i, k;
+@@ -694,6 +695,8 @@ static const char *lrWhere(int mode)
+         return _t("the SMB share");
+     if (mode == MIX_MODE)
+         return _l(_STR_RIPPS2_ALL_GAMES); // the guard: All Games put together again after a refresh
++    if (mode == RECENT_MODE)
++        return _l(_STR_RIPPS2_RECENT_GAMES); // build 115
+     return _t("its drive");
+ }
+ 
+@@ -1045,7 +1048,7 @@ static void hgGather(void)
+     shLock();
+     for (mode = 0; mode < MODE_COUNT; mode++) {
+         opl_io_module_t *mod = oplGetModule(mode);
+-        if (mode == APP_MODE || mode == FAV_MODE || mode == MIX_MODE || mod == NULL || mod->support == NULL || !mod->support->enabled)
++        if (mode == APP_MODE || mode == FAV_MODE || MODE_IS_MIX(mode) || mod == NULL || mod->support == NULL || !mod->support->enabled)
+             continue;
+         shLoad(mode, 1);
+         for (i = 0; i < shList[mode].count && hgCount < HG_ROWS; i++) {
+@@ -1328,13 +1331,13 @@ static int zpRow(item_list_t *support, int id, sh_row_t *r, item_list_t *view, c
+     opl_io_module_t *mod;
+     if (support == NULL || !gEnableWrite)
+         return 0;
+-    if (support->mode == MIX_MODE || support->mode == FAV_MODE) {
+-        int mix = support->mode == MIX_MODE;
+-        if (mix && mixIsWaiting(id))
++    if (MODE_IS_MIX(support->mode) || support->mode == FAV_MODE) {
++        int mix = MODE_IS_MIX(support->mode);
++        if (mix && mixIsWaiting(support->mode, id))
+             return 0;
+-        r->mode = mix ? mixGetItemSourceMode(id) : favGetItemSourceMode(id);
+-        r->id = mix ? mixGetItemSourceId(id) : favGetItemSourceId(id);
+-        r->kind = mix ? mixGetItemKind(id) : favGetItemKind(id);
++        r->mode = mix ? mixGetItemSourceMode(support->mode, id) : favGetItemSourceMode(id);
++        r->id = mix ? mixGetItemSourceId(support->mode, id) : favGetItemSourceId(id);
++        r->kind = mix ? mixGetItemKind(support->mode, id) : favGetItemKind(id);
+     } else {
+         int v = support->itemGetView != NULL ? support->itemGetView(support, id) : libListViewActive(support);
+         r->mode = support->mode;
+diff --git a/src/ripps2seance.c b/src/ripps2seance.c
+index aeaa17a..b0156b4 100644
+--- a/src/ripps2seance.c
++++ b/src/ripps2seance.c
+@@ -568,9 +568,9 @@ void seancePreLaunch(item_list_t *support, int id)
+     if (support == NULL)
+         return;
+     mode = support->mode;
+-    if (mode == MIX_MODE) {
+-        kind = mixGetItemKind(id);
+-        mode = mixGetItemSourceMode(id);
++    if (MODE_IS_MIX(mode)) {
++        kind = mixGetItemKind(mode, id);
++        mode = mixGetItemSourceMode(mode, id);
+     } else if (mode == FAV_MODE) {
+         kind = favGetItemKind(id);
+         mode = favGetItemSourceMode(id);
+diff --git a/src/ripps2side.c b/src/ripps2side.c
+index 1415c7b..df7ced2 100644
+--- a/src/ripps2side.c
++++ b/src/ripps2side.c
+@@ -43,6 +43,7 @@ int gRipps2CatLayout = 0;
+ #define SB_ICON_NET  7
+ #define SB_ICON_APPS 8
+ #define SB_ICON_STAR 9
++#define SB_ICON_RECENT 10 // build 115: Recent Games (the atlas's Last Played)
+ #define SB_ROW       26 // a drawer row
+ #define SB_PRIM(r, g, b, a) GS_SETREG_RGBAQ((r), (g), (b), (a), 0x00) // untextured: 0x80 = opaque
+ #define SB_TEX(v, a)        GS_SETREG_RGBA((v), (v), (v), (a))        // textured: 0x80 = the texel as it is
+@@ -107,6 +108,8 @@ static int sbSourceIcon(int i)
+     int icon = menuSourceIcon(i), mode = menuSourceMode(i);
+     if (mode == MIX_MODE)
+         return SB_ICON_ALL;
++    if (mode == RECENT_MODE)
++        return SB_ICON_RECENT;
+     if (icon == HDD_ICON || icon == HDD_BD_ICON)
+         return SB_ICON_HDD;
+     if (icon == MMCE_ICON || icon == MX4SIO_ICON)
 diff --git a/src/ripps2status.c b/src/ripps2status.c
 index c1bcf7f..a3c319a 100644
 --- a/src/ripps2status.c
@@ -1390,6 +2709,19 @@ index c1bcf7f..a3c319a 100644
  }
  
  void ripps2Status(void)
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 03fe071..4fe3a81 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -108,7 +108,7 @@ static int formationDirty = 0; // changed since the last save
+ // ---- RIPPSettings (Controller Settings > RIPPSettings) ----
+ int gRipps2Glyphs = RIPPS2_GLYPHS_HIDDEN, gRipps2Palette = 0, gRipps2Hints = RIPPS2_SHOW_ON, gRipps2CatBar = RIPPS2_SHOW_ON,
+     gRipps2CatSwap = 0;
+-int gRipps2SrcName = RIPPS2_SHOW_ON, gRipps2Recents = 0; // build 71
++int gRipps2SrcName = RIPPS2_SHOW_ON, gRipps2Recents = 10; // build 71; build 115: Recent Games, 10 to start
+ int gRipps2PaletteShown = 0; // build 81: the Color Theme drawn (ripps2tint.h): the setting, or the theme's color_theme
+ int gRipps2UserSet = 0;      // build 81: RIPPS2_SET_* bits, the Colors and More rows the user has changed (saved)
+ 
 diff --git a/src/supportbase.c b/src/supportbase.c
 index 04c5e85..0e944e8 100644
 --- a/src/supportbase.c
@@ -1827,6 +3159,32 @@ index 1bea4b2..89676bd 100644
      config->ExitPath[CORE_EXIT_PATH_MAX_LEN - 1] = '\0';
      strncpy(config->GameModeDesc, mode_str, CORE_GAME_MODE_DESC_MAX_LEN);
      config->GameModeDesc[CORE_GAME_MODE_DESC_MAX_LEN - 1] = '\0';
+diff --git a/src/texcache.c b/src/texcache.c
+index 321b35b..272c5c8 100644
+--- a/src/texcache.c
++++ b/src/texcache.c
+@@ -1329,8 +1329,8 @@ static int cacheRequestIsSIO2(item_list_t *list, const char *value)
+         if (src >= 0)
+             mode = src;
+     }
+-    if (mode == MIX_MODE && value != NULL) { // RIPPS2: All Games rows proxy too
+-        int src = mixGetArtMode(value);
++    if (MODE_IS_MIX(mode) && value != NULL) { // RIPPS2: All Games rows proxy too (build 115: and Recent Games')
++        int src = mixGetArtMode(mode, value);
+         if (src >= 0)
+             mode = src;
+     }
+@@ -1373,8 +1373,8 @@ static int cacheResolveArtArchive(item_list_t *list, const char *value, char *pa
+         if (src >= 0)
+             mode = src;
+     }
+-    if (mode == MIX_MODE && value != NULL) { // RIPPS2: All Games rows proxy too
+-        int src = mixGetArtMode(value);
++    if (MODE_IS_MIX(mode) && value != NULL) { // RIPPS2: All Games rows proxy too (build 115: and Recent Games')
++        int src = mixGetArtMode(mode, value);
+         if (src >= 0)
+             mode = src;
+     }
 diff --git a/src/textures.c b/src/textures.c
 index 2da860e..f337d6b 100644
 --- a/src/textures.c
