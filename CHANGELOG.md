@@ -183,6 +183,17 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
   game core, with its link, in a BUILT ON RIPTOPL, WITH NEUTRINO section.
 - **TESTERS** closes with "Special thanks to all the YouTube love as well: glad to help however you reach me."
 
+### Hotfixes in v1.1.4-beta (10/24 and 10/25)
+- **No "400: hard drive not detected" box at boot on a console without an HDD** (a slim, or a fat with no network
+  adapter). At boot RIPPS2 looks for an internal exFAT HDD whenever HDD Start Mode is not Off, and the boot folder
+  search's last step loads the HDD driver too; with no HDD interface their failure came up as that box on every boot,
+  HDD Start Mode Manual included (builds 113 and 114, found in the lab with the HDD taken out). Both checks are quiet
+  now; an HDD page you start, or HDD Start Mode Auto, still says the drive is missing.
+- **RIPGRID without Adapt's side bar**: the dark strip and its blue edge down the left are gone. RIPGRID has no
+  sidebar; Circle picks the source there.
+- **Compressing on an MMCE card asks the card first** whether it can rename (sd2psXtd 1.4.0 or newer), so older
+  firmware is told in a second, not after the whole work.
+
 ### Underneath
 - The new words in all 33 languages.
 - Host test `test_ripps2_build114.py`: every part statically, the APA check against six synthetic disks, the

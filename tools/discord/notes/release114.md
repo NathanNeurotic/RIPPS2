@@ -48,6 +48,8 @@
 <img src="https://raw.githubusercontent.com/akilluminati47/RIPPS2/v1.1.4-beta/media/b114/new-11-color-sweep.jpg" width="32%" alt="Storage in the Color Sweep, passing pink">
 </p>
 
+**Updated 10/25:** no "400: hard drive not detected" box at boot on a console without an HDD (a slim, or a fat with no network adapter), RIPGRID without Adapt's side bar down the left, and compressing on an MMCE card asks the card first. Downloaded v1.1.4 before? Get RIPPS2.elf again.
+
 The new words are in all 33 languages.
 
 **[Full changelog](https://github.com/akilluminati47/RIPPS2/blob/main/CHANGELOG.md)** | **[Watch the v1.1.4 wheel Short](https://akilluminati47.github.io/RIPPS2/media/b114/ripps2-v114-wheels-short.mp4)** | **[Watch the v1.1.0 reel](https://youtu.be/Q8ZLd6ArV8s)** | **[Talk about it on psx-place](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/)** | [RIPPCSX2](https://github.com/akilluminati47/RIPPCSX2/releases/latest) for seeing a theme in true 720p and 1080i
