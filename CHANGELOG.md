@@ -87,7 +87,9 @@ compressed to ZSO and back, a launch guard that only shows when a wait is long, 
   Compression, rips and copies write in whole clusters of the drive.
 - **MMCE: mmceman brought up to ps2-mmce's main** (de28936f): its hook no longer blocks the second memory card port,
   which only MX4SIO needed. Compressing on an MMCE card renames the finished image into place, which sd2psXtd does from
-  firmware 1.4.0 on.
+  firmware 1.4.0 on. **Hotfix (10/24):** on an MMCE card RIPPS2 first writes and renames a tiny file beside the game, so
+  older firmware is told in a second to update ([sd2psxtd.github.io/download](https://sd2psxtd.github.io/download)), with nothing changed, instead of
+  after the whole work.
 - **One background write at a time.** RIPPS2's own background writes now wait for each other (about 3 seconds at most;
   one that cannot wait is simply written next time), and none starts while Memory Files pastes, unpacks or deletes,
   while RIPDISC rips, or while a game is compressed.
