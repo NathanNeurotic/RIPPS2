@@ -12,8 +12,8 @@ GIF_URL = 'https://akilluminati47.github.io/RIPPS2/media/b114/ripps2-boot-empty-
 ICON_URL = 'https://akilluminati47.github.io/RIPPS2/media/deadelf/ripps2-deadelf-bluehat.png'
 WEBSITE_TITLE = 'Here lies an idea . . .'
 WEBSITE_DESCRIPTION = ('RIPPS2 | rest in pieces. Launch physical media, rip it into your library to enjoy, '
-                       'and manage files with ease. Homebrew Game Loader for Sony PlayStation 2 '
-                       '(Supports 33 World Languages)')
+                       'and manage files with ease. Homebrew Game Loader for Sony PlayStation 2')
+LANGUAGES_NOTE = '(Supports 33 World Languages)'
 WEBSITE = 'https://akilluminati47.github.io/RIPPS2/'
 PSX_PLACE = 'https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/'
 GITHUB = 'https://github.com/akilluminati47/RIPPS2'
@@ -41,6 +41,7 @@ def make_payload(gif_url):
                     'components': [
                         {'type': 10, 'content': header},
                         {'type': 10, 'content': WEBSITE_DESCRIPTION},
+                        {'type': 10, 'content': '-# ' + LANGUAGES_NOTE},
                     ],
                     'accessory': {
                         'type': 11,
@@ -74,10 +75,11 @@ def make_preview(path, gif_src, icon_src):
         for label, url in LINKS
     )
     doc = '''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RIPPS2 Discord Component Embed preview</title>
-<style>*{box-sizing:border-box}body{margin:0;background:#313338;color:#dbdee1;font:16px/1.5 Arial,sans-serif;padding:28px}main{max-width:720px;margin:auto}.note{color:#b5bac1;font-size:14px;margin:0 0 16px}.component{background:#2b2d31;border:1px solid #3c6ef0;border-radius:8px;padding:16px;color:#dbdee1}.head{display:flex;align-items:center;gap:16px}.head-copy{flex:1;min-width:0}h1{font-size:20px;line-height:1.3;margin:0 0 8px;color:#f2f3f5}.head-copy a{color:inherit;text-decoration:none}.description{margin:0}.icon{width:64px;height:64px;object-fit:cover;border-radius:8px}.gif{width:100%;height:auto;max-height:460px;object-fit:contain;display:block;border-radius:4px;margin:16px 0}.about{margin:0 0 14px;padding-left:24px}.about li{margin:3px 0}.buttons{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #45474f;padding-top:12px}.button{background:#4e5058;color:#fff;padding:7px 12px;border-radius:4px;text-decoration:none;font-weight:600;font-size:14px}</style></head><body><main><p class="note">Local preview of Discord's website Component Embed — not posted.</p><article class="component"><section class="head"><div class="head-copy"><h1><a href="__WEBSITE__">__TITLE__</a></h1><p class="description">__DESCRIPTION__</p></div><img class="icon" src="__ICON__" alt="RIPPS2 brand icon"></section><img class="gif" src="__GIF__" alt="__ALT__"><ul class="about">__BULLETS__</ul><nav class="buttons">__BUTTONS__</nav></article></main></body></html>'''
+<style>*{box-sizing:border-box}body{margin:0;background:#313338;color:#dbdee1;font:16px/1.5 Arial,sans-serif;padding:28px}main{max-width:720px;margin:auto}.note{color:#b5bac1;font-size:14px;margin:0 0 16px}.component{background:#2b2d31;border:1px solid #3c6ef0;border-radius:8px;padding:16px;color:#dbdee1}.head{display:flex;align-items:center;gap:16px}.head-copy{flex:1;min-width:0}h1{font-size:20px;line-height:1.3;margin:0 0 8px;color:#f2f3f5}.head-copy a{color:inherit;text-decoration:none}.description{margin:0}.languages{font-size:12px;color:#b5bac1;margin:2px 0 0}.icon{width:64px;height:64px;object-fit:cover;border-radius:8px}.gif{width:100%;height:auto;max-height:460px;object-fit:contain;display:block;border-radius:4px;margin:16px 0}.about{margin:0 0 14px;padding-left:24px}.about li{margin:3px 0}.buttons{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #45474f;padding-top:12px}.button{background:#4e5058;color:#fff;padding:7px 12px;border-radius:4px;text-decoration:none;font-weight:600;font-size:14px}</style></head><body><main><p class="note">Local preview of Discord's website Component Embed — not posted.</p><article class="component"><section class="head"><div class="head-copy"><h1><a href="__WEBSITE__">__TITLE__</a></h1><p class="description">__DESCRIPTION__</p><p class="languages">__LANGUAGES__</p></div><img class="icon" src="__ICON__" alt="RIPPS2 brand icon"></section><img class="gif" src="__GIF__" alt="__ALT__"><ul class="about">__BULLETS__</ul><nav class="buttons">__BUTTONS__</nav></article></main></body></html>'''
     for key, value in {
         '__WEBSITE__': esc(WEBSITE, quote=True), '__TITLE__': esc(WEBSITE_TITLE),
         '__DESCRIPTION__': esc(WEBSITE_DESCRIPTION), '__ICON__': esc(icon_src, quote=True),
+        '__LANGUAGES__': esc(LANGUAGES_NOTE),
         '__GIF__': esc(gif_src, quote=True), '__ALT__': esc(GIF_ALT, quote=True),
         '__BULLETS__': bullets, '__BUTTONS__': buttons,
     }.items():
