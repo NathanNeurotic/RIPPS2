@@ -1039,6 +1039,19 @@ index 0000000..74be374
 +    subprocess.run(["gcc", "-std=gnu99", "-Wall", "-Wextra", "-Werror", str(cfile), "-o", str(exe)], check=True, timeout=30)
 +    for args in ([], ["ready"]):
 +        subprocess.run([str(exe), *args], check=True, timeout=10)
+diff --git a/.github/scripts/test_bdm_ata_readiness.py b/.github/scripts/test_bdm_ata_readiness.py
+index e9f0297..a7ce5a0 100644
+--- a/.github/scripts/test_bdm_ata_readiness.py
++++ b/.github/scripts/test_bdm_ata_readiness.py
+@@ -54,6 +54,8 @@ typedef struct { unsigned int UltraDMASupport; } IDENTIFY_DEVICE_DATA;
+ static IDENTIFY_DEVICE_DATA deviceIdentifyData;
+ static int isHDPro, hddHDProKitDetected, hddModulesLoaded, hddModulesLoadCount;
+ static int gEnableBdmHDD, hddModLoaded, ata_devinfo_init;
++static int hddQuietProbe; /* build 114: the background probes keep the 400 box quiet */
++static void hddSetQuietProbe(int on) { hddQuietProbe = on; }
+ static int ready, present, connected, probe_calls, module_calls, dev9_refs, devctl_calls, fail_atad;
+ static ata_devinfo_t info;
+ static int bdm_irx, hdpro_atad_irx, ps2atad_irx, xhdd_irx;
 diff --git a/.github/scripts/test_bdm_transport_binding.py b/.github/scripts/test_bdm_transport_binding.py
 new file mode 100644
 index 0000000..868c1f8
@@ -2946,6 +2959,18 @@ index 0000000..43509f4
 +    print('\n'.join(failures))
 +    sys.exit(1)
 +print('HDD mini autolaunch: resolves its HDL partition, feeds -dvd=hdl:<part>, refuses unmatched sectors')
+diff --git a/.github/scripts/test_hdd_module_lifetime.py b/.github/scripts/test_hdd_module_lifetime.py
+index 1cca5f0..8548390 100644
+--- a/.github/scripts/test_hdd_module_lifetime.py
++++ b/.github/scripts/test_hdd_module_lifetime.py
+@@ -56,6 +56,7 @@ enum {
+ 
+ static u8 hddModulesLoadCount, hddModulesLoaded;
+ static int hddHDProKitDetected, hddSupportModulesLoaded, gDeinitTerminal;
++static int hddQuietProbe; /* build 114: the background probes keep the 400 box quiet */
+ static char *gHDDPrefix;
+ static const char *hddPrefix = "pfs0:";
+ static item_list_t hddGameList;
 diff --git a/.github/scripts/test_igr_polling.py b/.github/scripts/test_igr_polling.py
 index 9f5ecfc..a9e1bd3 100644
 --- a/.github/scripts/test_igr_polling.py
