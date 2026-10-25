@@ -513,6 +513,18 @@ index 90fe9f6..8688937 100644
  /* Drop every cached listing. Call wherever the "art may have appeared" epoch is bumped -- a device
   * generation change or a deliberate settings apply -- so a stick with new art on it is picked up.
   * Cheap, and safe from any thread. */
+diff --git a/include/dialogs.h b/include/dialogs.h
+index 4970d36..8915576 100644
+--- a/include/dialogs.h
++++ b/include/dialogs.h
+@@ -366,6 +366,7 @@ enum UI_ITEMS {
+     RIPPS2_HINTS_BUTTON,      // RIPPS2 build 90: Hints and Glyphs (Interface from build 113)
+     RIPPS2_CACHE_BUTTON,      // RIPPS2 build 113: Game Sources > Cache
+     CFG_RIPPS2_FASTCACHE,     // RIPPS2 build 113: Cache > Fast Cache (each source's saved list)
++    CFG_RIPPS2_TRUSTCACHE,    // RIPPS2 build 115: Cache > Trust Cache (a cached list stands until SELECT)
+     RIPPS2_HINT_ORDER_BUTTON, // and its Hint Order
+     RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
+     CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
 diff --git a/include/mmcesupport.h b/include/mmcesupport.h
 index abd65f5..dafc73d 100644
 --- a/include/mmcesupport.h
@@ -526,6 +538,27 @@ index abd65f5..dafc73d 100644
  // Arm the GameID transport at menu/settings time (idempotent; no-op when the feature is off).
  void mmceArmGameIDTransport(void);
  // Reset present MMCE cards (SD2PSX/MemCard PRO2) to default channel (Card 1 / Channel 1) and clear GameID.
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 131f69c..9e419a0 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -39,6 +39,8 @@ void ripps2PillarMusic(int on); // ripps2bg.c: the towers settle and light up to
+ int ripps2BootLockState(void);              // 1 when a PS2BBL config on the console has RIPPS2's lock in it
+ void ripps2BootLockApply(int on);           // writes it into (or out of) every PS2BBL config found; says how it went
+ int ripps2BootLockIgrPath(char *out, int size); // RIPPS2's path in the IGR Path's own form; 0 when the IGR cannot reach it
++void ripps2ExitPathCheck(void);                  // build 115: is a memory-card IGR Path there (the boot card in)
++const char *ripps2ExitPath(char *buf, int size); // build 115: where EXIT goes: the IGR Path, else RIPPS2, else Browser
+ void ripps2BibleManage(void);               // BOOT LOADER > MANAGE: what each card starts; BIBLE (PS2BBL 1.2.0) to install or repair
+ int ripps2RebootIopWith(const void *ioprp, int size); // opl.c: the IOP rebooted from an IOPRP image, the menu taken down and back
+ int ripps2GetBootPath(char *out, int size); // opl.c: the path RIPPS2 was started from; 0 when unknown
+@@ -148,6 +150,7 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
+ 
+ // ---- build 113: the category sidebar (ripps2side.c) ----
+ extern int gRipps2FastCache; // build 113: Game Sources > Cache > Fast Cache, each source's saved list (1, the default)
++extern int gRipps2TrustCache; // build 115: Game Sources > Cache > Trust Cache, a cached list stands until SELECT (1)
+ extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar
+ int ripps2SidebarOn(void);   // the categories drawn as the sidebar on this theme with this setting
+ void ripps2SidebarRender(void);
 diff --git a/include/supportbase.h b/include/supportbase.h
 index 2574003..7cd9f18 100644
 --- a/include/supportbase.h
@@ -553,6 +586,32 @@ index 1e8421d..ae7f253 100644
  void sysNeutrinoWarnPadEmu(config_set_t *configSet);
  
  // Compose the exact launch argv while the GUI is still live. Refuses a launch that would exceed
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index aef6bd1..be4c6b5 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -305,7 +305,7 @@ gui_strings:
+ - label: BDM_PREFIX
+   string: BDM Prefix Path
+ - label: HINT_EXITPATH
+-  string: "Boots a custom ELF after an IGR. Use a memory card (mc0:/mc1:) or a FAT32 USB drive (mass:/); for USB, RiptOPL offers to add the drivers the reset needs to the memory card's SYS-CONF folder. MMCE can't be reached after the reset; chain through an MC loader like PS2BBL."
++  string: "Where EXIT in the In-Game Menu goes. Empty: back to RIPPS2, where it was started (a memory card or USB); Browser: the PS2 browser. Or an ELF on a memory card (mc0:/mc1:) or a FAT32 USB drive (mass:/); for USB, RIPPS2 offers to add the drivers the reset needs to the memory card's SYS-CONF folder. MMCE can't be reached after the reset; chain through an MC loader like PS2BBL."
+ - label: HINT_SPINDOWN
+   string: Value in minute(s), 0 to disable spin down.
+ - label: HDD_SPINDOWN
+@@ -1582,7 +1582,11 @@ gui_strings:
+ - label: RIPPS2_FAST_CACHE
+   string: Fast Cache
+ - label: HINT_RIPPS2_FAST_CACHE
+-  string: "Each source keeps its last game list (RIPPS2.LST beside its CD and DVD folders) and shows it the moment the source answers, then reads the source again in the background. Off reads every list from its source first, as before."
++  string: "Each source keeps its last game list (RIPPS2.LST beside its CD and DVD folders) and shows it the moment the source answers. Trust Cache decides whether the source is read again after. Off reads every list from its source first, as before."
++- label: RIPPS2_TRUST_CACHE
++  string: Trust Cache
++- label: HINT_RIPPS2_TRUST_CACHE
++  string: "A list shown from its cache stays as it is, ready to launch from, until you press SELECT or RIPPS2 changes that source itself. Off reads each source again in the background after its cache shows, a pause you can feel on an MMCE or MX4SIO card, which share the controller's bus."
+ - label: RIPPS2_CATEGORY_LAYOUT
+   string: Category Layout
+ - label: HINT_RIPPS2_CATEGORY_LAYOUT
 diff --git a/src/artindex.c b/src/artindex.c
 index 51dd1df..6aa8d21 100644
 --- a/src/artindex.c
@@ -849,6 +908,22 @@ index 7894802..f345c14 100644
      if (pDeviceData->bdmDeviceTick != BdmGeneration)
          pDeviceData->bdmPs1RetryCount = pDeviceData->bdmPs1RetryPending = 0;
      // At most two extra scans on the normal idle-refresh cadence. This does
+diff --git a/src/dialogs.c b/src/dialogs.c
+index 6379d40..c9f14b6 100644
+--- a/src/dialogs.c
++++ b/src/dialogs.c
+@@ -2090,6 +2090,11 @@ struct UIItem diaCacheConfig[] = {
+     {UI_BOOL, CFG_RIPPS2_FASTCACHE, 1, 1, _STR_HINT_RIPPS2_FAST_CACHE, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_TRUST_CACHE}}},
++    {UI_SPACER},
++    {UI_BOOL, CFG_RIPPS2_TRUSTCACHE, 1, 1, _STR_HINT_RIPPS2_TRUST_CACHE, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_CACHE_HDD_GAME_LIST}}},
+     {UI_SPACER},
+     {UI_BOOL, CFG_HDDGAMELISTCACHE, 1, 1, _STR_HINT_HDDGAMELISTCACHE, 0, 0, {.intvalue = {0, 0}}},
 diff --git a/src/ethsupport.c b/src/ethsupport.c
 index 642b1ff..0b2a923 100644
 --- a/src/ethsupport.c
@@ -862,6 +937,42 @@ index 642b1ff..0b2a923 100644
      // RIPPS2 build 110: the games on screen came from the share's last list: read the share once
      if (ethSnap.shown) {
          ethSnap.shown = 0;
+diff --git a/src/gui.c b/src/gui.c
+index fef5147..2ef0567 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -674,6 +674,7 @@ void guiExitPathBegin(struct UIItem *ui)
+ void guiExitPathEnd(void)
+ {
+     snprintf(gExitPath, sizeof(gExitPath), "%s", exitPathEdit);
++    ripps2ExitPathCheck(); // build 115
+ }
+ 
+ // RIPPS2: BOOT LOCK (ripps2boot.c). Turning it on fills an empty IGR Path with RIPPS2's own path; a
+@@ -953,9 +954,10 @@ static void guiSaveAdvancedSettings(struct UIItem *ui);
+ static void guiShowCacheConfig(void)
+ {
+     static char seanceRows[SEANCE_COUNT][200]; // build 114: Launchers, a line each (the page keeps the pointers)
+-    int fast = gRipps2FastCache, list = gHDDGameListCache, refresh = gAutoRefresh, result, i;
++    int fast = gRipps2FastCache, trust = gRipps2TrustCache, list = gHDDGameListCache, refresh = gAutoRefresh, result, i;
+ 
+     diaSetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, gRipps2FastCache);
++    diaSetInt(diaCacheConfig, CFG_RIPPS2_TRUSTCACHE, gRipps2TrustCache); // build 115
+     diaSetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, gHDDGameListCache);
+     diaSetInt(diaCacheConfig, UICFG_AUTOREFRESH, gAutoRefresh);
+     for (;;) {
+@@ -980,9 +982,10 @@ static void guiShowCacheConfig(void)
+     if (!result)
+         return;
+     diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, &gRipps2FastCache);
++    diaGetInt(diaCacheConfig, CFG_RIPPS2_TRUSTCACHE, &gRipps2TrustCache);
+     diaGetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, &gHDDGameListCache);
+     diaGetInt(diaCacheConfig, UICFG_AUTOREFRESH, &gAutoRefresh);
+-    if (gRipps2FastCache != fast || gHDDGameListCache != list || gAutoRefresh != refresh)
++    if (gRipps2FastCache != fast || gRipps2TrustCache != trust || gHDDGameListCache != list || gAutoRefresh != refresh)
+         guiSettingsSavePending = 1; // saved with the rest when Settings closes
+ }
+ 
 diff --git a/src/mmcesupport.c b/src/mmcesupport.c
 index ba683b0..0f62892 100644
 --- a/src/mmcesupport.c
@@ -1027,7 +1138,7 @@ index ba683b0..0f62892 100644
      // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
      // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
 diff --git a/src/opl.c b/src/opl.c
-index 3b8cd19..733dcbe 100644
+index 3b8cd19..da51090 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -582,7 +582,7 @@ static void itemExecRefresh(struct menu_item *curMenu)
@@ -1066,6 +1177,43 @@ index 3b8cd19..733dcbe 100644
      if (startMode) {
          if (!mod->support) {
              mod->support = itemList;
+@@ -3739,6 +3750,8 @@ static void _loadConfig()
+                 gRipps2CatBar = value;
+             if (configGetInt(configOPL, "ripps2_fastcache", &value))
+                 gRipps2FastCache = value != 0; // build 113: Fast Cache (on unless turned off)
++            if (configGetInt(configOPL, "ripps2_trust_cache", &value))
++                gRipps2TrustCache = value != 0; // build 115: Trust Cache (on unless turned off)
+             if (configGetInt(configOPL, "ripps2_catlayout", &value) && value >= 0 && value <= 2)
+                 gRipps2CatLayout = value; // build 113: Category Layout (0 Theme, 1 Across the Top, 2 Sidebar)
+             if (configGetInt(configOPL, "ripps2_catswap", &value) && (value == 0 || value == 1))
+@@ -3832,7 +3845,8 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, &gHDDGameListCache);
+             if (!configGetInt(configOPL, "ripps2_hddcache_v", &value) || value < 110)
+                 gHDDGameListCache = 1; // build 110: on by default (checked in the background now); once for older configs
+-            configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath));
++            configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath)); // build 115: checked with the boot card in
++            ripps2ExitPathCheck();
+             configGetStrCopy(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
+             configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
+             configGetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, &gAutoRefresh);
+@@ -4468,6 +4482,7 @@ static void _saveConfig()
+         configSetInt(configOPL, "ripps2_catbar", gRipps2CatBar);
+         configSetInt(configOPL, "ripps2_catlayout", gRipps2CatLayout); // build 113
+         configSetInt(configOPL, "ripps2_fastcache", gRipps2FastCache);
++        configSetInt(configOPL, "ripps2_trust_cache", gRipps2TrustCache);
+         configSetInt(configOPL, "ripps2_catswap", gRipps2CatSwap);
+         configSetInt(configOPL, "ripps2_srcname", gRipps2SrcName); // build 71
+         configSetInt(configOPL, "ripps2_recents", gRipps2Recents);
+@@ -5988,7 +6003,8 @@ static void miniInit(int mode)
+             config_set_t *configOPL = configGetByType(CONFIG_OPL);
+ 
+             configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
+-            configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath));
++            configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath)); // build 115: checked with the boot card in
++            ripps2ExitPathCheck();
+             configGetInt(configOPL, CONFIG_OPL_HDD_SPINDOWN, &gHDDSpindown);
+ #ifdef RETROACHIEVEMENTS
+             configGetInt(configOPL, CONFIG_OPL_RA_TELEMETRY, &gRATelemetry);
 diff --git a/src/pad.c b/src/pad.c
 index c488407..c437192 100644
 --- a/src/pad.c
@@ -1124,6 +1272,44 @@ index cc7b9bf..7b953e4 100644
      {'S', N_("github.com/rickgaiser/neutrino")},
      {'G', NULL},
      {'H', N_("OPEN PS2 LOADER DEVELOPERS")},
+diff --git a/src/ripps2boot.c b/src/ripps2boot.c
+index a191468..67e986b 100644
+--- a/src/ripps2boot.c
++++ b/src/ripps2boot.c
+@@ -563,6 +563,33 @@ int ripps2BootLockIgrPath(char *out, int size)
+     return 0; // the IGR cannot reach MMCE or the HDD (see the IGR Path hint)
+ }
+ 
++// RIPPS2 build 115: where the in-game menu's EXIT goes. An empty IGR Path (the default) is back to this RIPPS2, where it
++// was started, when the IGR can reach that (a memory card or USB; ripps2BootLockIgrPath), else the PS2 browser as
++// before; "Browser" typed in is the browser. A memory-card path that names no file is passed over for RIPPS2's own:
++// the user's console kept exit_path=mc1:/APPS/RIPPS2.elf from an older set-up, an EXIT that went nowhere, while RIPPS2
++// itself was at mc0:/RIPPS2/RIPPS2.ELF (10/25). That is checked while the boot card is in (after the settings load,
++// and when the IGR Path is set), never at a launch: an SD2PSX may have switched to the game's own card by then.
++static int exitStale = 0;
++
++void ripps2ExitPathCheck(void)
++{
++    struct stat st;
++    exitStale = (!strncmp(gExitPath, "mc0:", 4) || !strncmp(gExitPath, "mc1:", 4)) && stat(gExitPath, &st) != 0;
++    if (exitStale)
++        LOG("RIPPS2: the IGR Path %s is not there; EXIT goes back to RIPPS2 instead\n", gExitPath);
++}
++
++const char *ripps2ExitPath(char *buf, int size)
++{
++    if (!strcmp(gExitPath, "Browser"))
++        return "Browser";
++    if (gExitPath[0] != '\0' && !exitStale)
++        return gExitPath;
++    if (ripps2BootLockIgrPath(buf, size))
++        return buf;
++    return "Browser";
++}
++
+ // 1 when the lock is in a PS2BBL config AND what the console starts at power on is PS2BBL (or no card
+ // says otherwise: PS2BBL may start from the HDD). A lock in the config of a card FMCB starts past is
+ // no lock at all, so it shows off, and turning it on says why and offers BIBLE.
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
 index 5651a19..8b2e109 100644
 --- a/src/ripps2ember.c
@@ -1205,7 +1391,7 @@ index c1bcf7f..a3c319a 100644
  
  void ripps2Status(void)
 diff --git a/src/supportbase.c b/src/supportbase.c
-index 04c5e85..9185900 100644
+index 04c5e85..0e944e8 100644
 --- a/src/supportbase.c
 +++ b/src/supportbase.c
 @@ -833,6 +833,16 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
@@ -1225,8 +1411,18 @@ index 04c5e85..9185900 100644
  void sbSnapForget(sb_snap_t *snap)
  {
      snap->tried = snap->shown = 0;
+@@ -1014,7 +1024,8 @@ void sbEnsureIgrUsbDrivers(int compatmask)
+     int mc, i, need[2] = {0, 0}, rc = 0;
+     char dir[16], path[2][32], msg[512];
+ 
+-    if (asked || (compatmask & COMPAT_MODE_6) || strncmp(gExitPath, "mass", 4) != 0)
++    char exitBuf[256]; // build 115: where EXIT will go, the IGR Path or RIPPS2 itself (ripps2ExitPath)
++    if (asked || (compatmask & COMPAT_MODE_6) || strncmp(ripps2ExitPath(exitBuf, sizeof(exitBuf)), "mass", 4) != 0)
+         return;
+     if ((gAutoLaunchGame != NULL) || (gAutoLaunchBDMGame != NULL))
+         return; // nobody at the pad to answer
 diff --git a/src/system.c b/src/system.c
-index 1bea4b2..242d79f 100644
+index 1bea4b2..89676bd 100644
 --- a/src/system.c
 +++ b/src/system.c
 @@ -21,6 +21,8 @@
@@ -1610,6 +1806,27 @@ index 1bea4b2..242d79f 100644
          if (argc + 2 > argvMax)
              return -1;
          argv[argc++] = "-cfg=ript-ra";
+@@ -2580,8 +2817,9 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+     AddHistoryRecordUsingFullPath(filename);
+ #endif
+ 
+-    if (gExitPath[0] == '\0')
+-        strncpy(gExitPath, "Browser", sizeof(gExitPath));
++    // RIPPS2 build 115: EXIT goes back to this RIPPS2 unless the IGR Path names another place (ripps2ExitPath)
++    static char exitBuf[256];
++    const char *exitTo = ripps2ExitPath(exitBuf, sizeof(exitBuf));
+ 
+     // Disable sound effects via libsd, to prevent some games with improper initialization from inadvertently using digital effect settings from other software.
+     LOG("[CLEAREFFECTS]:\n");
+@@ -2706,7 +2944,7 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+     config->magic[0] = EE_CORE_MAGIC_0;
+     config->magic[1] = EE_CORE_MAGIC_1;
+ 
+-    strncpy(config->ExitPath, gExitPath, CORE_EXIT_PATH_MAX_LEN);
++    strncpy(config->ExitPath, exitTo, CORE_EXIT_PATH_MAX_LEN);
+     config->ExitPath[CORE_EXIT_PATH_MAX_LEN - 1] = '\0';
+     strncpy(config->GameModeDesc, mode_str, CORE_GAME_MODE_DESC_MAX_LEN);
+     config->GameModeDesc[CORE_GAME_MODE_DESC_MAX_LEN - 1] = '\0';
 diff --git a/src/textures.c b/src/textures.c
 index 2da860e..f337d6b 100644
 --- a/src/textures.c

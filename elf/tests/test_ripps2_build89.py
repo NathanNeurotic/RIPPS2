@@ -40,7 +40,7 @@ if 'vcdFindPopsElsewhere(devPrefix)' not in vcd or 'vcdCopyFile(src, path)' not 
 
 # Neutrino: exactly one automatic -logo, after -bsd and before -dvd, in both branches
 body = sysc[sysc.index('static int sysRunNeutrinoLaunch('):sysc.index('static int sysRunNeutrinoLaunch(') + 9000]
-if body.count('argv[argc++] = "-logo";') != 2 or body.count('if (autoLogo && argc < argvMax)') != 2:
+if body.count('argv[argc++] = "-logo";') != 2 or body.count('if (autoLogo && sysNeutrinoTakes(neutrinoPath, NF_LOGO) && argc < argvMax)') != 2:  # build 115: only to a Neutrino that knows -logo
     fail.append('the automatic -logo must be offered in the apa and the bdm branches')
 for branch in body[body.index('if (!strcmp(deviceName, "apa"))'):].split('} else {', 1):
     i_logo, i_dvd = branch.find('argv[argc++] = "-logo";'), branch.find('argv[argc++] = filePath;')
