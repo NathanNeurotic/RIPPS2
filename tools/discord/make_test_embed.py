@@ -84,7 +84,7 @@ def banner(build, w=1280, h=480, words=None, halo=False):
             px[x, y] = c
     glow = Image.new('RGB', (w, h), (0, 0, 0))
     gd = ImageDraw.Draw(glow)
-    gd.ellipse((w * 0.18, h * 0.55, w * 0.82, h * 1.25), fill=(20, 60, 160))
+    gd.ellipse((w * 0.18, h * 0.62, w * 0.82, h * 1.3), fill=(20, 60, 160))
     im = Image.blend(im, Image.eval(glow.filter(ImageFilter.GaussianBlur(90)), lambda v: v), 0.45)
     d = ImageDraw.Draw(im, 'RGBA')
     rnd = random.Random(build)
@@ -93,8 +93,9 @@ def banner(build, w=1280, h=480, words=None, halo=False):
         a = rnd.randint(40, 160)
         d.point((x, y), fill=(200, 215, 255, a))
     # the pillars: a floor grid to the horizon, then towers in perspective rows (far ones dim), the
-    # tallest in the middle like the RIPPS2 field, every top kept below the words
-    horizon, cx = h * 0.56, w / 2
+    # tallest in the middle like the RIPPS2 field, every top kept below the words (build 114, the user: lowered, the
+    # towers had come up to the line under the title; tops now stop about 40 px below it)
+    horizon, cx = h * 0.63, w / 2
     for k in range(-14, 15):  # floor lines running to the vanishing point
         d.line((cx + k * 18, horizon, cx + k * 210, h), fill=(40, 80, 190, 70), width=1)
     for r in range(1, 9):
@@ -112,7 +113,7 @@ def banner(build, w=1280, h=480, words=None, halo=False):
         x = cx + col * sc * 0.95
         base = horizon + 140 / z - 20
         tw = sc * 0.6
-        top = max(h * 0.44, base - hgt * sc * 1.55)
+        top = max(h * 0.54, base - hgt * sc * 1.55)
         fade = max(0.25, 1.15 - z * 0.22)
         edge = (int(70 * fade + 20), int(120 * fade + 20), int(235 * fade + 20), int(255 * fade))
         d.rectangle((x - tw / 2, top, x + tw / 2, base), fill=(12, 30, 90, int(215 * fade)))
