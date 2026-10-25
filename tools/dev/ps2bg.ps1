@@ -147,6 +147,18 @@ public static class BG {
     }
     return true;
   }
+  // 10/25: PCSX2's own message boxes (an "Error" over the main window). One sat unseen on the lab's desktop from 01:30 on
+  // and, being modal, disabled the main window, so no key reached the game for hours. Visible Qt windows the main one owns.
+  [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr h, uint cmd);
+  public static List<IntPtr> Dialogs(int pid, IntPtr main) {
+    var list = new List<IntPtr>();
+    EnumProc f = (h, l) => { uint p; GetWindowThreadProcessId(h, out p);
+      if (p == pid && h != main && IsWindowVisible(h) && GetWindow(h, 4) == main) { var c = new StringBuilder(64); GetClassName(h, c, 64);
+        if (c.ToString().StartsWith("Qt")) list.Add(h); }
+      return true; };
+    OnDesk(() => { if (UseDesk) EnumDesktopWindows(Desk, f, IntPtr.Zero); else EnumWindows(f, IntPtr.Zero); });
+    return list;
+  }
   // The window drawn into a bitmap in memory, for the panel's preview
   public static System.Drawing.Bitmap GrabBitmap(IntPtr h) {
     System.Drawing.Bitmap bmp = null;
@@ -296,6 +308,21 @@ if (-not $Attach) {
   "parked off screen: $([BG]::Info($script:main))"
   if ([BG]::GetForegroundWindow() -ne $fgBefore) { "note: the foreground window changed during launch" }
 }
+# A PCSX2 message box over the main window takes every key the run sends (10/25: one did, unseen, for hours). Each is
+# grabbed to grabs\dialog_*.png, named in the output, and closed with Return, before the next step.
+$script:dialogsSeen = 0
+function Dialogs {
+  foreach ($d in [BG]::Dialogs($pid2, $script:main)) {
+    $script:dialogsSeen++
+    $file = Join-Path $grabDir ("dialog_{0}.png" -f (Get-Date -Format 'HHmmss_fff'))
+    $shot = if ([BG]::GrabOnDesk($d, $file)) { $file } else { "(no grab)" }
+    "PCSX2 DIALOG over the game: $([BG]::Info($d)), grabbed to $shot; closing it"
+    [BG]::Post($d, 0x0010, 0, 0) # WM_CLOSE: a key would not reach it (the box is no more active than PCSX2 is)
+    Start-Sleep -Milliseconds 400
+  }
+  if ($script:dialogsSeen -and @([BG]::Dialogs($pid2, $script:main)).Count) { "a PCSX2 dialog is still open: keys will not reach the game" }
+}
+Dialogs
 Press 0x10 # an unbound key (Shift) first, so the first real press is not lost
 
 # a wait the panel's buttons can cut short
@@ -308,6 +335,7 @@ $recOn = $false
 for ($n = 0; $n -lt $list.Count; $n++) {
   if ([LabPanel]::Request -ne 0) { break }
   $s = $list[$n]
+  if ($s -notlike 'wait:*') { Dialogs } # a box that came up since the last step would take this one's keys
   [LabPanel]::Status = "step $($n + 1) of $($list.Count): $s"
   if ($s -like 'wait:*') { Waiting ([double]($s.Split(':')[1])); continue }
   if ($s -eq 'rec') { $recOn = -not $recOn }
