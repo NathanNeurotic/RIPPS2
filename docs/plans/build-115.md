@@ -59,6 +59,17 @@ Everything below is grouped into rounds so each build is tested as a group. Roun
 9. **Control test (the user).** To tell a RIPPS2 problem from a device or SD one: the same Burnout 3 from the same SD
    with the ps2-mmce OPL and with NHDDL + Neutrino, and in RIPPS2 with the In-Game Menu off and with the Neutrino core.
 
+**Round 1 progress (10/25 night):** done in 0115: items 1 (Game ID on by default; the send waits to see the switch start,
+then waits it out on screen, START skips; the history-only path waits 4.5 s), 2 (missed pad reads hold the last
+buttons for 250 ms, no repeats on old data; right stick in FINDCTP1), 3 (MMCE art reads wait while a button is down,
+with a gap between pieces), 5 (MMCE only so far: one quiet background check of a trusted list; a change pulses SELECT's
+hint), 6 (the hardware log, SAVE DIAGNOSTICS, written beside RIPPS2 before MMCE and Ember launches), 7 (case-only name
+matches on a card are the same file; an SD2PSX card write says how long to wait before power off). Left: 4 (card writes
+during MMCE work: decide from the first hardware log), 5 for BDM and SMB (a drive can go while its check is
+queued: needs the device data kept alive or the check keyed by slot), 8 (Ember on MMCE: the setup on the SD checks
+out, SCPH-1001 BIOS and a good CUE; Ember never made its MC1.vmc, so the log decides), 9 (the user's control test: OPL
+MMCE beta 2 is on the SD as PS2BBL's R1).
+
 ### Round 1b: the SD2PSX as a home for RIPPS2 (the user, 10/25 evening)
 1. **AUDIO beside RIPPS2 on the SD** (`mmce?:/RIPPS2/AUDIO`). It is RIPPS2's own folder now, so it is searched first;
    it is quicker to read than the card and has room for music. BIOS Sounds, BIOS Music and the CD player write there.

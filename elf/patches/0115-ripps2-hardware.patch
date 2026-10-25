@@ -205,7 +205,7 @@ index ec32183..ebd7b53 100644
  
  typedef struct
 diff --git a/.github/scripts/test_neutrino_argv_budget.py b/.github/scripts/test_neutrino_argv_budget.py
-index b610b5c..7cde9c0 100644
+index b610b5c..dafb5a2 100644
 --- a/.github/scripts/test_neutrino_argv_budget.py
 +++ b/.github/scripts/test_neutrino_argv_budget.py
 @@ -33,6 +33,10 @@ functions = "\n\n".join(function(sig) for sig in (
@@ -228,6 +228,14 @@ index b610b5c..7cde9c0 100644
  
  #define LOG(...) ((void)0)
  #define NET_BOOT_UDPFS 2
+@@ -85,6 +91,7 @@ static int convertCompatmaskToModes(int mask) { return mask; }
+ static const char *_l(int id) { lastWarning = id; return ""; }
+ static void guiWarning(const char *msg, int secs) { (void)msg; (void)secs; }
+ static void launchDiagRefuse(int reason) { (void)reason; refuses++; }
++static void ripps2Diag(const char *fmt, ...) { (void)fmt; } /* RIPPS2 build 115: the hardware log */
+ static void launchDiagMark(int stage) { (void)stage; }
+ static int sysLoadELFKeepIOP(const char *path, const char *args, int argc, char **argv)
+ {
 diff --git a/.github/scripts/test_neutrino_bsdfs.py b/.github/scripts/test_neutrino_bsdfs.py
 index 238f1a7..1e68ab8 100644
 --- a/.github/scripts/test_neutrino_bsdfs.py
@@ -772,15 +780,20 @@ index 5c9c5c4..edf3935 100644
  
  #endif
 diff --git a/include/supportbase.h b/include/supportbase.h
-index 2574003..7cd9f18 100644
+index 2574003..b9d4aab 100644
 --- a/include/supportbase.h
 +++ b/include/supportbase.h
-@@ -64,6 +64,9 @@ int sbSnapShow(sb_snap_t *snap, const char *prefix, base_game_info_t **list, int
+@@ -64,6 +64,14 @@ int sbSnapShow(sb_snap_t *snap, const char *prefix, base_game_info_t **list, int
  // After a root scan: the list kept for next time (only when it changed); readOk 0 keeps the last one
  void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *list, int gamecount, int fsize, int readOk);
  void sbSnapForget(sb_snap_t *snap); // a source gone or changed: its list is looked for again
 +// build 115: 1 while the games on screen came from the source's cache and Trust Cache keeps them: no background read
 +int sbSnapTrusted(const sb_snap_t *snap);
++// build 115: a quiet check of a trusted list. 1 when the source's list read now differs from the one on screen; a source
++// that found one marks its page (sbListUpdateReadySet) and the page's SELECT hint pulses until the list is read again
++int sbSnapDiffers(const sb_snap_t *snap, const base_game_info_t *list, int gamecount, int fsize);
++void sbListUpdateReadySet(int mode, int on);
++int sbListUpdateReady(int mode); // mode < 0: any page
 +extern int gRipps2TrustCache;
  void sbSetPadBreath(int on);        // build 110: pause every scan (an MX4SIO drive shares SIO2 with the pads, as MMCE does)
  // errno of the last CD/DVD folder the latest sbReadList could not open (0 = both opened).
@@ -2249,7 +2262,7 @@ index 3eb2114..9132082 100644
 +    &mixGetConfig, &mixGetImage, &mixCleanUp, &mixShutdown, &mixCheckVMC, &mixGetIconId,
 +    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &mixGetRowView, NULL};
 diff --git a/src/mmcesupport.c b/src/mmcesupport.c
-index ba683b0..fc3ae4b 100644
+index ba683b0..1cb8c7f 100644
 --- a/src/mmcesupport.c
 +++ b/src/mmcesupport.c
 @@ -20,6 +20,8 @@
@@ -2271,7 +2284,7 @@ index ba683b0..fc3ae4b 100644
  #include <unistd.h>
  #include <fcntl.h>
  
-@@ -96,6 +101,9 @@ static unsigned char mmceEverResolved = 0;
+@@ -96,13 +101,19 @@ static unsigned char mmceEverResolved = 0;
  // gutted the wait so it returned in well under a second; a real sleep restores it.
  #define MMCE_GAMEID_WAIT_TICKS    15           // max polls of the card-switch busy bit
  #define MMCE_GAMEID_POLL_US       (200 * 1000) // 200 ms between polls -> ~3 s total budget (was 500 ms x 15 = 7.5 s)
@@ -2281,16 +2294,17 @@ index ba683b0..fc3ae4b 100644
  /* The MMCE worker checks its abort flag between 32 KB staged reads. A
   * 500 ms wait gives a slow card time to reach the next safe checkpoint. */
  #define MMCE_ART_ABORT_WAIT_TICKS 500
-@@ -103,6 +111,8 @@ static unsigned char mmceEverResolved = 0;
+ 
  // forward declaration
  static item_list_t mmceGameList;
++static void mmceSurveyQueue(void);
  static void mmceGetDeviceRoot(char *root, size_t size);
 +static void mmceSettleAfterSwitch(void);
 +static int mmceWaitCardReady(const char *root);
  
  // RIPPS2 build 109: a fast MMCE boot. The card's game list is kept on the card (RIPPS2.LST beside its CD and DVD
  // folders): at boot the games show from it at once, then the card is read again in the background (sbReadList, which
-@@ -202,24 +212,32 @@ int mmceSendGameID(const char *startup, const char *protectMcPath, int vmcSlotMa
+@@ -202,24 +213,32 @@ int mmceSendGameID(const char *startup, const char *protectMcPath, int vmcSlotMa
      // gate, batch S7) must poll the SAME device, not a guess.
      snprintf(mmceGameIdTarget, sizeof(mmceGameIdTarget), "%s", mmceDevice);
  
@@ -2335,7 +2349,7 @@ index ba683b0..fc3ae4b 100644
      }
  
      // Tri-state (batch S7): -1 = the 0x8 switch WAS sent but the settle was never confirmed (busy
-@@ -253,6 +271,115 @@ int mmceGameIdSettle(int timeoutMs)
+@@ -253,6 +272,115 @@ int mmceGameIdSettle(int timeoutMs)
      return -1;
  }
  
@@ -2451,7 +2465,7 @@ index ba683b0..fc3ae4b 100644
  static void mmceGetDeviceRoot(char *root, size_t size)
  {
      const char *separator = strstr(mmcePrefix, ":/");
-@@ -566,6 +693,15 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+@@ -566,6 +694,15 @@ static int mmceNeedsUpdate(item_list_t *itemList)
          return (mmceGameCount > 0 || mmcePs1GameCount > 0);
      }
  
@@ -2467,16 +2481,75 @@ index ba683b0..fc3ae4b 100644
      mmceGameList.updateDelay = MENU_UPD_DELAY_NOUPDATE;
  
      // Register the card's THM/LNG dirs BEFORE the VCD-view early returns (#152, AndrewBento). These
-@@ -612,6 +748,8 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+@@ -612,6 +749,10 @@ static int mmceNeedsUpdate(item_list_t *itemList)
              return result;
      }
  
-+    if (sbSnapTrusted(&mmceSnap)) // build 115: Trust Cache: the card's list stands until a refresh
++    if (sbSnapTrusted(&mmceSnap)) { // build 115: Trust Cache: the card's list stands until a refresh
++        mmceSurveyQueue();          // and is checked once, quietly (a change pulses SELECT's hint)
 +        return result;
++    }
      if (mmceSnap.shown) { // build 109: the games on screen came from the card's list: read the card once, in the background
          mmceSnap.shown = 0;
          mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
-@@ -1011,9 +1149,15 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -750,13 +891,55 @@ static int mmceUpdateGameList(item_list_t *itemList)
+             return result + mmceGameCount;
+         }
+         sbReadList(&mmceGames, mmcePrefix, sub, &mmceULSizePrev, &mmceGameCount);
+-        if (atRoot) // the card was read: keep its list for next time
++        if (atRoot) { // the card was read: keep its list for next time
+             sbSnapScanned(&mmceSnap, mmcePrefix, mmceGames, mmceGameCount, mmceULSizePrev, sbGetReadListError() == 0 || mmceGameCount > 0);
++            sbListUpdateReadySet(MMCE_MODE, 0); // build 115: what the check found is on screen now
++        }
+         result += mmceGameCount;
+     }
+     return result;
+ }
+ 
++// RIPPS2 build 115 (the user: "all the lists must load in once and make the refresh pulse if there's a list write ready;
++// otherwise, when it surveys the game list and it matches, don't make a hitch"): a list shown from the card's cache under
++// Trust Cache is checked once, on the IO worker, into a list of its own; the one on screen is never touched. Only after
++// the user has left the pad alone a few seconds and while the card is not busy, so it costs the pads nothing. A list
++// that differs marks the page: SELECT's hint pulses, and SELECT reads the card as before.
++static int mmceSurveyed = 0;
++static clock_t mmceSurveyAfter = 0;
++
++static void mmceSurveyWork(void)
++{
++    base_game_info_t *games = NULL;
++    int count = 0, fsize = mmceULSizePrev;
++    clock_t start = clock();
++
++    if (!sbSnapTrusted(&mmceSnap) || mmcePrefix[0] == '\0' || mmceCardBusy())
++        return; // a refresh came first, or the card is busy: the next pass asks again
++    mmceSurveyed = 1;
++    sbReadList(&games, mmcePrefix, "", &fsize, &count);
++    if ((sbGetReadListError() == 0 || count > 0) && sbSnapDiffers(&mmceSnap, games, count, fsize)) {
++        sbListUpdateReadySet(MMCE_MODE, 1);
++        ripps2Diag("mmce: the card's list changed (%d games, read in %d ms); SELECT takes it", count,
++                   (int)((clock() - start) * 1000 / CLOCKS_PER_SEC));
++    } else
++        ripps2Diag("mmce: the card's list matches the cache (read in %d ms)", (int)((clock() - start) * 1000 / CLOCKS_PER_SEC));
++    free(games);
++}
++
++static void mmceSurveyQueue(void)
++{
++    clock_t now = clock();
++    if (mmceSurveyed)
++        return;
++    if (mmceSurveyAfter == 0)
++        mmceSurveyAfter = now + 8 * CLOCKS_PER_SEC; // the boot's own reads first
++    if ((long)(now - mmceSurveyAfter) < 0 || padAnyHeld() || mmceCardBusy())
++        return;
++    mmceSurveyAfter = now + 3 * CLOCKS_PER_SEC; // asked again in a while if the worker turned it down
++    ioPutRequest(IO_CUSTOM_SIMPLEACTION, &mmceSurveyWork);
++}
++
+ static int mmceGetGameCount(item_list_t *itemList)
+ {
+     int view = libListViewActive(itemList);
+@@ -1011,9 +1194,15 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
      if (!cacheAbortMmceImageLoadsTimed(MMCE_ART_ABORT_WAIT_TICKS)) {
          // The card is still busy. Leave the menu and worker intact so the user
          // can retry after the current read returns.
@@ -2492,7 +2565,7 @@ index ba683b0..fc3ae4b 100644
  
      // VCD view: hand off to POPSTARTER (by name) instead of the disc path below. Menu-launch only.
      if (gAutoLaunchBDMGame == NULL && game != NULL && (mmceGetItemView(itemList, id) == LIB_VIEW_PS1)) {
-@@ -1066,8 +1210,11 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -1066,8 +1255,11 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
              }
              // protectMcPath=NULL: the native path loads no ELF from mcN: mid-launch (ee_core is
              // embedded; sysLaunchLoaderElf reads rom0: only).
@@ -2505,7 +2578,7 @@ index ba683b0..fc3ae4b 100644
          }
      }
  
-@@ -1395,6 +1542,8 @@ static config_set_t *mmceGetConfig(item_list_t *itemList, int id)
+@@ -1395,6 +1587,8 @@ static config_set_t *mmceGetConfig(item_list_t *itemList, int id)
  
  static int mmceGetImage(item_list_t *itemList, char *folder, int isRelative, char *value, char *suffix, GSTEXTURE *resultTex, short psm)
  {
@@ -3832,10 +3905,10 @@ index f4d22b4..5d51c70 100644
  // IO worker loads (deferredAudioInit, sfxInit(1)) and it plays the moment it is in, on voice 0, which nothing
  // else uses; the rest load after it. Once they are in, the music starts from a thread of its own (never the
 diff --git a/src/supportbase.c b/src/supportbase.c
-index 04c5e85..0e944e8 100644
+index 04c5e85..51f94c7 100644
 --- a/src/supportbase.c
 +++ b/src/supportbase.c
-@@ -833,6 +833,16 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
+@@ -833,6 +833,40 @@ void sbSnapScanned(sb_snap_t *snap, const char *prefix, const base_game_info_t *
      ioWriteEnd();
  }
  
@@ -3849,10 +3922,34 @@ index 04c5e85..0e944e8 100644
 +    return gRipps2TrustCache && gRipps2FastCache && snap->shown;
 +}
 +
++int sbSnapDiffers(const sb_snap_t *snap, const base_game_info_t *list, int gamecount, int fsize)
++{
++    return gamecount > 0 && list != NULL && sbSnapHash(list, gamecount, fsize) != snap->sum;
++}
++
++static volatile unsigned int sbUpdateReady; // build 115: a bit a page (its mode) whose list changed on its source
++
++void sbListUpdateReadySet(int mode, int on)
++{
++    if (mode < 0 || mode >= 32)
++        return;
++    if (on)
++        sbUpdateReady |= 1u << mode;
++    else
++        sbUpdateReady &= ~(1u << mode);
++}
++
++int sbListUpdateReady(int mode)
++{
++    if (mode < 0)
++        return sbUpdateReady != 0;
++    return mode < 32 && (sbUpdateReady & (1u << mode)) != 0;
++}
++
  void sbSnapForget(sb_snap_t *snap)
  {
      snap->tried = snap->shown = 0;
-@@ -1014,7 +1024,8 @@ void sbEnsureIgrUsbDrivers(int compatmask)
+@@ -1014,7 +1048,8 @@ void sbEnsureIgrUsbDrivers(int compatmask)
      int mc, i, need[2] = {0, 0}, rc = 0;
      char dir[16], path[2][32], msg[512];
  
@@ -3863,7 +3960,7 @@ index 04c5e85..0e944e8 100644
      if ((gAutoLaunchGame != NULL) || (gAutoLaunchBDMGame != NULL))
          return; // nobody at the pad to answer
 diff --git a/src/system.c b/src/system.c
-index 1bea4b2..b23abab 100644
+index 1bea4b2..5d7e052 100644
 --- a/src/system.c
 +++ b/src/system.c
 @@ -21,6 +21,8 @@
@@ -4265,7 +4362,18 @@ index 1bea4b2..b23abab 100644
      }
  
      // Hand off WITHOUT the elf-loader IOP reset (NHDDL parity, vendored elfldr/): Neutrino reads
-@@ -2562,6 +2803,7 @@ void sysLaunchEmber(const char *emberElf, const char *gameFolder)
+@@ -2551,6 +2792,10 @@ void sysLaunchEmber(const char *emberElf, const char *gameFolder)
+         argv[argc++] = (char *)gameFolder;
+ 
+     LOG("[EMBER] elf=%s game=%s\n", emberElf, (argc > 1) ? argv[1] : "(none)");
++    // build 115: the hardware log, beside RIPPS2 when it runs from a drive (Digimon World from the user's SD2PSXTD stopped
++    // before Ember made its MC1.vmc, with nothing left to say where)
++    ripps2Diag("launch: Ember %s, game %s", emberElf, (argc > 1) ? argv[1] : "(none)");
++    ripps2DiagBeforeLaunch();
+     ripps2LaunchReport("EMBER", emberElf, argc, argv); // RIPPS2 build 85: mc0:/RIPPS2/LAUNCH.TXT
+ 
+     // The kernel argv budget (15 strings / 256-byte pool, counting the child loader's own argv[0])
+@@ -2562,6 +2807,7 @@ void sysLaunchEmber(const char *emberElf, const char *gameFolder)
  
  void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdvdman_irx, void **cdvdman_irx, int size_mcemu_irx, void **mcemu_irx, int EnablePS2Logo, unsigned int compatflags)
  {
@@ -4273,7 +4381,7 @@ index 1bea4b2..b23abab 100644
      unsigned int modules, ModuleStorageSize;
      void *ModuleStorage, *ModuleStorageEnd;
      u8 local_ip_address[4], local_netmask[4], local_gateway[4];
-@@ -2580,8 +2822,9 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+@@ -2580,8 +2826,9 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
      AddHistoryRecordUsingFullPath(filename);
  #endif
  
@@ -4285,7 +4393,7 @@ index 1bea4b2..b23abab 100644
  
      // Disable sound effects via libsd, to prevent some games with improper initialization from inadvertently using digital effect settings from other software.
      LOG("[CLEAREFFECTS]:\n");
-@@ -2706,7 +2949,7 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+@@ -2706,7 +2953,7 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
      config->magic[0] = EE_CORE_MAGIC_0;
      config->magic[1] = EE_CORE_MAGIC_1;
  
@@ -4548,3 +4656,49 @@ index 2da860e..6c650e0 100644
 -    }
      return (result >= 0) ? 0 : result;
  }
+diff --git a/src/themes.c b/src/themes.c
+index fa854fb..92c9ef8 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -15,6 +15,7 @@
+ #include "include/vcdsupport.h" // vcdDisplayName -- display-only VCD game-ID prefix hide
+ #include "include/libview.h"    // libViewActive / libListViewActive -- which list this page shows
+ #include "include/ripps2.h"     // RIPPS2: art panel layers
++#include "include/supportbase.h" // RIPPS2 build 115: a page whose list changed pulses its SELECT hint
+ #include "include/metadb.h"     // RIPPS2: attributes fall back to the metadata database
+ #include "include/saveicon.h"   // SaveIcon: the selected game's 3D save icon
+ #include "include/cuesupport.h"
+@@ -4655,6 +4656,13 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+             row[j] = k;
+         }
+         u64 col = hintFade(elem->color, hintA), iconCol = hintFade(gDefaultCol, hintA);
++        // build 115: the source's list changed while a cached one was shown: SELECT's hint pulses until it is read again
++        item_list_t *hintSrc = menu->item->userdata;
++        int pulse = !sidebar && hintSrc != NULL && (sbListUpdateReady(hintSrc->mode) || (MODE_IS_MIX(hintSrc->mode) && sbListUpdateReady(-1)));
++        float pulseK = pulse ? 0.45f + 0.55f * (0.5f + 0.5f * sinf((float)clock() / CLOCKS_PER_SEC * 5.0f)) : 1.0f;
++        u64 colP = hintFade(elem->color, hintA * pulseK), iconColP = hintFade(gDefaultCol, hintA * pulseK);
++#define HINT_COL(h)  (pulse && ripps2HintToken((h)->text_id, (h)->icon_id) == RIPPS2_HINT_REFRESH ? colP : col)
++#define HINT_ICON(h) (pulse && ripps2HintToken((h)->text_id, (h)->icon_id) == RIPPS2_HINT_REFRESH ? iconColP : iconCol)
+ 
+         if (ripps2HintColumn()) {
+             // one hint a line from the element's x/y down; a column that would run off the bottom (the
+@@ -4665,7 +4673,7 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+             if (y < 0)
+                 y = 0;
+             for (i = 0; i < n; i++)
+-                drawHintEntry(row[i], labels, elem->font, x, y + i * pitch, col, iconCol);
++                drawHintEntry(row[i], labels, elem->font, x, y + i * pitch, HINT_COL(row[i]), HINT_ICON(row[i]));
+         } else {
+             // RIPPS2: fit the row between the screen margins. A full row (Menu, Run, Info, Options,
+             // Refresh, Favorite, PS1) is wider than a gap of elem->width allows, so the gap tightens
+@@ -4695,7 +4703,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+                 x = 4;
+ 
+             for (i = 0; i < n; i++)
+-                x = drawHintEntry(row[i], labels, font, x, elem->posY, col, iconCol) + gap;
++                x = drawHintEntry(row[i], labels, font, x, elem->posY, HINT_COL(row[i]), HINT_ICON(row[i])) + gap;
++#undef HINT_COL
++#undef HINT_ICON
+         }
+         if (showSource) {
+             menu_hint_item_t *h2 = menu->item->hints;
