@@ -6,7 +6,130 @@ uLaunchELF removed, RIPPS2/RIPPS2.ELF = the v1.1.4 hotfix ELF, PS2BBL AUTO -> RI
 and CFGs, EMBER (Digimon World) and POPS/POPSTARTER.ELF. RIPPS2 boots from the card; Burnout 3 from the internal HDD
 launches fine.
 
-Status: plan, nothing built yet. Talk it over with the user first ("we can go over it tomorrow").
+Status: in progress (patch 0115 on main). The first sections below are the plan from 10/25 evening; the
+lettered sections after them are the first run's notes, kept for their findings.
+
+## The plan from here (10/25 evening, after the second hardware run)
+
+The user tested the CI build of d4e9631 (run 40222153158) on the SD2PSXTD: the pad still lagged and jumped while MMCE
+loaded, the right stick stopped tilting after the load, Burnout 3 from MMCE still hung (black screen a long time, the
+logo's sound, nothing, a white screen 5 minutes later; from Memory Files the logo came sooner, then the same hang),
+Digimon World (Ember) did not start, and copying a new RIPPS2.ELF onto the boot card failed with no message (the file
+kept its old size; after erasing it, the new copy never arrived). Then a batch of navigation, sidebar and text requests.
+Everything below is grouped into rounds so each build is tested as a group. Rounds 1 to 3 go into 115; round 4 releases.
+
+### What the firmware source says (sd2psXtd main, read 10/25)
+- **The device's own game switch is late.** With GameID on in the device, it watches the play history file: it sees the
+  history write only when that sector is flushed to the SD (after 100 ms without card traffic) and acts only after 2 s
+  more of quiet (`HISTORY_WRITE_HYST_US`). Build 115's wait (1.5 s for the busy bit) gave up before that, so the switch
+  could start after RIPPS2 had handed off and the game was streaming. Creating or loading the game's card runs only
+  while MMCE is idle (30 ms slices), and a streaming game never lets it. That fits the late logo and the hang.
+- **The busy bit** (MMCE GET_STATUS) is set only while the device creates or loads a card. Card writes waiting to be
+  flushed are not shown, and RIPPS2's own MMCE reads during a wait stop the device's progress.
+- **The device's main loop** draws its OLED screen between MMCE requests; its README warns that long names that scroll
+  make MMCE games stutter. The boot channel was named "PS2BBL + RIPPS2" (now "RIPPS2").
+- **mmceman holds the SIO2 lock for a whole read** (all of a 16 KB fileXio piece, the device's SD time included); the
+  pads share that lock. The menu's mmceman runs with no pacing; only the in-game mmcedrv gets RiptOPL's 5 wait cycles.
+- **Card writes** go to the device's RAM at once and reach the SD later, in 100 ms slices that stall MMCE meanwhile.
+
+### Round 1: MMCE, the pad, and launching (hardware first)
+1. **GameID on by default** (`mmce_gameid` = 1, set once by a 115 migration, the user's choice kept after). Every MMCE
+   launch (OPL core, Neutrino, Memory Files) stops RIPPS2's own MMCE reads (art, lists, caches), sends the game's ID,
+   and waits on screen until the card is ready (the busy bit clear and the file system answering), with the seconds
+   counting and no 3 s cap; START skips. With RIPPS2's GameID off, the wait covers the device's own switch (at least 4 s
+   after the history write). This is "make the card before the game reads".
+2. **Pad reads that miss keep the last buttons.** A frame whose pad read failed (the bus busy) counts today as nothing
+   pressed, so one press becomes several: the cursor jumping. The last buttons are kept for up to 250 ms; past that,
+   held buttons are let go and nothing repeats until a fresh read. The right stick also reads in padman's FINDCTP1 state,
+   and DualShock is asked for again whenever the pad reports digital after a stall.
+3. **MMCE reads paced in the menu.** Art and list files are read in pieces of at most 8 KB with a yield between them,
+   none while a button is held or for 150 ms after a press (the pad breath MX4SIO has), and never two MMCE readers at
+   once.
+4. **No card writes during MMCE work.** Settings, recents, the master list and the play history wait until MMCE has
+   been quiet a moment before they are written to the boot card.
+5. **Lists load once.** Each list shows from its cache at once. A paced background check reads the drive. When the
+   drive's list differs, the refresh glyph pulses and SELECT takes the new list. When it matches, nothing on screen
+   moves.
+6. **A hardware log.** A RAM log records pad misses, the longest pad gap, MMCE request times, the busy bit and each
+   launch step. STATUS > SAVE DIAGNOSTICS writes it to the SD or a USB stick, so a hardware run can be read here.
+7. **Memory Files copies are checked.** Each copy reads back its size and CRC and says when it fails. A copy to a card
+   in an SD2PSX warns to wait a few seconds before power off, because the device writes the card to its SD later.
+8. **Ember from MMCE.** Digimon World did not start: check which devices Ember reads (mmce paths, its BIOS, the games
+   folder) and either make the launch work or say plainly what Ember needs.
+9. **Control test (the user).** To tell a RIPPS2 problem from a device or SD one: the same Burnout 3 from the same SD
+   with the ps2-mmce OPL and with NHDDL + Neutrino, and in RIPPS2 with the In-Game Menu off and with the Neutrino core.
+
+### Round 1b: the SD2PSX as a home for RIPPS2 (the user, 10/25 evening)
+1. **AUDIO beside RIPPS2 on the SD** (`mmce?:/RIPPS2/AUDIO`). It is RIPPS2's own folder now, so it is searched first;
+   it is quicker to read than the card and has room for music. BIOS Sounds, BIOS Music and the CD player write there.
+   The boot card keeps only PS2BBL and the settings save. Check that mmceman is up before the boot's sound load when
+   RIPPS2 starts from MMCE.
+2. **The device's cards in Memory Files.** `MemoryCards/PS2/<folder>/<name>-<channel>.mcd` are raw 8 MB cards, the same
+   format as an OPL VMC, so they open like folders (copy saves in and out, export and import PSU). A CARD BANKS view
+   lists the BOOT channels, the per-game cards and the named cards. From it: make a new card, copy a card, and move a
+   card to the holding folder (never a hard delete).
+3. **Card to card in MCKILLA.** A VMC or an SD2PSX card is written whole onto a physical card in slot 2 (and a physical
+   card is backed up as a `.mcd` bank on the SD). Today MCKILLA writes a VMC's saves back one by one.
+4. **Folder and file tooltips in Memory Files.** Say what each known folder and loose file is for: ART, CFG, CHT, CD,
+   DVD, VMC, THM, LNG, APPS, POPS, EMBER, RA, RIPPS2, AUDIO, MEDIA, MemoryCards, BOOT, .sd2psx, RIPPS2.LST, games.bin,
+   settings.ini, BootCard.ini, `*.mcd`, `*.crp`.
+5. **MEDIA from MMCE.** A PNG opens and tilts with no pad lag, and AVI video plays without stutter. Reads ahead in paced
+   pieces, with the pad reads kept clear (round 1).
+
+### Round 2: navigation and the sidebar
+1. **Layout > Sidebar Style**: Split (today's dark strip and the accent beside it) or One Piece (one bar, the same overall
+   width, the glyphs centred in it). The lit tile slides to the new category and the glyphs crossfade when it changes.
+2. **The bar and the drawer slide open** with RIPFLOW's cover easing (both the narrow bar and the opened drawer).
+3. **Category Bar becomes "Category/Sidebar".** On the sidebar, Fade When Idle slides the bar away; any press brings it
+   back, a little quicker than it left.
+4. **Category Layout gets "Menu"** as its last choice: no bar and no sidebar; the categories are in the START menu, as
+   on a legacy theme.
+5. **Sidebar mode owns Left.** Left always goes to the sidebar. Right never cycles the sources, and Up/Down never
+   changes the source on RIPFLOW. The cancel button (O) opens the Storage drawer on every page and view. With the
+   sidebar off, Left/Right work as the theme sets them, with L1/R1 on the categories.
+6. **Memory Files ORBITS in sidebar mode**: L1/R1 change the formation and Left opens the sidebar, as on Launch Disc.
+7. **RIPFLOW: L1/R1 step one cover**, and repeat while held, like the D-pad.
+8. **Hints and Glyphs fade.** A new option in Layout's top set, on by default for every theme (key `hints_fade`, written
+   into Adapt and Adapt Rx). When the hint line's glyphs change it fades in with the covers' own fade at 0 ms; the same
+   glyphs stay put; modals included. A **Guidance** choice fades the glyphs in after 4.2 s idle, with RIPFLOW's L1/R1
+   glyphs beside the centre covers.
+9. **Starred Games.** R3 held 4.2 s turns the star display off: no stars, no indent, no R3 hint, names from the left
+   edge at full width. Held again turns it back on (Manual, stars as last set) and stars the game under the cursor.
+   Default: Manual with the stars hidden; R3 still stars a game. The tooltip says all of this.
+
+### Round 3: text and page polish
+1. ACHIEVEMENTS and STATUS: the row names in Roboto on every theme (a theme's font keys can still override).
+2. Notifications: one Roboto, the built-in bold. Text Weight's global choice becomes Normal or Bold (it shows no change
+   today); theme keys keep all three weights.
+3. One title position on every page of the same kind. The PS1 game settings title sat too close to the bar, and its
+   sentence ran off.
+4. Network: the title and its line spaced like the other pages. Audio: the divider lines moved to fit the text, which
+   stays where it is.
+
+### Round 4: release
+- Translations: build 115's 58 strings and its new labels in the 32 languages.
+- Lab rounds in PCSX2: navigation and sidebar, Recent Games, the list pulse, STATUS LOADING, the BIOS Sounds room check,
+  art names, Neutrino on the exFAT HDD.
+- A hardware round on the SD2PSX with the user: MMCE input, Burnout 3, Digimon World, the sounds rip, EXIT back to
+  RIPPS2.
+- Themes edition 115 (`hints_fade`, the sidebar style keys) and the glossary; CHANGELOG; README (the ELF is 2,641 KB,
+  about 2.6 MB); the psx-place post built from the user's template (tools/discord/psxplace-post.bbcode); the Short
+  (repo and release only); release v1.1.5-beta; the Discord "Test me | Build 115" post.
+
+### The SD2PSX card as set up on 10/25 evening (D:)
+- `RIPPS2/RIPPS2.ELF` on the SD: build 115 (e6f0a21). PS2BBL's AUTO starts `mmce?:/RIPPS2/RIPPS2.ELF` first, then
+  `mc?:/RIPPS2/RIPPS2.ELF` (also on the boot card), then the browser. An update is one file copied on a PC.
+- BOOT: BootCard-1/2/4/6/8.mcd all the same card (PS2BBL, RIPPS2's settings save, RIPPS2.ELF); BootCard.ini channel 1
+  "RIPPS2", MaxChannels=1.
+- THM: Adapt and Adapt Rx (edition 114). The holding folder keeps the old cards, the Burnout 3 card the device made and
+  the APPS test build.
+
+### Answers given to the user
+- GameID on by default: yes. RIPPS2 sends it and waits until the card is ready before the game starts ("create
+  before reading"). The device's own switch is too late for a streaming game.
+- Where RIPPS2 lives on an SD2PSX: on the SD (`mmce?:/RIPPS2/RIPPS2.ELF`), started by PS2BBL from the boot card, which
+  keeps PS2BBL and RIPPS2's settings save. Loading is quicker, an update is one copied file, and nothing has to be
+  written into a card image. The boot card's own copy stays as the fallback.
 
 ## A. MMCE (first)
 
