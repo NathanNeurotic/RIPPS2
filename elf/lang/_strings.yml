@@ -456,7 +456,10 @@ strings:
   in:
   - mixsupport.c
   - ripps2games.c
-- en: The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done.
+- en: Asking the SD2PSX for this game's memory card...
+  in:
+  - mmcesupport.c
+- en: The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.
   in:
   - mmcesupport.c
 - en: ALL
@@ -2146,6 +2149,9 @@ strings:
 - en: STARTING...
   in:
   - ripps2files.c
+- en: 'Saving to the SD2PSX''s SD: wait %d s before turning off.'
+  in:
+  - ripps2files.c
 - en: Starting this drive's games
   in:
   - ripps2files.c
@@ -3056,6 +3062,9 @@ strings:
 - en: Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.
   in:
   - ripps2status.c
+- en: DIAG.TXT, for a bug report
+  in:
+  - ripps2status.c
 - en: DRIVES
   in:
   - ripps2status.c
@@ -3146,6 +3155,9 @@ strings:
 - en: RIP THIS CONSOLE'S SOUNDS
   in:
   - ripps2status.c
+- en: SAVE DIAGNOSTICS
+  in:
+  - ripps2status.c
 - en: START EVERY DRIVE
   in:
   - ripps2status.c
@@ -3173,6 +3185,12 @@ strings:
 - en: The IP and SMB share POPSTARTER uses for PS1 games over the network.
   in:
   - ripps2status.c
+- en: The diagnostics are in %s.
+  in:
+  - ripps2status.c
+- en: The diagnostics could not be written to %s.
+  in:
+  - ripps2status.c
 - en: USB, HDD, MMCE and the rest
   in:
   - ripps2status.c
@@ -3186,6 +3204,9 @@ strings:
   in:
   - ripps2status.c
 - en: Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.
+  in:
+  - ripps2status.c
+- en: Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
   in:
   - ripps2status.c
 - en: a drive of unknown kind

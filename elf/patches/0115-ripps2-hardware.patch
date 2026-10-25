@@ -452,6 +452,18 @@ index 0000000..258523c
 +if fails:
 +    print('\n'.join(fails))
 +    sys.exit(1)
+diff --git a/.github/scripts/test_pad_repeat_clock.py b/.github/scripts/test_pad_repeat_clock.py
+index b7cde84..7e1d281 100644
+--- a/.github/scripts/test_pad_repeat_clock.py
++++ b/.github/scripts/test_pad_repeat_clock.py
+@@ -102,6 +102,7 @@ static u32 cpu_ticks(void) { return fakeTicks; }
+ static u32 paddata, oldpaddata;
+ static int delaycnt[16], paddelay[16];
+ static int KeyPressedOnce, DisableCron;
++static int padHolding; /* RIPPS2 build 115: a missed pad read holding the last buttons */
+ 
+ @TABLE@
+ 
 diff --git a/.github/scripts/test_pccf.py b/.github/scripts/test_pccf.py
 index 4f2630e..869b1e1 100644
 --- a/.github/scripts/test_pccf.py
@@ -671,6 +683,18 @@ index abd65f5..dafc73d 100644
  // Arm the GameID transport at menu/settings time (idempotent; no-op when the feature is off).
  void mmceArmGameIDTransport(void);
  // Reset present MMCE cards (SD2PSX/MemCard PRO2) to default channel (Card 1 / Channel 1) and clear GameID.
+diff --git a/include/pad.h b/include/pad.h
+index 0f940c9..abc476d 100644
+--- a/include/pad.h
++++ b/include/pad.h
+@@ -31,6 +31,7 @@ int getKeyOn(int num);
+ void padGetRightStick(int *x, int *y); // RIPPS2: -128..127, 0 at rest or without an analog pad
+ int getKeyOff(int num);
+ int getKeyPressed(int num);
++int padAnyHeld(void); // RIPPS2 build 115: a button is down (MMCE reads wait for the pads)
+ 
+ /** Sets the repetition delay for the specified button
+  * @param button id (KEY_XXX values)
 diff --git a/include/ripps2.h b/include/ripps2.h
 index 131f69c..7213e49 100644
 --- a/include/ripps2.h
@@ -709,6 +733,33 @@ index 131f69c..7213e49 100644
  void ripps2Status(void);                    // ripps2status.c (build 80): the main menu's STATUS page, RIPPS2's homebrew
  int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize); // ripps2ember.c (build 77): install the Neutrino RIPPS2 carries, where the user picks
  void ripps2ArtDownload(void); // ripps2art.c (build 73): covers for the games without one, over HTTPS
+diff --git a/include/ripps2diag.h b/include/ripps2diag.h
+new file mode 100644
+index 0000000..42b838a
+--- /dev/null
++++ b/include/ripps2diag.h
+@@ -0,0 +1,21 @@
++#ifndef __RIPPS2DIAG_H
++#define __RIPPS2DIAG_H
++
++/*
++  RIPPS2 build 115: the hardware log. A release build has no console output, and a console run cannot be watched from a
++  PC, so what matters on hardware (pad reads that missed, an MMCE card's busy spells, a Game ID switch and its wait, art
++  reads that took long, each launch's steps) goes into a small ring in RAM, time-stamped. STATUS > SAVE DIAGNOSTICS
++  writes it to DIAG.TXT beside RIPPS2, and an MMCE launch writes it there by itself when RIPPS2 is not on a memory card,
++  so a launch that hangs still leaves its steps behind. Safe from any thread.
++*/
++
++void ripps2Diag(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
++
++// DIAG.TXT in dir (RIPPS2's own folder when NULL); 1 when written, the file's path in path
++int ripps2DiagSave(const char *dir, char *path, int pathSize);
++
++// before a launch from an MMCE card: written beside RIPPS2 unless that is a memory card (a card write just before the
++// card switches would be one more thing for the switch to wait on)
++void ripps2DiagBeforeLaunch(void);
++
++#endif
 diff --git a/include/sound.h b/include/sound.h
 index 5c9c5c4..edf3935 100644
 --- a/include/sound.h
@@ -2198,7 +2249,7 @@ index 3eb2114..9132082 100644
 +    &mixGetConfig, &mixGetImage, &mixCleanUp, &mixShutdown, &mixCheckVMC, &mixGetIconId,
 +    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &mixGetRowView, NULL};
 diff --git a/src/mmcesupport.c b/src/mmcesupport.c
-index ba683b0..0f62892 100644
+index ba683b0..fc3ae4b 100644
 --- a/src/mmcesupport.c
 +++ b/src/mmcesupport.c
 @@ -20,6 +20,8 @@
@@ -2210,23 +2261,81 @@ index ba683b0..0f62892 100644
  #include "modules/iopcore/common/cdvd_config.h"
  #include "../ee_core/include/coreconfig.h"
  #include <usbhdfsd-common.h>
-@@ -29,6 +31,7 @@
+@@ -29,6 +31,9 @@
  #define NEWLIB_PORT_AWARE
  #include <fileXio_rpc.h> // fileXioIoctl, fileXioDevctl
  #include <delaythread.h> // DelayThread() -- real-sleep gap in the MMCE card-switch wait
++#include "include/pad.h"     // RIPPS2 build 115: START skips the wait for the game's card
++#include "include/ripps2diag.h" // RIPPS2 build 115: the hardware log
 +#include <time.h>        // RIPPS2 build 115: clock, for the card's busy check
  #include <unistd.h>
  #include <fcntl.h>
  
-@@ -103,6 +106,7 @@ static unsigned char mmceEverResolved = 0;
+@@ -96,6 +101,9 @@ static unsigned char mmceEverResolved = 0;
+ // gutted the wait so it returned in well under a second; a real sleep restores it.
+ #define MMCE_GAMEID_WAIT_TICKS    15           // max polls of the card-switch busy bit
+ #define MMCE_GAMEID_POLL_US       (200 * 1000) // 200 ms between polls -> ~3 s total budget (was 500 ms x 15 = 7.5 s)
++#define MMCE_GAMEID_START_MS      2000         // build 115: how long a sent Game ID may take to start the switch
++#define MMCE_HISTORY_SWITCH_MS    4500         // build 115: the device's own switch, after a history write (see below)
++#define MMCE_CARD_READY_MAX_S     180          // build 115: the longest the launch waits for the game's card
+ /* The MMCE worker checks its abort flag between 32 KB staged reads. A
+  * 500 ms wait gives a slow card time to reach the next safe checkpoint. */
+ #define MMCE_ART_ABORT_WAIT_TICKS 500
+@@ -103,6 +111,8 @@ static unsigned char mmceEverResolved = 0;
  // forward declaration
  static item_list_t mmceGameList;
  static void mmceGetDeviceRoot(char *root, size_t size);
 +static void mmceSettleAfterSwitch(void);
++static int mmceWaitCardReady(const char *root);
  
  // RIPPS2 build 109: a fast MMCE boot. The card's game list is kept on the card (RIPPS2.LST beside its CD and DVD
  // folders): at boot the games show from it at once, then the card is read again in the background (sbReadList, which
-@@ -253,6 +257,87 @@ int mmceGameIdSettle(int timeoutMs)
+@@ -202,24 +212,32 @@ int mmceSendGameID(const char *startup, const char *protectMcPath, int vmcSlotMa
+     // gate, batch S7) must poll the SAME device, not a guess.
+     snprintf(mmceGameIdTarget, sizeof(mmceGameIdTarget), "%s", mmceDevice);
+ 
+-    // Wait until the busy bit clears -- i.e. until the physical card has finished switching to the
+-    // per-game folder. This runs on the single GUI thread BEFORE deinit, so every millisecond here is a
+-    // frozen loading screen. POLL FIRST, sleep only if still busy: a card that switches instantly (the
+-    // common case) now costs ~0 ms instead of a guaranteed 500 ms (the old loop slept 500 ms before its
+-    // first poll, taxing EVERY cross-device launch -- a regression on slow late-slim MC buses). The total
+-    // budget is generous enough (~3 s) to still cover a slow switch before we launch anyway (#50 race),
+-    // but no longer the 7.5 s worst case that read as a hard freeze on hardware. Break the instant it clears.
+-    for (int i = 0; i < MMCE_GAMEID_WAIT_TICKS; i++) {
++    // RIPPS2 build 115 (sd2psXtd's own source, read 10/25): the device starts the switch on a later pass of its main loop,
++    // not as it answers this send, so a poll straight after it read "not busy" before the switch had begun, and the game
++    // started while the device was still loading (or making) its card from the SD the game streams from: Burnout 3 on
++    // the user's SD2PSXTD, the PS2 logo minutes late, then a hang. So busy has to be SEEN first (within
++    // MMCE_GAMEID_START_MS; never seen: the card in the slot is this game's already, or Game ID is off on the device),
++    // then it is waited out on screen (mmceWaitCardReady): loading an 8 MB card takes ~9 s and making a new one longer,
++    // and either moves only while nothing reads the card's files, which nothing here does meanwhile.
++    for (int waited = 0; waited < MMCE_GAMEID_START_MS; waited += 50) {
+         int status = fileXioDevctl(mmceDevice, 0x2, NULL, 0, NULL, 0);
+         if (status < 0)
+             break; // busy-bit query unsupported/failed -> don't block the launch
+-
+-        if ((status & 1) == 0) {
++        if (status & 1) {
++            LOG("MMCE GameID %s: the card is switching after %d ms\n", startup, waited);
++            ripps2Diag("gameid %s: the card switching after %d ms", startup, waited);
++            if (mmceWaitCardReady(mmceDevice) == 0)
++                return -1; // still busy at the cap: launched anyway, not settled (START is the user's call: settled)
+             LOG("Set MMCE GameID to: %s\n", startup);
+             return 1; // card finished switching (settle CONFIRMED)
+         }
+-
+-        DelayThread(MMCE_GAMEID_POLL_US); // still busy -> wait a short interval, then re-poll
++        DelayThread(50 * 1000);
++    }
++    if (fileXioDevctl(mmceDevice, 0x2, NULL, 0, NULL, 0) >= 0) {
++        LOG("MMCE GameID %s: no switch within %d ms (this game's card already, or Game ID off on the card)\n", startup,
++            MMCE_GAMEID_START_MS);
++        ripps2Diag("gameid %s: no switch within %d ms", startup, MMCE_GAMEID_START_MS);
++        return 1;
+     }
+ 
+     // Tri-state (batch S7): -1 = the 0x8 switch WAS sent but the settle was never confirmed (busy
+@@ -253,6 +271,115 @@ int mmceGameIdSettle(int timeoutMs)
      return -1;
  }
  
@@ -2250,12 +2359,16 @@ index ba683b0..0f62892 100644
 +    mmceGetDeviceRoot(root, sizeof(root));
 +    status = root[0] != '\0' ? fileXioDevctl(root, 0x2, NULL, 0, NULL, 0) : -1;
 +    if (status < 0 || (status & 1) == 0) {
++        if (busySince != 0)
++            ripps2Diag("mmce: busy for %d ms", (int)((now - busySince) * 1000 / CLOCKS_PER_SEC));
 +        busy = 0;
 +        busySince = 0;
 +        return 0;
 +    }
-+    if (busySince == 0)
++    if (busySince == 0) {
 +        busySince = now;
++        ripps2Diag("mmce: the card says busy; its reads wait");
++    }
 +    busy = (now - busySince) < (clock_t)MMCE_BUSY_GIVEUP_S * CLOCKS_PER_SEC;
 +    if (!busy)
 +        LOG("MMCE: the card has said busy for %d s; reading it anyway\n", MMCE_BUSY_GIVEUP_S);
@@ -2271,9 +2384,9 @@ index ba683b0..0f62892 100644
 +// out and was not confirmed within its ~3 s.
 +static void mmceReadyGameCard(config_set_t *configSet, const char *startup, int sent)
 +{
-+    char root[sizeof(mmcePrefix)], name[32], line[256];
++    char root[sizeof(mmcePrefix)], name[32];
 +    clock_t start;
-+    int status, waited, s;
++    int status, waited;
 +
 +    mmceGetDeviceRoot(root, sizeof(root));
 +    if (root[0] == '\0' || fileXioDevctl(root, 0x2, NULL, 0, NULL, 0) < 0)
@@ -2284,37 +2397,61 @@ index ba683b0..0f62892 100644
 +        if (configGetStrCopy(configSet, CONFIG_ITEM_ALTSTARTUP, name, sizeof(name)) == 0)
 +            snprintf(name, sizeof(name), "%s", startup);
 +        AddHistoryRecordUsingFullPath(name);
-+        for (waited = 0; waited < 1500; waited += 100) {
++        // build 115: the device reads the history only once the write has reached its SD (after 100 ms without card
++        // traffic) and then 2 s more have passed with no card writes (sd2psXtd HISTORY_WRITE_HYST_US): 1.5 s was too short
++        for (waited = 0; waited < MMCE_HISTORY_SWITCH_MS; waited += 100) {
 +            status = fileXioDevctl(root, 0x2, NULL, 0, NULL, 0);
 +            if (status >= 0 && (status & 1))
 +                break;
++            guiRenderTextScreen(_t("Asking the SD2PSX for this game's memory card..."));
 +            DelayThread(100 * 1000);
 +        }
-+        if (waited >= 1500)
++        if (waited >= MMCE_HISTORY_SWITCH_MS)
 +            return; // the card stayed as it was: Game ID is off on it, or this game's card is in already
 +#else
 +        return; // these builds write no history at launch
 +#endif
 +    }
 +    start = clock();
++    mmceWaitCardReady(root);
++    LOG("MMCE: the game's memory card is ready after %d s\n", (int)((clock() - start) / CLOCKS_PER_SEC));
++    mmceSettleAfterSwitch();
++}
++
++// build 115: on screen while the card is busy loading or making a game's memory card. 1 when it cleared; 0 when it was
++// still busy after MMCE_CARD_READY_MAX_S; 2 when START was pressed (the game starts anyway, as the user chose)
++static int mmceWaitCardReady(const char *root)
++{
++    char line[256];
++    clock_t start = clock();
++    int status, s;
++
 +    while ((status = fileXioDevctl(root, 0x2, NULL, 0, NULL, 0)) >= 0 && (status & 1)) {
 +        s = (int)((clock() - start) / CLOCKS_PER_SEC);
-+        if (s >= 180) {
++        if (s >= MMCE_CARD_READY_MAX_S) {
 +            LOG("MMCE: the game's memory card was still busy after %d s; launching\n", s);
-+            break;
++            ripps2Diag("mmce: the game's card still busy after %d s; launching", s);
++            return 0;
 +        }
-+        snprintf(line, sizeof(line), _t("The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done."), s);
++        readPads();
++        if (getKeyOn(KEY_START)) {
++            LOG("MMCE: START pressed after %d s of the card's wait; launching\n", s);
++            ripps2Diag("mmce: START after %d s of the card's wait; launching", s);
++            return 2;
++        }
++        snprintf(line, sizeof(line),
++                 _t("The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now."), s);
 +        guiRenderTextScreen(line);
 +        DelayThread(250 * 1000);
 +    }
-+    LOG("MMCE: the game's memory card is ready after %d s\n", (int)((clock() - start) / CLOCKS_PER_SEC));
-+    mmceSettleAfterSwitch();
++    ripps2Diag("mmce: the game's card ready after %d ms", (int)((clock() - start) * 1000 / CLOCKS_PER_SEC));
++    return 1;
 +}
 +
  static void mmceGetDeviceRoot(char *root, size_t size)
  {
      const char *separator = strstr(mmcePrefix, ":/");
-@@ -566,6 +651,15 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+@@ -566,6 +693,15 @@ static int mmceNeedsUpdate(item_list_t *itemList)
          return (mmceGameCount > 0 || mmcePs1GameCount > 0);
      }
  
@@ -2330,7 +2467,7 @@ index ba683b0..0f62892 100644
      mmceGameList.updateDelay = MENU_UPD_DELAY_NOUPDATE;
  
      // Register the card's THM/LNG dirs BEFORE the VCD-view early returns (#152, AndrewBento). These
-@@ -612,6 +706,8 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+@@ -612,6 +748,8 @@ static int mmceNeedsUpdate(item_list_t *itemList)
              return result;
      }
  
@@ -2339,7 +2476,23 @@ index ba683b0..0f62892 100644
      if (mmceSnap.shown) { // build 109: the games on screen came from the card's list: read the card once, in the background
          mmceSnap.shown = 0;
          mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
-@@ -1066,8 +1162,11 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -1011,9 +1149,15 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+     if (!cacheAbortMmceImageLoadsTimed(MMCE_ART_ABORT_WAIT_TICKS)) {
+         // The card is still busy. Leave the menu and worker intact so the user
+         // can retry after the current read returns.
++        ripps2Diag("launch: %s from MMCE refused: an art read would not stop", game != NULL ? game->name : "?");
+         guiWarning(_l(_STR_ERR_FILE_INVALID), 8);
+         return;
+     }
++    if (game != NULL) { // build 115: the hardware log, saved beside RIPPS2 now in case the launch hangs
++        ripps2Diag("launch: %s (%s) from MMCE, default core %s, Game ID %s", game->name, game->startup,
++                   gDefaultCoreLoader ? "Neutrino" : "OPL", gMMCEEnableGameID ? "on" : "off");
++        ripps2DiagBeforeLaunch();
++    }
+ 
+     // VCD view: hand off to POPSTARTER (by name) instead of the disc path below. Menu-launch only.
+     if (gAutoLaunchBDMGame == NULL && game != NULL && (mmceGetItemView(itemList, id) == LIB_VIEW_PS1)) {
+@@ -1066,8 +1210,11 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
              }
              // protectMcPath=NULL: the native path loads no ELF from mcN: mid-launch (ee_core is
              // embedded; sysLaunchLoaderElf reads rom0: only).
@@ -2352,7 +2505,7 @@ index ba683b0..0f62892 100644
          }
      }
  
-@@ -1395,6 +1494,8 @@ static config_set_t *mmceGetConfig(item_list_t *itemList, int id)
+@@ -1395,6 +1542,8 @@ static config_set_t *mmceGetConfig(item_list_t *itemList, int id)
  
  static int mmceGetImage(item_list_t *itemList, char *folder, int isRelative, char *value, char *suffix, GSTEXTURE *resultTex, short psm)
  {
@@ -2362,7 +2515,7 @@ index ba683b0..0f62892 100644
      // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
      // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
 diff --git a/src/opl.c b/src/opl.c
-index 3b8cd19..53fe5e7 100644
+index 3b8cd19..4f37324 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -361,7 +361,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
@@ -2569,7 +2722,24 @@ index 3b8cd19..53fe5e7 100644
              configGetStrCopy(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
              configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
              configGetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, &gAutoRefresh);
-@@ -4468,9 +4489,11 @@ static void _saveConfig()
+@@ -3864,6 +3885,16 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_MMCE_SLOT, &gMMCESlot);
+             configGetInt(configOPL, CONFIG_OPL_MMCEIGR_SLOT, &gMMCEIGRSlot);
+             configGetInt(configOPL, CONFIG_OPL_MMCE_GAMEID, &gMMCEEnableGameID);
++            {
++                // RIPPS2 build 115: Game ID on once for a config from before it (sd2psXtd's own switch, on the play
++                // history, comes after the game has started); the user's choice after that is kept
++                int gameIdV = 0;
++                configGetInt(configOPL, "ripps2_mmce_gameid_v", &gameIdV);
++                if (gameIdV < 115) {
++                    gMMCEEnableGameID = 1;
++                    configSetInt(configOPL, "ripps2_mmce_gameid_v", 115);
++                }
++            }
+             configGetInt(configOPL, CONFIG_OPL_MMCE_WAIT_CYCLES, &gMMCEAckWaitCycles);
+             configGetInt(configOPL, CONFIG_OPL_MMCE_USE_ALARMS, &gMMCEUseAlarms);
+             // SIO2 pacing migration: silently upgrade the 0/0 defaults to 5/1
+@@ -4468,9 +4499,11 @@ static void _saveConfig()
          configSetInt(configOPL, "ripps2_catbar", gRipps2CatBar);
          configSetInt(configOPL, "ripps2_catlayout", gRipps2CatLayout); // build 113
          configSetInt(configOPL, "ripps2_fastcache", gRipps2FastCache);
@@ -2581,7 +2751,16 @@ index 3b8cd19..53fe5e7 100644
          configSetInt(configOPL, "ripps2_userset", gRipps2UserSet); // build 81
          ripps2HintsSaveConfig(configOPL);                          // build 90: Hints and Glyphs
          ripps2ColorsSaveConfig(configOPL);                         // build 114: Custom's colour, the Color Sweep
-@@ -5988,7 +6011,8 @@ static void miniInit(int mode)
+@@ -5661,7 +5694,7 @@ static void setDefaults(void)
+ 
+     gMMCESlot = 2; // Default to first Auto slot
+     gMMCEIGRSlot = 3;
+-    gMMCEEnableGameID = 0;
++    gMMCEEnableGameID = 1; // RIPPS2 build 115: the card switches before the game starts, and the launch waits for it
+     gMMCEAckWaitCycles = 5;
+     gMMCEUseAlarms = 1;
+ 
+@@ -5988,7 +6021,8 @@ static void miniInit(int mode)
              config_set_t *configOPL = configGetByType(CONFIG_OPL);
  
              configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
@@ -2592,10 +2771,36 @@ index 3b8cd19..53fe5e7 100644
  #ifdef RETROACHIEVEMENTS
              configGetInt(configOPL, CONFIG_OPL_RA_TELEMETRY, &gRATelemetry);
 diff --git a/src/pad.c b/src/pad.c
-index c488407..c437192 100644
+index c488407..a538b31 100644
 --- a/src/pad.c
 +++ b/src/pad.c
-@@ -162,6 +162,8 @@ static int padIdleForCommand(struct pad_data_t *pad)
+@@ -8,6 +8,7 @@
+ #include "include/pad.h"
+ #include "include/ioman.h"
+ #include "include/sound.h" // build 100: sfxFlush
++#include "include/ripps2diag.h" // build 115: the hardware log
+ #include <libpad.h>
+ #include <timer.h>
+ #include <time.h>
+@@ -42,8 +43,17 @@ struct pad_data_t
+     int actuators;
+     int actAligned; // padSetActAlign confirmed; see padRumbleRealign()
+     int needsInit;  // reconnect-edge re-init pending; runs once the verified-idle gate opens (see readPads)
++    u32 missMs;     // build 115: how long this pad's reads have been missing (its last buttons held meanwhile)
+ };
+ 
++/* RIPPS2 build 115 (the user's SD2PSXTD, 10/25: "the cursor would jump rapidly from a press down or up"): a frame whose
++   pad read failed (padman could not get the SIO2 bus: an MMCE card answering a long read holds it) used to count as
++   nothing pressed. One press then read pressed, released, pressed again: two or three steps, the cursor jumping. A
++   missed read now keeps the pad's last buttons for up to PAD_HOLD_MS; nothing repeats meanwhile (the repeat timers stand
++   still, the data being old); past it the buttons are let go, so a pad that is really gone never sticks. */
++#define PAD_HOLD_MS 250
++static int padHolding = 0; // a pad's last buttons are being held this poll
++
+ /// milliseconds between the last two polls (see padPollElapsedMs)
+ static u32 time_since_last = 0;
+ 
+@@ -162,6 +172,8 @@ static int padIdleForCommand(struct pad_data_t *pad)
  #define PAD_SELF_HEAL_IDLE_MS     1000
  #define PAD_IDLE_MAX_CLEAN_GAP_MS 100
  static u32 padIdleMs = 0;
@@ -2604,7 +2809,68 @@ index c488407..c437192 100644
  
  /*
   * waitPadReady()
-@@ -820,6 +822,31 @@ int readPads()
+@@ -403,6 +415,9 @@ static int readPad(struct pad_data_t *pad, int *pollClean)
+         if (ret != 0) {
+             newpdata = 0xffff ^ pad->buttons.btns;
+             padsRead++;
++            if (pad->missMs >= 50) // build 115: the hardware log
++                ripps2Diag("pad %d: no read for %u ms%s", pad->port, (unsigned)pad->missMs, pad->missMs > PAD_HOLD_MS ? " (buttons let go)" : "");
++            pad->missMs = 0;
+         } else {
+             // An attempted read that FAILED is unknown, never idle -- these misses are exactly what
+             // clusters with the reconnect flaps under IOP load. Native-only on purpose: the init
+@@ -479,7 +494,19 @@ static int readPad(struct pad_data_t *pad, int *pollClean)
+ 
+         // merge into the global vars
+         paddata |= pad->paddata;
+-    }
++    } else if (pad->state != PAD_STATE_DISCONN) { // build 115: a missed read (timed for the log) holds the last buttons
++        pad->missMs += time_since_last;
++        if (pad->paddata != 0) {
++            if (pad->missMs <= PAD_HOLD_MS) {
++                paddata |= pad->paddata;
++                padHolding = 1;
++            } else {
++                pad->oldpaddata = pad->paddata;
++                pad->paddata = 0; // gone too long: let go, so nothing sticks
++            }
++        }
++    } else
++        pad->paddata = 0;
+ 
+     return rcode;
+ }
+@@ -747,15 +774,17 @@ static u32 padPollElapsedMs(void)
+     return ticks / CLOCKS_PER_MILISEC;
+ }
+ 
+-// A held key counts down to its next repeat (getKey); a released one rearms at the initial delay.
++// A held key counts down to its next repeat (getKey); a released one rearms at the initial delay. Build 115: not while
++// a missed read holds the last buttons (old data must not repeat a press)
+ static void padAdvanceRepeatTimers(u32 elapsedMs)
+ {
+     int i;
+ 
+     for (i = 0; i < 16; ++i) {
+-        if (getKeyPressed(i + 1))
+-            delaycnt[i] -= elapsedMs;
+-        else
++        if (getKeyPressed(i + 1)) {
++            if (!padHolding)
++                delaycnt[i] -= elapsedMs;
++        } else
+             delaycnt[i] = getKeyDelay(i + 1, 0);
+     }
+ }
+@@ -773,6 +802,7 @@ int readPads()
+     paddata = 0;
+ 
+     time_since_last = padPollElapsedMs();
++    padHolding = 0;
+ 
+     int rslt = 0;
+ 
+@@ -820,6 +850,32 @@ int readPads()
          }
      }
  
@@ -2628,6 +2894,7 @@ index c488407..c437192 100644
 +            padAnalogRetries++;
 +            padIdleMs = 0;
 +            LOG("PAD %d,%d in digital mode (0x%02x): asking for DualShock again (%d)\n", pad->port, pad->slot, pad->buttons.mode, padAnalogRetries);
++            ripps2Diag("pad %d: digital (mode 0x%02x), DualShock asked for again", pad->port, pad->buttons.mode);
 +            padSetMainMode(pad->port, pad->slot, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
 +            break;
 +        }
@@ -2636,6 +2903,30 @@ index c488407..c437192 100644
      // Rumble decay, plus the bounded re-send tail (see RUMBLE_CMD_REPEATS). Edge-driven: the RPC
      // stream stops after a few polls instead of running for the pulse's whole life, but a single
      // dropped padSetActDirect no longer decides whether the pulse happens -- or whether it ends.
+@@ -888,7 +944,9 @@ void padGetRightStick(int *x, int *y)
+     *y = 0;
+     for (i = 0; i < pad_count && i < MAX_PADS; i++) {
+         struct pad_data_t *pad = &pad_data[i];
+-        if (pad->state != PAD_STATE_STABLE || (pad->buttons.mode >> 4) != 0x07)
++        // build 115: FINDCTP1 too (padman re-checking the pad after the bus was busy still sends analog data), and not
++        // while a missed read holds old data (a stale stick would keep tilting the page)
++        if ((pad->state != PAD_STATE_STABLE && pad->state != PAD_STATE_FINDCTP1) || (pad->buttons.mode >> 4) != 0x07 || pad->missMs)
+             continue;
+         int h = (int)pad->buttons.rjoy_h - 128, v = (int)pad->buttons.rjoy_v - 128;
+         if (h * h + v * v > 24 * 24) {
+@@ -929,6 +987,12 @@ int getKeyOff(int id)
+  * @param id The button ID
+  * @return nonzero if button is being held
+  */
++// RIPPS2 build 115: any button down this poll; read from the art worker too (one word, a stale read is harmless)
++int padAnyHeld(void)
++{
++    return paddata != 0;
++}
++
+ int getKeyPressed(int id)
+ {
+     // old v.s. new pad data
 diff --git a/src/ripps2about.c b/src/ripps2about.c
 index cc7b9bf..7b953e4 100644
 --- a/src/ripps2about.c
@@ -2946,6 +3237,97 @@ index 5651a19..8b2e109 100644
               "Neutrino game uses it from there."));
      guiMsgBoxSound(SFX_MESSAGE);
      if (guiMsgBox(msg, 1, NULL) != 1)
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index 0225897..749ae15 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -39,6 +39,7 @@
+ #include <delaythread.h>
+ #define NEWLIB_PORT_AWARE
+ #include <fileXio_rpc.h> // fileXioDevctl: the MMCE ping (START DRIVES)
++#include "include/ripps2diag.h" // build 115: the hardware log
+ #include <iox_stat.h>    // build 98: fileXioGetStat for an entry's details
+ #include <libmc.h>      // build 98: mcGetInfo, a card slot's own answer
+ 
+@@ -199,7 +200,7 @@ static int fbMenuOpen = 0, fbMenuSel = 0, fbMenuItems[FB_ACT_COUNT], fbMenuCount
+ static const char *fbDevices[] = {"mc0:/", "mc1:/", "mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/",
+                                   "mass7:/", "mmce0:/", "mmce1:/", "pfs0:/", NULL};
+ 
+-static char fbToastDetail[56];
++static char fbToastDetail[128]; // build 115: room for the SD2PSX's wait
+ 
+ static void fbSetToast(const char *text)
+ {
+@@ -874,6 +875,26 @@ static int fbExists(const char *path)
+     return 0;
+ }
+ 
++// RIPPS2 build 115 (the user's SD2PSXTD, 10/25): a memory card's names are case-sensitive, so RIPPS2.elf pasted into a
++// folder holding RIPPS2.ELF was a new file beside it, with no question asked, and PS2BBL kept starting the old one. On
++// a card, a name there that differs only in case is the same file: out gets the card's own spelling (kept by the
++// replace, so whatever starts it by that name still finds it). 1 when one is there.
++static int fbCardSameName(const char *dir, const char *name, char *out, int outSize)
++{
++    DIR *d;
++    struct dirent *e;
++    int found = 0;
++    if (!fbIsMc(dir) || (d = opendir(dir)) == NULL)
++        return 0;
++    while (!found && (e = readdir(d)) != NULL)
++        if (strcmp(e->d_name, name) && !strcasecmp(e->d_name, name)) {
++            snprintf(out, outSize, "%s", e->d_name);
++            found = 1;
++        }
++    closedir(d);
++    return found;
++}
++
+ static int fbFolderHasIconSys(const char *folder)
+ {
+     char path[320];
+@@ -994,6 +1015,13 @@ static void fbPasteWork(void)
+             fbMcRoot(fbPath, destDir, sizeof(destDir));
+         snprintf(dst, sizeof(dst), "%s%s", destDir, fbClip[i]);
+         int there = strcmp(src, dst) != 0 && fbExists(dst), ok = 1;
++        if (!there) { // build 115: on a card the file there in other capitals is replaced under its own name
++            char same[FB_NAME];
++            if (fbCardSameName(destDir, fbClip[i], same, sizeof(same))) {
++                snprintf(dst, sizeof(dst), "%s%s", destDir, same);
++                there = 1;
++            }
++        }
+         if (!strcmp(src, dst) || (there && !fbClipReplace[i])) {
+             fbSkipped++; // never over the top of something, unless the user said replace it
+             fbDoneItems++;
+@@ -1110,8 +1138,16 @@ static void fbReport(const char *verb, int done)
+     fbSetToast(text);
+     if (fbFailWhat[0]) // the first failure, named under it for longer
+         snprintf(fbToastDetail, sizeof(fbToastDetail), "%s", fbFailWhat);
+-    else
++    else if (ok > 0 && fbIsMc(fbPath) && (fbPath[2] == '0' || fbPath[2] == '1') && fbMmceSlot[fbPath[2] - '0']) {
++        // build 115 (the user's SD2PSXTD, 10/25: a RIPPS2.ELF copied onto the boot card never reached the card's SD): an
++        // SD2PSX takes a write into its RAM at once and saves it to its SD a few seconds after the PS2 goes quiet, at about
++        // 400 KB a second. Turned off before then, the write is lost. Say how long to wait.
++        int secs = 2 + (int)(fbDoneBytes / (400 * 1024));
++        snprintf(fbToastDetail, sizeof(fbToastDetail), _t("Saving to the SD2PSX's SD: wait %d s before turning off."), secs);
++        ripps2Diag("files: onto an SD2PSX card (%s), %u bytes, saved in about %d s", fbPath, (unsigned)fbDoneBytes, secs);
++    } else
+         fbToastDetail[0] = '\0';
++    ripps2Diag("files: %s in %s: %d ok, %d skipped, %d failed %s", verb, fbPath, ok, fbSkipped, fbFailed, fbFailWhat);
+ }
+ 
+ static void fbWorker(void)
+@@ -1218,6 +1254,10 @@ static void fbPasteAskReplace(void)
+             fbMcRoot(fbPath, destDir, sizeof(destDir));
+         snprintf(dst, sizeof(dst), "%s%s", destDir, fbClip[i]);
+         there[i] = strcmp(src, dst) != 0 && fbExists(dst);
++        if (!there[i]) { // build 115: on a card, the same name in other capitals is the same file
++            char same[FB_NAME];
++            there[i] = fbCardSameName(destDir, fbClip[i], same, sizeof(same));
++        }
+         left += there[i];
+     }
+     for (i = 0; i < fbClipCount; i++) {
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 index 5a5580f..386b7d3 100644
 --- a/src/ripps2games.c
@@ -3082,7 +3464,7 @@ index 1415c7b..df7ced2 100644
          return SB_ICON_HDD;
      if (icon == MMCE_ICON || icon == MX4SIO_ICON)
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index c1bcf7f..f128f02 100644
+index c1bcf7f..6fa2db4 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -14,7 +14,7 @@
@@ -3102,7 +3484,7 @@ index c1bcf7f..f128f02 100644
  #include "include/gui.h"
  #include "include/renderman.h"
  #include "include/fntsys.h"
-@@ -44,6 +45,7 @@
+@@ -44,10 +45,14 @@
  #include "include/bdmsupport.h"    // build 98: DRIVES
  #include "include/hddsupport.h"    // build 114: hddModulesAreLoaded
  #include "include/ripps2seance.h"  // build 114: LAUNCHERS
@@ -3110,11 +3492,19 @@ index c1bcf7f..f128f02 100644
  #include <zlib.h>                 // build 85: crc32 for the launch report
  #include "include/ripps2_build.h" // build 85: the launch report names its build
  #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
-@@ -74,14 +76,18 @@ enum {
+ #include "include/ripps2tr.h" // build 104: _t, RIPPS2's words in the chosen language
++#include "include/ripps2diag.h" // build 115: the hardware log
++#include <stdarg.h>
++#include <kernel.h>
+ 
+ #define ST_LIT  GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80)
+ #define ST_DIM  GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80)
+@@ -74,14 +79,19 @@ enum {
      ACT_SOUNDS_RIP,    // build 95
      ACT_START_DRIVES,  // build 114
      ACT_SEANCE_SEARCH, // build 114
 +    ACT_CACHE,         // build 115: the Cache page (from Cache: back to it)
++    ACT_DIAG_SAVE,     // build 115: SAVE DIAGNOSTICS, the hardware log to DIAG.TXT
  };
  
  typedef struct
@@ -3129,7 +3519,7 @@ index c1bcf7f..f128f02 100644
  #define ST_ROWS 48 // build 114: DRIVES and LAUNCHERS run longer
  static st_row_t stRows[ST_ROWS];
  static int stCount;
-@@ -95,6 +101,7 @@ static st_row_t *stAdd(int kind, int action, const char *text, const char *aside
+@@ -95,6 +105,7 @@ static st_row_t *stAdd(int kind, int action, const char *text, const char *aside
      r->kind = kind;
      r->action = action;
      r->ok = 0;
@@ -3137,7 +3527,7 @@ index c1bcf7f..f128f02 100644
      snprintf(r->text, sizeof(r->text), "%s", text);
      snprintf(r->aside, sizeof(r->aside), "%s", aside != NULL ? aside : "");
      return r;
-@@ -147,7 +154,7 @@ static void stLauncher(int what, const char *name, const char *const *probe, int
+@@ -147,7 +158,7 @@ static void stLauncher(int what, const char *name, const char *const *probe, int
  // Looks once on the way in and after anything that writes; a frame says so, the cards take a moment
  static void stScan(void)
  {
@@ -3146,7 +3536,7 @@ index c1bcf7f..f128f02 100644
      int i;
  
      guiRenderTextScreen(_t("STATUS: looking at the drives and the homebrew"));
-@@ -220,7 +227,57 @@ static void stScan(void)
+@@ -220,7 +231,60 @@ static void stScan(void)
          r->ok = m == 1;
      }
      if (!ripps2DrivesStarted())
@@ -3202,10 +3592,13 @@ index c1bcf7f..f128f02 100644
 +    stAdd(ROW_ACTION, ACT_CACHE, _t("CACHE SETTINGS"), stFromCache ? _t("back to Cache") : _t("Fast Cache, Trust Cache"))->hint =
 +        _t("Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press "
 +           "SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.");
++    stAdd(ROW_ACTION, ACT_DIAG_SAVE, _t("SAVE DIAGNOSTICS"), _t("DIAG.TXT, for a bug report"))->hint =
++        _t("Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. "
++           "Send it with a bug report.");
  
      // LAUNCHERS (build 114): where SEANCE found each, the one RIPPS2 carries (Neutrino) offered only when there is none
      stAdd(ROW_HEAD, ACT_NONE, _t("LAUNCHERS"), _t("found where you keep them"));
-@@ -230,7 +287,7 @@ static void stScan(void)
+@@ -230,7 +294,7 @@ static void stScan(void)
              snprintf(custom, sizeof(custom), "%s", gNeutrinoPath);
              p[0] = custom;
          }
@@ -3214,7 +3607,7 @@ index c1bcf7f..f128f02 100644
      }
      {
          const char *p[4] = {gPopstarterPath, "mass0:/POPS/POPSTARTER.ELF", "mc0:/POPS/POPSTARTER.ELF", "mc1:/POPS/POPSTARTER.ELF"};
-@@ -248,11 +305,16 @@ static void stScan(void)
+@@ -248,11 +312,16 @@ static void stScan(void)
          const char *p[1] = {"mass0:/EMBER/bios.bin"};
          stLauncher(SEANCE_EMBER_BIOS, _t("Ember's BIOS"), p, 1);
      }
@@ -3236,7 +3629,7 @@ index c1bcf7f..f128f02 100644
  
      // BIBLE: what starts at power on is MANAGE's to show, card by card
      stAdd(ROW_HEAD, ACT_NONE, "BIBLE", _t("PS2BBL 1.2.0 for RIPPS2"));
-@@ -262,7 +324,8 @@ static void stScan(void)
+@@ -262,7 +331,8 @@ static void stScan(void)
                              locked ? _t("A PS2BBL with RIPPS2's lock is on this console.") : _t("What each card starts; install or repair BIBLE."), NULL);
          r->ok = locked;
      }
@@ -3246,7 +3639,7 @@ index c1bcf7f..f128f02 100644
  
      // SOUNDS (build 95): none are built in any more, so say where they come from
      stAdd(ROW_HEAD, ACT_NONE, _t("SOUNDS"), _t("AUDIO folder"));
-@@ -276,7 +339,8 @@ static void stScan(void)
+@@ -276,7 +346,8 @@ static void stScan(void)
          st_row_t *r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
          r->ok = loaded > 0 && !skipped;
      }
@@ -3256,7 +3649,7 @@ index c1bcf7f..f128f02 100644
  }
  
  // build 114: LOOK FOR THEM, with the drives started first when they are not (so every one is searched)
-@@ -356,7 +420,7 @@ static void stInstallNeutrino(void)
+@@ -356,7 +427,7 @@ static void stInstallNeutrino(void)
      }
      if ((pick = ripps2PickList(labels, n)) < 0)
          return;
@@ -3265,7 +3658,7 @@ index c1bcf7f..f128f02 100644
  }
  
  void ripps2Status(void)
-@@ -376,7 +440,10 @@ void ripps2Status(void)
+@@ -376,7 +447,10 @@ void ripps2Status(void)
          ripps2DrawBackground();
          ripps2DrawPagePanel();
          fntRenderString(thmPageFont(5), ST_X, 44, ALIGN_VCENTER, 0, 0, _t("STATUS"), ST_GOLD);
@@ -3277,7 +3670,7 @@ index c1bcf7f..f128f02 100644
          rmDrawLine(ST_X, 82, ST_X + ST_W, 82, ST_PRIM(0x4A, 0x72, 0xDC, 0x60));
  
          // keep the chosen row in the viewport, its section's name with it where it fits; build 96: the right
-@@ -478,9 +545,17 @@ void ripps2Status(void)
+@@ -478,9 +552,28 @@ void ripps2Status(void)
                  sfxPlay(SFX_CURSOR);
              }
          } else if (getKeyOn(openKey) && sel >= 0 && sel < stCount) {
@@ -3285,6 +3678,17 @@ index c1bcf7f..f128f02 100644
 +            int act = stRows[sel].action, rescan = 0, leave = 0;
              sfxPlay(SFX_CONFIRM);
              switch (act) {
++                case ACT_DIAG_SAVE: { // build 115
++                    char where[300], msg[400];
++                    int ok = ripps2DiagSave(NULL, where, sizeof(where));
++                    if (ok)
++                        snprintf(msg, sizeof(msg), _t("The diagnostics are in %s."), where);
++                    else
++                        snprintf(msg, sizeof(msg), _t("The diagnostics could not be written to %s."), where);
++                    guiMsgBoxSound(ok ? SFX_MESSAGE : SFX_ERROR);
++                    guiMsgBox(msg, 0, NULL);
++                    break;
++                }
 +                case ACT_CACHE: // build 115: from Cache, back to it; else the Cache page, and back here
 +                    if (stFromCache)
 +                        leave = 1;
@@ -3296,7 +3700,7 @@ index c1bcf7f..f128f02 100644
                  case ACT_NT_INSTALL:
                      stInstallNeutrino();
                      rescan = 1;
-@@ -513,6 +588,8 @@ void ripps2Status(void)
+@@ -513,6 +606,8 @@ void ripps2Status(void)
                      rescan = 1;
                      break;
              }
@@ -3305,10 +3709,86 @@ index c1bcf7f..f128f02 100644
              if (rescan)
                  stScan();
              readPads();
-@@ -524,6 +601,13 @@ void ripps2Status(void)
+@@ -524,6 +619,89 @@ void ripps2Status(void)
      readPads();
  }
  
++// ---- build 115: the hardware log (include/ripps2diag.h) ----
++#define DIAG_SIZE (24 * 1024)
++static char diagRing[DIAG_SIZE];
++static int diagHead = 0, diagWrapped = 0;
++
++void ripps2Diag(const char *fmt, ...)
++{
++    char line[224];
++    va_list ap;
++    clock_t now = clock();
++    int n, i;
++
++    n = snprintf(line, sizeof(line), "%5d.%02d  ", (int)(now / CLOCKS_PER_SEC), (int)(now % CLOCKS_PER_SEC * 100 / CLOCKS_PER_SEC));
++    va_start(ap, fmt);
++    vsnprintf(line + n, sizeof(line) - n - 2, fmt, ap);
++    va_end(ap);
++    n = strlen(line);
++    line[n++] = '\r';
++    line[n++] = '\n';
++    DI();
++    for (i = 0; i < n; i++) {
++        diagRing[diagHead++] = line[i];
++        if (diagHead == DIAG_SIZE) {
++            diagHead = 0;
++            diagWrapped = 1;
++        }
++    }
++    EI();
++}
++
++int ripps2DiagSave(const char *dir, char *path, int pathSize)
++{
++    static char copy[DIAG_SIZE];
++    char base[256], head[400];
++    u32 notReady = 0, empty = 0;
++    int len, fd, ok, h, w;
++
++    if (dir == NULL) {
++        if (!oplGetRipps2Dir(base, sizeof(base)))
++            snprintf(base, sizeof(base), "mc0:/RIPPS2/");
++        dir = base;
++    }
++    snprintf(path, pathSize, "%sDIAG.TXT", dir);
++    DI();
++    h = diagHead;
++    w = diagWrapped;
++    if (w) {
++        memcpy(copy, diagRing + h, DIAG_SIZE - h);
++        memcpy(copy + DIAG_SIZE - h, diagRing, h);
++        len = DIAG_SIZE;
++    } else {
++        memcpy(copy, diagRing, h);
++        len = h;
++    }
++    EI();
++    padGetFaultCounters(&notReady, &empty);
++    snprintf(head, sizeof(head),
++             "RIPPS2 build %d diagnostics, %d s after boot\r\nlongest run of missed pad reads: %u polls; of empty reads: %u polls\r\n"
++             "MMCE: Game ID %s, slot setting %d\r\n%s\r\n\r\n",
++             RIPPS2_BUILD, (int)(clock() / CLOCKS_PER_SEC), (unsigned)notReady, (unsigned)empty, gMMCEEnableGameID ? "on" : "off",
++             gMMCESlot, w ? "(the oldest lines have rolled out of the log)" : "");
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
++        return 0;
++    ok = write(fd, head, strlen(head)) == (int)strlen(head) && write(fd, copy, len) == len;
++    close(fd);
++    return ok;
++}
++
++void ripps2DiagBeforeLaunch(void)
++{
++    char base[256], path[300];
++    if (!oplGetRipps2Dir(base, sizeof(base)) || !strncmp(base, "mc", 2))
++        return;
++    ripps2DiagSave(base, path, sizeof(path));
++}
++
 +void ripps2StatusFromCache(void)
 +{
 +    stFromCache = 1;
@@ -3383,7 +3863,7 @@ index 04c5e85..0e944e8 100644
      if ((gAutoLaunchGame != NULL) || (gAutoLaunchBDMGame != NULL))
          return; // nobody at the pad to answer
 diff --git a/src/system.c b/src/system.c
-index 1bea4b2..89676bd 100644
+index 1bea4b2..b23abab 100644
 --- a/src/system.c
 +++ b/src/system.c
 @@ -21,6 +21,8 @@
@@ -3395,7 +3875,15 @@ index 1bea4b2..89676bd 100644
  #include "include/lang.h"       // _l(_STR_...) -- Neutrino preflight abort toasts
  #include "include/launchdiag.h" // UDPBD hang-triage stage markers (gated on gLaunchDiag)
  #include "include/ethsupport.h"
-@@ -1433,6 +1435,210 @@ static int neutrinoArgHasActiveFlag(const char *args, const char *flag)
+@@ -29,6 +31,7 @@
+ #include "include/pad.h"
+ #include "include/system.h"
+ #include "include/ripps2.h" // RIPPS2: launch light-up
++#include "include/ripps2diag.h" // RIPPS2 build 115: the hardware log
+ #include "include/ripps2shot.h" // RIPPS2 build 108: RIPSHOT's state for ee_core
+ #ifdef RETROACHIEVEMENTS
+ #include "include/discsupport.h"
+@@ -1433,6 +1436,210 @@ static int neutrinoArgHasActiveFlag(const char *args, const char *flag)
      return 0;
  }
  
@@ -3606,7 +4094,7 @@ index 1bea4b2..89676bd 100644
  // The -bsdfs Neutrino will actually run with, so the preflight and the argv builder agree on it.
  // Read the user tokens the way Neutrino parses them: the global args, then the per-game args (the
  // order appendArgTokens adds them), last one wins, a $-prefixed token is switched off, and --b
-@@ -2038,6 +2244,13 @@ int sysNeutrinoPreflight(const char *driver, const char *neutrinoPath, int neutr
+@@ -2038,6 +2245,13 @@ int sysNeutrinoPreflight(const char *driver, const char *neutrinoPath, int neutr
          return -1;
  
      const char *deviceName = getDeviceName(driver);
@@ -3620,7 +4108,7 @@ index 1bea4b2..89676bd 100644
      if (!strcmp(deviceName, "unsupported")) {
          LOG("[NEUTRINO] preflight: unsupported device '%s'\n", driver);
          guiWarning(_l(_STR_NEUTRINO_DEV_UNSUPPORTED), 6);
-@@ -2220,6 +2433,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2220,6 +2434,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
      // makes the kernel read string bytes as argv pointers). Hop 1 prepends the elfldr child's load
      // path, spending one slot, so the target argv must stay <= 14 entries.
      const int argvMax = sizeof(argv) / sizeof(argv[0]);
@@ -3628,7 +4116,7 @@ index 1bea4b2..89676bd 100644
  
      // Target argv[0] = neutrino.elf's own path (NHDDL convention). sysLoadELFKeepIOP forwards
      // argv verbatim -- argv[0] included -- so this must be supplied explicitly here (POPSTARTER
-@@ -2234,6 +2448,10 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2234,6 +2449,10 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
      int autoLogo = EnablePS2Logo && !neutrinoArgHasActiveFlag(gNeutrinoArgs, "-logo") && !neutrinoArgHasActiveFlag(extraArgs, "-logo");
  
      if (!strcmp(deviceName, "apa")) {
@@ -3639,7 +4127,7 @@ index 1bea4b2..89676bd 100644
          snprintf(bsd, sizeof(bsd), "-bsd=ata");
          if (argc < argvMax)
              argv[argc++] = bsd;
-@@ -2241,7 +2459,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2241,7 +2460,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
          if (argc < argvMax)
              argv[argc++] = bsdfs;
          snprintf(filePath, sizeof(filePath), "-dvd=hdl:%s", path);
@@ -3648,7 +4136,7 @@ index 1bea4b2..89676bd 100644
              argv[argc++] = "-logo";
          if (argc < argvMax)
              argv[argc++] = filePath;
-@@ -2266,6 +2484,12 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2266,6 +2485,12 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
          static const char *const bsdfsTokens[] = {"", "exfat", "hdl", "bd"};
          static const char *const bsdfsDvdPrefix[] = {"", "", "hdl:", "bdfs:"};
          int fsOverride = neutrinoEffectiveBsdfs(deviceName, neutrinoBsdfs, extraArgs);
@@ -3661,7 +4149,7 @@ index 1bea4b2..89676bd 100644
          if (fsOverride) {
              snprintf(bsdfs, sizeof(bsdfs), "-bsdfs=%s", bsdfsTokens[fsOverride]);
              if (argc < argvMax)
-@@ -2283,7 +2507,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2283,7 +2508,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
          } else {
              snprintf(filePath, sizeof(filePath), "-dvd=%s%s", bsdfsDvdPrefix[fsOverride], path);
          }
@@ -3670,7 +4158,7 @@ index 1bea4b2..89676bd 100644
              argv[argc++] = "-logo";
          if (argc < argvMax)
              argv[argc++] = filePath;
-@@ -2314,16 +2538,23 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2314,16 +2539,23 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
             losing -qb and reproducing the black screen. */
          if ((!strcmp(deviceName, "usb") || !strcmp(deviceName, "ilink") ||
               !strcmp(deviceName, "udpfs") || !strcmp(deviceName, "udpfsbd") || !strcmp(deviceName, "udpbd")) &&
@@ -3697,7 +4185,7 @@ index 1bea4b2..89676bd 100644
          snprintf(compatModes, sizeof(compatModes), "-gc=%d", gcModes);
          if (argc < argvMax)
              argv[argc++] = compatModes;
-@@ -2332,7 +2563,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2332,7 +2564,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
      // Global toggles auto-emit -dbc/-logo; the per-game/global args screens now carry them as
      // structured bools too (forwarded via the tokenizer below), so suppress the auto-emit when the
      // user's args already hold an active (non-$-disabled) copy -- one flag, emitted once.
@@ -3706,7 +4194,7 @@ index 1bea4b2..89676bd 100644
          !neutrinoArgHasActiveFlag(gNeutrinoArgs, "-dbc") && !neutrinoArgHasActiveFlag(extraArgs, "-dbc"))
          argv[argc++] = "-dbc";
  
-@@ -2342,7 +2573,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2342,7 +2574,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
      // letting that explicit value win (precedence confirmed vs rickgaiser/neutrino ee/loader/src/main.c).
      int userHasGsm = neutrinoArgHasActiveFlag(gNeutrinoArgs, "-gsm=") ||
                       neutrinoArgHasActiveFlag(extraArgs, "-gsm=");
@@ -3715,7 +4203,7 @@ index 1bea4b2..89676bd 100644
          // -gsm=v:c grammar (neutrino main.c parse_gsm_flags): v in {fp1, fp2, 1080ix1, 1080ix2,
          // 1080ix3}, optional :c in {1,2,3} = field-flipping compatibility type. NEVER emit a bare
          // ":c" -- an unrecognized -gsm value aborts the whole neutrino boot -- so the comp half is
-@@ -2362,7 +2593,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2362,7 +2594,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
      // startups and skipped when the user already forwards an -elf= (structured field or free
      // text) -- neutrino must see exactly one.
      static char elfArg[40]; // outlives argv[] until the ExecPS2 handoff
@@ -3724,7 +4212,7 @@ index 1bea4b2..89676bd 100644
          !neutrinoArgHasActiveFlag(gNeutrinoArgs, "-elf=") && !neutrinoArgHasActiveFlag(extraArgs, "-elf=")) {
          snprintf(elfArg, sizeof(elfArg), "-elf=cdrom0:\\%s;1", startup);
          argv[argc++] = elfArg;
-@@ -2373,11 +2604,16 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2373,11 +2605,16 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
      // sbBuildVmcNeutrinoArgs (caller storage, alive across the launch) and must NOT pass through the
      // whitespace tokenizer below -- a VMC name with a space would otherwise be split into two args
      // and Neutrino would receive a truncated, unopenable card path (silent no-mount).
@@ -3744,7 +4232,7 @@ index 1bea4b2..89676bd 100644
          }
      }
  
-@@ -2388,7 +2624,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2388,7 +2625,7 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
      // for memory-card installs too.
      int userHasCwd = neutrinoArgHasActiveFlag(gNeutrinoArgs, "-cwd=") ||
                       neutrinoArgHasActiveFlag(extraArgs, "-cwd=");
@@ -3753,7 +4241,7 @@ index 1bea4b2..89676bd 100644
          const char *slash = sysLastPathSeparator(neutrinoPath);
          if (slash != NULL) {
              int dirLen = (int)(slash - neutrinoPath) + 1; // keep the device's native trailing separator
-@@ -2409,10 +2645,11 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+@@ -2409,10 +2646,11 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
      argc = appendArgTokens(argv, argc, argvMax, extraArgsBuf, sizeof(extraArgsBuf), extraArgs, 0, &gameBreak);
      // Cheats (sysNeutrinoHandCheats): after the user's own options, so the -cfg Neutrino keeps -- its
      // last -- is ours, which loads theirs through `depends`. Only for the game the file was written for.
@@ -3767,7 +4255,25 @@ index 1bea4b2..89676bd 100644
          if (argc + 2 > argvMax)
              return -1;
          argv[argc++] = "-cfg=ript-ra";
-@@ -2580,8 +2817,9 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+@@ -2453,6 +2691,9 @@ static int sysRunNeutrinoLaunch(const char *driver, const char *path, const char
+         int i;
+         for (i = 0; i < argc; i++)
+             LOG("[NEUTRINO]   argv[%d]=%s\n", i, argv[i]);
++        ripps2Diag("launch: Neutrino %s", neutrinoPath); // build 115: the hardware log
++        for (i = 0; i < argc; i++)
++            ripps2Diag("  argv[%d] %s", i, argv[i]);
+     }
+ 
+     // Hand off WITHOUT the elf-loader IOP reset (NHDDL parity, vendored elfldr/): Neutrino reads
+@@ -2562,6 +2803,7 @@ void sysLaunchEmber(const char *emberElf, const char *gameFolder)
+ 
+ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdvdman_irx, void **cdvdman_irx, int size_mcemu_irx, void **mcemu_irx, int EnablePS2Logo, unsigned int compatflags)
+ {
++    ripps2Diag("launch: OPL core, %s, %s, logo %d, compat 0x%x", mode_str, filename, EnablePS2Logo, compatflags); // build 115
+     unsigned int modules, ModuleStorageSize;
+     void *ModuleStorage, *ModuleStorageEnd;
+     u8 local_ip_address[4], local_netmask[4], local_gateway[4];
+@@ -2580,8 +2822,9 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
      AddHistoryRecordUsingFullPath(filename);
  #endif
  
@@ -3779,7 +4285,7 @@ index 1bea4b2..89676bd 100644
  
      // Disable sound effects via libsd, to prevent some games with improper initialization from inadvertently using digital effect settings from other software.
      LOG("[CLEAREFFECTS]:\n");
-@@ -2706,7 +2944,7 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
+@@ -2706,7 +2949,7 @@ void sysLaunchLoaderElf(const char *filename, const char *mode_str, int size_cdv
      config->magic[0] = EE_CORE_MAGIC_0;
      config->magic[1] = EE_CORE_MAGIC_1;
  
@@ -3815,19 +4321,39 @@ index 321b35b..272c5c8 100644
              mode = src;
      }
 diff --git a/src/textures.c b/src/textures.c
-index 2da860e..f337d6b 100644
+index 2da860e..6c650e0 100644
 --- a/src/textures.c
 +++ b/src/textures.c
-@@ -8,6 +8,8 @@
+@@ -8,6 +8,10 @@
  #include <kernel.h>
  #include <png.h>
  #include "include/ripps2.h" // RIPPS2 build 95: ripps2DecodePicture, game art as JPG
 +#include "include/vcdsupport.h" // RIPPS2 build 115: a PS1 game's disc ID, for its art
++#include "include/pad.h"        // RIPPS2 build 115: MMCE art reads wait while a button is down
++#include <delaythread.h>
 +#include <strings.h>               // strcasecmp, strncasecmp
  
  extern void *load0_png;
  extern void *load1_png;
-@@ -1109,16 +1111,20 @@ void texSetProbe(char *out, int size)
+@@ -643,6 +647,17 @@ static int texStageExternalFileIntoMemory(int fd, void **buffer, u32 *stagedSize
+             return ERR_LOAD_ABORTED;
+         }
+ 
++        // RIPPS2 build 115: an MMCE read holds the SIO2 bus the pads share for all of its 32 KB, the card's own SD time
++        // included. Between pieces the pads come first: while a button is down the next piece waits (up to 200 ms each),
++        // and every piece leaves a short gap, so padman's read each frame finds the bus free (the user's SD2PSXTD, 10/25:
++        // the pad lagged and jumped while covers loaded)
++        if (shortReadIsEof && bytesRead > 0) {
++            int held;
++            for (held = 0; held < 40 && padAnyHeld(); held++)
++                DelayThread(5 * 1000);
++            DelayThread(2 * 1000);
++        }
++
+         if (capacity - bytesRead < TEX_MMCE_STAGE_READ_SIZE) {
+             unsigned char *grown;
+ 
+@@ -1109,16 +1124,20 @@ void texSetProbe(char *out, int size)
  }
  
  // RIPPS2 build 95: game art as JPG. RiptOPL reads PNG only, and old OPL art packs are JPG, so every theme showed
@@ -3853,7 +4379,7 @@ index 2da860e..f337d6b 100644
      size = lseek(fd, 0, SEEK_END);
      lseek(fd, 0, SEEK_SET);
      if (size <= 0 || size > TEX_JPG_MAX_FILE || (buf = malloc(size)) == NULL) {
-@@ -1128,7 +1134,11 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
+@@ -1128,7 +1147,11 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
      while (got < size && (r = read(fd, buf + got, size - got)) > 0)
          got += r;
      close(fd);
@@ -3866,7 +4392,7 @@ index 2da860e..f337d6b 100644
          free(buf);
          return ERR_BAD_FILE;
      }
-@@ -1145,6 +1155,121 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
+@@ -1145,6 +1168,121 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
      return 0;
  }
  
@@ -3988,7 +4514,7 @@ index 2da860e..f337d6b 100644
  int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
  {
      char filePath[256];
-@@ -1171,15 +1296,28 @@ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
+@@ -1171,15 +1309,28 @@ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
      //
      // Only ever skips work: artIndexMayExist returns 1 for anything it is not certain about, so the
      // worst case is exactly the behaviour that was here before.
