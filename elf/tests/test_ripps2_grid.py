@@ -19,8 +19,9 @@ for fn, want in (('menuNavigateLeft', 'menuPrevV();'), ('menuNavigateRight', 'me
     if want not in ms[i:ms.index('\n}\n', i)]:
         fail.append('%s must %s on a Grid theme' % (fn, want))
 g = ms[ms.index('static void menuGridStep('):ms.index('\n}\n', ms.index('static void menuGridStep('))]
-if g.count('getKeyOn(') < 2:
-    fail.append('a drive change at the grid edge must need a fresh press')
+# build 115 (the user, 10/26 evening): the first and last rows are the list's ends; no drive change there at all
+if 'menuDriveStep' in g or g.count('return;') < 2:
+    fail.append('the grid must stop at its first and last rows (the source changes with Circle or the sidebar)')
 if '((cf && !grid) ? getKeyOn(KEY_UP) : getKey(KEY_UP))' not in ms:
     fail.append('Up/Down must repeat when held on a Grid theme')
 print('\n'.join(fail) or 'grid: element, draw, two-axis navigation, edge drive change OK')

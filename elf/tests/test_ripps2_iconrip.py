@@ -135,7 +135,7 @@ _, hshapes, htype, _, hverts = struct.unpack_from('<IIIfI', hat, 0)
 if hshapes != 3 or htype != 0x0E or hverts % 3 or hverts > 2000:
     fail.append('misc/ripps2.icn: %d shapes, type %#x, %d vertices (want 3 shapes, packed texture, at most 2000)' % (hshapes, htype, hverts))
 boot = rd('src/ripps2boot.c')
-if 'int ripps2CardFolderIcon(const char *dir)' not in boot or 'ripps2CardFolderIcon(parent); // build 98' not in boot or \
+if 'int ripps2CardFolderIcon(const char *dir)' not in boot or 'ripps2CardFolderIcon(' not in rd('src/opl.c') or \
         'ripps2CardFolderIcon("mc0:/RIPPS2");' not in rd('src/ripps2status.c') or 'ripps2_icn.o' not in rd('Makefile'):
     fail.append("RIPPS2's card folder must get its hat icon wherever RIPPS2 makes the folder")
 if fail:

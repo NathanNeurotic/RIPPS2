@@ -54,7 +54,7 @@ if 'ALIGN_VCENTER | ALIGN_RIGHT' in pick or 'x + w - 16 - rmUnScaleX(fntCalcDime
 dlg = rip[rip.index('void ripps2RipBiosMusicDialog(void)'):]
 if 'if ((want = rbsPickMusic(len)) == 0) {' not in dlg:
     fail.append('ripps2RipBiosMusicDialog: the chooser comes before the folder question, and backing out rips nothing')
-if 'rbsRipPiece(img, imgSize, k, len[k], dirs[pick - 1], done[k], sizeof(done[k]));' not in dlg:
+if 'rbsRipPiece(img, imgSize, k, len[k], dirs[pick - 1], done[k], sizeof(done[k]))' not in dlg: # build 115: its result kept
     fail.append('ripps2RipBiosMusicDialog: each chosen piece is ripped into the folder picked')
 if 'bgmStop(); // the music may be playing this very file' not in dlg:
     fail.append('ripps2RipBiosMusicDialog: the music lets go of a file it may be playing before it is rewritten')

@@ -70,7 +70,7 @@ res = body(vcd, 'int vcdResolvePopstarter(const char *devPrefix, char *out, int 
 if res.index('vcdResolveCustomPopstarter()') > res.index('SEANCE_MODE_LOOKUP') or res.index('SEANCE_MODE_LOOKUP') > res.index('vcdResolvePopstarterMcElf(out, outSize)'):
     fail.append('POPSTARTER: Settings\' path and the game\'s drive first, then where SEANCE found it, then the cards')
 need(vcd, (('seanceHook != NULL && seanceHook(SEANCE_POPS, SEANCE_MODE_LOOKUP', 'RIPPOPS copies from where SEANCE found the POPS files'),
-           ('snprintf(src, sizeof(src), "%s%s", from, files[i]); // build 114: from is the folder', 'the copy reads the folder found')), 'vcdsupport.c')
+           ('snprintf(src, sizeof(src), "%s%s", from, vcdPopsFiles[i]); // build 114: from is the folder', 'the copy reads the folder found')), 'vcdsupport.c')
 sb = rd('src/supportbase.c')
 nr = body(sb, 'const char *sbResolveNeutrinoPath(const char *activePrefix)')
 if not (nr.index('sbProbeNeutrinoMc()') < nr.index('SEANCE_MODE_LOOKUP') < nr.index('SEANCE_MODE_LAST') < nr.index('ripps2NeutrinoOffer(')):
@@ -237,7 +237,7 @@ need(gm_, (('hgRows[i].pack = ripps2PackKind(&view, id);', 'each hidden game kno
            ('"SHOW AGAIN, DELETE OR UNCOMPRESS"', 'the hint says so'), ('if (zpUnder != NULL) {\n        zpUnder();', 'zpPage draws it')), 'ripps2games.c Hidden Games')
 if 'static int seCopy(' in rd('src/ripps2seance.c') or 'ripps2CopyFile(src, dest, what == SEANCE_EMBER' not in rd('src/ripps2seance.c'):
     fail.append('ripps2seance.c: Ember and its BIOS are copied with the progress bar')
-if 'ripps2CopyFile != NULL ? ripps2CopyFile(src, path, files[i]) : vcdCopyFile(src, path)' not in rd('src/vcdsupport.c'):
+if 'ripps2CopyFile != NULL ? ripps2CopyFile(src, path, vcdPopsFiles[i]) : vcdCopyFile(src, path)' not in rd('src/vcdsupport.c'):
     fail.append('vcdsupport.c: the POPS files are copied with the progress bar')
 bs_ = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'build.sh'), encoding='utf-8').read()
 if 'python3 .github/scripts/install_safe_bdmfs.py' not in bs_ or bs_.find('install_safe_bdmfs.py') > bs_.find('make clean'):

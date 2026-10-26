@@ -615,7 +615,7 @@ index 844270a..d09e5bf 100644
 +void bdmIopWasReset(void); // RIPPS2 build 115: after an IOP reset, the transports load again
  #endif
 diff --git a/include/dialogs.h b/include/dialogs.h
-index 4970d36..cd9e856 100644
+index 4970d36..a76e1a0 100644
 --- a/include/dialogs.h
 +++ b/include/dialogs.h
 @@ -97,6 +97,7 @@ enum UI_ITEMS {
@@ -626,15 +626,16 @@ index 4970d36..cd9e856 100644
      CFG_ENABLEDVR,
      CFG_ENABLEBDMHDD,
      CFG_ENABLEUDPBD,     // legacy: kept as an unused placeholder (superseded by CFG_NETPROTOCOL)
-@@ -366,6 +367,7 @@ enum UI_ITEMS {
+@@ -366,6 +367,8 @@ enum UI_ITEMS {
      RIPPS2_HINTS_BUTTON,      // RIPPS2 build 90: Hints and Glyphs (Interface from build 113)
      RIPPS2_CACHE_BUTTON,      // RIPPS2 build 113: Game Sources > Cache
      CFG_RIPPS2_FASTCACHE,     // RIPPS2 build 113: Cache > Fast Cache (each source's saved list)
 +    CFG_RIPPS2_TRUSTCACHE,    // RIPPS2 build 115: Cache > Trust Cache (a cached list stands until SELECT)
++    CFG_RIPPS2_FASTBOOT,      // RIPPS2 build 115: Cache > Fast Boot (RIPPS2.FB beside the ELF)
      RIPPS2_HINT_ORDER_BUTTON, // and its Hint Order
      RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
      CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
-@@ -393,6 +395,11 @@ enum UI_ITEMS {
+@@ -393,6 +396,11 @@ enum UI_ITEMS {
      SWEEP_SPEED,
      SWEEP_DELETE, // build 114 (the user, 10/24): one of the user's own sweeps deleted
      UICFG_RIPPS2_SELECT_HOLD, // build 114: Interface > Hold SELECT (the theme list, the next theme, nothing)
@@ -822,7 +823,7 @@ index 3797788..7568573 100644
  
  /** Sets the display offset in units of pixels */
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 131f69c..6805cd0 100644
+index 131f69c..990b3bf 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -39,6 +39,8 @@ void ripps2PillarMusic(int on); // ripps2bg.c: the towers settle and light up to
@@ -860,11 +861,13 @@ index 131f69c..6805cd0 100644
  int ripps2HintToken(int textId, int iconId);              // which hint a hint bar entry is (RIPPS2_HINT_*)
  int ripps2HintShown(int token);                           // the user's pick, else the theme's hints_hide
  int ripps2HintLabels(void);                               // 1: glyph and label, 0: glyph only, 2: badges
-@@ -148,11 +151,17 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
+@@ -148,11 +151,19 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
  
  // ---- build 113: the category sidebar (ripps2side.c) ----
  extern int gRipps2FastCache; // build 113: Game Sources > Cache > Fast Cache, each source's saved list (1, the default)
 -extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar
++extern int gRipps2FastBoot;  // build 115: Game Sources > Cache > Fast Boot (opl.c: RIPPS2.FB beside the ELF)
++void ripps2FastBootApply(void); // build 115 (gui.c): Fast Boot just turned on: the drives and the sounds set for it
 +extern int gRipps2TrustCache; // build 115: Game Sources > Cache > Trust Cache, a cached list stands until SELECT (1)
 +extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar, 3 Menu (build 115)
 +extern int gRipps2SidebarStyle; // build 115: Layout > Sidebar Style: 0 Theme, 1 Split, 2 One Piece
@@ -879,7 +882,7 @@ index 131f69c..6805cd0 100644
  void ripps2SidebarInput(void);
  void ripps2DrawBusy(int alpha);     // loading: the mark breathes (in place, or small in the corner)
  // build 114: a BDM drive's free and total KB, cluster bytes and format (RIPPS2_FS_*), from RiptOPL's exFAT/FAT driver as
-@@ -257,10 +266,12 @@ void ripps2ColorsLoadConfig(config_set_t *config);
+@@ -257,10 +268,12 @@ void ripps2ColorsLoadConfig(config_set_t *config);
  void ripps2ColorsSaveConfig(config_set_t *config);
  void ripps2HintsSaveConfig(config_set_t *config);
  int ripps2EditFile(const char *path);                              // 1 when it saved
@@ -893,7 +896,7 @@ index 131f69c..6805cd0 100644
  void ripps2Status(void);                    // ripps2status.c (build 80): the main menu's STATUS page, RIPPS2's homebrew
  int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize); // ripps2ember.c (build 77): install the Neutrino RIPPS2 carries, where the user picks
  void ripps2ArtDownload(void); // ripps2art.c (build 73): covers for the games without one, over HTTPS
-@@ -290,7 +301,8 @@ int ripps2VmcDeleteSave(const char *image, const char *save);
+@@ -290,8 +303,10 @@ int ripps2VmcDeleteSave(const char *image, const char *save);
  int ripps2PickList(const char *const *items, int count); // ripps2edit.c: a small glass list; -1 = none
  void ripps2CardManager(int slot, const char *image); // ripps2card.c (build 86): memory card 1/2 (slot 0/1), or a card image (slot -1)
  // ripps2media.c (build 93): Memory Files opens pictures (PNG, JPG) and video (AVI, with libsmslite)
@@ -901,9 +904,11 @@ index 131f69c..6805cd0 100644
 +enum { RIPPS2_MEDIA_NONE = 0, RIPPS2_MEDIA_PICTURE, RIPPS2_MEDIA_VIDEO, RIPPS2_MEDIA_SOUND, RIPPS2_MEDIA_ICON,
 +       RIPPS2_MEDIA_MUSIC }; // build 115: .wav / .ogg
  int ripps2MediaKind(const char *name);
++void ripps2PlayMusicList(char (*paths)[256], int n, int start); // build 115: tracks played as a CD (ripps2media.c)
  void ripps2ViewPicture(const char *path);
  void ripps2ViewSaveIcon(const char *path); // build 98: a PS2 save icon (.ico / .icn) in 3D
-@@ -310,6 +322,8 @@ void ripps2LaunchPump(void);         // build 70: one more frame of it, with the
+ // build 98: the icon as OBJ (a shape each) + MTL + PNG in mass0:/RIPPS2/ICONS/<its folder>/ (in outDir); NULL = done
+@@ -310,6 +325,8 @@ void ripps2LaunchPump(void);         // build 70: one more frame of it, with the
  void ripps2LaunchAborted(void);      // the launch failed and returned to the menu
  int ripps2LaunchGuard(void);         // build 114: 1 to start; 0 when the user backed out (ripps2games.c)
  void ripps2NotchRing(int cx, int cy, float p, int a); // build 114: RIPDISC's notches (ripps2disc.c)
@@ -940,19 +945,21 @@ index 0000000..42b838a
 +
 +#endif
 diff --git a/include/sound.h b/include/sound.h
-index 5c9c5c4..3538c42 100644
+index 5c9c5c4..096acf8 100644
 --- a/include/sound.h
 +++ b/include/sound.h
-@@ -31,6 +31,8 @@ enum SFX {
+@@ -31,6 +31,10 @@ enum SFX {
  int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max); // AUDIO bgm*.ogg / .wav beside RIPPS2 and in OPL's resources
  void bgmAddMusicHome(const char *prefix);                    // build 100: a started drive's OPL root ("mass0:/"), from its update
  int bgmMusicHome(int i, char *out, int size);                // build 100: the i-th such root apart from RIPPS2's own
 +int bgmMusicPickPath(const char *full);                      // build 115: that track becomes the pick (1 when listed)
 +void bgmMusicHomeAdd(const char *audioDir);                  // build 115: a rip's "<base>AUDIO/" joins the music list
++int bgmMusicCurrent(char *out, int size);                    // build 115: the track the music plays, its whole path
++int bgmPlayFileOnce(const char *path);                       // build 115: a track played to its end, once (the file CD player)
  void bgmMusicTitle(const char *file, char *out, int size);
  int bgmMusicDefault(char (*names)[RIPPS2_MUSIC_NAME], int n); // build 88: the track called Menu, else the first   // "01 Slideshow.ogg" -> "Slideshow"
  
-@@ -62,6 +64,9 @@ void sfxGetPlayDiag(unsigned int *lastMs, unsigned int *maxMs);
+@@ -62,6 +66,9 @@ void sfxGetPlayDiag(unsigned int *lastMs, unsigned int *maxMs);
  void sfxGetDropDiag(unsigned int *staleDrops, unsigned int *fullDrops);
  
  void bgmStart(void);
@@ -962,7 +969,7 @@ index 5c9c5c4..3538c42 100644
  void sfxBootStart(void);        // RIPPS2: the main thread, as the towers rise: audio up, the boot sound playing
  void sfxBootSoundsLoaded(void); // RIPPS2: the IO worker, every sound loaded: the music may start
  void bgmBootTick(void);         // RIPPS2: every GUI frame: starts the music once the sounds are in, then fades it in
-@@ -89,5 +94,6 @@ extern volatile int gBgmInRead;
+@@ -89,5 +96,6 @@ extern volatile int gBgmInRead;
  
  void ripps2QuietBootMark(int bootSoundOn); // build 75: mc0:/RIPPS2/QUIETBOOT follows the boot sound setting
  int ripps2AudioBase(char *out, int size, int searchDrives); // build 74: the folder the AUDIO folder is in
@@ -1081,7 +1088,7 @@ index cf04f22..dd3f1a6 100644
 +
  #endif
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index aef6bd1..4d591ec 100644
+index aef6bd1..dbcef50 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -305,7 +305,7 @@ gui_strings:
@@ -1231,6 +1238,14 @@ index aef6bd1..4d591ec 100644
  
  - label: HINT_RIPPS2_THEME_COLOR
    string: "The Color Theme's own color. Pick Custom as the Color Theme to choose it yourself, as the text colors are chosen."
+@@ -2202,3 +2230,7 @@ gui_strings:
+   string: "How long each color lasts before the next fades in. Even Lively stays smooth: the colors never flash."
+ - label: HINT_RIPPS2_SELECT_HOLD
+   string: "SELECT held 4.2 s on a game list. List: the themes in a panel, pick one. Cycle: the next theme. Off: nothing (a press still refreshes)."
++- label: RIPPS2_FAST_BOOT
++  string: Fast Boot
++- label: HINT_RIPPS2_FAST_BOOT
++  string: "Boot reads RIPPS2's own drive only: the settings and the sounds beside RIPPS2.ELF (RIPPS2.FB there says where) and every list from its cache. The other drives wait: SELECT on a page starts its drives and brings their art (with Automatic Refresh on they start at boot). Turning it on copies your sounds, and the music when there is room, into AUDIO beside RIPPS2."
 diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
 index 0c9f01e..db1700e 100644
 --- a/misc/theme_coverflow.cfg
@@ -1873,7 +1888,7 @@ index 681481c..d0fbada 100644
  
      /* A focused int accepts Triangle for direct entry, and nothing on screen would otherwise say so:
 diff --git a/src/dialogs.c b/src/dialogs.c
-index 6379d40..c4fe9a9 100644
+index 6379d40..6fa4b89 100644
 --- a/src/dialogs.c
 +++ b/src/dialogs.c
 @@ -4,6 +4,7 @@
@@ -1919,7 +1934,18 @@ index 6379d40..c4fe9a9 100644
      // Legacy action rows. The Settings page skips these and composes both editors inline below.
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_COMM_SETTINGS}}},
      {UI_SPACER},
-@@ -2090,6 +2097,11 @@ struct UIItem diaCacheConfig[] = {
+@@ -2085,11 +2092,22 @@ struct UIItem diaCacheConfig[] = {
+     {UI_HEADER, 0, 1, 1, -1, 0, 0, {.label = {NULL, _STR_RIPPS2_CACHE}}},
+     {UI_SPLITTER},
+ 
++    // build 115: Fast Boot, the boot from RIPPS2's own drive alone
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_FAST_BOOT}}},
++    {UI_SPACER},
++    {UI_BOOL, CFG_RIPPS2_FASTBOOT, 1, 1, _STR_HINT_RIPPS2_FAST_BOOT, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_FAST_CACHE}}},
+     {UI_SPACER},
      {UI_BOOL, CFG_RIPPS2_FASTCACHE, 1, 1, _STR_HINT_RIPPS2_FAST_CACHE, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -1931,7 +1957,7 @@ index 6379d40..c4fe9a9 100644
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_CACHE_HDD_GAME_LIST}}},
      {UI_SPACER},
      {UI_BOOL, CFG_HDDGAMELISTCACHE, 1, 1, _STR_HINT_HDDGAMELISTCACHE, 0, 0, {.intvalue = {0, 0}}},
-@@ -2100,6 +2112,12 @@ struct UIItem diaCacheConfig[] = {
+@@ -2100,6 +2118,12 @@ struct UIItem diaCacheConfig[] = {
      {UI_BOOL, UICFG_AUTOREFRESH, 1, 1, _STR_HINT_AUTOREFRESH, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -1944,7 +1970,7 @@ index 6379d40..c4fe9a9 100644
      // RIPPS2 build 114: SEANCE (ripps2seance.c), the launchers RIPPS2 does not carry: where each was found, and the search.
      // Always in use, so there is nothing to switch: each line says Found or Not found (gui.c fills them in)
      {UI_SPLITTER},
-@@ -2168,6 +2186,10 @@ struct UIItem diaHintsConfig[] = {
+@@ -2168,6 +2192,10 @@ struct UIItem diaHintsConfig[] = {
      {UI_SPACER},
      {UI_ENUM, UICFG_RIPPS2_GLYPH_SET, 1, 1, _STR_HINT_RIPPS2_GLYPH_SET, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
@@ -1955,7 +1981,7 @@ index 6379d40..c4fe9a9 100644
      {UI_BUTTON, RIPPS2_HINT_ORDER_BUTTON, 1, 1, _STR_HINT_RIPPS2_HINT_ORDER, 0, 0, {.label = {NULL, _STR_RIPPS2_HINT_ORDER}}},
      {UI_BREAK},
  
-@@ -2229,16 +2251,29 @@ struct UIItem diaCoverflowConfig[] = {
+@@ -2229,16 +2257,29 @@ struct UIItem diaCoverflowConfig[] = {
      {UI_ENUM, UICFG_RIPPS2_CATLAYOUT, 1, 1, _STR_HINT_RIPPS2_CATEGORY_LAYOUT, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -2097,10 +2123,27 @@ index 7a1b2b6..d71c0fc 100644
      // Settings rows (builtin:ripflowbold, 700) and a theme's own pick of weight (builtin:roboto, font<N>_weight)
      if (strcmp(path, "builtin:ripflow") == 0 || strcmp(path, "builtin:ripflowbold") == 0 || strcmp(path, "builtin:roboto") == 0) {
 diff --git a/src/gui.c b/src/gui.c
-index fef5147..faffff4 100644
+index fef5147..40512d1 100644
 --- a/src/gui.c
 +++ b/src/gui.c
-@@ -443,10 +443,10 @@ static void guiRenderNotifications(char *string, int y)
+@@ -5,6 +5,8 @@
+  */
+ 
+ #include <delaythread.h> // RIPPS2: DelayThread (the frame-end yield)
++#include <dirent.h>      // RIPPS2 build 115: Fast Boot copies the sounds beside RIPPS2
++#include <sys/stat.h>
+ #include "include/opl.h"
+ #ifdef RETROACHIEVEMENTS
+ #include "include/achievements.h"
+@@ -17,6 +19,7 @@
+ #include "include/renderman.h"
+ #include "include/menusys.h"
+ #include "include/ripps2.h" // RIPPS2 category screens
++#include "include/ripps2diag.h" // build 115: Fast Boot in DIAG.TXT
+ #include "include/ripps2seance.h" // RIPPS2 build 114: Cache > Launchers
+ #include "include/ripps2games.h"  // RIPPS2 build 114: Game Sources > Hidden Games
+ #include "include/ripps2shot.h" // build 108: ripps2ShotTick
+@@ -443,10 +446,10 @@ static void guiRenderNotifications(char *string, int y)
  {
      int x;
  
@@ -2113,7 +2156,7 @@ index fef5147..faffff4 100644
  }
  
  // Feedback for a user action; independent of courtesy notification preferences.
-@@ -674,6 +674,7 @@ void guiExitPathBegin(struct UIItem *ui)
+@@ -674,6 +677,7 @@ void guiExitPathBegin(struct UIItem *ui)
  void guiExitPathEnd(void)
  {
      snprintf(gExitPath, sizeof(gExitPath), "%s", exitPathEdit);
@@ -2121,7 +2164,7 @@ index fef5147..faffff4 100644
  }
  
  // RIPPS2: BOOT LOCK (ripps2boot.c). Turning it on fills an empty IGR Path with RIPPS2's own path; a
-@@ -927,6 +928,10 @@ static int guiShowBdmDevicesConfig(void)
+@@ -927,6 +931,10 @@ static int guiShowBdmDevicesConfig(void)
  {
      int was[5] = {gEnableUSB, gEnableMX4SIO, gEnablePCCF, gEnableDVR, gEnableILK};
  
@@ -2132,7 +2175,7 @@ index fef5147..faffff4 100644
      diaSetInt(diaBdmDevicesConfig, CFG_ENABLEUSB, gEnableUSB);
      diaSetInt(diaBdmDevicesConfig, CFG_ENABLEMX4SIO, gEnableMX4SIO);
      diaSetInt(diaBdmDevicesConfig, CFG_ENABLEPCCF, gEnablePCCF);
-@@ -948,14 +953,27 @@ static void guiSetAdvancedSettings(struct UIItem *ui); // build 113: Game Source
+@@ -948,14 +956,30 @@ static void guiSetAdvancedSettings(struct UIItem *ui); // build 113: Game Source
  static void guiShowScreenConfig(void);                // build 114: Interface > Screen
  static void guiSaveAdvancedSettings(struct UIItem *ui);
  
@@ -2143,6 +2186,7 @@ index fef5147..faffff4 100644
 +{
 +    diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, &gRipps2FastCache);
 +    diaGetInt(diaCacheConfig, CFG_RIPPS2_TRUSTCACHE, &gRipps2TrustCache);
++    diaGetInt(diaCacheConfig, CFG_RIPPS2_FASTBOOT, &gRipps2FastBoot); // build 115
 +    diaGetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, &gHDDGameListCache);
 +    diaGetInt(diaCacheConfig, UICFG_AUTOREFRESH, &gAutoRefresh);
 +}
@@ -2157,13 +2201,15 @@ index fef5147..faffff4 100644
      static char seanceRows[SEANCE_COUNT][200]; // build 114: Launchers, a line each (the page keeps the pointers)
 -    int fast = gRipps2FastCache, list = gHDDGameListCache, refresh = gAutoRefresh, result, i;
 +    int fast = gRipps2FastCache, trust = gRipps2TrustCache, list = gHDDGameListCache, refresh = gAutoRefresh, result, i, changed;
++    int fastBoot = gRipps2FastBoot; // build 115
  
      diaSetInt(diaCacheConfig, CFG_RIPPS2_FASTCACHE, gRipps2FastCache);
 +    diaSetInt(diaCacheConfig, CFG_RIPPS2_TRUSTCACHE, gRipps2TrustCache); // build 115
++    diaSetInt(diaCacheConfig, CFG_RIPPS2_FASTBOOT, gRipps2FastBoot);     // build 115
      diaSetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, gHDDGameListCache);
      diaSetInt(diaCacheConfig, UICFG_AUTOREFRESH, gAutoRefresh);
      for (;;) {
-@@ -967,6 +985,15 @@ static void guiShowCacheConfig(void)
+@@ -967,6 +991,15 @@ static void guiShowCacheConfig(void)
              diaSetLabel(diaCacheConfig, RIPPS2_SEANCE_ROW0 + i, seanceRows[i]);
          }
          result = diaExecuteDialog(diaCacheConfig, -1, 1, NULL);
@@ -2179,7 +2225,7 @@ index fef5147..faffff4 100644
          if (result != RIPPS2_SEANCE_BUTTON)
              break;
          { // Look now: the started drives (Memory Files' and STATUS's START starts the rest)
-@@ -977,24 +1004,33 @@ static void guiShowCacheConfig(void)
+@@ -977,24 +1010,140 @@ static void guiShowCacheConfig(void)
              guiMsgBox(msg, 0, NULL);
          }
      }
@@ -2190,9 +2236,16 @@ index fef5147..faffff4 100644
 -    diaGetInt(diaCacheConfig, UICFG_AUTOREFRESH, &gAutoRefresh);
 -    if (gRipps2FastCache != fast || gHDDGameListCache != list || gAutoRefresh != refresh)
 -        guiSettingsSavePending = 1; // saved with the rest when Settings closes
+-}
+-
+-// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's);
+-// a change fills Starred Games again so it shows at once, and is saved when Settings closes
 +    if (result)
 +        guiCacheConfigRead();
-+    changed = gRipps2FastCache != fast || gRipps2TrustCache != trust || gHDDGameListCache != list || gAutoRefresh != refresh;
++    if (gRipps2FastBoot && !fastBoot)
++        ripps2FastBootApply(); // build 115: the drives and the sounds set for it (the gate comes with the save)
++    changed = gRipps2FastCache != fast || gRipps2TrustCache != trust || gHDDGameListCache != list || gAutoRefresh != refresh ||
++              gRipps2FastBoot != fastBoot;
 +    if (changed)
 +        guiSettingsSavePending = 1; // saved with the rest when Settings closes (from STATUS: when STATUS closes)
 +    return changed;
@@ -2205,10 +2258,112 @@ index fef5147..faffff4 100644
 +    changed = guiShowCacheConfig();
 +    cacheFromStatus = 0;
 +    return changed;
- }
- 
--// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's);
--// a change fills Starred Games again so it shows at once, and is saved when Settings closes
++}
++
++// RIPPS2 build 115: Fast Boot's sounds. Every .adp of the AUDIO folder they load from now (and README.txt) is copied into
++// the AUDIO beside RIPPS2, and the music picked when RIPPS2's drive is not a memory card; from then on they load from
++// there. A memory card without the room keeps them where they are. 1 when they are beside RIPPS2 now
++static int fastBootSounds(void)
++{
++    char own[256], base[256], from[300], to[300], src[400], dst[400], music[320];
++    long long need = 0;
++    struct stat st;
++    struct dirent *e;
++    DIR *d;
++    int copied = 0, n;
++
++    if (!oplGetRipps2Dir(own, sizeof(own) - 8) || !ripps2AudioBase(base, sizeof(base) - 8, 0))
++        return 0;
++    if (!strcmp(own, base))
++        return 1; // there already
++    snprintf(from, sizeof(from), "%sAUDIO", base);
++    snprintf(to, sizeof(to), "%sAUDIO", own);
++    if ((d = opendir(from)) == NULL)
++        return 0;
++    while ((e = readdir(d)) != NULL) { // the room they take
++        n = strlen(e->d_name);
++        if (n > 4 && !strcasecmp(e->d_name + n - 4, ".adp")) {
++            snprintf(src, sizeof(src), "%s/%s", from, e->d_name);
++            if (stat(src, &st) == 0)
++                need += st.st_size;
++        }
++    }
++    closedir(d);
++    if (!strncmp(own, "mc", 2) && own[2] >= '0' && own[2] <= '1') {
++        int freeKb = ripps2CardFreeKb(own[2] - '0');
++        if (freeKb >= 0 && freeKb < (int)(need / 1024) + 64) {
++            char msg[300];
++            snprintf(msg, sizeof(msg), _t("Fast Boot is on. The sounds take %d KB and the memory card RIPPS2 runs from has %d KB free, so they stay in %s."),
++                     (int)(need / 1024), freeKb, from);
++            guiMsgBox(msg, 0, NULL);
++            return 0;
++        }
++    }
++    mkdir(to, 0777);
++    if ((d = opendir(from)) == NULL)
++        return 0;
++    while ((e = readdir(d)) != NULL) {
++        n = strlen(e->d_name);
++        if (n <= 4 || (strcasecmp(e->d_name + n - 4, ".adp") && strcasecmp(e->d_name, "README.txt")))
++            continue;
++        snprintf(src, sizeof(src), "%s/%s", from, e->d_name);
++        snprintf(dst, sizeof(dst), "%s/%s", to, e->d_name);
++        if (ripps2CopyFile != NULL && ripps2CopyFile(src, dst, e->d_name))
++            copied++;
++    }
++    closedir(d);
++    // the picked track too, when RIPPS2's drive is not a memory card
++    if (strncmp(own, "mc", 2) && bgmMusicCurrent(music, sizeof(music)) && strncmp(music, own, strlen(own))) {
++        const char *name = strrchr(music, '/');
++        name = name != NULL ? name + 1 : music;
++        snprintf(dst, sizeof(dst), "%s/%s", to, name);
++        if (ripps2CopyFile != NULL && ripps2CopyFile(music, dst, name)) {
++            ripps2AudioBaseSet(own);
++            bgmMusicPickPath(dst);
++        }
++    }
++    ripps2AudioBaseSet(own);
++    ripps2Diag("fast boot: %d sounds copied from %s to %s", copied, from, to);
++    return copied > 0;
++}
++
++// RIPPS2 build 115: Fast Boot just turned on. RIPPS2's own drive starts at boot (Auto); every other drive on Auto waits on
++// Manual, its list shown from the cache, unless Automatic Refresh is on (which starts them at boot as before); the lists
++// are kept and trusted (Fast Cache, Trust Cache); the sounds go beside RIPPS2
++void ripps2FastBootApply(void)
++{
++    char boot[256], msg[400];
++    int fromMmce, fromHdd, fromMass, sounds;
++
++    if (!ripps2GetBootPath(boot, sizeof(boot)))
++        boot[0] = '\0';
++    fromMmce = !strncmp(boot, "mmce", 4);
++    fromHdd = !strncmp(boot, "hdd", 3) || !strncmp(boot, "pfs", 3) || (!strncmp(boot, "mass", 4) && ripps2GetBootBdmType() == BDM_TYPE_ATA);
++    fromMass = !strncmp(boot, "mass", 4) && !fromHdd;
++    gRipps2FastCache = 1;
++    gRipps2TrustCache = 1;
++    if (!gAutoRefresh) {
++        if (gMMCEStartMode == START_MODE_AUTO && !fromMmce)
++            gMMCEStartMode = START_MODE_MANUAL;
++        if (gHDDStartMode == START_MODE_AUTO && !fromHdd)
++            gHDDStartMode = START_MODE_MANUAL;
++        if (gBDMStartMode == START_MODE_AUTO && !fromMass)
++            gBDMStartMode = START_MODE_MANUAL;
++    }
++    if (fromMmce)
++        gMMCEStartMode = START_MODE_AUTO;
++    if (fromHdd)
++        gHDDStartMode = START_MODE_AUTO;
++    if (fromMass)
++        gBDMStartMode = START_MODE_AUTO;
++    sounds = fastBootSounds();
++    snprintf(msg, sizeof(msg),
++             _t("Fast Boot is on. RIPPS2 boots from its own drive (%s): the settings%s and every list from its cache. The other drives start when you press SELECT on their page, or launch one of their games."),
++             boot[0] ? boot : "?", sounds ? _t(", the sounds") : "");
++    guiMsgBoxSound(SFX_SAVE);
++    guiMsgBox(msg, 0, NULL);
++}
++
 +// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's).
 +// Build 115: Recent Games, its own page (0 hides it, else how many, up to 99); the change shows when Game Sources
 +// applies (initAllSupport starts or hides the page) and is saved when Settings closes
@@ -2224,7 +2379,7 @@ index fef5147..faffff4 100644
      }
  }
  
-@@ -1108,6 +1144,7 @@ int guiShowMmceConfig(void)
+@@ -1108,6 +1257,7 @@ int guiShowMmceConfig(void)
      diaSetEnum(ui, CFG_MMCEIGRSLOT, deviceIGRSlots);
      diaSetInt(ui, CFG_MMCEIGRSLOT, gMMCEIGRSlot);
      diaSetInt(ui, CFG_MMCEGAMEID, gMMCEEnableGameID);
@@ -2232,7 +2387,7 @@ index fef5147..faffff4 100644
      diaSetEnum(ui, CFG_MMCE_WAIT_CYCLES, deviceAckWaitCycles);
      diaSetInt(ui, CFG_MMCE_WAIT_CYCLES, gMMCEAckWaitCycles);
      diaSetEnum(ui, CFG_MMCE_USE_ALARMS, deviceOnOff);
-@@ -1119,6 +1156,7 @@ int guiShowMmceConfig(void)
+@@ -1119,6 +1269,7 @@ int guiShowMmceConfig(void)
          diaGetInt(ui, CFG_MMCESLOT, &gMMCESlot);
          diaGetInt(ui, CFG_MMCEIGRSLOT, &gMMCEIGRSlot);
          diaGetInt(ui, CFG_MMCEGAMEID, &gMMCEEnableGameID);
@@ -2240,7 +2395,7 @@ index fef5147..faffff4 100644
          diaGetInt(ui, CFG_MMCE_WAIT_CYCLES, &gMMCEAckWaitCycles);
          diaGetInt(ui, CFG_MMCE_USE_ALARMS, &gMMCEUseAlarms);
          diaGetString(ui, CFG_MMCEPREFIX, gMMCEPrefix, sizeof(gMMCEPrefix));
-@@ -1511,6 +1549,19 @@ void guiCycleTheme(void)
+@@ -1511,6 +1662,19 @@ void guiCycleTheme(void)
  
  // build 114 (the user, 10/23): Hold SELECT on List: the themes in a panel. The one in use picked: 0, the caller refreshes
  // the list as a SELECT press would; another: loaded, 1; backed out of: 1 (nothing to refresh)
@@ -2260,7 +2415,7 @@ index fef5147..faffff4 100644
  int guiPickTheme(void)
  {
      const char **names;
-@@ -2334,7 +2385,7 @@ static int guiReadPopsNet(int source, vcd_popsnet_t *out)
+@@ -2334,7 +2498,7 @@ static int guiReadPopsNet(int source, vcd_popsnet_t *out)
          if (guiDrawBGSettings() == 0)
              guiDrawBGPlasma();
          rmDrawRect(0, 0, screenWidth, screenHeight, gColDarker);
@@ -2269,7 +2424,7 @@ index fef5147..faffff4 100644
                          ALIGN_CENTER, 0, 0, _l(_STR_POPS_LOADING_SETTINGS), gTheme->textColor);
          guiDrawOverlays();
          guiEndFrame();
-@@ -2807,8 +2858,8 @@ void guiShowArtworkConfig(void)
+@@ -2807,8 +2971,8 @@ void guiShowArtworkConfig(void)
          diaGetInt(diaArtworkConfig, UICFG_ART_DELAY, &artDelayIdx);
          if (artDelayIdx >= 0 && artDelayIdx < 4) {
              gArtDelay = artDelayValues[artDelayIdx];
@@ -2280,7 +2435,7 @@ index fef5147..faffff4 100644
                  if (lists[i] != NULL)
                      lists[i]->delay = gArtDelay;
              }
-@@ -2822,11 +2873,13 @@ void guiShowArtworkConfig(void)
+@@ -2822,11 +2986,13 @@ void guiShowArtworkConfig(void)
  // page under Controller Settings): the D-pad glyphs, the Color Theme, the hints, the category bar and
  // its order. Each row shows live behind the page as it changes; Cancel puts back what was there.
  // build 96: every row starts with Theme, the theme's own choice (RIPPS2's default where it has none)
@@ -2296,7 +2451,7 @@ index fef5147..faffff4 100644
  static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 3]; // build 114: and Sweep, shown while a sweep is on
  
  // build 81: a row the user picks a value on becomes theirs; build 96: picking Theme (0) gives it back to the
-@@ -2902,7 +2955,7 @@ static void guiRipps2SettingsRead(void)
+@@ -2902,7 +3068,7 @@ static void guiRipps2SettingsRead(void)
      if ((gRipps2Sweep > 0) != (sweepWas > 0))
          guiRipps2PaletteSweepRow();
      guiRipps2ThemeColorRow();
@@ -2305,7 +2460,7 @@ index fef5147..faffff4 100644
          gRipps2TextWeight = v; // build 114: Text Weight, shown at once
          ripps2ApplyTextWeight();
      }
-@@ -2918,8 +2971,12 @@ static void guiRipps2LayoutRead(void)
+@@ -2918,8 +3084,12 @@ static void guiRipps2LayoutRead(void)
      guiRipps2Take(diaCoverflowConfig, UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
      if (diaGetInt(diaCoverflowConfig, UICFG_RIPPS2_TRANSITION, &v) && v >= 0 && v <= 3)
          gRipps2Transition = v; // build 92
@@ -2320,7 +2475,7 @@ index fef5147..faffff4 100644
  }
  
  static int guiRipps2LayoutUpdater(int modified)
-@@ -2942,6 +2999,10 @@ static void guiRipps2LayoutSet(void)
+@@ -2942,6 +3112,10 @@ static void guiRipps2LayoutSet(void)
      diaSetInt(diaCoverflowConfig, UICFG_RIPPS2_TRANSITION, gRipps2Transition);
      diaSetEnum(diaCoverflowConfig, UICFG_RIPPS2_CATLAYOUT, guiRipps2LayoutNames); // build 113
      diaSetInt(diaCoverflowConfig, UICFG_RIPPS2_CATLAYOUT, gRipps2CatLayout);
@@ -2331,7 +2486,7 @@ index fef5147..faffff4 100644
  }
  
  // build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
-@@ -3070,7 +3131,7 @@ static void guiRipps2SettingsSet(void)
+@@ -3070,7 +3244,7 @@ static void guiRipps2SettingsSet(void)
      diaSetEnum(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2PaletteNames);
      // build 81: each row shows what is in effect, a theme's default included
      diaSetInt(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2Shown(RIPPS2_SET_PALETTE, gRipps2Palette, 0));
@@ -2340,7 +2495,7 @@ index fef5147..faffff4 100644
      diaSetEnum(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, weights);
      diaSetInt(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, gRipps2TextWeight);
      guiRipps2SweepRows();
-@@ -5187,8 +5248,25 @@ int guiDrawIconAndText(int iconId, int textId, int font, int x, int y, u64 color
+@@ -5187,8 +5361,25 @@ int guiDrawIconAndText(int iconId, int textId, int font, int x, int y, u64 color
      return guiDrawIconAndTextA(iconId, textId, font, x, y, color, gDefaultCol);
  }
  
@@ -2367,7 +2522,7 @@ index fef5147..faffff4 100644
  {
      GSTEXTURE *iconTex = thmGetTexture(iconId);
      font = guiHintFont(font);
-@@ -5213,6 +5291,14 @@ int guiDrawIconAndTextA(int iconId, int textId, int font, int x, int y, u64 colo
+@@ -5213,6 +5404,14 @@ int guiDrawIconAndTextA(int iconId, int textId, int font, int x, int y, u64 colo
      return x;
  }
  
@@ -2382,7 +2537,7 @@ index fef5147..faffff4 100644
  static int guiDrawIconAndLiteralText(int iconId, const char *text, int font, int x, int y, u64 color)
  {
      GSTEXTURE *iconTex = thmGetTexture(iconId);
-@@ -5557,6 +5643,12 @@ static void guiShow()
+@@ -5557,6 +5756,12 @@ static void guiShow()
                  menuRenderBackdrop();
              else
                  ripps2DrawPanelMorph(ax, ay, aw, ah, bx, by, bw, bh, (t - MORPH_CONCEAL_S) / MORPH_MOVE_S);
@@ -2395,7 +2550,7 @@ index fef5147..faffff4 100644
          } else {
              if (!transArrived) {
                  transArrived = 1;
-@@ -5572,9 +5664,11 @@ static void guiShow()
+@@ -5572,9 +5777,11 @@ static void guiShow()
                  screenHandlerTarget = NULL;
              }
          }
@@ -2408,7 +2563,7 @@ index fef5147..faffff4 100644
  }
  
  // build 114: the page as it stands (the theme list fades in over it, whatever the theme)
-@@ -5747,7 +5841,7 @@ void guiUpdateScreenScale(void)
+@@ -5747,7 +5954,7 @@ void guiUpdateScreenScale(void)
  static int guiWrapText(const char *text, int innerW, char *out, int outSize)
  {
      int wlen = 0, lineW = 0, lines = 1;
@@ -2417,7 +2572,7 @@ index fef5147..faffff4 100644
      const char *p = text;
  
      if (out == NULL || outSize <= 0)
-@@ -5774,7 +5868,7 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
+@@ -5774,7 +5981,7 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
          while (*p && *p != ' ' && *p != '\n' && k < (int)sizeof(word) - 1)
              word[k++] = *p++;
          word[k] = '\0';
@@ -2426,7 +2581,7 @@ index fef5147..faffff4 100644
  
          if (lineW > 0 && (lineW + spaceW + wordW) > innerW) { // does not fit -> break the line
              if (wlen < outSize - 1)
-@@ -5794,6 +5888,27 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
+@@ -5794,6 +6001,27 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
      return lines;
  }
  
@@ -2454,7 +2609,7 @@ index fef5147..faffff4 100644
  // RIPPS2: the next message box's sound (an error, a save), once; then the plain message sound again
  static int msgBoxSound = SFX_MESSAGE;
  
-@@ -5835,6 +5950,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5835,6 +6063,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
      const char *backLabel = msgBoxBackLabel;   // build 114
      msgBoxStartLabel = NULL;
      msgBoxBackLabel = NULL;
@@ -2465,7 +2620,7 @@ index fef5147..faffff4 100644
      // Wrapped once up front, not per frame: the result depends only on `text` and the screen width.
      char wrapped[1024]; // RIPPS2: 512 cut the longer screens (BIBLE's) short
  
-@@ -5880,23 +5999,7 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5880,23 +6112,7 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
          // Render the wrapped lines ONE AT A TIME: ALIGN_CENTER centres on the measured width of the
          // WHOLE string, so handing it a multi-line buffer would centre it as a single long run and
          // leave every line off-centre. Block is vertically centred on the old single-line position.
@@ -2490,7 +2645,7 @@ index fef5147..faffff4 100644
          // RIPPS2: the hints sit where every other screen's do, right-aligned on the same footer line,
          // so BACK lines up with the settings pages' (was fixed at x 500, short of their right edge)
          {
-@@ -5996,7 +6099,7 @@ int guiPromptRebootIop(void)
+@@ -5996,7 +6212,7 @@ int guiPromptRebootIop(void)
  
          guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
  
@@ -2499,7 +2654,7 @@ index fef5147..faffff4 100644
  
          guiDrawIconAndLiteralText(guiConfirmIcon(), _t("Yes"), RIPPS2_UI_FONT, 70, 417, gTheme->textColor);
          guiDrawIconAndLiteralText(TRIANGLE_ICON, _l(_STR_CANCEL), RIPPS2_UI_FONT, 285, 417, gTheme->textColor);
-@@ -6181,7 +6284,12 @@ void guiRenderTextScreen(const char *message)
+@@ -6181,7 +6397,12 @@ void guiRenderTextScreen(const char *message)
      // background); the video-mode, remove-settings and cheat-selection screens went opaque too.
      guiDrawStatusBackdrop(); // RIPPS2: was opaque black
  
@@ -2513,7 +2668,7 @@ index fef5147..faffff4 100644
  
      guiDrawOverlays();
  
-@@ -6362,7 +6470,7 @@ void guiWarning(const char *text, int count)
+@@ -6362,7 +6583,7 @@ void guiWarning(const char *text, int count)
      // fixed number of frames, so it gets an opaque backdrop rather than a ~75% wash.
      guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
  
@@ -2522,7 +2677,7 @@ index fef5147..faffff4 100644
  
      guiEndFrame();
  
-@@ -6424,7 +6532,7 @@ int guiConfirmVideoMode(void)
+@@ -6424,7 +6645,7 @@ int guiConfirmVideoMode(void)
          // steps and the keep landed while it still looked 4/5 full (zackcage6, 09-26).
          guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
  
@@ -2531,7 +2686,7 @@ index fef5147..faffff4 100644
          // How long until the automatic revert (zackcage6's idea). Hidden during a hold. A hold does NOT
          // pause the deadline -- it only defers the revert check so a started hold can finish; let go
          // early after the deadline and the next pass reverts. Whole seconds rounded up, so it reads
-@@ -6433,7 +6541,7 @@ int guiConfirmVideoMode(void)
+@@ -6433,7 +6654,7 @@ int guiConfirmVideoMode(void)
              int leftMs = OPL_VMODE_CHANGE_CONFIRMATION_TIMEOUT_MS - (int)((clock() - timeStart) / (CLOCKS_PER_SEC / 1000));
              char countdown[64];
              snprintf(countdown, sizeof(countdown), _l(_STR_CFM_VMODE_REVERT_IN), leftMs > 0 ? (leftMs + 999) / 1000 : 1);
@@ -2540,7 +2695,7 @@ index fef5147..faffff4 100644
          }
          guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_BACK, RIPPS2_UI_FONT, 500, 417, gTheme->textColor);
          guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, _STR_CFM_VMODE_HOLD_KEEP, RIPPS2_UI_FONT, 70, 417, gTheme->textColor);
-@@ -6484,7 +6592,7 @@ int guiGameShowRemoveSettings(config_set_t *configSet, config_set_t *configGame)
+@@ -6484,7 +6705,7 @@ int guiGameShowRemoveSettings(config_set_t *configSet, config_set_t *configGame)
          // Opaque for the same reason as guiConfirmVideoMode: the backdrop is just guiShow().
          guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
  
@@ -2590,7 +2745,7 @@ index a7ff5de..9e3b714 100644
      // Neutrino-only row greyed even under a Neutrino global default (guiGameSetCoreAwareState reads
      // this). SMB likewise: ethsupport has no Neutrino launch leg, the effective core is always <OPL>.
 diff --git a/src/hddsupport.c b/src/hddsupport.c
-index c825958..ac42a1f 100644
+index c825958..139603a 100644
 --- a/src/hddsupport.c
 +++ b/src/hddsupport.c
 @@ -1,5 +1,6 @@
@@ -2600,22 +2755,7 @@ index c825958..ac42a1f 100644
  #ifdef RETROACHIEVEMENTS
  #include "include/achievements.h"
  #endif
-@@ -219,6 +220,14 @@ static int hddDvrGameCount = 0;
- static unsigned char hddDvrMounted[2] = {0, 0};
- static unsigned char hddDvrDriverTried = 0;
- static unsigned char hddDvrDrvLoaded = 0;
-+
-+// RIPPS2 build 115 (the user, 10/26 evening: after BIBLE the memory card and MMCE were gone, and the HDD said it was
-+// empty, until the console was turned off): an IOP reset (BIBLE, the NBD server) unloads every module, and these
-+// latches kept saying "loaded", so nothing was loaded again. sysReset clears its own table; opl.c reset() calls this.
-+void hddIopWasReset(void)
-+{
-+    hddModulesLoaded = hddSupportModulesLoaded = hddDvrDrvLoaded = 0;
-+}
- static unsigned char hddDvrDriverReady = 0;
- static unsigned char hddDvrReadableDirs = 0;
- 
-@@ -1652,7 +1661,7 @@ static int hddUpdateGameList(item_list_t *itemList)
+@@ -1652,7 +1653,7 @@ static int hddUpdateGameList(item_list_t *itemList)
      if (!hddSupportModulesLoaded)
          LOG("HDDSUPPORT UpdateGameList: PFS support incomplete; attempting read-only APA enumeration anyway\n");
  
@@ -2624,6 +2764,18 @@ index c825958..ac42a1f 100644
          // Reuse the session's built list on view flips; hddBuildVcdGameList runs only when never
          // built, invalidated (first-disc-only change), or freed by teardown (hddFreeVcdGameList).
          if (!hddVcdListBuilt)
+@@ -3342,3 +3343,11 @@ static item_list_t hddGameList = {
+     &hddGetGameCount, &hddGetGame, &hddGetGameName, &hddGetGameNameLength, &hddGetGameStartup, NULL, &hddRenameGame,
+     &hddLaunchGame, &hddGetConfig, &hddGetImage, &hddCleanUp, &hddShutdown, &hddCheckVMC, &hddGetIconId, &hddLaunchVcd, 0, &hddGetArtArchivePath,
+     &hddLaunchVcd, &hddGetItemView, &hddGetSourceId, &hddSaveCueSettings, &hddGetPs1SaveDir};
++
++// RIPPS2 build 115 (the user, 10/26 evening: after BIBLE the memory card and MMCE were gone, and the HDD said it was
++// empty, until the console was turned off): an IOP reset (BIBLE, the NBD server) unloads every module, and these
++// latches kept saying "loaded", so nothing was loaded again. sysReset clears its own table; opl.c reset() calls this.
++void hddIopWasReset(void)
++{
++    hddModulesLoaded = hddSupportModulesLoaded = hddDvrDrvLoaded = 0;
++}
 diff --git a/src/menusys.c b/src/menusys.c
 index 1f08c7e..0ea616c 100644
 --- a/src/menusys.c
@@ -4082,10 +4234,18 @@ index ba683b0..8c26291 100644
      // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
      // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
 diff --git a/src/opl.c b/src/opl.c
-index 3b8cd19..f114b16 100644
+index 3b8cd19..e7cef7d 100644
 --- a/src/opl.c
 +++ b/src/opl.c
-@@ -184,6 +184,7 @@ int gMMCEIGRSlot;
+@@ -50,6 +50,7 @@
+ #include "include/cuesupport.h" // cueIsCueEntry -- a PS1 row names its own core   // VCD display naming + POPSTARTER launch helpers
+ #include "include/libview.h"    // libViewActive / libListViewActive -- which list this page shows
+ #include "include/ripps2.h"     // RIPPS2: launch light-up
++#include "include/ripps2diag.h" // RIPPS2 build 115: Fast Boot and the boot read in DIAG.TXT
+ #include "include/ripps2seance.h" // RIPPS2 build 114: SEANCE, during a launch
+ #include "include/ripps2games.h"  // RIPPS2 build 114: SHROUD (hidden games)
+ #include "include/ripps2shot.h" // RIPPS2 build 108: RIPSHOT's settings
+@@ -184,6 +185,7 @@ int gMMCEIGRSlot;
  int gMMCESlot;
  int gMMCEAckWaitCycles;
  int gMMCEUseAlarms;
@@ -4093,7 +4253,7 @@ index 3b8cd19..f114b16 100644
  int gMMCEEnableGameID;
  int bdmCacheSize;
  int hddCacheSize;
-@@ -361,7 +362,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
+@@ -361,7 +363,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
              menuAddHint(&mod->menuItem, _STR_INFO, SQUARE_ICON);
  
          unsigned char flags = (mod->support->mode == FAV_MODE) ? favGetFlags(mod->support) :
@@ -4102,7 +4262,7 @@ index 3b8cd19..f114b16 100644
                                                                   mod->support->flags;
          if (!(flags & MODE_FLAG_NO_COMPAT) || gEnableWrite || mod->support->mode == APP_MODE) // build 102: Case Shape
              menuAddHint(&mod->menuItem, _STR_OPTIONS, TRIANGLE_ICON);
-@@ -430,7 +431,7 @@ void ripps2StartSources(void)
+@@ -430,7 +432,7 @@ void ripps2StartSources(void)
  {
      for (int i = 0; i < MODE_COUNT; i++) {
          item_list_t *source = list_support[i].support;
@@ -4111,7 +4271,7 @@ index 3b8cd19..f114b16 100644
              modeStartMode(i) == START_MODE_DISABLED)
              continue;
          itemInitSupport(source);
-@@ -468,7 +469,7 @@ static void itemExecSelect(struct menu_item *curMenu)
+@@ -468,7 +470,7 @@ static void itemExecSelect(struct menu_item *curMenu)
                  }
                  // RIPPS2 build 114: an All Games row from the master list whose source has not answered yet: start it, wait
                  // for its list (the cursor follows the game onto its real row), then launch as usual
@@ -4120,7 +4280,7 @@ index 3b8cd19..f114b16 100644
                      return;
                  config_set_t *configSet = menuLoadConfig();
                  if (configSet == NULL)
-@@ -539,7 +540,7 @@ static void itemExecSelect(struct menu_item *curMenu)
+@@ -539,7 +541,7 @@ static void itemExecSelect(struct menu_item *curMenu)
              }
          } else {
              // If we're trying to enable BDM support we need to enable it for all BDM menu slots.
@@ -4129,13 +4289,36 @@ index 3b8cd19..f114b16 100644
                  // RIPPS2: starting All Games starts every game source that waits for a start
                  ripps2StartSources();
                  itemInitSupport(support);
-@@ -573,16 +574,16 @@ static void itemExecRefresh(struct menu_item *curMenu)
+@@ -562,6 +564,19 @@ static void itemExecRefresh(struct menu_item *curMenu)
+ {
+     item_list_t *support = curMenu->userdata;
+ 
++    // RIPPS2 build 115 (the user, 10/26 evening: Fast Boot's "refresh starts a page's drive(s) to load art"): SELECT on a
++    // page whose drive waits on Manual starts it, as Cross on its Start does
++    if (support && !support->enabled && support->mode != APP_MODE && support->mode != FAV_MODE) {
++        if (MODE_IS_MIX(support->mode)) {
++            ripps2StartSources();
++            itemInitSupport(support);
++        } else if (support->mode == BDM_MODE) {
++            for (int i = BDM_MODE; i <= BDM_MODE_LAST; i++)
++                itemInitSupport(list_support[i].support);
++        } else
++            itemInitSupport(support);
++        return;
++    }
+     if (support && support->enabled) {
+ #ifdef RIPPS2_GUARD_TEST
+         ioGuardTestArm();
+@@ -573,16 +588,18 @@ static void itemExecRefresh(struct menu_item *curMenu)
          // explicit user Refresh must invalidate that cache before posting the deferred update.
          if (support->mode == FAV_MODE) {
              loadFavourites();
 -        } else if (support->mode == MIX_MODE) {
+-            // RIPPS2: All Games refreshes every started source; each rebuild queues its own after it
 +        } else if (MODE_IS_MIX(support->mode)) {
-             // RIPPS2: All Games refreshes every started source; each rebuild queues its own after it
++            // RIPPS2: All Games refreshes every started source; each rebuild queues its own after it. Build 115: and starts
++            // the ones waiting on Manual (Fast Boot leaves them so), so their art comes in
++            ripps2StartSources();
              for (int i = 0; i < MODE_COUNT; i++) {
                  item_list_t *source = list_support[i].support;
 -                if (i == APP_MODE || i == FAV_MODE || i == MIX_MODE || source == NULL || !source->enabled)
@@ -4149,7 +4332,7 @@ index 3b8cd19..f114b16 100644
              }
              mixRequestUpdate();
          } else if (support->mode == ETH_MODE && gNetworkProtocol == NET_PROTO_SMB) {
-@@ -597,7 +598,10 @@ static void itemExecRefresh(struct menu_item *curMenu)
+@@ -597,7 +614,10 @@ static void itemExecRefresh(struct menu_item *curMenu)
              // Explicit Refresh must bypass per-device scan caches. This also ensures a Mixed list
              // refreshes both of its backing stores instead of merely rebuilding the same rows.
              libViewMarkDirty(support->mode);
@@ -4161,7 +4344,7 @@ index 3b8cd19..f114b16 100644
          }
          sfxPlay(SFX_CONFIRM);
      }
-@@ -792,10 +796,10 @@ static void itemPushRecent(struct menu_item *curMenu, item_list_t *support)
+@@ -792,10 +812,10 @@ static void itemPushRecent(struct menu_item *curMenu, item_list_t *support)
      if (gRipps2Recents <= 0 || curMenu == NULL || curMenu->current == NULL || support == NULL)
          return;
      it = &curMenu->current->item;
@@ -4176,7 +4359,7 @@ index 3b8cd19..f114b16 100644
      } else if (support->mode == FAV_MODE) {
          mode = favGetItemSourceMode(it->id);
          id = favGetItemSourceId(it->id);
-@@ -834,9 +838,9 @@ static void itemExecFav(struct menu_item *curMenu)
+@@ -834,9 +854,9 @@ static void itemExecFav(struct menu_item *curMenu)
      if (support->mode != FAV_MODE && (it->isFolder || folderDepth(support->mode) > 0))
          return;
  
@@ -4188,7 +4371,7 @@ index 3b8cd19..f114b16 100644
          if (srcMode < 0 || srcId < 0 || kind < 0)
              return;
          if (it->favourited) {
-@@ -913,7 +917,7 @@ static void itemExecTriangle(struct menu_item *curMenu)
+@@ -913,7 +933,7 @@ static void itemExecTriangle(struct menu_item *curMenu)
              if (menuCheckParentalLock() == 0) {
                  // The row names its core: a favourite by its stored kind, a device row by its extension.
                  int kind = (support->mode == FAV_MODE) ? favGetItemKind(curMenu->current->item.id) :
@@ -4197,7 +4380,7 @@ index 3b8cd19..f114b16 100644
                                                           itemFavKind(support, curMenu->current->item.id, curMenu->current->item.text);
                  menuInitVcdMenu(kind == FAV_KIND_CUE);
                  guiSwitchScreen(GUI_SCREEN_APP_MENU);
-@@ -922,7 +926,7 @@ static void itemExecTriangle(struct menu_item *curMenu)
+@@ -922,7 +942,7 @@ static void itemExecTriangle(struct menu_item *curMenu)
          }
  
          unsigned char flags = (support->mode == FAV_MODE) ? favGetFlags(support) :
@@ -4206,7 +4389,7 @@ index 3b8cd19..f114b16 100644
                                                              support->flags;
  
          if (!(flags & MODE_FLAG_NO_COMPAT)) {
-@@ -1029,6 +1033,8 @@ static int modeStartMode(int mode)
+@@ -1029,6 +1049,8 @@ static int modeStartMode(int mode)
          startMode = gMMCEStartMode;
      else if (mode == MIX_MODE)
          startMode = mixStartMode();
@@ -4215,7 +4398,7 @@ index 3b8cd19..f114b16 100644
      // RIPPS2 build 96: Last Used starts the last page's device too, even when it waits for a press
      if (gRipps2StartLast && startMode == START_MODE_MANUAL && mode == gRipps2LastDevice)
          startMode = START_MODE_AUTO;
-@@ -1047,7 +1053,7 @@ static int mixStartMode(void)
+@@ -1047,7 +1069,7 @@ static int mixStartMode(void)
  {
      int mode, best = START_MODE_DISABLED;
      for (mode = 0; mode < MODE_COUNT; mode++) {
@@ -4224,7 +4407,7 @@ index 3b8cd19..f114b16 100644
              continue;
          int s = modeStartMode(mode);
          if (s > best)
-@@ -1063,6 +1069,14 @@ void initSupport(item_list_t *itemList, int mode, int force_reinit)
+@@ -1063,6 +1085,14 @@ void initSupport(item_list_t *itemList, int mode, int force_reinit)
      // Set the start mode flag based on device type.
      int startMode = modeStartMode(mode);
  
@@ -4239,7 +4422,7 @@ index 3b8cd19..f114b16 100644
      if (startMode) {
          if (!mod->support) {
              mod->support = itemList;
-@@ -1152,6 +1166,7 @@ static void initAllSupport(int force_reinit)
+@@ -1152,6 +1182,7 @@ static void initAllSupport(int force_reinit)
      initSupport(mmceGetObject(0), MMCE_MODE, force_reinit);
      LOG("BOOT scan: MMCE initSupport done\n");
      initSupport(mixGetObject(0), MIX_MODE, force_reinit); // RIPPS2: All Games, after every source
@@ -4247,7 +4430,7 @@ index 3b8cd19..f114b16 100644
  
      // Arm the MMCE GameID transport at boot and on every settings apply -- instead
      // of deferring it to itemLaunchMMCE.
-@@ -1650,7 +1665,7 @@ void menuDeferredUpdate(void *data)
+@@ -1650,7 +1681,7 @@ void menuDeferredUpdate(void *data)
          // If other modes have been updated, then the apps list should be updated too.
          // Exclude FAV: a FAV rebuild marking apps dirty would re-trigger the FAV resync below
          // (an apps refresh calls loadFavourites), looping forever once favNeedsUpdate fires.
@@ -4256,7 +4439,7 @@ index 3b8cd19..f114b16 100644
              shouldAppsUpdate = 1;
  
              // ...and SCHEDULE the pass that consumes that flag. Raising it is not enough: APPS has
-@@ -1687,7 +1702,7 @@ void menuDeferredUpdate(void *data)
+@@ -1687,7 +1718,7 @@ void menuDeferredUpdate(void *data)
  
          // RIPPS2: a game source changed, or filled a list it never scanned: All Games rebuilds after it (build 114: and its
          // saved games give way to its list)
@@ -4265,7 +4448,7 @@ index 3b8cd19..f114b16 100644
              mixSourceAnswered(mod->support->mode);
      } else if (libViewPending(mod->support->mode)) {
          // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
-@@ -2675,24 +2690,32 @@ static int isTypedBdmSettingsPath(const char *path)
+@@ -2675,24 +2706,32 @@ static int isTypedBdmSettingsPath(const char *path)
  // RIPPS2 started from the card, so load it and give the card the short wait an MMCE boot gets.
  static int prepareMmceSettingsPath(const char *path)
  {
@@ -4303,7 +4486,115 @@ index 3b8cd19..f114b16 100644
      return -1;
  }
  
-@@ -3739,20 +3762,30 @@ static void _loadConfig()
+@@ -3669,6 +3708,82 @@ static int ripps2CardSettingsHome(char *out, int size, int haveSettings)
+     return 0;
+ }
+ 
++/*
++  RIPPS2 build 115: Fast Boot (Game Sources > Cache). The user, 10/26 evening: "host filesystem drive is forced truly
++  auto so maybe read the .lst from there with settings in a combined file that's super lightweight RIPPS2 coded so the gui
++  pops up to navigate the sources from that master cache list". RIPPS2.FB, a few lines of text beside RIPPS2.ELF, names
++  where the settings (and the master list beside them) and the sounds are, so a boot reads RIPPS2's own drive and goes
++  straight there: no memory card scan, no redirect, no AUDIO search over every drive. Written after each settings save
++  while Fast Boot is on; removed when it is turned off.
++*/
++int gRipps2FastBoot = 0;
++
++static int fastBootPath(char *out, int size)
++{
++    char dir[256];
++    if (!oplGetRipps2Dir(dir, sizeof(dir)) || !strncmp(dir, "host", 4))
++        return 0; // PCSX2's host: is no drive a console has
++    return snprintf(out, size, "%sRIPPS2.FB", dir) < size;
++}
++
++static int fastBootRead(char *home, int homeSize, char *audio, int audioSize)
++{
++    char path[300], line[300];
++    FILE *f;
++    int n;
++
++    home[0] = audio[0] = '\0';
++    if (!fastBootPath(path, sizeof(path)) || (f = fopen(path, "r")) == NULL)
++        return 0;
++    while (fgets(line, sizeof(line), f) != NULL) {
++        n = strlen(line);
++        while (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r' || line[n - 1] == ' '))
++            line[--n] = '\0';
++        if (!strncmp(line, "home=", 5))
++            snprintf(home, homeSize, "%s", line + 5);
++        else if (!strncmp(line, "audio=", 6))
++            snprintf(audio, audioSize, "%s", line + 6);
++    }
++    fclose(f);
++    return home[0] != '\0';
++}
++
++// after a settings save: the gate says where they went (only when it changed: a memory card is not written each save)
++static void fastBootWrite(void)
++{
++    char path[300], text[700], old[700], audio[256];
++    int fd, n;
++
++    if (!fastBootPath(path, sizeof(path)))
++        return;
++    if (!gRipps2FastBoot) {
++        if ((fd = open(path, O_RDONLY)) >= 0) {
++            close(fd);
++            remove(path); // RIPPS2's own small file: off means the boot searches as it always did
++        }
++        return;
++    }
++    if (!ripps2AudioBase(audio, sizeof(audio), 0))
++        audio[0] = '\0';
++    n = snprintf(text, sizeof(text),
++                 "# RIPPS2 Fast Boot (Settings > Game Sources > Cache): where this RIPPS2 reads its settings and sounds first\r\n"
++                 "home=%s\r\naudio=%s\r\n",
++                 configGetHomePath(), audio);
++    if (n <= 0 || n >= (int)sizeof(text))
++        return;
++    if ((fd = open(path, O_RDONLY)) >= 0) {
++        int got = read(fd, old, sizeof(old) - 1);
++        close(fd);
++        if (got == n && !memcmp(old, text, n))
++            return;
++    }
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0) {
++        int ok = write(fd, text, n) == n;
++        close(fd);
++        ripps2Diag("fast boot: %s %s", path, ok ? "written" : "NOT written");
++    }
++}
++
+ static void _loadConfig()
+ {
+     int value, themeID = -1, langID = -1;
+@@ -3679,6 +3794,24 @@ static void _loadConfig()
+     resolveBootDirToMass();
+     // Discover the resolved CWD before restoring the saved language.
+     lngRefreshBootLanguages(-1);
++    // RIPPS2 build 115: Fast Boot's gate beside RIPPS2.ELF names the settings home: straight there
++    char fbHome[256], fbAudio[256];
++    if ((lscstatus & CONFIG_OPL) && fastBootRead(fbHome, sizeof(fbHome), fbAudio, sizeof(fbAudio)) &&
++        (strncmp(fbHome, "mmce", 4) || prepareMmceSettingsPath(fbHome) > 0)) {
++        snprintf(prevHome, sizeof(prevHome), "%s", configGetHomePath());
++        configSetMove(fbHome);
++        fromCard = 1; // (read back from prevHome if it does not answer, as a card home is)
++        if (fbAudio[0]) {
++            char probe[300];
++            DIR *d;
++            snprintf(probe, sizeof(probe), "%sAUDIO", fbAudio);
++            if ((d = opendir(probe)) != NULL) {
++                closedir(d);
++                ripps2AudioBaseSet(fbAudio); // the sound load goes straight there
++            }
++        }
++        ripps2Diag("boot: Fast Boot: settings from %s, sounds from %s", fbHome, fbAudio[0] ? fbAudio : "(search)");
++    } else
+     // RIPPS2 build 100: RIPPS2's own save on a memory card first, unless a Custom Settings Path points elsewhere
+     if ((lscstatus & CONFIG_OPL) && !readConfigPathRedirect(redirect, sizeof(redirect)) &&
+         ripps2CardSettingsHome(cardHome, sizeof(cardHome), 1)) {
+@@ -3739,20 +3872,32 @@ static void _loadConfig()
                  gRipps2CatBar = value;
              if (configGetInt(configOPL, "ripps2_fastcache", &value))
                  gRipps2FastCache = value != 0; // build 113: Fast Cache (on unless turned off)
@@ -4311,6 +4602,8 @@ index 3b8cd19..f114b16 100644
 -                gRipps2CatLayout = value; // build 113: Category Layout (0 Theme, 1 Across the Top, 2 Sidebar)
 +            if (configGetInt(configOPL, "ripps2_trust_cache", &value))
 +                gRipps2TrustCache = value != 0; // build 115: Trust Cache (on unless turned off)
++            if (configGetInt(configOPL, "ripps2_fastboot", &value))
++                gRipps2FastBoot = value != 0; // build 115: Fast Boot (off unless turned on)
 +            if (configGetInt(configOPL, "ripps2_catlayout", &value) && value >= 0 && value <= 3)
 +                gRipps2CatLayout = value; // build 113: Category Layout (0 Theme, 1 Across the Top, 2 Sidebar; 115: 3 Menu)
 +            if (configGetInt(configOPL, "ripps2_sidebar_style", &value) && value >= 0 && value <= 2)
@@ -4338,7 +4631,7 @@ index 3b8cd19..f114b16 100644
                  ripps2ApplyTextWeight();
              }
              if (configGetInt(configOPL, "ripps2_launch_disc", &value) && value >= 0 && value <= 3)
-@@ -3832,7 +3865,8 @@ static void _loadConfig()
+@@ -3832,7 +3977,8 @@ static void _loadConfig()
              configGetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, &gHDDGameListCache);
              if (!configGetInt(configOPL, "ripps2_hddcache_v", &value) || value < 110)
                  gHDDGameListCache = 1; // build 110: on by default (checked in the background now); once for older configs
@@ -4348,7 +4641,7 @@ index 3b8cd19..f114b16 100644
              configGetStrCopy(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
              configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
              configGetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, &gAutoRefresh);
-@@ -3864,8 +3898,19 @@ static void _loadConfig()
+@@ -3864,8 +4010,19 @@ static void _loadConfig()
              configGetInt(configOPL, CONFIG_OPL_MMCE_SLOT, &gMMCESlot);
              configGetInt(configOPL, CONFIG_OPL_MMCEIGR_SLOT, &gMMCEIGRSlot);
              configGetInt(configOPL, CONFIG_OPL_MMCE_GAMEID, &gMMCEEnableGameID);
@@ -4368,7 +4661,7 @@ index 3b8cd19..f114b16 100644
              // SIO2 pacing migration: silently upgrade the 0/0 defaults to 5/1
              {
                  int pacingMigrated = 0;
-@@ -4094,6 +4139,21 @@ static void _loadConfig()
+@@ -4094,6 +4251,21 @@ static void _loadConfig()
              configGetStrCopy(configOPL, CONFIG_OPL_DEFAULT_BGM_PATH, gDefaultBGMPath, sizeof(gDefaultBGMPath));
              configGetStrCopy(configOPL, "ripps2_music", gRipps2Music, sizeof(gRipps2Music)); // RIPPS2
              configGetInt(configOPL, "ripps2_star_side", &gRipps2StarSide); // build 106
@@ -4390,7 +4683,7 @@ index 3b8cd19..f114b16 100644
              configGetInt(configOPL, "ripps2_select_hold", &gRipps2SelectHold); // build 114: Hold SELECT
              if (gRipps2SelectHold < RIPPS2_HOLD_LIST || gRipps2SelectHold > RIPPS2_HOLD_OFF)
                  gRipps2SelectHold = RIPPS2_HOLD_LIST;
-@@ -4467,10 +4527,14 @@ static void _saveConfig()
+@@ -4467,10 +4639,15 @@ static void _saveConfig()
          configSetInt(configOPL, "ripps2_hints", gRipps2Hints);
          configSetInt(configOPL, "ripps2_catbar", gRipps2CatBar);
          configSetInt(configOPL, "ripps2_catlayout", gRipps2CatLayout); // build 113
@@ -4398,6 +4691,7 @@ index 3b8cd19..f114b16 100644
 +        configSetInt(configOPL, "ripps2_hint_fade", gRipps2HintFade); // build 115
          configSetInt(configOPL, "ripps2_fastcache", gRipps2FastCache);
 +        configSetInt(configOPL, "ripps2_trust_cache", gRipps2TrustCache);
++        configSetInt(configOPL, "ripps2_fastboot", gRipps2FastBoot); // build 115
          configSetInt(configOPL, "ripps2_catswap", gRipps2CatSwap);
          configSetInt(configOPL, "ripps2_srcname", gRipps2SrcName); // build 71
          configSetInt(configOPL, "ripps2_recents", gRipps2Recents);
@@ -4405,7 +4699,7 @@ index 3b8cd19..f114b16 100644
          configSetInt(configOPL, "ripps2_userset", gRipps2UserSet); // build 81
          ripps2HintsSaveConfig(configOPL);                          // build 90: Hints and Glyphs
          ripps2ColorsSaveConfig(configOPL);                         // build 114: Custom's colour, the Color Sweep
-@@ -4536,6 +4600,7 @@ static void _saveConfig()
+@@ -4536,6 +4713,7 @@ static void _saveConfig()
          configSetInt(configOPL, CONFIG_OPL_MMCE_GAMEID, gMMCEEnableGameID);
          configSetInt(configOPL, CONFIG_OPL_MMCE_WAIT_CYCLES, gMMCEAckWaitCycles);
          configSetInt(configOPL, CONFIG_OPL_MMCE_USE_ALARMS, gMMCEUseAlarms);
@@ -4413,7 +4707,7 @@ index 3b8cd19..f114b16 100644
          configSetInt(configOPL, CONFIG_OPL_MMCE_PACING_MIGR, 1);
          configSetInt(configOPL, CONFIG_OPL_BDM_CACHE, bdmCacheSize);
          configSetInt(configOPL, CONFIG_OPL_HDD_CACHE, hddCacheSize);
-@@ -4599,6 +4664,7 @@ static void _saveConfig()
+@@ -4599,6 +4777,7 @@ static void _saveConfig()
          configSetStr(configOPL, CONFIG_OPL_DEFAULT_BGM_PATH, gDefaultBGMPath);
          configSetStr(configOPL, "ripps2_music", gRipps2Music); // RIPPS2
          configSetInt(configOPL, "ripps2_star_side", gRipps2StarSide); // build 106
@@ -4421,7 +4715,15 @@ index 3b8cd19..f114b16 100644
          configSetInt(configOPL, "ripps2_select_hold", gRipps2SelectHold); // build 114: Hold SELECT
          configSetInt(configOPL, CONFIG_OPL_XSENSITIVITY, gXSensitivity);
          configSetInt(configOPL, CONFIG_OPL_YSENSITIVITY, gYSensitivity);
-@@ -5272,6 +5338,11 @@ int ripps2RebootIopWith(const void *ioprp, int size)
+@@ -4786,6 +4965,7 @@ static void _saveConfig()
+         config_set_t *oplCfg = configGetByType(CONFIG_OPL);
+         if (oplCfg != NULL)
+             checkMCSaveIcons(oplCfg->filename);
++        fastBootWrite(); // RIPPS2 build 115: Fast Boot's gate follows the settings
+     }
+ 
+     // Persist the bootstrap pointer only after the explicit config write succeeded. An explicit
+@@ -5272,6 +5452,11 @@ int ripps2RebootIopWith(const void *ioprp, int size)
  static void reset(void)
  {
      sysReset(SYS_LOAD_MC_MODULES | SYS_LOAD_USB_MODULES | SYS_LOAD_ISOFS_MODULE);
@@ -4433,7 +4735,7 @@ index 3b8cd19..f114b16 100644
  
      mcInit(MC_TYPE_XMC);
  }
-@@ -5661,7 +5732,7 @@ static void setDefaults(void)
+@@ -5661,7 +5846,7 @@ static void setDefaults(void)
  
      gMMCESlot = 2; // Default to first Auto slot
      gMMCEIGRSlot = 3;
@@ -4442,7 +4744,7 @@ index 3b8cd19..f114b16 100644
      gMMCEAckWaitCycles = 5;
      gMMCEUseAlarms = 1;
  
-@@ -5801,8 +5872,13 @@ static void init(void)
+@@ -5801,8 +5986,13 @@ static void init(void)
          // and would draw the not-yet-ready main menu as a garbled landing page
          // before the intro splash) while the config loads.
          guiSetBootStatus(_l(_STR_BOOT_LOADING_CONFIG));
@@ -4457,7 +4759,7 @@ index 3b8cd19..f114b16 100644
  #ifdef __OPLDIAG
          // #545: which settings home this boot chose, and why, before the menu covers it. Untranslated
          // developer text, diagnostic builds only -- a tester's photo answers what a log cannot.
-@@ -5988,7 +6064,8 @@ static void miniInit(int mode)
+@@ -5988,7 +6178,8 @@ static void miniInit(int mode)
              config_set_t *configOPL = configGetByType(CONFIG_OPL);
  
              configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
@@ -4468,7 +4770,7 @@ index 3b8cd19..f114b16 100644
  #ifdef RETROACHIEVEMENTS
              configGetInt(configOPL, CONFIG_OPL_RA_TELEMETRY, &gRATelemetry);
 diff --git a/src/pad.c b/src/pad.c
-index c488407..9828ff1 100644
+index c488407..9d03205 100644
 --- a/src/pad.c
 +++ b/src/pad.c
 @@ -8,6 +8,7 @@
@@ -4567,7 +4869,7 @@ index c488407..9828ff1 100644
  
      int rslt = 0;
  
-@@ -820,6 +850,39 @@ int readPads()
+@@ -820,6 +850,48 @@ int readPads()
          }
      }
  
@@ -4591,8 +4893,17 @@ index c488407..9828ff1 100644
 +                for (m = 0; m < modes; m++)
 +                    if (padInfoMode(pad->port, pad->slot, PAD_MODETABLE, m) == PAD_TYPE_DUALSHOCK)
 +                        break;
-+                if (modes <= 0 || m >= modes)
-+                    continue; // a digital pad: nothing to restore
++                if (modes <= 0 || m >= modes) {
++                    // a digital pad: nothing to restore. Build 115 (the user, 10/26 evening, an 8BitDo receiver on firmware 1.05
++                    // then 1.13): a receiver may list no DualShock mode and still take the request, so it is asked three
++                    // times in all, logged, then let be
++                    static int noTableAsks = 0;
++                    if (noTableAsks >= 3)
++                        continue;
++                    noTableAsks++;
++                    ripps2Diag("pad %d: digital (mode 0x%02x) and lists %d modes, DualShock asked for anyway (%d of 3)", pad->port,
++                               pad->buttons.mode, modes, noTableAsks);
++                }
 +                analogAskedAt = clock();
 +                padAnalogRetries++;
 +                LOG("PAD %d,%d in digital mode (0x%02x): asking for DualShock again (%d)\n", pad->port, pad->slot, pad->buttons.mode, padAnalogRetries);
@@ -4607,7 +4918,7 @@ index c488407..9828ff1 100644
      // Rumble decay, plus the bounded re-send tail (see RUMBLE_CMD_REPEATS). Edge-driven: the RPC
      // stream stops after a few polls instead of running for the pulse's whole life, but a single
      // dropped padSetActDirect no longer decides whether the pulse happens -- or whether it ends.
-@@ -888,7 +951,9 @@ void padGetRightStick(int *x, int *y)
+@@ -888,7 +960,9 @@ void padGetRightStick(int *x, int *y)
      *y = 0;
      for (i = 0; i < pad_count && i < MAX_PADS; i++) {
          struct pad_data_t *pad = &pad_data[i];
@@ -4618,7 +4929,7 @@ index c488407..9828ff1 100644
              continue;
          int h = (int)pad->buttons.rjoy_h - 128, v = (int)pad->buttons.rjoy_v - 128;
          if (h * h + v * v > 24 * 24) {
-@@ -929,6 +994,12 @@ int getKeyOff(int id)
+@@ -929,6 +1003,12 @@ int getKeyOff(int id)
   * @param id The button ID
   * @return nonzero if button is being held
   */
@@ -4688,7 +4999,7 @@ index 668955a..8e3f858 100644
      if (towerCount == 0)
          pillarsInit();
 diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
-index 11d84ce..9b611fb 100644
+index 11d84ce..7e699a7 100644
 --- a/src/ripps2biossnd.c
 +++ b/src/ripps2biossnd.c
 @@ -41,6 +41,7 @@
@@ -4836,7 +5147,58 @@ index 11d84ce..9b611fb 100644
  }
  
  // the BIOS's SNDIMAGE, malloc'd, through the IOP's rom0 device
-@@ -1172,9 +1257,11 @@ static unsigned char *rbsReadSndImage(int *size)
+@@ -1169,14 +1254,67 @@ static unsigned char *rbsReadSndImage(int *size)
+     return img;
+ }
+ 
++// build 115 (the user, 10/26 evening: "we should be able to choose our locations before both rips and suggest the host
++// drive which is read first and fastest"): where a rip's AUDIO folder goes. RIPPS2's own folder first (the drive it
++// started from: the boot looks there before anywhere else), then where the sounds load from now, then each started
++// drive's root. A memory card without needKb free is left out, so the music (megabytes) never lands on one. base gets
++// the folder AUDIO goes in (ending in '/'): 1 picked, 0 backed out, -1 nowhere to offer
++static int rbsPickHome(char *base, int size, int needKb)
++{
++    char cand[6][256], items[6][160], tmp[256], room[48];
++    const char *list[6];
++    int n = 0, k, i, pick, freeKb;
++
++    for (k = 0; k < 7 && n < 6; k++) {
++        if (k == 0 ? !oplGetRipps2Dir(tmp, sizeof(tmp)) : k == 1 ? !ripps2AudioBase(tmp, sizeof(tmp), 0) : !bgmMusicHome(k - 2, tmp, sizeof(tmp)))
++            continue;
++        for (i = 0; i < n && strcmp(cand[i], tmp); i++)
++            ;
++        if (i < n || tmp[0] == '\0')
++            continue; // listed already
++        room[0] = '\0';
++        if (!strncmp(tmp, "mc", 2) && tmp[2] >= '0' && tmp[2] <= '1') {
++            freeKb = ripps2CardFreeKb(tmp[2] - '0');
++            if (freeKb < 0 || freeKb < needKb)
++                continue; // no card there, or no room on it
++            snprintf(room, sizeof(room), _t(" (%d KB free)"), freeKb);
++        } else {
++            ripps2_vol_t v;
++            if (ripps2VolInfo(tmp, &v) && v.freeKb > 0) {
++                if ((int)v.freeKb < needKb)
++                    continue;
++                snprintf(room, sizeof(room), _t(" (%u MB free)"), v.freeKb / 1024);
++            }
++        }
++        snprintf(cand[n], sizeof(cand[n]), "%s", tmp);
++        if (k == 0)
++            snprintf(items[n], sizeof(items[n]), _t("BESIDE RIPPS2: %sAUDIO%s, read first at boot"), tmp, room);
++        else
++            snprintf(items[n], sizeof(items[n]), "%sAUDIO%s", tmp, room);
++        list[n] = items[n];
++        n++;
++    }
++    if (n == 0)
++        return -1;
++    if ((pick = ripps2PickList(list, n)) < 0)
++        return 0;
++    snprintf(base, size, "%s", cand[pick]);
++    return 1;
++}
++
  // Audio settings > BIOS Sounds > RIP: ask, rip into the AUDIO folder, load them, say what happened
  void ripps2RipBiosSoundsDialog(void)
  {
@@ -4848,9 +5210,15 @@ index 11d84ce..9b611fb 100644
 +    const char *failed = NULL;
 +    rbs_keep_t kept;
  
-     if (!ripps2AudioBase(base, sizeof(base) - 8, 0)) {
+-    if (!ripps2AudioBase(base, sizeof(base) - 8, 0)) {
++    int where = rbsPickHome(base, sizeof(base) - 8, 0); // build 115: the user says where, RIPPS2's own drive first
++    if (where == 0)
++        return;
++    if (where < 0) {
          guiMsgBox(_t("RIPPS2 cannot tell where its folder is, so there is nowhere to put the sounds."), 0, NULL);
-@@ -1196,21 +1283,67 @@ void ripps2RipBiosSoundsDialog(void)
+         return;
+     }
+@@ -1196,21 +1334,67 @@ void ripps2RipBiosSoundsDialog(void)
                    0, NULL);
          return;
      }
@@ -4928,7 +5296,104 @@ index 11d84ce..9b611fb 100644
      sfxReload(SFX_CONFIRM); // the new sounds, loaded on the IO worker, and a confirm in them
      snprintf(msg, sizeof(msg), _t("%d sounds from this console's BIOS are in %s and playing now."), n, dir);
      guiMsgBox(msg, 0, NULL);
-@@ -1488,15 +1621,31 @@ void ripps2RipBiosMusicDialog(void)
+@@ -1376,7 +1560,7 @@ static int rbsRipPiece(const unsigned char *img, int imgSize, int piece, int sam
+ // has room for it, so a memory card is never offered. Build 112: the menu's piece, the red screen's, or both.
+ void ripps2RipBiosMusicDialog(void)
+ {
+-    char own[256], home[64], dirs[2][288], path[320], msg[768], done[2][320], mb[16];
++    char own[256], dirs[2][288], path[320], msg[768], done[2][320], mb[16];
+     unsigned char *img;
+     int imgSize = 0, len[RIPPS2_BIOSMUSIC_COUNT], nd = 0, pick, want, k, wasPlaying;
+     unsigned int bytes = 0;
+@@ -1410,71 +1594,44 @@ void ripps2RipBiosMusicDialog(void)
+         return;
+     }
+     snprintf(mb, sizeof(mb), _t("%u.%u MB"), bytes / 1048576, bytes % 1048576 * 10 / 1048576);
+-    if (ripps2AudioBase(own, sizeof(own) - 8, 0) && strncmp(own, "mc", 2))
+-        snprintf(dirs[nd++], sizeof(dirs[0]), "%sAUDIO/", own);
+-    if (bgmMusicHome(0, home, sizeof(home)) && strncmp(home, "mc", 2))
+-        snprintf(dirs[nd++], sizeof(dirs[0]), "%sAUDIO/", home);
+-    if (nd == 0) {
++    // build 115: the user says where, RIPPS2's own drive first; a memory card never has the room
++    k = rbsPickHome(own, sizeof(own) - 8, (int)(bytes / 1024) + 64);
++    if (k <= 0) {
+         free(img);
+-        snprintf(msg, sizeof(msg),
+-                 _t("The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no "
+-                 "drive with an OPL folder is started: start one in Storage, then rip the music to it."),
+-                 mb);
+-        guiMsgBox(msg, 0, NULL);
++        if (k < 0) {
++            snprintf(msg, sizeof(msg),
++                     _t("The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no "
++                     "drive with an OPL folder is started: start one in Storage, then rip the music to it."),
++                     mb);
++            guiMsgBox(msg, 0, NULL);
++        }
+         return;
+     }
++    snprintf(dirs[nd++], sizeof(dirs[0]), "%sAUDIO/", own);
+     if (want == (1 << RIPPS2_BIOSMUSIC_MENU)) { // build 100's words, which were the menu's all along
+         int s = len[RIPPS2_BIOSMUSIC_MENU];
+-        if (nd == 2)
+-            snprintf(msg, sizeof(msg),
+-                     _t("RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and "
+-                     "writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes "
+-                     "it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two."),
+-                     s / RBS_MUSIC_RATE / 60, s / RBS_MUSIC_RATE % 60, mb, dirs[0], dirs[1], RBS_MUSIC_FILE);
+-        else
+-            snprintf(msg, sizeof(msg),
++        snprintf(msg, sizeof(msg),
+                      _t("RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and "
+                      "writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a "
+                      "minute or two."),
+                      s / RBS_MUSIC_RATE / 60, s / RBS_MUSIC_RATE % 60, mb, dirs[0], RBS_MUSIC_FILE);
+     } else if (want == (1 << RIPPS2_BIOSMUSIC_RED)) {
+         int s = len[RIPPS2_BIOSMUSIC_RED];
+-        if (nd == 2)
+-            snprintf(msg, sizeof(msg),
+-                     _t("RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own "
+-                     "notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START "
+-                     "writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two."),
+-                     s / RBS_MUSIC_RATE / 60, s / RBS_MUSIC_RATE % 60, mb, dirs[0], dirs[1], RBS_RED_FILE);
+-        else
+-            snprintf(msg, sizeof(msg),
++        snprintf(msg, sizeof(msg),
+                      _t("RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own "
+                      "notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It "
+                      "takes a minute or two."),
+                      s / RBS_MUSIC_RATE / 60, s / RBS_MUSIC_RATE % 60, mb, dirs[0], RBS_RED_FILE);
+     } else {
+         int m = len[RIPPS2_BIOSMUSIC_MENU], r = len[RIPPS2_BIOSMUSIC_RED];
+-        if (nd == 2)
+-            snprintf(msg, sizeof(msg),
+-                     _t("RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes "
+-                     "and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside "
+-                     "RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are "
+-                     "replaced. Each takes a minute or two."),
+-                     m / RBS_MUSIC_RATE / 60, m / RBS_MUSIC_RATE % 60, r / RBS_MUSIC_RATE / 60, r / RBS_MUSIC_RATE % 60, mb, dirs[0],
+-                     dirs[1]);
+-        else
+-            snprintf(msg, sizeof(msg),
++        snprintf(msg, sizeof(msg),
+                      _t("RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes "
+                      "and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already "
+                      "there are replaced. Each takes a minute or two."),
+                      m / RBS_MUSIC_RATE / 60, m / RBS_MUSIC_RATE % 60, r / RBS_MUSIC_RATE / 60, r / RBS_MUSIC_RATE % 60, mb, dirs[0]);
+     }
+-    if (nd == 2) {
+-        guiMsgBoxStartOption(_t("RIP TO OPL'S AUDIO"));
+-        pick = guiMsgBox(msg, 1, NULL); // 1: beside RIPPS2, 2: OPL's resources
+-    } else {
+-        guiMsgBoxStartOption(_t("RIP"));
+-        pick = guiMsgBox(msg, 0, NULL) == 2 ? 1 : 0;
+-    }
++    guiMsgBoxStartOption(_t("RIP"));
++    pick = guiMsgBox(msg, 0, NULL) == 2 ? 1 : 0;
+     if (pick < 1 || pick > nd) {
+         free(img);
+         return;
+@@ -1488,15 +1645,31 @@ void ripps2RipBiosMusicDialog(void)
      if (wasPlaying)
          bgmStop(); // the music may be playing this very file: it lets go while it is rewritten
      done[0][0] = done[1][0] = '\0';
@@ -5505,7 +5970,7 @@ index 5651a19..8b2e109 100644
      guiMsgBoxSound(SFX_MESSAGE);
      if (guiMsgBox(msg, 1, NULL) != 1)
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 0225897..f2b031e 100644
+index 0225897..fddfb82 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -39,6 +39,7 @@
@@ -5613,7 +6078,36 @@ index 0225897..f2b031e 100644
          left += there[i];
      }
      for (i = 0; i < fbClipCount; i++) {
-@@ -2377,7 +2418,7 @@ static void fbOrbitsPage(void)
+@@ -1907,7 +1948,27 @@ static void fbOpen(void)
+                 // build 93: a picture or a video, full screen (not from inside a card image: no file path there)
+                 sfxPlay(SFX_CONFIRM);
+                 fbJoin(path, sizeof(path), fbPath, e->name);
+-                ripps2OpenMedia(path);
++                // build 115 (the user, 10/26 evening): music tracks marked and opened together play as one CD, in list order,
++                // from the one opened when it is marked too
++                int marks = 0, startAt = 0, k;
++                if (ripps2MediaKind(e->name) == RIPPS2_MEDIA_MUSIC)
++                    for (k = 0; k < fbCount; k++)
++                        marks += fbList[k].marked && fbList[k].kind == FB_KIND_FILE && ripps2MediaKind(fbList[k].name) == RIPPS2_MEDIA_MUSIC;
++                if (marks > 0) {
++                    char (*set)[256] = malloc(marks * 256);
++                    int m = 0;
++                    if (set != NULL) {
++                        for (k = 0; k < fbCount; k++)
++                            if (fbList[k].marked && fbList[k].kind == FB_KIND_FILE && ripps2MediaKind(fbList[k].name) == RIPPS2_MEDIA_MUSIC) {
++                                if (k == fbCursor)
++                                    startAt = m;
++                                fbJoin(set[m++], 256, fbPath, fbList[k].name);
++                            }
++                        ripps2PlayMusicList(set, m, startAt);
++                        free(set);
++                    }
++                } else
++                    ripps2OpenMedia(path);
+             }
+             break;
+     }
+@@ -2377,7 +2438,7 @@ static void fbOrbitsPage(void)
              }
          }
          if (toast[0] && clock() - toastAt < 2 * CLOCKS_PER_SEC)
@@ -5622,7 +6116,7 @@ index 0225897..f2b031e 100644
          {
              int hx = OB_X, hy = 448;
              if (sel < 4)
-@@ -2931,6 +2972,71 @@ static void fbTipWork(void)
+@@ -2931,6 +2992,71 @@ static void fbTipWork(void)
      fbTipState = 2;
  }
  
@@ -5694,7 +6188,7 @@ index 0225897..f2b031e 100644
  static void fbDrawTip(void)
  {
      fb_entry_t *e;
-@@ -2961,7 +3067,8 @@ static void fbDrawTip(void)
+@@ -2961,7 +3087,8 @@ static void fbDrawTip(void)
      }
      if (fbTipState != 2 || strcmp(fbTipKey, path) != 0)
          return;
@@ -5704,7 +6198,7 @@ index 0225897..f2b031e 100644
      if (y + h > FB_LIST_Y + FB_ROWS * FB_ROW_H)
          y = FB_LIST_Y + row * FB_ROW_H - h - 4; // above the row near the bottom
      rmDrawRect(x, y, w, h, FB_PRIM(0x03, 0x08, 0x22, 0x7A));
-@@ -2973,6 +3080,8 @@ static void fbDrawTip(void)
+@@ -2973,6 +3100,8 @@ static void fbDrawTip(void)
      for (i = 0; i < 3; i++)
          if (fbTipLine[i][0])
              fntRenderString(smallFont, x + 10, y + 13 + (i + 1) * 17, ALIGN_VCENTER, 0, 0, fbTipLine[i], FB_SOFT);
@@ -5713,7 +6207,7 @@ index 0225897..f2b031e 100644
  }
  
  void ripps2RenderFiles(void)
-@@ -3011,10 +3120,12 @@ void ripps2RenderFiles(void)
+@@ -3011,10 +3140,12 @@ void ripps2RenderFiles(void)
          snprintf(buf, sizeof(buf), _t("%u KB FREE%s"), fbVmcFreeKb, fbVmcRO ? _t(", READ ONLY") : "");
      else
          buf[0] = '\0';
@@ -5919,7 +6413,7 @@ index b6ab16a..84ccb04 100644
  }
  #endif // RIPPS2_HINTS_HOST_TEST
 diff --git a/src/ripps2media.c b/src/ripps2media.c
-index 3cd9350..cbcc283 100644
+index 3cd9350..e6c1c1d 100644
 --- a/src/ripps2media.c
 +++ b/src/ripps2media.c
 @@ -64,6 +64,8 @@ int ripps2MediaKind(const char *name)
@@ -5931,57 +6425,243 @@ index 3cd9350..cbcc283 100644
      return RIPPS2_MEDIA_NONE;
  }
  
-@@ -927,6 +929,49 @@ static void ripps2PlaySound(const char *path)
+@@ -927,6 +929,235 @@ static void ripps2PlaySound(const char *path)
      readPads();
  }
  
-+// ---- music (build 115) ----
-+// A .wav (16-bit PCM, as RIPDISC and the BIOS Music rip write them), an .ogg or an .mp3 plays in the menu music's place, at full
-+// volume, until it is closed; the menu music comes back after. The confirm button plays it from the top again.
-+static void ripps2PlayMusic(const char *path)
-+{
-+    const char *name = strrchr(path, '/');
-+    int scrW, scrH, again = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS;
-+    char line[64];
++// ---- the CD player for files (build 115) ----
++// The user, 10/26 evening: "make this a cd player for marked tracks that get opened together or individual cd player
++// like experience from launch disc". Tracks marked in Memory Files and opened together play as a disc, in Launch
++// Disc's CD player panel, over the towers lit by the music; a track opened alone plays there too. Cross plays the picked
++// track (or stops the one playing), Up / Down pick, Left / Right the track before / after, Square stops, Circle closes.
++// Each track plays to its end and the next follows, to the last. A .wav's length comes from its header; an .ogg's and
++// an .mp3's show as they play.
++#define MP_X     60
++#define MP_Y     316
++#define MP_W     520
++#define MP_H     118
++#define MP_ROWS  4
++#define MP_ROW_H 19
++#define MP_LIT   GS_SETREG_RGBA(0x80, 0x80, 0x80, 0x80)
++#define MP_SOFT  GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)
++#define MP_DIM   GS_SETREG_RGBA(0x4C, 0x52, 0x64, 0x80)
++#define MP_BLUE  GS_SETREG_RGBA(0x5C, 0x98, 0xFF, 0x80)
++#define MP_PRIM(r, g, b, a) GS_SETREG_RGBAQ((r), (g), (b), (a), 0x00)
 +
-+    if (bgmPlayFile(path) < 0) {
++static unsigned int mpWavMs(const char *path) // a PCM .wav's length in ms from its header; 0 when it is not one
++{
++    unsigned char h[12], ck[8], fmt[16];
++    unsigned int byteRate = 0, size;
++    int fd = open(path, O_RDONLY), n;
++
++    if (fd < 0)
++        return 0;
++    if (read(fd, h, 12) != 12 || memcmp(h, "RIFF", 4) || memcmp(h + 8, "WAVE", 4)) {
++        close(fd);
++        return 0;
++    }
++    for (n = 0; n < 32 && read(fd, ck, 8) == 8; n++) {
++        size = ck[4] | (ck[5] << 8) | (ck[6] << 16) | ((unsigned int)ck[7] << 24);
++        if (!memcmp(ck, "fmt ", 4) && size >= 16) {
++            if (read(fd, fmt, 16) != 16)
++                break;
++            byteRate = fmt[8] | (fmt[9] << 8) | (fmt[10] << 16) | ((unsigned int)fmt[11] << 24);
++            lseek(fd, size - 16 + (size & 1), SEEK_CUR);
++        } else if (!memcmp(ck, "data", 4)) {
++            close(fd);
++            return byteRate > 0 ? (unsigned int)((unsigned long long)size * 1000 / byteRate) : 0;
++        } else
++            lseek(fd, size + (size & 1), SEEK_CUR);
++    }
++    close(fd);
++    return 0;
++}
++
++static void mpTime(unsigned int ms, char *out, int size)
++{
++    snprintf(out, size, "%u:%02u", ms / 60000, (ms / 1000) % 60);
++}
++
++static void mpHints(void)
++{
++    static const char *const texts[] = {N_("PLAY"), N_("STOP"), N_("TRACK"), N_("CLOSE")};
++    int icons[4] = {gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, SQUARE_ICON, RIGHT_ICON,
++                    gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON};
++    int i, w = 0, gap = 18, x;
++    for (i = 0; i < 4; i++)
++        w += 24 + ripps2HintWidth(texts[i]);
++    x = (640 - (w + gap * 3)) / 2;
++    for (i = 0; i < 4; i++) {
++        GSTEXTURE *t = icons[i] == RIGHT_ICON ? NULL : thmGetTexture(icons[i]);
++        if (icons[i] == RIGHT_ICON) { // Left / Right: two arrowheads, as the disc's player draws them
++            u64 c = MP_PRIM(0x80, 0x80, 0x80, 0x80);
++            rmDrawQuadGouraud(x + 1, 448, c, x + 8, 441, c, x + 1, 448, c, x + 8, 455, c);
++            rmDrawQuadGouraud(x + 19, 448, c, x + 12, 441, c, x + 19, 448, c, x + 12, 455, c);
++        } else if (t != NULL)
++            rmDrawPixmap(t, x, 438, ALIGN_NONE, 20, 20, SCALING_RATIO, MP_LIT, 0);
++        x += 24;
++        x = ripps2HintText(x, 448, texts[i], MP_SOFT) + gap;
++    }
++}
++
++void ripps2PlayMusicList(char (*paths)[256], int n, int start)
++{
++    unsigned int *len;
++    int sel = start, top = 0, playing = -1, i, confirm = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS;
++    int rowFont = gTheme->fonts[8], uiFont = gTheme->fonts[4], small = gTheme->fonts[5];
++    char buf[96], tl[16];
++
++    if (n <= 0)
++        return;
++    if ((len = calloc(n, sizeof(unsigned int))) == NULL)
++        return;
++    for (i = 0; i < n; i++)
++        len[i] = mpWavMs(paths[i]);
++    if (sel < 0 || sel >= n)
++        sel = 0;
++    if (bgmPlayFileOnce(paths[sel]) == 0) {
++        playing = sel;
++        ripps2PillarMusic(1);
++    } else {
 +        guiMsgBox(_t("This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip "
 +                     "them), Ogg Vorbis .ogg files and MP3s."),
 +                  0, NULL);
 +        bgmPlayFileStop();
 +        if (gEnableBGM && !isBgmPlaying())
 +            bgmStart();
++        free(len);
 +        return;
 +    }
-+    name = name != NULL ? name + 1 : path;
-+    rmGetScreenExtents(&scrW, &scrH);
 +    readPads();
 +    for (;;) {
-+        unsigned int ms = bgmPlayedMs();
++        unsigned int ms = playing >= 0 ? bgmPlayedMs() : 0;
++        // a track played to its end: the next one, to the last
++        if (playing >= 0 && !isBgmPlaying()) {
++            if (playing + 1 < n && bgmPlayFileOnce(paths[playing + 1]) == 0)
++                sel = ++playing;
++            else {
++                playing = -1;
++                ripps2PillarMusic(0);
++            }
++            ms = 0;
++        }
++
 +        guiStartFrame();
-+        rmDrawRect(0, 0, scrW, scrH, GS_SETREG_RGBA(0x02, 0x03, 0x0A, 0x70));
-+        fntRenderStringFit(gTheme->fonts[0], 320, 190, ALIGN_CENTER, 560, name, GS_SETREG_RGBA(0xE0, 0xE8, 0xFF, 0x80), 0);
-+        snprintf(line, sizeof(line), "%u:%02u", ms / 60000, (ms / 1000) % 60);
-+        fntRenderString(gTheme->fonts[0], 320, 222, ALIGN_CENTER, 0, 0, line, GS_SETREG_RGBA(0xA0, 0xB0, 0xE0, 0x80));
-+        fntRenderString(gTheme->fonts[0], 320, 458, ALIGN_CENTER, 0, 0,
-+                        gSelectButton == KEY_CIRCLE ? _t("Circle from the top   Cross close") : _t("Cross from the top   Circle close"),
-+                        GS_SETREG_RGBA(0xA0, 0xB0, 0xE0, 0x80));
++        ripps2DrawPillars();
++        ripps2DrawPanelGlass(MP_X, MP_Y, MP_W, MP_H, 0);
++        fntRenderString(uiFont, MP_X + 18, MP_Y + 18, ALIGN_VCENTER, 0, 0, _t("MUSIC"), MP_LIT);
++        snprintf(buf, sizeof(buf), _t("%d TRACKS"), n);
++        fntRenderString(small, MP_X + 18 + fntCalcDimensions(uiFont, _t("MUSIC")) + 12, MP_Y + 18, ALIGN_VCENTER, 0, 0, buf, MP_DIM);
++        rmDrawLine(MP_X + 14, MP_Y + 32, MP_X + MP_W - 14, MP_Y + 32, MP_PRIM(0x4A, 0x72, 0xDC, 0x60));
++        if (sel < top)
++            top = sel;
++        if (sel >= top + MP_ROWS)
++            top = sel - MP_ROWS + 1;
++        for (i = 0; i < MP_ROWS && top + i < n; i++) {
++            int t = top + i, y = MP_Y + 48 + i * MP_ROW_H;
++            const char *name = strrchr(paths[t], '/');
++            u64 col = t == playing ? MP_BLUE : (t == sel ? MP_LIT : MP_SOFT);
++            name = name != NULL ? name + 1 : paths[t];
++            if (t == sel)
++                rmDrawRect(MP_X + 12, y - 9, 236, 18, MP_PRIM(0x2A, 0x4C, 0xA0, 0x40));
++            snprintf(buf, sizeof(buf), "%02d", t + 1);
++            fntRenderString(rowFont, MP_X + 22, y, ALIGN_VCENTER, 0, 0, buf, col);
++            if (len[t] > 0)
++                mpTime(len[t], tl, sizeof(tl));
++            else
++                snprintf(tl, sizeof(tl), "--:--");
++            int lw = fntCalcDimensions(rowFont, tl);
++            fntRenderStringFit(rowFont, MP_X + 50, y, ALIGN_VCENTER, 190 - lw, name, col, 0);
++            fntRenderString(rowFont, MP_X + 240 - lw, y, ALIGN_VCENTER, 0, 0, tl, col);
++        }
++        // what is playing
++        {
++            int rx = MP_X + 276, track = playing >= 0 ? playing : sel;
++            unsigned int length = len[track];
++            snprintf(buf, sizeof(buf), _t("TRACK %02d"), track + 1);
++            fntRenderString(gTheme->fonts[11], rx, MP_Y + 52, ALIGN_VCENTER, 0, 0, buf, MP_LIT);
++            mpTime(ms, buf, sizeof(buf));
++            if (length > 0)
++                mpTime(length, tl, sizeof(tl));
++            else
++                snprintf(tl, sizeof(tl), "--:--");
++            strcat(buf, " / ");
++            strcat(buf, tl);
++            fntRenderString(uiFont, rx, MP_Y + 76, ALIGN_VCENTER, 0, 0, buf, MP_SOFT);
++            rmDrawRect(rx, MP_Y + 90, 216, 4, MP_PRIM(0x03, 0x08, 0x22, 0x80));
++            if (length > 0 && playing >= 0)
++                rmDrawRect(rx, MP_Y + 90, (int)(216.0f * (ms > length ? 1.0f : (float)ms / (float)length)), 4, MP_PRIM(0x4A, 0x8C, 0xF0, 0x80));
++            fntRenderString(small, rx, MP_Y + 106, ALIGN_VCENTER, 0, 0, playing >= 0 ? _t("PLAYING") : _t("STOPPED"),
++                            playing >= 0 ? MP_BLUE : MP_SOFT);
++        }
++        mpHints();
 +        guiEndFrame();
 +
 +        readPads();
-+        if (getKeyOn(guiCancelKey()) || getKeyOn(KEY_START))
++        if (getKeyOn(guiCancelKey()) || getKeyOn(KEY_START)) {
++            sfxPlay(SFX_CANCEL);
 +            break;
-+        if (getKeyOn(again) && bgmPlayFile(path) < 0)
-+            break;
++        }
++        if (getKeyOn(confirm)) {
++            if (playing == sel) { // the one playing stops
++                if (isBgmPlaying())
++                    bgmStop(); // the track stops; the menu music stays away until the player closes
++                playing = -1;
++                ripps2PillarMusic(0);
++            } else if (bgmPlayFileOnce(paths[sel]) == 0) {
++                playing = sel;
++                ripps2PillarMusic(1);
++            }
++        } else if (getKeyOn(KEY_SQUARE)) {
++            if (playing >= 0) {
++                sfxPlay(SFX_CANCEL);
++                if (isBgmPlaying())
++                    bgmStop(); // the track stops; the menu music stays away until the player closes
++                playing = -1;
++                ripps2PillarMusic(0);
++            }
++        } else if (getKey(KEY_UP)) {
++            if (sel > 0) {
++                sfxPlay(SFX_CURSOR);
++                sel--;
++            }
++        } else if (getKey(KEY_DOWN)) {
++            if (sel < n - 1) {
++                sfxPlay(SFX_CURSOR);
++                sel++;
++            }
++        } else if (getKeyOn(KEY_LEFT) || getKeyOn(KEY_RIGHT)) {
++            int from = playing >= 0 ? playing : sel, to = getKeyOn(KEY_RIGHT) ? from + 1 : (playing >= 0 && ms > 3000 ? from : from - 1);
++            if (to >= 0 && to < n) {
++                sfxPlay(SFX_CURSOR);
++                sel = to;
++                if (playing >= 0 && bgmPlayFileOnce(paths[sel]) == 0)
++                    playing = sel;
++            }
++        }
 +    }
++    ripps2PillarMusic(0);
 +    bgmPlayFileStop();
++    if (gEnableBGM && !isBgmPlaying())
++        bgmStart();
++    free(len);
 +    readPads();
++}
++
++// ---- music (build 115) ----
++// A .wav (16-bit PCM, as RIPDISC and the BIOS Music rip write them), an .ogg or an .mp3 plays in the menu music's place, at full
++// volume, until it is closed; the menu music comes back after. The confirm button plays it from the top again.
++static void ripps2PlayMusic(const char *path)
++{
++    static char one[1][256];
++    snprintf(one[0], sizeof(one[0]), "%s", path);
++    ripps2PlayMusicList(one, 1, 0); // build 115: the file CD player, one track
 +}
 +
  void ripps2OpenMedia(const char *path)
  {
      switch (ripps2MediaKind(path)) {
-@@ -942,6 +987,9 @@ void ripps2OpenMedia(const char *path)
+@@ -942,6 +1173,9 @@ void ripps2OpenMedia(const char *path)
          case RIPPS2_MEDIA_ICON:
              ripps2ViewSaveIcon(path);
              break;
@@ -6975,10 +7655,18 @@ index 03fe071..b5e1891 100644
          now = ripps2Seconds();
          readPads();
 diff --git a/src/sound.c b/src/sound.c
-index f4d22b4..66e4d0c 100644
+index f4d22b4..3075f7b 100644
 --- a/src/sound.c
 +++ b/src/sound.c
-@@ -434,6 +434,14 @@ int ripps2AudioBase(char *out, int size, int searchDrives)
+@@ -21,6 +21,7 @@
+ #include <iopheap.h> // build 95: SifAllocIopHeap, the room check before audsrv takes a sound
+ 
+ #include "include/sound.h"
++#include "include/ripps2diag.h" // build 115: the boot's steps in DIAG.TXT
+ #include "include/opl.h"
+ #include "include/ioman.h"
+ #include "include/themes.h"
+@@ -434,6 +435,14 @@ int ripps2AudioBase(char *out, int size, int searchDrives)
      return oplGetRipps2Dir(out, size);
  }
  
@@ -6993,8 +7681,19 @@ index f4d22b4..66e4d0c 100644
  // RIPPS2: the boot sound opens the show and the music follows it in. From build 95 it is the first sound the
  // IO worker loads (deferredAudioInit, sfxInit(1)) and it plays the moment it is in, on voice 0, which nothing
  // else uses; the rest load after it. Once they are in, the music starts from a thread of its own (never the
-@@ -1086,7 +1094,9 @@ void sfxBootSoundsLoaded(void)
+@@ -458,6 +467,7 @@ static volatile int sfxIntroOn = 0;     // the intro's towers have begun their s
+ void sfxIntroStarted(void)
+ {
+     sfxIntroOn = 1;
++    ripps2Diag("boot: the menu is up"); // build 115: with the lines below, how long a boot takes, step by step
+ }
+ 
+ static void sfxBootPlay(void)
+@@ -1084,9 +1094,12 @@ static void audioLateTick(void)
+ void sfxBootSoundsLoaded(void)
+ {
      bootAudioReady = 1;
++    ripps2Diag("boot: %d sounds loaded from %s", sfxLoadedCount, audioBaseFound ? audioBase : "RIPPS2's own set");
  }
  
 -static u8 bgmStarterStack[0x2000] __attribute__((aligned(16)));
@@ -7004,7 +7703,7 @@ index f4d22b4..66e4d0c 100644
  
  static void bgmStarterThread(void *arg)
  {
-@@ -1165,7 +1175,9 @@ void bgmBootTick(void)
+@@ -1165,7 +1178,9 @@ void bgmBootTick(void)
  // background queue from starving refills; the larger ring also covers stalls that are IOP-bound,
  // where EE thread priority cannot help.
  #define BGM_THREAD_BASE_PRIO       0x1E
@@ -7015,7 +7714,7 @@ index f4d22b4..66e4d0c 100644
  // Sleep bounds while audsrv's ring has no room for the next piece (see bgmWaitForRoom). The sleep is the
  // time the missing room takes to play out, but never under one SPU2 block -- 512 samples at 48 kHz,
  // 10.7 ms -- because the IOP frees room a block at a time and a shorter sleep only re-reads the same
-@@ -1254,6 +1266,7 @@ static OggVorbis_File *vorbisFile;
+@@ -1254,6 +1269,7 @@ static OggVorbis_File *vorbisFile;
  // the stream 16-bit samples; 0 ends it (what is queued plays out, then the music stops), < 0 is an
  // error. bgmPcmExternal is the CD player's, set through bgmStartPcm; a .wav track's is the file reader.
  static int (*bgmPcmRead)(char *buf, int size) = NULL;
@@ -7023,7 +7722,14 @@ index f4d22b4..66e4d0c 100644
  static int (*bgmPcmExternal)(char *buf, int size) = NULL;
  static int bgmPcmRate = 44100, bgmPcmChannels = 2;
  static volatile int bgmPcmEnded = 0;
-@@ -1369,7 +1382,10 @@ unsigned int bgmPlayedBytes(void)
+@@ -1366,10 +1382,17 @@ unsigned int bgmPlayedBytes(void)
+ // mono: "BGM: audsrv cannot play 24000 Hz, 1 ch -- no music", so the ripped Menu music never played: testers' "missing
+ // menu bgm after its rip"). The reader converts as it reads: a mono frame goes to both sides, another rate is
+ // interpolated between its two nearest frames; a 48 kHz file passes through unchanged.
++// build 115: a track the file CD player plays ends at its end (bgmPlayFileOnce), where the music loops
++static volatile int bgmOnce = 0;
++static int pcmEnded = 0; // the once-played .wav or .mp3 reached its end (not a read error)
++
  static FILE *wavFile = NULL;
  static long wavData = 0, wavSize = 0, wavPos = 0;
  static int wavSrcRate = 48000, wavSrcCh = 2;
@@ -7035,7 +7741,36 @@ index f4d22b4..66e4d0c 100644
  static int wavInLen = 0, wavInPos = 0;
  static unsigned int wavPhase = 0; // where the next 48 kHz frame falls between wavPrev and wavCur, 16.16
  static short wavPrev[2], wavCur[2];
-@@ -1482,6 +1498,184 @@ bad:
+@@ -1382,6 +1405,10 @@ static int wavNextFrame(short *out) // the next frame of the file (from the top
+ 
+     if (wavInLen - wavInPos < frame) {
+         if (wavSize - wavPos < frame) {
++            if (bgmOnce) {
++                pcmEnded = 1;
++                return 0;
++            }
+             if (fseek(wavFile, wavData, SEEK_SET) != 0)
+                 return 0;
+             wavPos = 0;
+@@ -1413,7 +1440,7 @@ static int wavRead(char *buf, int size)
+ 
+     if (!wavPrimed) {
+         if (!wavNextFrame(wavPrev) || !wavNextFrame(wavCur))
+-            return -1;
++            return pcmEnded ? 0 : -1;
+         wavPhase = 0;
+         wavPrimed = 1;
+     }
+@@ -1425,7 +1452,7 @@ static int wavRead(char *buf, int size)
+             wavPrev[0] = wavCur[0];
+             wavPrev[1] = wavCur[1];
+             if (!wavNextFrame(wavCur))
+-                return k > 0 ? (k + 1) * 4 : -1;
++                return k > 0 ? (k + 1) * 4 : pcmEnded ? 0 : -1;
+         }
+     }
+     return frames * 4;
+@@ -1482,6 +1509,188 @@ bad:
      return 0;
  }
  
@@ -7090,6 +7825,10 @@ index f4d22b4..66e4d0c 100644
 +        if (!mp3Eof && mp3InLen - mp3InPos < MP3_IN_SIZE / 4)
 +            mp3Fill();
 +        if (mp3InPos >= mp3InLen) { // the end: round again, once a call (a file with no frame in it gives up)
++            if (bgmOnce && rounds == 0) {
++                pcmEnded = 1;
++                return 0;
++            }
 +            if (rounds++ > 0 || fseek(mp3File, mp3Start, SEEK_SET) != 0)
 +                return 0;
 +            mp3InLen = mp3InPos = 0;
@@ -7137,7 +7876,7 @@ index f4d22b4..66e4d0c 100644
 +
 +    if (!mp3Primed) {
 +        if (!mp3NextFrame(mp3Prev) || !mp3NextFrame(mp3Cur))
-+            return -1;
++            return pcmEnded ? 0 : -1;
 +        mp3Phase = 0;
 +        mp3Primed = 1;
 +    }
@@ -7149,7 +7888,7 @@ index f4d22b4..66e4d0c 100644
 +            mp3Prev[0] = mp3Cur[0];
 +            mp3Prev[1] = mp3Cur[1];
 +            if (!mp3NextFrame(mp3Cur))
-+                return k > 0 ? (k + 1) * 4 : -1;
++                return k > 0 ? (k + 1) * 4 : pcmEnded ? 0 : -1;
 +        }
 +    }
 +    return frames * 4;
@@ -7220,7 +7959,20 @@ index f4d22b4..66e4d0c 100644
  // PCM bytes the stream plays per millisecond, set by bgmStart from its format.
  static int bgmBytesPerMs = 0;
  /* RIPPS2 build 102 (user: "a crazy audio beeping bug ... happens when loading is stuck, and switching can cause a long
-@@ -2185,22 +2379,45 @@ static int bgmHomeHasMusic(const char *prefix)
+@@ -1737,6 +1946,12 @@ static void bgmIoThread(void *arg)
+                 terminateFlag = 1;
+                 break;
+             } else if (ret == 0) {
++                if (bgmOnce) { // build 115: the file CD player's track ends here; what is queued plays out
++                    memset(bgmBuffer[wrPtr] + bufferPtr, 0, decodeTotal);
++                    decodeTotal = 0;
++                    bgmPcmEnded = 1;
++                    break;
++                }
+                 // End of stream: loop the track
+                 if (ov_pcm_seek(vorbisFile, 0) != 0) {
+                     LOG("BGM: cannot rewind (descriptor lost?) -- stopping.\n");
+@@ -2185,22 +2400,45 @@ static int bgmHomeHasMusic(const char *prefix)
      return bgmMusicScan("", sub, 0, names, 0, RIPPS2_MUSIC_MAX) > 0;
  }
  
@@ -7272,7 +8024,7 @@ index f4d22b4..66e4d0c 100644
          bgmFadeIn = 1;
          bgmFadeAt = clock();
          bgmStart();
-@@ -2240,7 +2457,8 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
+@@ -2240,7 +2478,8 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
          int len = strlen(e->d_name);
          if (e->d_name[0] == '.' || len <= 4 || len + (int)strlen(sub) + 2 > RIPPS2_MUSIC_NAME)
              continue;
@@ -7282,7 +8034,7 @@ index f4d22b4..66e4d0c 100644
              continue;
          if (bgmOnly && strncasecmp(e->d_name, "bgm", 3))
              continue;
-@@ -2250,6 +2468,26 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
+@@ -2250,6 +2489,26 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
      return n;
  }
  
@@ -7309,7 +8061,7 @@ index f4d22b4..66e4d0c 100644
  int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
  {
      char dir[256], sub[64];
-@@ -2260,6 +2498,7 @@ int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
+@@ -2260,6 +2519,7 @@ int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
          n = bgmMusicScan(dir, "MUSIC", 0, names, n, max);
      } else
          dir[0] = '\0';
@@ -7317,7 +8069,7 @@ index f4d22b4..66e4d0c 100644
      for (i = 0; i < bgmHomeCount && n < max; i++) { // build 100: OPL's resources AUDIO on each started drive
          if (!strcmp(bgmHomes[i], dir))
              continue; // RIPPS2's own folder, read above
-@@ -2313,6 +2552,30 @@ int bgmMusicDefault(char (*names)[RIPPS2_MUSIC_NAME], int n)
+@@ -2313,6 +2573,38 @@ int bgmMusicDefault(char (*names)[RIPPS2_MUSIC_NAME], int n)
      return 0;
  }
  
@@ -7345,10 +8097,18 @@ index f4d22b4..66e4d0c 100644
 +    return 0;
 +}
 +
++static int bgmMusicPath(char *out, int size);
++
++// build 115: the picked (or default) track's whole path, for Fast Boot's copy beside RIPPS2
++int bgmMusicCurrent(char *out, int size)
++{
++    return bgmMusicPath(out, size);
++}
++
  static int bgmMusicPath(char *out, int size)
  {
      static char names[RIPPS2_MUSIC_MAX][RIPPS2_MUSIC_NAME];
-@@ -2350,6 +2613,23 @@ static int bgmLoad(void)
+@@ -2350,6 +2642,23 @@ static int bgmLoad(void)
  
      memset(vorbisFile, 0, sizeof(OggVorbis_File));
  
@@ -7372,7 +8132,7 @@ index f4d22b4..66e4d0c 100644
      themeID = thmGetGuiValue();
      char *thmPath = thmGetFilePath(themeID);
      if (thmPath != NULL) { // NULL for <OPL> + the built-in <Coverflow>
-@@ -2368,9 +2648,8 @@ static int bgmLoad(void)
+@@ -2368,9 +2677,8 @@ static int bgmLoad(void)
      // configured file. Up to build 110 only the built-in themes got here, so on Adapt or Adapt Rx (no bgm.ogg since
      // edition 100) no music played at all, the ripped Menu music included (testers: "missing menu bgm after its rip").
      if (bgmMusicPath(bgmPath, sizeof(bgmPath))) {
@@ -7384,7 +8144,7 @@ index f4d22b4..66e4d0c 100644
                  free(vorbisFile);
                  vorbisFile = NULL;
                  snprintf(bgmOpenPath, sizeof(bgmOpenPath), "%s", bgmPath);
-@@ -2483,6 +2762,7 @@ static void bgmDeinit(void)
+@@ -2483,6 +2791,7 @@ static void bgmDeinit(void)
          vorbisFile = NULL;
      }
      wavClose(); // RIPPS2
@@ -7392,7 +8152,7 @@ index f4d22b4..66e4d0c 100644
      bgmOpenPath[0] = '\0'; // build 98: closed
      bgmPcmRead = NULL;
      bgmPcmEnded = 0;
-@@ -2564,7 +2844,7 @@ void bgmStart(void)
+@@ -2564,7 +2873,7 @@ void bgmStart(void)
              bgmRoomTarget = BGM_RING_BUFFER_SIZE;
          LOG("BGM: %ld Hz, %d ch, audsrv ring %d bytes, queue up to %d at a time\n", rate, channels, ring, bgmRoomTarget);
          // RIPPS2: a CD plays at full; the boot music starts silent and bgmBootTick raises it
@@ -7401,7 +8161,7 @@ index f4d22b4..66e4d0c 100644
  
          bgmIsPlaying = 1;
  
-@@ -2580,9 +2860,53 @@ void bgmStart(void)
+@@ -2580,9 +2889,66 @@ void bgmStart(void)
  
          if (!terminateFlag && bgmIoThreadRunning)
              StartThread(bgmThreadID, NULL);
@@ -7436,8 +8196,21 @@ index f4d22b4..66e4d0c 100644
 +    return 0;
 +}
 +
++// build 115: the file CD player's track, played once to its end (isBgmPlaying() goes 0 when it has)
++int bgmPlayFileOnce(const char *path)
++{
++    int r;
++    bgmOnce = 1;
++    pcmEnded = 0;
++    r = bgmPlayFile(path);
++    if (r < 0)
++        bgmOnce = 0;
++    return r;
++}
++
 +void bgmPlayFileStop(void)
 +{
++    bgmOnce = 0;
 +    if (bgmOverride[0] == '\0')
 +        return;
 +    if (isBgmPlaying())
@@ -7455,7 +8228,7 @@ index f4d22b4..66e4d0c 100644
  // RIPPS2: the CD player's stream. Whatever music was playing stops; bgmStopPcm ends it again, and the
  // menu music starts over once the player is closed (bgmBootTick's job is done by then, so the caller
  // restarts it).
-@@ -2685,6 +3009,7 @@ void bgmStop(void)
+@@ -2685,6 +3051,7 @@ void bgmStop(void)
          return;
      }
      bgmAbandoned = 0; // build 102: everything stopped: what the old stream held goes now
