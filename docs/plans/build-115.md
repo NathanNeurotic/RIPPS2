@@ -192,6 +192,20 @@ From the round before (10/26 morning):
 22. Game settings: Set Metadata merged into the Change Name row, reading "Set Metadata (Rename)", spacing as is.
 23. POPSTARTER's own in-game menu (a lite RIPPS2-themed one): POPSTARTER is closed, so only its own IGR is possible;
     noted, not planned.
+24. Issues (build 114 reports): #3 Exit Game black (IGR Path set to RIPPS2.ELF): answered with three steps. #4 Ember
+    PS1 and PS2 games never together in All Games: fixed (sources fill their PS1 lists while All Games shows PS1).
+25. BIOS Music turned to noise from 2:33: a retriggered key never ended its note (rbsSequence); fixed, levels
+    re-measured, rendered clean on the PC (C:/msys64/mingw64/bin/gcc, -DRIPPS2_BIOSSND_HOST_TEST).
+
+Round 3c progress (10/26, pushed): 1 (guiLock taken inside a frame), 2, 4 (Pad First on; the DIAG shows the pad's
+misses), 5 (asks once a drive, says POPSTARTER may find them), 6 (pick goes to Menu, restart, never "playing" with
+nothing playing, own homes, STATUS counts tracks), 8 (.wav / .ogg play in Memory Files; MP3 would need a decoder),
+9, 10 (names, the bar through the morph, Adapt draws none of its own: one piece), 11, 12, 13, 14, 15, 16 (hints_flank),
+17, 19, 20, 21 (title, 0 ms, the rename lets go of a protected folder, DIAG lines), 22, 24, 25.
+3: a source's first answer clears the metadata and cover memos; the boot refresh against Trust Cache still to check.
+7: the CD and video players already stop and restart the music; checked, nothing else silences it.
+18: tilt needs the pad in DualShock mode; RIPPS2 re-asks only in a clean poll, which MMCE traffic rarely gives (the
+ANALOG button works).
 
 ### Round 4: release
 - Translations: build 115's 58 strings and its new labels in the 32 languages.
