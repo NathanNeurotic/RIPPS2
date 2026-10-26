@@ -1,5 +1,98 @@
 # RIPPS2 changelog
 
+## Build 115 (beta, v1.1.5-beta), changes since build 114
+
+The first real-hardware rounds on an SD2PSX (LinkRetro's SD2PSXTD on sd2psXtd 1.4.0), the testers' reports since
+v1.1.4, and the user's notes of 10/25 and 10/26: MMCE and the pad sharing one bus, RIPPS2 living on the SD, Fast Boot,
+the sidebar and themes of two files, the BIOS music made clean, MP3, a CD player for your own tracks, and BIBLE that
+never copies RIPPS2.
+
+### Fast Boot
+- **Game Sources > Cache > Fast Boot.** A boot reads RIPPS2's own drive only: `RIPPS2.FB`, a few lines beside
+  RIPPS2.ELF, names where the settings (and All Games' master list beside them) and the sounds are, so there is no
+  memory card scan, no redirect and no AUDIO search over every drive. Every list shows from its cache.
+- **The other drives wait.** Turning Fast Boot on sets RIPPS2's own drive to Auto and the others on Auto to Manual
+  (unless Automatic Refresh is on, which starts them at boot as before). **SELECT on a page starts its drives** and
+  brings their art; on All Games it starts every drive waiting on Manual. A game from a waiting drive starts it.
+- **The sounds beside RIPPS2.** Turning it on copies your sound set, and the music when the drive has room, into the
+  AUDIO folder beside RIPPS2, the first place the boot looks.
+- **DIAG.TXT** has the boot's steps with their times (settings, sounds and how long the menu sounds waited for them,
+  the menu up), so a hardware run shows where a slow boot spends its time.
+
+### MMCE and the pad
+- **Game ID on by default.** RIPPS2 sends the game's ID itself and waits on screen while the SD2PSX makes the game's
+  card (the busy bit clear and its file system answering), seconds counting, START skips. The device's own history
+  tracking acts too late for a streaming game: that was Burnout 3's long black screen and hang.
+- **Pad reads that miss keep the last buttons** for up to 250 ms, then let go with no repeats on old data (a missed
+  read counted as nothing pressed, so one press became several). **Pad First** (MMCE settings, on): covers come in
+  small pieces with the pad read between them.
+- **Always analog.** A pad left in digital mode is asked for DualShock mode again every 2 s while idle; a receiver
+  that lists no DualShock mode (8BitDo) is asked three times anyway. Each ask is in DIAG.TXT.
+- **Lists load once**: each shows from its cache; a quiet check of the drive pulses SELECT's hint when the list
+  changed (Trust Cache, Game Sources > Cache). All Games takes a source's answer quietly when it has the same titles.
+- **STATUS > SAVE DIAGNOSTICS** writes the hardware log (pad gaps, MMCE request times, the busy bit, each launch's
+  steps) to DIAG.TXT beside RIPPS2; an MMCE launch writes it by itself.
+- **Memory Files copies are checked** (size and CRC read back), and a copy to a card in an SD2PSX says how long to wait
+  before power off. Settings save to `mmce0:/RIPPS2` (the root mmceman opens).
+
+### BIBLE
+- **RIPPS2 is never copied.** PS2BBL 1.2.0 starts RIPPS2 where it is (a memory card, USB or MX4SIO). RIPPS2 running
+  from MMCE or the HDD, which 1.2.0 cannot read, on a card with PS2BBL Extended (an SD2PSX BOOT card): BOOT LOCK sets
+  that config to start it from MMCE. Otherwise the message says where RIPPS2 has to be.
+- **"RIPPS2: Setting up BBL 1.20"** names every step; the panel says it is for standard 8 MB PS2 memory cards (a
+  MagicGate card, or an SD2PSX or MMCE BOOT card), names slots 1 and 2, and that PS2BBL reads slot 2's config first.
+- **Drives come back after the IOP restart.** BIBLE (and the NBD server) restart the I/O processor, and every drive's
+  "module loaded" mark survived it, so USB, the HDD and MMCE never loaded again ("everything gone and empty" until a
+  power cycle). They load again now. A refused card write says the card was put back, and that an SD2PSX may protect
+  itself until the console is turned off and on.
+- **RESTORE** puts back what BIBLE moved aside on a card (BBL 1.20 kept beside it, nothing deleted).
+
+### Music and sounds
+- **MP3** (minimp3, CC0): Memory Files plays .mp3, an .mp3 in AUDIO is music; an ID3 tag is skipped.
+- **A CD player for your tracks.** Memory Files: marked .wav, .ogg or .mp3 tracks opened together play as one disc
+  in Launch Disc's CD player panel, over the towers lit by the music; Left / Right the track before or after, each
+  plays to its end and the next follows. One track opened alone plays there too.
+- **WAV music read in 32 KB pieces** (it was 4 KB: 43 reads a second for CD audio on MMCE, where it stuttered in the
+  menus and played clean in the media player).
+- **BIOS Music** plays clean past 2:33 (a retriggered note never ended: noise), levels re-measured. **The ripped
+  track becomes the music** (Menu when both were ripped), saved at once, on every theme. **Choose where rips go**:
+  BIOS Sounds and BIOS Music list RIPPS2's own drive first ("read first at boot"), then each started drive with its
+  free space.
+- The music plays everywhere but the CD player, the media player and the pickers' previews, which stop and restart it.
+
+### Navigation and the sidebar
+- **Sidebar styles Classic and XL**, the bar sliding with RIPFLOW's easing and drawn through the morph; Left reaches
+  it from lists and info pages, Up / Down run along it (Storage to Launch Disc, its last source to Memory Files),
+  Circle with it hidden brings out its icons. RIPFLOW keeps Left for its covers; Memory Files' L1 / R1 are the
+  formations. **Category Layout** (Across the Top, Sidebar, Menu) as one theme key.
+- **RIPGRID stops at the list's ends**: Up on the first row and Down on the last no longer change the source; Circle
+  (the Storage drawer) or the sidebar does.
+- **R3** stars a game; held 4.2 s it hides or shows the stars. **Hold SELECT** opens the theme window (no freeze: the
+  window took a lock its own frame already held). **Recent Games**: its own page, 1 to 99.
+- **Game options**: "Set Metadata (Rename)" just above Delete on every game, PS1 games and apps included (it opens the
+  details editor; its ACTIONS rename, on All Games rows on the game's own drive). The rows start under the game's name
+  (the first one sat on it).
+
+### Themes
+- **A theme of two files**: an image a theme names but does not ship is RIPPS2's own. Planet N Condensed built in,
+  RIPPS2's badge set, `loading_mark`, `category_layout`, `hints_flank` (Cross RUN and Circle SOURCE either side of the
+  source name, OSDSYS style). Adapt and Adapt Rx edition 115 are conf_theme.cfg and one picture each.
+- Option names in Roboto on every theme; one notification face; Text Weight Normal or Bold; one title place on every
+  page of a kind; message boxes that only inform have one OK.
+
+### Games, art and launchers
+- **Art under every name** (any case, .png / .jpg / .jpeg, decoded by content, big pictures shrunk; OPL Manager's
+  `_BG_00`, `_SCR_00`, `_SCR_01`; PS1 disc IDs) and **All Games shows Ember PS1 and PS2 games together** (issue #4).
+- **POPSTARTER's two file sets**: POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG (as AnimMouse's
+  POPS-binaries and POPSLoader lay them out). RIPPOPS copies every one it finds; a drive launched anyway is not asked
+  about again.
+- **The in-game menu's EXIT** goes back to the RIPPS2 that launched it (memory card or USB), a stale path passed over.
+- A drive on Manual: its first answer is read again, so its list comes whole.
+
+### Underneath
+- The new words in all 33 languages (tools/lang115 and tools/lang115b).
+- Host tests follow the new behaviour (the grid's ends, POPS copies, the music rip's result).
+
 ## Build 114 (beta, v1.1.4-beta when released), changes since build 113
 
 The user's plans of 10/22: All Games before the drives answer, hide and delete games, the launchers found and

@@ -75,8 +75,9 @@ for f in sorted(langdir.glob('*.yml')):
     missing = [k for k in new if not mine.get(k)]
     reds = [k for k in mine if k.startswith("RIPPS2 plays this console's red screen music") or
             k.startswith("RIPPS2 plays this console's menu music (%d:%02d) and its red screen music")]
-    if missing or len(reds) != 4:
-        fail.append('%s: the chooser, the progress, the result and the four rip questions (%d missing, %d of 4)' % (f.stem, len(missing), len(reds)))
+    # build 115: the place is picked first (rbsPickHome), so each question has one wording, not one for each of two places
+    if missing or len(reds) != 2:
+        fail.append('%s: the chooser, the progress, the result and the two rip questions (%d missing, %d of 2)' % (f.stem, len(missing), len(reds)))
 
 print('\n'.join(fail) or 'build112: the menu music is the clock\'s, the red screen\'s beside it, chosen per rip, in every language OK')
 sys.exit(1 if fail else 0)
