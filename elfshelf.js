@@ -1,5 +1,5 @@
 // The elf shelf: STORAGE's showcase. uOPL's wooden plank (gfx/plank.png, AFL-3.0) as a shelf in front of
-// the towers, and on it the RIPPS2 mark six times over: an elf's felt hat standing brim-down in its own
+// the towers, and on it the RIPPS2 mark ten times over: an elf's felt hat standing brim-down in its own
 // pool of blood, one per Colors and More theme. Three show at a time, the way RIPFLOW shows covers: the
 // middle one turns to follow the pointer (the nearer the pointer, the quicker it turns), and a touch on
 // either neighbour, or Left / Right, brings that one to the middle.
@@ -8,9 +8,13 @@
 // lies over it, and pointing at it (or focusing it) rings the bell as RIPPS2's memory card icon does in the
 // PS2 browser (make_hat_icon.py's keys: four rings dying away, then rest, a 1.5 s loop).
 //
+// A hat pressed (or brought to the middle by Left / Right) calls onHatPress with its Color Theme's name, and the page
+// sends that theme across the towers (pillars.js colorWave): a tap is a burst of colour, a hold keeps it up.
+//
 // Usage:
 //   import { createElfShelf } from "./elfshelf.js";
-//   const shelf = createElfShelf(canvas, { interactTarget: heroEl, caption: captionEl, link: anchorEl });
+//   const shelf = createElfShelf(canvas, { interactTarget: heroEl, caption: captionEl, link: anchorEl,
+//     onHatPress: (name, clientX, clientY) => handle });   // a hat pressed (its handle's release() when let go)
 //   shelf.show(true | false);  shelf.destroy();
 
 import * as THREE from "three";
@@ -24,6 +28,11 @@ const HATS = [
   { name: "Blood", felt: "#7c0c18", sheen: "#ff8a96", bend: 1.4, lean: -0.14, turn: 1.1, seed: 43 },
   { name: "Amethyst", felt: "#6a34b8", sheen: "#d8b8ff", bend: 1.7, lean: 0.09, turn: 0.65, seed: 57 },
   { name: "Bone", felt: "#cfc4a8", sheen: "#ffffff", bend: 1.1, lean: -0.05, turn: 0.85, seed: 71 },
+  // build 114's four; Moonlight's felt glows faintly, as its theme's lift does
+  { name: "Tangerine", felt: "#e0700f", sheen: "#ffc27a", bend: 1.6, lean: 0.07, turn: 0.7, seed: 83 },
+  { name: "Flamingo", felt: "#e2508f", sheen: "#ffc6de", bend: 1.3, lean: -0.1, turn: 1.0, seed: 97 },
+  { name: "Turquoise", felt: "#11a596", sheen: "#8ff5ea", bend: 1.75, lean: 0.1, turn: 0.6, seed: 109 },
+  { name: "Moonlight", felt: "#c3cbe6", sheen: "#ffffff", glow: "#a9bcff", bend: 1.2, lean: -0.06, turn: 0.9, seed: 127 },
 ];
 const SLOT_X = 4.1;       // world units between the shelf's three places
 const SIDE_SCALE = 0.78;  // the neighbours stand a little smaller, as RIPFLOW's side covers do
@@ -41,7 +50,7 @@ function ringAt(f) {
   return 0;
 }
 
-export function createElfShelf(canvas, { interactTarget = canvas, caption = null, link = null } = {}) {
+export function createElfShelf(canvas, { interactTarget = canvas, caption = null, link = null, onHatPress = null } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -207,6 +216,7 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
     const hat = new THREE.Group();
     const felt = new THREE.MeshPhysicalMaterial({ shadowSide: THREE.FrontSide, map: feltMap, bumpMap: feltBump, bumpScale: 0.5, roughness: 0.92, sheen: 0.6, sheenRoughness: 0.7,
       sheenColor: new THREE.Color(def.sheen), side: THREE.DoubleSide, envMap: env, envMapIntensity: 0.4 });
+    if (def.glow) { felt.emissive.set(def.glow); felt.emissiveMap = feltMap; felt.emissiveIntensity = 0.22; } // the blood stays dark
     bendFelt(felt, bendU);
     const cone = new THREE.Mesh(geo, felt); cone.castShadow = true; hat.add(cone);
     const depth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
@@ -337,16 +347,25 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
   }
   const onMove = (e) => { toNdc(e); pointerIn = true; };
   const onLeave = () => { pointerIn = false; };
+  // the hat being held down: its theme stays up on the towers until it is let go
+  let press = null;
+  const pressHat = (k, x, y) => { press?.release(); press = onHatPress?.(HATS[k].name, x, y) || null; };
+  const onUp = () => { press?.release(); press = null; };
+  const middleIdx = () => ((Math.round(target) % n) + n) % n;
   const onDown = (e) => {
     if (!visible) return;
-    if (linkOn && e.target === link) { e.stopImmediatePropagation(); hats[linkIdx].userData.bendV -= 4.5; return; } // the link opens on click
+    if (linkOn && e.target === link) { // the link opens on click
+      e.stopImmediatePropagation(); hats[linkIdx].userData.bendV -= 4.5; pressHat(linkIdx, e.clientX, e.clientY); return;
+    }
     toNdc(e);
     ray.setFromCamera(pointer, camera);
     const hit = ray.intersectObjects(hats, true)[0];
     if (!hit) {
       // anywhere on the shelf beside the middle hat counts as touching its neighbour
       const plank = ray.intersectObject(shelf, true)[0];
-      if (plank && Math.abs(plank.point.x) > slotX * 0.45) { e.stopImmediatePropagation(); step(Math.sign(plank.point.x)); }
+      if (plank && Math.abs(plank.point.x) > slotX * 0.45) {
+        e.stopImmediatePropagation(); step(Math.sign(plank.point.x)); pressHat(middleIdx(), e.clientX, e.clientY);
+      }
       return;
     }
     const holder = hit.object.userData.holder, k = hats.indexOf(holder);
@@ -354,16 +373,24 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
     e.stopImmediatePropagation(); // a hat, not the towers' blast
     if (Math.abs(off) < 0.5) holder.userData.bendV -= 4.5;  // the middle one's bell jumps
     else step(Math.sign(off));
+    pressHat(k, e.clientX, e.clientY);
   };
+  const midScreen = new THREE.Vector3();
   const onKey = (e) => {
-    if (!visible) return;
-    if (e.key === "ArrowLeft") step(-1);
-    else if (e.key === "ArrowRight") step(1);
+    if (!visible || (e.key !== "ArrowLeft" && e.key !== "ArrowRight") || e.repeat) return;
+    step(e.key === "ArrowLeft" ? -1 : 1);
+    // the new middle hat's theme bursts from where it stands
+    const r = canvas.getBoundingClientRect();
+    midScreen.set(0, 1.4, 0.4).project(camera);
+    onHatPress?.(HATS[middleIdx()].name, r.left + (midScreen.x + 1) / 2 * r.width, r.top + (1 - midScreen.y) / 2 * r.height)?.release();
   };
   interactTarget.addEventListener("pointermove", onMove);
   interactTarget.addEventListener("pointerleave", onLeave);
   interactTarget.addEventListener("pointerdown", onDown, { capture: true });
   window.addEventListener("keydown", onKey);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onUp);
+  window.addEventListener("blur", onUp);
 
   // ---- size ----
   let slotX = SLOT_X, sideScale = SIDE_SCALE;
@@ -445,6 +472,10 @@ export function createElfShelf(canvas, { interactTarget = canvas, caption = null
       interactTarget.removeEventListener("pointerleave", onLeave);
       interactTarget.removeEventListener("pointerdown", onDown, { capture: true });
       window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("blur", onUp);
+      onUp();
       if (linkIdx >= 0) {
         link.removeEventListener("pointerenter", ringStart); link.removeEventListener("pointerleave", ringStop);
         link.removeEventListener("focus", ringStart); link.removeEventListener("blur", ringStop);

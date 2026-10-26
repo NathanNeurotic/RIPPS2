@@ -5,6 +5,7 @@
 // Usage:
 //   import { createPillars } from "./pillars.js";
 //   const pillars = createPillars(canvas, { palette: "cobalt", interactTarget: heroEl });
+//   pillars.colorWave("Ember", clientX, clientY).release();   // a Color Theme's wave (see COLOR_THEMES)
 //   pillars.destroy();
 
 import * as THREE from "three";
@@ -17,6 +18,33 @@ import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 export const PALETTES = {
   cobalt:   { base: "#0a1a52", glow: "#2f6bff", rim: "#7ec2ff", zenith: "#010209", horizon: "#0a1646", mote: "#8fc4ff" },
 };
+
+// RIPPS2's Color Themes (RiptOPL src/ripps2ui.c, paletteDef): hue turn (degrees), saturation, lift. The ELF tints
+// everything it draws with one colour matrix, a turn of the hue and a change of saturation built so a grey stays the
+// same grey, plus a lift (a colour's own strength added back as white, Moonlight's glow). The towers here are drawn in
+// RIPPS2's blue too, so the same matrix gives the same theme.
+export const COLOR_THEMES = {
+  RIPPS2: [0, 1, 0], Ember: [150, 1.6, 0], Blood: [130, 1.8, 0], Ectoplasm: [250, 1.2, 0], Amethyst: [40, 1.1, 0],
+  Bone: [180, 0.25, 0], Tangerine: [172, 1.7, 0.05], Flamingo: [112, 0.85, 0.18], Turquoise: [318, 1.15, 0.04],
+  Moonlight: [0, 0.1, 0.55],
+};
+
+// tintMatrix() from ripps2ui.c, row by row into a Matrix3
+function tintMatrix(hue, sat, out) {
+  const L = [0.213, 0.715, 0.072];
+  const rad = (hue * Math.PI) / 180, c = Math.cos(rad), s = Math.sin(rad);
+  const h = [0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928,
+    0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.14, 0.072 - c * 0.072 - s * 0.283,
+    0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072];
+  const m = [];
+  for (let i = 0; i < 3; i++)
+    for (let j = 0; j < 3; j++) {
+      let v = 0;
+      for (let k = 0; k < 3; k++) v += ((i === k ? sat : 0) + L[k] * (1 - sat)) * h[k * 3 + j];
+      m.push(v);
+    }
+  return out.set(...m);
+}
 
 const DEFAULTS = {
   palette: "cobalt",
@@ -276,6 +304,12 @@ const FINISH_SHADER = {
     uRes: { value: new THREE.Vector2(1, 1) },
     uGrain: { value: 0.025 },
     uCA: { value: 0.004 },
+    // up to three Color Theme waves (colorWave): each its matrix, its lift, and where it is: its origin (x, y in screen
+    // heights from the centre), the colour's leading edge and the edge the blue washes back behind (-1: not yet)
+    uAspect: { value: 1 },
+    uTintM: { value: [new THREE.Matrix3(), new THREE.Matrix3(), new THREE.Matrix3()] },
+    uTintLift: { value: [0, 0, 0] },
+    uTintWave: { value: [new THREE.Vector4(0, 0, 0, -1), new THREE.Vector4(0, 0, 0, -1), new THREE.Vector4(0, 0, 0, -1)] },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -287,6 +321,10 @@ const FINISH_SHADER = {
     uniform vec2 uRes;
     uniform float uGrain;
     uniform float uCA;
+    uniform float uAspect;
+    uniform mat3 uTintM[3];
+    uniform float uTintLift[3];
+    uniform vec4 uTintWave[3];
     varying vec2 vUv;
     void main() {
       vec2 c = vUv - 0.5;
@@ -295,6 +333,19 @@ const FINISH_SHADER = {
       col.r = texture2D(tDiffuse, vUv + c * k).r;
       col.g = texture2D(tDiffuse, vUv).g;
       col.b = texture2D(tDiffuse, vUv - c * k).b;
+      // Color Theme waves: inside the leading edge and outside the wash-back, the theme; a bright crest on the edge
+      vec3 base = col;
+      float mx = max(base.r, max(base.g, base.b)), mn = min(base.r, min(base.g, base.b));
+      vec2 p = vec2(c.x * uAspect, c.y);
+      for (int i = 0; i < 3; i++) {
+        vec4 wv = uTintWave[i];
+        if (wv.z <= 0.0) continue;
+        float d = distance(p, wv.xy);
+        float w = (1.0 - smoothstep(wv.z - 0.16, wv.z, d)) * smoothstep(wv.w - 0.16, wv.w, d);
+        vec3 tinted = clamp(uTintM[i] * base + uTintLift[i] * (mx - mn), 0.0, 1.0);
+        float crest = exp(-pow((d - wv.z + 0.05) / 0.045, 2.0)) * smoothstep(wv.w - 0.16, wv.w, d);
+        col = mix(col, tinted, w) + tinted * crest * 0.32;
+      }
       float n = fract(sin(dot(floor(vUv * uRes) + fract(uTime) * 91.0, vec2(12.9898, 78.233))) * 43758.5453);
       col += (n - 0.5) * uGrain;
       gl_FragColor = vec4(col, 1.0);
@@ -320,7 +371,7 @@ export function createPillars(canvas, options = {}) {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
   } catch (err) {
     canvas.dataset.pillars = "unsupported";
-    return { setPalette() {}, blast() {}, destroy() {}, supported: false };
+    return { setPalette() {}, blast() {}, colorWave() { return { release() {} }; }, destroy() {}, supported: false };
   }
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.95;
@@ -477,6 +528,7 @@ export function createPillars(canvas, options = {}) {
     camera.fov = w / h < 1 ? 40 + (1 - w / h) * 28 : 40;
     camera.updateProjectionMatrix();
     finish.uniforms.uRes.value.set(w * dpr, h * dpr);
+    finish.uniforms.uAspect.value = w / h;
     moteUniforms.uScale.value = (h * dpr) / 900;
     if (!running) renderFrame();
   }
@@ -507,16 +559,64 @@ export function createPillars(canvas, options = {}) {
   let hadHover = false;
   let kick = 0;
 
-  // Small ripples trail the pointer; a click is a big area blast
-  function spawnWave(x, z, big) {
+  // Small ripples trail the pointer; a click is a big area blast; a Color Theme sends a swell through, without the shake
+  function spawnWave(x, z, big, swell = false) {
     if (waves.length >= MAX_WAVES) {
       const small = waves.findIndex((w) => !w.big);
       waves.splice(small >= 0 ? small : 0, 1);
     }
     waves.push(big
       ? { x, z, big, age: 0, life: 2.8, speed: 24, width: 3.2, power: 2.1 }
-      : { x, z, big, age: 0, life: 1.5, speed: 12, width: 1.2, power: 0.55 });
+      : swell
+        ? { x, z, big, age: 0, life: 2.4, speed: 17, width: 2.6, power: 1.25 }
+        : { x, z, big, age: 0, life: 1.5, speed: 12, width: 1.2, power: 0.55 });
     if (big) kick = 1;
+  }
+
+  // ---- Color Theme waves ----
+  // A hat pressed on the elf shelf: its theme spreads from the press across the whole render, and RIPPS2's blue washes
+  // back behind it once it is let go (a tap is a burst of colour crossing the field; a hold keeps the theme up)
+  const TINT_SLOTS = 3, TINT_IN = 1.6, TINT_OUT = 1.25, TINT_BAND_S = 0.45;
+  const tints = [];
+  function colorWave(name, clientX, clientY) {
+    const th = COLOR_THEMES[name] || COLOR_THEMES.RIPPS2;
+    const r = canvas.getBoundingClientRect(), aspect = r.width / Math.max(1, r.height);
+    const x = ((clientX - r.left) / Math.max(1, r.width) - 0.5) * aspect, y = 0.5 - (clientY - r.top) / Math.max(1, r.height);
+    let far = 0;
+    for (const [cx, cy] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]) far = Math.max(far, Math.hypot(cx * aspect - x, cy - y));
+    if (tints.length >= TINT_SLOTS) tints.shift();
+    const w = { m: tintMatrix(th[0], th[1], new THREE.Matrix3()), lift: th[2], x, y, far: far + 0.2, age: 0, released: -1, front: 0, back: -1 };
+    tints.push(w);
+    spawnWave(0, 0, false, true);
+    if (!running) { w.front = w.far + 1; renderFrame(); } // reduced motion: the theme while held, no wave
+    return {
+      release() {
+        if (w.released >= 0) return;
+        w.released = w.age;
+        if (!running) { tints.splice(tints.indexOf(w), 1); renderFrame(); }
+      },
+    };
+  }
+  function updateTints(dt) {
+    for (let i = tints.length - 1; i >= 0; i--) {
+      const w = tints[i];
+      w.age += dt;
+      w.front = Math.min(w.age * TINT_IN, w.far + 1);
+      w.back = -1;
+      if (w.released >= 0) {
+        const from = Math.max(w.released, TINT_BAND_S);
+        if (w.age > from) w.back = (w.age - from) * TINT_OUT;
+      }
+      if (w.back > w.far) tints.splice(i, 1);
+    }
+    const u = finish.uniforms;
+    for (let i = 0; i < TINT_SLOTS; i++) {
+      const w = tints[i];
+      if (!w) { u.uTintWave.value[i].set(0, 0, 0, -1); continue; }
+      u.uTintWave.value[i].set(w.x, w.y, w.front, w.back);
+      u.uTintM.value[i].copy(w.m);
+      u.uTintLift.value[i] = w.lift;
+    }
   }
 
   const onDown = (e) => {
@@ -632,6 +732,7 @@ export function createPillars(canvas, options = {}) {
     aBeam.needsUpdate = true;
 
     finish.uniforms.uTime.value = t;
+    if (running) updateTints(dt);
   }
 
   function renderFrame() { update(0.016); composer.render(); }
@@ -684,5 +785,5 @@ export function createPillars(canvas, options = {}) {
   // Big area blast from code (default: the center of the field)
   const blast = (x = 0, z = 0) => spawnWave(x, z, true);
 
-  return { setPalette, blast, destroy, supported: true };
+  return { setPalette, blast, colorWave, destroy, supported: true };
 }

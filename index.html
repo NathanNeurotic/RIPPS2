@@ -100,7 +100,7 @@
 
 <section class="hero" id="hero">
   <canvas id="pillars" aria-hidden="true"></canvas>
-  <canvas class="shelf" id="shelf" aria-label="The elf shelf: touch a hat beside the middle one, or press Left / Right; the blue RIPPS2 hat opens the beta's psx-place thread"></canvas>
+  <canvas class="shelf" id="shelf" aria-label="The elf shelf: touch a hat beside the middle one, or press Left / Right; a hat sends its Color Theme across the towers (hold it to keep it); the blue RIPPS2 hat opens the beta's psx-place thread"></canvas>
   <div class="shelf-caption" id="shelf-caption" aria-live="polite"></div>
   <a class="shelf-link" id="shelf-link" href="https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/"
      target="_blank" rel="noopener" data-hat="RIPPS2" data-caption="RIPPS2 beta on psx-place"
@@ -148,7 +148,9 @@
 
   try {
     shelf = createElfShelf(document.getElementById("shelf"), { interactTarget: hero, caption: document.getElementById("shelf-caption"),
-      link: document.getElementById("shelf-link") });
+      link: document.getElementById("shelf-link"),
+      // a hat pressed: its Color Theme across the towers, washing back to RIPPS2's blue once let go
+      onHatPress: (name, x, y) => pillars.colorWave(name, x, y) });
   } catch (e) { console.warn("elf shelf:", e); }
   showTab(arrived === "launch" ? "launch" : current);
 
