@@ -26,11 +26,14 @@ for f in ('int ripps2BiosMusicSamplesOf(const unsigned char *img, int size, int 
           'int ripps2BiosMusicFromImageOf(const unsigned char *img, int size, int piece, ripps2_biosmusic_put_t put, void *ctx);'):
     if f not in hdr:
         fail.append('ripps2biossnd.h: ' + f.split('(')[0])
-# the clock's levels, measured as build 100 measured the red screen's (its own numbers reproduce exactly)
-if '#define RBS_MENU_WET      0.0781f' not in rip or '#define RBS_MENU_GAIN     1.5812f' not in rip:
-    fail.append("ripps2biossnd.c: the clock's hall 0.0781 and gain 1.5812 (ripps2BiosMusicMeasure)")
-if '#define RBS_MUSIC_WET     0.0807f' not in rip or '#define RBS_MUSIC_GAIN    1.3875f' not in rip:
-    fail.append("ripps2biossnd.c: the red screen's levels stay build 100's")
+# the clock's levels, measured as build 100 measured the red screen's. Build 115: both measured again once a retriggered
+# key ends its note before (rbsSequence), since the old peaks were the stuck notes' noise
+if '#define RBS_MENU_WET      0.0489f' not in rip or '#define RBS_MENU_GAIN     3.1685f' not in rip:
+    fail.append("ripps2biossnd.c: the clock's hall 0.0489 and gain 3.1685 (ripps2BiosMusicMeasure)")
+if '#define RBS_MUSIC_WET     0.1018f' not in rip or '#define RBS_MUSIC_GAIN    1.6956f' not in rip:
+    fail.append("ripps2biossnd.c: the red screen's hall 0.1018 and gain 1.6956")
+if 'if ((k = held[chn][d0]) >= 0 && notes[k].off < 0)\n                notes[k].off = s;' not in rip:
+    fail.append('rbsSequence: a key struck while held ends the note before (the music turned to noise at 2:33)')
 if 'return ripps2BiosMusicSamplesOf(img, size, RIPPS2_BIOSMUSIC_RED);' not in rip or \
         'return ripps2BiosMusicFromImageOf(img, size, RIPPS2_BIOSMUSIC_RED, put, ctx);' not in rip:
     fail.append("ripps2biossnd.c: build 100's two calls are the red screen's")
