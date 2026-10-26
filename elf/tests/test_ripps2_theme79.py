@@ -36,6 +36,7 @@ static void guiCycleTheme(void) { cycles++; }
 #define RIPPS2_HOLD_OFF 2
 static int gRipps2SelectHold = RIPPS2_HOLD_CYCLE;
 static int guiPickTheme(void) { return 1; }
+static void ripps2ThemeHold(float heldS) { (void)heldS; } /* build 115: the held SELECT's themes window */
 struct item { void (*refresh)(struct item *); };
 static void doRefresh(struct item *it) { refreshes++; }
 static struct item it = { doRefresh };
