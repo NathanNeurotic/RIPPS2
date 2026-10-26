@@ -1,13 +1,12 @@
-// Top menu behavior shared by both pages.
-// Launch Disc and Storage show the pillars page; Memory Files opens the orbs page. The site lands on
-// Storage (its elf shelf); #launch-disc opens Launch Disc. onSelect hears every change of tab on the page.
-// Selecting Launch Disc sparks the pillars (onLaunch), right away if we are already
-// there, or on arrival after navigating over from the orbs page.
+// The top menu. The three tabs are one page: Launch Disc and Storage show the pillars (Storage its elf shelf), Memory
+// Files the orbs, each switched in place with no page load. The site lands on Storage; #launch-disc and #memory-files
+// open the others (orbs.html sends old links to #memory-files). onSelect hears every change of tab, Back and Forward's
+// too; selecting Launch Disc sparks the pillars (onLaunch).
 // Labels follow the visitor's language (override with ?lang=xx).
 // The PS2 mark (assets/logo.png) rides under the selected label and flies between them.
 
-const KEY = "ps2-menu";
 const ORDER = ["launch", "storage", "memory"];
+const HASH = { launch: "#launch-disc", storage: "#storage", memory: "#memory-files" };
 
 // [Launch Disc, Storage, Memory Files]
 const LABELS = {
@@ -56,7 +55,6 @@ const easeInOutCubic = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2
 
 export function initMenu({ onLaunch, onSelect } = {}) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const onPillars = !location.pathname.endsWith("orbs.html");
   const nav = document.querySelector(".options");
   const items = ORDER.map((name) => nav.querySelector(`[data-item="${name}"]`));
   const labels = items.map((el) => el.querySelector(".label"));
@@ -70,7 +68,7 @@ export function initMenu({ onLaunch, onSelect } = {}) {
     label.classList.toggle("fb", !IN_FONT.test(text.toLocaleUpperCase(lang)));
   });
 
-  const currentFromPage = () => ORDER.indexOf(!onPillars ? "memory" : location.hash === "#launch-disc" ? "launch" : "storage");
+  const currentFromPage = () => { const i = ORDER.findIndex((name) => HASH[name] === location.hash); return i < 0 ? 1 : i; };
   function mark(idx) {
     items.forEach((el, k) => (k === idx ? el.setAttribute("aria-current", "page") : el.removeAttribute("aria-current")));
   }
@@ -181,32 +179,24 @@ export function initMenu({ onLaunch, onSelect } = {}) {
     });
   }
 
-  // ---- Clicks ----
+  // ---- Clicks: every tab switches in place ----
+  function select(idx, fromHistory) {
+    const name = ORDER[idx];
+    if (!fromHistory) history.replaceState(null, "", HASH[name]);
+    flyTo(idx);
+    onSelect?.(name);
+    if (name === "launch") onLaunch?.();
+  }
   items.forEach((el, idx) => {
     el.addEventListener("click", (e) => {
-      const name = ORDER[idx];
-      const samePage = onPillars && name !== "memory";
       e.preventDefault();
-      if (samePage) {
-        history.replaceState(null, "", name === "storage" ? "#storage" : "#launch-disc");
-        flyTo(idx);
-        onSelect?.(name);
-        if (name === "launch") onLaunch?.();
-      } else {
-        // Crossing pages: let the mark land first, then tell the next page how we arrived
-        try { sessionStorage.setItem(KEY, name); } catch {}
-        const wait = hasMark ? flyTo(idx) : 0;
-        setTimeout(() => { location.href = el.href; }, wait ? wait + 90 : 0);
-      }
+      select(idx, false);
     });
   });
+  addEventListener("hashchange", () => { const idx = currentFromPage(); if (idx !== cur) select(idx, true); });
 
   mark(cur);
-  // Arriving from the other page: the mark drops into place
-  let arrived = null;
-  try { arrived = sessionStorage.getItem(KEY); sessionStorage.removeItem(KEY); } catch {}
-  if (arrived && !reduced) landAt = performance.now();
   requestAnimationFrame(frame);
 
-  return { arrived, lang, current: ORDER[cur] };
+  return { lang, current: ORDER[cur], select: (name) => select(ORDER.indexOf(name), false) };
 }

@@ -4,8 +4,13 @@
 //
 // Usage:
 //   import { createOrbs, FORMATIONS } from "./orbs.js";
-//   const orbs = createOrbs(canvas, { onChange: (index, formation) => {} });
-//   orbs.go(3); orbs.next(); orbs.prev(); orbs.toggleLines(); orbs.destroy();
+//   const orbs = createOrbs(canvas, { onChange: (index, formation) => {}, onSwipe: (dir) => {}, onInput: () => {} });
+//   orbs.go(3); orbs.next(); orbs.prev(); orbs.showOutline(); orbs.holdPaths(true); orbs.stick(x, y); orbs.destroy();
+//
+// As RIPPS2's Memory Files draws them (RiptOPL src/ripps2bg.c): each formation's outline draws on with a flash when the
+// page opens and each time a formation settles, holds 1.9 s and fades over 1.2 s, never mid-morph. A press held on the
+// scene (L2 on the console) shows the whole path, steady, and a drag while holding turns the formation (the right
+// stick), which slides to a stop once let go. A quick swipe across changes the formation (onSwipe).
 
 import * as THREE from "three";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -344,8 +349,10 @@ export function createOrbs(canvas, options = {}) {
     maxPixelRatio: 2,
     start: 0,
     startTime: 0,
-    lines: true,        // outlines on at load; click or tap the scene to toggle
     onChange: () => {},
+    onSwipe: () => {},          // a swipe across the scene: -1 back, 1 on
+    onSwipeProgress: () => {},  // (dir, 0..1) while one is under way
+    onInput: () => {},          // any press on the scene
     ...options,
   };
 
@@ -354,7 +361,7 @@ export function createOrbs(canvas, options = {}) {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
   } catch (err) {
     canvas.dataset.orbs = "unsupported";
-    return { go() {}, next() {}, prev() {}, toggleLines() {}, setLines() {}, destroy() {}, supported: false };
+    return { go() {}, next() {}, prev() {}, showOutline() {}, holdPaths() {}, stick() {}, destroy() {}, supported: false };
   }
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
@@ -394,7 +401,9 @@ export function createOrbs(canvas, options = {}) {
     transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
   }));
   cloud.frustumCulled = false;
-  scene.add(cloud);
+  const turn = new THREE.Group(); // the formation as the right stick (or a held drag) turns it
+  scene.add(turn);
+  turn.add(cloud);
 
   // Base trail fade per slot; scaled each frame by how far the orb actually moved
   const fade = Array.from({ length: T }, (_, k) => (k === 0 ? 1 : Math.pow(1 - k / (T - 1), 1.8) * 0.5));
@@ -431,7 +440,7 @@ export function createOrbs(canvas, options = {}) {
       transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false,
     }));
     line.frustumCulled = false;
-    scene.add(line);
+    turn.add(line);
     return line;
   }
   const guideCur = makeGuide(), guidePrev = makeGuide();
@@ -488,27 +497,73 @@ export function createOrbs(canvas, options = {}) {
   // ---- Pointer parallax ----
   const ndc = new THREE.Vector2(), parallax = new THREE.Vector2();
   const onMove = (e) => {
+    if (press?.mode === "hold") return; // a held drag turns the formation, not the camera
     const r = canvas.getBoundingClientRect();
+    if (!r.width || !r.height) return; // hidden (another tab is up): no size to measure against, and 0/0 would stick
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   };
   window.addEventListener("pointermove", onMove);
 
-  // ---- Outline toggle (click or tap the scene) ----
-  let linesOn = cfg.lines, linesLevel = linesOn ? 1 : 0, reveal = 1, flash = 0;
-  function setLines(on) {
-    if (on === linesOn) return;
-    linesOn = on;
-    if (on) { reveal = 0; flash = 1; }
-  }
-  let downAt = null;
-  const onDown = (e) => { downAt = { x: e.clientX, y: e.clientY }; };
+  // ---- The outline, as RIPPS2 draws it: on (with a flash) as the page opens and as each formation settles, held, then
+  // faded; the whole path, steady, while a press is held (L2 on the console) ----
+  const GUIDE_REVEAL_S = 0.7, GUIDE_HOLD_S = 1.9, GUIDE_FADE_S = 1.2;
+  let guideStart = 0, pathsHeld = false, pathsLevel = 0;
+  const showOutline = () => { guideStart = t; };
+
+  // ---- The turn: the right stick's spin (speed ramps up while held, slides to a stop), or a held drag ----
+  const SPIN_MAX = 2.4, SPIN_RAMP = 3.2, SPIN_SLIDE = 1.5, PITCH_MAX = 1.1;
+  let yaw = 0, pitch = 0, yawV = 0, pitchV = 0, stickX = 0, stickY = 0;
+  const stick = (x, y) => { stickX = Math.abs(x) > 0.15 ? x : 0; stickY = Math.abs(y) > 0.15 ? y : 0; };
+
+  // ---- A press on the scene: held still a moment, it shows the paths and a drag turns the formation; moved first, it
+  // is a swipe (far enough across: the next or previous formation) ----
+  const HOLD_MS = 260, MOVE_PX = 12, SWIPE_PX = 70;
+  let press = null;
+  const onDown = (e) => {
+    if (press) return;
+    cfg.onInput();
+    press = { id: e.pointerId, x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, lt: performance.now(), mode: "wait" };
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* a pointer the browser no longer has: no capture */ }
+    press.timer = setTimeout(() => {
+      if (press?.mode !== "wait") return;
+      press.mode = "hold";
+      pathsHeld = true;
+      yawV = pitchV = 0;
+    }, HOLD_MS);
+  };
+  const onPressMove = (e) => {
+    if (!press || e.pointerId !== press.id) return;
+    const dx = e.clientX - press.x, dy = e.clientY - press.y, now = performance.now();
+    if (press.mode === "wait" && Math.hypot(dx, dy) > MOVE_PX) { press.mode = "swipe"; clearTimeout(press.timer); }
+    if (press.mode === "swipe") {
+      cfg.onSwipeProgress(dx < 0 ? 1 : -1, Math.abs(dx) > Math.abs(dy) ? Math.abs(dx) / SWIPE_PX : 0);
+    } else if (press.mode === "hold") {
+      const k = (Math.PI * 2) / Math.max(320, canvas.clientWidth), ddt = Math.max(1, now - press.lt) / 1000;
+      const dyaw = (e.clientX - press.lx) * k, dpitch = (e.clientY - press.ly) * k * 0.6;
+      yaw += dyaw;
+      pitch = Math.max(-PITCH_MAX, Math.min(PITCH_MAX, pitch + dpitch));
+      yawV = lerp(yawV, dyaw / ddt, 0.5);    // let go mid-turn and it carries on, sliding to a stop
+      pitchV = lerp(pitchV, dpitch / ddt, 0.5);
+    }
+    press.lx = e.clientX; press.ly = e.clientY; press.lt = now;
+  };
   const onUp = (e) => {
-    // A tap, not a drag
-    if (downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) < 10) setLines(!linesOn);
-    downAt = null;
+    if (!press || e.pointerId !== press.id) return;
+    clearTimeout(press.timer);
+    const dx = e.clientX - press.x, dy = e.clientY - press.y;
+    if (press.mode === "hold") {
+      pathsHeld = false;
+      if (performance.now() - press.lt > 80) yawV = pitchV = 0; // held still at the end: it stays put
+    } else if (press.mode === "swipe") {
+      cfg.onSwipeProgress(0, 0);
+      if (Math.abs(dx) >= SWIPE_PX && Math.abs(dx) > Math.abs(dy) * 1.3) cfg.onSwipe(dx < 0 ? 1 : -1);
+    }
+    press = null;
   };
   canvas.addEventListener("pointerdown", onDown);
+  canvas.addEventListener("pointermove", onPressMove);
   canvas.addEventListener("pointerup", onUp);
+  canvas.addEventListener("pointercancel", onUp);
 
   // ---- Formation state ----
   const wrap = (i) => ((i % FORMATIONS.length) + FORMATIONS.length) % FORMATIONS.length;
@@ -562,7 +617,10 @@ export function createOrbs(canvas, options = {}) {
 
   function frame(dt, draw = true) {
     t += dt;
-    if (morph < 1) morph += dt / cfg.morphSeconds;
+    if (morph < 1) {
+      morph += dt / cfg.morphSeconds;
+      if (morph >= 1) showOutline(); // settled into the new formation: its outline draws on
+    }
 
     stepLorenz(dt);
     place();
@@ -580,13 +638,21 @@ export function createOrbs(canvas, options = {}) {
     }
 
     const e = easeInOutCubic(Math.min(1, morph));
-    // Outline toggle: draws on with a bright glow when switched on, fades when off
-    linesLevel += ((linesOn ? 1 : 0) - linesLevel) * Math.min(1, dt * (linesOn ? 6 : 3));
-    if (linesOn) reveal = Math.min(1, reveal + dt / 0.9);
-    flash *= Math.exp(-dt * 2.2);
-    const glow = linesLevel * (GUIDE_OPACITY + flash * 0.6);
-    buildGuide(guideCur, FORMATIONS[cur], glow * e, Math.min(reveal, e));
-    buildGuide(guidePrev, FORMATIONS[prev], e < 1 ? glow * (1 - e) : 0);
+    // The outline: drawn on, flashed, held, faded, never mid-morph; a held press shows the whole path, steady (and that
+    // one crossfades through a morph)
+    pathsLevel += ((pathsHeld ? 1 : 0) - pathsLevel) * Math.min(1, dt * (pathsHeld ? 6 : 3));
+    let glow = 0, reveal = 1;
+    if (morph >= 1 && guideStart >= 0) {
+      const age = t - guideStart;
+      const level = age < GUIDE_HOLD_S ? 1 : Math.max(0, 1 - (age - GUIDE_HOLD_S) / GUIDE_FADE_S);
+      if (level <= 0) guideStart = -1;
+      glow = level * (GUIDE_OPACITY + Math.exp(-age * 3) * 0.6);
+      reveal = Math.min(1, age / GUIDE_REVEAL_S);
+    }
+    const held = pathsLevel * GUIDE_OPACITY * 1.3;
+    if (held > glow) { glow = held; reveal = 1; }
+    buildGuide(guideCur, FORMATIONS[cur], morph < 1 ? held * e : glow, reveal);
+    buildGuide(guidePrev, FORMATIONS[prev], morph < 1 ? held * (1 - e) : 0);
     const orbSize = lerp(sizeFor(FORMATIONS[prev]), sizeFor(FORMATIONS[cur]), e);
     for (let i = 0; i < MAX; i++) {
       c.copy(palPrev[i % palPrev.length]).lerp(palCur[i % palCur.length], e);
@@ -606,8 +672,28 @@ export function createOrbs(canvas, options = {}) {
     }
     aPos.needsUpdate = aCol.needsUpdate = aSize.needsUpdate = aAlpha.needsUpdate = true;
 
+    // The turn: the stick's spin ramps toward its tilt and slides to a stop; a held drag sets it directly (onPressMove)
+    if (press?.mode !== "hold") {
+      if (stickX || stickY) {
+        const k = Math.min(1, dt * SPIN_RAMP);
+        yawV += (stickX * SPIN_MAX - yawV) * k;
+        pitchV += (stickY * SPIN_MAX * 0.6 - pitchV) * k;
+      } else {
+        const k = Math.exp(-dt * SPIN_SLIDE);
+        yawV *= k;
+        pitchV *= k;
+      }
+      yaw = (yaw + yawV * dt) % (Math.PI * 2);
+      pitch += pitchV * dt;
+      if (Math.abs(pitch) > PITCH_MAX) { pitch = Math.sign(pitch) * PITCH_MAX; pitchV = 0; }
+    }
+    // as on the console (build 70): a bad step never sticks
+    if (!(Number.isFinite(yaw) && Number.isFinite(pitch) && Math.abs(yawV) < 100 && Math.abs(pitchV) < 100)) yaw = pitch = yawV = pitchV = 0;
+    turn.rotation.set(pitch, yaw, 0);
+
     // Camera: a gentle sway (never a full orbit, so flat shapes never go edge-on)
     parallax.lerp(ndc, Math.min(1, dt * 2 || 1));
+    if (!Number.isFinite(parallax.x + parallax.y)) parallax.set(0, 0);
     const ang = Math.sin(t * 0.07) * 0.3 + parallax.x * 0.35;
     const r = 15;
     camera.position.set(Math.sin(ang) * r, 1.5 + parallax.y * 2.2 + Math.sin(t * 0.13) * 0.8, Math.cos(ang) * r);
@@ -646,8 +732,9 @@ export function createOrbs(canvas, options = {}) {
     supported: true,
     go,
     next: () => go(cur + 1),
-    toggleLines: () => setLines(!linesOn),
-    setLines,
+    showOutline,
+    holdPaths: (on) => { pathsHeld = !!on; }, // L on a keyboard, Cross on a pad: the whole path while held
+    stick,
     prev: () => go(cur - 1),
     get index() { return cur; },
     destroy() {
@@ -657,7 +744,10 @@ export function createOrbs(canvas, options = {}) {
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerdown", onDown);
+      canvas.removeEventListener("pointermove", onPressMove);
       canvas.removeEventListener("pointerup", onUp);
+      canvas.removeEventListener("pointercancel", onUp);
+      clearTimeout(press?.timer);
       scene.traverse((o) => { o.geometry?.dispose(); o.material?.dispose(); });
       renderer.dispose();
     },

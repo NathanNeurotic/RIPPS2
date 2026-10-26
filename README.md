@@ -140,7 +140,7 @@ The PS2 mark rides under the selected option and flies between them: a swoop to 
 
 **Pillars:** glass data towers with glowing edges, seams, flickering cells and energy pulses, on a reflective floor. Towers rise out of the ground on load, then breathe and ripple; the pointer sends ripples and a click sets off a blast. Adapts resolution on slow devices, pauses off screen, respects reduced motion.
 
-**Orbs:** twelve formations (Browser Orbit, Borromean Rings, Torus Orbit, Icosahedron, Double Helix, Strange Attractor, Trefoil Knot, Mobius Strip, Klein Bottle, Golden Spiral, Lissajous and Seven-Point Star), each with as many orbs as it needs, splitting and merging between them. Faint outlines trace every shape (tap, `L`, or controller A). Switch with the arrows, the dots, a swipe, the arrow keys, or a controller's d-pad or bumpers.
+**Orbs:** twelve formations (Browser Orbit, Borromean Rings, Torus Orbit, Icosahedron, Double Helix, Strange Attractor, Trefoil Knot, Mobius Strip, Klein Bottle, Golden Spiral, Lissajous and Seven-Point Star), each with as many orbs as it needs, splitting and merging between them. As in the ELF's Memory Files, each shape's outline draws on with a flash when the tab opens and each time a formation settles, holds about two seconds and fades. Press and hold the scene (or hold `L`, or a controller's L2 or Cross) for the whole path, steady; drag while holding to turn the formation, which slides to a stop when let go (a controller's right stick turns it too). Switch with a swipe, the Left / Right glyphs beside the name, the arrow keys, or a controller's d-pad or bumpers.
 
 To run it locally, serve the folder (ES modules need a web server) and open http://localhost:8000:
 
@@ -148,7 +148,7 @@ To run it locally, serve the folder (ES modules need a web server) and open http
 python -m http.server 8000
 ```
 
-Add `?t=12` to skip the pillars intro, or `orbs.html?f=3` to open a specific formation.
+Add `?t=12` to skip the pillars intro, or `?f=3#memory-files` to open a specific formation (old `orbs.html` links land on Memory Files).
 
 ## Credits
 

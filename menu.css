@@ -1,3 +1,8 @@
+/* The footnote every tab carries, in the bottom-right corner (in a phone's portrait player, under the chin's note) */
+.ripps2-foot { position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 11; margin: 0; font: 400 11px/1.3 "Albert Sans", system-ui, sans-serif; letter-spacing: .06em; color: #9aa6c8;
+  opacity: .7; text-align: right; pointer-events: none; }
+
 /* Shared top menu: LAUNCH DISC | STORAGE | MEMORY FILES, set in the site font and
    gently floating. Labels are localized by menu.js; any label the font cannot draw
    falls back as a whole to the menu font. */

@@ -16,6 +16,7 @@ const KEY = "ripps2.letterbox";
 const CSS = `
 html.lb-embedded .hero { touch-action: manipulation; }
 html.lb-embedded canvas#orbs { touch-action: pan-y pinch-zoom; }
+html.lb-embedded .ripps2-foot { display: none; }
 html.letterboxed, html.letterboxed body { background: #03040b; min-height: 100%; }
 html.letterboxed body > :not(.lb) { display: none !important; }
 .lb { min-height: 100vh; min-height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column;
@@ -30,7 +31,7 @@ html.letterboxed body > :not(.lb) { display: none !important; }
   animation: lb-bob 1.6s ease-in-out infinite; }
 @keyframes lb-bob { 50% { transform: translateY(-7px); } }
 .lb-note { margin: 0; font-family: "Master", "Albert Sans", system-ui, sans-serif; text-transform: uppercase;
-  letter-spacing: .08em; line-height: 1.5; font-size: clamp(15px, 4.6vw, 22px); color: #f4f8ff;
+  letter-spacing: .08em; line-height: 1.5; font-size: clamp(18px, 5.8vw, 28px); color: #f4f8ff;
   text-shadow: 0 0 6px rgba(200, 222, 255, .9), 0 0 22px rgba(110, 160, 255, .8); }
 .lb-note span { display: block; font-size: .78em; color: #c8d8ff; opacity: .85; }
 .lb-shape { display: flex; align-items: center; gap: 12px; font-family: "Master", "Albert Sans", system-ui, sans-serif;
@@ -44,9 +45,6 @@ html.letterboxed body > :not(.lb) { display: none !important; }
   background: #dce7ff; box-shadow: 0 0 10px rgba(110, 160, 255, .9); transition: transform .3s cubic-bezier(.2, .7, .3, 1); }
 .lb-switch[aria-checked="true"]::after { transform: translateX(26px); }
 .lb-switch:focus-visible { outline: 2px solid rgba(170, 205, 255, .8); outline-offset: 3px; }
-.lb-foot { position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom));
-  margin: 0; font: 400 11px/1.3 "Albert Sans", system-ui, sans-serif; letter-spacing: .06em; color: #9aa6c8; opacity: .7;
-  text-align: right; }
 @media (prefers-reduced-motion: reduce) { .lb-arrow { animation: none; } .lb-screen, .lb-switch::after { transition: none; } }
 `;
 
@@ -95,7 +93,7 @@ export function letterbox() {
       <div class="lb-shape"><b data-s="4:3">4:3</b><button class="lb-switch" role="switch"
         aria-label="Widescreen (16:9) box"></button><b data-s="16:9">16:9</b></div>
     </div>
-    <p class="lb-foot">RIPPS2 (vision interactive mock-up)</p>`;
+    <p class="ripps2-foot">RIPPS2 (vision interactive mock-up)</p>`;
   document.body.prepend(box);
 
   const screen = box.querySelector(".lb-screen"), frame = box.querySelector(".lb-player");

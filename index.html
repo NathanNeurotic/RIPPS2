@@ -49,6 +49,14 @@
   .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
     opacity: 0; transition: opacity 1.2s ease; }
   .hero canvas[data-pillars="ready"] { opacity: 1; }
+  .hero canvas[hidden] { display: none; }
+  /* Memory Files: the orbs (orbs.js) over the towers, the two crossfading as the tab changes; the one out of sight is
+     hidden after the fade, so only one scene ever draws */
+  .hero #pillars, .hero #orbs { transition: opacity .6s ease; }
+  .hero[data-tab="memory"] #pillars { opacity: 0; }
+  .hero #orbs { cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; }
+  .hero #orbs:active { cursor: grabbing; }
+  .hero[data-tab="memory"] #orbs[data-orbs="ready"] { opacity: 1; }
   .arrived .hero canvas { transition: none; }
   .hero::after { content: ""; position: absolute; inset: 0; pointer-events: none;
     background:
@@ -79,8 +87,41 @@
   .shelf-link { position: absolute; left: 0; top: 0; z-index: 2; display: none; cursor: pointer; border-radius: 18px;
     outline: none; -webkit-tap-highlight-color: transparent; }
   .shelf-link:focus-visible { box-shadow: 0 0 0 2px rgba(170, 205, 255, .75), 0 0 26px rgba(110, 160, 255, .45); }
-  .hero[data-tab="storage"] .console { opacity: 0; transition: opacity .5s ease; }
+  .hero[data-tab="storage"] .console, .hero[data-tab="memory"] .console { opacity: 0; transition: opacity .5s ease; }
   .hero[data-tab="launch"] .console { opacity: 1; transition: opacity .5s ease; }
+
+  /* RIPPS2's footnotes on Launch Disc and Memory Files, where the ELF draws them in its 640 x 480 picture (--u is one of
+     its pixels, the picture fitted to the page): the START prompt (y 423) in RIPPS2 Sleek Bold 20 beside the START
+     glyph, the line under it (y 450: what is in the drive, or the formation between its Left / Right glyphs) and the
+     count (y 467) in Planet N 13. The prompt and the drive's line go when the page is left alone 6 s (Fade When
+     Idle) and come back on any press; the formation's name holds 2.5 s after a change, then fades */
+  @font-face { font-family: "RIPPS2 Sleek"; font-weight: 700; font-display: swap;
+    src: url("vendor/fonts/RIPPS2Sleek-Bold.woff2") format("woff2"); }
+  .hero { --u: min(calc(100vh / 480), calc(100vw / 640)); }
+  @supports (height: 100dvh) { .hero { --u: min(calc(100dvh / 480), calc(100vw / 640)); } }
+  .elf { position: absolute; left: 50%; z-index: 3; transform: translate(-50%, 50%); white-space: nowrap; margin: 0;
+    opacity: 0; pointer-events: none; transition: opacity .35s ease; }
+  .prompt { bottom: calc(57 * var(--u)); display: flex; align-items: center; gap: calc(10 * var(--u)); padding: 0;
+    border: 0; background: none; color: #fff; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    font: 700 calc(20 * var(--u)) / 1 "RIPPS2 Sleek", "Master", var(--menu-font); }
+  .prompt img { width: calc(20 * var(--u)); height: calc(20 * var(--u)); display: block; }
+  .prompt:focus-visible { outline: none; text-shadow: 0 0 calc(8 * var(--u)) rgba(140, 180, 255, .9); }
+  .foot-line, .formation, .foot-count { font: 400 calc(13 * var(--u)) / 1 "Master", var(--menu-font); text-transform: uppercase; }
+  .foot-line, .formation { bottom: calc(30 * var(--u)); }
+  .foot-line { color: #6e7694; }
+  .formation { display: flex; align-items: center; gap: calc(10 * var(--u)); color: #ced9f5; }
+  .formation h2 { margin: 0; font: inherit; }
+  .formation button { width: calc(15 * var(--u)); height: calc(15 * var(--u)); padding: 0; border: 0; background: none;
+    cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .formation button img { width: 100%; height: 100%; display: block; }
+  .foot-count { bottom: calc(13 * var(--u)); color: #6e7694; }
+  .hero[data-tab="launch"] .prompt, .hero[data-tab="launch"] .foot-line,
+  .hero[data-tab="memory"] .prompt { opacity: 1; pointer-events: auto; }
+  .hero[data-tab="memory"][data-name="on"] .formation, .hero[data-tab="memory"][data-name="on"] .foot-count {
+    opacity: 1; pointer-events: auto; }
+  .hero[data-tab="memory"] .formation, .hero[data-tab="memory"] .foot-count { transition: opacity .7s ease-in; }
+  .hero[data-tab][data-idle] .prompt, .hero[data-tab][data-idle] .foot-line { opacity: 0; transition: opacity .7s ease; }
+  @media (prefers-reduced-motion: reduce) { .elf { transition: none !important; } }
 
   /* Phones on their side: tighter images so both fit above the towers */
   @media (max-height: 500px) {
@@ -95,11 +136,12 @@
 <nav class="options" aria-label="Sections">
   <a data-item="launch" href="index.html#launch-disc"><span class="label">Launch Disc</span></a>
   <a data-item="storage" href="index.html#storage"><span class="label">Storage</span></a>
-  <a data-item="memory" href="orbs.html"><span class="label">Memory Files</span></a>
+  <a data-item="memory" href="index.html#memory-files"><span class="label">Memory Files</span></a>
 </nav>
 
 <section class="hero" id="hero">
   <canvas id="pillars" aria-hidden="true"></canvas>
+  <canvas id="orbs" hidden aria-label="Memory Files, the orbs: hold to show their paths and drag to turn them, swipe across for the next formation"></canvas>
   <canvas class="shelf" id="shelf" aria-label="The elf shelf: touch a hat beside the middle one, or press Left / Right; a hat sends its Color Theme across the towers (hold it to keep it); the blue RIPPS2 hat opens the beta's psx-place thread"></canvas>
   <div class="shelf-caption" id="shelf-caption" aria-live="polite"></div>
   <a class="shelf-link" id="shelf-link" href="https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/"
@@ -108,7 +150,17 @@
   <div class="hero-content">
     <img class="console" src="assets/console.png" alt="Console" onerror="this.remove()">
   </div>
+  <!-- RIPPS2's footnotes (Launch Disc, Memory Files): its own glyphs, from the ELF's theme -->
+  <button class="elf prompt" id="prompt" type="button"><img src="elf/theme/gfx/start.png" alt="START"><span id="prompt-text">START LASER</span></button>
+  <p class="elf foot-line" id="disc-line">INSERT PS1/PS2 GAME OR CD/DVD MEDIA</p>
+  <div class="elf formation" id="formation">
+    <button type="button" id="prev" aria-label="Previous formation"><img src="elf/theme/gfx/left.png" alt=""></button>
+    <h2 id="name" aria-live="polite"></h2>
+    <button type="button" id="next" aria-label="Next formation"><img src="elf/theme/gfx/right.png" alt=""></button>
+  </div>
+  <p class="elf foot-count" id="count"></p>
 </section>
+<p class="ripps2-foot">RIPPS2 (vision interactive mock-up)</p>
 
 
 <script type="importmap">
@@ -121,42 +173,121 @@
 </script>
 <script type="module">
   import { createPillars } from "./pillars.js";
+  import { createOrbs, FORMATIONS } from "./orbs.js";
   import { initMenu } from "./menu.js";
   import { createElfShelf } from "./elfshelf.js";
   import { letterbox } from "./letterbox.js";
 
   // a phone held upright gets the page in a letterboxed player (letterbox.js); nothing is drawn out here then
   if (!letterbox()) {
-  const hero = document.getElementById("hero");
+  const $ = (id) => document.getElementById(id);
+  const hero = $("hero"), params = new URLSearchParams(location.search);
+  const scale = window.top !== window ? 1.5 : 2; // in the player the page is scaled down anyway
 
-  // Launch Disc sparks the field: two blasts straight into the center
-  let pillars;
-  const spark = () => { pillars.blast(); setTimeout(() => pillars.blast(), 220); };
-  // Storage shows the elf shelf, Launch Disc the console; the site lands on Storage
-  let shelf;
-  const showTab = (name) => {
-    hero.dataset.tab = name;
-    shelf?.show(name === "storage");
-  };
-  const { arrived, current } = initMenu({ onLaunch: spark, onSelect: showTab });
-
-  // Coming over from the orbs page skips the rise-up intro so the towers are already standing
-  if (arrived) document.documentElement.classList.add("arrived");
-  pillars = createPillars(document.getElementById("pillars"), {
-    palette: "cobalt",
-    interactTarget: hero,
-    startTime: arrived ? 6 : Number(new URLSearchParams(location.search).get("t")) || 0,
-    maxPixelRatio: window.top !== window ? 1.5 : 2, // in the player the page is scaled down anyway
+  // ---- Launch Disc and Storage: the towers; Launch Disc (and its START LASER) sparks them, two blasts into the centre
+  const pillars = createPillars($("pillars"), {
+    palette: "cobalt", interactTarget: hero, maxPixelRatio: scale,
+    startTime: Number(params.get("t")) || 0,
   });
-  if (arrived === "launch") spark();
-
+  const spark = () => { pillars.blast(); setTimeout(() => pillars.blast(), 220); };
+  let shelf;
   try {
-    shelf = createElfShelf(document.getElementById("shelf"), { interactTarget: hero, caption: document.getElementById("shelf-caption"),
-      link: document.getElementById("shelf-link"),
+    shelf = createElfShelf($("shelf"), { interactTarget: hero, caption: $("shelf-caption"), link: $("shelf-link"),
       // a hat pressed: its Color Theme across the towers, washing back to RIPPS2's blue once let go
       onHatPress: (name, x, y) => pillars.colorWave(name, x, y) });
   } catch (e) { console.warn("elf shelf:", e); }
-  showTab(arrived === "launch" ? "launch" : current);
+
+  // ---- Memory Files: the orbs, made once (the first visit, or once the page has settled, so that visit is instant).
+  // The formation's name and count hold 2.5 s after a change, a press or the page opening, then fade
+  let orbs = null, nameTimer = 0;
+  const showName = () => {
+    hero.dataset.name = "on";
+    clearTimeout(nameTimer);
+    nameTimer = setTimeout(() => { hero.dataset.name = ""; }, 2500);
+  };
+  function makeOrbs() {
+    if (orbs) return orbs;
+    orbs = createOrbs($("orbs"), {
+      start: Number(params.get("f")) || 0, maxPixelRatio: scale,
+      onChange(i, f) {
+        $("name").textContent = f.name;
+        $("count").textContent = `${String(i + 1).padStart(2, "0")} / ${String(FORMATIONS.length).padStart(2, "0")}`;
+        showName();
+      },
+      onSwipe: (dir) => (dir < 0 ? orbs.prev() : orbs.next()),
+      onInput: showName,
+    });
+    return orbs;
+  }
+  $("prev").addEventListener("click", () => makeOrbs().prev());
+  $("next").addEventListener("click", () => makeOrbs().next());
+  // START: Launch Disc's laser sparks the towers; Memory Files' browser draws the formation's outline on
+  $("prompt").addEventListener("click", () => (hero.dataset.tab === "memory" ? makeOrbs().showOutline() : spark()));
+
+  // ---- the tabs, one page: the towers and the orbs crossfade, and the one out of sight is hidden (it stops drawing)
+  let hideTimer = 0;
+  function showTab(name) {
+    const memory = name === "memory";
+    const show = memory ? $("orbs") : $("pillars"), hide = memory ? $("pillars") : $("orbs");
+    show.hidden = false;
+    void show.offsetWidth; // laid out before the tab changes, so it fades in rather than popping
+    if (memory) makeOrbs();
+    hero.dataset.tab = name;
+    pillars.setActive(!memory);
+    shelf?.show(name === "storage");
+    $("prompt-text").textContent = memory ? "START BROWSER" : "START LASER";
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => { hide.hidden = true; }, 650);
+    if (memory) { orbs.showOutline(); showName(); }
+    noteInput();
+  }
+
+  // ---- Fade When Idle, as RIPPS2's hints: the START prompt and the drive's line go after 6 s with no input
+  let idleTimer = 0;
+  function noteInput() {
+    if (hero.dataset.idle) delete hero.dataset.idle;
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { hero.dataset.idle = "1"; }, 6000);
+  }
+  for (const ev of ["pointermove", "pointerdown", "keydown", "wheel"]) addEventListener(ev, noteInput, { passive: true });
+
+  // ---- keys on Memory Files: Left / Right the formations, L held their paths (L2 on the console)
+  addEventListener("keydown", (e) => {
+    if (hero.dataset.tab !== "memory" || !orbs) return;
+    if (e.key === "ArrowRight") orbs.next();
+    else if (e.key === "ArrowLeft") orbs.prev();
+    else if ((e.key === "l" || e.key === "L") && !e.repeat) orbs.holdPaths(true);
+  });
+  addEventListener("keyup", (e) => { if ((e.key === "l" || e.key === "L") && orbs) orbs.holdPaths(false); });
+
+  // ---- a controller, as on the console: START the prompt; on Memory Files Left / Right or L1 / R1 the formations,
+  // L2 (or Cross) held the paths, the right stick turns them
+  const held = {};
+  function pollPads() {
+    let any = false;
+    for (const pad of navigator.getGamepads?.() || []) {
+      if (!pad) continue;
+      any = true;
+      const b = (i) => !!pad.buttons[i]?.pressed;
+      const edge = (k, on) => { const was = held[pad.index + k]; held[pad.index + k] = on; return on === was ? 0 : on ? 1 : -1; };
+      const sx = pad.axes[2] || 0, sy = pad.axes[3] || 0;
+      if (pad.buttons.some((x) => x.pressed) || Math.hypot(sx, sy) > 0.3) noteInput();
+      if (edge("s", b(9)) > 0) $("prompt").click();
+      if (hero.dataset.tab === "memory" && orbs) {
+        if (edge("l", b(14) || b(4)) > 0) orbs.prev();
+        if (edge("r", b(15) || b(5)) > 0) orbs.next();
+        const paths = edge("p", b(6) || b(0));
+        if (paths) orbs.holdPaths(paths > 0);
+        orbs.stick(sx, sy);
+      }
+    }
+    if (any) requestAnimationFrame(pollPads);
+  }
+  addEventListener("gamepadconnected", () => requestAnimationFrame(pollPads));
+
+  const { current } = initMenu({ onLaunch: spark, onSelect: showTab });
+  showTab(current);
+  if (!orbs) (window.requestIdleCallback || ((f) => setTimeout(f, 2500)))(() => makeOrbs(), { timeout: 4000 });
   }
 
 </script>

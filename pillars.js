@@ -6,6 +6,7 @@
 //   import { createPillars } from "./pillars.js";
 //   const pillars = createPillars(canvas, { palette: "cobalt", interactTarget: heroEl });
 //   pillars.colorWave("Ember", clientX, clientY).release();   // a Color Theme's wave (see COLOR_THEMES)
+//   pillars.setActive(false);                                  // another tab is up: the pointer leaves the towers be
 //   pillars.destroy();
 
 import * as THREE from "three";
@@ -371,7 +372,7 @@ export function createPillars(canvas, options = {}) {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
   } catch (err) {
     canvas.dataset.pillars = "unsupported";
-    return { setPalette() {}, blast() {}, colorWave() { return { release() {} }; }, destroy() {}, supported: false };
+    return { setPalette() {}, blast() {}, colorWave() { return { release() {} }; }, setActive() {}, destroy() {}, supported: false };
   }
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.95;
@@ -552,7 +553,8 @@ export function createPillars(canvas, options = {}) {
     ray.setFromCamera(ndc, camera);
     return ray.ray.intersectPlane(ground, out);
   }
-  const onMove = (e) => { toNdc(e); hovering = true; };
+  let active = true; // setActive(false): another tab is showing (the towers hidden), so the pointer leaves them be
+  const onMove = (e) => { if (!active) return; toNdc(e); hovering = true; };
   const onLeave = () => { hovering = false; ndc.set(0, 0); };
   const lastRipple = new THREE.Vector3();
   let rippleTravel = 0;
@@ -620,6 +622,7 @@ export function createPillars(canvas, options = {}) {
   }
 
   const onDown = (e) => {
+    if (!active) return;
     if (e.target.closest && e.target.closest("a, button, input, select, textarea, label")) return;
     toNdc(e);
     const p = new THREE.Vector3();
@@ -785,5 +788,6 @@ export function createPillars(canvas, options = {}) {
   // Big area blast from code (default: the center of the field)
   const blast = (x = 0, z = 0) => spawnWave(x, z, true);
 
-  return { setPalette, blast, colorWave, destroy, supported: true };
+  const setActive = (on) => { active = !!on; if (!active) hovering = false; };
+  return { setPalette, blast, colorWave, setActive, destroy, supported: true };
 }
