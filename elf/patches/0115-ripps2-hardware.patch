@@ -6499,7 +6499,7 @@ index b6ab16a..84ccb04 100644
  }
  #endif // RIPPS2_HINTS_HOST_TEST
 diff --git a/src/ripps2media.c b/src/ripps2media.c
-index 3cd9350..e6c1c1d 100644
+index 3cd9350..6b986ea 100644
 --- a/src/ripps2media.c
 +++ b/src/ripps2media.c
 @@ -64,6 +64,8 @@ int ripps2MediaKind(const char *name)
@@ -6511,7 +6511,7 @@ index 3cd9350..e6c1c1d 100644
      return RIPPS2_MEDIA_NONE;
  }
  
-@@ -927,6 +929,235 @@ static void ripps2PlaySound(const char *path)
+@@ -927,6 +929,238 @@ static void ripps2PlaySound(const char *path)
      readPads();
  }
  
@@ -6636,7 +6636,10 @@ index 3cd9350..e6c1c1d 100644
 +        ripps2DrawPillars();
 +        ripps2DrawPanelGlass(MP_X, MP_Y, MP_W, MP_H, 0);
 +        fntRenderString(uiFont, MP_X + 18, MP_Y + 18, ALIGN_VCENTER, 0, 0, _t("MUSIC"), MP_LIT);
-+        snprintf(buf, sizeof(buf), _t("%d TRACKS"), n);
++        if (n == 1)
++            snprintf(buf, sizeof(buf), "1 %s", _t("TRACK")); // one track opened alone: not "1 TRACKS"
++        else
++            snprintf(buf, sizeof(buf), _t("%d TRACKS"), n);
 +        fntRenderString(small, MP_X + 18 + fntCalcDimensions(uiFont, _t("MUSIC")) + 12, MP_Y + 18, ALIGN_VCENTER, 0, 0, buf, MP_DIM);
 +        rmDrawLine(MP_X + 14, MP_Y + 32, MP_X + MP_W - 14, MP_Y + 32, MP_PRIM(0x4A, 0x72, 0xDC, 0x60));
 +        if (sel < top)
@@ -6747,7 +6750,7 @@ index 3cd9350..e6c1c1d 100644
  void ripps2OpenMedia(const char *path)
  {
      switch (ripps2MediaKind(path)) {
-@@ -942,6 +1173,9 @@ void ripps2OpenMedia(const char *path)
+@@ -942,6 +1176,9 @@ void ripps2OpenMedia(const char *path)
          case RIPPS2_MEDIA_ICON:
              ripps2ViewSaveIcon(path);
              break;
