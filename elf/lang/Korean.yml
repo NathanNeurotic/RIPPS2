@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: 메뉴 음악을 %s에 쓸 수 없었습니다 (%s). 드라이브가 가득 찼나요?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 메뉴 음악은 %s 크기의 WAV라서 메모리 카드에는 들어가지 않습니다. 여기서 RIPPS2는 메모리 카드에서 실행 중이고 OPL 폴더가 있는 드라이브도 시작되지 않았습니다. 저장소에서 하나를 시작한 뒤 그곳으로 음악을 추출하세요.
-  The sounds could not be written to %s. Is the drive full or write-protected?: 사운드를 %s에 쓸 수 없었습니다. 드라이브가 가득 찼거나 쓰기 금지되어 있나요?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: 이 BIOS의 메뉴 음악은 RIPPS2가 아는 것이 아닙니다. 아무것도 쓰지 않았습니다.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: 이 BIOS의 사운드 뱅크는 RIPPS2가 아는 것이 아닙니다. 아무것도 쓰지 않았습니다.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s(%s)을(를) 먼저 통째로 백업 폴더로 옮김.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- 본체가 PS2BBL 1.2.0을 이 카드에 연결하고 %s/%s(으)로 씀.
-
-    - 그 설정 mc%d:/PS2BBL/CONFIG.INI가 %s에서 RIPPS2를 시작하며 BOOT LOCK은 켜짐.
-
-    이를 위해 I/O 프로세서가 재시작되고, 음악과 드라이브는 나중에 돌아옵니다. 완료라고 표시될 때까지 카드를 꽂아 두고 본체를 켜 두세요.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: 메모리 카드 %d의 사본
   A COPY ON MX4SIO: MX4SIO의 사본
   A COPY ON THE USB DRIVE: USB 드라이브의 사본
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: BIBLE을 메모리 카드 %d에 쓸 수 없어서 카드를 원래대로 되돌렸습니다. 남은 공간을 확인한 뒤 다시 시도하세요.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE이 RIPPS2를 %s에 복사할 수 없었습니다. 공간과 쓰기 금지 여부를 확인하세요. 다른 것은 바꾸지 않았습니다.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE이 RIPPS2를 HDD의 %s 파티션에 복사할 수 없었습니다. 남은 공간을 확인하세요. 다른 것은 바꾸지 않았습니다.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE이 HDD 부트 프로그램의 사본을 보관할 수 없어서 바꾸기 전에 멈췄습니다. RIPPS2는 HDD에 복사되었고, 다른 것은 바꾸지 않았습니다.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE이 %s을(를) 따로 옮겨 보관할 수 없어서 거기서 멈췄습니다. 카드에서는 아무것도 바꾸지 않았습니다.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE이 설정(%s)을 쓸 수 없었습니다. 부트 프로그램은 바꾸지 않았습니다.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE이 HDD의 부트 프로그램을 쓸 수 없었습니다 (%d단계). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK이 켜져 있습니다. 이제 PS2BBL은 전원을 켤 때 RIPPS2를 시작합니다 (%s). 다른 것으로 가려면 본체가 시작될 때 PS2BBL 단축키를 누르고 있으세요.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK은 PS2BBL(PlayStation 2 Basic BootLoader)을 통해 작동하는데, 여기 있는 메모리 카드에는 없습니다.
   INSTALL BIBLE: BIBLE 설치
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : '메모리 카드 %d에 BIBLE 설치
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     HDD로 부팅하는 본체(네트워크 어댑터가 있는 구형 PS2)가 필요합니다. 완료라고 표시될 때까지 켜 두세요.'
   INTERNAL HDD  (its boot area): 내장 HDD  (부트 영역)
   MEMORY CARD %d  (%s): 메모리 카드 %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : '메모리 카드 0: %s
-
-    메모리 카드 1: %s
-
-    %s
-
-    BIBLE은 El Isra의 PS2BBL 1.2.0을 RIPPS2가 설정한 것입니다: 전원을 켤 때 기다리지 않고 RIPPS2부터 시작하며, 전원을 켤 때 버튼을 누르고 있으면 브라우저(세모), 디스크(START), 원래 있던 것(동그라미)으로도 갈 수 있습니다. 메모리 카드나 내장 HDD에 설치하거나 복구할까요?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: 메모리 카드 %d의 남은 공간은 %d KB이고, BIBLE은 그곳에 %d KB가 필요합니다. 공간을 비운 뒤 다시 시도하세요.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: 메모리 카드 %d의 남은 공간은 %d KB이고, RIPPS2 사본에는 %d KB가 필요합니다. 공간을 비우거나 다른 곳을 고르세요.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: 메모리 카드 %d은(는) 전원을 켤 때 %s을(를) 시작하는데, BOOT LOCK은 PS2BBL을 통해서만 작동합니다.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: 트레이 열림
   TREFOIL KNOT: 세잎 매듭
   ' and ': ' 그리고 '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s이(가) %s%s에 없습니다. POPSTARTER가 게임을 시작하려면 게임 옆에 POPS.ELF와 POPS_IOX.PAK(내 본체의 PS1 에뮬레이터)가 있어야 합니다.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s이(가) %s%s에 없습니다. RIPPOPS가 %s에서 POPS.ELF와 POPS_IOX.PAK(Sony의 PS1 에뮬레이터)를 찾았습니다: START를 누르면 여기로 복사하고 게임을 시작합니다.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s을(를) %s%s에 복사할 수 없었습니다. 드라이브가 가득 찼거나 쓰기 금지되어 있나요?'
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s이(가) %s%s에 없습니다. POPSTARTER가 게임을 시작하려면 게임 옆에 POPS.ELF와 POPS_IOX.PAK(내 본체의 PS1 에뮬레이터)가 있어야 합니다.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s이(가) %s%s에 없습니다. RIPPOPS가 %s에서 POPS.ELF와 POPS_IOX.PAK(Sony의 PS1 에뮬레이터)를 찾았습니다: START를 누르면 여기로 복사하고 게임을 시작합니다.'
   COPY AND START: 복사하고 시작
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'YouTube에서 보내 주신 모든 사랑에도 특별히 감사드립니다:'
   and its own look, launchers, file browser and save tools.: 그리고 고유한 모습, 런처, 파일 브라우저, 세이브 도구를 갖췄습니다.
   glad to help however you reach me.: 어떤 방법으로 연락하든 기꺼이 돕겠습니다.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): 두 번째 게임 코어, 1.8.0을 수정 없이 포함 (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: rickgaiser의 Neutrino를 두 번째 게임 코어로 내장하고,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : '이 게임은 Neutrino로 시작하는데, RIPPS2가 찾지 못했습니다: 설정의 경로에도, 게임의 드라이브에도, 메모리 카드에도, 시작된 드라이브에도 없습니다. RIPPS2에는 rickgaiser의 Neutrino 1.8.0(AFL-3.0)이 들어 있습니다: 원하는 곳에 한 번 설치하면 모든 Neutrino 게임이 거기서 사용합니다.'
   STARTING THE DRIVES: 드라이브 시작 중
   '%d games, on the started drives': 게임 %d개, 시작된 드라이브에서
   '%s: SOME FILES COULD NOT BE DELETED': '%s: 일부 파일을 삭제하지 못했습니다'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: 시작된 드라이브에 없음
   only if you have none: 없을 때만
   starts every drive first: 먼저 모든 드라이브를 시작함
-  Drives, launchers and homebrew: 드라이브, 런처, 홈브루
   BDM Devices: BDM 장치
   Color Sweep: 색 스윕
   Colors and Text: 색과 글자
@@ -1079,9 +1038,7 @@ strings:
   Bold: 굵게
   Controllers: 컨트롤러
   Lively: 경쾌하게
-  Medium: 중간
   PS Emulation: PS 에뮬레이션
-  Regular: 보통
   Slow: 천천히
   A MOMENT: 잠시만요
   A TASK IN THE BACKGROUND: 백그라운드 작업
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: '%s을(를) 삭제할까요? RIPPS2 자체 스윕은 그대로 남습니다.'
   Sweep: 스윕
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: 배지는 목록에서 업적이 있는 게임과 잠금 해제한 수를 표시합니다. 텔레메트리를 켜야 합니다.
+  Classic (Split): 클래식 (분리형)
+  Guidance: 안내
+  OK: OK
+  XL (One Piece): XL (일체형)
+  STARS HIDDEN: 별 숨김
+  STARS SHOWN: 별 표시
+  Asking the SD2PSX for this game's memory card...: SD2PSX에 이 게임의 메모리 카드를 요청하는 중...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX가 이 게임의 메모리 카드를 준비하고 있습니다 (%d초). 끝나면 게임이 시작됩니다. START로 바로 시작합니다.
+  the second game core, its newest build carried unmodified (AFL-3.0): 두 번째 게임 코어, 최신 빌드를 수정 없이 포함 (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': '%s을(를) %s에 쓸 수 없었습니다 (사운드 %d개는 씀). 드라이브가 가득 찼거나 쓰기 금지되어 있나요?'
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': '%s을(를) %s에 쓸 수 없었습니다 (사운드 %d개는 썼고, 카드의 남은 공간은 이제 %d KB). 카드가 쓰기 금지되어 있나요?'
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: 폴더 %s을(를) 만들 수 없었습니다. 드라이브가 가득 찼거나 쓰기 금지되어 있나요? 아무것도 쓰지 않았습니다.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 사운드는 %d KB가 필요하고 이 메모리 카드의 남은 공간은 %d KB입니다. 아무것도 쓰지 않았습니다. 카드에 공간을 비우거나, 저장소에서 드라이브를 시작한 뒤 다시 추출하세요. 그러면 RIPPS2가 그 드라이브를 제안합니다.
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : 사운드는 %d KB가 필요하고 이 메모리 카드의 남은 공간은 %d KB입니다. START를 누르면 대신 드라이브의 %sAUDIO/에 쓰고, RIPPS2는 거기서 재생합니다.
+  There was not enough memory to make the sounds. Nothing was written.: 사운드를 만들 메모리가 부족했습니다. 아무것도 쓰지 않았습니다.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- 본체가 PS2BBL 1.2.0을 이 카드에 연결하고 %s/%s(으)로 씀.
+  
+    - 그 설정 mc%d:/PS2BBL/CONFIG.INI가 %s에서 RIPPS2를 기다림 없이 시작하며(0 ms, PS2BBL Extended는 허용하지 않음) BOOT LOCK은 켜짐.
+  
+    이를 위해 I/O 프로세서가 재시작되고, 음악과 드라이브는 나중에 돌아옵니다. 완료라고 표시될 때까지 카드를 꽂아 두고 본체를 켜 두세요.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE을 메모리 카드 %d에 쓸 수 없어서 카드를 원래대로 되돌렸습니다. 남은 공간을 확인한 뒤 다시 시도하세요. (RIPPS2 옆의 DIAG.TXT에 카드의 응답이 있습니다.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE이 %s을(를) 따로 옮겨 보관할 수 없어서 거기서 멈췄습니다. 카드에서는 아무것도 바꾸지 않았습니다. (RIPPS2 옆의 DIAG.TXT에 카드의 응답이 있습니다.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : '메모리 카드 0: %s
+  
+    메모리 카드 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, El Isra의 PS2BBL 1.2.0을 RIPPS2가 설정한 것: 전원을 켜면 0 ms 만에 시작(PS2BBL Extended는 0을 허용하지 않음), RIPPS2부터 시작하며, 전원을 켤 때 버튼을 누르고 있으면 브라우저(세모), 디스크(START), 원래 있던 것(동그라미)으로도 갈 수 있습니다. 메모리 카드나 내장 HDD에 설치하거나 복구할까요?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: 메모리 카드 %d에 BBL 1.20
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : '이제 메모리 파일이 MEDIA에서 열리고, 디스크가 클립보드에 있습니다(추출됨). 넣을 드라이브와 폴더로 가서(어느 드라이브든: USB, HDD, SD2PSX의 MEDIA) 세모를 눌러 작업을 열고 붙여넣기를 고르세요. RIPDISC가 한 번 더 묻고 PS2의 레이저로 디스크를 읽어 거기에 씁니다.'
+  RENAME THE GAME: 게임 이름 바꾸기
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : '이 게임은 Neutrino로 시작하는데, RIPPS2가 찾지 못했습니다: 설정의 경로에도, 게임의 드라이브에도, 메모리 카드에도, 시작된 드라이브에도 없습니다. RIPPS2에는 rickgaiser의 Neutrino(AFL-3.0) 최신 빌드가 들어 있습니다: 원하는 곳에 한 번 설치하면 모든 Neutrino 게임이 거기서 사용합니다.'
+  A PS1 disc's track list, for Ember: PS1 디스크의 트랙 목록 (Ember용)
+  A PS1 game for POPSTARTER: POPSTARTER용 PS1 게임
+  A PS2 game: PS2 게임
+  A card the SD2PSX set aside (wrong size): SD2PSX가 따로 둔 카드 (크기가 다름)
+  'A program: Cross starts it': '프로그램: 가위표로 시작'
+  A save, packed in one file: 파일 하나로 묶은 세이브
+  All Games' master list: 모든 게임의 마스터 목록
+  'An SD2PSX boot card: open it to look in': 'SD2PSX 부트 카드: 열어서 안을 보세요'
+  'An SD2PSX memory card: open it like a VMC': 'SD2PSX 메모리 카드: VMC처럼 여세요'
+  Cheats, a file a game: 치트, 게임마다 파일 하나
+  Each game's settings and info page: 각 게임의 설정과 정보 페이지
+  Ember, its BIOS and its PS1 games: Ember, 그 BIOS와 PS1 게임
+  Game covers and art, by game ID: 게임 커버와 이미지 (게임 ID별)
+  Games kept in 1 GB parts: 1 GB 조각으로 나눈 게임
+  Games that share one SD2PSX card: SD2PSX 카드 하나를 함께 쓰는 게임
+  Languages for RIPPS2: RIPPS2 언어
+  Neutrino, the second game core: Neutrino, 두 번째 게임 코어
+  OPL's list of this folder's games: 이 폴더의 게임에 대한 OPL 목록
+  POPSTARTER and PS1 games (VCDs): POPSTARTER와 PS1 게임 (VCD)
+  PS2 games on CD, as ISOs: CD의 PS2 게임 (ISO)
+  PS2 games on DVD, as ISOs: DVD의 PS2 게임 (ISO)
+  PS2BBL's settings: PS2BBL 설정
+  Programs to start (ELFs): 시작할 프로그램 (ELF)
+  RIPPS2's diagnostics, for a bug report: RIPPS2 진단 정보 (버그 신고용)
+  RIPPS2's own folder: RIPPS2 자체 폴더
+  RIPPS2's settings: RIPPS2 설정
+  RIPPS2's sounds and music: RIPPS2 사운드와 음악
+  Recent games: 최근 게임
+  RetroAchievements' files: RetroAchievements 파일
+  Ripped CDs and DVDs, pictures, video: 추출한 CD와 DVD, 사진, 동영상
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'SD2PSX의 SD에 저장 중: 끄기 전에 %d초 기다리세요.'
+  Starred games: 즐겨찾는 게임
+  The SD2PSX's boot cards (PS2BBL): SD2PSX 부트 카드 (PS2BBL)
+  The SD2PSX's boot channels and names: SD2PSX 부트 채널과 이름
+  The SD2PSX's memory cards: SD2PSX 메모리 카드
+  The SD2PSX's own settings: SD2PSX 자체 설정
+  The SD2PSX's settings: SD2PSX 설정
+  Themes, a folder each: 테마, 하나에 폴더 하나
+  This drive's game list, for a quick boot: 이 드라이브의 게임 목록 (빠른 부팅용)
+  Virtual memory cards for games: 게임용 가상 메모리 카드
+  What RIPPS2's last launch did: RIPPS2의 마지막 실행이 한 일
+  Circle from the top   Cross close: '동그라미: 처음부터   가위표: 닫기'
+  Cross from the top   Circle close: '가위표: 처음부터   동그라미: 닫기'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : 이 트랙을 재생할 수 없었습니다. RIPPS2는 16비트 PCM .wav 파일(RIPDISC와 BIOS 음악이 추출하는 형식), Ogg Vorbis .ogg 파일, MP3를 재생합니다.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': '읽기 전용: SD2PSX의 부트 카드가 사용 중입니다'
+  '%d music tracks': 음악 트랙 %d개
+  1 music track: 음악 트랙 1개
+  'A game''s EXIT: %s': '게임의 EXIT: %s'
+  'A game''s EXIT: the browser': '게임의 EXIT: 브라우저'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': '모든 게임: %d개를 %s에 보관, 부팅 때 어느 드라이브보다 먼저 표시'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': '모든 게임: 마스터 목록 없음; 게임 목록이 나오면 %s을(를) 씀 (Fast Cache 켜짐)'
+  CACHE SETTINGS: 캐시 설정
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: RIPPS2에 든 Neutrino를 드라이브나 메모리 카드에 복사합니다. 직접 가진 Neutrino는 그대로 씁니다.
+  DIAG.TXT, for a bug report: DIAG.TXT (버그 신고용)
+  Drives, loading, launchers and homebrew: 드라이브, 불러오기, 런처, 홈브루
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache는 드라이브가 응답하는 순간 그 드라이브의 마지막 게임 목록을 보여 주고, Trust Cache는 SELECT를 누를 때까지 그대로 둡니다. 둘 다 켜고, 설정을 RIPPS2가 시작하는 메모리 카드에 두면 가장 빠른 부팅입니다.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': '게임 목록: Fast Cache 꺼짐, 부팅 때 각자 드라이브에서 읽음'
+  'Game lists: each shows at once from its cache and stands until SELECT': '게임 목록: 캐시에서 바로 표시, SELECT까지 유지'
+  'Game lists: each shows at once from its cache, then is read again': '게임 목록: 캐시에서 바로 표시, 그 뒤 다시 읽음'
+  LOADING: 불러오기
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: 이 본체의 BIOS로 RIPPS2 사운드를 만들어 AUDIO 폴더에 씁니다.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': '아직 음악 없음: 오디오 설정 > BIOS 음악으로 이 본체의 메뉴 음악을 추출합니다.'
+  SAVE DIAGNOSTICS: 진단 정보 저장
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: 드라이브에서 POPSTARTER, POPS 파일, Ember, Ember의 BIOS, Neutrino를 찾아 각각의 위치를 기억합니다.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': '설정: %s, 부팅이 기다리는 드라이브 (메모리 카드가 더 빠름)'
+  'Settings: %s, read first (the quickest place)': '설정: %s, 가장 먼저 읽음 (가장 빠른 곳)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: 지금 모든 드라이브(USB, HDD, MMCE, MX4SIO, 네트워크)를 시작해 각 드라이브와 공간을 여기 표시합니다.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: POPSTARTER가 네트워크로 PS1 게임에 쓰는 IP와 SMB 공유.
+  The diagnostics are in %s.: 진단 정보는 %s에 있습니다.
+  The diagnostics could not be written to %s.: 진단 정보를 %s에 쓸 수 없었습니다.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: 각 메모리 카드가 전원을 켤 때 시작하는 것; BIBLE(RIPPS2를 시작하도록 설정한 PS2BBL) 설치 또는 복구.
+  Where POPSTARTER and Ember are, and how PS1 games start.: POPSTARTER와 Ember의 위치, PS1 게임을 시작하는 방법.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Neutrino의 위치, 비디오 모드, Neutrino로 실행할 때마다 받는 인수.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : 컨트롤러, 드라이브, MMCE 카드, 최근 실행에 대해 RIPPS2가 기록한 내용을 RIPPS2 옆의 DIAG.TXT에 씁니다. 버그 신고와 함께 보내 주세요.
+  back to Cache: 캐시로 돌아가기
+  what boot reads first: 부팅이 먼저 읽는 것
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : 이 Neutrino는 1.3보다 오래되어 APA HDD에서 게임을 시작할 수 없습니다. 게임 실행 > Neutrino를 Neutrino 1.3 이상으로 지정하거나, 경로를 비워 RIPPS2에 든 것을 쓰세요.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2에서는 %s이(가) %s%s에 보이지 않습니다. POPSTARTER에는 POPS.ELF와 POPS_IOX.PAK(내 본체의 PS1 에뮬레이터)가 필요하며, RIPPS2가 보지 않는 곳에서 찾을 수도 있습니다(게임이 시작되면 찾은 것입니다). START로 실행하며, 이 드라이브는 다시 묻지 않습니다.
 labels:
   IP_ADDRESS_TYPE_STATIC: 고정
   HINT_NEUTRINO_AUTO_ELF: 게임의 부트 ELF를 Neutrino에 넘겨 타이틀별 설정을 찾게 합니다. 기본으로 켜져 있으며, 직접 설정한 Boot ELF 옵션이 우선합니다.
@@ -1301,16 +1398,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: '타워, 구슬, 유리, CD 플레이어, 파일 브라우저를 세 탭 모두에서 한 가지 색으로. 테마: 테마가 정합니다 (정하지 않으면 RIPPS2 파랑).'
   RIPPS2_HINTS: 버튼 도움말
   HINT_RIPPS2_HINTS: '아래쪽의 버튼 도움말. 조작이 없을 때 페이드는 버튼을 누를 때까지 숨깁니다. 테마: 테마가 정합니다.'
-  RIPPS2_CATEGORY_BAR: 카테고리 막대
-  HINT_RIPPS2_CATEGORY_BAR: '위쪽의 디스크 실행, 저장소, 메모리 파일. 조작이 없을 때 페이드는 버튼을 누를 때까지 숨깁니다. 테마: 테마가 정합니다.'
+  RIPPS2_CATEGORY_BAR: 카테고리/사이드바
+  HINT_RIPPS2_CATEGORY_BAR: '디스크 실행, 저장소, 메모리 파일: 위에 있는 이름, 또는 사이드바. 조작이 없을 때 페이드는 버튼을 누를 때까지 이름을 흐리게 하거나 사이드바를 밀어 둡니다. 바로 돌아옵니다. 테마: 테마가 정합니다.'
   RIPPS2_SOURCE_NAME: 소스 이름
   RIPPS2_STATUS: 상태
   RIPPS2_SOURCE: 소스
   HINT_RIPPS2_SOURCE_NAME: '게임 위의 소스 이름 (모든 게임, HDD 게임 등). 조작이 없을 때 페이드는 카테고리 막대와 함께 흐려지게 합니다. 팝인은 대신 L3가 목록 이름을 보여 주듯, 부팅 후 첫 목록과 소스가 바뀔 때마다 페이지 가운데에 크게 보여 준 뒤 흐려집니다. 테마는 팝인을 자신의 표시로 삼을 수 있습니다. 테마: 테마가 정합니다.'
-  RIPPS2_RECENTS: 최근 게임 표시
-  HINT_RIPPS2_RECENTS: 최근에 실행한 게임을 최대 이 개수만큼, 최신순으로 즐겨찾기 게임 맨 위에 보여 줍니다. 0이면 끕니다.
+  RIPPS2_RECENTS: 최근 게임
+  HINT_RIPPS2_RECENTS: '최근 게임: 최근에 실행한 게임을 새것부터 보여 주는 사이드바 페이지. 몇 개를 남길지, 1~99(세모로 숫자 입력). 드라이브가 수동인 게임은 고르면 그 드라이브를 시작합니다. 0이면 페이지가 꺼집니다.'
   RIPPS2_CATEGORY_ORDER: 카테고리 순서
-  HINT_RIPPS2_CATEGORY_ORDER: '메모리 파일을 처음에, 디스크 실행을 마지막에. RIPFLOW용입니다 (인터페이스 > 테마). 테마: 테마가 정합니다.'
+  HINT_RIPPS2_CATEGORY_ORDER: '디스크 실행과 메모리 파일을 바꿉니다: 메모리 파일이 먼저, 디스크 실행이 마지막. 바의 이름과 사이드바의 아이콘 모두. RIPFLOW용입니다(인터페이스 > 테마). 테마: 테마가 정합니다.'
   RIPPS2_MUSIC: 음악
   HINT_RIPPS2_MUSIC: RIPPS2 옆의 AUDIO 폴더와 시작한 각 드라이브의 OPL AUDIO 폴더에 있는 bgm 파일(태그 없는 Ogg 또는 16비트 WAV)을 재생합니다. Menu라는 이름의 파일이 먼저 재생됩니다. 테마 자체의 음악이 있으면 대신 그것이 재생됩니다.
   RIPPS2_BIOS_SOUNDS: BIOS 사운드
@@ -1319,7 +1416,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: 도움말과 글리프
   HINT_RIPPS2_HINTS_GLYPHS: 버튼 도움말과 글리프의 모양. 모든 줄은 테마, 즉 테마가 고른 것으로 시작합니다. 다른 선택은 내 것이며 모든 테마보다 우선합니다.
   RIPPS2_HINT_LAYOUT: 도움말 배치
-  HINT_RIPPS2_STARSIDE: '즐겨찾기한 게임의 별이 목록에서 놓이는 곳. 왼쪽: 각 행 앞의 전용 열. 오른쪽: 제목 뒤. 숨김: 별 없음. 테마: 테마가 정한 대로. 테마의 행 아이콘은 반대쪽 끝으로 옮겨져 겹치지 않습니다.'
+  HINT_RIPPS2_STARSIDE: '즐겨찾는 게임의 별이 목록에서 놓이는 곳. 왼쪽: 각 줄 앞의 전용 열. 오른쪽: 제목 뒤. 숨김(처음 값): 별도 열도 없이 제목을 끝까지 표시. 테마: 테마대로. R3는 어떤 경우든 게임을 즐겨찾기에 넣습니다. 목록에서 R3를 4초 누르고 있으면 별을 숨기거나 되돌립니다(커서 아래 게임도 즐겨찾기에 들어감).'
   HINT_RIPPS2_HINT_LAYOUT: '가로: 도움말을 한 줄로. 세로: 한 줄에 도움말 하나씩, 테마가 도움말을 두는 곳에서 시작해 옆에 목록으로 나열합니다.'
   RIPPS2_HINT_LABELS: 도움말 라벨
   HINT_RIPPS2_HINT_LABELS: 글리프만은 버튼만 그립니다. 글자가 들어 있는 글리프용입니다. 배지는 각 도움말의 글리프와 이름을 배지 하나로 묶습니다.
@@ -1340,11 +1437,11 @@ labels:
   RIPPS2_TRANSITION: 페이지 전환
   HINT_RIPPS2_TRANSITION: '다른 카테고리로 갈 때 새 페이지가 나타나는 방식: 테마의 배경색에서, 또는 플래시에서. 테마는 테마의 선택을 씁니다.'
   RIPPS2_CATEGORY_LAYOUT: 카테고리 배치
-  HINT_RIPPS2_CATEGORY_LAYOUT: '세 카테고리의 위치: 이름을 위쪽에 가로로, 또는 사이드바에 아이콘을 세로로 두고 각각 페이지 서랍을 엽니다(목록에서 왼쪽을 누르면 그곳으로). 테마는 테마 자체의 것을 씁니다.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: '세 카테고리의 위치: 이름을 위에 나란히, 또는 사이드바를 따라 아이콘을 세로로 두고 각각 페이지 서랍을 둡니다(목록에서 왼쪽을 누르면 그곳으로). 메뉴: 바 없이, OPL용 테마처럼 카테고리를 START 메뉴에. 테마는 테마 자체의 배치를 씁니다.'
   RIPPS2_CACHE: 캐시
   HINT_RIPPS2_CACHE: '각 소스의 게임 목록을 보관해 페이지가 바로 열리게 하는 방법: Fast Cache, 내장 HDD 목록, 자동 새로고침.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: 각 소스는 마지막 게임 목록(CD와 DVD 폴더 옆의 RIPPS2.LST)을 보관해 소스가 응답하는 즉시 보여주고, 그 뒤 백그라운드에서 소스를 다시 읽습니다. 끄면 예전처럼 각 목록을 먼저 소스에서 읽습니다.
+  HINT_RIPPS2_FAST_CACHE: 각 소스는 마지막 게임 목록(CD와 DVD 폴더 옆의 RIPPS2.LST)을 저장하고 소스가 응답하는 순간 보여 줍니다. 그 뒤 소스를 다시 읽을지는 Trust Cache가 정합니다. 끄면 예전처럼 각 목록을 먼저 소스에서 읽습니다.
   HINT_RIPPS2_VIGNETTE: 고른 표지를 뺀 모든 표지의 가장자리를 어둡게 해 고른 표지를 돋보이게 합니다. 약하게는 최대의 절반입니다.
   RIPPS2_GRID_WIDE: 와이드스크린 그리드 레이아웃
   HINT_RIPPS2_GRID_WIDE: 16:9 화면(와이드스크린, 720p, 1080i)에서만 쓰는 그리드 페이지로, 표지가 좁아지고 가로로 더 많이 들어갑니다. 테마는 테마 자체의 것을, 같음은 그리드 레이아웃을 따릅니다.
@@ -1360,7 +1457,7 @@ labels:
   GAME_TYPE_LABELS: '[PS1]/[PS2] 라벨 표시'
   NEUTRINO_CHEATS_WRITE_FAILED: 치트 목록을 Neutrino 폴더에 저장할 수 없어서 Neutrino가 쓸 수 없습니다. 치트 없이 실행할까요?
   AUTO_CREATE_VMC: 처음 실행할 때 VMC 만들기
-  HINT_AUTO_CREATE_VMC: 슬롯 1에 VMC가 없는 PS2 게임을 실행하면 게임의 장치에 8 MB 카드를 만들고, VMC 화면이 제안하는 이름(그 게임의 모든 디스크가 공유)을 붙여 할당합니다. Neutrino에서의 내장 HDD에는 해당되지 않습니다.
+  HINT_AUTO_CREATE_VMC: 슬롯 1에 VMC 없이 PS2 게임을 실행하면 게임의 장치에 8 MB 카드를 만들고, VMC 화면이 제안하는 이름(그 게임의 모든 디스크가 함께 씀)을 붙여 지정합니다. Neutrino에서는 APA HDD 불가(exFAT HDD는 가능).
   AUTO_VMC_CREATING: 이 게임의 VMC를 만드는 중...
   AUTO_VMC_FAILED: 이 게임의 VMC를 만들 수 없었습니다. 게임은 VMC 없이 시작합니다.
   RIPPS2_BIOS_MUSIC: BIOS 음악
@@ -1397,7 +1494,7 @@ labels:
   HINT_LANGUAGE: 메뉴 언어. lang_*.lng 파일을 LNG 폴더에 넣으면 더 추가할 수 있습니다.
   HINT_GSM_DEFAULTS_BUTTON: 자체 GSM 설정이 없는 한 모든 게임에 적용되는 영상 모드 수정.
   HINT_DEFDEVICE: 부팅할 때 RiptOPL이 여는 페이지.
-  HINT_MMCE_MODE: SD2PSX나 MemCard PRO2의 게임. 자동은 부팅할 때, 수동은 페이지를 열 때 시작하고, 끄기는 숨깁니다.
+  HINT_MMCE_MODE: 'SD2PSX나 MemCard PRO2의 게임. 자동은 부팅 때 시작합니다: 꽂힌 카드에 가장 빠르며, 그 게임이 처음부터 모든 게임에 있습니다. 수동은 페이지를 열 때 시작하고, 끄기는 숨깁니다.'
   HINT_MMCE_SETTINGS_BUTTON: MMCE의 슬롯, IGR bootcard, GameID, 타이밍 옵션.
   HINT_ENABLE_USB: USB 저장 장치 드라이버를 불러옵니다.
   HINT_ENABLE_MX4SIO: MX4SIO SD 카드 어댑터 드라이버를 불러옵니다.
@@ -1577,8 +1674,8 @@ labels:
   HINT_RIPPS2_SCREEN: '메뉴의 화면: 비디오 모드, 와이드스크린, TV에서의 위치(H-POS, V-POS)와 오버스캔.'
   HINT_RIPPS2_LAYOUT: 카테고리의 위치와 페이지가 들어오는 방식, 그리고 RIPFLOW의 커버와 RIPGRID의 격자.
   HINT_RIPPS2_COLORS_TEXT: 글자 굵기, 색 테마, 색 스윕과 모든 색.
-  HINT_RIPPS2_TEXT_WEIGHT: 'RIPPS2 자체 글자의 굵기: 설정의 도움말, 상태, 정보. 보통은 예전 그대로이고, 중간과 굵게는 부드러운 화면에서 더 잘 읽힙니다.'
-  HINT_RIPPS2_HDD_START: 내장 HDD는 APA든 exFAT든 RIPPS2가 무엇이든 읽어 HDD 게임으로 한 번만 보여 줍니다. 끄기는 그대로 둡니다.
+  HINT_RIPPS2_TEXT_WEIGHT: 'RIPPS2 자체 글자의 굵기: 설정의 도움말, 상태, 정보. 보통은 예전과 같고, 굵게는 부드러운 화면에서 더 잘 읽힙니다. 테마 자체의 글꼴은 테마가 정한 굵기를 유지합니다.'
+  HINT_RIPPS2_HDD_START: 내장 HDD는 APA든 exFAT든 RIPPS2가 어느 쪽인지 읽어 HDD 게임으로 한 번만 보여 줍니다. 자동(HDD가 있으면 가장 빠름)은 부팅 때 시작하고, 끄기는 건드리지 않습니다.
   HINT_RIPPS2_THEME_COLOR: 색 테마 자체의 색. 색 테마에서 사용자 지정을 고르면 글자 색처럼 직접 고를 수 있습니다.
   HINT_RIPPS2_SWEEP: 테마가 천천히 부드럽게 지나가는 다섯 가지 색. 무지개, 각 색 테마로 만든 스윕, 또는 직접 만든 것. 끄기는 색 테마를 그대로 둡니다.
   HINT_RIPPS2_SWEEP_COLORS: 스윕의 다섯 색과 속도. RIPPS2의 것을 바꾸면 붙인 이름으로 내 것으로 남습니다.
@@ -1587,3 +1684,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 다음 색이 들어오기 전까지 각 색이 머무는 시간. 경쾌하게도 부드럽고, 색이 깜박이지 않습니다.
   RIPPS2_HIDE_COMPRESS: 게임 숨기기 및 압축
   HINT_RIPPS2_SELECT_HOLD: '게임 목록에서 SELECT를 4.2초 누름. 목록: 패널에 테마를 띄워 하나 고르기. 순환: 다음 테마. 끄기: 아무것도 안 함 (누르면 새로고침은 됨).'
+  RIPPS2_RECENT_GAMES: 최근 게임
+  RIPPS2_SET_METADATA_RENAME: 메타데이터 설정 (이름 바꾸기)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: 컨트롤러 우선 (실험적)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX는 컨트롤러와 함께 쓰는 버스로 읽으며, 읽는 동안에는 컨트롤러가 들리지 않습니다: 커버를 불러오는 동안 입력이 늦거나 빠집니다. 켜기: 커버를 작게 나눠 받고 사이사이 컨트롤러를 읽습니다(조금 느림). 끄기: 카드가 낼 수 있는 최고 속도. 카드의 소스가 자동이면 목록은 부팅 때 한 번만 불러옵니다.'
+  HINT_RIPPS2_TRUST_CACHE: '캐시에서 보여 준 목록은 SELECT를 누르거나 RIPPS2가 직접 그 소스를 바꿀 때까지 그대로, 바로 실행할 수 있게 남습니다. 끄기: 캐시를 보여 준 뒤 각 소스를 백그라운드에서 다시 읽으며, 컨트롤러와 버스를 함께 쓰는 MMCE나 MX4SIO 카드에서는 멈춤이 느껴집니다.'
+  RIPPS2_STATUS_OPEN: 불러오기와 드라이브
+  HINT_RIPPS2_STATUS_OPEN: '상태를 엽니다: 부팅이 설정과 게임 목록을 어디서 읽는지, 어디가 가장 빠른지, 게임의 EXIT가 어디로 가는지, 그리고 모든 드라이브. 거기의 캐시 설정에서 여기로 돌아옵니다.'
+  RIPPS2_BADGE_SET: 배지 세트
+  HINT_RIPPS2_BADGE_SET: '게임 정보 페이지의 배지(등급, 인원, ESRB, 비디오 모드, 스캔, 화면비). RIPPS2: 자체 세트로, 모든 테마에서 같음. 테마: 테마 자체의 그림, 테마가 원하면 RIPPS2의 것.'
+  RIPPS2_HINT_FADE: 힌트와 아이콘 페이드
+  HINT_RIPPS2_HINT_FADE: '바뀌는 버튼 힌트나 아이콘은 커버처럼 바뀌는 순간 페이드인합니다. 그대로인 것은 건드리지 않습니다(모든 페이지와 메시지에서). 끄기: 그냥 나타납니다. 테마: 테마가 정합니다(hints_fade=0이 없으면 켜짐).'
+  RIPPS2_SIDEBAR_STYLE: 사이드바 스타일
+  HINT_RIPPS2_SIDEBAR_STYLE: '클래식 (분리형): 사이드바의 어두운 띠에 아이콘, 옆에 색 띠. XL (일체형): 더 넓은 띠 하나, 가운데에 아이콘. 테마: 테마가 정합니다.'
+  HINT_EXITPATH: '게임 내 메뉴의 EXIT가 가는 곳. BIBLE을 설정하고(상태 > 부트 로더 > 관리, 또는 PS2BBL의 BOOT LOCK) 비워 두는 것이 가장 좋습니다. 그러면 EXIT는 본체 자체의 부팅 경로로 리셋하고 PS2BBL이 전원을 켤 때처럼 RIPPS2를 시작합니다. 가장 안전한 복귀입니다. 브라우저: PS2 브라우저. 메모리 카드(mc0:/mc1:)나 FAT32 USB 드라이브(mass:/)의 ELF는 리셋 직후 불러오는데, 모든 게임이 본체를 그에 맞게 두지는 않습니다. 그때 MMCE에는 전혀 접근할 수 없습니다.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO, exFAT HDD. 자동은 부팅 때 시작합니다: 꽂아 둔 드라이브에 가장 빠르며, 그 게임이 처음부터 모든 게임에 있습니다. 수동은 페이지를 열 때 시작합니다.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino는 APA HDD의 VMC를 쓸 수 없습니다(exFAT, USB, MX4SIO는 가능): 이 게임은 그 슬롯의 실제 카드로 시작합니다.'

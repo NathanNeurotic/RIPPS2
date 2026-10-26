@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: Hudbu menu se nepodařilo zapsat do %s (%s). Je disk plný?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'Hudba menu je WAV o velikosti %s a žádná paměťová karta ji nepojme. RIPPS2 tu běží z paměťové karty a žádný disk se složkou OPL není spuštěný: spusťte nějaký v Úložišti a pak na něj hudbu vyjměte.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: Zvuky se nepodařilo zapsat do %s. Je disk plný nebo chráněný proti zápisu?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Hudba menu tohoto BIOSu není ta, kterou RIPPS2 zná. Nic nebylo zapsáno.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Zvuková banka tohoto BIOSu není ta, kterou RIPPS2 zná. Nic nebylo zapsáno.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) se nejdřív celý přesune do složky zálohy.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 sváže konzole s touto kartou a zapíše jako %s/%s.
-
-    - Jeho nastavení, mc%d:/PS2BBL/CONFIG.INI, spouští RIPPS2 z %s, BOOT LOCK zapnutý.
-
-    Procesor I/O se kvůli tomu restartuje; hudba a disky se pak vrátí. Nechte kartu zasunutou a konzoli zapnutou, dokud se neukáže hotovo.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: KOPIE NA PAMĚŤOVÉ KARTĚ %d
   A COPY ON MX4SIO: KOPIE NA MX4SIO
   A COPY ON THE USB DRIVE: KOPIE NA USB DISKU
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: BIBLE se nepodařilo zapsat na paměťovou kartu %d, takže karta byla vrácena do původního stavu. Zkontrolujte volné místo a zkuste to znovu.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE nedokázalo zkopírovat RIPPS2 do %s. Zkontrolujte místo a ochranu proti zápisu. Nic jiného se nezměnilo.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE nedokázalo zkopírovat RIPPS2 do oddílu %s na HDD. Zkontrolujte volné místo. Nic jiného se nezměnilo.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE nedokázalo uchovat kopii zaváděcího programu HDD, takže se zastavilo dřív, než ho změnilo. RIPPS2 bylo zkopírováno na HDD; nic jiného se nezměnilo.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE nedokázalo odsunout %s, aby ho uchovalo, takže se tam zastavilo. Na kartě se nic nezměnilo.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE nedokázalo zapsat své nastavení (%s). Zaváděcí program se nezměnil.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE nedokázalo zapsat zaváděcí program HDD (krok %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK je zapnutý. PS2BBL teď při zapnutí spouští RIPPS2 (%s). Abyste se dostali jinam, držte při startu konzole klávesovou zkratku PS2BBL.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK funguje přes PS2BBL (PlayStation 2 Basic BootLoader) a na žádné zdejší paměťové kartě není.
   INSTALL BIBLE: NAINSTALOVAT BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'NAINSTALOVAT BIBLE NA PAMĚŤOVOU KARTU %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Potřebujete konzoli, která startuje ze svého HDD (tlustou PS2 se síťovým adaptérem). Nechte ji zapnutou, dokud se neukáže hotovo.'
   INTERNAL HDD  (its boot area): INTERNÍ HDD  (jeho zaváděcí oblast)
   MEMORY CARD %d  (%s): PAMĚŤOVÁ KARTA %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'PAMĚŤOVÁ KARTA 0: %s
-
-    PAMĚŤOVÁ KARTA 1: %s
-
-    %s
-
-    BIBLE je PS2BBL 1.2.0 od El Isry, nastavené pomocí RIPPS2: žádné čekání při zapnutí, nejdřív RIPPS2, a tlačítko držené při zapnutí pořád vede do prohlížeče (TROJÚHELNÍK), na disk (START) a k tomu, co tam bylo předtím (KROUŽEK). Nainstalovat nebo opravit ho na paměťové kartě nebo interním HDD?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Paměťová karta %d má %d KB volno a BIBLE na ní potřebuje %d KB. Uvolněte trochu místa a zkuste to znovu.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Paměťová karta %d má %d KB volno a kopie RIPPS2 potřebuje %d KB. Uvolněte trochu místa nebo vyberte jiné místo.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Paměťová karta %d při zapnutí spouští %s a BOOT LOCK funguje jen přes PS2BBL.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: MECHANIKA OTEVŘENÁ
   TREFOIL KNOT: TROJLÍSTKOVÝ UZEL
   ' and ': ' a '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s chybí v %s%s. POPSTARTER potřebuje POPS.ELF a POPS_IOX.PAK, emulátor PS1 z vaší vlastní konzole, vedle her, aby nějakou spustil.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s chybí v %s%s. RIPPOPS našel POPS.ELF a POPS_IOX.PAK, emulátor PS1 od Sony, na %s: START je sem zkopíruje a spustí hru.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s nešlo zkopírovat do %s%s. Je disk plný nebo chráněný proti zápisu?'
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s chybí v %s%s. POPSTARTER potřebuje POPS.ELF a POPS_IOX.PAK, emulátor PS1 z vaší vlastní konzole, vedle her, aby nějakou spustil.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s chybí v %s%s. RIPPOPS našel POPS.ELF a POPS_IOX.PAK, emulátor PS1 od Sony, na %s: START je sem zkopíruje a spustí hru.'
   COPY AND START: ZKOPÍROVAT A SPUSTIT
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'Zvláštní díky také za všechnu lásku z YouTube:'
   and its own look, launchers, file browser and save tools.: a s vlastním vzhledem, spouštěči, prohlížečem souborů a nástroji pro uložené pozice.
   glad to help however you reach me.: rád pomůžu, ať se ke mně dostanete jakkoli.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): druhé herní jádro, 1.8.0 přiložené beze změn (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: s Neutrinem od rickgaisera uvnitř jako druhým herním jádrem,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Tato hra se spouští přes Neutrino a RIPPS2 ho nenašel: ani na cestě z Nastavení, ani na disku hry, ani na paměťových kartách, ani na žádném spuštěném disku. RIPPS2 obsahuje Neutrino 1.8.0 od rickgaisera (AFL-3.0): nainstalujte ho jednou, kam chcete, a každá hra s Neutrinem ho odtamtud použije.'
   STARTING THE DRIVES: SPOUŠTÍM DISKY
   '%d games, on the started drives': '%d her, na spuštěných discích'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: NĚKTERÉ SOUBORY NEŠLO SMAZAT'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: není na spuštěném disku
   only if you have none: jen pokud žádný nemáte
   starts every drive first: nejdřív spustí všechny disky
-  Drives, launchers and homebrew: Disky, spouštěče a homebrew
   BDM Devices: Zařízení BDM
   Color Sweep: Střídání barev
   Colors and Text: Barvy a text
@@ -1079,9 +1038,7 @@ strings:
   Bold: Tučné
   Controllers: Ovladače
   Lively: Živě
-  Medium: Střední
   PS Emulation: Emulace PS
-  Regular: Běžné
   Slow: Pomalu
   A MOMENT: OKAMŽIK
   A TASK IN THE BACKGROUND: ÚLOHA NA POZADÍ
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: Smazat %s? Střídání samotného RIPPS2 zůstanou, jak jsou.
   Sweep: Střídání
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Odznaky označují hry s úspěchy ve vašich seznamech a kolik jste jich odemkli. Potřebují zapnutou TELEMETRII.
+  Classic (Split): Klasický (dělený)
+  Guidance: Navádění
+  OK: OK
+  XL (One Piece): XL (z jednoho kusu)
+  STARS HIDDEN: HVĚZDIČKY SKRYTÉ
+  STARS SHOWN: HVĚZDIČKY ZOBRAZENÉ
+  Asking the SD2PSX for this game's memory card...: Žádám SD2PSX o paměťovou kartu této hry...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX připravuje paměťovou kartu této hry (%d s). Hra se spustí, až bude hotovo; START ji spustí hned.
+  the second game core, its newest build carried unmodified (AFL-3.0): druhé herní jádro, jeho nejnovější sestavení přiložené beze změn (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': '%s se nepodařilo zapsat do %s (%d zvuků ano). Je disk plný nebo chráněný proti zápisu?'
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': '%s se nepodařilo zapsat do %s (%d zvuků ano a karta má teď volných %d KB). Je karta chráněná proti zápisu?'
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: Složku %s se nepodařilo vytvořit. Je disk plný nebo chráněný proti zápisu? Nic nebylo zapsáno.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'Zvuky zabírají %d KB a tato paměťová karta má volných %d KB. Nic nebylo zapsáno. Uvolněte na kartě místo, nebo spusťte disk v Úložišti a extrahujte je znovu: RIPPS2 pak nabídne ten disk.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : Zvuky zabírají %d KB a tato paměťová karta má volných %d KB. START je místo toho zapíše do %sAUDIO/ na disku a RIPPS2 je odtamtud přehrává.
+  There was not enough memory to make the sounds. Nothing was written.: Na vytvoření zvuků nebylo dost paměti. Nic nebylo zapsáno.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- PS2BBL 1.2.0 sváže konzole s touto kartou a zapíše jako %s/%s.
+  
+    - Jeho nastavení, mc%d:/PS2BBL/CONFIG.INI, spouští RIPPS2 z %s bez čekání (0 ms, což PS2BBL Extended nedovoluje), BOOT LOCK zapnutý.
+  
+    Procesor I/O se kvůli tomu restartuje; hudba a disky se pak vrátí. Nechte kartu zasunutou a konzoli zapnutou, dokud se neukáže hotovo.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE se nepodařilo zapsat na paměťovou kartu %d, takže karta byla vrácena do původního stavu. Zkontrolujte volné místo a zkuste to znovu. (DIAG.TXT vedle RIPPS2 obsahuje, co karta odpověděla.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE nedokázalo odsunout %s, aby ho uchovalo, takže se tam zastavilo. Na kartě se nic nezměnilo. (DIAG.TXT vedle RIPPS2 obsahuje, co karta odpověděla.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'PAMĚŤOVÁ KARTA 0: %s
+  
+    PAMĚŤOVÁ KARTA 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 od El Isry nastavené pomocí RIPPS2: start za 0 ms po zapnutí (PS2BBL Extended 0 nedovoluje), nejdřív RIPPS2, a tlačítko držené při zapnutí pořád vede do prohlížeče (TROJÚHELNÍK), na disk (START) a k tomu, co tam bylo předtím (KROUŽEK). Nainstalovat nebo opravit ho na paměťové kartě nebo interním HDD?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 NA PAMĚŤOVÉ KARTĚ %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'Paměťové soubory se teď otevřou na MEDIA s diskem ve schránce (VYJMUTO). Přejděte na disk a do složky, kam má jít (jakýkoli disk: USB, HDD, MEDIA na SD2PSX), stiskněte TROJÚHELNÍK pro AKCE a zvolte VLOŽIT. RIPDISC se pak ještě jednou zeptá, přečte disk laserem vaší PS2 a zapíše ho tam.'
+  RENAME THE GAME: PŘEJMENOVAT HRU
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Tato hra se spouští přes Neutrino a RIPPS2 ho nenašel: ani na cestě z Nastavení, ani na disku hry, ani na paměťových kartách, ani na žádném spuštěném disku. RIPPS2 obsahuje Neutrino od rickgaisera (AFL-3.0), jeho nejnovější sestavení: nainstalujte ho jednou, kam chcete, a každá hra s Neutrinem ho odtamtud použije.'
+  A PS1 disc's track list, for Ember: Seznam stop disku PS1, pro Ember
+  A PS1 game for POPSTARTER: Hra PS1 pro POPSTARTER
+  A PS2 game: Hra PS2
+  A card the SD2PSX set aside (wrong size): Karta, kterou SD2PSX odložil (špatná velikost)
+  'A program: Cross starts it': 'Program: Křížek ho spustí'
+  A save, packed in one file: Uložená hra zabalená do jednoho souboru
+  All Games' master list: Hlavní seznam Všech her
+  'An SD2PSX boot card: open it to look in': 'Spouštěcí karta SD2PSX: otevřete ji a podívejte se dovnitř'
+  'An SD2PSX memory card: open it like a VMC': 'Paměťová karta SD2PSX: otevřete ji jako VMC'
+  Cheats, a file a game: Cheaty, jeden soubor na hru
+  Each game's settings and info page: Nastavení a informační stránka každé hry
+  Ember, its BIOS and its PS1 games: Ember, jeho BIOS a jeho hry PS1
+  Game covers and art, by game ID: Obaly a obrázky her podle ID hry
+  Games kept in 1 GB parts: Hry uložené po částech 1 GB
+  Games that share one SD2PSX card: Hry sdílející jednu kartu SD2PSX
+  Languages for RIPPS2: Jazyky pro RIPPS2
+  Neutrino, the second game core: Neutrino, druhé herní jádro
+  OPL's list of this folder's games: Seznam her OPL v této složce
+  POPSTARTER and PS1 games (VCDs): POPSTARTER a hry PS1 (VCD)
+  PS2 games on CD, as ISOs: Hry PS2 na CD jako ISO
+  PS2 games on DVD, as ISOs: Hry PS2 na DVD jako ISO
+  PS2BBL's settings: Nastavení PS2BBL
+  Programs to start (ELFs): Programy ke spuštění (ELF)
+  RIPPS2's diagnostics, for a bug report: Diagnostika RIPPS2 pro hlášení chyby
+  RIPPS2's own folder: Vlastní složka RIPPS2
+  RIPPS2's settings: Nastavení RIPPS2
+  RIPPS2's sounds and music: Zvuky a hudba RIPPS2
+  Recent games: Nedávné hry
+  RetroAchievements' files: Soubory RetroAchievements
+  Ripped CDs and DVDs, pictures, video: Vyjmutá CD a DVD, obrázky, video
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'Ukládání na SD kartu SD2PSX: před vypnutím počkejte %d s.'
+  Starred games: Oblíbené hry
+  The SD2PSX's boot cards (PS2BBL): Spouštěcí karty SD2PSX (PS2BBL)
+  The SD2PSX's boot channels and names: Spouštěcí kanály a názvy SD2PSX
+  The SD2PSX's memory cards: Paměťové karty SD2PSX
+  The SD2PSX's own settings: Vlastní nastavení SD2PSX
+  The SD2PSX's settings: Nastavení SD2PSX
+  Themes, a folder each: Motivy, každý ve vlastní složce
+  This drive's game list, for a quick boot: Seznam her tohoto disku pro rychlý start
+  Virtual memory cards for games: Virtuální paměťové karty pro hry
+  What RIPPS2's last launch did: Co udělalo poslední spuštění RIPPS2
+  Circle from the top   Cross close: 'Kroužek: od začátku   Křížek: zavřít'
+  Cross from the top   Circle close: 'Křížek: od začátku   Kroužek: zavřít'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Tuto skladbu se nepodařilo přehrát. RIPPS2 přehrává 16bitové soubory PCM .wav (jak je extrahují RIPDISC a Hudba BIOS), soubory Ogg Vorbis .ogg a MP3.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'JEN PRO ČTENÍ: SPOUŠTĚCÍ KARTA SD2PSX SE POUŽÍVÁ'
+  '%d music tracks': 'Hudební skladby: %d'
+  1 music track: 1 hudební skladba
+  'A game''s EXIT: %s': 'EXIT hry: %s'
+  'A game''s EXIT: the browser': 'EXIT hry: prohlížeč'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Všechny hry: %d her uložených v %s, zobrazených při startu dřív, než odpoví jakýkoli disk'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Všechny hry: zatím žádný hlavní seznam; %s se zapíše, až se hry zobrazí (Fast Cache zapnutý)'
+  CACHE SETTINGS: NASTAVENÍ MEZIPAMĚTI
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: Zkopíruje Neutrino, které RIPPS2 obsahuje, na disk nebo paměťovou kartu. Vlastní Neutrino se použije tak, jak je.
+  DIAG.TXT, for a bug report: DIAG.TXT pro hlášení chyby
+  Drives, loading, launchers and homebrew: Disky, načítání, spouštěče a homebrew
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache ukáže poslední seznam her každého disku, jakmile disk odpoví; Trust Cache ho podrží, dokud nestisknete SELECT. Obojí zapnuté, s nastavením na paměťové kartě, ze které RIPPS2 startuje, je nejrychlejší start.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Seznamy her: Fast Cache vypnutý, takže se každý při startu čte ze svého disku'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Seznamy her: každý se hned ukáže z mezipaměti a zůstane až do SELECT'
+  'Game lists: each shows at once from its cache, then is read again': 'Seznamy her: každý se hned ukáže z mezipaměti a pak se načte znovu'
+  LOADING: NAČÍTÁNÍ
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: Vytvoří zvuky RIPPS2 z BIOSu této konzole a zapíše je do složky AUDIO.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Zatím žádná hudba: Nastavení zvuku > Hudba BIOS extrahuje hudbu z menu této konzole.'
+  SAVE DIAGNOSTICS: ULOŽIT DIAGNOSTIKU
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Prohledá disky kvůli POPSTARTER, souborům POPS, Ember, BIOSu Ember a Neutrinu a zapamatuje si, kde co je.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Nastavení: %s, na disku, na který start čeká (paměťová karta je rychlejší)'
+  'Settings: %s, read first (the quickest place)': 'Nastavení: %s, čtené jako první (nejrychlejší místo)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Spustí teď každý disk (USB, HDD, MMCE, MX4SIO a síť), aby se tu ukázal každý i s jeho místem.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: IP a sdílená složka SMB, které POPSTARTER používá pro hry PS1 přes síť.
+  The diagnostics are in %s.: Diagnostika je v %s.
+  The diagnostics could not be written to %s.: Diagnostiku se nepodařilo zapsat do %s.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Co každá paměťová karta spouští po zapnutí; instalace nebo oprava BIBLE, PS2BBL nastaveného ke spuštění RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: Kde jsou POPSTARTER a Ember a jak se spouštějí hry PS1.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Kde je vaše Neutrino, jeho video režim a argumenty, které dostane každé spuštění Neutrina.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : Zapíše, co si RIPPS2 poznamenal o ovladačích, discích, kartách MMCE a posledních spuštěních, do DIAG.TXT vedle RIPPS2. Pošlete ho s hlášením chyby.
+  back to Cache: zpět do Mezipaměti
+  what boot reads first: co start čte jako první
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Toto Neutrino je starší než 1.3, které neumí spouštět hry z APA HDD. Nastavte Spouštění her > Neutrino na Neutrino 1.3 nebo novější, nebo cestu vymažte a použijte to, které obsahuje RIPPS2.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 nevidí %s v %s%s. POPSTARTER potřebuje POPS.ELF a POPS_IOX.PAK, emulátor PS1 z vaší vlastní konzole; může je najít tam, kde RIPPS2 nehledá (pokud se vaše hry spouštějí, najde je). START spustí a na tento disk se už nebude ptát.
 labels:
   HINT_NEUTRINO_AUTO_ELF: Předá zaváděcí ELF hry Neutrinu, aby vyhledalo nastavení pro daný titul. Ve výchozím stavu zapnuto; ručně nastavená volba Boot ELF má přednost.
   HINT_POPSTARTER_PATH: Kde je POPSTARTER.ELF. Když zůstane prázdné, RIPPS2 doplní ten, který najde na disku; přepište, chcete-li jiný, např. usb:/POPS/POPSTARTER.ELF
@@ -1300,16 +1397,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Jedna barva pro věže, koule, sklo, CD přehrávač a prohlížeč souborů, na všech třech kartách. Motiv: rozhoduje motiv (kde nerozhoduje, modrá RIPPS2).'
   RIPPS2_HINTS: Nápověda tlačítek
   HINT_RIPPS2_HINTS: 'Nápověda tlačítek dole. Zmizet při nečinnosti ji skryje, dokud nestisknete tlačítko. Motiv: rozhoduje motiv.'
-  RIPPS2_CATEGORY_BAR: Lišta kategorií
-  HINT_RIPPS2_CATEGORY_BAR: 'SPUŠTĚNÍ DISKU, ÚLOŽIŠTĚ a PAMĚŤOVÉ SOUBORY nahoře. Zmizet při nečinnosti je skryje, dokud nestisknete tlačítko. Motiv: rozhoduje motiv.'
+  RIPPS2_CATEGORY_BAR: Kategorie/Postranní panel
+  HINT_RIPPS2_CATEGORY_BAR: 'SPUSTIT DISK, ÚLOŽIŠTĚ a PAMĚŤOVÉ SOUBORY: názvy nahoře, nebo postranní panel. Zmizet při nečinnosti ztlumí názvy nebo zasune postranní panel, dokud nestisknete tlačítko; hned se vrátí. Motiv: rozhodne motiv.'
   RIPPS2_SOURCE_NAME: Název zdroje
   RIPPS2_STATUS: Stav
   RIPPS2_SOURCE: Zdroj
   HINT_RIPPS2_SOURCE_NAME: 'Název zdroje nad hrami (VŠECHNY HRY, HRY HDD a tak dále). Zmizet při nečinnosti ho nechá zmizet s lištou kategorií; Vyskočení ho místo toho ukáže velký uprostřed stránky, tak jak L3 pojmenuje seznam, u prvního seznamu po startu a při každé změně zdroje, a pak zmizí. Motivy mohou udělat z Vyskočení své Zobrazeno. Motiv: rozhoduje motiv.'
-  RIPPS2_RECENTS: Zobrazit nedávné
-  HINT_RIPPS2_RECENTS: Až tolik naposledy spuštěných her nahoře v Oblíbených hrách, nejnovější první. 0 vypne.
+  RIPPS2_RECENTS: Nedávné hry
+  HINT_RIPPS2_RECENTS: 'Nedávné hry, stránka v postranním panelu s naposledy spuštěnými hrami, nejnovější první: kolik jich drží, 1 až 99 (Trojúhelník zadá číslo). Hra, jejíž disk je na Ručně, ho spustí, když ji vyberete. 0 stránku vypne.'
   RIPPS2_CATEGORY_ORDER: Pořadí kategorií
-  HINT_RIPPS2_CATEGORY_ORDER: 'Paměťové soubory první a Spuštění disku poslední. Vytvořeno pro RIPFLOW (Rozhraní > Motiv). Motiv: rozhoduje motiv.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Prohodí Spustit disk a Paměťové soubory: Paměťové soubory první a Spustit disk poslední, v názvech lišty i v ikonách postranního panelu. Pro RIPFLOW (Rozhraní > Motiv). Motiv: rozhodne motiv.'
   RIPPS2_MUSIC: Hudba
   HINT_RIPPS2_MUSIC: Přehrává soubory bgm ve složce AUDIO vedle RIPPS2 a ve složce AUDIO OPL na každém spuštěném disku (Ogg bez tagů, nebo 16bitový WAV); ten s názvem Menu hraje první. Vlastní hudba motivu hraje místo nich.
   RIPPS2_BIOS_SOUNDS: Zvuky BIOS
@@ -1318,7 +1415,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: Nápověda a symboly
   HINT_RIPPS2_HINTS_GLYPHS: Jak vypadá nápověda tlačítek a symboly. Každý řádek začíná na Motiv, tedy volbě motivu; každá jiná volba je vaše a má přednost před každým motivem.
   RIPPS2_HINT_LAYOUT: Rozložení nápovědy
-  HINT_RIPPS2_STARSIDE: 'Kde stojí hvězdička oblíbené hry v seznamu. Vlevo: vlastní sloupec na začátku každého řádku. Vpravo: za názvem. Skrytá: žádná hvězdička. Motiv: jak říká motiv. Ikona řádku motivu se přesune na druhý konec, takže se nikdy nepřekrývají.'
+  HINT_RIPPS2_STARSIDE: 'Kde je v seznamu hvězdička oblíbené hry. Vlevo: vlastní sloupec na začátku každého řádku. Vpravo: za názvem. Skryté (výchozí): žádná hvězdička ani sloupec, názvy v plné délce. Motiv: jak říká motiv. R3 označí hru jako oblíbenou v každém případě; podržte R3 4 sekundy na seznamu, abyste hvězdičky skryli nebo vrátili (označí to i hru pod kurzorem).'
   HINT_RIPPS2_HINT_LAYOUT: 'Řádek: nápověda v jedné řadě. Sloupec: jedna nápověda na řádek, seznam po straně, začínající tam, kam motiv dává nápovědu.'
   RIPPS2_HINT_LABELS: Popisky nápovědy
   HINT_RIPPS2_HINT_LABELS: Jen symbol kreslí pouze tlačítka, pro symboly s vlastními slovy. Odznaky spojí symbol a název každé nápovědy do jednoho odznaku.
@@ -1339,11 +1436,11 @@ labels:
   RIPPS2_TRANSITION: Přechod stránky
   HINT_RIPPS2_TRANSITION: 'Jak se objeví nová stránka, když přejdete do jiné kategorie: z barvy pozadí motivu, nebo ze záblesku. Motiv ponechá volbu motivu.'
   RIPPS2_CATEGORY_LAYOUT: Rozložení kategorií
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Kde jsou tři kategorie: jejich názvy nahoře, nebo ikony dolů po postranním panelu, každá se šuplíkem svých stránek (Vlevo v seznamu tam přejde). Motiv ponechá vlastní rozložení motivu.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Kde jsou tři kategorie: jejich názvy nahoře, nebo ikony podél postranního panelu, každá se zásuvkou svých stránek (Vlevo na seznamu tam vede), nebo Menu: žádná lišta, kategorie v menu START jako v motivu pro OPL. Motiv zachová rozvržení motivu.'
   RIPPS2_CACHE: Mezipaměť
   HINT_RIPPS2_CACHE: 'Jak se uchovává seznam her každého zdroje, aby se jeho stránka otevřela hned: Fast Cache, seznam interního HDD a Automatické obnovení.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Každý zdroj si uchovává svůj poslední seznam her (RIPPS2.LST vedle složek CD a DVD) a ukáže ho, jakmile zdroj odpoví, pak zdroj znovu přečte na pozadí. Vypnuto čte každý seznam nejdřív ze zdroje, jako dřív.
+  HINT_RIPPS2_FAST_CACHE: 'Každý zdroj si drží svůj poslední seznam her (RIPPS2.LST vedle složek CD a DVD) a ukáže ho, jakmile zdroj odpoví. Trust Cache rozhodne, zda se zdroj potom načte znovu. Vyp: každý seznam se nejdřív čte ze zdroje, jako dřív.'
   HINT_RIPPS2_VIGNETTE: Ztmaví okraje všech obalů kromě vybraného, aby vybraný vynikl. Slabé je polovina Plného.
   RIPPS2_GRID_WIDE: Širokoúhlé rozložení mřížky
   HINT_RIPPS2_GRID_WIDE: Stránka mřížky jen pro obraz 16:9 (Širokoúhlý, 720p, 1080i), kde se obaly kreslí užší a vedle sebe jich vejde víc. Motiv použije rozložení motivu; Stejné se řídí rozložením mřížky.
@@ -1359,7 +1456,7 @@ labels:
   GAME_TYPE_LABELS: Zobrazit štítky [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: Seznam cheatů nešlo uložit do složky Neutrina, takže ho Neutrino nemůže použít. Spustit bez cheatů?
   AUTO_CREATE_VMC: Vytvořit VMC při prvním spuštění
-  HINT_AUTO_CREATE_VMC: Spuštění hry PS2 bez VMC ve slotu 1 vytvoří 8 MB kartu na zařízení hry, pojmenovanou tak, jak navrhuje obrazovka VMC (sdílenou všemi disky hry), a přiřadí ji. Neplatí pro interní HDD s Neutrinem.
+  HINT_AUTO_CREATE_VMC: Spuštění hry PS2 bez VMC ve slotu 1 vytvoří 8MB kartu na zařízení hry, pojmenovanou podle návrhu obrazovky VMC (sdílenou všemi disky hry), a přiřadí ji. Pod Neutrinem ne na APA HDD (exFAT HDD funguje).
   AUTO_VMC_CREATING: Vytváření VMC této hry...
   AUTO_VMC_FAILED: VMC této hry nešlo vytvořit. Hra se spustí bez ní.
   RIPPS2_BIOS_MUSIC: Hudba BIOS
@@ -1396,7 +1493,7 @@ labels:
   HINT_LANGUAGE: Jazyk menu. Další přidáte vložením souborů lang_*.lng do složky LNG.
   HINT_GSM_DEFAULTS_BUTTON: Opravy režimu videa, které dostane každá hra, pokud nemá vlastní nastavení GSM.
   HINT_DEFDEVICE: Stránka, kterou RiptOPL otevře při startu.
-  HINT_MMCE_MODE: Hry na SD2PSX nebo MemCard PRO2. Auto se spustí při startu, Ručně při otevření stránky, Vypnuto ji skryje.
+  HINT_MMCE_MODE: 'Hry na SD2PSX nebo MemCard PRO2. Automaticky ho spustí při startu: nejrychlejší pro připojenou kartu, její hry jsou ve Všech hrách od začátku. Ručně ho spustí, když otevřete jeho stránku, Vyp ho skryje.'
   HINT_MMCE_SETTINGS_BUTTON: Slot, IGR bootcard, GameID a volby časování pro MMCE.
   HINT_ENABLE_USB: Načte ovladač úložiště USB.
   HINT_ENABLE_MX4SIO: Načte ovladač adaptéru SD karet MX4SIO.
@@ -1576,8 +1673,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'Obraz nabídky: režim obrazu, širokoúhlý obraz, jeho poloha na televizoru (H-POS, V-POS) a overscan.'
   HINT_RIPPS2_LAYOUT: Kde jsou kategorie a jak stránka přichází, pak obaly RIPFLOW a mřížka RIPGRID.
   HINT_RIPPS2_COLORS_TEXT: Tloušťka textu, barevný motiv, střídání barev a každá barva.
-  HINT_RIPPS2_TEXT_WEIGHT: 'Jak tučný je vlastní text RIPPS2: tipy v nastavení, STAV a O aplikaci. Běžné je jako dřív; Střední a Tučné se lépe čtou na měkkém obraze.'
-  HINT_RIPPS2_HDD_START: 'Vnitřní HDD, APA nebo exFAT: RIPPS2 ho přečte, ať je jakýkoli, a ukáže ho jednou jako hry na HDD. Vypnuto ho nechá být.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'Jak silný je vlastní text RIPPS2: nápovědy v nastavení, STAV a O aplikaci. Normální je jako dřív; Tučné se lépe čte na měkkém obrazu. Vlastní písma motivu si ponechají tloušťky, které jim motiv dává.'
+  HINT_RIPPS2_HDD_START: 'Interní HDD, APA nebo exFAT: RIPPS2 přečte, ať je jakýkoli, a ukáže ho jednou, jako HDD Hry. Automaticky (nejrychlejší s vloženým diskem) ho spustí při startu; Vyp ho nechá být.'
   HINT_RIPPS2_THEME_COLOR: Vlastní barva motivu. Zvolte Vlastní jako barevný motiv a vyberte ji sami, jako barvy textu.
   HINT_RIPPS2_SWEEP: Pět barev, kterými motiv pomalu a plynule přechází. Duha, střídání z každého barevného motivu nebo vaše vlastní. Vypnuto nechá motiv v klidu.
   HINT_RIPPS2_SWEEP_COLORS: Pět barev střídání a jeho rychlost. Změňte jedno z RIPPS2 a uloží se jako vaše, pod názvem, který mu dáte.
@@ -1586,3 +1683,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Jak dlouho každá barva trvá, než přijde další. I Živě zůstává plynulé: barvy nikdy neblikají.'
   RIPPS2_HIDE_COMPRESS: Skrýt hru a komprese
   HINT_RIPPS2_SELECT_HOLD: 'SELECT podržený 4.2 s na seznamu her. Seznam: motivy v panelu, vyberte jeden. Dokola: další motiv. Vypnuto: nic (stisk stále obnovuje).'
+  RIPPS2_RECENT_GAMES: Nedávné hry
+  RIPPS2_SET_METADATA_RENAME: Nastavit metadata (přejmenovat)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Nejdřív ovladač (experimentální)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX čte po sběrnici, kterou sdílí ovladač, a během čtení není ovladač slyšet: stisky se zpožďují nebo ztrácejí, zatímco se načítají obaly. Zap: obaly přicházejí po malých kouscích a mezi nimi se čte ovladač, o něco pomaleji. Vyp: tak rychle, jak karta zvládne. Se zdroji karty na Automaticky se její seznam načte jednou, při startu.'
+  HINT_RIPPS2_TRUST_CACHE: 'Seznam zobrazený z mezipaměti zůstane, jak je, připravený ke spuštění, dokud nestisknete SELECT nebo RIPPS2 sám ten zdroj nezmění. Vyp: každý zdroj se po zobrazení mezipaměti znovu načte na pozadí, pauza znatelná na kartě MMCE nebo MX4SIO, které sdílejí sběrnici ovladače.'
+  RIPPS2_STATUS_OPEN: Načítání a disky
+  HINT_RIPPS2_STATUS_OPEN: 'Otevře STAV: odkud start čte nastavení a seznamy her, které místo je nejrychlejší, kam vede EXIT hry, a každý disk. Jeho NASTAVENÍ MEZIPAMĚTI vede zpět sem.'
+  RIPPS2_BADGE_SET: Sada odznaků
+  HINT_RIPPS2_BADGE_SET: 'Odznaky na informační stránce hry (hodnocení, hráči, ESRB, video režim, skenování, poměr stran). RIPPS2: jeho vlastní sada, stejná v každém motivu. Motiv: obrázky motivu, nebo RIPPS2, když o ně motiv požádá.'
+  RIPPS2_HINT_FADE: Prolínání nápověd a symbolů
+  HINT_RIPPS2_HINT_FADE: 'Nápověda tlačítka nebo symbol, který se změní, se v okamžiku změny prolne, jako obaly; ty, které zůstávají, se nemění, na každé stránce i ve zprávě. Vyp: prostě se objeví. Motiv: rozhodne motiv (zap, pokud neuvádí hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: Styl postranního panelu
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Klasický (dělený): ikony v tmavém pruhu postranního panelu s barevným proužkem vedle. XL (z jednoho kusu): jeden širší pruh s ikonami uprostřed. Motiv: rozhodne motiv.'
+  HINT_EXITPATH: 'Kam vede EXIT v Menu ve hře. Nejlépe nechat prázdné, s nastaveným BIBLE (STAV > Zavaděč > Spravovat, nebo BOOT LOCK na vašem PS2BBL): EXIT pak resetuje konzoli její vlastní spouštěcí cestou a PS2BBL spustí RIPPS2 jako po zapnutí, nejbezpečnější návrat. Prohlížeč: prohlížeč PS2. ELF na paměťové kartě (mc0:/mc1:) nebo USB disku FAT32 (mass:/) se načte hned po resetu, na což ne každá hra nechá konzoli připravenou; MMCE pak není vůbec dostupné.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO a exFAT HDD. Automaticky je spustí při startu: nejrychlejší pro připojené disky, jejich hry jsou ve Všech hrách od začátku. Ručně je spustí, když otevřete jejich stránku.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino nemůže použít VMC na APA HDD (exFAT, USB a MX4SIO ano): tato hra se spustí se skutečnou kartou v tom slotu.'

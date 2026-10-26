@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: Muzika e menysë nuk u shkrua dot në %s (%s). A është njësia plot?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'Muzika e menysë është WAV prej %s, dhe asnjë kartë memorieje nuk ka vend për të. RIPPS2 këtu niset nga një kartë memorieje dhe asnjë njësi me dosje OPL nuk është nisur: nis një në Ruajtja, pastaj nxirr muzikën atje.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: Tingujt nuk u shkruan dot në %s. A është njësia plot ose e mbrojtur nga shkrimi?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Muzika e menysë së këtij BIOS-i nuk është ajo që njeh RIPPS2. Nuk u shkrua asgjë.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Banka e tingujve e këtij BIOS-i nuk është ajo që njeh RIPPS2. Nuk u shkrua asgjë.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) zhvendoset së pari, i tëri, në një dosje rezervë.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- Konsola e lidh PS2BBL 1.2.0 me këtë kartë dhe e shkruan si %s/%s.
-
-    - Konfigurimi i tij, mc%d:/PS2BBL/CONFIG.INI, nis RIPPS2 nga %s, me BOOT LOCK të ndezur.
-
-    Procesori I/O riniset për këtë; muzika dhe njësitë kthehen më pas. Mbaje kartën brenda dhe konsolën ndezur derisa të thotë u krye.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: NJË KOPJE NË KARTËN E MEMORIES %d
   A COPY ON MX4SIO: NJË KOPJE NË MX4SIO
   A COPY ON THE USB DRIVE: NJË KOPJE NË USB
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: BIBLE nuk u shkrua dot në kartën e memories %d, ndaj karta u kthye siç ishte. Kontrollo hapësirën e lirë, pastaj provo përsëri.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE nuk e kopjoi dot RIPPS2 në %s. Kontrollo hapësirën dhe që të mos jetë e mbrojtur nga shkrimi. Asgjë tjetër nuk ndryshoi.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE nuk e kopjoi dot RIPPS2 në particionin %s të HDD. Kontrollo hapësirën e lirë. Asgjë tjetër nuk ndryshoi.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE nuk mundi të ruante një kopje të programit të nisjes së HDD, ndaj ndaloi para se ta ndryshonte. RIPPS2 u kopjua në HDD; asgjë tjetër nuk ndryshoi.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE nuk mundi ta vinte mënjanë %s për ta ruajtur, ndaj ndaloi atje. Asgjë në kartë nuk ndryshoi.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE nuk mundi të shkruante konfigurimin e tij (%s). Programi i nisjes nuk ndryshoi.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE nuk mundi të shkruante programin e nisjes së HDD (hapi %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK është ndezur. PS2BBL tani nis RIPPS2 në ndezje (%s). Mbaj një tast të shpejtë të PS2BBL ndërsa konsola niset për të arritur diçka tjetër.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK punon përmes PS2BBL (PlayStation 2 Basic BootLoader), dhe këtu nuk ka asnjë në asnjë kartë memorieje.
   INSTALL BIBLE: INSTALO BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'INSTALO BIBLE NË KARTËN E MEMORIES %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Kjo kërkon një konsolë që niset nga HDD-ja e saj (PS2 e trashë me përshtatësin e rrjetit). Mbaje ndezur derisa të thotë u krye.'
   INTERNAL HDD  (its boot area): HDD I BRENDSHËM  (zona e tij e nisjes)
   MEMORY CARD %d  (%s): KARTA E MEMORIES %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'KARTA E MEMORIES 0: %s
-
-    KARTA E MEMORIES 1: %s
-
-    %s
-
-    BIBLE është PS2BBL 1.2.0 nga El Isra, i përgatitur nga RIPPS2: pa pritje në ndezje, RIPPS2 i pari, dhe një buton i mbajtur në ndezje të çon ende te shfletuesi (TREKËNDËSHI), te një disk (START) dhe te ajo që ishte atje më parë (RRETHI). Ta instalosh ose ta riparosh në një kartë memorieje ose në HDD-në e brendshme?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Karta e memories %d ka %d KB të lira, dhe BIBLE ka nevojë për %d KB atje. Liro pak hapësirë, pastaj provo përsëri.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Karta e memories %d ka %d KB të lira, dhe kopja e RIPPS2 ka nevojë për %d KB. Liro pak hapësirë ose zgjidh një vend tjetër.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Karta e memories %d nis %s në ndezje, dhe BOOT LOCK punon vetëm përmes PS2BBL.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: SIRTARI I HAPUR
   TREFOIL KNOT: NYJA TRIFLETËSHE
   ' and ': ' dhe '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s mungojnë në %s%s. POPSTARTER ka nevojë për POPS.ELF dhe POPS_IOX.PAK, emulatorin PS1 nga konsola jote, pranë lojërave për të nisur një.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s mungojnë në %s%s. RIPPOPS gjeti POPS.ELF dhe POPS_IOX.PAK, emulatorin PS1 të Sony, në %s: START i kopjon këtu dhe nis lojën.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s nuk u kopjua dot në %s%s. A është njësia plot ose e mbrojtur nga shkrimi?'
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s mungon në %s%s. POPSTARTER ka nevojë për POPS.ELF dhe POPS_IOX.PAK, emulatorin PS1 nga konsola jote, pranë lojërave për të nisur një.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s mungon në %s%s. RIPPOPS gjeti POPS.ELF dhe POPS_IOX.PAK, emulatorin PS1 të Sony, në %s: START i kopjon këtu dhe nis lojën.'
   COPY AND START: KOPJO DHE NIS
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'Falënderime të veçanta edhe për gjithë dashurinë nga YouTube:'
   and its own look, launchers, file browser and save tools.: dhe me pamjen, nisësit, shfletuesin e skedarëve dhe mjetet e ruajtjeve të veta.
   glad to help however you reach me.: i lumtur të ndihmoj, si do që të më gjeni.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): bërthama e dytë e lojërave, 1.8.0 e pandryshuar (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: me Neutrino të rickgaiser brenda si bërthamë e dytë e lojërave,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Kjo lojë niset përmes Neutrino, dhe RIPPS2 nuk gjeti asnjë: as te shtegu i Cilësimeve, as në njësinë e lojës, as në kartat e memories, as në ndonjë njësi të nisur. RIPPS2 mbart Neutrino 1.8.0 nga rickgaiser (AFL-3.0): instaloje një herë, ku të duash, dhe çdo lojë Neutrino e përdor prej andej.'
   STARTING THE DRIVES: PO NIS NJËSITË
   '%d games, on the started drives': '%d lojëra, në njësitë e nisura'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: DISA SKEDARË NUK U FSHINË DOT'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: jo në një njësi të nisur
   only if you have none: vetëm nëse nuk ke asnjë
   starts every drive first: nis së pari çdo njësi
-  Drives, launchers and homebrew: Njësitë, nisësit dhe homebrew
   BDM Devices: Pajisjet BDM
   Color Sweep: Kalimi i ngjyrave
   Colors and Text: Ngjyrat dhe teksti
@@ -1078,9 +1037,7 @@ strings:
   Bold: Të trasha
   Controllers: Kontrolluesit
   Lively: E gjallë
-  Medium: Mesatare
   PS Emulation: Emulimi PS
-  Regular: E rregullt
   Slow: E ngadaltë
   A MOMENT: NJË ÇAST
   A TASK IN THE BACKGROUND: NJË DETYRË NË SFOND
@@ -1145,6 +1102,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: Të fshihet %s? Kalimet e vetë RIPPS2 mbeten siç janë.
   Sweep: Kalim
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Distinktivët shënojnë lojërat me arritje në listat e tua, me sa ke zhbllokuar. Duan TELEMETRIA të ndezur.
+  Classic (Split): Klasik (i ndarë)
+  Guidance: Udhëzim
+  OK: OK
+  XL (One Piece): XL (një copë)
+  STARS HIDDEN: YJET TË FSHEHURA
+  STARS SHOWN: YJET TË SHFAQURA
+  Asking the SD2PSX for this game's memory card...: Po i kërkohet SD2PSX karta e memories së kësaj loje...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX po përgatit kartën e memories së kësaj loje (%d s). Loja niset kur të mbarojë; START e nis tani.
+  the second game core, its newest build carried unmodified (AFL-3.0): bërthama e dytë e lojërave, versioni i saj më i ri i pandryshuar (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': '%s nuk u shkrua dot në %s (%d nga tingujt u shkruan). A është njësia plot ose e mbrojtur nga shkrimi?'
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': '%s nuk u shkrua dot në %s (%d nga tingujt u shkruan, dhe karta tani ka %d KB të lira). A është karta e mbrojtur nga shkrimi?'
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: Dosja %s nuk u krijua dot. A është njësia plot ose e mbrojtur nga shkrimi? Asgjë nuk u shkrua.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'Tingujt zënë %d KB dhe kjo kartë memorieje ka %d KB të lira. Asgjë nuk u shkrua. Liro vend në kartë, ose nis një njësi te Ruajtja dhe nxirri përsëri: RIPPS2 atëherë ta ofron njësinë.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : Tingujt zënë %d KB dhe kjo kartë memorieje ka %d KB të lira. START i shkruan në vend të saj te %sAUDIO/ në njësi, dhe RIPPS2 i luan prej andej.
+  There was not enough memory to make the sounds. Nothing was written.: Nuk kishte memorie të mjaftueshme për të krijuar tingujt. Asgjë nuk u shkrua.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- Konsola e lidh PS2BBL 1.2.0 me këtë kartë dhe e shkruan si %s/%s.
+  
+    - Konfigurimi i tij, mc%d:/PS2BBL/CONFIG.INI, nis RIPPS2 nga %s pa pritje (0 ms, gjë që PS2BBL Extended nuk e lejon), me BOOT LOCK të ndezur.
+  
+    Procesori I/O riniset për këtë; muzika dhe njësitë kthehen më pas. Mbaje kartën brenda dhe konsolën ndezur derisa të thotë u krye.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE nuk u shkrua dot në kartën e memories %d, ndaj karta u kthye siç ishte. Kontrollo hapësirën e lirë, pastaj provo përsëri. (DIAG.TXT pranë RIPPS2 ka atë që u përgjigj karta.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE nuk mundi ta vinte mënjanë %s për ta ruajtur, ndaj ndaloi atje. Asgjë në kartë nuk ndryshoi. (DIAG.TXT pranë RIPPS2 ka atë që u përgjigj karta.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'KARTA E MEMORIES 0: %s
+  
+    KARTA E MEMORIES 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 nga El Isra i përgatitur nga RIPPS2: nisje për 0 ms në ndezje (PS2BBL Extended nuk e lejon 0), RIPPS2 i pari, dhe një buton i mbajtur në ndezje të çon ende te shfletuesi (TREKËNDËSHI), te një disk (START) dhe te ajo që ishte atje më parë (RRETHI). Ta instalosh ose ta riparosh në një kartë memorieje ose në HDD-në e brendshme?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 NË KARTËN E MEMORIES %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'Skedarët e memories hapen tani, te MEDIA, me diskun në kujtesën e fragmenteve (U NXOR). Shko te njësia dhe dosja ku duhet të shkojë (çdo njësi: USB, HDD, MEDIA e SD2PSX), shtyp TREKËNDËSHIN për VEPRIMET dhe zgjidh NGJIT. RIPDISC pyet edhe një herë dhe e lexon diskun me lazerin e PS2-së tënde, duke e shkruar atje.'
+  RENAME THE GAME: RIEMËRTO LOJËN
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Kjo lojë niset përmes Neutrino, dhe RIPPS2 nuk gjeti asnjë: as te shtegu i Cilësimeve, as në njësinë e lojës, as në kartat e memories, as në ndonjë njësi të nisur. RIPPS2 mbart Neutrino nga rickgaiser (AFL-3.0), versionin e tij më të ri: instaloje një herë, ku të duash, dhe çdo lojë Neutrino e përdor prej andej.'
+  A PS1 disc's track list, for Ember: Lista e këngëve të një disku PS1, për Ember
+  A PS1 game for POPSTARTER: Një lojë PS1 për POPSTARTER
+  A PS2 game: Një lojë PS2
+  A card the SD2PSX set aside (wrong size): Një kartë që SD2PSX e la mënjanë (madhësi e gabuar)
+  'A program: Cross starts it': 'Një program: Kryqi e nis'
+  A save, packed in one file: Një ruajtje, e paketuar në një skedar
+  All Games' master list: Lista kryesore e Të gjitha lojërave
+  'An SD2PSX boot card: open it to look in': 'Një kartë nisjeje SD2PSX: hape për të parë brenda'
+  'An SD2PSX memory card: open it like a VMC': 'Një kartë memorieje SD2PSX: hape si një VMC'
+  Cheats, a file a game: Mashtrime, një skedar për çdo lojë
+  Each game's settings and info page: Cilësimet dhe faqja e informacionit të çdo loje
+  Ember, its BIOS and its PS1 games: Ember, BIOS-i i tij dhe lojërat e tij PS1
+  Game covers and art, by game ID: Kopertina dhe imazhe lojërash, sipas ID-së së lojës
+  Games kept in 1 GB parts: Lojëra të mbajtura në pjesë 1 GB
+  Games that share one SD2PSX card: Lojëra që ndajnë një kartë SD2PSX
+  Languages for RIPPS2: Gjuhë për RIPPS2
+  Neutrino, the second game core: Neutrino, bërthama e dytë e lojërave
+  OPL's list of this folder's games: Lista e OPL me lojërat e kësaj dosjeje
+  POPSTARTER and PS1 games (VCDs): POPSTARTER dhe lojëra PS1 (VCD)
+  PS2 games on CD, as ISOs: Lojëra PS2 në CD, si ISO
+  PS2 games on DVD, as ISOs: Lojëra PS2 në DVD, si ISO
+  PS2BBL's settings: Cilësimet e PS2BBL
+  Programs to start (ELFs): Programe për t'u nisur (ELF)
+  RIPPS2's diagnostics, for a bug report: Diagnostikimi i RIPPS2, për një raport gabimi
+  RIPPS2's own folder: Dosja e vetë RIPPS2
+  RIPPS2's settings: Cilësimet e RIPPS2
+  RIPPS2's sounds and music: Tingujt dhe muzika e RIPPS2
+  Recent games: Lojërat e fundit
+  RetroAchievements' files: Skedarët e RetroAchievements
+  Ripped CDs and DVDs, pictures, video: CD dhe DVD të nxjerra, imazhe, video
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'Po ruhet në SD-në e SD2PSX: prit %d s para se ta fikësh.'
+  Starred games: Lojërat e preferuara
+  The SD2PSX's boot cards (PS2BBL): Kartat e nisjes së SD2PSX (PS2BBL)
+  The SD2PSX's boot channels and names: Kanalet e nisjes dhe emrat e SD2PSX
+  The SD2PSX's memory cards: Kartat e memories së SD2PSX
+  The SD2PSX's own settings: Cilësimet e vetë SD2PSX
+  The SD2PSX's settings: Cilësimet e SD2PSX
+  Themes, a folder each: Tema, secila në një dosje
+  This drive's game list, for a quick boot: Lista e lojërave të kësaj njësie, për një nisje të shpejtë
+  Virtual memory cards for games: Karta memorieje virtuale për lojërat
+  What RIPPS2's last launch did: Çfarë bëri nisja e fundit e RIPPS2
+  Circle from the top   Cross close: 'Rrethi: nga fillimi   Kryqi: mbyll'
+  Cross from the top   Circle close: 'Kryqi: nga fillimi   Rrethi: mbyll'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Kjo këngë nuk u luajt dot. RIPPS2 luan skedarë .wav PCM 16-bit (siç i nxjerrin RIPDISC dhe Muzika e BIOS), skedarë Ogg Vorbis .ogg dhe MP3.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'VETËM LEXIM: KARTA E NISJES SË SD2PSX ËSHTË NË PËRDORIM'
+  '%d music tracks': '%d këngë muzikore'
+  1 music track: 1 këngë muzikore
+  'A game''s EXIT: %s': 'EXIT i një loje: %s'
+  'A game''s EXIT: the browser': 'EXIT i një loje: shfletuesi'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Të gjitha lojërat: %d lojëra të mbajtura në %s, të listuara në nisje para se të përgjigjet ndonjë njësi'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Të gjitha lojërat: ende pa listë kryesore; %s shkruhet sapo të listohen lojërat (Fast Cache ndezur)'
+  CACHE SETTINGS: CILËSIMET E CACHE
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: Kopjon Neutrino-n që mbart RIPPS2 në një njësi ose kartë memorieje. Një Neutrino i yti përdoret siç është.
+  DIAG.TXT, for a bug report: DIAG.TXT, për një raport gabimi
+  Drives, loading, launchers and homebrew: Njësitë, ngarkimi, nisësit dhe homebrew
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache tregon listën e fundit të lojërave të çdo njësie sapo njësia përgjigjet; Trust Cache e mban derisa të shtypësh SELECT. Të dyja ndezur, me cilësimet në kartën e memories nga e cila niset RIPPS2, jep nisjen më të shpejtë.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Listat e lojërave: Fast Cache fikur, ndaj secila lexohet nga njësia e saj në nisje'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Listat e lojërave: secila shfaqet menjëherë nga cache dhe qëndron deri te SELECT'
+  'Game lists: each shows at once from its cache, then is read again': 'Listat e lojërave: secila shfaqet menjëherë nga cache, pastaj lexohet përsëri'
+  LOADING: NGARKIMI
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: Krijon tingujt e RIPPS2 nga BIOS-i i kësaj konsole dhe i shkruan në dosjen AUDIO.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Ende pa muzikë: Cilësimet e audios > Muzika e BIOS nxjerr muzikën e menysë së kësaj konsole.'
+  SAVE DIAGNOSTICS: RUAJ DIAGNOSTIKIMIN
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Kërkon në njësi për POPSTARTER, skedarët POPS, Ember, BIOS-in e Ember dhe Neutrino, dhe mban mend ku është secili.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Cilësimet: %s, në një njësi që nisja e pret (një kartë memorieje është më e shpejtë)'
+  'Settings: %s, read first (the quickest place)': 'Cilësimet: %s, lexohen të parat (vendi më i shpejtë)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Nis tani çdo njësi (USB, HDD, MMCE, MX4SIO dhe rrjetin), që secila dhe hapësira e saj të shfaqen këtu.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: IP-ja dhe ndarja SMB që POPSTARTER përdor për lojërat PS1 përmes rrjetit.
+  The diagnostics are in %s.: Diagnostikimi është në %s.
+  The diagnostics could not be written to %s.: Diagnostikimi nuk u shkrua dot në %s.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Çfarë nis çdo kartë memorieje në ndezje; instalo ose riparo BIBLE, PS2BBL i përgatitur për të nisur RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: Ku janë POPSTARTER dhe Ember, dhe si nisen lojërat PS1.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Ku është Neutrino yt, modaliteti i tij i videos dhe argumentet që merr çdo nisje me Neutrino.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : Shkruan atë që RIPPS2 shënoi për kontrolluesit, njësitë, kartat MMCE dhe nisjet e fundit në DIAG.TXT pranë RIPPS2. Dërgoje me një raport gabimi.
+  back to Cache: kthehu te Cache
+  what boot reads first: çfarë lexon nisja e para
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Ky Neutrino është më i vjetër se 1.3, i cili nuk mund të nisë lojëra nga HDD-ja APA. Drejto Nisja e lojërave > Neutrino te Neutrino 1.3 ose më i ri, ose pastro shtegun për të përdorur atë që mbart RIPPS2.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 nuk e sheh %s në %s%s. POPSTARTER ka nevojë për POPS.ELF dhe POPS_IOX.PAK, emulatorin PS1 nga konsola jote; mund t'i gjejë aty ku RIPPS2 nuk shikon (nëse lojërat e tua nisen, i gjen). START nis, dhe për këtë njësi nuk pyetet më.
 labels:
   OK: OK
   EXITTO: Shtegu IGR
@@ -1323,16 +1420,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Një ngjyrë për kullat, sferat, xhamin, luajtësin e CD dhe shfletuesin e skedarëve, në të tre skedat. Tema: vendos tema (blu e RIPPS2 ku nuk vendos).'
   RIPPS2_HINTS: Udhëzimet e butonave
   HINT_RIPPS2_HINTS: 'Udhëzimet e butonave përgjatë fundit. Zbehje kur është i papunë i fsheh derisa të shtypësh një buton. Tema: vendos tema.'
-  RIPPS2_CATEGORY_BAR: Shiriti i kategorive
-  HINT_RIPPS2_CATEGORY_BAR: 'NIS DISKUN, RUAJTJA dhe SKEDARËT E MEMORIES përgjatë krye. Zbehje kur është i papunë i fsheh derisa të shtypësh një buton. Tema: vendos tema.'
+  RIPPS2_CATEGORY_BAR: Kategoritë/Shiriti anësor
+  HINT_RIPPS2_CATEGORY_BAR: 'NIS DISKUN, RUAJTJA dhe SKEDARËT E MEMORIES: emrat lart, ose shiriti anësor. Zbehje kur është i papunë zbeh emrat, ose e fsheh shiritin anësor, derisa të shtypësh një buton; kthehet menjëherë. Tema: vendos tema.'
   RIPPS2_SOURCE_NAME: Emri i burimit
   RIPPS2_STATUS: Gjendja
   RIPPS2_SOURCE: Burimi
   HINT_RIPPS2_SOURCE_NAME: 'Emri i burimit mbi lojërat (TË GJITHA LOJËRAT, LOJËRAT HDD e kështu me radhë). Zbehje kur është i papunë e zbeh bashkë me shiritin e kategorive; Shfaqje e menjëhershme e tregon në vend të kësaj të madh në mes të faqes, siç e emërton L3 listën, në listën e parë pas nisjes dhe sa herë që ndryshon burimi, pastaj zbehet. Temat mund ta bëjnë Shfaqjen e menjëhershme të Shfaqurën e tyre. Tema: vendos tema.'
-  RIPPS2_RECENTS: Shfaq të fundit
-  HINT_RIPPS2_RECENTS: Deri në kaq nga lojërat e tua të nisura së fundi në krye të Lojërave të preferuara, më e reja e para. 0 e fik.
+  RIPPS2_RECENTS: Lojërat e fundit
+  HINT_RIPPS2_RECENTS: 'Lojërat e fundit, një faqe në shiritin anësor me lojërat që nise së fundi, më e reja e para: sa mban, nga 1 deri në 99 (Trekëndëshi shkruan numrin). Një lojë njësia e së cilës është në Manuale e nis atë kur e zgjedh. 0 e fik faqen.'
   RIPPS2_CATEGORY_ORDER: Rendi i kategorive
-  HINT_RIPPS2_CATEGORY_ORDER: 'Skedarët e memories së pari dhe Nis diskun në fund. Bërë për RIPFLOW (Ndërfaqja > Tema). Tema: vendos tema.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Ndërron Nis diskun dhe Skedarët e memories: Skedarët e memories të parët dhe Nis diskun i fundit, si te emrat e shiritit ashtu edhe te ikonat e shiritit anësor. Bërë për RIPFLOW (Ndërfaqja > Tema). Tema: vendos tema.'
   RIPPS2_MUSIC: Muzika
   HINT_RIPPS2_MUSIC: Luan skedarët bgm në dosjen AUDIO pranë RIPPS2 dhe në dosjen AUDIO të OPL në çdo njësi të nisur (Ogg pa etiketa, ose WAV 16-bit); ai me emrin Menu luhet i pari. Muzika e vetë temës luhet në vend të tyre, nëse ka.
   RIPPS2_BIOS_SOUNDS: Tingujt e BIOS
@@ -1341,7 +1438,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: Udhëzimet dhe simbolet
   HINT_RIPPS2_HINTS_GLYPHS: Si duken udhëzimet e butonave dhe simbolet. Çdo rresht fillon te Tema, ajo që zgjodhi tema; çdo zgjedhje tjetër është e jotja dhe ka përparësi mbi çdo temë.
   RIPPS2_HINT_LAYOUT: Paraqitja e udhëzimeve
-  HINT_RIPPS2_STARSIDE: 'Ku qëndron ylli i një loje të preferuar në listë. Majtas: kolona e vet në fillim të çdo rreshti. Djathtas: pas titullit. E fshehur: pa yll. Tema: si thotë tema. Ikona e rreshtit të temës kalon në skajin tjetër, që të mos mbivendosen kurrë.'
+  HINT_RIPPS2_STARSIDE: 'Ku qëndron ylli i një loje të preferuar në listë. Majtas: kolonë e vetë në fillim të çdo rreshti. Djathtas: pas titullit. E fshehur (fillimi): pa yll dhe pa kolonë, titujt të plotë. Tema: çfarë thotë tema. R3 e shënon një lojë si të preferuar gjithsesi; mbaj R3 4 sekonda në një listë për të fshehur yjet ose për t''i kthyer (kjo shënon edhe lojën nën kursor).'
   HINT_RIPPS2_HINT_LAYOUT: 'Rresht: udhëzimet në një rresht. Kolonë: një udhëzim për rresht, një listë anash, duke filluar aty ku tema vendos udhëzimet e saj.'
   RIPPS2_HINT_LABELS: Etiketat e udhëzimeve
   HINT_RIPPS2_HINT_LABELS: Vetëm simboli vizaton vetëm butonat, për simbolet që mbajnë fjalët e tyre. Distinktivët vendosin simbolin dhe titullin e çdo udhëzimi bashkë në një distinktiv.
@@ -1362,11 +1459,11 @@ labels:
   RIPPS2_TRANSITION: Kalimi i faqeve
   HINT_RIPPS2_TRANSITION: 'Si hyn një faqe e re kur shkon te një kategori tjetër: nga ngjyra e sfondit të temës, ose nga një shkrepje. Tema mban zgjedhjen e temës.'
   RIPPS2_CATEGORY_LAYOUT: Paraqitja e kategorive
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Ku qëndrojnë tri kategoritë: emrat e tyre lart, ose ikona poshtë shiritit anësor, secila me një sirtar me faqet e saj (Majtas në një listë shkon atje). Tema mban atë të vetë temës.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Ku qëndrojnë tri kategoritë: emrat e tyre lart, ose ikona përgjatë shiritit anësor, secila me një sirtar të faqeve të saj (Majtas në një listë të çon atje), ose Menyja: pa shirit fare, kategoritë në menynë START si në një temë të bërë për OPL. Tema mban paraqitjen e temës.'
   RIPPS2_CACHE: Cache
   HINT_RIPPS2_CACHE: 'Si ruhet lista e lojërave e çdo burimi që faqja e tij të hapet menjëherë: Fast Cache, lista e HDD-së së brendshme dhe Rifreskimi automatik.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Çdo burim ruan listën e tij të fundit të lojërave (RIPPS2.LST pranë dosjeve CD dhe DVD) dhe e shfaq sapo burimi përgjigjet, pastaj e lexon burimin përsëri në sfond. Joaktiv lexon çdo listë fillimisht nga burimi i saj, si më parë.
+  HINT_RIPPS2_FAST_CACHE: 'Çdo burim mban listën e tij të fundit të lojërave (RIPPS2.LST pranë dosjeve CD dhe DVD) dhe e tregon sapo burimi përgjigjet. Trust Cache vendos nëse burimi lexohet përsëri më pas. Fikur: çdo listë lexohet së pari nga burimi, si më parë.'
   HINT_RIPPS2_VIGNETTE: Errëson skajet e çdo kopertine përveç asaj të zgjedhur, që e zgjedhura të dallohet. E dobët është gjysma e së Plotës.
   RIPPS2_GRID_WIDE: Paraqitja në rrjetë për ekran të gjerë
   HINT_RIPPS2_GRID_WIDE: Faqja Rrjetë vetëm në një figurë 16:9 (ekran i gjerë, 720p, 1080i), ku kopertinat vizatohen më të ngushta dhe më shumë zënë vend. Tema përdor atë të temës; Njësoj ndjek Paraqitjen në rrjetë.
@@ -1382,7 +1479,7 @@ labels:
   GAME_TYPE_LABELS: Shfaq etiketat [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: Lista e mashtrimeve nuk u ruajt dot në dosjen Neutrino, ndaj Neutrino nuk mund ta përdorë. Të niset pa mashtrime?
   AUTO_CREATE_VMC: Krijo VMC në nisjen e parë
-  HINT_AUTO_CREATE_VMC: Nisja e një loje PS2 pa VMC në folenë 1 krijon një kartë 8 MB në pajisjen e lojës, me emrin që sugjeron ekrani VMC (i përbashkët për të gjithë disqet e lojës), dhe e cakton. Jo për HDD-në e brendshme nën Neutrino.
+  HINT_AUTO_CREATE_VMC: Nisja e një loje PS2 pa VMC në folenë 1 krijon një kartë 8 MB në pajisjen e lojës, me emrin që sugjeron ekrani VMC (e ndarë nga të gjithë disqet e lojës), dhe e cakton. Nën Neutrino jo në HDD-në APA (një HDD exFAT funksionon).
   AUTO_VMC_CREATING: Duke krijuar VMC-në e kësaj loje...
   AUTO_VMC_FAILED: VMC e kësaj loje nuk u krijua dot. Loja fillon pa të.
   RIPPS2_BIOS_MUSIC: Muzika e BIOS
@@ -1419,7 +1516,7 @@ labels:
   HINT_LANGUAGE: Gjuha e menysë. Shto të tjera duke vendosur skedarë lang_*.lng në një dosje LNG.
   HINT_GSM_DEFAULTS_BUTTON: Rregullimet e mënyrës së videos që merr çdo lojë përveç nëse ka cilësimet e veta GSM.
   HINT_DEFDEVICE: Faqja ku hapet RiptOPL në nisje.
-  HINT_MMCE_MODE: Lojëra në një SD2PSX ose MemCard PRO2. Auto niset në nisje, Manuale kur hap faqen, Fikur e fsheh.
+  HINT_MMCE_MODE: 'Lojëra në një SD2PSX ose MemCard PRO2. Automatike e nis në nisje: më e shpejta për një kartë të lidhur, me lojërat e saj te Të gjitha lojërat që nga fillimi. Manuale e nis kur hap faqen e tij, Fikur e fsheh.'
   HINT_MMCE_SETTINGS_BUTTON: Opsionet e folesë, kartës së nisjes IGR, GameID dhe kohës për MMCE.
   HINT_ENABLE_USB: Ngarkon drajverin e ruajtjes USB.
   HINT_ENABLE_MX4SIO: Ngarkon drajverin e përshtatësit të kartave SD MX4SIO.
@@ -1601,8 +1698,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'Pamja e menysë: mënyra e videos, ekrani i gjerë, vendi në televizor (H-POS, V-POS) dhe overscan.'
   HINT_RIPPS2_LAYOUT: Ku qëndrojnë kategoritë dhe si hyn një faqe, pastaj kopertinat e RIPFLOW dhe rrjeta e RIPGRID.
   HINT_RIPPS2_COLORS_TEXT: Trashësia e tekstit, ngjyra e temës, kalimi i ngjyrave dhe çdo ngjyrë.
-  HINT_RIPPS2_TEXT_WEIGHT: 'Sa i trashë është teksti i RIPPS2: këshillat e cilësimeve, GJENDJA dhe Rreth. E rregullt është si më parë; Mesatare dhe Të trasha lexohen më mirë në një figurë të butë.'
-  HINT_RIPPS2_HDD_START: 'HDD i brendshëm, APA ose exFAT: RIPPS2 lexon atë që është dhe e shfaq një herë, si Lojëra HDD. Joaktiv e lë të qetë.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'Sa i trashë është teksti i vetë RIPPS2: këshillat e cilësimeve, GJENDJA dhe Rreth. Normale është si më parë; Të trasha lexohen më mirë mbi një figurë të butë. Fontet e vetë një teme mbajnë trashësitë që u jep tema.'
+  HINT_RIPPS2_HDD_START: 'HDD-ja e brendshme, APA ose exFAT: RIPPS2 e lexon cilado qoftë dhe e shfaq një herë, si Lojërat HDD. Automatike (më e shpejta me disk brenda) e nis në nisje; Fikur e lë të qetë.'
   HINT_RIPPS2_THEME_COLOR: Ngjyra e vetë temës. Zgjidh E personalizuar si ngjyrë teme për ta zgjedhur vetë, si ngjyrat e tekstit.
   HINT_RIPPS2_SWEEP: Pesë ngjyra nëpër të cilat kalon tema, ngadalë dhe butë. Ylber, një kalim nga çdo temë ngjyre, ose i yti. Joaktiv e mban temën të palëvizur.
   HINT_RIPPS2_SWEEP_COLORS: Pesë ngjyrat e kalimit dhe shpejtësia e tij. Ndrysho një të RIPPS2 dhe ruhet si i yti, me emrin që i jep.
@@ -1611,3 +1708,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Sa zgjat çdo ngjyrë para se të shfaqet tjetra. Edhe E gjallë mbetet e butë: ngjyrat nuk ndezin kurrë.'
   RIPPS2_HIDE_COMPRESS: Fshih lojën dhe ngjeshja
   HINT_RIPPS2_SELECT_HOLD: 'SELECT i mbajtur 4.2 s në një listë lojërash. Listë: temat në një panel, zgjidh një. Me radhë: tema tjetër. Fikur: asgjë (një shtypje ende rifreskon).'
+  RIPPS2_RECENT_GAMES: Lojërat e fundit
+  RIPPS2_SET_METADATA_RENAME: Vendos meta të dhënat (riemërto)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Kontrolluesi i pari (eksperimental)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX lexon nëpër autobusin që ndan me kontrolluesin, dhe ndërsa zgjat një lexim kontrolluesi nuk dëgjohet: shtypjet vonohen ose humbasin ndërsa ngarkohen kopertinat. Ndezur: kopertinat vijnë në copa të vogla me kontrolluesin të lexuar mes tyre, pak më ngadalë. Fikur: aq shpejt sa shkon karta. Me burimet e kartës në Automatike, lista e saj ngarkohet një herë, në nisje.'
+  HINT_RIPPS2_TRUST_CACHE: 'Një listë e shfaqur nga cache mbetet siç është, gati për t''u nisur, derisa të shtypësh SELECT ose RIPPS2 ta ndryshojë vetë atë burim. Fikur: çdo burim lexohet përsëri në sfond pasi shfaqet cache e tij, një pauzë që ndihet në një kartë MMCE ose MX4SIO, që ndajnë autobusin e kontrolluesit.'
+  RIPPS2_STATUS_OPEN: Ngarkimi dhe njësitë
+  HINT_RIPPS2_STATUS_OPEN: 'Hap GJENDJA: ku i lexon nisja cilësimet dhe listat e lojërave, cili vend është më i shpejti, ku shkon EXIT i një loje, dhe çdo njësi. CILËSIMET E CACHE atje të kthejnë këtu.'
+  RIPPS2_BADGE_SET: Grupi i distinktivëve
+  HINT_RIPPS2_BADGE_SET: 'Distinktivët në faqen e informacionit të një loje (vlerësimi, lojtarët, ESRB, modaliteti i videos, skanimi, raporti). RIPPS2: grupi i tij, i njëjtë në çdo temë. Tema: imazhet e temës, ose ato të RIPPS2 kur tema i kërkon.'
+  RIPPS2_HINT_FADE: Shfaqje e butë e këshillave dhe simboleve
+  HINT_RIPPS2_HINT_FADE: 'Një këshillë butoni ose simbol që ndryshon shfaqet butë, si kopertinat, në çastin që ndryshon; ato që mbeten nuk preken, në çdo faqe dhe mesazh. Fikur: thjesht shfaqen. Tema: vendos tema (ndezur, përveç nëse thotë hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: Stili i shiritit anësor
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Klasik (i ndarë): ikonat në shiritin e errët të shiritit anësor me rripin me ngjyrë pranë. XL (një copë): një shirit më i gjerë, me ikonat në mes. Tema: vendos tema.'
+  HINT_EXITPATH: 'Ku shkon EXIT në Menynë në lojë. Më mirë bosh, me BIBLE të përgatitur (GJENDJA > Ngarkuesi i nisjes > Menaxho, ose BOOT LOCK në PS2BBL-në tënde): EXIT atëherë e rivendos konsolën nëpër rrugën e saj të nisjes dhe PS2BBL nis RIPPS2 si në ndezje, rruga më e sigurt mbrapsht. Shfletuesi: shfletuesi i PS2. Një ELF në kartë memorieje (mc0:/mc1:) ose në njësi USB FAT32 (mass:/) ngarkohet menjëherë pas rivendosjes, për të cilën jo çdo lojë e lë konsolën gati; MMCE atëherë nuk arrihet fare.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO dhe HDD exFAT. Automatike i nis në nisje: më e shpejta për njësitë e lidhura, me lojërat e tyre te Të gjitha lojërat që nga fillimi. Manuale i nis kur hap faqen e tyre.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino nuk mund të përdorë VMC në HDD-në APA (exFAT, USB dhe MX4SIO mundin): kjo lojë niset me kartën e vërtetë në atë fole.'

@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: Dili masulat ang menu music sa %s (%s). Puno na ba ang drive?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'Ang menu music usa ka WAV nga %s, ug walay memory card nga adunay lugar niini. Dinhi, nagdagan ang RIPPS2 gikan sa memory card ug walay drive nga adunay OPL folder nga nasugdan: sugdi ang usa sa Storage, unya i-rip ang musika didto.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: Dili masulat ang mga tunog sa %s. Puno ba o naka-write-protect ang drive?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Dili kini ang menu music nga nailhan sa RIPPS2 niining BIOS. Walay nasulat.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Dili kini ang sound bank nga nailhan sa RIPPS2 niining BIOS. Walay nasulat.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- Ibalhin una nga tibuok ang %s (%s) sa backup folder.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- Gihigot sa console ang PS2BBL 1.2.0 niining card ug gisulat isip %s/%s.
-
-    - Ang config niini, mc%d:/PS2BBL/CONFIG.INI, mosugod sa RIPPS2 gikan sa %s, naka-on ang BOOT LOCK.
-
-    Mag-restart ang I/O processor tungod niini; mobalik ang musika ug mga drive pagkahuman. Ayaw kuhaa ang card ug ayaw palonga ang console hangtod moingon nga humana.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: USA KA KOPYA SA MEMORY CARD %d
   A COPY ON MX4SIO: USA KA KOPYA SA MX4SIO
   A COPY ON THE USB DRIVE: USA KA KOPYA SA USB DRIVE
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: Dili masulat ang BIBLE sa memory card %d, mao nga gibalik ang card sama kaniadto. Susiha ang libreng lugar niini, unya sulayi pag-usab.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: Dili makopya sa BIBLE ang RIPPS2 sa %s. Susiha ang lugar ug nga dili kini naka-write-protect. Walay laing giusab.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: Dili makopya sa BIBLE ang RIPPS2 sa %s partition sa HDD. Susiha ang libreng lugar niini. Walay laing giusab.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : Dili makatipig ang BIBLE og kopya sa boot program sa HDD, mao nga mihunong kini sa wala pa kini usba. Nakopya ang RIPPS2 sa HDD; walay laing giusab.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: Dili maibalhin sa BIBLE ang %s aron matipigan, mao nga mihunong kini didto. Walay giusab sa card.
   BIBLE could not write its config (%s). The boot program was not changed.: Dili masulat sa BIBLE ang config niini (%s). Wala giusab ang boot program.
   BIBLE could not write the HDD's boot program (step %d). %s: Dili masulat sa BIBLE ang boot program sa HDD (lakang %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : Gibuksan ang BOOT LOCK. Gisugdan na sa PS2BBL ang RIPPS2 sa pag-on (%s). Pindota og dugay ang usa ka PS2BBL hotkey samtang nagsugod ang console aron makaadto sa uban.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: Molihok ang BOOT LOCK pinaagi sa PS2BBL (PlayStation 2 Basic BootLoader), ug walay ingon niana sa bisan unsang memory card dinhi.
   INSTALL BIBLE: I-INSTALL ANG BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'I-INSTALL ANG BIBLE SA MEMORY CARD %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Kinahanglan niini ang console nga mo-boot gikan sa HDD niini (tambok nga PS2 nga adunay network adapter). Ayaw kini palonga hangtod moingon nga humana.'
   INTERNAL HDD  (its boot area): INTERNAL HDD  (ang boot area niini)
   MEMORY CARD %d  (%s): MEMORY CARD %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    Ang BIBLE mao ang PS2BBL 1.2.0 ni El Isra, nga gi-set up sa RIPPS2: walay paghulat sa pag-on, RIPPS2 una, ug ang button nga gipindot og dugay sa pag-on modala gihapon sa browser (TRIANGLE), sa disc (START) ug sa naa didto kaniadto (CIRCLE). I-install o ayohon kini sa memory card o sa internal HDD?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Ang memory card %d adunay %d KB nga libre, ug kinahanglan sa BIBLE ang %d KB didto. Pagbakante og lugar, unya sulayi pag-usab.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Ang memory card %d adunay %d KB nga libre, ug kinahanglan sa kopya sa RIPPS2 ang %d KB. Pagbakante og lugar o pagpili og laing dapit.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Gisugdan sa memory card %d ang %s sa pag-on, ug molihok lang ang BOOT LOCK pinaagi sa PS2BBL.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: ABLI ANG TRAY
   TREFOIL KNOT: TREFOIL KNOT
   ' and ': ' ug '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : Nawala ang %s sa %s%s. Kinahanglan sa POPSTARTER ang POPS.ELF ug POPS_IOX.PAK, ang PS1 emulator gikan sa imong kaugalingong console, tupad sa mga dula aron makasugod og usa.
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : 'Nawala ang %s sa %s%s. Nakit-an sa RIPPOPS ang POPS.ELF ug POPS_IOX.PAK, ang PS1 emulator sa Sony, sa %s: kopyahon kini sa START dinhi ug sugdan ang dula.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': Dili makopya ang %s sa %s%s. Puno ba o naka-write-protect ang drive?
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : Nawala ang %s sa %s%s. Kinahanglan sa POPSTARTER ang POPS.ELF ug POPS_IOX.PAK, ang PS1 emulator gikan sa imong kaugalingong console, tupad sa mga dula aron makasugod og usa.
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : 'Nawala ang %s sa %s%s. Nakit-an sa RIPPOPS ang POPS.ELF ug POPS_IOX.PAK, ang PS1 emulator sa Sony, sa %s: kopyahon kini sa START dinhi ug sugdan ang dula.'
   COPY AND START: KOPYAHA UG SUGDI
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'Espesyal nga pasalamat usab sa tanang gugma gikan sa YouTube:'
   and its own look, launchers, file browser and save tools.: ug adunay kaugalingong dagway, launcher, file browser ug save tools.
   glad to help however you reach me.: malipayon nga motabang, bisan unsaon nimo ako pagkontak.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): ang ikaduhang game core, 1.8.0 nga gidala nga walay giusab (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: nga adunay Neutrino ni rickgaiser sa sulod isip ikaduhang game core,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Kini nga dula mosugod pinaagi sa Neutrino, ug walay nakit-an ang RIPPS2: wala sa path sa Settings, sa drive sa dula, sa mga memory card o sa bisan unsang nasugdang drive. Gidala sa RIPPS2 ang Neutrino 1.8.0 ni rickgaiser (AFL-3.0): i-install kini kausa, bisan asa nimo gusto, ug didto kini gamiton sa matag dula sa Neutrino.'
   STARTING THE DRIVES: GISUGDAN ANG MGA DRIVE
   '%d games, on the started drives': '%d ka dula, sa mga nasugdang drive'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: ADUNAY MGA FILE NGA WALA MAPAPAS'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: wala sa nasugdang drive
   only if you have none: kung wala ka lang
   starts every drive first: sugdan una ang matag drive
-  Drives, launchers and homebrew: Mga drive, launcher ug homebrew
   BDM Devices: Mga device sa BDM
   Color Sweep: Pagbalhin sa kolor
   Colors and Text: Kolor ug teksto
@@ -1140,6 +1099,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: Papasa ang %s? Ang kaugalingong mga pagbalhin sa RIPPS2 magpabilin.
   Sweep: Pagbalhin
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Ang mga badge nagtimaan sa mga dula nga adunay achievement sa imong mga lista, ug pila ang imong na-unlock. Kinahanglan nga on ang TELEMETRY.
+  Classic (Split): Classic (Bahin)
+  Guidance: Giya
+  OK: OK
+  XL (One Piece): XL (Usa ka Piraso)
+  STARS HIDDEN: NATAGO ANG MGA STAR
+  STARS SHOWN: MAKITA ANG MGA STAR
+  Asking the SD2PSX for this game's memory card...: Gipangayo sa SD2PSX ang memory card niining dulaa...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: Giandam sa SD2PSX ang memory card niining dulaa (%d s). Mosugod ang dula kon mahuman na; ang START mosugod niini karon.
+  the second game core, its newest build carried unmodified (AFL-3.0): ang ikaduhang game core, ang pinakabag-ong build niini nga gidala nga walay giusab (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': Dili masulat ang %s sa %s (%d sa mga tunog ang nasulat). Puno ba o naka-write-protect ang drive?
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': Dili masulat ang %s sa %s (%d sa mga tunog ang nasulat, ug ang card adunay %d KB nga libre karon). Naka-write-protect ba ang card?
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: Dili mahimo ang folder nga %s. Puno ba o naka-write-protect ang drive? Walay nasulat.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'Ang mga tunog nagkinahanglan og %d KB ug kini nga memory card adunay %d KB nga libre. Walay nasulat. Paghawan og lugar sa card, o sugdi ang usa ka drive sa Storage ug i-rip kini pag-usab: itanyag dayon sa RIPPS2 ang drive.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : Ang mga tunog nagkinahanglan og %d KB ug kini nga memory card adunay %d KB nga libre. Hinuon, isulat kini sa START sa %sAUDIO/ sa drive, ug didto kini patokaron sa RIPPS2.
+  There was not enough memory to make the sounds. Nothing was written.: Kulang ang memory aron mahimo ang mga tunog. Walay nasulat.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- Gihigot sa console ang PS2BBL 1.2.0 niining card ug gisulat isip %s/%s.
+  
+    - Ang config niini, mc%d:/PS2BBL/CONFIG.INI, mosugod sa RIPPS2 gikan sa %s nga walay paghulat (0 ms, nga dili gitugotan sa PS2BBL Extended), naka-on ang BOOT LOCK.
+  
+    Mag-restart ang I/O processor tungod niini; mobalik ang musika ug mga drive pagkahuman. Ayaw kuhaa ang card ug ayaw palonga ang console hangtod moingon nga humana.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : Dili masulat ang BIBLE sa memory card %d, mao nga gibalik ang card sama kaniadto. Susiha ang libreng lugar niini, unya sulayi pag-usab. (Ang DIAG.TXT tupad sa RIPPS2 adunay tubag sa card.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : Dili maibalhin sa BIBLE ang %s aron matipigan, mao nga mihunong kini didto. Walay giusab sa card. (Ang DIAG.TXT tupad sa RIPPS2 adunay tubag sa card.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 ni El Isra nga gi-set up sa RIPPS2: 0 ms nga pagsugod sa pag-on (dili gitugotan sa PS2BBL Extended ang 0), RIPPS2 una, ug ang button nga gipindot og dugay sa pag-on modala gihapon sa browser (TRIANGLE), sa disc (START) ug sa naa didto kaniadto (CIRCLE). I-install o ayohon kini sa memory card o sa internal HDD?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 SA MEMORY CARD %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'Moabli na karon ang Memory files, sa MEDIA, uban ang disc sa clipboard niini (NA-RIP). Adto sa drive ug folder diin kini ibutang (bisan unsang drive: USB, ang HDD, ang MEDIA sa SD2PSX), pindota ang TRIANGLE para sa MGA AKSYON ug pilia ang I-PASTE. Mangutana pa og usa ka higayon ang RIPDISC ug basahon ang disc gamit ang laser sa imong PS2, ug isulat kini didto.'
+  RENAME THE GAME: ILISI ANG NGALAN SA DULA
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Kini nga dula mosugod pinaagi sa Neutrino, ug walay nakit-an ang RIPPS2: wala sa path sa Settings, sa drive sa dula, sa mga memory card o sa bisan unsang nasugdang drive. Gidala sa RIPPS2 ang Neutrino ni rickgaiser (AFL-3.0), ang pinakabag-ong build niini: i-install kini kausa, bisan asa nimo gusto, ug didto kini gamiton sa matag dula sa Neutrino.'
+  A PS1 disc's track list, for Ember: Ang track list sa usa ka PS1 disc, para sa Ember
+  A PS1 game for POPSTARTER: Usa ka PS1 nga dula para sa POPSTARTER
+  A PS2 game: Usa ka PS2 nga dula
+  A card the SD2PSX set aside (wrong size): Usa ka card nga gilain sa SD2PSX (sayop nga gidak-on)
+  'A program: Cross starts it': 'Usa ka program: ang Cross mosugod niini'
+  A save, packed in one file: Usa ka save, giputos sa usa ka file
+  All Games' master list: Ang master list sa Tanang dula
+  'An SD2PSX boot card: open it to look in': 'Usa ka SD2PSX boot card: ablihi aron tan-awon ang sulod'
+  'An SD2PSX memory card: open it like a VMC': 'Usa ka SD2PSX memory card: ablihi sama sa VMC'
+  Cheats, a file a game: Mga cheat, usa ka file matag dula
+  Each game's settings and info page: Ang settings ug info page sa matag dula
+  Ember, its BIOS and its PS1 games: Ember, ang BIOS niini ug ang mga PS1 nga dula niini
+  Game covers and art, by game ID: Mga cover ug hulagway sa dula, sumala sa game ID
+  Games kept in 1 GB parts: Mga dula nga gitipigan sa mga bahin nga 1 GB
+  Games that share one SD2PSX card: Mga dula nga nag-ambit og usa ka SD2PSX card
+  Languages for RIPPS2: Mga pinulongan para sa RIPPS2
+  Neutrino, the second game core: Neutrino, ang ikaduhang game core
+  OPL's list of this folder's games: Ang lista sa OPL sa mga dula niining folder
+  POPSTARTER and PS1 games (VCDs): POPSTARTER ug mga PS1 nga dula (VCD)
+  PS2 games on CD, as ISOs: Mga PS2 nga dula sa CD, isip ISO
+  PS2 games on DVD, as ISOs: Mga PS2 nga dula sa DVD, isip ISO
+  PS2BBL's settings: Ang settings sa PS2BBL
+  Programs to start (ELFs): Mga program nga sugdan (ELF)
+  RIPPS2's diagnostics, for a bug report: Ang diagnostics sa RIPPS2, para sa bug report
+  RIPPS2's own folder: Ang kaugalingong folder sa RIPPS2
+  RIPPS2's settings: Ang settings sa RIPPS2
+  RIPPS2's sounds and music: Ang mga tunog ug musika sa RIPPS2
+  Recent games: Bag-o lang nga mga dula
+  RetroAchievements' files: Ang mga file sa RetroAchievements
+  Ripped CDs and DVDs, pictures, video: Mga na-rip nga CD ug DVD, hulagway, video
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'Nag-save sa SD sa SD2PSX: paghulat og %d s sa dili pa palongon.'
+  Starred games: Mga paborito nga dula
+  The SD2PSX's boot cards (PS2BBL): Ang mga boot card sa SD2PSX (PS2BBL)
+  The SD2PSX's boot channels and names: Ang mga boot channel ug ngalan sa SD2PSX
+  The SD2PSX's memory cards: Ang mga memory card sa SD2PSX
+  The SD2PSX's own settings: Ang kaugalingong settings sa SD2PSX
+  The SD2PSX's settings: Ang settings sa SD2PSX
+  Themes, a folder each: Mga theme, usa ka folder matag usa
+  This drive's game list, for a quick boot: Ang lista sa dula niining drive, para sa paspas nga boot
+  Virtual memory cards for games: Mga virtual memory card para sa mga dula
+  What RIPPS2's last launch did: Ang gibuhat sa kataposang launch sa RIPPS2
+  Circle from the top   Cross close: 'Circle: gikan sa sinugdanan   Cross: sirado'
+  Cross from the top   Circle close: 'Cross: gikan sa sinugdanan   Circle: sirado'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Dili ma-play kini nga track. Ang RIPPS2 mopatokar og 16-bit PCM nga .wav file (sama sa pag-rip sa RIPDISC ug BIOS Music), Ogg Vorbis nga .ogg file ug MP3.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'READ ONLY: GIGAMIT ANG BOOT CARD SA SD2PSX'
+  '%d music tracks': '%d ka music track'
+  1 music track: 1 ka music track
+  'A game''s EXIT: %s': 'EXIT sa dula: %s'
+  'A game''s EXIT: the browser': 'EXIT sa dula: ang browser'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Tanang dula: %d ka dula nga gitipigan sa %s, gilista sa boot sa dili pa motubag ang bisan unsang drive'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Tanang dula: wala pay master list; isulat ang %s kon nalista na ang mga dula (Fast Cache naka-on)'
+  CACHE SETTINGS: CACHE SETTINGS
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: Gikopya ang Neutrino nga gidala sa RIPPS2 ngadto sa drive o memory card. Ang imong kaugalingong Neutrino gamiton kon unsa kini.
+  DIAG.TXT, for a bug report: DIAG.TXT, para sa bug report
+  Drives, loading, launchers and homebrew: Mga drive, pag-load, launcher ug homebrew
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Gipakita sa Fast Cache ang kataposang lista sa dula sa matag drive dayon pagtubag sa drive; gitipigan kini sa Trust Cache hangtod imong pindoton ang SELECT. Kon parehong naka-on, nga ang settings anaa sa memory card nga gisugdan sa RIPPS2, kini ang labing paspas nga boot.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Mga lista sa dula: Fast Cache naka-off, mao nga basahon ang matag usa gikan sa drive niini sa boot'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Mga lista sa dula: makita dayon gikan sa cache ug magpabilin hangtod SELECT'
+  'Game lists: each shows at once from its cache, then is read again': 'Mga lista sa dula: makita dayon gikan sa cache, unya basahon pag-usab'
+  LOADING: NAG-LOAD
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: Himoon ang mga tunog sa RIPPS2 gikan sa kaugalingong BIOS niining console ug isulat sa folder nga AUDIO.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Wala pay musika: Audio settings > BIOS Music ang mo-rip sa menu music niining console.'
+  SAVE DIAGNOSTICS: I-SAVE ANG DIAGNOSTICS
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Pangitaon sa mga drive ang POPSTARTER, ang mga POPS file, Ember, ang BIOS sa Ember ug Neutrino, ug hinumdoman kon asa ang matag usa.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Settings: %s, sa drive nga ginahulat sa boot (mas paspas ang memory card)'
+  'Settings: %s, read first (the quickest place)': 'Settings: %s, unang basahon (ang labing paspas nga lugar)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Sugdan karon ang matag drive (USB, ang HDD, MMCE, MX4SIO ug ang network), aron makita dinhi ang matag usa ug ang lugar niini.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: Ang IP ug SMB share nga gigamit sa POPSTARTER para sa mga PS1 nga dula sa network.
+  The diagnostics are in %s.: Ang diagnostics anaa sa %s.
+  The diagnostics could not be written to %s.: Dili masulat ang diagnostics sa %s.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Ang sugdan sa matag memory card sa pag-on; i-install o ayoha ang BIBLE, ang PS2BBL nga gi-set up aron sugdan ang RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: Asa ang POPSTARTER ug Ember, ug unsaon pagsugod sa mga PS1 nga dula.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Asa ang imong Neutrino, ang video mode niini, ug ang mga argument nga madawat sa matag Neutrino launch.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : Isulat ang gitala sa RIPPS2 bahin sa mga controller, mga drive, mga MMCE card ug mga kataposang launch sa DIAG.TXT tupad sa RIPPS2. Ipadala kini uban sa bug report.
+  back to Cache: balik sa Cache
+  what boot reads first: ang unang basahon sa boot
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Mas karaan kini nga Neutrino kaysa 1.3, nga dili makasugod og dula gikan sa APA HDD. Itudlo ang Game Launching > Neutrino sa Neutrino 1.3 o mas bag-o, o hawani ang path aron gamiton ang gidala sa RIPPS2.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : Wala makita sa RIPPS2 ang %s sa %s%s. Kinahanglan sa POPSTARTER ang POPS.ELF ug POPS_IOX.PAK, ang PS1 emulator gikan sa imong kaugalingong console; mahimong makit-an niini kini diin wala motan-aw ang RIPPS2 (kon mosugod ang imong mga dula, makit-an niini). Mo-launch ang START, ug dili na pangutan-on pag-usab kini nga drive.
 labels:
   MEDIUM: Tunga-tunga
   BDMMODE: BDM Start Mode
@@ -1324,16 +1423,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Usa ka kolor alang sa mga tore, orb, glass, CD player ug file browser, sa tulo ka tab. Tema: ang tema ang modesisyon (asul sa RIPPS2 kung dili kini modesisyon).'
   RIPPS2_HINTS: Mga hint sa button
   HINT_RIPPS2_HINTS: 'Ang mga hint sa button sa ubos. Itago sila sa Fade When Idle hangtod mopindot ka og button. Tema: ang tema ang modesisyon.'
-  RIPPS2_CATEGORY_BAR: Category bar
-  HINT_RIPPS2_CATEGORY_BAR: 'SUGDI ANG DISC, STORAGE ug MEMORY FILES sa taas. Itago sila sa Fade When Idle hangtod mopindot ka og button. Tema: ang tema ang modesisyon.'
+  RIPPS2_CATEGORY_BAR: Category/Sidebar
+  HINT_RIPPS2_CATEGORY_BAR: 'LAUNCH DISC, STORAGE ug MEMORY FILES: ang mga ngalan sa ibabaw, o ang sidebar. Ang Fade kung idle mopahanap sa mga ngalan, o motago sa sidebar, hangtod mopindot ka og button; mobalik dayon kini. Theme: ang theme ang modesisyon.'
   RIPPS2_SOURCE_NAME: Ngalan sa source
   RIPPS2_STATUS: Status
   RIPPS2_SOURCE: Source
   HINT_RIPPS2_SOURCE_NAME: 'Ang ngalan sa source ibabaw sa mga dula (TANANG DULA, HDD GAMES ug uban pa). I-fade kini sa Fade When Idle uban sa category bar; ipakita kini sa Pop In nga dako sa tunga sa page, sama sa pagngalan sa L3 sa lista, sa unang lista human sa pag-boot ug matag usab sa source, unya mawala. Mahimo sa mga tema nga ang Pop In ang ilang Shown. Tema: ang tema ang modesisyon.'
-  RIPPS2_RECENTS: Ipakita ang bag-o lang
-  HINT_RIPPS2_RECENTS: Hangtod niining gidaghanon sa imong katapusang gilansad nga dula sa taas sa Mga Paborito, ang pinakabag-o una. Ang 0 mopalong niini.
+  RIPPS2_RECENTS: Bag-o lang nga mga Dula
+  HINT_RIPPS2_RECENTS: 'Bag-o lang nga mga Dula, usa ka page sa sidebar sa imong kataposang na-launch nga mga dula, pinakabag-o una: pila ang gitipigan, 1 hangtod 99 (i-type sa Triangle ang numero). Ang dula nga naa sa Manwal ang drive mosugod sa drive kon imong pilion. Ang 0 mopalong sa page.'
   RIPPS2_CATEGORY_ORDER: Han-ay sa category
-  HINT_RIPPS2_CATEGORY_ORDER: 'Memory Files una ug Sugdi ang Disc sa katapusan. Gihimo alang sa RIPFLOW (Interface > Theme). Tema: ang tema ang modesisyon.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Ilisan ang Launch Disc ug Memory files: Memory files una ug Launch Disc sa kataposan, sa mga ngalan sa bar ug sa mga icon sa sidebar. Gihimo para sa RIPFLOW (Interface > Theme). Theme: ang theme ang modesisyon.'
   RIPPS2_MUSIC: Musika
   HINT_RIPPS2_MUSIC: Gitugtog ang mga bgm file sa AUDIO folder tupad sa RIPPS2 ug sa AUDIO folder sa OPL sa matag nasugdang drive (Ogg nga walay tag, o 16-bit nga WAV); una nga motugtog ang ginganlan og Menu. Ang kaugalingong musika sa tema ang motugtog kung naa.
   RIPPS2_BIOS_SOUNDS: Mga tunog sa BIOS
@@ -1342,7 +1441,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: Mga hint ug glyph
   HINT_RIPPS2_HINTS_GLYPHS: Ang dagway sa mga hint sa button ug glyph. Magsugod ang matag row sa Tema, ang gipili sa tema; bisan unsang laing pagpili imo ug mas una sa matag tema.
   RIPPS2_HINT_LAYOUT: Layout sa hint
-  HINT_RIPPS2_STARSIDE: 'Asa ibutang ang bitoon sa starred nga dula sa lista. Wala: kaugalingong column sa sinugdanan sa matag row. Tuo: human sa titulo. Tago: walay bitoon. Theme: sumala sa theme. Mobalhin sa pikas tumoy ang row icon sa theme aron dili sila magpatong.'
+  HINT_RIPPS2_STARSIDE: 'Asa nahimutang ang star sa paborito nga dula sa lista. Wala: kaugalingong column sa sinugdanan sa matag row. Tuo: human sa titulo. Tinago (ang sinugdanan): walay star ug walay column, bug-os ang mga titulo. Theme: kon unsa ang giingon sa theme. Himoon sa R3 nga paborito ang dula bisan unsa; pindota og 4 ka segundo ang R3 sa lista aron itago ang mga star o ibalik kini (himoon usab niini nga paborito ang dula ilawom sa cursor).'
   HINT_RIPPS2_HINT_LAYOUT: 'Row: ang mga hint sa usa ka linya. Column: usa ka hint matag linya, lista sa kilid, sugod kung asa ibutang sa tema ang mga hint niini.'
   RIPPS2_HINT_LABELS: Mga label sa hint
   HINT_RIPPS2_HINT_LABELS: Gidrowing ra sa Glyph ra ang mga button, alang sa mga glyph nga adunay kaugalingong pulong. Gihiusa sa Mga badge ang glyph ug titulo sa matag hint sa usa ka badge.
@@ -1363,11 +1462,11 @@ labels:
   RIPPS2_TRANSITION: Transition sa page
   HINT_RIPPS2_TRANSITION: 'Giunsa pagsulod ang bag-ong page kung moadto ka sa laing category: gikan sa kolor sa background sa tema, o gikan sa flash. Gitipigan sa Tema ang gipili sa tema.'
   RIPPS2_CATEGORY_LAYOUT: Layout sa category
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Asa makita ang tulo ka category: ang ilang mga ngalan sa ibabaw, o mga icon paubos sa sidebar, matag usa adunay drawer sa iyang mga page (ang Wala sa usa ka lista moadto didto). Gitipigan sa Tema ang kaugalingong layout sa tema.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Asa nahimutang ang tulo ka category: ang ilang mga ngalan sa ibabaw, o mga icon paubos sa sidebar, matag usa adunay drawer sa mga page niini (dad-on ka didto sa Wala sa lista), o Menu: walay bar, anaa sa START menu ang mga category sama sa theme nga gihimo para sa OPL. Ang Theme mopabilin sa iya sa theme.'
   RIPPS2_CACHE: Cache
   HINT_RIPPS2_CACHE: 'Giunsa pagtipig ang lista sa dula sa matag tinubdan aron dayon maabli ang iyang page: Fast Cache, ang lista sa internal HDD ug ang Automatic Refresh.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Ang matag tinubdan magtipig sa iyang katapusang lista sa dula (RIPPS2.LST tupad sa iyang CD ug DVD nga mga folder) ug ipakita kini dayon sa pagtubag sa tinubdan, unya basahon pag-usab ang tinubdan sa background. Kung Off, basahon una ang matag lista gikan sa tinubdan, sama kaniadto.
+  HINT_RIPPS2_FAST_CACHE: 'Gitipigan sa matag source ang kataposang lista sa dula niini (RIPPS2.LST tupad sa CD ug DVD folder niini) ug ipakita kini dayon pagtubag sa source. Ang Trust Cache ang modesisyon kon basahon pag-usab ang source pagkahuman. Naka-off: basahon una ang matag lista gikan sa source niini, sama kaniadto.'
   HINT_RIPPS2_VIGNETTE: Ngitngitan ang mga ngilit sa matag cover gawas sa gipili, aron mabantog ang gipili. Ang Huyang tunga sa Puno.
   RIPPS2_GRID_WIDE: Widescreen grid layout
   HINT_RIPPS2_GRID_WIDE: Ang Grid page sa 16:9 nga hulagway ra (Widescreen, 720p, 1080i), diin mas niwang ang mga cover ug mas daghan ang masulod. Gigamit sa Tema ang layout sa tema; gisundan sa Pareho ang Grid layout.
@@ -1383,7 +1482,7 @@ labels:
   GAME_TYPE_LABELS: Ipakita ang mga label nga [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: Dili ma-save ang cheat list sa Neutrino folder, mao nga dili kini magamit sa Neutrino. Ilansad nga walay cheat?
   AUTO_CREATE_VMC: Paghimo og VMC sa unang paglansad
-  HINT_AUTO_CREATE_VMC: Ang paglansad sa PS2 nga dula nga walay VMC sa slot 1 mohimo og 8 MB nga card sa device sa dula, nga ginganlan sumala sa gisugyot sa VMC screen (gipaambit sa matag disc sa dula), ug itudlo kini. Dili alang sa internal HDD ilalom sa Neutrino.
+  HINT_AUTO_CREATE_VMC: Ang pag-launch og PS2 nga dula nga walay VMC sa slot 1 mohimo og 8 MB nga card sa device sa dula, nga nganlan sumala sa sugyot sa VMC screen (gi-ambit sa matag disc sa dula), ug itudlo kini. Sa Neutrino, dili sa APA HDD (molihok ang exFAT HDD).
   AUTO_VMC_CREATING: Gihimo ang VMC niining dula...
   AUTO_VMC_FAILED: Dili mahimo ang VMC niining dula. Magsugod ang dula nga wala niini.
   RIPPS2_BIOS_MUSIC: BIOS Music
@@ -1420,7 +1519,7 @@ labels:
   HINT_LANGUAGE: Pinulongan sa menu. Pagdugang pa pinaagi sa pagbutang og mga lang_*.lng file sa LNG folder.
   HINT_GSM_DEFAULTS_BUTTON: Mga ayo sa video mode nga makuha sa matag dula gawas kung adunay kaugalingong GSM settings.
   HINT_DEFDEVICE: Ang page nga ablihan sa RiptOPL sa pag-boot.
-  HINT_MMCE_MODE: Mga dula sa SD2PSX o MemCard PRO2. Mosugod ang Auto sa pag-boot, ang Manwal kung ablihan nimo ang page, itago kini sa Off.
+  HINT_MMCE_MODE: 'Mga dula sa SD2PSX o MemCard PRO2. Sugdan kini sa Awto sa boot: labing paspas para sa nakasaksak nga card, anaa sa Tanang dula ang mga dula niini sukad sa sinugdanan. Sugdan kini sa Manwal kon imong ablihan ang page niini, itago kini sa Gipalong.'
   HINT_MMCE_SETTINGS_BUTTON: Mga opsyon sa slot, IGR bootcard, GameID ug timing alang sa MMCE.
   HINT_ENABLE_USB: I-load ang USB storage driver.
   HINT_ENABLE_MX4SIO: I-load ang driver sa MX4SIO SD card adapter.
@@ -1602,8 +1701,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'Ang hulagway sa menu: video mode, widescreen, asa kini sa TV (H-POS, V-POS) ug overscan.'
   HINT_RIPPS2_LAYOUT: Asa ang mga kategorya ug giunsa pagsulod sa panid, dayon ang mga cover sa RIPFLOW ug ang grid sa RIPGRID.
   HINT_RIPPS2_COLORS_TEXT: Kabug-at sa teksto, ang kolor sa tema, ang pagbalhin sa kolor ug matag kolor.
-  HINT_RIPPS2_TEXT_WEIGHT: 'Unsa kabug-at ang kaugalingong teksto sa RIPPS2: ang mga tip sa Settings, STATUS ug About. Ang Regular sama sa kaniadto; ang Medium ug Bold mas klaro sa humok nga hulagway.'
-  HINT_RIPPS2_HDD_START: 'Ang internal HDD, APA o exFAT: basahon kini sa RIPPS2 bisan unsa pa kini ug ipakita kausa, isip mga dula sa HDD. Ang Off dili mohilabot niini.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'Unsa ka baga ang kaugalingong teksto sa RIPPS2: ang tooltips sa Settings, STATUS ug About. Ang Normal sama kaniadto; mas sayon basahon ang Bold sa humok nga hulagway. Ang kaugalingong font sa theme mopabilin sa gibag-on nga gihatag sa theme.'
+  HINT_RIPPS2_HDD_START: 'Ang internal HDD, APA o exFAT: basahon kini sa RIPPS2 bisan unsa kini ug ipakita kausa, isip Dula sa HDD. Sugdan kini sa Awto (labing paspas kon naay drive) sa boot; pasagdan kini sa Gipalong.'
   HINT_RIPPS2_THEME_COLOR: Ang kaugalingong kolor sa tema. Pilia ang Kaugalingon isip kolor sa tema aron ikaw ang mopili niini, sama sa mga kolor sa teksto.
   HINT_RIPPS2_SWEEP: Lima ka kolor nga agian sa tema, hinay ug hamis. Balangaw, usa ka pagbalhin gikan sa matag kolor sa tema, o imong kaugalingon. Ang Off magpabilin sa tema nga dili molihok.
   HINT_RIPPS2_SWEEP_COLORS: Ang lima ka kolor sa pagbalhin ug ang kakusog niini. Usba ang usa sa RIPPS2 ug tipigan kini isip imo, sa ngalan nga imong ihatag.
@@ -1612,3 +1711,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Unsa kadugay ang matag kolor sa dili pa mogawas ang sunod. Bisan ang Buhi nagpabiling hamis: ang mga kolor dili gyud mokidlap.'
   RIPPS2_HIDE_COMPRESS: Itago ang dula ug compression
   HINT_RIPPS2_SELECT_HOLD: 'SELECT gikuptan 4.2 s sa lista sa dula. Lista: ang mga tema sa usa ka panel, pili og usa. Sunod-sunod: ang sunod nga tema. Gipalong: walay mahitabo (ang pagpindot mo-refresh gihapon).'
+  RIPPS2_RECENT_GAMES: Bag-o lang nga mga Dula
+  RIPPS2_SET_METADATA_RENAME: Ibutang ang Metadata (Ilisi ang Ngalan)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Controller Una (Experimental)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'Nagbasa ang SD2PSX sa bus nga gi-ambit sa controller, ug samtang adunay gibasa dili madungog ang controller: malangan o mawala ang mga pindot samtang nag-load ang mga cover. Naka-on: moabot ang mga cover sa gagmayng bahin nga gibasa ang controller taliwala, mas hinay gamay. Naka-off: kutob sa kapaspas sa card. Kon naa sa Awto ang mga source sa card, kausa ra mo-load ang lista niini, sa boot.'
+  HINT_RIPPS2_TRUST_CACHE: 'Ang lista nga gipakita gikan sa cache magpabilin kon unsa kini, andam i-launch, hangtod imong pindoton ang SELECT o usbon mismo sa RIPPS2 kana nga source. Naka-off: basahon pag-usab ang matag source sa background human makita ang cache niini, usa ka paghunong nga mabati sa MMCE o MX4SIO card, nga nag-ambit sa bus sa controller.'
+  RIPPS2_STATUS_OPEN: Pag-load ug mga Drive
+  HINT_RIPPS2_STATUS_OPEN: 'Abrihan ang STATUS: diin basahon sa boot ang settings ug ang mga lista sa dula, unsang lugar ang labing paspas, asa padulong ang EXIT sa dula, ug ang matag drive. Ang CACHE SETTINGS didto mobalik dinhi.'
+  RIPPS2_BADGE_SET: Badge Set
+  HINT_RIPPS2_BADGE_SET: 'Ang mga badge sa info page sa dula (rating, magdudula, ESRB, video mode, scan, aspect). RIPPS2: ang kaugalingong set niini, pareho sa matag theme. Theme: ang kaugalingong hulagway sa theme, o ang sa RIPPS2 kon pangayoon sa theme.'
+  RIPPS2_HINT_FADE: Fade sa Hints ug Glyphs
+  HINT_RIPPS2_HINT_FADE: 'Ang button hint o glyph nga mausab mo-fade in, sama sa mga cover, dayon pag-usab niini; ang nagpabilin dili hilabtan, sa matag page ug mensahe. Naka-off: motungha lang. Theme: ang theme ang modesisyon (naka-on gawas kon hints_fade=0 ang giingon niini).'
+  RIPPS2_SIDEBAR_STYLE: Estilo sa Sidebar
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Classic (Bahin): ang mga icon sa itom nga bar sa sidebar nga adunay kolor nga linya tupad. XL (Usa ka Piraso): usa ka mas lapad nga bar, ang mga icon sa tunga. Theme: ang theme ang modesisyon.'
+  HINT_EXITPATH: 'Asa padulong ang EXIT sa Menu sulod sa dula. Mas maayo nga biyaan nga blangko, nga naka-set up ang BIBLE (STATUS > Boot Loader > Manage, o BOOT LOCK sa imong PS2BBL): i-reset sa EXIT ang console sa kaugalingong boot path niini ug sugdan sa PS2BBL ang RIPPS2 sama sa pag-on, ang labing luwas nga pagbalik. Browser: ang PS2 browser. Ang ELF sa memory card (mc0:/mc1:) o FAT32 USB drive (mass:/) mo-load dayon human sa reset, nga dili tanang dula mobiya sa console nga andam; dili maabot ang MMCE niana.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO ug ang exFAT HDD. Sugdan sila sa Awto sa boot: labing paspas para sa mga drive nga nakasaksak, anaa sa Tanang dula ang ilang mga dula sukad sa sinugdanan. Sugdan sila sa Manwal kon imong ablihan ang ilang page.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Dili magamit sa Neutrino ang VMC sa APA HDD (kaya sa exFAT, USB ug MX4SIO): mosugod kini nga dula gamit ang tinuod nga card niana nga slot.'

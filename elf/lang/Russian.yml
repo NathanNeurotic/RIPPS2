@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: Не удалось записать музыку меню в %s (%s). Накопитель заполнен?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'Музыка меню это WAV размером %s, и ни на одной карте памяти нет для неё места. Здесь RIPPS2 запущен с карты памяти и ни один накопитель с папкой OPL не запущен: запустите один в «Хранилище», затем извлеките музыку на него.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: Не удалось записать звуки в %s. Накопитель заполнен или защищён от записи?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Музыка меню этого BIOS не та, что знает RIPPS2. Ничего не записано.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Звуковой банк этого BIOS не тот, что знает RIPPS2. Ничего не записано.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) сначала целиком переносится в папку резервной копии.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- Консоль привязывает PS2BBL 1.2.0 к этой карте и записывает его как %s/%s.
-
-    - Его конфигурация, mc%d:/PS2BBL/CONFIG.INI, запускает RIPPS2 с %s, BOOT LOCK включён.
-
-    Для этого перезапускается процессор ввода-вывода; музыка и накопители вернутся после. Не вынимайте карту и не выключайте консоль, пока не появится сообщение о завершении.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: КОПИЯ НА КАРТЕ ПАМЯТИ %d
   A COPY ON MX4SIO: КОПИЯ НА MX4SIO
   A COPY ON THE USB DRIVE: КОПИЯ НА USB-НАКОПИТЕЛЕ
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: Не удалось записать BIBLE на карту памяти %d, поэтому карта возвращена в прежнее состояние. Проверьте свободное место и попробуйте снова.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE не смог скопировать RIPPS2 в %s. Проверьте место и отсутствие защиты от записи. Больше ничего не изменено.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE не смог скопировать RIPPS2 в раздел HDD %s. Проверьте свободное место. Больше ничего не изменено.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE не смог сохранить копию загрузочной программы HDD, поэтому остановился, ничего не меняя. RIPPS2 скопирован на HDD; больше ничего не изменено.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE не смог отложить %s, чтобы сохранить его, и остановился на этом. На карте ничего не изменено.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE не смог записать свою конфигурацию (%s). Загрузочная программа не изменена.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE не смог записать загрузочную программу HDD (шаг %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK включён. Теперь PS2BBL запускает RIPPS2 при включении (%s). Удерживайте горячую кнопку PS2BBL при запуске консоли, чтобы попасть в другое место.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK работает через PS2BBL (PlayStation 2 Basic BootLoader), а здесь его нет ни на одной карте памяти.
   INSTALL BIBLE: УСТАНОВИТЬ BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'УСТАНОВИТЬ BIBLE НА КАРТУ ПАМЯТИ %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Нужна консоль, которая загружается со своего HDD (толстая PS2 с сетевым адаптером). Не выключайте её, пока не появится сообщение о завершении.'
   INTERNAL HDD  (its boot area): ВНУТРЕННИЙ HDD  (его загрузочная область)
   MEMORY CARD %d  (%s): КАРТА ПАМЯТИ %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'КАРТА ПАМЯТИ 0: %s
-
-    КАРТА ПАМЯТИ 1: %s
-
-    %s
-
-    BIBLE это PS2BBL 1.2.0 от El Isra, настроенный RIPPS2: без ожидания при включении, сначала RIPPS2, а кнопка, удерживаемая при включении, по-прежнему ведёт в браузер (ТРЕУГОЛЬНИК), к диску (START) и к тому, что было раньше (КРУГ). Установить или исправить его на карте памяти или внутреннем HDD?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: На карте памяти %d свободно %d КБ, а BIBLE нужно там %d КБ. Освободите место и попробуйте снова.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: На карте памяти %d свободно %d КБ, а копии RIPPS2 нужно %d КБ. Освободите место или выберите другое место.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Карта памяти %d запускает %s при включении, а BOOT LOCK работает только через PS2BBL.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: ЛОТОК ОТКРЫТ
   TREFOIL KNOT: УЗЕЛ-ТРИЛИСТНИК
   ' and ': ' и '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : Нет %s в %s%s. POPSTARTER нужны POPS.ELF и POPS_IOX.PAK, эмулятор PS1 с вашей собственной консоли, рядом с играми, чтобы запустить игру.
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : 'Нет %s в %s%s. RIPPOPS нашёл POPS.ELF и POPS_IOX.PAK, эмулятор PS1 от Sony, на %s: START скопирует их сюда и запустит игру.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': Не удалось скопировать %s в %s%s. Накопитель заполнен или защищён от записи?
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : Нет %s в %s%s. POPSTARTER нужны POPS.ELF и POPS_IOX.PAK, эмулятор PS1 с вашей собственной консоли, рядом с играми, чтобы запустить игру.
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : 'Нет %s в %s%s. RIPPOPS нашёл POPS.ELF и POPS_IOX.PAK, эмулятор PS1 от Sony, на %s: START скопирует их сюда и запустит игру.'
   COPY AND START: КОПИРОВАТЬ И ЗАПУСТИТЬ
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'Особая благодарность и всей любви с YouTube:'
   and its own look, launchers, file browser and save tools.: и со своим видом, загрузчиками, файловым браузером и инструментами для сохранений.
   glad to help however you reach me.: рад помочь, как бы вы со мной ни связались.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): второе игровое ядро, 1.8.0 в неизменном виде (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: с Neutrino от rickgaiser внутри как вторым игровым ядром,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Эта игра запускается через Neutrino, а RIPPS2 его не нашёл: ни по пути из Настроек, ни на накопителе игры, ни на картах памяти, ни на одном запущенном накопителе. В RIPPS2 есть Neutrino 1.8.0 от rickgaiser (AFL-3.0): установите его один раз, куда захотите, и каждая игра с Neutrino будет брать его оттуда.'
   STARTING THE DRIVES: ЗАПУСК НАКОПИТЕЛЕЙ
   '%d games, on the started drives': '%d игр, на запущенных накопителях'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: НЕКОТОРЫЕ ФАЙЛЫ НЕ УДАЛОСЬ УДАЛИТЬ'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: не на запущенном накопителе
   only if you have none: только если у вас его нет
   starts every drive first: сначала запускает все накопители
-  Drives, launchers and homebrew: Накопители, загрузчики и homebrew
   BDM Devices: Устройства BDM
   Color Sweep: Смена цветов
   Colors and Text: Цвета и текст
@@ -1079,9 +1038,7 @@ strings:
   Bold: Жирный
   Controllers: Контроллеры
   Lively: Живо
-  Medium: Средний
   PS Emulation: Эмуляция PS
-  Regular: Обычный
   Slow: Медленно
   A MOMENT: МИНУТКУ
   A TASK IN THE BACKGROUND: ЗАДАЧА В ФОНЕ
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: Удалить %s? Смены цветов самого RIPPS2 останутся как есть.
   Sweep: Смена
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Значки отмечают в ваших списках игры с достижениями и сколько вы открыли. Нужна включённая ТЕЛЕМЕТРИЯ.
+  Classic (Split): Классический (раздельный)
+  Guidance: Подсказка
+  OK: OK
+  XL (One Piece): XL (цельный)
+  STARS HIDDEN: ЗВЁЗДЫ СКРЫТЫ
+  STARS SHOWN: ЗВЁЗДЫ ПОКАЗАНЫ
+  Asking the SD2PSX for this game's memory card...: Запрашиваю у SD2PSX карту памяти этой игры...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX готовит карту памяти этой игры (%d с). Игра запустится, когда всё будет готово; START запускает её сейчас.
+  the second game core, its newest build carried unmodified (AFL-3.0): второе игровое ядро, его новейшая сборка в неизменном виде (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': 'Не удалось записать %s в %s (записано звуков: %d). Накопитель заполнен или защищён от записи?'
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': 'Не удалось записать %s в %s (записано звуков: %d, а на карте теперь свободно %d КБ). Карта защищена от записи?'
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: Не удалось создать папку %s. Накопитель заполнен или защищён от записи? Ничего не записано.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'Звуки занимают %d КБ, а на этой карте памяти свободно %d КБ. Ничего не записано. Освободите место на карте или запустите накопитель в Хранилище и извлеките их снова: тогда RIPPS2 предложит этот накопитель.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : Звуки занимают %d КБ, а на этой карте памяти свободно %d КБ. START запишет их вместо этого в %sAUDIO/ на накопителе, и RIPPS2 будет играть их оттуда.
+  There was not enough memory to make the sounds. Nothing was written.: Не хватило памяти, чтобы создать звуки. Ничего не записано.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- Консоль привязывает PS2BBL 1.2.0 к этой карте и записывает его как %s/%s.
+  
+    - Его конфигурация, mc%d:/PS2BBL/CONFIG.INI, запускает RIPPS2 с %s без ожидания (0 мс, чего PS2BBL Extended не позволяет), BOOT LOCK включён.
+  
+    Для этого перезапускается процессор ввода-вывода; музыка и накопители вернутся после. Не вынимайте карту и не выключайте консоль, пока не появится сообщение о завершении.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : Не удалось записать BIBLE на карту памяти %d, поэтому карта возвращена в прежнее состояние. Проверьте свободное место и попробуйте снова. (В DIAG.TXT рядом с RIPPS2 есть ответ карты.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE не смог отложить %s, чтобы сохранить его, и остановился на этом. На карте ничего не изменено. (В DIAG.TXT рядом с RIPPS2 есть ответ карты.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'КАРТА ПАМЯТИ 0: %s
+  
+    КАРТА ПАМЯТИ 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 от El Isra, настроенный RIPPS2: запуск за 0 мс при включении (PS2BBL Extended не позволяет 0), сначала RIPPS2, а кнопка, удерживаемая при включении, по-прежнему ведёт в браузер (ТРЕУГОЛЬНИК), к диску (START) и к тому, что было раньше (КРУГ). Установить или исправить его на карте памяти или внутреннем HDD?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 НА КАРТЕ ПАМЯТИ %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'Сейчас откроются Файлы памяти, на MEDIA, с диском в буфере обмена (ИЗВЛЕЧЕНО). Перейдите к накопителю и папке, куда он должен попасть (любой накопитель: USB, HDD, MEDIA на SD2PSX), нажмите ТРЕУГОЛЬНИК для ДЕЙСТВИЙ и выберите ВСТАВИТЬ. RIPDISC спросит ещё раз и прочитает диск лазером вашей PS2, записав его туда.'
+  RENAME THE GAME: ПЕРЕИМЕНОВАТЬ ИГРУ
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Эта игра запускается через Neutrino, а RIPPS2 его не нашёл: ни по пути из Настроек, ни на накопителе игры, ни на картах памяти, ни на одном запущенном накопителе. В RIPPS2 есть Neutrino от rickgaiser (AFL-3.0), его новейшая сборка: установите его один раз, куда захотите, и каждая игра с Neutrino будет брать его оттуда.'
+  A PS1 disc's track list, for Ember: Список дорожек диска PS1, для Ember
+  A PS1 game for POPSTARTER: Игра PS1 для POPSTARTER
+  A PS2 game: Игра PS2
+  A card the SD2PSX set aside (wrong size): Карта, отложенная SD2PSX (неверный размер)
+  'A program: Cross starts it': 'Программа: Крест запускает её'
+  A save, packed in one file: Сохранение, упакованное в один файл
+  All Games' master list: Главный список Всех игр
+  'An SD2PSX boot card: open it to look in': 'Загрузочная карта SD2PSX: откройте, чтобы заглянуть внутрь'
+  'An SD2PSX memory card: open it like a VMC': 'Карта памяти SD2PSX: откройте её как VMC'
+  Cheats, a file a game: Читы, по файлу на игру
+  Each game's settings and info page: Настройки и страница сведений каждой игры
+  Ember, its BIOS and its PS1 games: Ember, его BIOS и его игры PS1
+  Game covers and art, by game ID: Обложки и картинки игр, по ID игры
+  Games kept in 1 GB parts: Игры, хранимые частями по 1 ГБ
+  Games that share one SD2PSX card: Игры с общей картой SD2PSX
+  Languages for RIPPS2: Языки для RIPPS2
+  Neutrino, the second game core: Neutrino, второе игровое ядро
+  OPL's list of this folder's games: Список игр OPL в этой папке
+  POPSTARTER and PS1 games (VCDs): POPSTARTER и игры PS1 (VCD)
+  PS2 games on CD, as ISOs: Игры PS2 на CD, в виде ISO
+  PS2 games on DVD, as ISOs: Игры PS2 на DVD, в виде ISO
+  PS2BBL's settings: Настройки PS2BBL
+  Programs to start (ELFs): Программы для запуска (ELF)
+  RIPPS2's diagnostics, for a bug report: Диагностика RIPPS2, для отчёта об ошибке
+  RIPPS2's own folder: Собственная папка RIPPS2
+  RIPPS2's settings: Настройки RIPPS2
+  RIPPS2's sounds and music: Звуки и музыка RIPPS2
+  Recent games: Недавние игры
+  RetroAchievements' files: Файлы RetroAchievements
+  Ripped CDs and DVDs, pictures, video: Извлечённые CD и DVD, картинки, видео
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'Сохранение на SD-карту SD2PSX: подождите %d с перед выключением.'
+  Starred games: Избранные игры
+  The SD2PSX's boot cards (PS2BBL): Загрузочные карты SD2PSX (PS2BBL)
+  The SD2PSX's boot channels and names: Загрузочные каналы и названия SD2PSX
+  The SD2PSX's memory cards: Карты памяти SD2PSX
+  The SD2PSX's own settings: Собственные настройки SD2PSX
+  The SD2PSX's settings: Настройки SD2PSX
+  Themes, a folder each: Темы, у каждой своя папка
+  This drive's game list, for a quick boot: Список игр этого накопителя, для быстрого запуска
+  Virtual memory cards for games: Виртуальные карты памяти для игр
+  What RIPPS2's last launch did: Что сделал последний запуск RIPPS2
+  Circle from the top   Cross close: 'Круг: с начала   Крест: закрыть'
+  Cross from the top   Circle close: 'Крест: с начала   Круг: закрыть'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Не удалось воспроизвести эту дорожку. RIPPS2 воспроизводит 16-битные файлы PCM .wav (такие, как извлекают RIPDISC и Музыка BIOS), файлы Ogg Vorbis .ogg и MP3.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'ТОЛЬКО ЧТЕНИЕ: ЗАГРУЗОЧНАЯ КАРТА SD2PSX ИСПОЛЬЗУЕТСЯ'
+  '%d music tracks': 'Музыкальных дорожек: %d'
+  1 music track: 1 музыкальная дорожка
+  'A game''s EXIT: %s': 'EXIT игры: %s'
+  'A game''s EXIT: the browser': 'EXIT игры: браузер'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Все игры: %d игр хранится в %s, показаны при запуске раньше, чем ответит любой накопитель'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Все игры: главного списка ещё нет; %s запишется, когда игры будут показаны (Fast Cache вкл)'
+  CACHE SETTINGS: НАСТРОЙКИ КЭША
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: Копирует Neutrino, который есть в RIPPS2, на накопитель или карту памяти. Ваш собственный Neutrino используется как есть.
+  DIAG.TXT, for a bug report: DIAG.TXT, для отчёта об ошибке
+  Drives, loading, launchers and homebrew: Накопители, загрузка, загрузчики и homebrew
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache показывает последний список игр каждого накопителя, как только он ответит; Trust Cache держит его, пока вы не нажмёте SELECT. Оба включены, с настройками на карте памяти, с которой запускается RIPPS2, это самый быстрый запуск.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Списки игр: Fast Cache выкл, поэтому каждый читается со своего накопителя при запуске'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Списки игр: каждый сразу показывается из кэша и остаётся до SELECT'
+  'Game lists: each shows at once from its cache, then is read again': 'Списки игр: каждый сразу показывается из кэша, а затем читается заново'
+  LOADING: ЗАГРУЗКА
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: Создаёт звуки RIPPS2 из BIOS этой консоли и записывает их в папку AUDIO.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Музыки пока нет: Настройки звука > Музыка BIOS извлекает музыку меню этой консоли.'
+  SAVE DIAGNOSTICS: СОХРАНИТЬ ДИАГНОСТИКУ
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Ищет на накопителях POPSTARTER, файлы POPS, Ember, BIOS для Ember и Neutrino и запоминает, где что лежит.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Настройки: %s, на накопителе, которого ждёт запуск (карта памяти быстрее)'
+  'Settings: %s, read first (the quickest place)': 'Настройки: %s, читаются первыми (самое быстрое место)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Запускает сейчас каждый накопитель (USB, HDD, MMCE, MX4SIO и сеть), чтобы здесь были видны все они и их место.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: IP и общий ресурс SMB, которые POPSTARTER использует для игр PS1 по сети.
+  The diagnostics are in %s.: Диагностика в %s.
+  The diagnostics could not be written to %s.: Не удалось записать диагностику в %s.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Что запускает каждая карта памяти при включении; установка или исправление BIBLE, PS2BBL, настроенного запускать RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: Где находятся POPSTARTER и Ember и как запускаются игры PS1.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Где ваш Neutrino, его видеорежим и аргументы, которые получает каждый запуск через Neutrino.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : Записывает в DIAG.TXT рядом с RIPPS2 то, что RIPPS2 отметил о контроллерах, накопителях, картах MMCE и последних запусках. Приложите его к отчёту об ошибке.
+  back to Cache: назад к Кэшу
+  what boot reads first: что запуск читает первым
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Этот Neutrino старше 1.3, который не может запускать игры с APA HDD. Укажите в Запуск игр > Neutrino версию Neutrino 1.3 или новее либо очистите путь, чтобы использовать встроенный в RIPPS2.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 не видит %s в %s%s. POPSTARTER нужны POPS.ELF и POPS_IOX.PAK, эмулятор PS1 с вашей собственной консоли; он может найти их там, где RIPPS2 не ищет (если ваши игры запускаются, находит). START запускает, а про этот накопитель больше не спросят.
 labels:
   DS34BT_MODE: DualShock3/4 по Bluetooth
   HINT_NEUTRINO_AUTO_ELF: Передаёт загрузочный ELF игры в Neutrino, чтобы найти настройки для этой игры. Включено по умолчанию; заданный вручную параметр Boot ELF важнее.
@@ -1301,16 +1398,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Один цвет для башен, сфер, стекла, CD-плеера и файлового браузера на всех трёх вкладках. Тема: решает тема (иначе синий RIPPS2).'
   RIPPS2_HINTS: Подсказки кнопок
   HINT_RIPPS2_HINTS: 'Подсказки кнопок внизу экрана. «Скрывать в покое» прячет их, пока вы не нажмёте кнопку. Тема: решает тема.'
-  RIPPS2_CATEGORY_BAR: Панель категорий
-  HINT_RIPPS2_CATEGORY_BAR: 'ЗАПУСК ДИСКА, ХРАНИЛИЩЕ и ФАЙЛЫ ПАМЯТИ вверху экрана. «Скрывать в покое» прячет их, пока вы не нажмёте кнопку. Тема: решает тема.'
+  RIPPS2_CATEGORY_BAR: Категории/Боковая панель
+  HINT_RIPPS2_CATEGORY_BAR: 'ЗАПУСК ДИСКА, ХРАНИЛИЩЕ и ФАЙЛЫ ПАМЯТИ: названия вверху или боковая панель. Скрывать в покое гасит названия или убирает боковую панель, пока вы не нажмёте кнопку; она сразу возвращается. Тема: решает тема.'
   RIPPS2_SOURCE_NAME: Название источника
   RIPPS2_STATUS: Состояние
   RIPPS2_SOURCE: Источник
   HINT_RIPPS2_SOURCE_NAME: 'Название источника над играми (ВСЕ ИГРЫ, ИГРЫ HDD и так далее). «Скрывать в покое» гасит его вместе с панелью категорий; «Всплытие» показывает его крупно посреди страницы, как L3 называет список, в первом списке после запуска и при каждой смене источника, затем оно гаснет. Темы могут сделать «Всплытие» своим «Показано». Тема: решает тема.'
-  RIPPS2_RECENTS: Показывать недавние
-  HINT_RIPPS2_RECENTS: До стольких последних запущенных игр вверху «Избранных игр», новые первыми. 0 выключает.
+  RIPPS2_RECENTS: Недавние игры
+  HINT_RIPPS2_RECENTS: 'Недавние игры, страница на боковой панели с вашими последними запущенными играми, новые первыми: сколько она хранит, от 1 до 99 (Треугольник вводит число). Игра, чей накопитель стоит на Вручную, запускает его, когда вы её выбираете. 0 отключает страницу.'
   RIPPS2_CATEGORY_ORDER: Порядок категорий
-  HINT_RIPPS2_CATEGORY_ORDER: '«Файлы памяти» первыми, а «Запуск диска» последним. Сделано для RIPFLOW (Интерфейс > Тема). Тема: решает тема.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Меняет местами Запуск диска и Файлы памяти: Файлы памяти первыми, Запуск диска последним, и в названиях панели, и в значках боковой панели. Сделано для RIPFLOW (Интерфейс > Тема). Тема: решает тема.'
   RIPPS2_MUSIC: Музыка
   HINT_RIPPS2_MUSIC: Играет файлы bgm из папки AUDIO рядом с RIPPS2 и из папки AUDIO OPL на каждом запущенном накопителе (Ogg без тегов или 16-битный WAV); файл с именем Menu играет первым. Собственная музыка темы играет вместо них.
   RIPPS2_BIOS_SOUNDS: Звуки BIOS
@@ -1319,7 +1416,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: Подсказки и значки
   HINT_RIPPS2_HINTS_GLYPHS: Как выглядят подсказки кнопок и значки. Каждая строка начинается с «Тема», выбора темы; любой другой выбор ваш и важнее любой темы.
   RIPPS2_HINT_LAYOUT: Раскладка подсказок
-  HINT_RIPPS2_STARSIDE: 'Где стоит звезда избранной игры в списке. Слева: свой столбец в начале каждой строки. Справа: после названия. Скрыта: без звезды. Тема: как задаёт тема. Значок строки темы уходит на другой конец, чтобы они не перекрывались.'
+  HINT_RIPPS2_STARSIDE: 'Где стоит звезда избранной игры в списке. Слева: свой столбец в начале каждой строки. Справа: после названия. Скрыто (по умолчанию): ни звезды, ни столбца, названия целиком. Тема: как скажет тема. R3 добавляет игру в избранное в любом случае; удерживайте R3 4 секунды на списке, чтобы скрыть звёзды или вернуть их (это также добавит в избранное игру под курсором).'
   HINT_RIPPS2_HINT_LAYOUT: 'Строка: подсказки в одну строку. Столбец: по одной подсказке в строке, списком сбоку, начиная там, где тема ставит свои подсказки.'
   RIPPS2_HINT_LABELS: Подписи подсказок
   HINT_RIPPS2_HINT_LABELS: «Только значок» рисует одни кнопки, для значков со своими словами. «Значки» объединяет значок и название каждой подсказки на одном значке.
@@ -1340,11 +1437,11 @@ labels:
   RIPPS2_TRANSITION: Переход страниц
   HINT_RIPPS2_TRANSITION: 'Как появляется новая страница при переходе в другую категорию: из цвета фона темы или из вспышки. «Тема» сохраняет выбор темы.'
   RIPPS2_CATEGORY_LAYOUT: Расположение категорий
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Где стоят три категории: их названия вверху или значки вдоль боковой панели, у каждой выдвижной список её страниц (Влево в списке ведёт туда). «Тема» сохраняет раскладку темы.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Где расположены три категории: их названия вверху или значки вдоль боковой панели, у каждого ящик со своими страницами (Влево на списке ведёт туда), или Меню: никакой панели, категории в меню START, как в теме для OPL. Тема оставляет вариант темы.'
   RIPPS2_CACHE: Кэш
   HINT_RIPPS2_CACHE: 'Как хранится список игр каждого источника, чтобы его страница открывалась сразу: Fast Cache, список внутреннего HDD и Автообновление.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Каждый источник хранит свой последний список игр (RIPPS2.LST рядом с папками CD и DVD) и показывает его, как только источник ответит, а затем перечитывает источник в фоне. Выключено читает каждый список сначала с источника, как раньше.
+  HINT_RIPPS2_FAST_CACHE: 'Каждый источник хранит свой последний список игр (RIPPS2.LST рядом с его папками CD и DVD) и показывает его, как только источник ответит. Trust Cache решает, перечитывается ли источник потом. Выкл: каждый список сначала читается из источника, как раньше.'
   HINT_RIPPS2_VIGNETTE: Затемняет края всех обложек, кроме выбранной, чтобы она выделялась. «Слабая» вдвое меньше «Полной».
   RIPPS2_GRID_WIDE: Раскладка сетки для широкого экрана
   HINT_RIPPS2_GRID_WIDE: Страница сетки только при картинке 16:9 (Широкий экран, 720p, 1080i), где обложки уже и их помещается больше. «Тема» использует раскладку темы; «Как» следует раскладке сетки.
@@ -1360,7 +1457,7 @@ labels:
   GAME_TYPE_LABELS: Показывать метки [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: Список читов не удалось сохранить в папку Neutrino, поэтому Neutrino не может его использовать. Запустить без читов?
   AUTO_CREATE_VMC: Создавать VMC при первом запуске
-  HINT_AUTO_CREATE_VMC: Запуск игры PS2 без VMC в слоте 1 создаёт карту на 8 МБ на накопителе игры, с именем, которое предлагает экран VMC (общая для всех дисков игры), и назначает её. Не для внутреннего HDD под Neutrino.
+  HINT_AUTO_CREATE_VMC: Запуск игры PS2 без VMC в слоте 1 создаёт карту на 8 МБ на устройстве игры с именем, которое предлагает экран VMC (общую для всех дисков игры), и назначает её. Под Neutrino не на APA HDD (HDD exFAT работает).
   AUTO_VMC_CREATING: Создание VMC для этой игры...
   AUTO_VMC_FAILED: Не удалось создать VMC для этой игры. Игра запустится без неё.
   RIPPS2_BIOS_MUSIC: Музыка BIOS
@@ -1397,7 +1494,7 @@ labels:
   HINT_LANGUAGE: Язык меню. Добавьте другие, положив файлы lang_*.lng в папку LNG.
   HINT_GSM_DEFAULTS_BUTTON: Исправления видеорежима, которые получает каждая игра без собственных настроек GSM.
   HINT_DEFDEVICE: Страница, на которой RiptOPL открывается при запуске.
-  HINT_MMCE_MODE: Игры на SD2PSX или MemCard PRO2. «Авто» при запуске, «Вручную» при открытии страницы, «Выкл.» скрывает её.
+  HINT_MMCE_MODE: 'Игры на SD2PSX или MemCard PRO2. Авто запускает его при загрузке: быстрее всего для вставленной карты, её игры в Всех играх с самого начала. Вручную запускает его, когда вы открываете его страницу, Выкл скрывает его.'
   HINT_MMCE_SETTINGS_BUTTON: Слот, загрузочная карта IGR, GameID и тайминги для MMCE.
   HINT_ENABLE_USB: Загружает драйвер USB-накопителей.
   HINT_ENABLE_MX4SIO: Загружает драйвер адаптера SD-карт MX4SIO.
@@ -1577,8 +1674,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'Картинка меню: видеорежим, широкий экран, её место на телевизоре (H-POS, V-POS) и overscan.'
   HINT_RIPPS2_LAYOUT: Где стоят категории и как входит страница, затем обложки RIPFLOW и сетка RIPGRID.
   HINT_RIPPS2_COLORS_TEXT: Толщина текста, цветовая тема, смена цветов и каждый цвет.
-  HINT_RIPPS2_TEXT_WEIGHT: 'Насколько плотный собственный текст RIPPS2: подсказки настроек, СОСТОЯНИЕ и О программе. Обычный как раньше; Средний и Жирный лучше читаются на мягкой картинке.'
-  HINT_RIPPS2_HDD_START: 'Встроенный HDD, APA или exFAT: RIPPS2 читает его, каким бы он ни был, и показывает один раз, как игры HDD. Выкл. оставляет его в покое.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'Насколько жирный собственный текст RIPPS2: подсказки настроек, СОСТОЯНИЕ и О программе. Обычный как раньше; Жирный лучше читается на мягкой картинке. Собственные шрифты темы сохраняют насыщенность, которую им задаёт тема.'
+  HINT_RIPPS2_HDD_START: 'Внутренний HDD, APA или exFAT: RIPPS2 читает его, каким бы он ни был, и показывает один раз, как HDD-Игры. Авто (быстрее всего с установленным диском) запускает его при загрузке; Выкл его не трогает.'
   HINT_RIPPS2_THEME_COLOR: Собственный цвет темы. Выберите Свой как цветовую тему, чтобы выбрать его самим, как цвета текста.
   HINT_RIPPS2_SWEEP: Пять цветов, через которые тема переходит медленно и плавно. Радуга, смена из каждой цветовой темы или ваша. Выкл. держит тему неподвижной.
   HINT_RIPPS2_SWEEP_COLORS: Пять цветов смены и её скорость. Измените одну из RIPPS2, и она сохранится как ваша, под данным вами именем.
@@ -1587,3 +1684,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Сколько длится каждый цвет, пока не войдёт следующий. Даже Живо остаётся плавным: цвета никогда не мигают.'
   RIPPS2_HIDE_COMPRESS: Скрыть игру и сжатие
   HINT_RIPPS2_SELECT_HOLD: 'SELECT удерживается 4.2 с на списке игр. Список: темы на панели, выберите одну. По кругу: следующая тема. Выкл.: ничего (нажатие по-прежнему обновляет).'
+  RIPPS2_RECENT_GAMES: Недавние игры
+  RIPPS2_SET_METADATA_RENAME: Задать метаданные (переименовать)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Сначала контроллер (экспериментально)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX читает по шине, общей с контроллером, и пока идёт чтение, контроллер не слышно: нажатия запаздывают или теряются, пока грузятся обложки. Вкл: обложки приходят маленькими частями, а между ними опрашивается контроллер, чуть медленнее. Выкл: так быстро, как может карта. Если источники карты стоят на Авто, её список загружается один раз, при запуске.'
+  HINT_RIPPS2_TRUST_CACHE: 'Список, показанный из кэша, остаётся как есть, готовым к запуску, пока вы не нажмёте SELECT или RIPPS2 сам не изменит этот источник. Выкл: каждый источник перечитывается в фоне после показа кэша, и на карте MMCE или MX4SIO, делящих шину контроллера, это ощутимая пауза.'
+  RIPPS2_STATUS_OPEN: Загрузка и накопители
+  HINT_RIPPS2_STATUS_OPEN: 'Открывает СОСТОЯНИЕ: откуда запуск читает настройки и списки игр, какое место быстрее всего, куда ведёт EXIT игры, и каждый накопитель. Его НАСТРОЙКИ КЭША возвращают сюда.'
+  RIPPS2_BADGE_SET: Набор значков
+  HINT_RIPPS2_BADGE_SET: 'Значки на странице сведений игры (рейтинг, игроки, ESRB, видеорежим, развёртка, формат). RIPPS2: свой набор, одинаковый во всех темах. Тема: собственные картинки темы или значки RIPPS2, если тема их просит.'
+  RIPPS2_HINT_FADE: Плавное появление подсказок и значков
+  HINT_RIPPS2_HINT_FADE: 'Подсказка кнопки или значок, который меняется, плавно проявляется, как обложки, в момент смены; неизменные не трогаются, на каждой странице и в каждом сообщении. Выкл: они просто появляются. Тема: решает тема (вкл, если в ней нет hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: Стиль боковой панели
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Классический (раздельный): значки в тёмной полосе боковой панели с цветной полоской рядом. XL (цельный): одна широкая полоса со значками посередине. Тема: решает тема.'
+  HINT_EXITPATH: 'Куда ведёт EXIT в Игровом меню. Лучше оставить пустым, настроив BIBLE (СОСТОЯНИЕ > Загрузчик > Управление, или BOOT LOCK на вашем PS2BBL): тогда EXIT перезагружает консоль её собственным путём загрузки, и PS2BBL запускает RIPPS2, как при включении, это самый надёжный путь назад. Браузер: браузер PS2. ELF на карте памяти (mc0:/mc1:) или USB-накопителе FAT32 (mass:/) загружается сразу после перезагрузки, к которой не каждая игра оставляет консоль готовой; MMCE тогда вообще недоступен.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO и HDD exFAT. Авто запускает их при загрузке: быстрее всего для подключённых накопителей, их игры в Всех играх с самого начала. Вручную запускает их, когда вы открываете их страницу.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino не может использовать VMC на APA HDD (exFAT, USB и MX4SIO могут): эта игра запустится с настоящей картой в этом слоте.'

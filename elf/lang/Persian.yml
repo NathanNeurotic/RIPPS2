@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: نوشتن موسیقی منو در %s ممکن نشد (%s). آیا درایو پر است؟
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'موسیقی منو یک WAV به حجم %s است و هیچ کارت حافظه‌ای جای آن را ندارد. RIPPS2 اینجا از کارت حافظه اجرا می‌شود و هیچ درایوی با پوشه OPL شروع نشده است: یکی را در ذخیره‌سازی شروع کنید، سپس موسیقی را روی آن استخراج کنید.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: نوشتن صداها در %s ممکن نشد. آیا درایو پر است یا در برابر نوشتن محافظت شده است؟
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: موسیقی منوی این BIOS آن چیزی نیست که RIPPS2 می‌شناسد. چیزی نوشته نشد.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: بانک صدای این BIOS آن چیزی نیست که RIPPS2 می‌شناسد. چیزی نوشته نشد.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) اول به‌طور کامل به یک پوشه پشتیبان منتقل می‌شود.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- کنسول PS2BBL 1.2.0 را به این کارت پیوند می‌دهد و آن را به نام %s/%s می‌نویسد.
-
-    - پیکربندی آن، mc%d:/PS2BBL/CONFIG.INI، RIPPS2 را از %s اجرا می‌کند و BOOT LOCK روشن است.
-
-    پردازنده ورودی/خروجی برای این کار دوباره راه‌اندازی می‌شود؛ موسیقی و درایوها پس از آن برمی‌گردند. تا وقتی پیام پایان نیامده، کارت را بیرون نیاورید و کنسول را خاموش نکنید.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: یک نسخه روی کارت حافظه %d
   A COPY ON MX4SIO: یک نسخه روی MX4SIO
   A COPY ON THE USB DRIVE: یک نسخه روی فلش USB
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: نوشتن BIBLE روی کارت حافظه %d ممکن نشد، پس کارت به حالت قبل برگردانده شد. فضای خالی آن را بررسی کنید، سپس دوباره تلاش کنید.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE نتوانست RIPPS2 را در %s کپی کند. فضا را بررسی کنید و اینکه در برابر نوشتن محافظت نشده باشد. چیز دیگری تغییر نکرد.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE نتوانست RIPPS2 را در پارتیشن %s هارد کپی کند. فضای خالی آن را بررسی کنید. چیز دیگری تغییر نکرد.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE نتوانست نسخه‌ای از برنامه راه‌اندازی هارد نگه دارد، پس پیش از تغییر آن متوقف شد. RIPPS2 روی هارد کپی شد؛ چیز دیگری تغییر نکرد.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE نتوانست %s را برای نگه‌داری کنار بگذارد، پس همان‌جا متوقف شد. چیزی روی کارت تغییر نکرد.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE نتوانست پیکربندی خود را بنویسد (%s). برنامه راه‌اندازی تغییر نکرد.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE نتوانست برنامه راه‌اندازی هارد را بنویسد (مرحله %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK روشن است. PS2BBL اکنون هنگام روشن شدن RIPPS2 را اجرا می‌کند (%s). برای رسیدن به چیز دیگر، هنگام شروع کنسول یک کلید میان‌بر PS2BBL را نگه دارید.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK از طریق PS2BBL (PlayStation 2 Basic BootLoader) کار می‌کند و روی هیچ کارت حافظه‌ای در اینجا وجود ندارد.
   INSTALL BIBLE: نصب BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'نصب BIBLE روی کارت حافظه %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     این کار به کنسولی نیاز دارد که از هارد خود راه‌اندازی شود (PS2 چاق با آداپتور شبکه). تا وقتی پیام پایان نیامده، آن را روشن نگه دارید.'
   INTERNAL HDD  (its boot area): هارد داخلی  (ناحیه راه‌اندازی آن)
   MEMORY CARD %d  (%s): کارت حافظه %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'کارت حافظه 0: %s
-
-    کارت حافظه 1: %s
-
-    %s
-
-    BIBLE همان PS2BBL 1.2.0 از El Isra است که RIPPS2 آن را تنظیم کرده: بدون انتظار هنگام روشن شدن، اول RIPPS2، و دکمه‌ای که هنگام روشن کردن نگه داشته شود همچنان به مرورگر (مثلث)، دیسک (START) و آنچه پیش‌تر آنجا بود (دایره) می‌رسد. آن را روی کارت حافظه یا هارد داخلی نصب یا تعمیر کنید؟'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: کارت حافظه %d، %d کیلوبایت فضای خالی دارد و BIBLE روی آن %d کیلوبایت لازم دارد. کمی فضا آزاد کنید، سپس دوباره تلاش کنید.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: کارت حافظه %d، %d کیلوبایت فضای خالی دارد و نسخه RIPPS2 به %d کیلوبایت نیاز دارد. کمی فضا آزاد کنید یا جای دیگری انتخاب کنید.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: کارت حافظه %d هنگام روشن شدن %s را اجرا می‌کند و BOOT LOCK فقط از طریق PS2BBL کار می‌کند.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: سینی باز است
   TREFOIL KNOT: گره سه‌پر
   ' and ': ' و '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s در %s%s نیستند. POPSTARTER برای اجرای یک بازی به POPS.ELF و POPS_IOX.PAK، شبیه‌ساز PS1 از کنسول خود شما، کنار بازی‌ها نیاز دارد.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s در %s%s نیستند. RIPPOPS فایل‌های POPS.ELF و POPS_IOX.PAK، شبیه‌ساز PS1 از Sony، را روی %s پیدا کرد: START آن‌ها را به اینجا کپی می‌کند و بازی را اجرا می‌کند.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': کپی %s در %s%s ممکن نشد. آیا درایو پر است یا در برابر نوشتن محافظت شده است؟
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s در %s%s نیست. POPSTARTER برای اجرای یک بازی به POPS.ELF و POPS_IOX.PAK، شبیه‌ساز PS1 از کنسول خود شما، کنار بازی‌ها نیاز دارد.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s در %s%s نیست. RIPPOPS فایل‌های POPS.ELF و POPS_IOX.PAK، شبیه‌ساز PS1 از Sony، را روی %s پیدا کرد: START آن‌ها را به اینجا کپی می‌کند و بازی را اجرا می‌کند.'
   COPY AND START: کپی و اجرا
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'تشکر ویژه هم از همه محبت‌ها در YouTube:'
   and its own look, launchers, file browser and save tools.: و با ظاهر، اجراکننده‌ها، مرورگر فایل و ابزارهای ذخیره مخصوص خودش.
   glad to help however you reach me.: خوشحالم که کمک کنم، از هر راهی که به من برسید.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): هسته دوم بازی، 1.8.0 بدون تغییر همراه است (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: با Neutrino ساخته rickgaiser در درونش به عنوان هسته دوم بازی،
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'این بازی از طریق Neutrino شروع می‌شود و RIPPS2 هیچ نسخه‌ای پیدا نکرد: نه در مسیر تنظیمات، نه روی درایو بازی، نه روی کارت‌های حافظه و نه روی هیچ درایو شروع‌شده‌ای. RIPPS2 همراه خود Neutrino 1.8.0 ساخته rickgaiser را دارد (AFL-3.0): آن را یک بار، هر جا که خواستید، نصب کنید و هر بازی Neutrino از همان‌جا از آن استفاده می‌کند.'
   STARTING THE DRIVES: در حال شروع درایوها
   '%d games, on the started drives': '%d بازی، روی درایوهای شروع‌شده'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: برخی فایل‌ها پاک نشدند'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: روی درایو شروع‌شده نیست
   only if you have none: فقط اگر هیچ‌کدام را ندارید
   starts every drive first: اول همه درایوها را شروع می‌کند
-  Drives, launchers and homebrew: درایوها، اجراکننده‌ها و برنامه‌های خانگی
   BDM Devices: دستگاه‌های BDM
   Color Sweep: گذر رنگ
   Colors and Text: رنگ و متن
@@ -1079,9 +1038,7 @@ strings:
   Bold: پررنگ
   Controllers: دسته‌ها
   Lively: سرزنده
-  Medium: متوسط
   PS Emulation: شبیه‌سازی PS
-  Regular: معمولی
   Slow: آرام
   A MOMENT: یک لحظه
   A TASK IN THE BACKGROUND: کاری در پس‌زمینه
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: '%s حذف شود؟ گذرهای خود RIPPS2 همان‌طور می‌مانند.'
   Sweep: گذر
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: نشان‌ها بازی‌های دارای دستاورد را در فهرست‌های شما با تعداد بازشده‌ها نشان می‌دهند. تله‌متری باید روشن باشد.
+  Classic (Split): کلاسیک (دوتکه)
+  Guidance: راهنما
+  OK: تأیید
+  XL (One Piece): XL (یک‌تکه)
+  STARS HIDDEN: ستاره‌ها پنهان
+  STARS SHOWN: ستاره‌ها نمایان
+  Asking the SD2PSX for this game's memory card...: در حال درخواست کارت حافظه این بازی از SD2PSX...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX دارد کارت حافظه این بازی را آماده می‌کند (%d ث). وقتی تمام شد بازی شروع می‌شود؛ START همین حالا شروعش می‌کند.
+  the second game core, its newest build carried unmodified (AFL-3.0): هسته دوم بازی، تازه‌ترین نسخه‌اش بدون تغییر همراه است (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': نوشتن %s در %s ممکن نشد (%d تا از صداها نوشته شد). آیا درایو پر است یا در برابر نوشتن محافظت شده است؟
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': نوشتن %s در %s ممکن نشد (%d تا از صداها نوشته شد و کارت اکنون %d KB جای خالی دارد). آیا کارت در برابر نوشتن محافظت شده است؟
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: ساختن پوشه %s ممکن نشد. آیا درایو پر است یا در برابر نوشتن محافظت شده است؟ چیزی نوشته نشد.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'صداها %d KB جا می‌خواهند و این کارت حافظه %d KB جای خالی دارد. چیزی نوشته نشد. روی کارت جا باز کنید، یا درایوی را در ذخیره‌سازی شروع کنید و دوباره استخراجشان کنید: آن‌وقت RIPPS2 همان درایو را پیشنهاد می‌دهد.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : صداها %d KB جا می‌خواهند و این کارت حافظه %d KB جای خالی دارد. START آن‌ها را به‌جایش در %sAUDIO/ روی درایو می‌نویسد و RIPPS2 از همان‌جا پخششان می‌کند.
+  There was not enough memory to make the sounds. Nothing was written.: حافظه برای ساختن صداها کافی نبود. چیزی نوشته نشد.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- کنسول PS2BBL 1.2.0 را به این کارت پیوند می‌دهد و آن را به نام %s/%s می‌نویسد.
+  
+    - پیکربندی آن، mc%d:/PS2BBL/CONFIG.INI، RIPPS2 را از %s بی‌درنگ اجرا می‌کند (0 ms، که PS2BBL Extended اجازه نمی‌دهد) و BOOT LOCK روشن است.
+  
+    پردازنده ورودی/خروجی برای این کار دوباره راه‌اندازی می‌شود؛ موسیقی و درایوها پس از آن برمی‌گردند. تا وقتی پیام پایان نیامده، کارت را بیرون نیاورید و کنسول را خاموش نکنید.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : نوشتن BIBLE روی کارت حافظه %d ممکن نشد، پس کارت به حالت قبل برگردانده شد. فضای خالی آن را بررسی کنید، سپس دوباره تلاش کنید. (DIAG.TXT کنار RIPPS2 پاسخ کارت را دارد.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE نتوانست %s را برای نگه‌داری کنار بگذارد، پس همان‌جا متوقف شد. چیزی روی کارت تغییر نکرد. (DIAG.TXT کنار RIPPS2 پاسخ کارت را دارد.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'کارت حافظه 0: %s
+  
+    کارت حافظه 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20، همان PS2BBL 1.2.0 از El Isra که RIPPS2 آن را تنظیم کرده: شروع در 0 ms هنگام روشن شدن (PS2BBL Extended اجازه 0 نمی‌دهد)، اول RIPPS2، و دکمه‌ای که هنگام روشن کردن نگه داشته شود همچنان به مرورگر (مثلث)، دیسک (START) و آنچه پیش‌تر آنجا بود (دایره) می‌رسد. آن را روی کارت حافظه یا هارد داخلی نصب یا تعمیر کنید؟'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 روی کارت حافظه %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'فایل‌های حافظه اکنون روی MEDIA باز می‌شود و دیسک در کلیپ‌بورد است (استخراج شد). به درایو و پوشه‌ای بروید که باید در آن باشد (هر درایوی: USB، هارد، MEDIA در SD2PSX)، مثلث را برای کارها بزنید و چسباندن را انتخاب کنید. RIPDISC یک بار دیگر می‌پرسد و دیسک را با لیزر PS2 شما می‌خواند و همان‌جا می‌نویسد.'
+  RENAME THE GAME: تغییر نام بازی
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'این بازی از طریق Neutrino شروع می‌شود و RIPPS2 هیچ نسخه‌ای پیدا نکرد: نه در مسیر تنظیمات، نه روی درایو بازی، نه روی کارت‌های حافظه و نه روی هیچ درایو شروع‌شده‌ای. RIPPS2 تازه‌ترین نسخه Neutrino ساخته rickgaiser را همراه دارد (AFL-3.0): آن را یک بار، هر جا که خواستید، نصب کنید و هر بازی Neutrino از همان‌جا از آن استفاده می‌کند.'
+  A PS1 disc's track list, for Ember: فهرست ترک‌های یک دیسک PS1، برای Ember
+  A PS1 game for POPSTARTER: یک بازی PS1 برای POPSTARTER
+  A PS2 game: یک بازی PS2
+  A card the SD2PSX set aside (wrong size): کارتی که SD2PSX کنار گذاشت (اندازه نادرست)
+  'A program: Cross starts it': 'یک برنامه: ضربدر اجرایش می‌کند'
+  A save, packed in one file: یک ذخیره بازی، بسته‌شده در یک فایل
+  All Games' master list: فهرست اصلی همه بازی‌ها
+  'An SD2PSX boot card: open it to look in': 'یک کارت بوت SD2PSX: بازش کنید تا درونش را ببینید'
+  'An SD2PSX memory card: open it like a VMC': 'یک کارت حافظه SD2PSX: مثل یک VMC بازش کنید'
+  Cheats, a file a game: تقلب‌ها، برای هر بازی یک فایل
+  Each game's settings and info page: تنظیمات و صفحه اطلاعات هر بازی
+  Ember, its BIOS and its PS1 games: Ember، BIOS آن و بازی‌های PS1 آن
+  Game covers and art, by game ID: جلدها و تصاویر بازی، بر پایه شناسه بازی
+  Games kept in 1 GB parts: بازی‌هایی که در تکه‌های 1 GB نگه داشته می‌شوند
+  Games that share one SD2PSX card: بازی‌هایی که یک کارت SD2PSX را با هم دارند
+  Languages for RIPPS2: زبان‌های RIPPS2
+  Neutrino, the second game core: Neutrino، هسته دوم بازی
+  OPL's list of this folder's games: فهرست OPL از بازی‌های این پوشه
+  POPSTARTER and PS1 games (VCDs): POPSTARTER و بازی‌های PS1 (VCD)
+  PS2 games on CD, as ISOs: بازی‌های PS2 روی CD، به‌صورت ISO
+  PS2 games on DVD, as ISOs: بازی‌های PS2 روی DVD، به‌صورت ISO
+  PS2BBL's settings: تنظیمات PS2BBL
+  Programs to start (ELFs): برنامه‌هایی برای اجرا (ELF)
+  RIPPS2's diagnostics, for a bug report: عیب‌یابی RIPPS2، برای گزارش خطا
+  RIPPS2's own folder: پوشه خود RIPPS2
+  RIPPS2's settings: تنظیمات RIPPS2
+  RIPPS2's sounds and music: صداها و موسیقی RIPPS2
+  Recent games: بازی‌های اخیر
+  RetroAchievements' files: فایل‌های RetroAchievements
+  Ripped CDs and DVDs, pictures, video: CD و DVDهای استخراج‌شده، تصویر، ویدیو
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'در حال ذخیره روی SD در SD2PSX: پیش از خاموش کردن %d ث صبر کنید.'
+  Starred games: بازی‌های ستاره‌دار
+  The SD2PSX's boot cards (PS2BBL): کارت‌های بوت SD2PSX (PS2BBL)
+  The SD2PSX's boot channels and names: کانال‌های بوت و نام‌های SD2PSX
+  The SD2PSX's memory cards: کارت‌های حافظه SD2PSX
+  The SD2PSX's own settings: تنظیمات خود SD2PSX
+  The SD2PSX's settings: تنظیمات SD2PSX
+  Themes, a folder each: پوسته‌ها، هر کدام یک پوشه
+  This drive's game list, for a quick boot: فهرست بازی‌های این درایو، برای بوت سریع
+  Virtual memory cards for games: کارت‌های حافظه مجازی برای بازی‌ها
+  What RIPPS2's last launch did: آنچه آخرین اجرای RIPPS2 انجام داد
+  Circle from the top   Cross close: 'دایره: از ابتدا   ضربدر: بستن'
+  Cross from the top   Circle close: 'ضربدر: از ابتدا   دایره: بستن'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : این ترک پخش نشد. RIPPS2 فایل‌های .wav با PCM ‏16 بیتی (همان‌طور که RIPDISC و موسیقی BIOS استخراج می‌کنند)، فایل‌های Ogg Vorbis ‏.ogg و MP3 را پخش می‌کند.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'فقط خواندنی: کارت بوت SD2PSX در حال استفاده است'
+  '%d music tracks': 'ترک‌های موسیقی: %d'
+  1 music track: یک ترک موسیقی
+  'A game''s EXIT: %s': 'EXIT بازی: %s'
+  'A game''s EXIT: the browser': 'EXIT بازی: مرورگر'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'همه بازی‌ها: %d بازی در %s نگه داشته شده، هنگام بوت پیش از پاسخ هر درایوی فهرست می‌شوند'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'همه بازی‌ها: هنوز فهرست اصلی نیست؛ %s پس از فهرست شدن بازی‌ها نوشته می‌شود (Fast Cache روشن)'
+  CACHE SETTINGS: تنظیمات حافظه نهان
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: Neutrino همراه RIPPS2 را روی یک درایو یا کارت حافظه کپی می‌کند. Neutrino خود شما همان‌طور که هست استفاده می‌شود.
+  DIAG.TXT, for a bug report: DIAG.TXT، برای گزارش خطا
+  Drives, loading, launchers and homebrew: درایوها، بارگذاری، اجراکننده‌ها و برنامه‌های خانگی
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache آخرین فهرست بازی هر درایو را همان لحظه که درایو پاسخ دهد نشان می‌دهد؛ Trust Cache آن را تا وقتی SELECT را بزنید نگه می‌دارد. هر دو روشن، با تنظیمات روی کارت حافظه‌ای که RIPPS2 از آن شروع می‌شود، سریع‌ترین بوت است.
+  Fast Cache, Trust Cache: Fast Cache، Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'فهرست بازی‌ها: Fast Cache خاموش، پس هر کدام هنگام بوت از درایو خودش خوانده می‌شود'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'فهرست بازی‌ها: هر کدام بی‌درنگ از حافظه نهان نشان داده می‌شود و تا SELECT می‌ماند'
+  'Game lists: each shows at once from its cache, then is read again': 'فهرست بازی‌ها: هر کدام بی‌درنگ از حافظه نهان نشان داده می‌شود، سپس دوباره خوانده می‌شود'
+  LOADING: بارگذاری
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: صداهای RIPPS2 را از BIOS خود این کنسول می‌سازد و در پوشه AUDIO می‌نویسد.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'هنوز موسیقی نیست: تنظیمات صدا > موسیقی BIOS موسیقی منوی این کنسول را استخراج می‌کند.'
+  SAVE DIAGNOSTICS: ذخیره عیب‌یابی
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: درایوها را برای POPSTARTER، فایل‌های POPS، Ember، BIOS ‏Ember و Neutrino جست‌وجو می‌کند و به یاد می‌سپارد هر کدام کجاست.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'تنظیمات: %s، روی درایوی که بوت منتظرش می‌ماند (کارت حافظه سریع‌تر است)'
+  'Settings: %s, read first (the quickest place)': 'تنظیمات: %s، اول خوانده می‌شود (سریع‌ترین جا)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: همین حالا همه درایوها (USB، هارد، MMCE، MX4SIO و شبکه) را شروع می‌کند تا هر کدام و فضایش اینجا نشان داده شود.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: IP و اشتراک SMB که POPSTARTER برای بازی‌های PS1 از راه شبکه به کار می‌برد.
+  The diagnostics are in %s.: عیب‌یابی در %s است.
+  The diagnostics could not be written to %s.: نوشتن عیب‌یابی در %s ممکن نشد.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: آنچه هر کارت حافظه هنگام روشن شدن اجرا می‌کند؛ نصب یا تعمیر BIBLE، یعنی PS2BBL تنظیم‌شده برای اجرای RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: POPSTARTER و Ember کجا هستند و بازی‌های PS1 چگونه شروع می‌شوند.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Neutrino شما کجاست، حالت ویدیوی آن و آرگومان‌هایی که هر اجرای Neutrino می‌گیرد.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : آنچه RIPPS2 درباره دسته‌ها، درایوها، کارت‌های MMCE و آخرین اجراها یادداشت کرده را در DIAG.TXT کنار RIPPS2 می‌نویسد. آن را همراه گزارش خطا بفرستید.
+  back to Cache: بازگشت به حافظه نهان
+  what boot reads first: آنچه بوت اول می‌خواند
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : این Neutrino قدیمی‌تر از 1.3 است که نمی‌تواند بازی‌ها را از هارد APA شروع کند. اجرای بازی > Neutrino را به Neutrino 1.3 یا جدیدتر بدهید، یا مسیر را پاک کنید تا نسخه همراه RIPPS2 استفاده شود.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 ‏%s را در %s%s نمی‌بیند. POPSTARTER به POPS.ELF و POPS_IOX.PAK، شبیه‌ساز PS1 از کنسول خود شما، نیاز دارد؛ ممکن است آن‌ها را جایی پیدا کند که RIPPS2 نگاه نمی‌کند (اگر بازی‌هایتان شروع می‌شوند، پیدایشان می‌کند). START اجرا می‌کند و دیگر درباره این درایو پرسیده نمی‌شود.
 labels:
   SAVE_CHANGES: ذخیره تغییرات
   BACK: بازگشت
@@ -1270,7 +1367,7 @@ labels:
   DEVS: برنامه‌نویسان
   QANDA: تضمین کیفیت
   BDM_PREFIX: مسیر پیشوند BDM
-  HINT_EXITPATH: پس از IGR یک ELF سفارشی را اجرا می‌کند. از کارت حافظه (mc0:/mc1:) یا فلش USB با FAT32 (mass:/) استفاده کنید؛ برای USB، RiptOPL پیشنهاد می‌کند درایورهایی را که بازنشانی لازم دارد به پوشه SYS-CONF کارت حافظه بیفزاید. پس از بازنشانی به MMCE نمی‌توان رسید؛ از طریق یک لودر کارت حافظه مانند PS2BBL زنجیره کنید.
+  HINT_EXITPATH: 'EXIT در منوی درون بازی به کجا می‌رود. بهتر است خالی بماند، با BIBLE تنظیم‌شده (وضعیت > بوت‌لودر > مدیریت، یا BOOT LOCK روی PS2BBL شما): آن‌وقت EXIT کنسول را از مسیر بوت خودش بازنشانی می‌کند و PS2BBL مثل هنگام روشن شدن RIPPS2 را اجرا می‌کند، امن‌ترین راه بازگشت. مرورگر: مرورگر PS2. یک ELF روی کارت حافظه (mc0:/mc1:) یا درایو USB با FAT32 ‏(mass:/) درست پس از بازنشانی بارگذاری می‌شود، که هر بازی‌ای کنسول را برایش آماده نمی‌گذارد؛ آن‌وقت به MMCE اصلاً نمی‌توان رسید.'
   HINT_SPINDOWN: مقدار به دقیقه، 0 برای غیرفعال کردن توقف چرخش.
   HDD_SPINDOWN: توقف خودکار چرخش هارد
   VMODE: حالت ویدیو
@@ -1558,16 +1655,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'یک رنگ برای برج‌ها، گوی‌ها، شیشه، پخش‌کننده CD و مرورگر فایل، در هر سه زبانه. پوسته: پوسته تصمیم می‌گیرد (آبی RIPPS2 جایی که تصمیم نمی‌گیرد).'
   RIPPS2_HINTS: راهنمای دکمه‌ها
   HINT_RIPPS2_HINTS: 'راهنمای دکمه‌ها در پایین صفحه. محو در حالت بیکاری آن‌ها را تا وقتی دکمه‌ای بزنید پنهان می‌کند. پوسته: پوسته تصمیم می‌گیرد.'
-  RIPPS2_CATEGORY_BAR: نوار دسته‌ها
-  HINT_RIPPS2_CATEGORY_BAR: 'اجرای دیسک، ذخیره‌سازی و فایل‌های حافظه در بالای صفحه. محو در حالت بیکاری آن‌ها را تا وقتی دکمه‌ای بزنید پنهان می‌کند. پوسته: پوسته تصمیم می‌گیرد.'
+  RIPPS2_CATEGORY_BAR: دسته‌ها/نوار کناری
+  HINT_RIPPS2_CATEGORY_BAR: 'اجرای دیسک، ذخیره‌سازی و فایل‌های حافظه: نام‌ها در بالا، یا نوار کناری. محو در حالت بیکاری نام‌ها را کم‌رنگ می‌کند، یا نوار کناری را کنار می‌کشد، تا وقتی دکمه‌ای بزنید؛ بی‌درنگ برمی‌گردد. پوسته: پوسته تصمیم می‌گیرد.'
   RIPPS2_SOURCE_NAME: نام منبع
   RIPPS2_STATUS: وضعیت
   RIPPS2_SOURCE: منبع
   HINT_RIPPS2_SOURCE_NAME: 'نام منبع بالای بازی‌ها (همه بازی‌ها، بازی‌های HDD و مانند آن). محو در حالت بیکاری آن را همراه نوار دسته‌ها محو می‌کند؛ ظاهر شدن ناگهانی به جای آن، آن را بزرگ در وسط صفحه نشان می‌دهد، همان‌طور که L3 فهرست را نام می‌برد، در نخستین فهرست پس از راه‌اندازی و هر بار که منبع عوض شود، و سپس محو می‌شود. پوسته‌ها می‌توانند ظاهر شدن ناگهانی را نمایانِ خود کنند. پوسته: پوسته تصمیم می‌گیرد.'
-  RIPPS2_RECENTS: نمایش موارد اخیر
-  HINT_RIPPS2_RECENTS: تا این تعداد از آخرین بازی‌هایی که اجرا کرده‌اید، در بالای علاقه‌مندی‌ها، تازه‌ترین اول. 0 آن را خاموش می‌کند.
+  RIPPS2_RECENTS: بازی‌های اخیر
+  HINT_RIPPS2_RECENTS: 'بازی‌های اخیر، صفحه‌ای در نوار کناری با آخرین بازی‌هایی که اجرا کرده‌اید، تازه‌ترین اول: چند تا نگه می‌دارد، از 1 تا 99 (مثلث عدد را تایپ می‌کند). بازی‌ای که درایوش روی دستی است، وقتی انتخابش کنید درایو را شروع می‌کند. 0 صفحه را خاموش می‌کند.'
   RIPPS2_CATEGORY_ORDER: ترتیب دسته‌ها
-  HINT_RIPPS2_CATEGORY_ORDER: 'اول فایل‌های حافظه و آخر اجرای دیسک. ساخته‌شده برای RIPFLOW (رابط کاربری > پوسته). پوسته: پوسته تصمیم می‌گیرد.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'جای اجرای دیسک و فایل‌های حافظه را عوض می‌کند: فایل‌های حافظه اول و اجرای دیسک آخر، هم در نام‌های نوار و هم در نمادهای نوار کناری. ساخته‌شده برای RIPFLOW (رابط > پوسته). پوسته: پوسته تصمیم می‌گیرد.'
   RIPPS2_MUSIC: موسیقی
   HINT_RIPPS2_MUSIC: فایل‌های bgm را در پوشه AUDIO کنار RIPPS2 و در پوشه AUDIO مربوط به OPL روی هر درایو شروع‌شده پخش می‌کند (Ogg بدون برچسب، یا WAV شانزده‌بیتی)؛ فایلی به نام Menu اول پخش می‌شود. اگر پوسته موسیقی خودش را داشته باشد، به جای آن پخش می‌شود.
   RIPPS2_BIOS_SOUNDS: صداهای BIOS
@@ -1576,7 +1673,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: راهنماها و نمادها
   HINT_RIPPS2_HINTS_GLYPHS: ظاهر راهنمای دکمه‌ها و نمادها. هر سطر روی پوسته، یعنی انتخاب پوسته، شروع می‌شود؛ هر انتخاب دیگری مال شماست و بر هر پوسته‌ای اولویت دارد.
   RIPPS2_HINT_LAYOUT: چیدمان راهنما
-  HINT_RIPPS2_STARSIDE: 'جای ستارهٔ بازی محبوب در فهرست. چپ: ستونی جدا در ابتدای هر ردیف. راست: بعد از عنوان. پنهان: بدون ستاره. تم: هرچه تم بگوید. آیکون ردیف تم به سر دیگر می‌رود تا هیچ‌وقت روی هم نیفتند.'
+  HINT_RIPPS2_STARSIDE: 'ستاره بازی ستاره‌دار در فهرست کجا می‌نشیند. چپ: ستون خودش در آغاز هر ردیف. راست: پس از عنوان. پنهان (پیش‌فرض): نه ستاره و نه ستون، عنوان‌ها کامل. پوسته: هرچه پوسته بگوید. R3 در هر حال بازی را ستاره‌دار می‌کند؛ R3 را 4 ثانیه روی فهرست نگه دارید تا ستاره‌ها پنهان شوند یا برگردند (این کار بازی زیر نشانگر را هم ستاره‌دار می‌کند).'
   HINT_RIPPS2_HINT_LAYOUT: 'سطر: راهنماها در یک خط. ستون: یک راهنما در هر خط، فهرستی در کنار، از جایی که پوسته راهنماهایش را می‌گذارد.'
   RIPPS2_HINT_LABELS: برچسب‌های راهنما
   HINT_RIPPS2_HINT_LABELS: فقط نماد تنها دکمه‌ها را می‌کشد، برای نمادهایی که واژه‌های خودشان را دارند. نشان‌ها نماد و عنوان هر راهنما را با هم روی یک نشان می‌گذارند.
@@ -1597,11 +1694,11 @@ labels:
   RIPPS2_TRANSITION: گذار صفحه
   HINT_RIPPS2_TRANSITION: 'صفحه تازه هنگام رفتن به دسته دیگر چگونه وارد شود: از رنگ پس‌زمینه پوسته، یا از یک درخشش. پوسته انتخاب پوسته را نگه می‌دارد.'
   RIPPS2_CATEGORY_LAYOUT: چیدمان دسته‌ها
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'جای سه دسته: نامشان در بالا، یا نمادها در طول نوار کناری، هر کدام با کشویی از صفحه‌هایش (چپ در یک فهرست به آنجا می‌رود). پوسته چیدمان خود پوسته را نگه می‌دارد.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'سه دسته کجا می‌نشینند: نامشان در بالا، یا نمادها در امتداد نوار کناری، هر کدام با کشویی از صفحه‌هایش (چپ روی فهرست به آنجا می‌رود)، یا منو: بی‌هیچ نواری، دسته‌ها در منوی START مثل پوسته‌ای که برای OPL ساخته شده. پوسته چیدمان خود پوسته را نگه می‌دارد.'
   RIPPS2_CACHE: حافظه نهان
   HINT_RIPPS2_CACHE: 'فهرست بازی‌های هر منبع چگونه نگه داشته می‌شود تا صفحه‌اش فوراً باز شود: Fast Cache، فهرست هارد داخلی و تازه‌سازی خودکار.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: هر منبع آخرین فهرست بازی‌هایش را نگه می‌دارد (RIPPS2.LST کنار پوشه‌های CD و DVD) و همان لحظه که منبع پاسخ داد نشانش می‌دهد، سپس منبع را در پس‌زمینه دوباره می‌خواند. خاموش، مثل قبل هر فهرست را اول از منبعش می‌خواند.
+  HINT_RIPPS2_FAST_CACHE: 'هر منبع آخرین فهرست بازی‌اش را نگه می‌دارد (RIPPS2.LST کنار پوشه‌های CD و DVD آن) و همان لحظه که منبع پاسخ دهد نشانش می‌دهد. Trust Cache تصمیم می‌گیرد که منبع پس از آن دوباره خوانده شود یا نه. خاموش: هر فهرست اول از منبعش خوانده می‌شود، مثل گذشته.'
   HINT_RIPPS2_VIGNETTE: لبه‌های همه جلدها جز جلد انتخاب‌شده را تیره می‌کند تا انتخاب‌شده برجسته شود. ضعیف نصف کامل است.
   RIPPS2_GRID_WIDE: چیدمان شبکه‌ای صفحه عریض
   HINT_RIPPS2_GRID_WIDE: صفحه شبکه‌ای فقط روی تصویر 16:9 (صفحه عریض، 720p، 1080i)، که جلدها باریک‌تر کشیده می‌شوند و تعداد بیشتری در یک سطر جا می‌گیرند. پوسته چیدمان پوسته را به کار می‌برد؛ مانند چیدمان شبکه‌ای از چیدمان شبکه‌ای پیروی می‌کند.
@@ -1617,7 +1714,7 @@ labels:
   GAME_TYPE_LABELS: نمایش برچسب‌های [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: فهرست تقلب‌ها در پوشه Neutrino ذخیره نشد، پس Neutrino نمی‌تواند از آن استفاده کند. بدون تقلب اجرا شود؟
   AUTO_CREATE_VMC: ساخت VMC در نخستین اجرا
-  HINT_AUTO_CREATE_VMC: اجرای یک بازی PS2 بدون VMC در شیار 1، یک کارت 8 مگابایتی روی دستگاه بازی می‌سازد، با نامی که صفحه VMC پیشنهاد می‌دهد (مشترک میان همه دیسک‌های بازی)، و آن را اختصاص می‌دهد. برای هارد داخلی زیر Neutrino نیست.
+  HINT_AUTO_CREATE_VMC: اجرای یک بازی PS2 بدون VMC در شکاف 1 یک کارت 8 MB روی دستگاه بازی می‌سازد، با نامی که صفحه VMC پیشنهاد می‌دهد (مشترک برای همه دیسک‌های بازی)، و آن را اختصاص می‌دهد. با Neutrino نه روی هارد APA (هارد exFAT کار می‌کند).
   AUTO_VMC_CREATING: در حال ساخت VMC این بازی...
   AUTO_VMC_FAILED: VMC این بازی ساخته نشد. بازی بدون آن شروع می‌شود.
   RIPPS2_BIOS_MUSIC: موسیقی BIOS
@@ -1654,7 +1751,7 @@ labels:
   HINT_LANGUAGE: زبان منو. با گذاشتن فایل‌های lang_*.lng در یک پوشه LNG زبان‌های بیشتری بیفزایید.
   HINT_GSM_DEFAULTS_BUTTON: اصلاحات حالت ویدیو که هر بازی می‌گیرد، مگر آنکه تنظیمات GSM خودش را داشته باشد.
   HINT_DEFDEVICE: صفحه‌ای که RiptOPL هنگام راه‌اندازی روی آن باز می‌شود.
-  HINT_MMCE_MODE: بازی‌ها روی SD2PSX یا MemCard PRO2. خودکار هنگام راه‌اندازی شروع می‌شود، دستی وقتی صفحه را باز کنید، خاموش آن را پنهان می‌کند.
+  HINT_MMCE_MODE: 'بازی‌ها روی SD2PSX یا MemCard PRO2. خودکار آن را هنگام بوت شروع می‌کند: سریع‌ترین برای کارتی که وصل است، و بازی‌هایش از اول در همه بازی‌ها. دستی وقتی صفحه‌اش را باز کنید شروعش می‌کند، خاموش پنهانش می‌کند.'
   HINT_MMCE_SETTINGS_BUTTON: گزینه‌های شیار، کارت راه‌اندازی IGR، GameID و زمان‌بندی برای MMCE.
   HINT_ENABLE_USB: درایور ذخیره‌سازی USB را بارگذاری می‌کند.
   HINT_ENABLE_MX4SIO: درایور آداپتور کارت SD نوع MX4SIO را بارگذاری می‌کند.
@@ -1836,8 +1933,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'تصویر منو: حالت ویدیو، صفحهٔ عریض، جایش روی تلویزیون (H-POS، V-POS) و overscan.'
   HINT_RIPPS2_LAYOUT: جای دسته‌ها و چگونگی آمدن صفحه، سپس جلدهای RIPFLOW و شبکهٔ RIPGRID.
   HINT_RIPPS2_COLORS_TEXT: ضخامت متن، رنگ پوسته، گذر رنگ و همهٔ رنگ‌ها.
-  HINT_RIPPS2_TEXT_WEIGHT: 'ضخامت متن خود RIPPS2: راهنماهای تنظیمات، وضعیت و درباره. معمولی مثل قبل است؛ متوسط و پررنگ روی تصویر نرم بهتر خوانده می‌شوند.'
-  HINT_RIPPS2_HDD_START: 'هارد داخلی، APA یا exFAT: RIPPS2 هرچه باشد آن را می‌خواند و یک بار، به‌عنوان بازی‌های HDD، نشان می‌دهد. خاموش به آن دست نمی‌زند.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'متن خود RIPPS2 چقدر پررنگ است: راهنماهای تنظیمات، وضعیت و درباره. معمولی همان قبلی است؛ پررنگ روی تصویر نرم بهتر خوانده می‌شود. قلم‌های خود پوسته همان ضخامتی را نگه می‌دارند که پوسته به آن‌ها می‌دهد.'
+  HINT_RIPPS2_HDD_START: 'هارد داخلی، APA یا exFAT: RIPPS2 هر کدام که باشد می‌خواندش و یک بار، به نام بازی‌های HDD، نشانش می‌دهد. خودکار (سریع‌ترین وقتی هارد هست) هنگام بوت شروعش می‌کند؛ خاموش کاری به آن ندارد.'
   HINT_RIPPS2_THEME_COLOR: رنگ خود پوسته. سفارشی را به‌عنوان رنگ پوسته برگزینید تا خودتان آن را انتخاب کنید، مثل رنگ‌های متن.
   HINT_RIPPS2_SWEEP: پنج رنگی که پوسته آرام و نرم از آن‌ها می‌گذرد. رنگین‌کمان، گذری ساخته از هر رنگ پوسته، یا گذر خودتان. خاموش رنگ پوسته را ثابت نگه می‌دارد.
   HINT_RIPPS2_SWEEP_COLORS: پنج رنگ گذر و سرعتش. یکی از گذرهای RIPPS2 را تغییر دهید تا با نامی که می‌دهید به‌عنوان گذر خودتان نگه داشته شود.
@@ -1846,3 +1943,19 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'هر رنگ چقدر می‌ماند تا رنگ بعدی بیاید. حتی سرزنده هم نرم می‌ماند: رنگ‌ها هرگز چشمک نمی‌زنند.'
   RIPPS2_HIDE_COMPRESS: پنهان کردن بازی و فشرده‌سازی
   HINT_RIPPS2_SELECT_HOLD: 'SELECT به مدت 4.2 ثانیه روی فهرست بازی نگه داشته شود. فهرست: پوسته‌ها در یک پنل، یکی را انتخاب کنید. چرخشی: پوسته بعدی. خاموش: هیچ (فشار دادن همچنان تازه می‌کند).'
+  RIPPS2_RECENT_GAMES: بازی‌های اخیر
+  RIPPS2_SET_METADATA_RENAME: تنظیم فراداده (تغییر نام)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: اول دسته (آزمایشی)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX از گذرگاهی می‌خواند که با دسته مشترک است و تا خواندن ادامه دارد دسته شنیده نمی‌شود: فشردن دکمه‌ها هنگام بارگذاری جلدها دیر می‌رسد یا گم می‌شود. روشن: جلدها تکه‌تکه می‌آیند و دسته میانشان خوانده می‌شود، کمی کندتر. خاموش: با بیشترین سرعت کارت. وقتی منابع کارت روی خودکار باشند، فهرستش یک بار، هنگام بوت، بارگذاری می‌شود.'
+  HINT_RIPPS2_TRUST_CACHE: 'فهرستی که از حافظه نهان نشان داده شده همان‌طور و آماده اجرا می‌ماند تا وقتی SELECT را بزنید یا خود RIPPS2 آن منبع را تغییر دهد. خاموش: هر منبع پس از نمایش حافظه نهانش در پس‌زمینه دوباره خوانده می‌شود، مکثی که روی کارت MMCE یا MX4SIO حس می‌شود، چون گذرگاه دسته را با هم دارند.'
+  RIPPS2_STATUS_OPEN: بارگذاری و درایوها
+  HINT_RIPPS2_STATUS_OPEN: 'وضعیت را باز می‌کند: بوت تنظیمات و فهرست بازی‌ها را از کجا می‌خواند، کدام جا سریع‌ترین است، EXIT بازی به کجا می‌رود، و همه درایوها. تنظیمات حافظه نهان در آنجا به اینجا برمی‌گردد.'
+  RIPPS2_BADGE_SET: مجموعه نشان‌ها
+  HINT_RIPPS2_BADGE_SET: 'نشان‌های صفحه اطلاعات بازی (رده‌بندی، بازیکنان، ESRB، حالت ویدیو، اسکن، نسبت تصویر). RIPPS2: مجموعه خودش، در همه پوسته‌ها یکسان. پوسته: تصاویر خود پوسته، یا تصاویر RIPPS2 وقتی پوسته بخواهد.'
+  RIPPS2_HINT_FADE: محو شدن راهنماها و نمادها
+  HINT_RIPPS2_HINT_FADE: 'راهنمای دکمه یا نمادی که تغییر کند، مثل جلدها، همان لحظه آرام پدیدار می‌شود؛ آن‌هایی که ثابت می‌مانند دست نمی‌خورند، در هر صفحه و پیام. خاموش: فقط ظاهر می‌شوند. پوسته: پوسته تصمیم می‌گیرد (روشن، مگر بگوید hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: سبک نوار کناری
+  HINT_RIPPS2_SIDEBAR_STYLE: 'کلاسیک (دوتکه): نمادها در نوار تیره نوار کناری با نوار رنگی کنارش. XL (یک‌تکه): یک نوار پهن‌تر، نمادها در میانه آن. پوسته: پوسته تصمیم می‌گیرد.'
+  HINT_BDM_START: 'USB، iLink، MX4SIO و هارد exFAT. خودکار آن‌ها را هنگام بوت شروع می‌کند: سریع‌ترین برای درایوهای وصل‌شده، و بازی‌هایشان از اول در همه بازی‌ها. دستی وقتی صفحه‌شان را باز کنید شروعشان می‌کند.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino نمی‌تواند از VMC روی هارد APA استفاده کند (exFAT، USB و MX4SIO می‌توانند): این بازی با کارت واقعی در آن شکاف شروع می‌شود.'

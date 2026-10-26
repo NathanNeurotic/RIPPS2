@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: 'A menüzenét nem sikerült kiírni ide: %s (%s). Megtelt a meghajtó?'
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'A menüzene egy %s méretű WAV, és egyetlen memóriakártyára sem fér rá. A RIPPS2 itt memóriakártyáról fut, és nincs elindítva OPL mappás meghajtó: indíts el egyet a Tárolóban, aztán oda nyerd ki a zenét.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: 'A hangokat nem sikerült kiírni ide: %s. Megtelt vagy írásvédett a meghajtó?'
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Ennek a BIOS-nak a menüzenéje nem az, amelyet a RIPPS2 ismer. Semmi nem lett kiírva.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Ennek a BIOS-nak a hangbankja nem az, amelyet a RIPPS2 ismer. Semmi nem lett kiírva.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) előbb egészben egy biztonsági mappába kerül.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- A PS2BBL 1.2.0-t a konzol ehhez a kártyához köti, és így írja ki: %s/%s.
-
-    - A beállítása, mc%d:/PS2BBL/CONFIG.INI, innen indítja a RIPPS2-t: %s, BOOT LOCK bekapcsolva.
-
-    Ehhez az I/O processzor újraindul; a zene és a meghajtók utána visszatérnek. Hagyd benn a kártyát és bekapcsolva a konzolt, amíg a kész felirat meg nem jelenik.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: PÉLDÁNY A(Z) %d. MEMÓRIAKÁRTYÁN
   A COPY ON MX4SIO: PÉLDÁNY AZ MX4SIO-N
   A COPY ON THE USB DRIVE: PÉLDÁNY AZ USB MEGHAJTÓN
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: A BIBLE-t nem sikerült a(z) %d. memóriakártyára írni, ezért a kártya visszaállt az eredeti állapotába. Ellenőrizd a szabad helyet, és próbáld újra.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: 'A BIBLE nem tudta ide másolni a RIPPS2-t: %s. Ellenőrizd a helyet és az írásvédelmet. Semmi más nem változott.'
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: A BIBLE nem tudta a HDD %s partíciójára másolni a RIPPS2-t. Ellenőrizd a szabad helyet. Semmi más nem változott.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : A BIBLE nem tudott másolatot tartani a HDD rendszerindító programjáról, ezért megállt, mielőtt megváltoztatta volna. A RIPPS2 a HDD-re került; semmi más nem változott.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: 'A BIBLE nem tudta félretenni ezt: %s, ezért ott megállt. A kártyán semmi nem változott.'
   BIBLE could not write its config (%s). The boot program was not changed.: A BIBLE nem tudta kiírni a beállítását (%s). A rendszerindító program nem változott.
   BIBLE could not write the HDD's boot program (step %d). %s: A BIBLE nem tudta kiírni a HDD rendszerindító programját (%d. lépés). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : A BOOT LOCK be van kapcsolva. A PS2BBL most bekapcsoláskor a RIPPS2-t indítja (%s). Ha máshová szeretnél jutni, tarts lenyomva egy PS2BBL gyorsbillentyűt, miközben a konzol indul.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: A BOOT LOCK a PS2BBL-en (PlayStation 2 Basic BootLoader) keresztül működik, és egyik itteni memóriakártyán sincs.
   INSTALL BIBLE: BIBLE TELEPÍTÉSE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'BIBLE TELEPÍTÉSE A(Z) %d. MEMÓRIAKÁRTYÁRA
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Ehhez olyan konzol kell, amely a HDD-jéről indul (vastag PS2 hálózati adapterrel). Hagyd bekapcsolva, amíg a kész felirat meg nem jelenik.'
   INTERNAL HDD  (its boot area): BELSŐ HDD  (a rendszerindító területe)
   MEMORY CARD %d  (%s): '%d. MEMÓRIAKÁRTYA  (%s)'
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : '0. MEMÓRIAKÁRTYA: %s
-
-    1. MEMÓRIAKÁRTYA: %s
-
-    %s
-
-    A BIBLE El Isra PS2BBL 1.2.0-ja, a RIPPS2 által beállítva: nincs várakozás bekapcsoláskor, először a RIPPS2, és a bekapcsoláskor lenyomva tartott gomb továbbra is elvisz a böngészőhöz (HÁROMSZÖG), egy lemezhez (START) és ahhoz, ami korábban ott volt (KÖR). Telepíted vagy javítod memóriakártyán vagy a belső HDD-n?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: A(z) %d. memóriakártyán %d KB szabad, a BIBLE-nek pedig %d KB kell ott. Szabadíts fel egy kis helyet, és próbáld újra.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: A(z) %d. memóriakártyán %d KB szabad, a RIPPS2 példányának pedig %d KB kell. Szabadíts fel egy kis helyet, vagy válassz másik helyet.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: 'A(z) %d. memóriakártya bekapcsoláskor ezt indítja: %s, a BOOT LOCK pedig csak a PS2BBL-en keresztül működik.'
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: TÁLCA NYITVA
   TREFOIL KNOT: LÓHERECSOMÓ
   ' and ': ' és '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s hiányzik innen: %s%s. A POPSTARTER-nek a játékok mellett szüksége van a POPS.ELF-re és a POPS_IOX.PAK-ra, vagyis a saját konzolod PS1 emulátorára, hogy elindítson egyet.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s hiányzik innen: %s%s. A RIPPOPS megtalálta a POPS.ELF-et és a POPS_IOX.PAK-ot, a Sony PS1 emulátorát, itt: %s: a START ide másolja őket, és elindítja a játékot.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': 'Nem sikerült átmásolni ezt: %s ide: %s%s. Megtelt vagy írásvédett a meghajtó?'
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s hiányzik innen: %s%s. A POPSTARTER-nek a játékok mellett szüksége van a POPS.ELF-re és a POPS_IOX.PAK-ra, vagyis a saját konzolod PS1 emulátorára, hogy elindítson egyet.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s hiányzik innen: %s%s. A RIPPOPS megtalálta a POPS.ELF-et és a POPS_IOX.PAK-ot, a Sony PS1 emulátorát, itt: %s: a START ide másolja őket, és elindítja a játékot.'
   COPY AND START: MÁSOLÁS ÉS INDÍTÁS
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'Külön köszönet a YouTube-on kapott szeretetért is:'
   and its own look, launchers, file browser and save tools.: és saját kinézettel, indítókkal, fájlböngészővel és mentéskezelő eszközökkel.
   glad to help however you reach me.: szívesen segítek, bárhogy is értek el.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): a második játékmag, 1.8.0 változatlanul mellékelve (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: benne rickgaiser Neutrinójával mint második játékmaggal,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Ez a játék a Neutrinón keresztül indul, és a RIPPS2 egyet sem talált: sem a Beállítások útvonalán, sem a játék meghajtóján, sem a memóriakártyákon, sem elindított meghajtón. A RIPPS2 tartalmazza rickgaiser Neutrino 1.8.0-ját (AFL-3.0): telepítsd egyszer, ahová szeretnéd, és minden Neutrino-játék onnan használja.'
   STARTING THE DRIVES: A MEGHAJTÓK INDÍTÁSA
   '%d games, on the started drives': '%d játék, az elindított meghajtókon'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: NÉHÁNY FÁJLT NEM SIKERÜLT TÖRÖLNI'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: nincs elindított meghajtón
   only if you have none: csak ha nincs egy sem
   starts every drive first: előbb minden meghajtót elindít
-  Drives, launchers and homebrew: Meghajtók, indítók és homebrew programok
   BDM Devices: BDM-eszközök
   Color Sweep: Színváltás
   Colors and Text: Színek és szöveg
@@ -1079,9 +1038,7 @@ strings:
   Bold: Félkövér
   Controllers: Kontrollerek
   Lively: Élénk
-  Medium: Közepes
   PS Emulation: PS-emuláció
-  Regular: Normál
   Slow: Lassú
   A MOMENT: EGY PILLANAT
   A TASK IN THE BACKGROUND: EGY HÁTTÉRFELADAT
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: 'Törlöd ezt: %s? A RIPPS2 saját színváltásai maradnak.'
   Sweep: Színváltás
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: A jelvények megjelölik a listáidban a teljesítményes játékokat, és hogy mennyit oldottál fel. Bekapcsolt TELEMETRIA kell hozzájuk.
+  Classic (Split): Klasszikus (osztott)
+  Guidance: Útmutatás
+  OK: OK
+  XL (One Piece): XL (egy darabban)
+  STARS HIDDEN: CSILLAGOK REJTVE
+  STARS SHOWN: CSILLAGOK LÁTHATÓK
+  Asking the SD2PSX for this game's memory card...: A játék memóriakártyájának kérése az SD2PSX-től...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: Az SD2PSX előkészíti a játék memóriakártyáját (%d mp). A játék akkor indul, amikor kész; a START most indítja.
+  the second game core, its newest build carried unmodified (AFL-3.0): a második játékmag, a legújabb változata változatlanul mellékelve (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': '%s nem írható ide: %s (%d hang sikerült). Megtelt vagy írásvédett a meghajtó?'
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': '%s nem írható ide: %s (%d hang sikerült, és a kártyán most %d KB szabad). Írásvédett a kártya?'
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: A(z) %s mappát nem sikerült létrehozni. Megtelt vagy írásvédett a meghajtó? Semmi sem lett kiírva.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'A hangok %d KB-ot foglalnak, ezen a memóriakártyán pedig %d KB szabad. Semmi sem lett kiírva. Szabadíts fel helyet a kártyán, vagy indíts el egy meghajtót a Tárolóban, és nyerd ki őket újra: a RIPPS2 ekkor felajánlja a meghajtót.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : 'A hangok %d KB-ot foglalnak, ezen a memóriakártyán pedig %d KB szabad. A START inkább ide írja őket: %sAUDIO/ a meghajtón, és a RIPPS2 onnan játssza le őket.'
+  There was not enough memory to make the sounds. Nothing was written.: Nem volt elég memória a hangok elkészítéséhez. Semmi sem lett kiírva.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- A PS2BBL 1.2.0-t a konzol ehhez a kártyához köti, és így írja ki: %s/%s.
+  
+    - A beállítása, mc%d:/PS2BBL/CONFIG.INI, innen indítja a RIPPS2-t: %s, várakozás nélkül (0 ms, amit a PS2BBL Extended nem enged), BOOT LOCK bekapcsolva.
+  
+    Ehhez az I/O processzor újraindul; a zene és a meghajtók utána visszatérnek. Hagyd benn a kártyát és bekapcsolva a konzolt, amíg a kész felirat meg nem jelenik.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : A BIBLE-t nem sikerült a(z) %d. memóriakártyára írni, ezért a kártya visszaállt az eredeti állapotába. Ellenőrizd a szabad helyet, és próbáld újra. (A RIPPS2 melletti DIAG.TXT-ben benne van, mit válaszolt a kártya.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : 'A BIBLE nem tudta félretenni ezt: %s, ezért ott megállt. A kártyán semmi nem változott. (A RIPPS2 melletti DIAG.TXT-ben benne van, mit válaszolt a kártya.)'
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : '0. MEMÓRIAKÁRTYA: %s
+  
+    1. MEMÓRIAKÁRTYA: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, El Isra PS2BBL 1.2.0-ja a RIPPS2 beállításával: 0 ms-os indulás bekapcsoláskor (a PS2BBL Extended nem enged 0-t), először a RIPPS2, és a bekapcsoláskor lenyomva tartott gomb továbbra is elvisz a böngészőhöz (HÁROMSZÖG), egy lemezhez (START) és ahhoz, ami korábban ott volt (KÖR). Telepíted vagy javítod memóriakártyán vagy a belső HDD-n?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 A(Z) %d. MEMÓRIAKÁRTYÁN
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'A Memóriafájlok most megnyílik a MEDIA-n, a lemezzel a vágólapon (KINYERVE). Menj arra a meghajtóra és mappába, ahová kerülnie kell (bármelyik meghajtó: USB, a HDD, az SD2PSX MEDIA-ja), nyomd meg a HÁROMSZÖG gombot a MŰVELETEK-hez, és válaszd a BEILLESZTÉS-t. A RIPDISC ekkor még egyszer rákérdez, és a PS2-d lézerével beolvassa a lemezt, majd odaírja.'
+  RENAME THE GAME: JÁTÉK ÁTNEVEZÉSE
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Ez a játék a Neutrinón keresztül indul, és a RIPPS2 egyet sem talált: sem a Beállítások útvonalán, sem a játék meghajtóján, sem a memóriakártyákon, sem elindított meghajtón. A RIPPS2 tartalmazza rickgaiser Neutrinóját (AFL-3.0), a legújabb változatot: telepítsd egyszer, ahová szeretnéd, és minden Neutrino-játék onnan használja.'
+  A PS1 disc's track list, for Ember: Egy PS1 lemez számlistája, az Emberhez
+  A PS1 game for POPSTARTER: Egy PS1 játék a POPSTARTER-hez
+  A PS2 game: Egy PS2 játék
+  A card the SD2PSX set aside (wrong size): Egy kártya, amit az SD2PSX félretett (rossz méret)
+  'A program: Cross starts it': 'Egy program: a Kereszt elindítja'
+  A save, packed in one file: Egy mentés, egy fájlba csomagolva
+  All Games' master list: A Minden játék fő listája
+  'An SD2PSX boot card: open it to look in': 'Egy SD2PSX indítókártya: nyisd meg, hogy belenézz'
+  'An SD2PSX memory card: open it like a VMC': 'Egy SD2PSX memóriakártya: nyisd meg VMC-ként'
+  Cheats, a file a game: Csalások, játékonként egy fájl
+  Each game's settings and info page: Minden játék beállításai és adatlapja
+  Ember, its BIOS and its PS1 games: Az Ember, a BIOS-a és a PS1 játékai
+  Game covers and art, by game ID: Játékborítók és képek, játékazonosító szerint
+  Games kept in 1 GB parts: 1 GB-os részekben tárolt játékok
+  Games that share one SD2PSX card: Egy SD2PSX kártyán osztozó játékok
+  Languages for RIPPS2: Nyelvek a RIPPS2-höz
+  Neutrino, the second game core: Neutrino, a második játékmag
+  OPL's list of this folder's games: Az OPL listája a mappa játékairól
+  POPSTARTER and PS1 games (VCDs): POPSTARTER és PS1 játékok (VCD-k)
+  PS2 games on CD, as ISOs: PS2 játékok CD-n, ISO-ként
+  PS2 games on DVD, as ISOs: PS2 játékok DVD-n, ISO-ként
+  PS2BBL's settings: A PS2BBL beállításai
+  Programs to start (ELFs): Indítható programok (ELF-ek)
+  RIPPS2's diagnostics, for a bug report: A RIPPS2 diagnosztikája, hibajelentéshez
+  RIPPS2's own folder: A RIPPS2 saját mappája
+  RIPPS2's settings: A RIPPS2 beállításai
+  RIPPS2's sounds and music: A RIPPS2 hangjai és zenéje
+  Recent games: Legutóbbi játékok
+  RetroAchievements' files: A RetroAchievements fájljai
+  Ripped CDs and DVDs, pictures, video: Kinyert CD-k és DVD-k, képek, videó
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'Mentés az SD2PSX SD-kártyájára: kikapcsolás előtt várj %d mp-et.'
+  Starred games: Kedvenc játékok
+  The SD2PSX's boot cards (PS2BBL): Az SD2PSX indítókártyái (PS2BBL)
+  The SD2PSX's boot channels and names: Az SD2PSX indítócsatornái és nevei
+  The SD2PSX's memory cards: Az SD2PSX memóriakártyái
+  The SD2PSX's own settings: Az SD2PSX saját beállításai
+  The SD2PSX's settings: Az SD2PSX beállításai
+  Themes, a folder each: Témák, mindegyik külön mappában
+  This drive's game list, for a quick boot: A meghajtó játéklistája, a gyors indításhoz
+  Virtual memory cards for games: Virtuális memóriakártyák a játékokhoz
+  What RIPPS2's last launch did: Mit csinált a RIPPS2 legutóbbi indítása
+  Circle from the top   Cross close: 'Kör: az elejéről   X: bezárás'
+  Cross from the top   Circle close: 'X: az elejéről   Kör: bezárás'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Ezt a számot nem sikerült lejátszani. A RIPPS2 16 bites PCM .wav fájlokat (ahogy a RIPDISC és a BIOS zene kinyeri őket), Ogg Vorbis .ogg fájlokat és MP3-akat játszik le.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'CSAK OLVASHATÓ: AZ SD2PSX INDÍTÓKÁRTYÁJA HASZNÁLATBAN VAN'
+  '%d music tracks': '%d zeneszám'
+  1 music track: 1 zeneszám
+  'A game''s EXIT: %s': 'Egy játék EXIT-je: %s'
+  'A game''s EXIT: the browser': 'Egy játék EXIT-je: a böngésző'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Minden játék: %d játék tárolva itt: %s, indításkor listázva, mielőtt bármelyik meghajtó válaszolna'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Minden játék: még nincs fő lista; %s akkor íródik ki, amikor a játékok listázva vannak (Fast Cache be)'
+  CACHE SETTINGS: GYORSÍTÓTÁR BEÁLLÍTÁSAI
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: A RIPPS2-ben lévő Neutrinót egy meghajtóra vagy memóriakártyára másolja. A saját Neutrinód úgy használja, ahogy van.
+  DIAG.TXT, for a bug report: DIAG.TXT, hibajelentéshez
+  Drives, loading, launchers and homebrew: Meghajtók, betöltés, indítók és homebrew programok
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : A Fast Cache minden meghajtó legutóbbi játéklistáját megmutatja, amint a meghajtó válaszol; a Trust Cache megtartja, amíg meg nem nyomod a SELECT-et. Mindkettő bekapcsolva, a beállításokkal azon a memóriakártyán, ahonnan a RIPPS2 indul, a leggyorsabb indítás.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Játéklisták: Fast Cache ki, így mindegyik indításkor a saját meghajtójáról olvasódik'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Játéklisták: mindegyik azonnal megjelenik a gyorsítótárból, és SELECT-ig marad'
+  'Game lists: each shows at once from its cache, then is read again': 'Játéklisták: mindegyik azonnal megjelenik a gyorsítótárból, aztán újra beolvasódik'
+  LOADING: BETÖLTÉS
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: Elkészíti a RIPPS2 hangjait a konzol saját BIOS-ából, és az AUDIO mappába írja őket.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Még nincs zene: Hangbeállítások > BIOS zene kinyeri a konzol menüzenéjét.'
+  SAVE DIAGNOSTICS: DIAGNOSZTIKA MENTÉSE
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Végigkeresi a meghajtókon a POPSTARTER-t, a POPS fájlokat, az Embert, az Ember BIOS-át és a Neutrinót, és megjegyzi, melyik hol van.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Beállítások: %s, olyan meghajtón, amire az indítás vár (a memóriakártya gyorsabb)'
+  'Settings: %s, read first (the quickest place)': 'Beállítások: %s, elsőként olvasva (a leggyorsabb hely)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Most elindít minden meghajtót (USB, a HDD, MMCE, MX4SIO és a hálózat), hogy mindegyik és a helye itt látsszon.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: Az IP és az SMB-megosztás, amit a POPSTARTER a hálózati PS1 játékokhoz használ.
+  The diagnostics are in %s.: 'A diagnosztika itt van: %s.'
+  The diagnostics could not be written to %s.: 'A diagnosztikát nem sikerült ide írni: %s.'
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Mit indít az egyes memóriakártyák bekapcsoláskor; a BIBLE telepítése vagy javítása, a RIPPS2 indítására beállított PS2BBL.
+  Where POPSTARTER and Ember are, and how PS1 games start.: Hol van a POPSTARTER és az Ember, és hogyan indulnak a PS1 játékok.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Hol van a Neutrinód, a videómódja és az argumentumok, amiket minden Neutrino-indítás kap.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : A DIAG.TXT-be írja a RIPPS2 mellé, amit a RIPPS2 a kontrollerekről, a meghajtókról, az MMCE kártyákról és a legutóbbi indításokról feljegyzett. Küldd el egy hibajelentéssel.
+  back to Cache: vissza a Gyorsítótárhoz
+  what boot reads first: amit az indítás elsőként olvas
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Ez a Neutrino régebbi az 1.3-nál, ami nem tud játékot indítani az APA HDD-ről. Állítsd a Játékindítás > Neutrino útvonalat Neutrino 1.3-ra vagy újabbra, vagy töröld az útvonalat, és a RIPPS2-ben lévőt használja.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : 'A RIPPS2 nem látja ezt: %s itt: %s%s. A POPSTARTER-nek szüksége van a POPS.ELF-re és a POPS_IOX.PAK-ra, a saját konzolod PS1 emulátorára; megtalálhatja őket ott, ahol a RIPPS2 nem keres (ha a játékaid elindulnak, megtalálja). A START indít, és erre a meghajtóra többé nem kérdez rá.'
 labels:
   OK: OK
   BACKSPACE: Visszatörlés
@@ -1311,16 +1408,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Egy szín a tornyokhoz, gömbökhöz, üveghez, CD lejátszóhoz és fájlböngészőhöz, mindhárom fülön. Téma: a téma dönt (ahol nem, ott RIPPS2 kék).'
   RIPPS2_HINTS: Gombtippek
   HINT_RIPPS2_HINTS: 'Az alul futó gombtippek. Az Eltűnés tétlenségkor elrejti őket, amíg meg nem nyomsz egy gombot. Téma: a téma dönt.'
-  RIPPS2_CATEGORY_BAR: Kategóriasáv
-  HINT_RIPPS2_CATEGORY_BAR: 'LEMEZ INDÍTÁSA, TÁROLÓ és MEMÓRIAFÁJLOK felül. Az Eltűnés tétlenségkor elrejti őket, amíg meg nem nyomsz egy gombot. Téma: a téma dönt.'
+  RIPPS2_CATEGORY_BAR: Kategória/Oldalsáv
+  HINT_RIPPS2_CATEGORY_BAR: 'LEMEZ INDÍTÁSA, TÁROLÓ és MEMÓRIAFÁJLOK: a nevek felül, vagy az oldalsáv. Az Eltűnés tétlenségkor elhalványítja a neveket, vagy elcsúsztatja az oldalsávot, amíg meg nem nyomsz egy gombot; azonnal visszajön. Téma: a téma dönt.'
   RIPPS2_SOURCE_NAME: Forrás neve
   RIPPS2_STATUS: Állapot
   RIPPS2_SOURCE: Forrás
   HINT_RIPPS2_SOURCE_NAME: 'A forrás neve a játékok felett (MINDEN JÁTÉK, HDD JÁTÉKOK és így tovább). Az Eltűnés tétlenségkor a kategóriasávval együtt halványítja el; a Felugrás ehelyett nagyban mutatja az oldal közepén, ahogy az L3 megnevezi a listát, az indítás utáni első listánál és minden forrásváltáskor, aztán elhalványul. A témák a Felugrást tehetik a saját Látható módjukká. Téma: a téma dönt.'
-  RIPPS2_RECENTS: Legutóbbiak mutatása
-  HINT_RIPPS2_RECENTS: Legfeljebb ennyi legutóbb indított játékod a Kedvenc játékok tetején, a legújabb elöl. A 0 kikapcsolja.
+  RIPPS2_RECENTS: Legutóbbi játékok
+  HINT_RIPPS2_RECENTS: 'Legutóbbi játékok, egy oldal az oldalsávban a legutóbb indított játékaiddal, a legújabb elöl: hányat tart meg, 1-től 99-ig (a Háromszög beírja a számot). Egy játék, amelynek meghajtója Manuális, elindítja azt, amikor kiválasztod. A 0 kikapcsolja az oldalt.'
   RIPPS2_CATEGORY_ORDER: Kategóriák sorrendje
-  HINT_RIPPS2_CATEGORY_ORDER: 'A Memóriafájlok elöl, a Lemez indítása a végén. A RIPFLOW-hoz készült (Felület > Téma). Téma: a téma dönt.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Felcseréli a Lemez indítása és a Memóriafájlok helyét: Memóriafájlok elöl és Lemez indítása a végén, a sáv nevein és az oldalsáv ikonjain egyaránt. A RIPFLOW-hoz készült (Felület > Téma). Téma: a téma dönt.'
   RIPPS2_MUSIC: Zene
   HINT_RIPPS2_MUSIC: Lejátssza a RIPPS2 melletti AUDIO mappában és minden elindított meghajtón az OPL AUDIO mappájában lévő bgm fájlokat (címkék nélküli Ogg vagy 16 bites WAV); a Menu nevű szól először. A téma saját zenéje ezek helyett szól.
   RIPPS2_BIOS_SOUNDS: BIOS hangok
@@ -1329,7 +1426,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: Tippek és ikonok
   HINT_RIPPS2_HINTS_GLYPHS: A gombtippek és ikonok kinézete. Minden sor a Témán kezdődik, vagyis azon, amit a téma választott; minden más választás a tiéd, és minden téma felett áll.
   RIPPS2_HINT_LAYOUT: Tippek elrendezése
-  HINT_RIPPS2_STARSIDE: 'Hol áll a kedvenc játék csillaga a listában. Bal: saját oszlop minden sor elején. Jobb: a cím után. Rejtett: nincs csillag. Téma: amit a téma mond. A téma sorikonja a másik végére kerül, így sosem fedik egymást.'
+  HINT_RIPPS2_STARSIDE: 'Hol áll egy kedvenc játék csillaga a listában. Bal: saját oszlop minden sor elején. Jobb: a cím után. Rejtett (alapértelmezett): se csillag, se oszlop, a címek teljes hosszban. Téma: ahogy a téma mondja. Az R3 mindenképp kedvencnek jelöl egy játékot; tartsd lenyomva az R3-at 4 másodpercig egy listán a csillagok elrejtéséhez vagy visszahozásához (ez a kurzor alatti játékot is kedvencnek jelöli).'
   HINT_RIPPS2_HINT_LAYOUT: 'Sor: a tippek egy sorban. Oszlop: soronként egy tipp, oldalt egy lista, ott kezdve, ahová a téma a tippjeit teszi.'
   RIPPS2_HINT_LABELS: Tippfeliratok
   HINT_RIPPS2_HINT_LABELS: A Csak ikon csak a gombokat rajzolja, a saját szavakat tartalmazó ikonokhoz. A Jelvények minden tipp ikonját és címét egy jelvénybe teszik.
@@ -1350,11 +1447,11 @@ labels:
   RIPPS2_TRANSITION: Oldalváltás
   HINT_RIPPS2_TRANSITION: 'Hogyan érkezik az új oldal, amikor másik kategóriára lépsz: a téma háttérszínéből vagy egy villanásból. A Téma megtartja a téma választását.'
   RIPPS2_CATEGORY_LAYOUT: Kategóriák elrendezése
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Hol áll a három kategória: a nevük felül, vagy ikonok az oldalsávon lefelé, mindegyik egy fiókkal a saját oldalaival (a Bal egy listán oda visz). A Téma megtartja a téma sajátját.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Hol áll a három kategória: a neveik felül, vagy ikonok az oldalsáv mentén, mindegyik az oldalai fiókjával (Balra egy listán oda visz), vagy Menü: nincs sáv, a kategóriák a START menüben, mint egy OPL-hez készült témán. A Téma megtartja a téma sajátját.'
   RIPPS2_CACHE: Gyorsítótár
   HINT_RIPPS2_CACHE: 'Hogyan tárolódik minden forrás játéklistája, hogy az oldala azonnal megnyíljon: Fast Cache, a belső HDD listája és az Automatikus frissítés.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Minden forrás megtartja a legutóbbi játéklistáját (RIPPS2.LST a CD és DVD mappák mellett), és megmutatja, amint a forrás válaszol, aztán a háttérben újra beolvassa a forrást. Kikapcsolva minden lista először a forrásáról töltődik be, mint korábban.
+  HINT_RIPPS2_FAST_CACHE: 'Minden forrás megtartja a legutóbbi játéklistáját (RIPPS2.LST a CD és DVD mappái mellett), és megmutatja, amint a forrás válaszol. A Trust Cache dönti el, hogy a forrás utána újra beolvasódik-e. Ki: minden lista előbb a forrásáról olvasódik, mint régen.'
   HINT_RIPPS2_VIGNETTE: A kiválasztott kivételével minden borító szélét sötétíti, hogy a kiválasztott kiemelkedjen. A Gyenge a Teljes fele.
   RIPPS2_GRID_WIDE: Szélesvásznú rácselrendezés
   HINT_RIPPS2_GRID_WIDE: A rács oldala csak 16:9-es képen (Szélesvásznú, 720p, 1080i), ahol a borítók keskenyebbek, és több fér el egymás mellett. A Téma a téma sajátját használja; a Mint a rácselrendezés követi a rácselrendezést.
@@ -1370,7 +1467,7 @@ labels:
   GAME_TYPE_LABELS: '[PS1]/[PS2] címkék mutatása'
   NEUTRINO_CHEATS_WRITE_FAILED: A csaláslista nem menthető a Neutrino mappájába, így a Neutrino nem tudja használni. Csalások nélkül indítod?
   AUTO_CREATE_VMC: VMC létrehozása első indításkor
-  HINT_AUTO_CREATE_VMC: Ha egy PS2 játékot az 1. foglalatban VMC nélkül indítasz, a játék eszközén létrejön egy 8 MB-os kártya, a VMC képernyő által javasolt névvel (a játék minden lemeze közösen használja), és hozzárendelődik. A Neutrino alatti belső HDD-re nem vonatkozik.
+  HINT_AUTO_CREATE_VMC: Egy PS2 játék indítása VMC nélkül az 1. foglalatban létrehoz egy 8 MB-os kártyát a játék eszközén, a VMC képernyő javaslata szerint elnevezve (a játék összes lemeze osztozik rajta), és hozzárendeli. Neutrino alatt nem az APA HDD-n (egy exFAT HDD működik).
   AUTO_VMC_CREATING: A játék VMC-jének létrehozása...
   AUTO_VMC_FAILED: A játék VMC-jét nem sikerült létrehozni. A játék VMC nélkül indul.
   RIPPS2_BIOS_MUSIC: BIOS zene
@@ -1407,7 +1504,7 @@ labels:
   HINT_LANGUAGE: A menü nyelve. Továbbiakat lang_*.lng fájlok LNG mappába tételével adhatsz hozzá.
   HINT_GSM_DEFAULTS_BUTTON: Videómód-javítások, amelyeket minden játék megkap, hacsak nincs saját GSM beállítása.
   HINT_DEFDEVICE: Az oldal, amelyet a RiptOPL indításkor megnyit.
-  HINT_MMCE_MODE: SD2PSX-en vagy MemCard PRO2-n lévő játékok. Az Automatikus indításkor, a Kézi az oldal megnyitásakor indul, a Ki elrejti.
+  HINT_MMCE_MODE: 'Játékok SD2PSX-en vagy MemCard PRO2-n. Az Automatikus indításkor elindítja: egy bedugott kártyához ez a leggyorsabb, a játékai kezdettől a Minden játék között vannak. A Manuális akkor indítja, amikor megnyitod az oldalát, a Ki elrejti.'
   HINT_MMCE_SETTINGS_BUTTON: Foglalat, IGR bootcard, GameID és időzítési beállítások az MMCE-hez.
   HINT_ENABLE_USB: Betölti az USB tároló illesztőprogramját.
   HINT_ENABLE_MX4SIO: Betölti az MX4SIO SD kártya adapter illesztőprogramját.
@@ -1589,8 +1686,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'A menü képe: videómód, szélesvászon, a helye a tévén (H-POS, V-POS) és overscan.'
   HINT_RIPPS2_LAYOUT: Hol vannak a kategóriák és hogyan jön be egy oldal, aztán a RIPFLOW borítói és a RIPGRID rácsa.
   HINT_RIPPS2_COLORS_TEXT: Szövegvastagság, a színtéma, a színváltás és minden szín.
-  HINT_RIPPS2_TEXT_WEIGHT: 'Milyen vastag a RIPPS2 saját szövege: a beállítások tippjei, az ÁLLAPOT és a Névjegy. A Normál olyan, mint korábban; a Közepes és a Félkövér lágy képen jobban olvasható.'
-  HINT_RIPPS2_HDD_START: 'A belső HDD, APA vagy exFAT: a RIPPS2 beolvassa, akármilyen is, és egyszer mutatja, HDD-játékokként. A Ki békén hagyja.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'Milyen vastag a RIPPS2 saját szövege: a beállítások tippjei, az ÁLLAPOT és a Névjegy. A Normál olyan, mint eddig; a Félkövér lágy képen jobban olvasható. Egy téma saját betűtípusai megtartják a téma által adott vastagságot.'
+  HINT_RIPPS2_HDD_START: 'A belső HDD, APA vagy exFAT: a RIPPS2 beolvassa, akármelyik is, és egyszer mutatja meg, HDD játékok néven. Az Automatikus (beszerelt lemezzel a leggyorsabb) indításkor elindítja; a Ki békén hagyja.'
   HINT_RIPPS2_THEME_COLOR: A színtéma saját színe. Válaszd az Egyéni színtémát, hogy magad válaszd meg, ahogy a szöveg színeit.
   HINT_RIPPS2_SWEEP: Öt szín, amelyeken a téma lassan és simán végigmegy. Szivárvány, minden színtémából egy váltás, vagy a sajátod. A Ki mozdulatlanul hagyja a témát.
   HINT_RIPPS2_SWEEP_COLORS: A váltás öt színe és sebessége. Változtass meg egyet a RIPPS2-éiből, és sajátodként marad meg, a neked tetsző néven.
@@ -1599,3 +1696,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Meddig tart minden szín, mielőtt a következő beúszik. Még az Élénk is sima marad: a színek sosem villognak.'
   RIPPS2_HIDE_COMPRESS: Játék elrejtése és tömörítés
   HINT_RIPPS2_SELECT_HOLD: 'SELECT 4.2 mp-ig nyomva egy játéklistán. Lista: a témák egy panelen, válassz egyet. Léptetés: a következő téma. Ki: semmi (egy nyomás továbbra is frissít).'
+  RIPPS2_RECENT_GAMES: Legutóbbi játékok
+  RIPPS2_SET_METADATA_RENAME: Metaadatok beállítása (átnevezés)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Kontroller előbb (kísérleti)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'Az SD2PSX azon a buszon olvas, amin a kontrollerrel osztozik, és olvasás közben a kontroller nem hallatszik: a gombnyomások késnek vagy elvesznek, amíg a borítók töltődnek. Be: a borítók kis darabokban jönnek, köztük a kontroller beolvasásával, kicsit lassabban. Ki: amilyen gyorsan a kártya bírja. Ha a kártya forrásai Automatikusra vannak állítva, a listája egyszer töltődik be, indításkor.'
+  HINT_RIPPS2_TRUST_CACHE: 'A gyorsítótárból megjelenített lista úgy marad, ahogy van, indításra készen, amíg meg nem nyomod a SELECT-et, vagy a RIPPS2 maga meg nem változtatja azt a forrást. Ki: minden forrás újra beolvasódik a háttérben, miután a gyorsítótára megjelent, ami érezhető szünet egy MMCE vagy MX4SIO kártyán, mivel ezek osztoznak a kontroller buszán.'
+  RIPPS2_STATUS_OPEN: Betöltés és meghajtók
+  HINT_RIPPS2_STATUS_OPEN: 'Megnyitja az ÁLLAPOT oldalt: honnan olvassa az indítás a beállításokat és a játéklistákat, melyik hely a leggyorsabb, hová vezet egy játék EXIT-je, és minden meghajtó. A GYORSÍTÓTÁR BEÁLLÍTÁSAI onnan ide hoz vissza.'
+  RIPPS2_BADGE_SET: Jelvénykészlet
+  HINT_RIPPS2_BADGE_SET: 'A jelvények egy játék adatlapján (besorolás, játékosok, ESRB, videómód, letapogatás, képarány). RIPPS2: a saját készlete, minden témán ugyanaz. Téma: a téma saját képei, vagy a RIPPS2-éi, ha a téma ezt kéri.'
+  RIPPS2_HINT_FADE: Tippek és ikonok áttűnése
+  HINT_RIPPS2_HINT_FADE: 'Egy gombtipp vagy ikon, ami megváltozik, áttűnéssel jelenik meg, mint a borítók, a változás pillanatában; amelyek maradnak, azokhoz nem nyúl, minden oldalon és üzenetben. Ki: egyszerűen megjelennek. Téma: a téma dönt (be, hacsak nem írja, hogy hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: Oldalsáv stílusa
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Klasszikus (osztott): az ikonok az oldalsáv sötét sávjában, mellette a színes csíkkal. XL (egy darabban): egyetlen szélesebb sáv, közepén az ikonokkal. Téma: a téma dönt.'
+  HINT_EXITPATH: 'Hová vezet az EXIT a Játék közbeni menüben. Legjobb üresen hagyni, beállított BIBLE-lel (ÁLLAPOT > Rendszerbetöltő > Kezelés, vagy BOOT LOCK a PS2BBL-eden): az EXIT ekkor a konzol saját indítási útján újraindítja a konzolt, és a PS2BBL úgy indítja a RIPPS2-t, mint bekapcsoláskor, ez a legbiztonságosabb visszaút. Böngésző: a PS2 böngészője. Egy ELF memóriakártyán (mc0:/mc1:) vagy FAT32 USB meghajtón (mass:/) közvetlenül az újraindítás után töltődik be, amire nem minden játék hagyja készen a konzolt; az MMCE ekkor egyáltalán nem érhető el.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO és az exFAT HDD. Az Automatikus indításkor elindítja őket: a csatlakoztatott meghajtókhoz ez a leggyorsabb, a játékaik kezdettől a Minden játék között vannak. A Manuális akkor indítja őket, amikor megnyitod az oldalukat.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'A Neutrino nem tud VMC-t használni az APA HDD-n (az exFAT, az USB és az MX4SIO igen): ez a játék a valódi kártyával indul abban a foglalatban.'

@@ -1,7 +1,8 @@
 # Build 115 translation kit
 
-Build 115 added 102 strings RIPPS2 translates itself and 29 labels (14 new, 15 whose English changed). German is
-done (`tr115/German.json`, merged into `elf/lang/German.yml`). The other 31 languages are still to do.
+Build 115 added 102 strings RIPPS2 translates itself and 29 labels (14 new, 15 whose English changed). All 32
+languages are done (10/26): `tr115/<Language>.json`, merged into `elf/lang/<Language>.yml`. Keep the kit for the
+next build's strings: copy it to `tools/lang<N>/` and refresh `s115.json` and `labels115.json` from the new patch.
 
 ## Files
 

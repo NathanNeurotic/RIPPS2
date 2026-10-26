@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: Menumusikken kunne ikke skrives til %s (%s). Er drevet fuldt?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'Menumusikken er en WAV på %s, og intet memorykort har plads til den. RIPPS2 kører her fra et memorykort, og intet drev med en OPL-mappe er startet: start et i Lager, og rip derefter musikken til det.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: Lydene kunne ikke skrives til %s. Er drevet fuldt eller skrivebeskyttet?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Denne BIOS' menumusik er ikke den, RIPPS2 kender. Intet blev skrevet.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Denne BIOS' lydbank er ikke den, RIPPS2 kender. Intet blev skrevet.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) flyttes først i sin helhed til en sikkerhedskopimappe.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 bindes til dette kort af konsollen og skrives som %s/%s.
-
-    - Dens konfiguration, mc%d:/PS2BBL/CONFIG.INI, starter RIPPS2 fra %s, BOOT LOCK til.
-
-    I/O-processoren genstarter til dette; musik og drev kommer tilbage bagefter. Lad kortet sidde i og konsollen være tændt, indtil der står færdig.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: EN KOPI PÅ MEMORYKORT %d
   A COPY ON MX4SIO: EN KOPI PÅ MX4SIO
   A COPY ON THE USB DRIVE: EN KOPI PÅ USB-NØGLEN
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: BIBLE kunne ikke skrives til memorykort %d, så kortet blev sat tilbage, som det var. Tjek den ledige plads, og prøv igen.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE kunne ikke kopiere RIPPS2 til %s. Tjek pladsen, og at den ikke er skrivebeskyttet. Intet andet blev ændret.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE kunne ikke kopiere RIPPS2 til HDD'ens partition %s. Tjek den ledige plads. Intet andet blev ændret.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE kunne ikke gemme en kopi af HDD'ens startprogram, så det stoppede, før det ændrede det. RIPPS2 blev kopieret til HDD'en; intet andet blev ændret.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE kunne ikke flytte %s til side for at gemme det, så det stoppede der. Intet på kortet blev ændret.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE kunne ikke skrive sin konfiguration (%s). Startprogrammet blev ikke ændret.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE kunne ikke skrive HDD'ens startprogram (trin %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK er slået til. PS2BBL starter nu RIPPS2 ved opstart (%s). Hold en PS2BBL-genvejstast nede, mens konsollen starter, for at nå noget andet.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK virker gennem PS2BBL (PlayStation 2 Basic BootLoader), og den findes ikke på noget memorykort her.
   INSTALL BIBLE: INSTALLER BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'INSTALLER BIBLE PÅ MEMORYKORT %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Dette kræver en konsol, der starter fra sin HDD (en tyk PS2 med netværksadapteren). Lad den være tændt, indtil der står færdig.'
   INTERNAL HDD  (its boot area): INTERN HDD  (dens startområde)
   MEMORY CARD %d  (%s): MEMORYKORT %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'MEMORYKORT 0: %s
-
-    MEMORYKORT 1: %s
-
-    %s
-
-    BIBLE er PS2BBL 1.2.0 af El Isra, indstillet af RIPPS2: ingen ventetid ved opstart, RIPPS2 først, og en knap, der holdes nede ved opstart, når stadig browseren (TREKANT), en disk (START) og det, der var der før (CIRKEL). Installer eller reparer den på et memorykort eller den interne HDD?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Memorykort %d har %d KB ledigt, og BIBLE skal bruge %d KB der. Frigør lidt plads, og prøv igen.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Memorykort %d har %d KB ledigt, og kopien af RIPPS2 skal bruge %d KB. Frigør lidt plads, eller vælg et andet sted.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Memorykort %d starter %s ved opstart, og BOOT LOCK virker kun gennem PS2BBL.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: SKUFFEN ER ÅBEN
   TREFOIL KNOT: KLØVERBLADSKNUDE
   ' and ': ' og '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s mangler i %s%s. POPSTARTER skal bruge POPS.ELF og POPS_IOX.PAK, PS1-emulatoren fra din egen konsol, ved siden af spillene for at starte et.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s mangler i %s%s. RIPPOPS fandt POPS.ELF og POPS_IOX.PAK, Sonys PS1-emulator, på %s: START kopierer dem hertil og starter spillet.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s kunne ikke kopieres til %s%s. Er drevet fuldt eller skrivebeskyttet?'
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s mangler i %s%s. POPSTARTER skal bruge POPS.ELF og POPS_IOX.PAK, PS1-emulatoren fra din egen konsol, ved siden af spillene for at starte et.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s mangler i %s%s. RIPPOPS fandt POPS.ELF og POPS_IOX.PAK, Sonys PS1-emulator, på %s: START kopierer dem hertil og starter spillet.'
   COPY AND START: KOPIER OG START
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'En særlig tak også til al kærligheden på YouTube:'
   and its own look, launchers, file browser and save tools.: og med sit eget udseende, startere, filbrowser og gemmeværktøjer.
   glad to help however you reach me.: glad for at hjælpe, uanset hvordan I fanger mig.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): den anden spilkerne, 1.8.0 medbragt uændret (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: med rickgaisers Neutrino indeni som sin anden spilkerne,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Dette spil starter gennem Neutrino, og RIPPS2 fandt ingen: ikke ved stien i Indstillinger, ikke på spillets drev, ikke på memorykortene og ikke på noget startet drev. RIPPS2 har Neutrino 1.8.0 af rickgaiser med (AFL-3.0): installer den én gang, hvor du vil, og hvert Neutrino-spil bruger den derfra.'
   STARTING THE DRIVES: STARTER DREVENE
   '%d games, on the started drives': '%d spil, på de startede drev'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: NOGLE FILER KUNNE IKKE SLETTES'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: ikke på et startet drev
   only if you have none: kun hvis du ikke har nogen
   starts every drive first: starter alle drev først
-  Drives, launchers and homebrew: Drev, startere og homebrew
   BDM Devices: BDM-enheder
   Color Sweep: Farveskift
   Colors and Text: Farver og tekst
@@ -1078,9 +1037,7 @@ strings:
   Bold: Fed
   Controllers: Controllere
   Lively: Livlig
-  Medium: Mellem
   PS Emulation: PS-emulering
-  Regular: Normal
   Slow: Langsom
   A MOMENT: ET ØJEBLIK
   A TASK IN THE BACKGROUND: EN OPGAVE I BAGGRUNDEN
@@ -1145,6 +1102,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: Slet %s? RIPPS2's egne farveskift bliver, som de er.
   Sweep: Farveskift
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Mærker viser spillene med achievements i dine lister, og hvor mange du har låst op. De kræver TELEMETRI slået til.
+  Classic (Split): Klassisk (delt)
+  Guidance: Vejledning
+  OK: OK
+  XL (One Piece): XL (ét stykke)
+  STARS HIDDEN: STJERNER SKJULT
+  STARS SHOWN: STJERNER VIST
+  Asking the SD2PSX for this game's memory card...: Beder SD2PSX om dette spils memorykort...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX gør dette spils memorykort klar (%d s). Spillet starter, når det er færdigt; START starter det nu.
+  the second game core, its newest build carried unmodified (AFL-3.0): den anden spilkerne, dens nyeste build medbragt uændret (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': '%s kunne ikke skrives til %s (%d af lydene blev). Er drevet fuldt eller skrivebeskyttet?'
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': '%s kunne ikke skrives til %s (%d af lydene blev, og kortet har nu %d KB fri). Er kortet skrivebeskyttet?'
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: Mappen %s kunne ikke oprettes. Er drevet fuldt eller skrivebeskyttet? Intet blev skrevet.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'Lydene fylder %d KB, og dette memorykort har %d KB fri. Intet blev skrevet. Frigør plads på kortet, eller start et drev under Lager og rip dem igen: RIPPS2 tilbyder så drevet.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : Lydene fylder %d KB, og dette memorykort har %d KB fri. START skriver dem i stedet til %sAUDIO/ på drevet, og RIPPS2 afspiller dem derfra.
+  There was not enough memory to make the sounds. Nothing was written.: Der var ikke nok hukommelse til at lave lydene. Intet blev skrevet.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- PS2BBL 1.2.0 bindes til dette kort af konsollen og skrives som %s/%s.
+  
+    - Dens konfiguration, mc%d:/PS2BBL/CONFIG.INI, starter RIPPS2 fra %s uden ventetid (0 ms, som PS2BBL Extended ikke tillader), BOOT LOCK til.
+  
+    I/O-processoren genstarter til dette; musik og drev kommer tilbage bagefter. Lad kortet sidde i og konsollen være tændt, indtil der står færdig.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE kunne ikke skrives til memorykort %d, så kortet blev sat tilbage, som det var. Tjek den ledige plads, og prøv igen. (DIAG.TXT ved siden af RIPPS2 har det, kortet svarede.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE kunne ikke flytte %s til side for at gemme det, så det stoppede der. Intet på kortet blev ændret. (DIAG.TXT ved siden af RIPPS2 har det, kortet svarede.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'MEMORYKORT 0: %s
+  
+    MEMORYKORT 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 af El Isra indstillet af RIPPS2: en start på 0 ms ved opstart (PS2BBL Extended tillader ikke 0), RIPPS2 først, og en knap, der holdes nede ved opstart, når stadig browseren (TREKANT), en disk (START) og det, der var der før (CIRKEL). Installer eller reparer den på et memorykort eller den interne HDD?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 PÅ MEMORYKORT %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'Hukommelsesfiler åbner nu, på MEDIA, med disken på sin udklipsholder (RIPPET). Gå til det drev og den mappe, den skal ligge i (ethvert drev: USB, HDD''en, SD2PSX''ens MEDIA), tryk på TREKANT for HANDLINGER og vælg SÆT IND. RIPDISC spørger så én gang til og læser disken med din PS2''s laser og skriver den dér.'
+  RENAME THE GAME: OMDØB SPILLET
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Dette spil starter gennem Neutrino, og RIPPS2 fandt ingen: ikke ved stien i Indstillinger, ikke på spillets drev, ikke på memorykortene og ikke på noget startet drev. RIPPS2 har Neutrino af rickgaiser med (AFL-3.0), dens nyeste build: installer den én gang, hvor du vil, og hvert Neutrino-spil bruger den derfra.'
+  A PS1 disc's track list, for Ember: En PS1-disks sporliste, til Ember
+  A PS1 game for POPSTARTER: Et PS1-spil til POPSTARTER
+  A PS2 game: Et PS2-spil
+  A card the SD2PSX set aside (wrong size): Et kort, som SD2PSX har lagt til side (forkert størrelse)
+  'A program: Cross starts it': 'Et program: Kryds starter det'
+  A save, packed in one file: Et gemt spil, pakket i én fil
+  All Games' master list: Alle spils hovedliste
+  'An SD2PSX boot card: open it to look in': 'Et SD2PSX-bootkort: åbn det for at se indeni'
+  'An SD2PSX memory card: open it like a VMC': 'Et SD2PSX-memorykort: åbn det som en VMC'
+  Cheats, a file a game: Snydekoder, én fil pr. spil
+  Each game's settings and info page: Hvert spils indstillinger og infoside
+  Ember, its BIOS and its PS1 games: Ember, dens BIOS og dens PS1-spil
+  Game covers and art, by game ID: Spilcovers og billeder, efter spil-ID
+  Games kept in 1 GB parts: Spil gemt i dele på 1 GB
+  Games that share one SD2PSX card: Spil, der deler ét SD2PSX-kort
+  Languages for RIPPS2: Sprog til RIPPS2
+  Neutrino, the second game core: Neutrino, den anden spilkerne
+  OPL's list of this folder's games: OPL's liste over denne mappes spil
+  POPSTARTER and PS1 games (VCDs): POPSTARTER og PS1-spil (VCD'er)
+  PS2 games on CD, as ISOs: PS2-spil på cd, som ISO'er
+  PS2 games on DVD, as ISOs: PS2-spil på dvd, som ISO'er
+  PS2BBL's settings: PS2BBL's indstillinger
+  Programs to start (ELFs): Programmer at starte (ELF'er)
+  RIPPS2's diagnostics, for a bug report: RIPPS2's diagnostik, til en fejlrapport
+  RIPPS2's own folder: RIPPS2's egen mappe
+  RIPPS2's settings: RIPPS2's indstillinger
+  RIPPS2's sounds and music: RIPPS2's lyde og musik
+  Recent games: Seneste spil
+  RetroAchievements' files: RetroAchievements' filer
+  Ripped CDs and DVDs, pictures, video: Rippede cd'er og dvd'er, billeder, video
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'Gemmer på SD2PSX''ens SD: vent %d s, før du slukker.'
+  Starred games: Favoritspil
+  The SD2PSX's boot cards (PS2BBL): SD2PSX'ens bootkort (PS2BBL)
+  The SD2PSX's boot channels and names: SD2PSX'ens bootkanaler og navne
+  The SD2PSX's memory cards: SD2PSX'ens memorykort
+  The SD2PSX's own settings: SD2PSX'ens egne indstillinger
+  The SD2PSX's settings: SD2PSX'ens indstillinger
+  Themes, a folder each: Temaer, en mappe hver
+  This drive's game list, for a quick boot: Dette drevs spilliste, til en hurtig start
+  Virtual memory cards for games: Virtuelle memorykort til spil
+  What RIPPS2's last launch did: Hvad RIPPS2's seneste start gjorde
+  Circle from the top   Cross close: 'Cirkel: fra start   Kryds: luk'
+  Cross from the top   Circle close: 'Kryds: fra start   Cirkel: luk'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Dette nummer kunne ikke afspilles. RIPPS2 afspiller 16-bit PCM .wav-filer (som RIPDISC og BIOS-musik ripper dem), Ogg Vorbis .ogg-filer og MP3'er.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'KUN LÆSNING: SD2PSX''ENS BOOTKORT ER I BRUG'
+  '%d music tracks': '%d musiknumre'
+  1 music track: 1 musiknummer
+  'A game''s EXIT: %s': 'Et spils EXIT: %s'
+  'A game''s EXIT: the browser': 'Et spils EXIT: browseren'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Alle spil: %d spil gemt i %s, vist ved opstart, før noget drev svarer'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Alle spil: ingen hovedliste endnu; %s skrives, når spillene er vist (Fast Cache til)'
+  CACHE SETTINGS: CACHE-INDSTILLINGER
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: Kopierer den Neutrino, RIPPS2 har med, til et drev eller et memorykort. En Neutrino, du selv har, bruges, som den er.
+  DIAG.TXT, for a bug report: DIAG.TXT, til en fejlrapport
+  Drives, loading, launchers and homebrew: Drev, indlæsning, startere og homebrew
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache viser hvert drevs seneste spilliste, så snart drevet svarer; Trust Cache beholder den, til du trykker på SELECT. Begge til, med indstillingerne på det memorykort, RIPPS2 starter fra, giver den hurtigste opstart.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Spillister: Fast Cache fra, så hver læses fra sit drev ved opstart'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Spillister: hver vises straks fra sin cache og bliver stående til SELECT'
+  'Game lists: each shows at once from its cache, then is read again': 'Spillister: hver vises straks fra sin cache og læses så igen'
+  LOADING: INDLÆSNING
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: Laver RIPPS2's lyde ud fra denne konsols egen BIOS og skriver dem til mappen AUDIO.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Ingen musik endnu: Lydindstillinger > BIOS-musik ripper denne konsols menumusik.'
+  SAVE DIAGNOSTICS: GEM DIAGNOSTIK
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Søger drevene igennem efter POPSTARTER, POPS-filerne, Ember, Embers BIOS og Neutrino og husker, hvor hver enkelt er.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Indstillinger: %s, på et drev, som opstarten venter på (et memorykort er hurtigere)'
+  'Settings: %s, read first (the quickest place)': 'Indstillinger: %s, læst først (det hurtigste sted)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Starter alle drev nu (USB, HDD'en, MMCE, MX4SIO og netværket), så hvert drev og dets plads vises her.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: Den IP og SMB-deling, POPSTARTER bruger til PS1-spil over netværket.
+  The diagnostics are in %s.: Diagnostikken ligger i %s.
+  The diagnostics could not be written to %s.: Diagnostikken kunne ikke skrives til %s.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Hvad hvert memorykort starter ved opstart; installer eller reparer BIBLE, PS2BBL indstillet til at starte RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: Hvor POPSTARTER og Ember er, og hvordan PS1-spil starter.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Hvor din Neutrino er, dens videotilstand og de argumenter, hver Neutrino-start får.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : Skriver det, RIPPS2 noterede om controllerne, drevene, MMCE-kort og de seneste starter, til DIAG.TXT ved siden af RIPPS2. Send den med en fejlrapport.
+  back to Cache: tilbage til Cache
+  what boot reads first: hvad opstarten læser først
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Denne Neutrino er ældre end 1.3, som ikke kan starte spil fra APA-HDD'en. Peg Spilstart > Neutrino på Neutrino 1.3 eller nyere, eller ryd stien for at bruge den, RIPPS2 har med.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 ser ikke %s i %s%s. POPSTARTER skal bruge POPS.ELF og POPS_IOX.PAK, PS1-emulatoren fra din egen konsol; den finder dem måske, hvor RIPPS2 ikke kigger (starter dine spil, gør den det). START starter, og der spørges ikke om dette drev igen.
 labels:
   OK: OK
   MEDIUM: Mellem
@@ -1316,16 +1413,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Én farve til tårnene, kuglerne, glasset, cd-afspilleren og filbrowseren, på alle tre faner. Tema: temaet bestemmer (RIPPS2-blå, hvor det ikke gør).'
   RIPPS2_HINTS: Knaptips
   HINT_RIPPS2_HINTS: 'Knaptipsene nederst. Fade ved inaktivitet skjuler dem, indtil du trykker på en knap. Tema: temaet bestemmer.'
-  RIPPS2_CATEGORY_BAR: Kategorilinje
-  HINT_RIPPS2_CATEGORY_BAR: 'START DISK, LAGER og HUKOMMELSESFILER øverst. Fade ved inaktivitet skjuler dem, indtil du trykker på en knap. Tema: temaet bestemmer.'
+  RIPPS2_CATEGORY_BAR: Kategori/Sidebjælke
+  HINT_RIPPS2_CATEGORY_BAR: 'START DISK, LAGER og HUKOMMELSESFILER: navnene langs toppen, eller sidebjælken. Fade ved inaktivitet fader navnene, eller skubber sidebjælken væk, indtil du trykker på en knap; den kommer straks tilbage. Tema: temaet bestemmer.'
   RIPPS2_SOURCE_NAME: Kildenavn
   RIPPS2_STATUS: Status
   RIPPS2_SOURCE: Kilde
   HINT_RIPPS2_SOURCE_NAME: 'Kildens navn over spillene (ALLE SPIL, HDD-SPIL og så videre). Fade ved inaktivitet fader det ud sammen med kategorilinjen; Pop ind viser det i stedet stort midt på siden, ligesom L3 navngiver listen, ved første liste efter opstart og hver gang kilden skifter, og fader det så ud. Temaer kan gøre Pop ind til deres Vist. Tema: temaet bestemmer.'
-  RIPPS2_RECENTS: Vis seneste
-  HINT_RIPPS2_RECENTS: Op til så mange af dine senest startede spil øverst i Stjernemarkerede spil, nyeste først. 0 slår det fra.
+  RIPPS2_RECENTS: Seneste spil
+  HINT_RIPPS2_RECENTS: 'Seneste spil, en side i sidebjælken med dine sidst startede spil, det nyeste først: hvor mange den gemmer, 1 til 99 (Trekant indtaster tallet). Et spil, hvis drev står på Manuel, starter drevet, når du vælger det. 0 slår siden fra.'
   RIPPS2_CATEGORY_ORDER: Kategorirækkefølge
-  HINT_RIPPS2_CATEGORY_ORDER: 'Hukommelsesfiler først og Start disk sidst. Lavet til RIPFLOW (Grænseflade > Tema). Tema: temaet bestemmer.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Bytter om på Start disk og Hukommelsesfiler: Hukommelsesfiler først og Start disk sidst, både i bjælkens navne og sidebjælkens ikoner. Lavet til RIPFLOW (Interface > Tema). Tema: temaet bestemmer.'
   RIPPS2_MUSIC: Musik
   HINT_RIPPS2_MUSIC: Afspiller bgm-filerne i AUDIO-mappen ved siden af RIPPS2 og i OPL's AUDIO-mappe på hvert startet drev (Ogg uden tags, eller 16-bit WAV); en, der hedder Menu, spiller først. Et temas egen musik spiller i stedet.
   RIPPS2_BIOS_SOUNDS: BIOS-lyde
@@ -1334,7 +1431,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: Tips og symboler
   HINT_RIPPS2_HINTS_GLYPHS: Hvordan knaptips og symboler ser ud. Hver række starter på Tema, det temaet valgte; ethvert andet valg er dit og går forud for ethvert tema.
   RIPPS2_HINT_LAYOUT: Tipslayout
-  HINT_RIPPS2_STARSIDE: 'Hvor et favoritspils stjerne står i listen. Venstre: sin egen kolonne i starten af hver række. Højre: efter titlen. Skjult: ingen stjerne. Tema: som temaet siger. Temaets rækkeikon flytter til den anden ende, så de aldrig overlapper.'
+  HINT_RIPPS2_STARSIDE: 'Hvor et favoritspils stjerne står i spillisten. Venstre: sin egen kolonne i starten af hver række. Højre: efter titlen. Skjult (fra start): ingen stjerne og ingen kolonne, titlerne i fuld længde. Tema: hvad temaet siger. R3 markerer et spil under alle omstændigheder; hold R3 i 4 sekunder på en liste for at skjule stjernerne eller hente dem tilbage (det markerer også spillet under markøren).'
   HINT_RIPPS2_HINT_LAYOUT: 'Række: tipsene på én linje. Kolonne: ét tip pr. linje, en liste ned langs siden, der starter, hvor temaet lægger sine tips.'
   RIPPS2_HINT_LABELS: Tipsetiketter
   HINT_RIPPS2_HINT_LABELS: Kun symbol tegner kun knapperne, til symboler med deres egne ord. Mærker samler hvert tips symbol og titel på ét mærke.
@@ -1355,11 +1452,11 @@ labels:
   RIPPS2_TRANSITION: Sideovergang
   HINT_RIPPS2_TRANSITION: 'Hvordan en ny side kommer ind, når du går til en anden kategori: ud af temaets baggrundsfarve eller ud af et glimt. Tema beholder temaets valg.'
   RIPPS2_CATEGORY_LAYOUT: Kategorilayout
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Hvor de tre kategorier står: deres navne hen over toppen, eller ikoner ned ad sidebjælken, hver med en skuffe med sine sider (Venstre på en liste går dertil). Tema beholder temaets eget.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Hvor de tre kategorier står: deres navne langs toppen, eller ikoner ned ad sidebjælken, hver med en skuffe med sine sider (Venstre på en liste fører dertil), eller Menu: ingen bjælke, kategorierne i START-menuen som på et tema lavet til OPL. Tema beholder temaets egen.'
   RIPPS2_CACHE: Cache
   HINT_RIPPS2_CACHE: 'Hvordan hver kildes spilliste gemmes, så dens side åbner med det samme: Fast Cache, den interne HDD''s liste og Automatisk opdatering.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Hver kilde gemmer sin seneste spilliste (RIPPS2.LST ved siden af CD- og DVD-mapperne) og viser den, så snart kilden svarer, og læser derefter kilden igen i baggrunden. Fra læser hver liste fra kilden først, som før.
+  HINT_RIPPS2_FAST_CACHE: 'Hver kilde gemmer sin seneste spilliste (RIPPS2.LST ved siden af sine CD- og DVD-mapper) og viser den, så snart kilden svarer. Trust Cache bestemmer, om kilden læses igen bagefter. Fra: hver liste læses først fra sin kilde, som før.'
   HINT_RIPPS2_VIGNETTE: Gør kanterne på hvert cover undtagen det valgte mørkere, så det valgte skiller sig ud. Svag er halvdelen af Fuld.
   RIPPS2_GRID_WIDE: Gitterlayout til bredformat
   HINT_RIPPS2_GRID_WIDE: Gitterets side kun til et 16:9-billede (bredformat, 720p, 1080i), hvor covers tegnes smallere og flere kan være ved siden af hinanden. Tema bruger temaets eget; Samme følger gitterlayoutet.
@@ -1375,7 +1472,7 @@ labels:
   GAME_TYPE_LABELS: Vis etiketterne [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: Snydelisten kunne ikke gemmes i Neutrino-mappen, så Neutrino kan ikke bruge den. Start uden snyd?
   AUTO_CREATE_VMC: Opret VMC ved første start
-  HINT_AUTO_CREATE_VMC: At starte et PS2-spil uden VMC i stik 1 opretter et kort på 8 MB på spillets enhed, navngivet som VMC-skærmen foreslår (delt af alle spillets diske), og tildeler det. Ikke til den interne HDD under Neutrino.
+  HINT_AUTO_CREATE_VMC: At starte et PS2-spil uden VMC i plads 1 opretter et kort på 8 MB på spillets enhed, navngivet som VMC-skærmen foreslår (delt af alle spillets diske), og tildeler det. Under Neutrino ikke på APA-HDD'en (en exFAT-HDD virker).
   AUTO_VMC_CREATING: Opretter dette spils VMC...
   AUTO_VMC_FAILED: Kunne ikke oprette dette spils VMC. Spillet starter uden.
   RIPPS2_BIOS_MUSIC: BIOS-musik
@@ -1412,7 +1509,7 @@ labels:
   HINT_LANGUAGE: Menusprog. Tilføj flere ved at lægge lang_*.lng-filer i en LNG-mappe.
   HINT_GSM_DEFAULTS_BUTTON: Rettelser af videotilstand, som hvert spil får, medmindre det har sine egne GSM-indstillinger.
   HINT_DEFDEVICE: Den side, RiptOPL åbner ved opstart.
-  HINT_MMCE_MODE: Spil på en SD2PSX eller MemCard PRO2. Auto starter ved opstart, Manuel når du åbner siden, Fra skjuler den.
+  HINT_MMCE_MODE: 'Spil på en SD2PSX eller MemCard PRO2. Automatisk starter den ved opstart: det hurtigste for et kort, der sidder i, med dets spil i Alle spil fra starten. Manuel starter den, når du åbner dens side, Fra skjuler den.'
   HINT_MMCE_SETTINGS_BUTTON: Stik, IGR bootcard, GameID og timingindstillinger for MMCE.
   HINT_ENABLE_USB: Indlæser driveren til USB-lager.
   HINT_ENABLE_MX4SIO: Indlæser driveren til SD-kortadapteren MX4SIO.
@@ -1592,8 +1689,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'Menuens billede: videotilstand, widescreen, hvor det sidder på tv''et (H-POS, V-POS) og overscan.'
   HINT_RIPPS2_LAYOUT: Hvor kategorierne sidder, og hvordan en side kommer ind, derefter RIPFLOWs covers og RIPGRIDs gitter.
   HINT_RIPPS2_COLORS_TEXT: Tekstvægt, farvetemaet, farveskiftet og hver farve.
-  HINT_RIPPS2_TEXT_WEIGHT: 'Hvor kraftig RIPPS2''s egen tekst er: tippene i Indstillinger, STATUS og Om. Normal er som før; Mellem og Fed læses bedre på et blødt billede.'
-  HINT_RIPPS2_HDD_START: 'Den interne HDD, APA eller exFAT: RIPPS2 læser den, uanset hvad den er, og viser den én gang som HDD-spil. Fra lader den være.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'Hvor kraftig RIPPS2''s egen tekst er: tippene i Indstillinger, STATUS og Om. Normal er som før; Fed læses bedre på et blødt billede. Et temas egne skrifttyper beholder de vægte, temaet giver dem.'
+  HINT_RIPPS2_HDD_START: 'Den interne HDD, APA eller exFAT: RIPPS2 læser den, hvad den end er, og viser den én gang, som HDD-spil. Automatisk (det hurtigste med en disk i) starter den ved opstart; Fra lader den være.'
   HINT_RIPPS2_THEME_COLOR: Farvetemaets egen farve. Vælg Brugerdefineret som farvetema for selv at vælge den, ligesom tekstfarverne.
   HINT_RIPPS2_SWEEP: Fem farver, temaet glider igennem, langsomt og blødt. Regnbue, et skift lavet af hvert farvetema eller dit eget. Fra holder farvetemaet stille.
   HINT_RIPPS2_SWEEP_COLORS: Skiftets fem farver og dets hastighed. Ændr et af RIPPS2's, så gemmes det som dit eget under det navn, du giver det.
@@ -1602,3 +1699,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Hvor længe hver farve varer, før den næste toner frem. Selv Livlig forbliver blød: farverne blinker aldrig.'
   RIPPS2_HIDE_COMPRESS: Skjul spil og komprimering
   HINT_RIPPS2_SELECT_HOLD: 'SELECT holdt 4.2 s på en spilliste. Liste: temaerne i et panel, vælg et. Skift: det næste tema. Fra: intet (et tryk opdaterer stadig).'
+  RIPPS2_RECENT_GAMES: Seneste spil
+  RIPPS2_SET_METADATA_RENAME: Angiv metadata (omdøb)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Controller først (eksperimentel)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX læser over den bus, controlleren deler, og mens en læsning kører, høres controlleren ikke: tryk halter eller forsvinder, mens covers indlæses. Til: covers kommer i små stykker med controlleren læst imellem, lidt langsommere. Fra: så hurtigt som kortet kan. Med kortets kilder på Automatisk indlæses dets liste én gang, ved opstart.'
+  HINT_RIPPS2_TRUST_CACHE: 'En liste, der vises fra sin cache, bliver, som den er, klar til start, indtil du trykker på SELECT, eller RIPPS2 selv ændrer den kilde. Fra: hver kilde læses igen i baggrunden, efter dens cache er vist, en pause, man kan mærke på et MMCE- eller MX4SIO-kort, som deler controllerens bus.'
+  RIPPS2_STATUS_OPEN: Indlæsning og drev
+  HINT_RIPPS2_STATUS_OPEN: 'Åbner STATUS: hvor opstarten læser indstillingerne og spillisterne, hvilket sted er hurtigst, hvor et spils EXIT går hen, og hvert drev. Dens CACHE-INDSTILLINGER fører tilbage hertil.'
+  RIPPS2_BADGE_SET: Mærkesæt
+  HINT_RIPPS2_BADGE_SET: 'Mærkerne på et spils infoside (aldersmærke, spillere, ESRB, videotilstand, scanning, format). RIPPS2: sit eget sæt, det samme på alle temaer. Tema: temaets egne billeder, eller RIPPS2''s, når temaet beder om dem.'
+  RIPPS2_HINT_FADE: Fade hints og symboler
+  HINT_RIPPS2_HINT_FADE: 'Et knaphint eller symbol, der skifter, fader ind, som covers gør, i det øjeblik det skifter; dem, der bliver stående, røres ikke, på hver side og i hver besked. Fra: de dukker bare op. Tema: temaet bestemmer (til, medmindre det siger hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: Sidebjælkens stil
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Klassisk (delt): ikonerne i sidebjælkens mørke bjælke med den farvede stribe ved siden af. XL (ét stykke): én bredere bjælke med ikonerne i midten. Tema: temaet bestemmer.'
+  HINT_EXITPATH: 'Hvor EXIT i Menu i spillet fører hen. Bedst at lade stå tom, med BIBLE sat op (STATUS > Opstartsindlæser > Administrer, eller BOOT LOCK på din PS2BBL): EXIT nulstiller så konsollen gennem dens egen opstartsvej, og PS2BBL starter RIPPS2 som ved opstart, den sikreste vej tilbage. Browser: PS2-browseren. En ELF på et memorykort (mc0:/mc1:) eller et FAT32-USB-drev (mass:/) indlæses lige efter nulstillingen, som ikke alle spil efterlader konsollen klar til; MMCE kan så slet ikke nås.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO og exFAT-HDD''en. Automatisk starter dem ved opstart: det hurtigste for de drev, du har sat i, med deres spil i Alle spil fra starten. Manuel starter dem, når du åbner deres side.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino kan ikke bruge en VMC på APA-HDD''en (exFAT, USB og MX4SIO kan): dette spil starter med det rigtige kort i den plads.'

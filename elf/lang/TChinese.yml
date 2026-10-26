@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: 無法把選單音樂寫入 %s（%s）。磁碟機滿了嗎？
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 選單音樂是 %s 的 WAV，沒有任何記憶卡放得下它。這裡 RIPPS2 是從記憶卡執行的，且沒有啟動含 OPL 資料夾的磁碟機：請在「儲存裝置」中啟動一個，然後把音樂擷取到那裡。
-  The sounds could not be written to %s. Is the drive full or write-protected?: 無法把音效寫入 %s。磁碟機是否已滿或防寫？
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: 這個 BIOS 的選單音樂不是 RIPPS2 認得的那首。沒有寫入任何內容。
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: 這個 BIOS 的音色庫不是 RIPPS2 認得的那個。沒有寫入任何內容。
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s（%s）先整個移到備份資料夾。
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 由主機綁定到這張卡，並寫入為 %s/%s。
-
-    - 它的設定 mc%d:/PS2BBL/CONFIG.INI 從 %s 啟動 RIPPS2，開啟 BOOT LOCK。
-
-    為此 I/O 處理器會重新啟動；音樂與磁碟機之後會恢復。在顯示完成之前，請保持記憶卡插入且主機開著。'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: 記憶卡 %d 上的副本
   A COPY ON MX4SIO: MX4SIO 上的副本
   A COPY ON THE USB DRIVE: 隨身碟上的副本
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: 無法把 BIBLE 寫入記憶卡 %d，所以已把記憶卡恢復原狀。請檢查可用空間後重試。
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE 無法把 RIPPS2 複製到 %s。請檢查空間以及是否防寫。其他內容沒有變更。
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE 無法把 RIPPS2 複製到硬碟的 %s 分割區。請檢查可用空間。其他內容沒有變更。
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE 無法保留硬碟開機程式的副本，因此在變更它之前就停止了。RIPPS2 已複製到硬碟；其他內容沒有變更。
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE 無法把 %s 移開保留，因此停在那裡。記憶卡上沒有任何變更。
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE 無法寫入它的設定（%s）。開機程式沒有變更。
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE 無法寫入硬碟的開機程式（第 %d 步）。%s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK 已開啟。PS2BBL 現在開機時啟動 RIPPS2（%s）。主機啟動時按住 PS2BBL 的快速鍵可進入其他內容。%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK 透過 PS2BBL（PlayStation 2 Basic BootLoader）運作，而這裡的記憶卡上都沒有它。
   INSTALL BIBLE: 安裝 BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : '在記憶卡 %d 上安裝 BIBLE
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     這需要能從硬碟開機的主機（裝有網路轉接器的厚機 PS2）。在顯示完成之前請保持開機。'
   INTERNAL HDD  (its boot area): 內建硬碟  （其開機區）
   MEMORY CARD %d  (%s): 記憶卡 %d  （%s）
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : '記憶卡 0：%s
-
-    記憶卡 1：%s
-
-    %s
-
-    BIBLE 是 El Isra 的 PS2BBL 1.2.0，由 RIPPS2 設定：開機不等待，先啟動 RIPPS2，開機時按住按鍵仍可進入瀏覽器（三角）、光碟（START）以及原本的內容（圓圈）。要在記憶卡或內建硬碟上安裝或修復它嗎？'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: 記憶卡 %d 可用 %d KB，而 BIBLE 在那裡需要 %d KB。請騰出空間後重試。
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: 記憶卡 %d 可用 %d KB，而 RIPPS2 的副本需要 %d KB。請騰出空間或選擇其他位置。
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: 記憶卡 %d 開機時啟動 %s，而 BOOT LOCK 只能透過 PS2BBL 運作。
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: 托盤已開啟
   TREFOIL KNOT: 三葉結
   ' and ': ' 和 '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s 不在 %s%s 中。POPSTARTER 需要 POPS.ELF 與 POPS_IOX.PAK（來自你自己主機的 PS1 模擬器）放在遊戲旁邊才能啟動遊戲。'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s 不在 %s%s 中。RIPPOPS 在 %s 上找到了 POPS.ELF 與 POPS_IOX.PAK（Sony 的 PS1 模擬器）：START 會把它們複製到這裡並啟動遊戲。'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': 無法把 %s 複製到 %s%s。磁碟機是否已滿或防寫？
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s 不在 %s%s 中。POPSTARTER 需要 POPS.ELF 與 POPS_IOX.PAK（來自你自己主機的 PS1 模擬器）放在遊戲旁邊才能啟動遊戲。'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s 不在 %s%s 中。RIPPOPS 在 %s 上找到了 POPS.ELF 與 POPS_IOX.PAK（Sony 的 PS1 模擬器）：START 會把它們複製到這裡並啟動遊戲。'
   COPY AND START: 複製並啟動
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 也特別感謝來自 YouTube 的所有喜愛：
   and its own look, launchers, file browser and save tools.: 並有自己的外觀、啟動器、檔案瀏覽器和存檔工具。
   glad to help however you reach me.: 不論你怎麼聯絡我，都樂意幫忙。
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): 第二個遊戲核心，1.8.0 原樣附帶（AFL-3.0）
   with rickgaiser's Neutrino inside as its second game core,: 內含 rickgaiser 的 Neutrino 作為第二個遊戲核心，
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 這個遊戲透過 Neutrino 啟動，而 RIPPS2 沒有找到：設定裡的路徑、遊戲所在的磁碟機、記憶卡和任何已啟動的磁碟機上都沒有。RIPPS2 附帶 rickgaiser 的 Neutrino 1.8.0（AFL-3.0）：在你選的地方安裝一次，之後每個 Neutrino 遊戲都從那裡使用它。
   STARTING THE DRIVES: 正在啟動磁碟機
   '%d games, on the started drives': '%d 個遊戲，在已啟動的磁碟機上'
   '%s: SOME FILES COULD NOT BE DELETED': '%s：有些檔案無法刪除'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: 不在已啟動的磁碟機上
   only if you have none: 僅在你沒有時
   starts every drive first: 先啟動所有磁碟機
-  Drives, launchers and homebrew: 磁碟機、啟動器和自製程式
   BDM Devices: BDM 裝置
   Color Sweep: 顏色漸變
   Colors and Text: 顏色與文字
@@ -1079,9 +1038,7 @@ strings:
   Bold: 粗體
   Controllers: 控制器
   Lively: 活潑
-  Medium: 中等
   PS Emulation: PS 模擬
-  Regular: 一般
   Slow: 緩慢
   A MOMENT: 稍等
   A TASK IN THE BACKGROUND: 背景工作
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: 刪除 %s？RIPPS2 內建的漸變保持不變。
   Sweep: 漸變
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: 徽章會在清單中標出有成就的遊戲，以及你已解鎖的數量。需要開啟遙測。
+  Classic (Split): 經典（分體）
+  Guidance: 引導
+  OK: 確定
+  XL (One Piece): XL（一體）
+  STARS HIDDEN: 已隱藏星號
+  STARS SHOWN: 已顯示星號
+  Asking the SD2PSX for this game's memory card...: 正在向 SD2PSX 要求這個遊戲的記憶卡...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX 正在準備這個遊戲的記憶卡（%d 秒）。完成後遊戲開始；按 START 立即開始。
+  the second game core, its newest build carried unmodified (AFL-3.0): 第二個遊戲核心，其最新版本原樣附帶（AFL-3.0）
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': 無法把 %s 寫入 %s（已寫入 %d 個音效）。磁碟機是否已滿或防寫？
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': 無法把 %s 寫入 %s（已寫入 %d 個音效，記憶卡現在剩餘 %d KB）。記憶卡是否防寫？
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: 無法建立資料夾 %s。磁碟機是否已滿或防寫？沒有寫入任何內容。
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 音效需要 %d KB，而這張記憶卡剩餘 %d KB。沒有寫入任何內容。請在記憶卡上騰出空間，或在儲存裝置中啟動一個磁碟機後重新擷取：RIPPS2 會提供該磁碟機。
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : 音效需要 %d KB，而這張記憶卡剩餘 %d KB。按 START 改為寫入磁碟機上的 %sAUDIO/，RIPPS2 會從那裡播放。
+  There was not enough memory to make the sounds. Nothing was written.: 記憶體不足，無法產生音效。沒有寫入任何內容。
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- PS2BBL 1.2.0 由主機綁定到這張卡，並寫入為 %s/%s。
+  
+    - 它的設定 mc%d:/PS2BBL/CONFIG.INI 從 %s 不等待地啟動 RIPPS2（0 毫秒，PS2BBL Extended 不允許），開啟 BOOT LOCK。
+  
+    為此 I/O 處理器會重新啟動；音樂與磁碟機之後會恢復。在顯示完成之前，請保持記憶卡插入且主機開著。'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : 無法把 BIBLE 寫入記憶卡 %d，所以已把記憶卡恢復原狀。請檢查可用空間後重試。（RIPPS2 旁的 DIAG.TXT 記有記憶卡的回應。）
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE 無法把 %s 移開保留，因此停在那裡。記憶卡上沒有任何變更。（RIPPS2 旁的 DIAG.TXT 記有記憶卡的回應。）
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : '記憶卡 0：%s
+  
+    記憶卡 1：%s
+  
+    %s
+  
+    RIPPS2 BIBLE：BBL 1.20，El Isra 的 PS2BBL 1.2.0，由 RIPPS2 設定：開機 0 毫秒啟動（PS2BBL Extended 不允許 0），先啟動 RIPPS2，開機時按住按鍵仍可進入瀏覽器（三角）、光碟（START）以及原本的內容（圓圈）。要在記憶卡或內建硬碟上安裝或修復它嗎？'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE：記憶卡 %d 上的 BBL 1.20
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 記憶檔案現在在 MEDIA 開啟，光碟已在剪貼簿中（已擷取）。前往要放置的磁碟機與資料夾（任何磁碟機：USB、硬碟、SD2PSX 的 MEDIA），按三角開啟動作並選擇貼上。RIPDISC 會再確認一次，然後用你的 PS2 的雷射讀取光碟並寫入那裡。
+  RENAME THE GAME: 重新命名遊戲
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 這個遊戲透過 Neutrino 啟動，而 RIPPS2 沒有找到：設定裡的路徑、遊戲所在的磁碟機、記憶卡和任何已啟動的磁碟機上都沒有。RIPPS2 附帶 rickgaiser 的 Neutrino（AFL-3.0）最新版本：在你選的地方安裝一次，之後每個 Neutrino 遊戲都從那裡使用它。
+  A PS1 disc's track list, for Ember: PS1 光碟的音軌清單，供 Ember 使用
+  A PS1 game for POPSTARTER: 供 POPSTARTER 使用的 PS1 遊戲
+  A PS2 game: PS2 遊戲
+  A card the SD2PSX set aside (wrong size): SD2PSX 擱置的卡（大小不對）
+  'A program: Cross starts it': 程式：按叉啟動
+  A save, packed in one file: 打包成一個檔案的存檔
+  All Games' master list: 全部遊戲的主清單
+  'An SD2PSX boot card: open it to look in': SD2PSX 開機卡：開啟即可查看內容
+  'An SD2PSX memory card: open it like a VMC': SD2PSX 記憶卡：像 VMC 一樣開啟
+  Cheats, a file a game: 金手指，每個遊戲一個檔案
+  Each game's settings and info page: 每個遊戲的設定與資訊頁
+  Ember, its BIOS and its PS1 games: Ember、它的 BIOS 和它的 PS1 遊戲
+  Game covers and art, by game ID: 遊戲封面與圖片，依遊戲 ID
+  Games kept in 1 GB parts: 以 1 GB 分段保存的遊戲
+  Games that share one SD2PSX card: 共用一張 SD2PSX 卡的遊戲
+  Languages for RIPPS2: RIPPS2 的語言
+  Neutrino, the second game core: Neutrino，第二個遊戲核心
+  OPL's list of this folder's games: OPL 關於此資料夾遊戲的清單
+  POPSTARTER and PS1 games (VCDs): POPSTARTER 與 PS1 遊戲（VCD）
+  PS2 games on CD, as ISOs: CD 上的 PS2 遊戲，ISO 格式
+  PS2 games on DVD, as ISOs: DVD 上的 PS2 遊戲，ISO 格式
+  PS2BBL's settings: PS2BBL 的設定
+  Programs to start (ELFs): 可啟動的程式（ELF）
+  RIPPS2's diagnostics, for a bug report: RIPPS2 的診斷資訊，用於錯誤回報
+  RIPPS2's own folder: RIPPS2 自己的資料夾
+  RIPPS2's settings: RIPPS2 的設定
+  RIPPS2's sounds and music: RIPPS2 的音效與音樂
+  Recent games: 最近的遊戲
+  RetroAchievements' files: RetroAchievements 的檔案
+  Ripped CDs and DVDs, pictures, video: 擷取的 CD 與 DVD、圖片、影片
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 正在儲存到 SD2PSX 的 SD 卡：關機前請等待 %d 秒。
+  Starred games: 星號遊戲
+  The SD2PSX's boot cards (PS2BBL): SD2PSX 的開機卡（PS2BBL）
+  The SD2PSX's boot channels and names: SD2PSX 的開機頻道與名稱
+  The SD2PSX's memory cards: SD2PSX 的記憶卡
+  The SD2PSX's own settings: SD2PSX 本身的設定
+  The SD2PSX's settings: SD2PSX 的設定
+  Themes, a folder each: 主題，每個一個資料夾
+  This drive's game list, for a quick boot: 此磁碟機的遊戲清單，用於快速開機
+  Virtual memory cards for games: 遊戲用的虛擬記憶卡
+  What RIPPS2's last launch did: RIPPS2 上次啟動做了什麼
+  Circle from the top   Cross close: 圓圈：從頭開始   叉：關閉
+  Cross from the top   Circle close: 叉：從頭開始   圓圈：關閉
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : 無法播放這個音軌。RIPPS2 可播放 16 位元 PCM 的 .wav 檔（如 RIPDISC 與 BIOS 音樂擷取的那樣）、Ogg Vorbis 的 .ogg 檔以及 MP3。
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 唯讀：SD2PSX 的開機卡正在使用
+  '%d music tracks': '%d 首音樂'
+  1 music track: 1 首音樂
+  'A game''s EXIT: %s': 遊戲的 EXIT：%s
+  'A game''s EXIT: the browser': 遊戲的 EXIT：瀏覽器
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 全部遊戲：%d 個遊戲保存在 %s，開機時在任何磁碟機回應前就列出
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 全部遊戲：尚無主清單；遊戲列出後會寫入 %s（Fast Cache 開啟）
+  CACHE SETTINGS: 快取設定
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: 把 RIPPS2 附帶的 Neutrino 複製到磁碟機或記憶卡。你自己的 Neutrino 會原樣使用。
+  DIAG.TXT, for a bug report: DIAG.TXT，用於錯誤回報
+  Drives, loading, launchers and homebrew: 磁碟機、載入、啟動器與自製程式
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache 在磁碟機回應的瞬間顯示其上次的遊戲清單；Trust Cache 會保留它，直到你按 SELECT。兩者都開啟，並把設定放在 RIPPS2 啟動所用的記憶卡上，就是最快的開機。
+  Fast Cache, Trust Cache: Fast Cache、Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 遊戲清單：Fast Cache 關閉，因此開機時各自從磁碟機讀取
+  'Game lists: each shows at once from its cache and stands until SELECT': 遊戲清單：立即從快取顯示，保持到按 SELECT
+  'Game lists: each shows at once from its cache, then is read again': 遊戲清單：立即從快取顯示，然後重新讀取
+  LOADING: 載入
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: 用這台主機自己的 BIOS 產生 RIPPS2 的音效，並寫入 AUDIO 資料夾。
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 還沒有音樂：音訊設定 > BIOS 音樂可擷取這台主機的選單音樂。
+  SAVE DIAGNOSTICS: 儲存診斷資訊
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: 在各磁碟機上尋找 POPSTARTER、POPS 檔案、Ember、Ember 的 BIOS 和 Neutrino，並記住各自的位置。
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 設定：%s，在開機需要等待的磁碟機上（記憶卡較快）
+  'Settings: %s, read first (the quickest place)': 設定：%s，最先讀取（最快的位置）
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: 立即啟動每個磁碟機（USB、硬碟、MMCE、MX4SIO 與網路），讓每個磁碟機及其空間顯示在這裡。
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: POPSTARTER 透過網路執行 PS1 遊戲所用的 IP 與 SMB 共用。
+  The diagnostics are in %s.: 診斷資訊在 %s。
+  The diagnostics could not be written to %s.: 無法把診斷資訊寫入 %s。
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: 每張記憶卡開機時啟動的內容；安裝或修復 BIBLE，即設定為啟動 RIPPS2 的 PS2BBL。
+  Where POPSTARTER and Ember are, and how PS1 games start.: POPSTARTER 與 Ember 的位置，以及 PS1 遊戲的啟動方式。
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: 你的 Neutrino 的位置、影像模式，以及每次用 Neutrino 啟動時傳入的參數。
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : 把 RIPPS2 記下的關於控制器、磁碟機、MMCE 卡和最近幾次啟動的資訊寫入 RIPPS2 旁的 DIAG.TXT。請隨錯誤回報一起傳送。
+  back to Cache: 返回快取
+  what boot reads first: 開機最先讀取的內容
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : 這個 Neutrino 早於 1.3，無法從 APA 硬碟啟動遊戲。請把遊戲啟動 > Neutrino 指向 Neutrino 1.3 或更新版本，或清空路徑以使用 RIPPS2 附帶的版本。
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 看不到 %s（位置：%s%s）。POPSTARTER 需要 POPS.ELF 與 POPS_IOX.PAK（來自你自己主機的 PS1 模擬器）；它可能在 RIPPS2 不尋找的地方找到它們（如果你的遊戲能啟動，就是找到了）。按 START 啟動，之後不再詢問這個磁碟機。
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色
@@ -1311,16 +1408,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 為塔樓、光球、玻璃、CD 播放器與檔案瀏覽器統一一種顏色，作用於全部三個分頁。主題：由主題決定（否則為 RIPPS2 藍）。
   RIPPS2_HINTS: 按鍵提示
   HINT_RIPPS2_HINTS: 底部的按鍵提示。「閒置時淡出」會隱藏它們，直到你按下按鍵。主題：由主題決定。
-  RIPPS2_CATEGORY_BAR: 分類列
-  HINT_RIPPS2_CATEGORY_BAR: 頂部的 啟動光碟、儲存裝置 與 記憶檔案。「閒置時淡出」會隱藏它們，直到你按下按鍵。主題：由主題決定。
+  RIPPS2_CATEGORY_BAR: 分類/側邊欄
+  HINT_RIPPS2_CATEGORY_BAR: 啟動光碟、儲存裝置與記憶檔案：頂部的名稱，或側邊欄。閒置時淡出會讓名稱變淡，或把側邊欄滑開，直到你按下按鍵；它會立即回來。主題：由主題決定。
   RIPPS2_SOURCE_NAME: 來源名稱
   RIPPS2_STATUS: 狀態
   RIPPS2_SOURCE: 來源
   HINT_RIPPS2_SOURCE_NAME: 遊戲上方的來源名稱（全部遊戲、硬碟遊戲等）。「閒置時淡出」會讓它隨分類列一起淡出；「彈出」則像 L3 顯示清單名稱那樣，在開機後的第一個清單和每次切換來源時，把它大大地顯示在頁面中央，然後淡出。主題可以把「彈出」當作它的「顯示」。主題：由主題決定。
-  RIPPS2_RECENTS: 顯示最近遊玩
-  HINT_RIPPS2_RECENTS: 在最愛遊戲頂部顯示最多這麼多個你最近啟動的遊戲，最新的在前。0 表示關閉。
+  RIPPS2_RECENTS: 最近的遊戲
+  HINT_RIPPS2_RECENTS: 最近的遊戲：側邊欄中的一個頁面，由新到舊列出你最近啟動的遊戲：保留多少個，1 到 99（按三角輸入數字）。磁碟機設為手動的遊戲，選取時會啟動該磁碟機。0 關閉該頁面。
   RIPPS2_CATEGORY_ORDER: 分類順序
-  HINT_RIPPS2_CATEGORY_ORDER: 記憶檔案在前，啟動光碟在最後。為 RIPFLOW 設計（介面 > 主題）。主題：由主題決定。
+  HINT_RIPPS2_CATEGORY_ORDER: 交換啟動光碟與記憶檔案：記憶檔案在前，啟動光碟在後，欄中的名稱和側邊欄的圖示都一樣。為 RIPFLOW 設計（介面 > 主題）。主題：由主題決定。
   RIPPS2_MUSIC: 音樂
   HINT_RIPPS2_MUSIC: 播放 RIPPS2 旁邊 AUDIO 資料夾以及每個已啟動磁碟機上 OPL 的 AUDIO 資料夾中的 bgm 檔案（無標籤的 Ogg 或 16 位元 WAV）；名為 Menu 的先播放。主題自帶的音樂會取而代之。
   RIPPS2_BIOS_SOUNDS: BIOS 音效
@@ -1329,7 +1426,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: 提示與圖示
   HINT_RIPPS2_HINTS_GLYPHS: 按鍵提示與圖示的樣式。每一列都從「主題」開始，也就是主題的選擇；你的任何其他選擇都優先於所有主題。
   RIPPS2_HINT_LAYOUT: 提示版面
-  HINT_RIPPS2_STARSIDE: 收藏遊戲的星號在清單中的位置。左：每列開頭單獨一欄。右：標題之後。隱藏：不顯示星號。主題：依主題設定。主題的列圖示會移到另一端，兩者不會重疊。
+  HINT_RIPPS2_STARSIDE: 星號遊戲的星號在清單中的位置。左：每列開頭單獨一欄。右：在標題後面。隱藏（初始值）：沒有星號也沒有該欄，標題完整顯示。主題：依主題所寫。R3 在任何情況下都會為遊戲加星號；在清單上按住 R3 4 秒可隱藏或恢復星號（這也會為游標下的遊戲加星號）。
   HINT_RIPPS2_HINT_LAYOUT: 橫列：所有提示排成一行。直欄：每行一個提示，在一側排成清單，從主題放提示的位置開始。
   RIPPS2_HINT_LABELS: 提示文字
   HINT_RIPPS2_HINT_LABELS: 「僅圖示」只畫按鍵，適合自帶文字的圖示。「徽章」把每個提示的圖示與名稱合在一個徽章上。
@@ -1350,11 +1447,11 @@ labels:
   RIPPS2_TRANSITION: 頁面轉場
   HINT_RIPPS2_TRANSITION: 切換到其他分類時新頁面如何出現：從主題的背景色中浮現，或從閃光中出現。「主題」保持主題的選擇。
   RIPPS2_CATEGORY_LAYOUT: 分類版面
-  HINT_RIPPS2_CATEGORY_LAYOUT: 三個分類的位置：名稱在頂部橫排，或圖示沿側邊欄直排，每個都有一個裝著其頁面的抽屜（在清單中按左鍵前往）。「主題」保持主題自己的。
+  HINT_RIPPS2_CATEGORY_LAYOUT: 三個分類的位置：名稱排在頂部，或圖示沿側邊欄排列，每個都有一個裝著其頁面的抽屜（在清單上按左進入），或選單：沒有欄，分類放在 START 選單中，就像為 OPL 製作的主題。主題使用主題自己的版面。
   RIPPS2_CACHE: 快取
   HINT_RIPPS2_CACHE: 如何保存每個來源的遊戲清單，讓它的頁面立刻開啟：Fast Cache、內建硬碟的清單和自動重新整理。
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: 每個來源都會保存上一次的遊戲清單（CD 和 DVD 資料夾旁的 RIPPS2.LST），來源一回應就立刻顯示，然後在背景重新讀取來源。關閉時，會像以前一樣先從來源讀取每個清單。
+  HINT_RIPPS2_FAST_CACHE: 每個來源都會保存上次的遊戲清單（放在其 CD 與 DVD 資料夾旁的 RIPPS2.LST），並在來源回應的瞬間顯示。之後是否重新讀取來源由 Trust Cache 決定。關閉：像以前一樣，先從來源讀取每個清單。
   HINT_RIPPS2_VIGNETTE: 讓所選封面以外的每個封面邊緣變暗，以突顯所選的那個。「弱」是「完整」的一半。
   RIPPS2_GRID_WIDE: 寬螢幕格狀版面
   HINT_RIPPS2_GRID_WIDE: 僅在 16:9 畫面（寬螢幕、720p、1080i）下的格狀頁面，封面較窄、一列能放更多。「主題」使用主題自己的；「相同」跟隨格狀版面。
@@ -1370,7 +1467,7 @@ labels:
   GAME_TYPE_LABELS: 顯示 [PS1]/[PS2] 標籤
   NEUTRINO_CHEATS_WRITE_FAILED: 無法把金手指清單儲存到 Neutrino 資料夾，因此 Neutrino 無法使用。要不帶金手指啟動嗎？
   AUTO_CREATE_VMC: 首次啟動時建立 VMC
-  HINT_AUTO_CREATE_VMC: 啟動插槽 1 中沒有 VMC 的 PS2 遊戲時，會在遊戲所在裝置上建立一張 8 MB 的記憶卡，依 VMC 畫面建議的名稱命名（該遊戲的所有光碟共用），並指派給它。不適用於 Neutrino 下的內建硬碟。
+  HINT_AUTO_CREATE_VMC: 在插槽 1 沒有 VMC 時啟動 PS2 遊戲，會在遊戲所在裝置上建立一張 8 MB 的卡，依 VMC 畫面建議的名稱命名（該遊戲的所有光碟共用），並指派給它。Neutrino 下不能在 APA 硬碟上（exFAT 硬碟可以）。
   AUTO_VMC_CREATING: 正在建立這個遊戲的 VMC...
   AUTO_VMC_FAILED: 無法建立這個遊戲的 VMC。遊戲將在沒有 VMC 的情況下啟動。
   RIPPS2_BIOS_MUSIC: BIOS 音樂
@@ -1407,7 +1504,7 @@ labels:
   HINT_LANGUAGE: 選單語言。把 lang_*.lng 檔案放進 LNG 資料夾即可新增更多語言。
   HINT_GSM_DEFAULTS_BUTTON: 每個遊戲都會套用的視訊模式修正，除非它有自己的 GSM 設定。
   HINT_DEFDEVICE: RiptOPL 開機時開啟的頁面。
-  HINT_MMCE_MODE: SD2PSX 或 MemCard PRO2 上的遊戲。自動在開機時啟動，手動在開啟頁面時啟動，關閉則隱藏它。
+  HINT_MMCE_MODE: SD2PSX 或 MemCard PRO2 上的遊戲。自動在開機時啟動它：對已插入的卡最快，其遊戲從一開始就在全部遊戲中。手動在你開啟其頁面時啟動，關閉則隱藏它。
   HINT_MMCE_SETTINGS_BUTTON: MMCE 的插槽、IGR bootcard、GameID 與時序選項。
   HINT_ENABLE_USB: 載入 USB 儲存裝置驅動程式。
   HINT_ENABLE_MX4SIO: 載入 MX4SIO SD 卡轉接器驅動程式。
@@ -1587,8 +1684,8 @@ labels:
   HINT_RIPPS2_SCREEN: 選單的畫面：影像模式、寬螢幕、在電視上的位置（H-POS、V-POS）與過掃描。
   HINT_RIPPS2_LAYOUT: 分類所在的位置與頁面進入的方式，接著是 RIPFLOW 的封面與 RIPGRID 的格線。
   HINT_RIPPS2_COLORS_TEXT: 文字粗細、配色、顏色漸變與每種顏色。
-  HINT_RIPPS2_TEXT_WEIGHT: RIPPS2 自己文字的粗細：設定的提示、狀態與關於。一般和以前一樣；中等與粗體在柔和的畫面上更好讀。
-  HINT_RIPPS2_HDD_START: 內建硬碟，無論 APA 或 exFAT，RIPPS2 都會讀取並只顯示一次，作為硬碟遊戲。關閉則不碰它。
+  HINT_RIPPS2_TEXT_WEIGHT: RIPPS2 自身文字的粗細：設定中的提示、狀態與關於。一般與以前相同；粗體在柔和的畫面上更易讀。主題自己的字型保持主題設定的粗細。
+  HINT_RIPPS2_HDD_START: 內建硬碟，APA 或 exFAT：RIPPS2 會讀取它是哪一種，並以 HDD 遊戲 顯示一次。自動（裝有硬碟時最快）在開機時啟動；關閉則不碰它。
   HINT_RIPPS2_THEME_COLOR: 配色本身的顏色。把配色選為自訂，就能像文字顏色一樣自己挑選。
   HINT_RIPPS2_SWEEP: 主題緩慢平順地經過的五種顏色。彩虹、由每種配色做成的漸變，或你自己的。關閉讓配色保持不動。
   HINT_RIPPS2_SWEEP_COLORS: 漸變的五種顏色與速度。改動 RIPPS2 的某個漸變，它會以你取的名字作為你自己的保存下來。
@@ -1597,3 +1694,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 每種顏色停留多久後下一種淡入。即使活潑也很平順：顏色從不閃爍。
   RIPPS2_HIDE_COMPRESS: 隱藏遊戲與壓縮
   HINT_RIPPS2_SELECT_HOLD: 在遊戲清單上按住 SELECT 4.2 秒。清單：在面板中列出主題，選一個。輪替：下一個主題。關閉：不做任何事（按一下仍會重新整理）。
+  RIPPS2_RECENT_GAMES: 最近的遊戲
+  RIPPS2_SET_METADATA_RENAME: 設定中繼資料（重新命名）
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: 控制器優先（實驗性）
+  HINT_RIPPS2_MMCE_PAD_FIRST: SD2PSX 透過與控制器共用的匯流排讀取，讀取期間聽不到控制器：載入封面時按鍵會延遲或遺失。開啟：封面分成小塊傳來，中間讀取控制器，稍慢一些。關閉：以記憶卡的最快速度。記憶卡的來源設為自動時，其清單在開機時只載入一次。
+  HINT_RIPPS2_TRUST_CACHE: 從快取顯示的清單會保持原樣、隨時可啟動，直到你按 SELECT 或 RIPPS2 自己變更該來源。關閉：快取顯示後在背景重新讀取每個來源，在與控制器共用匯流排的 MMCE 或 MX4SIO 卡上會感到停頓。
+  RIPPS2_STATUS_OPEN: 載入與磁碟機
+  HINT_RIPPS2_STATUS_OPEN: 開啟狀態：開機從哪裡讀取設定與遊戲清單、哪個位置最快、遊戲的 EXIT 去哪裡，以及每個磁碟機。其中的快取設定會回到這裡。
+  RIPPS2_BADGE_SET: 徽章組
+  HINT_RIPPS2_BADGE_SET: 遊戲資訊頁上的徽章（分級、人數、ESRB、影像模式、掃描、畫面比例）。RIPPS2：自己的一組，所有主題都一樣。主題：主題自己的圖片，或在主題要求時使用 RIPPS2 的。
+  RIPPS2_HINT_FADE: 提示與圖示淡入
+  HINT_RIPPS2_HINT_FADE: 變化的按鍵提示或圖示會像封面一樣在變化時淡入；不變的保持原樣，在每個頁面和訊息中都是如此。關閉：直接出現。主題：由主題決定（除非寫有 hints_fade=0，否則開啟）。
+  RIPPS2_SIDEBAR_STYLE: 側邊欄樣式
+  HINT_RIPPS2_SIDEBAR_STYLE: 經典（分體）：圖示在側邊欄的深色條中，旁邊是彩色條帶。XL（一體）：一條更寬的條，圖示在中間。主題：由主題決定。
+  HINT_EXITPATH: 遊戲內選單中 EXIT 去哪裡。最好留空，並設定好 BIBLE（狀態 > 開機程式 > 管理，或你的 PS2BBL 上的 BOOT LOCK）：EXIT 會依主機自己的開機路徑重設，PS2BBL 像開機時一樣啟動 RIPPS2，這是最安全的返回方式。瀏覽器：PS2 瀏覽器。記憶卡（mc0:/mc1:）或 FAT32 USB 磁碟機（mass:/）上的 ELF 會在重設後立即載入，但並非每個遊戲都會讓主機為此做好準備；那時完全無法存取 MMCE。
+  HINT_BDM_START: USB、iLink、MX4SIO 與 exFAT 硬碟。自動在開機時啟動它們：對已插入的磁碟機最快，其遊戲從一開始就在全部遊戲中。手動在你開啟其頁面時啟動。
+  NEUTRINO_VMC_HDD_UNSUPPORTED: Neutrino 無法使用 APA 硬碟上的 VMC（exFAT、USB 與 MX4SIO 可以）：這個遊戲將使用該插槽中的真實記憶卡啟動。

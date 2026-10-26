@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: Không ghi được nhạc menu vào %s (%s). Ổ đầy rồi sao?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'Nhạc menu là WAV %s, và không thẻ nhớ nào chứa nổi. Ở đây RIPPS2 chạy từ thẻ nhớ và chưa có ổ nào có thư mục OPL được khởi động: hãy khởi động một ổ trong Lưu trữ, rồi trích nhạc vào đó.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: Không ghi được âm thanh vào %s. Ổ đầy hay bị chống ghi?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Nhạc menu của BIOS này không phải bản RIPPS2 biết. Không ghi gì cả.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Ngân hàng âm thanh của BIOS này không phải loại RIPPS2 biết. Không ghi gì cả.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) được chuyển nguyên vẹn vào thư mục sao lưu trước.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 được máy gắn vào thẻ này và ghi thành %s/%s.
-
-    - Cấu hình của nó, mc%d:/PS2BBL/CONFIG.INI, chạy RIPPS2 từ %s, BOOT LOCK bật.
-
-    Bộ xử lý I/O sẽ khởi động lại cho việc này; nhạc và các ổ sẽ trở lại sau đó. Giữ thẻ cắm và máy bật cho tới khi báo xong.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: BẢN SAO TRÊN THẺ NHỚ %d
   A COPY ON MX4SIO: BẢN SAO TRÊN MX4SIO
   A COPY ON THE USB DRIVE: BẢN SAO TRÊN USB
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: Không ghi được BIBLE vào thẻ nhớ %d, nên thẻ đã được trả về như cũ. Hãy kiểm tra dung lượng trống rồi thử lại.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE không chép được RIPPS2 vào %s. Hãy kiểm tra dung lượng và việc chống ghi. Không thay đổi gì khác.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE không chép được RIPPS2 vào phân vùng %s của HDD. Hãy kiểm tra dung lượng trống. Không thay đổi gì khác.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE không giữ được bản sao chương trình khởi động của HDD, nên đã dừng trước khi thay nó. RIPPS2 đã được chép vào HDD; không thay đổi gì khác.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE không dời được %s sang bên để giữ lại, nên đã dừng ở đó. Không thay đổi gì trên thẻ.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE không ghi được cấu hình của nó (%s). Chương trình khởi động không bị thay đổi.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE không ghi được chương trình khởi động của HDD (bước %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK đang bật. Giờ PS2BBL chạy RIPPS2 khi bật máy (%s). Giữ phím tắt PS2BBL trong lúc máy khởi động để vào thứ khác.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK hoạt động qua PS2BBL (PlayStation 2 Basic BootLoader), và không thẻ nhớ nào ở đây có nó.
   INSTALL BIBLE: CÀI BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'CÀI BIBLE LÊN THẺ NHỚ %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Việc này cần một máy khởi động từ HDD (PS2 dày có bộ chuyển mạng). Giữ máy bật cho tới khi báo xong.'
   INTERNAL HDD  (its boot area): HDD TRONG  (vùng khởi động)
   MEMORY CARD %d  (%s): THẺ NHỚ %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'THẺ NHỚ 0: %s
-
-    THẺ NHỚ 1: %s
-
-    %s
-
-    BIBLE là PS2BBL 1.2.0 của El Isra, do RIPPS2 thiết lập: không chờ khi bật máy, RIPPS2 trước tiên, và nút được giữ khi bật máy vẫn vào được trình duyệt (TAM GIÁC), đĩa (START) và thứ có trước đó (TRÒN). Cài hoặc sửa nó trên thẻ nhớ hay HDD trong?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Thẻ nhớ %d còn trống %d KB, còn BIBLE cần %d KB ở đó. Hãy giải phóng chút dung lượng rồi thử lại.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Thẻ nhớ %d còn trống %d KB, còn bản sao RIPPS2 cần %d KB. Hãy giải phóng chút dung lượng hoặc chọn chỗ khác.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Thẻ nhớ %d chạy %s khi bật máy, và BOOT LOCK chỉ hoạt động qua PS2BBL.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: KHAY ĐANG MỞ
   TREFOIL KNOT: NÚT BA LÁ
   ' and ': ' và '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s không có trong %s%s. POPSTARTER cần POPS.ELF và POPS_IOX.PAK, trình giả lập PS1 từ chính máy của bạn, đặt cạnh các trò chơi để chạy chúng.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s không có trong %s%s. RIPPOPS đã tìm thấy POPS.ELF và POPS_IOX.PAK, trình giả lập PS1 của Sony, trên %s: START sẽ chép chúng vào đây và chạy trò chơi.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': Không chép được %s vào %s%s. Ổ đầy hay bị chống ghi?
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s không có trong %s%s. POPSTARTER cần POPS.ELF và POPS_IOX.PAK, trình giả lập PS1 từ chính máy của bạn, đặt cạnh các trò chơi để chạy chúng.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s không có trong %s%s. RIPPOPS đã tìm thấy POPS.ELF và POPS_IOX.PAK, trình giả lập PS1 của Sony, trên %s: START sẽ chép chúng vào đây và chạy trò chơi.'
   COPY AND START: CHÉP VÀ CHẠY
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'Đặc biệt cảm ơn tất cả tình cảm từ YouTube:'
   and its own look, launchers, file browser and save tools.: cùng giao diện, trình khởi chạy, trình duyệt tệp và công cụ lưu game của riêng nó.
   glad to help however you reach me.: rất vui được giúp, dù bạn liên hệ với tôi bằng cách nào.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): lõi trò chơi thứ hai, 1.8.0 kèm theo nguyên vẹn (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: với Neutrino của rickgaiser bên trong làm lõi trò chơi thứ hai,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Trò chơi này khởi động qua Neutrino, và RIPPS2 không tìm thấy bản nào: không ở đường dẫn trong Cài đặt, không trên ổ của trò chơi, không trên thẻ nhớ, cũng không trên ổ đã khởi động nào. RIPPS2 mang theo Neutrino 1.8.0 của rickgaiser (AFL-3.0): hãy cài nó một lần, ở nơi bạn chọn, và mọi trò chơi Neutrino sẽ dùng nó từ đó.'
   STARTING THE DRIVES: ĐANG KHỞI ĐỘNG CÁC Ổ
   '%d games, on the started drives': '%d trò chơi, trên các ổ đã khởi động'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: MỘT SỐ TỆP KHÔNG XÓA ĐƯỢC'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: không ở trên ổ đã khởi động
   only if you have none: chỉ khi bạn chưa có
   starts every drive first: khởi động mọi ổ trước
-  Drives, launchers and homebrew: Ổ, trình khởi chạy và homebrew
   BDM Devices: Thiết bị BDM
   Color Sweep: Chuyển màu
   Colors and Text: Màu và chữ
@@ -1079,9 +1038,7 @@ strings:
   Bold: Đậm
   Controllers: Tay cầm
   Lively: Sôi động
-  Medium: Vừa
   PS Emulation: Giả lập PS
-  Regular: Thường
   Slow: Chậm
   A MOMENT: CHỜ MỘT CHÚT
   A TASK IN THE BACKGROUND: MỘT VIỆC CHẠY NỀN
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: Xóa %s? Các kiểu chuyển màu riêng của RIPPS2 vẫn giữ nguyên.
   Sweep: Chuyển màu
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Huy hiệu đánh dấu các trò chơi có thành tựu trong danh sách của bạn, cùng số bạn đã mở khóa. Cần bật ĐO ĐẠC.
+  Classic (Split): Cổ điển (tách)
+  Guidance: Hướng dẫn
+  OK: OK
+  XL (One Piece): XL (liền một khối)
+  STARS HIDDEN: ĐÃ ẨN SAO
+  STARS SHOWN: ĐÃ HIỆN SAO
+  Asking the SD2PSX for this game's memory card...: Đang hỏi SD2PSX thẻ nhớ của trò chơi này...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX đang chuẩn bị thẻ nhớ của trò chơi này (%d giây). Trò chơi chạy khi xong; START chạy ngay.
+  the second game core, its newest build carried unmodified (AFL-3.0): lõi trò chơi thứ hai, bản dựng mới nhất kèm theo nguyên vẹn (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': Không ghi được %s vào %s (đã ghi %d âm thanh). Ổ đầy hay bị chống ghi?
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': Không ghi được %s vào %s (đã ghi %d âm thanh, và thẻ giờ còn trống %d KB). Thẻ có bị chống ghi không?
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: Không tạo được thư mục %s. Ổ đầy hay bị chống ghi? Chưa ghi gì cả.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'Âm thanh cần %d KB và thẻ nhớ này còn trống %d KB. Chưa ghi gì cả. Hãy dọn chỗ trên thẻ, hoặc khởi động một ổ trong Lưu trữ rồi trích lại: khi đó RIPPS2 sẽ đề nghị ổ đó.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : Âm thanh cần %d KB và thẻ nhớ này còn trống %d KB. START sẽ ghi chúng vào %sAUDIO/ trên ổ thay vào đó, và RIPPS2 phát chúng từ đó.
+  There was not enough memory to make the sounds. Nothing was written.: Không đủ bộ nhớ để tạo âm thanh. Chưa ghi gì cả.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- PS2BBL 1.2.0 được máy gắn vào thẻ này và ghi thành %s/%s.
+  
+    - Cấu hình của nó, mc%d:/PS2BBL/CONFIG.INI, chạy RIPPS2 từ %s không chờ (0 ms, điều PS2BBL Extended không cho phép), BOOT LOCK bật.
+  
+    Bộ xử lý I/O sẽ khởi động lại cho việc này; nhạc và các ổ sẽ trở lại sau đó. Giữ thẻ cắm và máy bật cho tới khi báo xong.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : Không ghi được BIBLE vào thẻ nhớ %d, nên thẻ đã được trả về như cũ. Hãy kiểm tra dung lượng trống rồi thử lại. (DIAG.TXT cạnh RIPPS2 có câu trả lời của thẻ.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE không dời được %s sang bên để giữ lại, nên đã dừng ở đó. Không thay đổi gì trên thẻ. (DIAG.TXT cạnh RIPPS2 có câu trả lời của thẻ.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'THẺ NHỚ 0: %s
+  
+    THẺ NHỚ 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 của El Isra do RIPPS2 thiết lập: khởi động 0 ms khi bật máy (PS2BBL Extended không cho phép 0), RIPPS2 trước tiên, và nút được giữ khi bật máy vẫn vào được trình duyệt (TAM GIÁC), đĩa (START) và thứ có trước đó (TRÒN). Cài hoặc sửa nó trên thẻ nhớ hay HDD trong?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 TRÊN THẺ NHỚ %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'Tệp bộ nhớ sẽ mở ngay, ở MEDIA, với đĩa trong bộ nhớ tạm (ĐÃ TRÍCH XUẤT). Hãy tới ổ và thư mục nơi nó cần đặt (ổ nào cũng được: USB, HDD, MEDIA của SD2PSX), nhấn TAM GIÁC để mở THAO TÁC và chọn DÁN. RIPDISC sẽ hỏi thêm một lần rồi đọc đĩa bằng laser của PS2 và ghi nó vào đó.'
+  RENAME THE GAME: ĐỔI TÊN TRÒ CHƠI
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Trò chơi này khởi động qua Neutrino, và RIPPS2 không tìm thấy bản nào: không ở đường dẫn trong Cài đặt, không trên ổ của trò chơi, không trên thẻ nhớ, cũng không trên ổ đã khởi động nào. RIPPS2 mang theo Neutrino của rickgaiser (AFL-3.0), bản dựng mới nhất: hãy cài nó một lần, ở nơi bạn chọn, và mọi trò chơi Neutrino sẽ dùng nó từ đó.'
+  A PS1 disc's track list, for Ember: Danh sách bài của một đĩa PS1, cho Ember
+  A PS1 game for POPSTARTER: Một trò chơi PS1 cho POPSTARTER
+  A PS2 game: Một trò chơi PS2
+  A card the SD2PSX set aside (wrong size): Một thẻ SD2PSX đã để riêng (sai kích thước)
+  'A program: Cross starts it': 'Một chương trình: Chéo để chạy'
+  A save, packed in one file: Một bản lưu, gói trong một tệp
+  All Games' master list: Danh sách chính của Tất cả trò chơi
+  'An SD2PSX boot card: open it to look in': 'Một thẻ khởi động SD2PSX: mở ra để xem bên trong'
+  'An SD2PSX memory card: open it like a VMC': 'Một thẻ nhớ SD2PSX: mở như một VMC'
+  Cheats, a file a game: Mã gian lận, mỗi trò chơi một tệp
+  Each game's settings and info page: Cài đặt và trang thông tin của từng trò chơi
+  Ember, its BIOS and its PS1 games: Ember, BIOS của nó và các trò chơi PS1
+  Game covers and art, by game ID: Bìa và hình trò chơi, theo ID trò chơi
+  Games kept in 1 GB parts: Trò chơi lưu thành các phần 1 GB
+  Games that share one SD2PSX card: Các trò chơi dùng chung một thẻ SD2PSX
+  Languages for RIPPS2: Ngôn ngữ cho RIPPS2
+  Neutrino, the second game core: Neutrino, lõi trò chơi thứ hai
+  OPL's list of this folder's games: Danh sách trò chơi của OPL trong thư mục này
+  POPSTARTER and PS1 games (VCDs): POPSTARTER và trò chơi PS1 (VCD)
+  PS2 games on CD, as ISOs: Trò chơi PS2 trên CD, dạng ISO
+  PS2 games on DVD, as ISOs: Trò chơi PS2 trên DVD, dạng ISO
+  PS2BBL's settings: Cài đặt của PS2BBL
+  Programs to start (ELFs): Chương trình để chạy (ELF)
+  RIPPS2's diagnostics, for a bug report: Chẩn đoán của RIPPS2, để báo lỗi
+  RIPPS2's own folder: Thư mục riêng của RIPPS2
+  RIPPS2's settings: Cài đặt của RIPPS2
+  RIPPS2's sounds and music: Âm thanh và nhạc của RIPPS2
+  Recent games: Trò chơi gần đây
+  RetroAchievements' files: Tệp của RetroAchievements
+  Ripped CDs and DVDs, pictures, video: CD và DVD đã trích, hình ảnh, video
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'Đang lưu vào thẻ SD của SD2PSX: đợi %d giây trước khi tắt máy.'
+  Starred games: Trò chơi yêu thích
+  The SD2PSX's boot cards (PS2BBL): Thẻ khởi động của SD2PSX (PS2BBL)
+  The SD2PSX's boot channels and names: Kênh khởi động và tên của SD2PSX
+  The SD2PSX's memory cards: Thẻ nhớ của SD2PSX
+  The SD2PSX's own settings: Cài đặt riêng của SD2PSX
+  The SD2PSX's settings: Cài đặt của SD2PSX
+  Themes, a folder each: Chủ đề, mỗi cái một thư mục
+  This drive's game list, for a quick boot: Danh sách trò chơi của ổ này, để khởi động nhanh
+  Virtual memory cards for games: Thẻ nhớ ảo cho trò chơi
+  What RIPPS2's last launch did: Lần chạy gần nhất của RIPPS2 đã làm gì
+  Circle from the top   Cross close: 'Tròn: từ đầu   Chéo: đóng'
+  Cross from the top   Circle close: 'Chéo: từ đầu   Tròn: đóng'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Không phát được bài này. RIPPS2 phát tệp .wav PCM 16-bit (như RIPDISC và Nhạc BIOS trích ra), tệp Ogg Vorbis .ogg và MP3.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'CHỈ ĐỌC: THẺ KHỞI ĐỘNG CỦA SD2PSX ĐANG ĐƯỢC DÙNG'
+  '%d music tracks': '%d bài nhạc'
+  1 music track: 1 bài nhạc
+  'A game''s EXIT: %s': 'EXIT của trò chơi: %s'
+  'A game''s EXIT: the browser': 'EXIT của trò chơi: trình duyệt'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Tất cả trò chơi: %d trò chơi lưu trong %s, hiện khi khởi động trước khi ổ nào trả lời'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Tất cả trò chơi: chưa có danh sách chính; %s được ghi khi trò chơi đã hiện (Fast Cache bật)'
+  CACHE SETTINGS: CÀI ĐẶT BỘ NHỚ ĐỆM
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: Sao chép Neutrino mà RIPPS2 mang theo vào một ổ hoặc thẻ nhớ. Neutrino của riêng bạn được dùng nguyên như vậy.
+  DIAG.TXT, for a bug report: DIAG.TXT, để báo lỗi
+  Drives, loading, launchers and homebrew: Ổ, tải, trình khởi chạy và homebrew
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache hiện danh sách trò chơi gần nhất của mỗi ổ ngay khi ổ trả lời; Trust Cache giữ nó cho tới khi bạn nhấn SELECT. Bật cả hai, với cài đặt trên thẻ nhớ mà RIPPS2 khởi động từ đó, là cách khởi động nhanh nhất.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Danh sách trò chơi: Fast Cache tắt, nên mỗi cái được đọc từ ổ của nó khi khởi động'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Danh sách trò chơi: mỗi cái hiện ngay từ bộ nhớ đệm và giữ tới khi SELECT'
+  'Game lists: each shows at once from its cache, then is read again': 'Danh sách trò chơi: mỗi cái hiện ngay từ bộ nhớ đệm, rồi được đọc lại'
+  LOADING: ĐANG TẢI
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: Tạo âm thanh của RIPPS2 từ chính BIOS của máy này và ghi vào thư mục AUDIO.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Chưa có nhạc: Cài đặt âm thanh > Nhạc BIOS trích nhạc menu của máy này.'
+  SAVE DIAGNOSTICS: LƯU CHẨN ĐOÁN
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Tìm trên các ổ POPSTARTER, tệp POPS, Ember, BIOS của Ember và Neutrino, rồi ghi nhớ chỗ của từng thứ.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Cài đặt: %s, trên một ổ mà khởi động phải chờ (thẻ nhớ nhanh hơn)'
+  'Settings: %s, read first (the quickest place)': 'Cài đặt: %s, đọc trước tiên (chỗ nhanh nhất)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Khởi động mọi ổ ngay (USB, HDD, MMCE, MX4SIO và mạng), để từng ổ và dung lượng của nó hiện ở đây.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: IP và thư mục chia sẻ SMB mà POPSTARTER dùng cho trò chơi PS1 qua mạng.
+  The diagnostics are in %s.: Chẩn đoán nằm trong %s.
+  The diagnostics could not be written to %s.: Không ghi được chẩn đoán vào %s.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Mỗi thẻ nhớ chạy gì khi bật máy; cài hoặc sửa BIBLE, PS2BBL được thiết lập để chạy RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: POPSTARTER và Ember ở đâu, và trò chơi PS1 khởi động thế nào.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Neutrino của bạn ở đâu, chế độ video của nó và các tham số mà mỗi lần chạy Neutrino nhận được.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : Ghi những gì RIPPS2 ghi nhận về tay cầm, các ổ, thẻ MMCE và những lần chạy gần nhất vào DIAG.TXT cạnh RIPPS2. Gửi nó kèm báo lỗi.
+  back to Cache: về Bộ nhớ đệm
+  what boot reads first: khởi động đọc gì trước
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Neutrino này cũ hơn 1.3, bản không thể chạy trò chơi từ HDD APA. Hãy trỏ Chạy trò chơi > Neutrino tới Neutrino 1.3 hoặc mới hơn, hoặc xóa đường dẫn để dùng bản RIPPS2 mang theo.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 không thấy %s trong %s%s. POPSTARTER cần POPS.ELF và POPS_IOX.PAK, trình giả lập PS1 từ chính máy của bạn; nó có thể tìm thấy chúng ở nơi RIPPS2 không xem (nếu trò chơi của bạn chạy được, nó tìm thấy). START khởi chạy, và ổ này sẽ không bị hỏi lại.
 labels:
   NETCONFIG: Cài đặt mạng
   SETTINGS_SAVED: Đã lưu cài đặt vào %s
@@ -1348,16 +1445,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Một màu cho tháp, quả cầu, kính, trình phát CD và trình duyệt tệp, trên cả ba thẻ. Chủ đề: chủ đề quyết định (xanh RIPPS2 nếu chủ đề không quyết).'
   RIPPS2_HINTS: Gợi ý nút
   HINT_RIPPS2_HINTS: 'Các gợi ý nút ở phía dưới. Mờ khi rảnh ẩn chúng cho tới khi bạn nhấn nút. Chủ đề: chủ đề quyết định.'
-  RIPPS2_CATEGORY_BAR: Thanh danh mục
-  HINT_RIPPS2_CATEGORY_BAR: 'CHẠY ĐĨA, LƯU TRỮ và TỆP BỘ NHỚ ở phía trên. Mờ khi rảnh ẩn chúng cho tới khi bạn nhấn nút. Chủ đề: chủ đề quyết định.'
+  RIPPS2_CATEGORY_BAR: Danh mục/Thanh bên
+  HINT_RIPPS2_CATEGORY_BAR: 'CHẠY ĐĨA, LƯU TRỮ và TỆP BỘ NHỚ: các tên ở trên cùng, hoặc thanh bên. Mờ khi rảnh làm mờ các tên, hoặc trượt thanh bên đi, cho tới khi bạn nhấn một nút; nó quay lại ngay. Chủ đề: chủ đề quyết định.'
   RIPPS2_SOURCE_NAME: Tên nguồn
   RIPPS2_STATUS: Trạng thái
   RIPPS2_SOURCE: Nguồn
   HINT_RIPPS2_SOURCE_NAME: 'Tên nguồn phía trên các trò chơi (TẤT CẢ TRÒ CHƠI, TRÒ CHƠI HDD, v.v.). Mờ khi rảnh làm nó mờ cùng thanh danh mục; Bật ra thì hiện nó thật to giữa trang, như cách L3 gọi tên danh sách, ở danh sách đầu tiên sau khi khởi động và mỗi lần đổi nguồn, rồi mờ đi. Chủ đề có thể lấy Bật ra làm Hiện của mình. Chủ đề: chủ đề quyết định.'
-  RIPPS2_RECENTS: Hiện gần đây
-  HINT_RIPPS2_RECENTS: Tối đa bấy nhiêu trò chơi bạn chạy gần nhất ở đầu Trò chơi gắn sao, mới nhất trước. 0 để tắt.
+  RIPPS2_RECENTS: Trò chơi gần đây
+  HINT_RIPPS2_RECENTS: 'Trò chơi gần đây, một trang trong thanh bên với các trò chơi bạn chạy gần nhất, mới nhất trước: giữ bao nhiêu, từ 1 tới 99 (Tam giác để nhập số). Trò chơi có ổ ở Thủ công sẽ khởi động ổ đó khi bạn chọn nó. 0 tắt trang.'
   RIPPS2_CATEGORY_ORDER: Thứ tự danh mục
-  HINT_RIPPS2_CATEGORY_ORDER: 'Tệp bộ nhớ trước và Chạy đĩa sau cùng. Làm cho RIPFLOW (Giao diện > Chủ đề). Chủ đề: chủ đề quyết định.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Đổi chỗ Chạy đĩa và Tệp bộ nhớ: Tệp bộ nhớ trước và Chạy đĩa sau cùng, cả ở tên trên thanh lẫn biểu tượng thanh bên. Làm cho RIPFLOW (Giao diện > Chủ đề). Chủ đề: chủ đề quyết định.'
   RIPPS2_MUSIC: Nhạc
   HINT_RIPPS2_MUSIC: Phát các tệp bgm trong thư mục AUDIO cạnh RIPPS2 và trong thư mục AUDIO của OPL trên mỗi ổ đã khởi động (Ogg không thẻ, hoặc WAV 16-bit); tệp tên Menu phát trước. Nhạc riêng của chủ đề sẽ phát thay thế.
   RIPPS2_BIOS_SOUNDS: Âm thanh BIOS
@@ -1366,7 +1463,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: Gợi ý và biểu tượng
   HINT_RIPPS2_HINTS_GLYPHS: Diện mạo của gợi ý nút và biểu tượng. Mỗi dòng bắt đầu ở Chủ đề, tức lựa chọn của chủ đề; mọi lựa chọn khác là của bạn và thắng mọi chủ đề.
   RIPPS2_HINT_LAYOUT: Bố cục gợi ý
-  HINT_RIPPS2_STARSIDE: 'Vị trí ngôi sao của trò chơi yêu thích trong danh sách. Trái: cột riêng ở đầu mỗi dòng. Phải: sau tên. Ẩn: không có sao. Chủ đề: theo chủ đề. Biểu tượng dòng của chủ đề chuyển sang đầu kia nên không bao giờ chồng lên nhau.'
+  HINT_RIPPS2_STARSIDE: 'Ngôi sao của trò chơi yêu thích nằm ở đâu trong danh sách. Trái: cột riêng ở đầu mỗi hàng. Phải: sau tên. Ẩn (mặc định): không sao, không cột, tên hiện đầy đủ. Chủ đề: theo chủ đề. R3 luôn đánh dấu yêu thích một trò chơi; giữ R3 4 giây trên danh sách để ẩn các ngôi sao hoặc hiện lại (việc này cũng đánh dấu trò chơi dưới con trỏ).'
   HINT_RIPPS2_HINT_LAYOUT: 'Hàng: các gợi ý trên một dòng. Cột: mỗi dòng một gợi ý, một danh sách dọc một bên, bắt đầu ở chỗ chủ đề đặt gợi ý.'
   RIPPS2_HINT_LABELS: Nhãn gợi ý
   HINT_RIPPS2_HINT_LABELS: Chỉ biểu tượng chỉ vẽ các nút, cho biểu tượng đã có chữ riêng. Huy hiệu ghép biểu tượng và tên của mỗi gợi ý vào một huy hiệu.
@@ -1387,11 +1484,11 @@ labels:
   RIPPS2_TRANSITION: Chuyển trang
   HINT_RIPPS2_TRANSITION: 'Trang mới hiện ra thế nào khi bạn sang danh mục khác: từ màu nền của chủ đề, hoặc từ một chớp sáng. Chủ đề giữ lựa chọn của chủ đề.'
   RIPPS2_CATEGORY_LAYOUT: Bố cục danh mục
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Nơi đặt ba danh mục: tên của chúng ngang phía trên, hoặc biểu tượng dọc thanh bên, mỗi cái có một ngăn kéo chứa các trang của nó (Trái trong danh sách sẽ đến đó). Chủ đề giữ bố cục riêng của chủ đề.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Ba danh mục nằm ở đâu: tên của chúng ở trên cùng, hoặc biểu tượng dọc thanh bên, mỗi cái có ngăn kéo chứa các trang của nó (Trái trên danh sách đi tới đó), hoặc Menu: không có thanh, các danh mục nằm trong menu START như chủ đề làm cho OPL. Chủ đề giữ bố cục của chủ đề.'
   RIPPS2_CACHE: Bộ nhớ đệm
   HINT_RIPPS2_CACHE: 'Cách giữ danh sách trò chơi của mỗi nguồn để trang của nó mở ngay: Fast Cache, danh sách của HDD trong và Tự làm mới.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Mỗi nguồn giữ danh sách trò chơi gần nhất của nó (RIPPS2.LST cạnh thư mục CD và DVD) và hiện ngay khi nguồn trả lời, rồi đọc lại nguồn ở chế độ nền. Tắt sẽ đọc mỗi danh sách từ nguồn trước, như trước đây.
+  HINT_RIPPS2_FAST_CACHE: 'Mỗi nguồn giữ danh sách trò chơi gần nhất của nó (RIPPS2.LST cạnh các thư mục CD và DVD) và hiện nó ngay khi nguồn trả lời. Trust Cache quyết định nguồn có được đọc lại sau đó hay không. Tắt: mỗi danh sách được đọc từ nguồn trước, như trước đây.'
   HINT_RIPPS2_VIGNETTE: Làm tối viền mọi ảnh bìa trừ ảnh đang chọn, để ảnh đang chọn nổi bật. Yếu bằng một nửa Đầy đủ.
   RIPPS2_GRID_WIDE: Bố cục lưới màn hình rộng
   HINT_RIPPS2_GRID_WIDE: Trang Lưới chỉ dùng cho hình 16:9 (Màn hình rộng, 720p, 1080i), nơi ảnh bìa vẽ hẹp hơn và xếp ngang được nhiều hơn. Chủ đề dùng bố cục riêng của chủ đề; Giống theo Bố cục lưới.
@@ -1407,7 +1504,7 @@ labels:
   GAME_TYPE_LABELS: Hiện nhãn [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: Không lưu được danh sách mã gian lận vào thư mục Neutrino, nên Neutrino không dùng được. Chạy không có mã gian lận?
   AUTO_CREATE_VMC: Tạo VMC ở lần chạy đầu
-  HINT_AUTO_CREATE_VMC: Chạy một trò chơi PS2 chưa có VMC ở khe 1 sẽ tạo thẻ 8 MB trên thiết bị của trò chơi, đặt tên theo gợi ý của màn hình VMC (mọi đĩa của trò chơi dùng chung), rồi gán nó. Không áp dụng cho HDD trong khi dùng Neutrino.
+  HINT_AUTO_CREATE_VMC: Chạy một trò chơi PS2 không có VMC ở khe 1 sẽ tạo thẻ 8 MB trên thiết bị của trò chơi, đặt tên như màn hình VMC gợi ý (dùng chung cho mọi đĩa của trò chơi), và gán nó. Với Neutrino thì không trên HDD APA (HDD exFAT thì được).
   AUTO_VMC_CREATING: Đang tạo VMC của trò chơi này...
   AUTO_VMC_FAILED: Không tạo được VMC của trò chơi này. Trò chơi chạy mà không có VMC.
   RIPPS2_BIOS_MUSIC: Nhạc BIOS
@@ -1444,7 +1541,7 @@ labels:
   HINT_LANGUAGE: Ngôn ngữ menu. Thêm ngôn ngữ bằng cách đặt tệp lang_*.lng vào thư mục LNG.
   HINT_GSM_DEFAULTS_BUTTON: Các bản sửa chế độ video mọi trò chơi đều nhận, trừ khi nó có cài đặt GSM riêng.
   HINT_DEFDEVICE: Trang RiptOPL mở khi khởi động.
-  HINT_MMCE_MODE: Trò chơi trên SD2PSX hoặc MemCard PRO2. Tự động khởi động khi bật máy, Thủ công khi bạn mở trang, Tắt thì ẩn nó.
+  HINT_MMCE_MODE: 'Trò chơi trên SD2PSX hoặc MemCard PRO2. Tự động khởi động nó lúc bật máy: nhanh nhất cho thẻ đang cắm, trò chơi của nó có trong Tất cả trò chơi ngay từ đầu. Thủ công khởi động nó khi bạn mở trang của nó, Tắt thì ẩn nó.'
   HINT_MMCE_SETTINGS_BUTTON: Khe, IGR bootcard, GameID và tùy chọn định thời cho MMCE.
   HINT_ENABLE_USB: Nạp trình điều khiển lưu trữ USB.
   HINT_ENABLE_MX4SIO: Nạp trình điều khiển bộ chuyển thẻ SD MX4SIO.
@@ -1626,8 +1723,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'Hình ảnh menu: chế độ video, màn hình rộng, vị trí trên TV (H-POS, V-POS) và overscan.'
   HINT_RIPPS2_LAYOUT: Vị trí các mục và cách một trang hiện vào, rồi bìa của RIPFLOW và lưới của RIPGRID.
   HINT_RIPPS2_COLORS_TEXT: Độ đậm chữ, chủ đề màu, chuyển màu và mọi màu.
-  HINT_RIPPS2_TEXT_WEIGHT: 'Độ đậm của chữ riêng RIPPS2: gợi ý trong Cài đặt, TRẠNG THÁI và Giới thiệu. Thường như trước; Vừa và Đậm dễ đọc hơn trên hình mềm.'
-  HINT_RIPPS2_HDD_START: 'HDD bên trong, APA hay exFAT: RIPPS2 đọc nó dù là loại nào và hiện một lần, là game HDD. Tắt sẽ để yên nó.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'Chữ riêng của RIPPS2 đậm cỡ nào: chú giải trong Cài đặt, TRẠNG THÁI và Giới thiệu. Thường giữ như cũ; Đậm dễ đọc hơn trên hình mềm. Phông riêng của chủ đề giữ độ đậm mà chủ đề đặt cho chúng.'
+  HINT_RIPPS2_HDD_START: 'HDD trong, APA hoặc exFAT: RIPPS2 đọc loại nào cũng được và hiện nó một lần, dưới tên Trò chơi trên HDD. Tự động (nhanh nhất khi có ổ) khởi động nó lúc bật máy; Tắt thì để yên.'
   HINT_RIPPS2_THEME_COLOR: Màu riêng của chủ đề. Chọn Tùy chỉnh làm chủ đề màu để tự chọn, giống màu chữ.
   HINT_RIPPS2_SWEEP: Năm màu mà chủ đề chuyển qua, chậm và mượt. Cầu vồng, một chuyển màu từ mỗi chủ đề màu, hoặc của bạn. Tắt giữ chủ đề đứng yên.
   HINT_RIPPS2_SWEEP_COLORS: Năm màu của chuyển màu và tốc độ. Đổi một cái của RIPPS2 thì nó được giữ làm của bạn, với tên bạn đặt.
@@ -1636,3 +1733,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Mỗi màu kéo dài bao lâu trước khi màu kế tiếp hiện vào. Ngay cả Sôi động vẫn mượt: màu không bao giờ nhấp nháy.'
   RIPPS2_HIDE_COMPRESS: Ẩn trò chơi và nén
   HINT_RIPPS2_SELECT_HOLD: 'Giữ SELECT 4.2 giây trên danh sách trò chơi. Danh sách: các chủ đề trong một bảng, chọn một. Xoay vòng: chủ đề tiếp theo. Tắt: không làm gì (nhấn vẫn làm mới).'
+  RIPPS2_RECENT_GAMES: Trò chơi gần đây
+  RIPPS2_SET_METADATA_RENAME: Đặt siêu dữ liệu (đổi tên)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Ưu tiên tay cầm (thử nghiệm)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX đọc qua bus dùng chung với tay cầm, và trong lúc đọc thì tay cầm không được nghe: nút bấm bị trễ hoặc mất khi bìa đang tải. Bật: bìa tới từng phần nhỏ, xen giữa là đọc tay cầm, chậm hơn một chút. Tắt: nhanh hết mức thẻ cho phép. Khi các nguồn của thẻ ở Tự động, danh sách của nó tải một lần, lúc khởi động.'
+  HINT_RIPPS2_TRUST_CACHE: 'Một danh sách hiện từ bộ nhớ đệm giữ nguyên như vậy, sẵn sàng để chạy, cho tới khi bạn nhấn SELECT hoặc RIPPS2 tự thay đổi nguồn đó. Tắt: mỗi nguồn được đọc lại trong nền sau khi bộ nhớ đệm hiện, một quãng dừng cảm nhận được trên thẻ MMCE hoặc MX4SIO, vốn dùng chung bus với tay cầm.'
+  RIPPS2_STATUS_OPEN: Tải và các ổ
+  HINT_RIPPS2_STATUS_OPEN: 'Mở TRẠNG THÁI: khởi động đọc cài đặt và danh sách trò chơi ở đâu, chỗ nào nhanh nhất, EXIT của trò chơi đi đâu, và mọi ổ. CÀI ĐẶT BỘ NHỚ ĐỆM ở đó đưa về đây.'
+  RIPPS2_BADGE_SET: Bộ huy hiệu
+  HINT_RIPPS2_BADGE_SET: 'Các huy hiệu trên trang thông tin trò chơi (xếp hạng, người chơi, ESRB, chế độ video, quét, tỉ lệ). RIPPS2: bộ riêng của nó, giống nhau trên mọi chủ đề. Chủ đề: hình riêng của chủ đề, hoặc của RIPPS2 khi chủ đề yêu cầu.'
+  RIPPS2_HINT_FADE: Mờ dần gợi ý và biểu tượng
+  HINT_RIPPS2_HINT_FADE: 'Gợi ý nút hoặc biểu tượng nào thay đổi sẽ hiện dần, như bìa, ngay lúc thay đổi; những cái giữ nguyên thì để yên, trên mọi trang và thông báo. Tắt: chúng chỉ xuất hiện. Chủ đề: chủ đề quyết định (bật, trừ khi ghi hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: Kiểu thanh bên
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Cổ điển (tách): biểu tượng trong dải tối của thanh bên, kèm dải màu bên cạnh. XL (liền một khối): một dải rộng hơn, biểu tượng ở giữa. Chủ đề: chủ đề quyết định.'
+  HINT_EXITPATH: 'EXIT trong Menu trong trò chơi đi đâu. Tốt nhất để trống, với BIBLE đã thiết lập (TRẠNG THÁI > Trình khởi động > Quản lý, hoặc BOOT LOCK trên PS2BBL của bạn): khi đó EXIT đặt lại máy theo đường khởi động riêng của nó và PS2BBL chạy RIPPS2 như lúc bật máy, cách quay về an toàn nhất. Trình duyệt: trình duyệt PS2. Một ELF trên thẻ nhớ (mc0:/mc1:) hoặc ổ USB FAT32 (mass:/) được tải ngay sau khi đặt lại, việc mà không phải trò chơi nào cũng để máy sẵn sàng; lúc đó MMCE hoàn toàn không truy cập được.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO và HDD exFAT. Tự động khởi động chúng lúc bật máy: nhanh nhất cho các ổ đang cắm, trò chơi của chúng có trong Tất cả trò chơi ngay từ đầu. Thủ công khởi động chúng khi bạn mở trang của chúng.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino không dùng được VMC trên HDD APA (exFAT, USB và MX4SIO thì được): trò chơi này chạy với thẻ thật trong khe đó.'

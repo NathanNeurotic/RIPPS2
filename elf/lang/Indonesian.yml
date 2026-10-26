@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: Musik menu tidak bisa ditulis ke %s (%s). Apakah drive penuh?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'Musik menu adalah WAV berukuran %s, dan tidak ada kartu memori yang muat. Di sini RIPPS2 berjalan dari kartu memori dan belum ada drive dengan folder OPL yang dimulai: mulai satu di Penyimpanan, lalu rip musiknya ke sana.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: Suara tidak bisa ditulis ke %s. Apakah drive penuh atau dilindungi dari penulisan?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Musik menu BIOS ini bukan yang dikenal RIPPS2. Tidak ada yang ditulis.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Bank suara BIOS ini bukan yang dikenal RIPPS2. Tidak ada yang ditulis.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) dipindahkan utuh ke folder cadangan lebih dulu.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 diikat ke kartu ini oleh konsol dan ditulis sebagai %s/%s.
-
-    - Konfigurasinya, mc%d:/PS2BBL/CONFIG.INI, menjalankan RIPPS2 dari %s, BOOT LOCK menyala.
-
-    Prosesor I/O dimulai ulang untuk ini; musik dan drive kembali setelahnya. Biarkan kartu terpasang dan konsol menyala sampai muncul tulisan selesai.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: SALINAN DI KARTU MEMORI %d
   A COPY ON MX4SIO: SALINAN DI MX4SIO
   A COPY ON THE USB DRIVE: SALINAN DI FLASHDISK USB
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: BIBLE tidak bisa ditulis ke kartu memori %d, jadi kartu dikembalikan seperti semula. Periksa ruang kosongnya, lalu coba lagi.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE tidak bisa menyalin RIPPS2 ke %s. Periksa ruangnya dan pastikan tidak dilindungi dari penulisan. Tidak ada hal lain yang diubah.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE tidak bisa menyalin RIPPS2 ke partisi %s di HDD. Periksa ruang kosongnya. Tidak ada hal lain yang diubah.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE tidak bisa menyimpan salinan program boot HDD, jadi berhenti sebelum mengubahnya. RIPPS2 sudah disalin ke HDD; tidak ada hal lain yang diubah.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE tidak bisa memindahkan %s untuk menyimpannya, jadi berhenti di situ. Tidak ada yang diubah di kartu.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE tidak bisa menulis konfigurasinya (%s). Program boot tidak diubah.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE tidak bisa menulis program boot HDD (langkah %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK menyala. PS2BBL sekarang menjalankan RIPPS2 saat menyala (%s). Tahan tombol pintas PS2BBL saat konsol mulai untuk menuju hal lain.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK bekerja melalui PS2BBL (PlayStation 2 Basic BootLoader), dan tidak ada PS2BBL di kartu memori mana pun di sini.
   INSTALL BIBLE: INSTAL BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'INSTAL BIBLE DI KARTU MEMORI %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Ini butuh konsol yang boot dari HDD-nya (PS2 tebal dengan adaptor jaringan). Biarkan menyala sampai muncul tulisan selesai.'
   INTERNAL HDD  (its boot area): HDD INTERNAL  (area boot-nya)
   MEMORY CARD %d  (%s): KARTU MEMORI %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'KARTU MEMORI 0: %s
-
-    KARTU MEMORI 1: %s
-
-    %s
-
-    BIBLE adalah PS2BBL 1.2.0 oleh El Isra, diatur oleh RIPPS2: tanpa menunggu saat menyala, RIPPS2 dulu, dan tombol yang ditahan saat menyala tetap menuju peramban (SEGITIGA), disk (START), dan isi sebelumnya (LINGKARAN). Instal atau perbaiki di kartu memori atau HDD internal?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Kartu memori %d punya %d KB kosong, dan BIBLE butuh %d KB di sana. Kosongkan sedikit ruang, lalu coba lagi.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Kartu memori %d punya %d KB kosong, dan salinan RIPPS2 butuh %d KB. Kosongkan sedikit ruang atau pilih tempat lain.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Kartu memori %d menjalankan %s saat menyala, dan BOOT LOCK hanya bekerja melalui PS2BBL.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: BAKI TERBUKA
   TREFOIL KNOT: SIMPUL TREFOIL
   ' and ': ' dan '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s tidak ada di %s%s. POPSTARTER butuh POPS.ELF dan POPS_IOX.PAK, emulator PS1 dari konsolmu sendiri, di samping game untuk menjalankannya.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s tidak ada di %s%s. RIPPOPS menemukan POPS.ELF dan POPS_IOX.PAK, emulator PS1 milik Sony, di %s: START menyalinnya ke sini dan menjalankan game.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s tidak bisa disalin ke %s%s. Apakah drive penuh atau dilindungi dari penulisan?'
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s tidak ada di %s%s. POPSTARTER butuh POPS.ELF dan POPS_IOX.PAK, emulator PS1 dari konsolmu sendiri, di samping game untuk menjalankannya.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s tidak ada di %s%s. RIPPOPS menemukan POPS.ELF dan POPS_IOX.PAK, emulator PS1 milik Sony, di %s: START menyalinnya ke sini dan menjalankan game.'
   COPY AND START: SALIN DAN JALANKAN
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'Terima kasih khusus juga untuk semua cinta dari YouTube:'
   and its own look, launchers, file browser and save tools.: dan dengan tampilan, peluncur, penjelajah file, dan alat save miliknya sendiri.
   glad to help however you reach me.: senang membantu, lewat mana pun kamu menghubungiku.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): inti game kedua, 1.8.0 dibawa tanpa diubah (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: dengan Neutrino buatan rickgaiser di dalamnya sebagai inti game kedua,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Game ini dimulai lewat Neutrino, dan RIPPS2 tidak menemukannya: tidak di jalur Pengaturan, di drive game ini, di kartu memori, atau di drive mana pun yang sudah dimulai. RIPPS2 membawa Neutrino 1.8.0 buatan rickgaiser (AFL-3.0): pasang sekali, di mana pun kamu mau, dan setiap game Neutrino memakainya dari sana.'
   STARTING THE DRIVES: MEMULAI DRIVE
   '%d games, on the started drives': '%d game, di drive yang sudah dimulai'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: BEBERAPA FILE TIDAK BISA DIHAPUS'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: tidak di drive yang sudah dimulai
   only if you have none: hanya jika kamu tidak punya
   starts every drive first: memulai semua drive dulu
-  Drives, launchers and homebrew: Drive, peluncur, dan homebrew
   BDM Devices: Perangkat BDM
   Color Sweep: Peralihan Warna
   Colors and Text: Warna dan Teks
@@ -1078,9 +1037,7 @@ strings:
   Bold: Tebal
   Controllers: Pengontrol
   Lively: Lincah
-  Medium: Sedang
   PS Emulation: Emulasi PS
-  Regular: Biasa
   Slow: Lambat
   A MOMENT: SEBENTAR
   A TASK IN THE BACKGROUND: SEBUAH TUGAS DI LATAR
@@ -1145,6 +1102,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: Hapus %s? Peralihan bawaan RIPPS2 tetap seperti semula.
   Sweep: Peralihan
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Lencana menandai game yang punya pencapaian di daftar Anda, dengan berapa yang sudah terbuka. Butuh TELEMETRI menyala.
+  Classic (Split): Klasik (terpisah)
+  Guidance: Panduan
+  OK: OK
+  XL (One Piece): XL (satu bagian)
+  STARS HIDDEN: BINTANG DISEMBUNYIKAN
+  STARS SHOWN: BINTANG DITAMPILKAN
+  Asking the SD2PSX for this game's memory card...: Meminta kartu memori game ini ke SD2PSX...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX sedang menyiapkan kartu memori game ini (%d dtk). Game dimulai setelah selesai; START memulainya sekarang.
+  the second game core, its newest build carried unmodified (AFL-3.0): inti game kedua, build terbarunya dibawa tanpa diubah (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': '%s tidak bisa ditulis ke %s (%d suara berhasil). Apakah drive penuh atau dilindungi dari penulisan?'
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': '%s tidak bisa ditulis ke %s (%d suara berhasil, dan kartu kini punya %d KB kosong). Apakah kartu dilindungi dari penulisan?'
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: Folder %s tidak bisa dibuat. Apakah drive penuh atau dilindungi dari penulisan? Tidak ada yang ditulis.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'Suara butuh %d KB dan kartu memori ini punya %d KB kosong. Tidak ada yang ditulis. Kosongkan ruang di kartu, atau mulai drive di Penyimpanan lalu rip ulang: RIPPS2 lalu menawarkan drive itu.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : Suara butuh %d KB dan kartu memori ini punya %d KB kosong. START menulisnya ke %sAUDIO/ di drive sebagai gantinya, dan RIPPS2 memutarnya dari sana.
+  There was not enough memory to make the sounds. Nothing was written.: Memori tidak cukup untuk membuat suara. Tidak ada yang ditulis.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- PS2BBL 1.2.0 diikat ke kartu ini oleh konsol dan ditulis sebagai %s/%s.
+  
+    - Konfigurasinya, mc%d:/PS2BBL/CONFIG.INI, menjalankan RIPPS2 dari %s tanpa menunggu (0 ms, yang tidak diizinkan PS2BBL Extended), BOOT LOCK menyala.
+  
+    Prosesor I/O dimulai ulang untuk ini; musik dan drive kembali setelahnya. Biarkan kartu terpasang dan konsol menyala sampai muncul tulisan selesai.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE tidak bisa ditulis ke kartu memori %d, jadi kartu dikembalikan seperti semula. Periksa ruang kosongnya, lalu coba lagi. (DIAG.TXT di samping RIPPS2 berisi jawaban kartu.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE tidak bisa memindahkan %s untuk menyimpannya, jadi berhenti di situ. Tidak ada yang diubah di kartu. (DIAG.TXT di samping RIPPS2 berisi jawaban kartu.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'KARTU MEMORI 0: %s
+  
+    KARTU MEMORI 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 oleh El Isra yang diatur RIPPS2: mulai dalam 0 ms saat menyala (PS2BBL Extended tidak mengizinkan 0), RIPPS2 dulu, dan tombol yang ditahan saat menyala tetap menuju peramban (SEGITIGA), disk (START), dan isi sebelumnya (LINGKARAN). Instal atau perbaiki di kartu memori atau HDD internal?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 DI KARTU MEMORI %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'File Memori terbuka sekarang, di MEDIA, dengan disk di papan klipnya (DI-RIP). Buka drive dan folder tujuannya (drive apa saja: USB, HDD, MEDIA milik SD2PSX), tekan SEGITIGA untuk TINDAKAN, lalu pilih TEMPEL. RIPDISC lalu bertanya sekali lagi dan membaca disk dengan laser PS2-mu, lalu menulisnya di sana.'
+  RENAME THE GAME: GANTI NAMA GAME
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Game ini dimulai lewat Neutrino, dan RIPPS2 tidak menemukannya: tidak di jalur Pengaturan, di drive game ini, di kartu memori, atau di drive mana pun yang sudah dimulai. RIPPS2 membawa Neutrino buatan rickgaiser (AFL-3.0), build terbarunya: pasang sekali, di mana pun kamu mau, dan setiap game Neutrino memakainya dari sana.'
+  A PS1 disc's track list, for Ember: Daftar trek disk PS1, untuk Ember
+  A PS1 game for POPSTARTER: Game PS1 untuk POPSTARTER
+  A PS2 game: Game PS2
+  A card the SD2PSX set aside (wrong size): Kartu yang disisihkan SD2PSX (ukuran salah)
+  'A program: Cross starts it': 'Program: Silang memulainya'
+  A save, packed in one file: Simpanan game, dikemas dalam satu file
+  All Games' master list: Daftar utama Semua Game
+  'An SD2PSX boot card: open it to look in': 'Kartu boot SD2PSX: buka untuk melihat isinya'
+  'An SD2PSX memory card: open it like a VMC': 'Kartu memori SD2PSX: buka seperti VMC'
+  Cheats, a file a game: Cheat, satu file per game
+  Each game's settings and info page: Pengaturan dan halaman info setiap game
+  Ember, its BIOS and its PS1 games: Ember, BIOS-nya, dan game PS1-nya
+  Game covers and art, by game ID: Sampul dan gambar game, menurut ID game
+  Games kept in 1 GB parts: Game yang disimpan dalam bagian 1 GB
+  Games that share one SD2PSX card: Game yang berbagi satu kartu SD2PSX
+  Languages for RIPPS2: Bahasa untuk RIPPS2
+  Neutrino, the second game core: Neutrino, inti game kedua
+  OPL's list of this folder's games: Daftar game OPL di folder ini
+  POPSTARTER and PS1 games (VCDs): POPSTARTER dan game PS1 (VCD)
+  PS2 games on CD, as ISOs: Game PS2 di CD, sebagai ISO
+  PS2 games on DVD, as ISOs: Game PS2 di DVD, sebagai ISO
+  PS2BBL's settings: Pengaturan PS2BBL
+  Programs to start (ELFs): Program untuk dijalankan (ELF)
+  RIPPS2's diagnostics, for a bug report: Diagnostik RIPPS2, untuk laporan bug
+  RIPPS2's own folder: Folder milik RIPPS2
+  RIPPS2's settings: Pengaturan RIPPS2
+  RIPPS2's sounds and music: Suara dan musik RIPPS2
+  Recent games: Game terbaru
+  RetroAchievements' files: File RetroAchievements
+  Ripped CDs and DVDs, pictures, video: CD dan DVD hasil rip, gambar, video
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'Menyimpan ke SD milik SD2PSX: tunggu %d dtk sebelum mematikan.'
+  Starred games: Game favorit
+  The SD2PSX's boot cards (PS2BBL): Kartu boot SD2PSX (PS2BBL)
+  The SD2PSX's boot channels and names: Kanal boot dan nama SD2PSX
+  The SD2PSX's memory cards: Kartu memori SD2PSX
+  The SD2PSX's own settings: Pengaturan SD2PSX sendiri
+  The SD2PSX's settings: Pengaturan SD2PSX
+  Themes, a folder each: Tema, masing-masing satu folder
+  This drive's game list, for a quick boot: Daftar game drive ini, untuk boot cepat
+  Virtual memory cards for games: Kartu memori virtual untuk game
+  What RIPPS2's last launch did: Apa yang dilakukan peluncuran terakhir RIPPS2
+  Circle from the top   Cross close: 'Lingkaran: dari awal   Silang: tutup'
+  Cross from the top   Circle close: 'Silang: dari awal   Lingkaran: tutup'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Trek ini tidak bisa diputar. RIPPS2 memutar file .wav PCM 16-bit (seperti hasil rip RIPDISC dan Musik BIOS), file Ogg Vorbis .ogg, dan MP3.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'HANYA BACA: KARTU BOOT SD2PSX SEDANG DIPAKAI'
+  '%d music tracks': '%d trek musik'
+  1 music track: 1 trek musik
+  'A game''s EXIT: %s': 'EXIT game: %s'
+  'A game''s EXIT: the browser': 'EXIT game: peramban'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Semua Game: %d game disimpan di %s, ditampilkan saat boot sebelum drive mana pun menjawab'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Semua Game: belum ada daftar utama; %s ditulis setelah game ditampilkan (Fast Cache menyala)'
+  CACHE SETTINGS: PENGATURAN CACHE
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: Menyalin Neutrino bawaan RIPPS2 ke drive atau kartu memori. Neutrino milikmu sendiri dipakai apa adanya.
+  DIAG.TXT, for a bug report: DIAG.TXT, untuk laporan bug
+  Drives, loading, launchers and homebrew: Drive, pemuatan, peluncur, dan homebrew
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache menampilkan daftar game terakhir setiap drive begitu drive menjawab; Trust Cache menahannya sampai kamu menekan SELECT. Keduanya menyala, dengan pengaturan di kartu memori tempat RIPPS2 dimulai, adalah boot tercepat.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Daftar game: Fast Cache mati, jadi tiap daftar dibaca dari drive-nya saat boot'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Daftar game: tiap daftar langsung tampil dari cache dan bertahan sampai SELECT'
+  'Game lists: each shows at once from its cache, then is read again': 'Daftar game: tiap daftar langsung tampil dari cache, lalu dibaca ulang'
+  LOADING: PEMUATAN
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: Membuat suara RIPPS2 dari BIOS konsol ini dan menulisnya ke folder AUDIO.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Belum ada musik: Pengaturan audio > Musik BIOS me-rip musik menu konsol ini.'
+  SAVE DIAGNOSTICS: SIMPAN DIAGNOSTIK
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Mencari POPSTARTER, file POPS, Ember, BIOS Ember, dan Neutrino di drive, lalu mengingat letak masing-masing.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Pengaturan: %s, di drive yang ditunggu saat boot (kartu memori lebih cepat)'
+  'Settings: %s, read first (the quickest place)': 'Pengaturan: %s, dibaca pertama (tempat tercepat)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Memulai setiap drive sekarang (USB, HDD, MMCE, MX4SIO, dan jaringan), agar tiap drive dan ruangnya tampil di sini.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: IP dan share SMB yang dipakai POPSTARTER untuk game PS1 lewat jaringan.
+  The diagnostics are in %s.: Diagnostik ada di %s.
+  The diagnostics could not be written to %s.: Diagnostik tidak bisa ditulis ke %s.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Apa yang dijalankan tiap kartu memori saat menyala; instal atau perbaiki BIBLE, PS2BBL yang diatur untuk menjalankan RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: Letak POPSTARTER dan Ember, dan cara game PS1 dimulai.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Letak Neutrino-mu, mode videonya, dan argumen yang diterima setiap peluncuran Neutrino.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : Menulis catatan RIPPS2 tentang kontroler, drive, kartu MMCE, dan peluncuran terakhir ke DIAG.TXT di samping RIPPS2. Kirimkan bersama laporan bug.
+  back to Cache: kembali ke Cache
+  what boot reads first: yang dibaca boot lebih dulu
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Neutrino ini lebih lama dari 1.3, yang tidak bisa memulai game dari HDD APA. Arahkan Peluncuran game > Neutrino ke Neutrino 1.3 atau lebih baru, atau kosongkan jalurnya untuk memakai bawaan RIPPS2.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 tidak melihat %s di %s%s. POPSTARTER butuh POPS.ELF dan POPS_IOX.PAK, emulator PS1 dari konsolmu sendiri; ia mungkin menemukannya di tempat yang tidak dilihat RIPPS2 (jika game-mu berjalan, ia menemukannya). START meluncurkan, dan drive ini tidak ditanyakan lagi.
 labels:
   BDM_GAMES: Game BDM
   HDD_GAMES: Game HDD
@@ -1325,16 +1422,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Satu warna untuk menara, bola, kaca, pemutar CD, dan peramban file, di ketiga tab. Tema: tema yang memutuskan (biru RIPPS2 jika tidak).'
   RIPPS2_HINTS: Petunjuk Tombol
   HINT_RIPPS2_HINTS: 'Petunjuk tombol di bagian bawah. Pudar Saat Diam menyembunyikannya sampai kamu menekan tombol. Tema: tema yang memutuskan.'
-  RIPPS2_CATEGORY_BAR: Bilah Kategori
-  HINT_RIPPS2_CATEGORY_BAR: 'JALANKAN DISK, PENYIMPANAN, dan FILE MEMORI di bagian atas. Pudar Saat Diam menyembunyikannya sampai kamu menekan tombol. Tema: tema yang memutuskan.'
+  RIPPS2_CATEGORY_BAR: Kategori/Bilah Samping
+  HINT_RIPPS2_CATEGORY_BAR: 'LUNCURKAN DISK, PENYIMPANAN, dan FILE MEMORI: nama di atas, atau bilah samping. Pudar Saat Diam memudarkan nama, atau menggeser bilah samping, sampai kamu menekan tombol; langsung kembali. Tema: tema yang menentukan.'
   RIPPS2_SOURCE_NAME: Nama Sumber
   RIPPS2_STATUS: Status
   RIPPS2_SOURCE: Sumber
   HINT_RIPPS2_SOURCE_NAME: 'Nama sumber di atas game (SEMUA GAME, GAME HDD, dan seterusnya). Pudar Saat Diam memudarkannya bersama bilah kategori; Muncul justru menampilkannya besar di tengah halaman, seperti L3 menyebut nama daftar, di daftar pertama setelah boot dan setiap kali sumber berganti, lalu memudar. Tema bisa menjadikan Muncul sebagai Tampil miliknya. Tema: tema yang memutuskan.'
-  RIPPS2_RECENTS: Tampilkan Terbaru
-  HINT_RIPPS2_RECENTS: Sampai sebanyak ini game yang terakhir kamu jalankan di bagian atas Game Berbintang, yang terbaru dulu. 0 mematikannya.
+  RIPPS2_RECENTS: Game Terbaru
+  HINT_RIPPS2_RECENTS: 'Game Terbaru, halaman di bilah samping berisi game yang terakhir kamu luncurkan, terbaru di depan: berapa yang disimpan, 1 sampai 99 (Segitiga mengetik angkanya). Game yang drive-nya di Manual memulai drive itu saat kamu memilihnya. 0 mematikan halaman.'
   RIPPS2_CATEGORY_ORDER: Urutan Kategori
-  HINT_RIPPS2_CATEGORY_ORDER: 'File Memori pertama dan Jalankan Disk terakhir. Dibuat untuk RIPFLOW (Antarmuka > Tema). Tema: tema yang memutuskan.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Menukar Luncurkan Disk dan File Memori: File Memori pertama dan Luncurkan Disk terakhir, di nama bilah maupun ikon bilah samping. Dibuat untuk RIPFLOW (Antarmuka > Tema). Tema: tema yang menentukan.'
   RIPPS2_MUSIC: Musik
   HINT_RIPPS2_MUSIC: Memutar file bgm di folder AUDIO di samping RIPPS2 dan di folder AUDIO milik OPL di setiap drive yang dimulai (Ogg tanpa tag, atau WAV 16-bit); yang bernama Menu diputar lebih dulu. Musik milik tema diputar sebagai gantinya.
   RIPPS2_BIOS_SOUNDS: Suara BIOS
@@ -1343,7 +1440,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: Petunjuk dan Simbol
   HINT_RIPPS2_HINTS_GLYPHS: Tampilan petunjuk tombol dan simbol. Setiap baris dimulai dengan Tema, pilihan tema; pilihan lain apa pun adalah milikmu dan mengalahkan setiap tema.
   RIPPS2_HINT_LAYOUT: Tata Letak Petunjuk
-  HINT_RIPPS2_STARSIDE: 'Letak bintang game favorit di daftar. Kiri: kolomnya sendiri di awal setiap baris. Kanan: setelah judul. Tersembunyi: tanpa bintang. Tema: sesuai tema. Ikon baris tema pindah ke ujung lain, jadi keduanya tak pernah bertumpuk.'
+  HINT_RIPPS2_STARSIDE: 'Letak bintang game favorit di daftar game. Kiri: kolomnya sendiri di awal setiap baris. Kanan: setelah judul. Tersembunyi (awal): tanpa bintang dan kolom, judul tampil penuh. Tema: sesuai tema. R3 memfavoritkan game apa pun pilihannya; tahan R3 4 detik di daftar untuk menyembunyikan bintang atau memunculkannya lagi (ini juga memfavoritkan game di bawah kursor).'
   HINT_RIPPS2_HINT_LAYOUT: 'Baris: petunjuk dalam satu garis. Kolom: satu petunjuk per baris, daftar menurun di samping, dimulai di tempat tema menaruh petunjuknya.'
   RIPPS2_HINT_LABELS: Label Petunjuk
   HINT_RIPPS2_HINT_LABELS: Simbol Saja hanya menggambar tombolnya, untuk simbol yang membawa kata-katanya sendiri. Lencana menyatukan simbol dan judul setiap petunjuk dalam satu lencana.
@@ -1364,11 +1461,11 @@ labels:
   RIPPS2_TRANSITION: Transisi Halaman
   HINT_RIPPS2_TRANSITION: 'Bagaimana halaman baru masuk saat kamu pindah ke kategori lain: dari warna latar tema, atau keluar dari kilatan. Tema mempertahankan pilihan tema.'
   RIPPS2_CATEGORY_LAYOUT: Tata Letak Kategori
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Di mana tiga kategori berada: namanya di atas, atau ikon menurun di bilah samping, masing-masing dengan laci berisi halamannya (Kiri di daftar menuju ke sana). Tema mempertahankan milik tema sendiri.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Letak tiga kategori: namanya di atas, atau ikon di sepanjang bilah samping, masing-masing dengan laci halamannya (Kiri di daftar menuju ke sana), atau Menu: tanpa bilah, kategori di menu START seperti tema buatan untuk OPL. Tema memakai milik tema.'
   RIPPS2_CACHE: Cache
   HINT_RIPPS2_CACHE: 'Cara daftar game setiap sumber disimpan agar halamannya langsung terbuka: Fast Cache, daftar HDD internal, dan Penyegaran Otomatis.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Setiap sumber menyimpan daftar game terakhirnya (RIPPS2.LST di samping folder CD dan DVD-nya) dan menampilkannya begitu sumber menjawab, lalu membaca sumbernya lagi di latar belakang. Mati membaca setiap daftar dari sumbernya dulu, seperti sebelumnya.
+  HINT_RIPPS2_FAST_CACHE: 'Setiap sumber menyimpan daftar game terakhirnya (RIPPS2.LST di samping folder CD dan DVD) dan menampilkannya begitu sumber menjawab. Trust Cache menentukan apakah sumber dibaca ulang sesudahnya. Mati: setiap daftar dibaca dulu dari sumbernya, seperti sebelumnya.'
   HINT_RIPPS2_VIGNETTE: Menggelapkan tepi setiap sampul kecuali yang dipilih, sehingga yang dipilih menonjol. Lemah adalah separuh Penuh.
   RIPPS2_GRID_WIDE: Tata Letak Kisi Layar Lebar
   HINT_RIPPS2_GRID_WIDE: Halaman Kisi khusus gambar 16:9 (Layar lebar, 720p, 1080i), tempat sampul digambar lebih sempit dan lebih banyak yang muat ke samping. Tema memakai milik tema; Sama mengikuti Tata Letak Kisi.
@@ -1384,7 +1481,7 @@ labels:
   GAME_TYPE_LABELS: Tampilkan Label [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: Daftar cheat tidak bisa disimpan ke folder Neutrino, jadi Neutrino tidak bisa memakainya. Luncurkan tanpa cheat?
   AUTO_CREATE_VMC: Buat VMC saat Peluncuran Pertama
-  HINT_AUTO_CREATE_VMC: Meluncurkan game PS2 tanpa VMC di slot 1 membuat kartu 8 MB di perangkat game, dinamai seperti saran layar VMC (dipakai bersama oleh setiap disk game itu), lalu memasangnya. Tidak untuk HDD internal di bawah Neutrino.
+  HINT_AUTO_CREATE_VMC: Meluncurkan game PS2 tanpa VMC di slot 1 membuat kartu 8 MB di perangkat game, dinamai sesuai saran layar VMC (dipakai bersama semua disk game itu), lalu menetapkannya. Dengan Neutrino tidak di HDD APA (HDD exFAT bisa).
   AUTO_VMC_CREATING: Membuat VMC game ini...
   AUTO_VMC_FAILED: Tidak bisa membuat VMC game ini. Game dimulai tanpa VMC.
   RIPPS2_BIOS_MUSIC: Musik BIOS
@@ -1421,7 +1518,7 @@ labels:
   HINT_LANGUAGE: Bahasa menu. Tambah lagi dengan menaruh file lang_*.lng di folder LNG.
   HINT_GSM_DEFAULTS_BUTTON: Perbaikan mode video yang didapat setiap game kecuali punya pengaturan GSM sendiri.
   HINT_DEFDEVICE: Halaman yang dibuka RiptOPL saat boot.
-  HINT_MMCE_MODE: Game di SD2PSX atau MemCard PRO2. Otomatis mulai saat boot, Manual saat kamu membuka halamannya, Mati menyembunyikannya.
+  HINT_MMCE_MODE: 'Game di SD2PSX atau MemCard PRO2. Otomatis memulainya saat boot: tercepat untuk kartu yang tertancap, game-nya ada di Semua Game sejak awal. Manual memulainya saat kamu membuka halamannya, Mati menyembunyikannya.'
   HINT_MMCE_SETTINGS_BUTTON: Slot, IGR bootcard, GameID, dan opsi timing untuk MMCE.
   HINT_ENABLE_USB: Memuat driver penyimpanan USB.
   HINT_ENABLE_MX4SIO: Memuat driver adaptor kartu SD MX4SIO.
@@ -1601,8 +1698,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'Gambar menu: mode video, layar lebar, letaknya di TV (H-POS, V-POS) dan overscan.'
   HINT_RIPPS2_LAYOUT: Letak kategori dan cara halaman masuk, lalu sampul RIPFLOW dan kisi RIPGRID.
   HINT_RIPPS2_COLORS_TEXT: Ketebalan teks, tema warna, peralihan warna, dan setiap warna.
-  HINT_RIPPS2_TEXT_WEIGHT: 'Seberapa tebal teks milik RIPPS2: tip di Pengaturan, STATUS, dan Tentang. Biasa seperti sebelumnya; Sedang dan Tebal lebih mudah dibaca pada gambar yang lembut.'
-  HINT_RIPPS2_HDD_START: 'HDD internal, APA atau exFAT: RIPPS2 membacanya apa pun formatnya dan menampilkannya sekali, sebagai Game HDD. Mati membiarkannya.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'Seberapa tebal teks milik RIPPS2: tooltip Pengaturan, STATUS, dan Tentang. Normal seperti sebelumnya; Tebal lebih mudah dibaca di gambar yang lembut. Font milik tema mempertahankan ketebalan yang diberikan tema.'
+  HINT_RIPPS2_HDD_START: 'HDD internal, APA atau exFAT: RIPPS2 membaca apa pun jenisnya dan menampilkannya sekali, sebagai Game HDD. Otomatis (tercepat jika ada disk) memulainya saat boot; Mati membiarkannya.'
   HINT_RIPPS2_THEME_COLOR: Warna milik tema itu sendiri. Pilih Kustom sebagai tema warna untuk memilihnya sendiri, seperti warna teks.
   HINT_RIPPS2_SWEEP: Lima warna yang dilalui tema, perlahan dan halus. Pelangi, peralihan dari tiap tema warna, atau milikmu. Mati menjaga tema tetap diam.
   HINT_RIPPS2_SWEEP_COLORS: Lima warna peralihan dan kecepatannya. Ubah salah satu milik RIPPS2 dan itu disimpan sebagai milikmu, dengan nama yang kamu berikan.
@@ -1611,3 +1708,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Berapa lama tiap warna bertahan sebelum warna berikutnya muncul. Bahkan Lincah tetap halus: warnanya tidak pernah berkedip.'
   RIPPS2_HIDE_COMPRESS: Sembunyikan game dan kompresi
   HINT_RIPPS2_SELECT_HOLD: 'SELECT ditahan 4.2 dtk di daftar game. Daftar: tema dalam panel, pilih satu. Bergilir: tema berikutnya. Mati: tidak ada (tekan tetap menyegarkan).'
+  RIPPS2_RECENT_GAMES: Game Terbaru
+  RIPPS2_SET_METADATA_RENAME: Atur Metadata (Ganti Nama)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Kontroler Dulu (Eksperimental)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX membaca lewat bus yang dipakai bersama kontroler, dan selama pembacaan berlangsung kontroler tidak terdengar: tekanan tombol terlambat atau hilang saat sampul dimuat. Hidup: sampul datang dalam potongan kecil dengan kontroler dibaca di sela-selanya, sedikit lebih lambat. Mati: secepat kartunya. Dengan sumber kartu di Otomatis, daftarnya dimuat sekali, saat boot.'
+  HINT_RIPPS2_TRUST_CACHE: 'Daftar yang tampil dari cache tetap seperti apa adanya, siap diluncurkan, sampai kamu menekan SELECT atau RIPPS2 sendiri mengubah sumber itu. Mati: setiap sumber dibaca ulang di latar belakang setelah cache-nya tampil, jeda yang terasa pada kartu MMCE atau MX4SIO, yang berbagi bus kontroler.'
+  RIPPS2_STATUS_OPEN: Pemuatan dan Drive
+  HINT_RIPPS2_STATUS_OPEN: 'Membuka STATUS: tempat boot membaca pengaturan dan daftar game, tempat mana yang tercepat, ke mana EXIT game pergi, dan setiap drive. PENGATURAN CACHE di sana kembali ke sini.'
+  RIPPS2_BADGE_SET: Set Lencana
+  HINT_RIPPS2_BADGE_SET: 'Lencana di halaman info game (rating, pemain, ESRB, mode video, pindai, rasio). RIPPS2: set miliknya, sama di setiap tema. Tema: gambar milik tema, atau milik RIPPS2 jika tema memintanya.'
+  RIPPS2_HINT_FADE: Petunjuk dan Glif Memudar
+  HINT_RIPPS2_HINT_FADE: 'Petunjuk tombol atau glif yang berubah muncul memudar, seperti sampul, saat berubah; yang tetap dibiarkan, di setiap halaman dan pesan. Mati: muncul begitu saja. Tema: tema yang menentukan (hidup kecuali tema menulis hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: Gaya Bilah Samping
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Klasik (terpisah): ikon di bilah gelap bilah samping dengan strip berwarna di sebelahnya. XL (satu bagian): satu bilah lebih lebar, ikon di tengahnya. Tema: tema yang menentukan.'
+  HINT_EXITPATH: 'Ke mana EXIT di Menu Dalam Game pergi. Sebaiknya dikosongkan, dengan BIBLE terpasang (STATUS > Boot Loader > Kelola, atau BOOT LOCK di PS2BBL-mu): EXIT lalu me-reset konsol lewat jalur boot-nya sendiri dan PS2BBL memulai RIPPS2 seperti saat menyala, jalan pulang paling aman. Peramban: peramban PS2. ELF di kartu memori (mc0:/mc1:) atau drive USB FAT32 (mass:/) dimuat tepat setelah reset, yang tidak semua game siapkan; MMCE sama sekali tidak bisa dijangkau saat itu.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO, dan HDD exFAT. Otomatis memulainya saat boot: tercepat untuk drive yang tertancap, game-nya ada di Semua Game sejak awal. Manual memulainya saat kamu membuka halamannya.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino tidak bisa memakai VMC di HDD APA (exFAT, USB, dan MX4SIO bisa): game ini dimulai dengan kartu asli di slot itu.'

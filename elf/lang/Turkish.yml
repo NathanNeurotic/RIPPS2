@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: Menü müziği %s konumuna yazılamadı (%s). Sürücü dolu mu?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'Menü müziği %s boyutunda bir WAV ve hiçbir hafıza kartında ona yer yok. RIPPS2 burada bir hafıza kartından çalışıyor ve OPL klasörü olan hiçbir sürücü başlatılmadı: Depolama''da birini başlatın, sonra müziği oraya çıkarın.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: Sesler %s konumuna yazılamadı. Sürücü dolu mu ya da yazmaya karşı korumalı mı?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: Bu BIOS'un menü müziği RIPPS2'nin bildiği değil. Hiçbir şey yazılmadı.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Bu BIOS'un ses bankası RIPPS2'nin bildiği değil. Hiçbir şey yazılmadı.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) önce bütünüyle bir yedek klasörüne taşınır.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 konsol tarafından bu karta bağlanır ve %s/%s olarak yazılır.
-
-    - Yapılandırması mc%d:/PS2BBL/CONFIG.INI, RIPPS2''yi %s konumundan başlatır, BOOT LOCK açık.
-
-    Bunun için G/Ç işlemcisi yeniden başlar; müzik ve sürücüler sonra geri gelir. Bitti yazana kadar kartı takılı ve konsolu açık tutun.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: HAFIZA KARTI %d ÜZERİNDE BİR KOPYA
   A COPY ON MX4SIO: MX4SIO ÜZERİNDE BİR KOPYA
   A COPY ON THE USB DRIVE: USB BELLEKTE BİR KOPYA
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: BIBLE hafıza kartı %d üzerine yazılamadı, bu yüzden kart eski hâline getirildi. Boş alanını kontrol edip yeniden deneyin.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE, RIPPS2'yi %s konumuna kopyalayamadı. Alanı ve yazmaya karşı korumalı olmadığını kontrol edin. Başka hiçbir şey değiştirilmedi.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE, RIPPS2'yi HDD'nin %s bölümüne kopyalayamadı. Boş alanını kontrol edin. Başka hiçbir şey değiştirilmedi.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE, HDD'nin önyükleme programının bir kopyasını saklayamadı, bu yüzden onu değiştirmeden önce durdu. RIPPS2 HDD'ye kopyalandı; başka hiçbir şey değiştirilmedi.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE, saklamak için %s öğesini kenara taşıyamadı, bu yüzden orada durdu. Kartta hiçbir şey değiştirilmedi.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE yapılandırmasını yazamadı (%s). Önyükleme programı değiştirilmedi.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE, HDD'nin önyükleme programını yazamadı (adım %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK açık. PS2BBL artık açılışta RIPPS2'yi başlatır (%s). Başka bir şeye ulaşmak için konsol başlarken bir PS2BBL kısayol tuşuna basılı tutun.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK, PS2BBL (PlayStation 2 Basic BootLoader) üzerinden çalışır ve buradaki hafıza kartlarında hiç yok.
   INSTALL BIBLE: BIBLE'I KUR
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'BIBLE''I HAFIZA KARTI %d ÜZERİNE KUR
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     Bunun için HDD''sinden önyükleyen bir konsol gerekir (ağ adaptörlü kalın bir PS2). Bitti yazana kadar açık tutun.'
   INTERNAL HDD  (its boot area): DAHİLİ HDD  (önyükleme alanı)
   MEMORY CARD %d  (%s): HAFIZA KARTI %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'HAFIZA KARTI 0: %s
-
-    HAFIZA KARTI 1: %s
-
-    %s
-
-    BIBLE, El Isra''nın PS2BBL 1.2.0''ıdır ve RIPPS2 tarafından ayarlanmıştır: açılışta bekleme yok, önce RIPPS2, ve açılışta basılı tutulan bir tuş yine tarayıcıya (ÜÇGEN), bir diske (START) ve daha önce orada olana (DAİRE) ulaşır. Bir hafıza kartına veya dahili HDD''ye kurulsun ya da onarılsın mı?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Hafıza kartı %d üzerinde %d KB boş, BIBLE'ın orada %d KB'ye ihtiyacı var. Biraz yer açıp yeniden deneyin.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Hafıza kartı %d üzerinde %d KB boş, RIPPS2'nin kopyasının %d KB'ye ihtiyacı var. Biraz yer açın veya başka bir yer seçin.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Hafıza kartı %d açılışta %s başlatır ve BOOT LOCK yalnızca PS2BBL üzerinden çalışır.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: TEPSİ AÇIK
   TREFOIL KNOT: YONCA DÜĞÜMÜ
   ' and ': ' ve '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s, %s%s içinde yok. POPSTARTER''ın bir oyunu başlatması için oyunların yanında POPS.ELF ve POPS_IOX.PAK''a, yani kendi konsolunuzun PS1 öykünücüsüne ihtiyacı var.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s, %s%s içinde yok. RIPPOPS, Sony''nin PS1 öykünücüsü olan POPS.ELF ve POPS_IOX.PAK dosyalarını %s üzerinde buldu: START onları buraya kopyalar ve oyunu başlatır.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s, %s%s içine kopyalanamadı. Sürücü dolu mu ya da yazmaya karşı korumalı mı?'
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s, %s%s içinde yok. POPSTARTER''ın bir oyunu başlatması için oyunların yanında POPS.ELF ve POPS_IOX.PAK''a, yani kendi konsolunuzun PS1 öykünücüsüne ihtiyacı var.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s, %s%s içinde yok. RIPPOPS, Sony''nin PS1 öykünücüsü olan POPS.ELF ve POPS_IOX.PAK dosyalarını %s üzerinde buldu: START onları buraya kopyalar ve oyunu başlatır.'
   COPY AND START: KOPYALA VE BAŞLAT
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'YouTube''daki tüm sevgiye de özel teşekkürler:'
   and its own look, launchers, file browser and save tools.: ve kendi görünümü, başlatıcıları, dosya tarayıcısı ve kayıt araçlarıyla.
   glad to help however you reach me.: bana nasıl ulaşırsanız ulaşın, yardım etmekten memnunum.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): ikinci oyun çekirdeği, 1.8.0 değiştirilmeden taşınır (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: içinde ikinci oyun çekirdeği olarak rickgaiser'ın Neutrino'suyla,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'Bu oyun Neutrino üzerinden başlar ve RIPPS2 bir tane bulamadı: ne Ayarlar''daki yolda, ne oyunun sürücüsünde, ne hafıza kartlarında, ne de başlatılmış bir sürücüde. RIPPS2, rickgaiser''ın Neutrino 1.8.0''ını taşır (AFL-3.0): onu bir kez, seçtiğiniz yere kurun; her Neutrino oyunu onu oradan kullanır.'
   STARTING THE DRIVES: SÜRÜCÜLER BAŞLATILIYOR
   '%d games, on the started drives': '%d oyun, başlatılan sürücülerde'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: BAZI DOSYALAR SİLİNEMEDİ'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: başlatılmış bir sürücüde değil
   only if you have none: yalnızca hiç yoksa
   starts every drive first: önce tüm sürücüleri başlatır
-  Drives, launchers and homebrew: Sürücüler, başlatıcılar ve ev yapımı yazılımlar
   BDM Devices: BDM Aygıtları
   Color Sweep: Renk Geçişi
   Colors and Text: Renkler ve Metin
@@ -1079,9 +1038,7 @@ strings:
   Bold: Kalın
   Controllers: Kumandalar
   Lively: Canlı
-  Medium: Orta
   PS Emulation: PS Öykünmesi
-  Regular: Normal
   Slow: Yavaş
   A MOMENT: BİR AN
   A TASK IN THE BACKGROUND: ARKA PLANDA BİR İŞ
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: '%s silinsin mi? RIPPS2''nin kendi geçişleri olduğu gibi kalır.'
   Sweep: Geçiş
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: Rozetler, listelerinizde başarımı olan oyunları ve kaç tanesini açtığınızı gösterir. TELEMETRİ açık olmalıdır.
+  Classic (Split): Klasik (bölünmüş)
+  Guidance: Rehber
+  OK: OK
+  XL (One Piece): XL (tek parça)
+  STARS HIDDEN: YILDIZLAR GİZLİ
+  STARS SHOWN: YILDIZLAR GÖRÜNÜR
+  Asking the SD2PSX for this game's memory card...: SD2PSX'ten bu oyunun hafıza kartı isteniyor...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX bu oyunun hafıza kartını hazırlıyor (%d sn). Bitince oyun başlar; START şimdi başlatır.
+  the second game core, its newest build carried unmodified (AFL-3.0): ikinci oyun çekirdeği, en yeni sürümü değiştirilmeden taşınır (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': '%s, %s konumuna yazılamadı (seslerden %d tanesi yazıldı). Sürücü dolu mu ya da yazmaya karşı korumalı mı?'
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': '%s, %s konumuna yazılamadı (seslerden %d tanesi yazıldı ve kartta şimdi %d KB boş alan var). Kart yazmaya karşı korumalı mı?'
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: '%s klasörü oluşturulamadı. Sürücü dolu mu ya da yazmaya karşı korumalı mı? Hiçbir şey yazılmadı.'
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'Sesler %d KB tutuyor ve bu hafıza kartında %d KB boş alan var. Hiçbir şey yazılmadı. Kartta yer açın ya da Depolama''da bir sürücü başlatıp sesleri yeniden çıkarın: RIPPS2 o zaman sürücüyü önerir.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : Sesler %d KB tutuyor ve bu hafıza kartında %d KB boş alan var. START bunları bunun yerine sürücüde %sAUDIO/ konumuna yazar ve RIPPS2 onları oradan çalar.
+  There was not enough memory to make the sounds. Nothing was written.: Sesleri oluşturmak için yeterli bellek yoktu. Hiçbir şey yazılmadı.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- PS2BBL 1.2.0 konsol tarafından bu karta bağlanır ve %s/%s olarak yazılır.
+  
+    - Yapılandırması mc%d:/PS2BBL/CONFIG.INI, RIPPS2''yi %s konumundan beklemeden başlatır (0 ms, PS2BBL Extended buna izin vermez), BOOT LOCK açık.
+  
+    Bunun için G/Ç işlemcisi yeniden başlar; müzik ve sürücüler sonra geri gelir. Bitti yazana kadar kartı takılı ve konsolu açık tutun.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE hafıza kartı %d üzerine yazılamadı, bu yüzden kart eski hâline getirildi. Boş alanını kontrol edip yeniden deneyin. (RIPPS2'nin yanındaki DIAG.TXT kartın verdiği yanıtı içerir.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE, saklamak için %s öğesini kenara taşıyamadı, bu yüzden orada durdu. Kartta hiçbir şey değiştirilmedi. (RIPPS2'nin yanındaki DIAG.TXT kartın verdiği yanıtı içerir.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'HAFIZA KARTI 0: %s
+  
+    HAFIZA KARTI 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, El Isra''nın RIPPS2 tarafından ayarlanmış PS2BBL 1.2.0''ı: açılışta 0 ms''de başlama (PS2BBL Extended 0''a izin vermez), önce RIPPS2, ve açılışta basılı tutulan bir tuş yine tarayıcıya (ÜÇGEN), bir diske (START) ve daha önce orada olana (DAİRE) ulaşır. Bir hafıza kartına veya dahili HDD''ye kurulsun ya da onarılsın mı?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 HAFIZA KARTI %d ÜZERİNDE
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'Hafıza dosyaları şimdi MEDIA''da, disk panosundayken (ÇIKARILDI) açılır. Diskin gideceği sürücüye ve klasöre gidin (herhangi bir sürücü: USB, HDD, SD2PSX''in MEDIA''sı), İŞLEMLER için ÜÇGEN''e basın ve YAPIŞTIR''ı seçin. RIPDISC bir kez daha sorar ve diski PS2''nizin lazeriyle okuyup oraya yazar.'
+  RENAME THE GAME: OYUNU YENİDEN ADLANDIR
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'Bu oyun Neutrino üzerinden başlar ve RIPPS2 bir tane bulamadı: ne Ayarlar''daki yolda, ne oyunun sürücüsünde, ne hafıza kartlarında, ne de başlatılmış bir sürücüde. RIPPS2, rickgaiser''ın Neutrino''sunu taşır (AFL-3.0), en yeni sürümünü: onu bir kez, seçtiğiniz yere kurun; her Neutrino oyunu onu oradan kullanır.'
+  A PS1 disc's track list, for Ember: Bir PS1 diskinin parça listesi, Ember için
+  A PS1 game for POPSTARTER: POPSTARTER için bir PS1 oyunu
+  A PS2 game: Bir PS2 oyunu
+  A card the SD2PSX set aside (wrong size): SD2PSX'in kenara ayırdığı bir kart (yanlış boyut)
+  'A program: Cross starts it': 'Bir program: Çarpı onu başlatır'
+  A save, packed in one file: Tek dosyaya paketlenmiş bir kayıt
+  All Games' master list: Tüm Oyunlar'ın ana listesi
+  'An SD2PSX boot card: open it to look in': 'Bir SD2PSX önyükleme kartı: içine bakmak için açın'
+  'An SD2PSX memory card: open it like a VMC': 'Bir SD2PSX hafıza kartı: VMC gibi açın'
+  Cheats, a file a game: Hileler, her oyun için bir dosya
+  Each game's settings and info page: Her oyunun ayarları ve bilgi sayfası
+  Ember, its BIOS and its PS1 games: Ember, BIOS'u ve PS1 oyunları
+  Game covers and art, by game ID: Oyun kapakları ve görselleri, oyun kimliğine göre
+  Games kept in 1 GB parts: 1 GB'lık parçalar hâlinde tutulan oyunlar
+  Games that share one SD2PSX card: Bir SD2PSX kartını paylaşan oyunlar
+  Languages for RIPPS2: RIPPS2 için diller
+  Neutrino, the second game core: Neutrino, ikinci oyun çekirdeği
+  OPL's list of this folder's games: OPL'nin bu klasördeki oyun listesi
+  POPSTARTER and PS1 games (VCDs): POPSTARTER ve PS1 oyunları (VCD'ler)
+  PS2 games on CD, as ISOs: CD'deki PS2 oyunları, ISO olarak
+  PS2 games on DVD, as ISOs: DVD'deki PS2 oyunları, ISO olarak
+  PS2BBL's settings: PS2BBL'nin ayarları
+  Programs to start (ELFs): Başlatılacak programlar (ELF'ler)
+  RIPPS2's diagnostics, for a bug report: RIPPS2'nin tanılama kaydı, hata bildirimi için
+  RIPPS2's own folder: RIPPS2'nin kendi klasörü
+  RIPPS2's settings: RIPPS2'nin ayarları
+  RIPPS2's sounds and music: RIPPS2'nin sesleri ve müziği
+  Recent games: Son oyunlar
+  RetroAchievements' files: RetroAchievements dosyaları
+  Ripped CDs and DVDs, pictures, video: Çıkarılmış CD'ler ve DVD'ler, görseller, video
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'SD2PSX''in SD kartına kaydediliyor: kapatmadan önce %d sn bekleyin.'
+  Starred games: Favori oyunlar
+  The SD2PSX's boot cards (PS2BBL): SD2PSX'in önyükleme kartları (PS2BBL)
+  The SD2PSX's boot channels and names: SD2PSX'in önyükleme kanalları ve adları
+  The SD2PSX's memory cards: SD2PSX'in hafıza kartları
+  The SD2PSX's own settings: SD2PSX'in kendi ayarları
+  The SD2PSX's settings: SD2PSX'in ayarları
+  Themes, a folder each: Temalar, her biri bir klasörde
+  This drive's game list, for a quick boot: Bu sürücünün oyun listesi, hızlı açılış için
+  Virtual memory cards for games: Oyunlar için sanal hafıza kartları
+  What RIPPS2's last launch did: RIPPS2'nin son başlatmasının yaptıkları
+  Circle from the top   Cross close: 'Daire: baştan   Çarpı: kapat'
+  Cross from the top   Circle close: 'Çarpı: baştan   Daire: kapat'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : Bu parça çalınamadı. RIPPS2 16 bit PCM .wav dosyalarını (RIPDISC ve BIOS Müziği'nin çıkardığı gibi), Ogg Vorbis .ogg dosyalarını ve MP3'leri çalar.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'SALT OKUNUR: SD2PSX''İN ÖNYÜKLEME KARTI KULLANIMDA'
+  '%d music tracks': '%d müzik parçası'
+  1 music track: 1 müzik parçası
+  'A game''s EXIT: %s': 'Bir oyunun EXIT''i: %s'
+  'A game''s EXIT: the browser': 'Bir oyunun EXIT''i: tarayıcı'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'Tüm Oyunlar: %d oyun %s içinde tutuluyor, açılışta herhangi bir sürücü yanıt vermeden listelenir'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Tüm Oyunlar: henüz ana liste yok; %s, oyunlar listelenince yazılır (Fast Cache açık)'
+  CACHE SETTINGS: ÖNBELLEK AYARLARI
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: RIPPS2'nin taşıdığı Neutrino'yu bir sürücüye veya hafıza kartına kopyalar. Kendi Neutrino'nuz olduğu gibi kullanılır.
+  DIAG.TXT, for a bug report: DIAG.TXT, hata bildirimi için
+  Drives, loading, launchers and homebrew: Sürücüler, yükleme, başlatıcılar ve ev yapımı yazılımlar
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache, her sürücünün son oyun listesini sürücü yanıt verir vermez gösterir; Trust Cache, siz SELECT'e basana kadar onu tutar. İkisi de açık, ayarlar RIPPS2'nin başladığı hafıza kartındayken en hızlı açılıştır.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'Oyun listeleri: Fast Cache kapalı, bu yüzden her biri açılışta kendi sürücüsünden okunur'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'Oyun listeleri: her biri hemen önbelleğinden gelir ve SELECT''e kadar kalır'
+  'Game lists: each shows at once from its cache, then is read again': 'Oyun listeleri: her biri hemen önbelleğinden gelir, sonra yeniden okunur'
+  LOADING: YÜKLEME
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: RIPPS2'nin seslerini bu konsolun kendi BIOS'undan oluşturur ve AUDIO klasörüne yazar.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'Henüz müzik yok: Ses ayarları > BIOS Müziği bu konsolun menü müziğini çıkarır.'
+  SAVE DIAGNOSTICS: TANILAMAYI KAYDET
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: Sürücülerde POPSTARTER'ı, POPS dosyalarını, Ember'ı, Ember'ın BIOS'unu ve Neutrino'yu arar ve her birinin nerede olduğunu hatırlar.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'Ayarlar: %s, açılışın beklediği bir sürücüde (hafıza kartı daha hızlıdır)'
+  'Settings: %s, read first (the quickest place)': 'Ayarlar: %s, ilk okunan (en hızlı yer)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: Her sürücüyü şimdi başlatır (USB, HDD, MMCE, MX4SIO ve ağ), böylece her biri ve alanı burada görünür.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: POPSTARTER'ın ağ üzerinden PS1 oyunları için kullandığı IP ve SMB paylaşımı.
+  The diagnostics are in %s.: Tanılama kaydı %s içinde.
+  The diagnostics could not be written to %s.: Tanılama kaydı %s konumuna yazılamadı.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: Her hafıza kartının açılışta başlattığı şey; BIBLE'ı, yani RIPPS2'yi başlatmak için ayarlanmış PS2BBL'yi kurun veya onarın.
+  Where POPSTARTER and Ember are, and how PS1 games start.: POPSTARTER ve Ember'ın nerede olduğu ve PS1 oyunlarının nasıl başladığı.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Neutrino'nuzun nerede olduğu, video modu ve her Neutrino başlatmasının aldığı argümanlar.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : RIPPS2'nin kumandalar, sürücüler, MMCE kartları ve son başlatmalar hakkında not ettiklerini RIPPS2'nin yanındaki DIAG.TXT dosyasına yazar. Bir hata bildirimiyle birlikte gönderin.
+  back to Cache: Önbellek'e geri dön
+  what boot reads first: açılışın ilk okuduğu
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Bu Neutrino 1.3'ten eski, o da APA HDD'den oyun başlatamaz. Oyun Başlatma > Neutrino'yu Neutrino 1.3 veya daha yenisine yöneltin ya da RIPPS2'nin taşıdığını kullanmak için yolu temizleyin.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2, %s öğesini %s%s içinde görmüyor. POPSTARTER'ın POPS.ELF ve POPS_IOX.PAK'a, yani kendi konsolunuzun PS1 öykünücüsüne ihtiyacı var; onları RIPPS2'nin bakmadığı yerde bulabilir (oyunlarınız başlıyorsa buluyordur). START başlatır ve bu sürücü bir daha sorulmaz.
 labels:
   ETH_100MFDX: 100Mbit Tam çift yönlü
   ETH_100MHDX: 100Mbit Yarı çift yönlü
@@ -1306,16 +1403,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'Kuleler, küreler, cam, CD çalar ve dosya tarayıcısı için üç sekmenin hepsinde tek bir renk. Tema: tema karar verir (vermediği yerde RIPPS2 mavisi).'
   RIPPS2_HINTS: Tuş İpuçları
   HINT_RIPPS2_HINTS: 'Alt kısımdaki tuş ipuçları. Boştayken Sol, bir tuşa basana kadar onları gizler. Tema: tema karar verir.'
-  RIPPS2_CATEGORY_BAR: Kategori Çubuğu
-  HINT_RIPPS2_CATEGORY_BAR: 'Üstteki DİSK BAŞLAT, DEPOLAMA ve HAFIZA DOSYALARI. Boştayken Sol, bir tuşa basana kadar onları gizler. Tema: tema karar verir.'
+  RIPPS2_CATEGORY_BAR: Kategori/Kenar Çubuğu
+  HINT_RIPPS2_CATEGORY_BAR: 'DİSK BAŞLAT, DEPOLAMA ve HAFIZA DOSYALARI: üstteki adlar ya da kenar çubuğu. Boştayken Sol, bir tuşa basana kadar adları soldurur ya da kenar çubuğunu kaydırıp gizler; hemen geri gelir. Tema: tema karar verir.'
   RIPPS2_SOURCE_NAME: Kaynak Adı
   RIPPS2_STATUS: Durum
   RIPPS2_SOURCE: Kaynak
   HINT_RIPPS2_SOURCE_NAME: 'Oyunların üzerindeki kaynak adı (TÜM OYUNLAR, HDD OYUNLARI vb.). Boştayken Sol onu kategori çubuğuyla birlikte soldurur; Açılır ise L3''ün listeyi adlandırdığı gibi, açılıştan sonraki ilk listede ve kaynak her değiştiğinde onu sayfanın ortasında büyükçe gösterir, sonra soldurur. Temalar Açılır''ı kendi Gösterilir''i yapabilir. Tema: tema karar verir.'
-  RIPPS2_RECENTS: Son Oynananları Göster
-  HINT_RIPPS2_RECENTS: En son başlattığınız oyunlardan en fazla bu kadarını Yıldızlı Oyunlar'ın en üstünde, en yenisi önce olacak şekilde gösterir. 0 kapatır.
+  RIPPS2_RECENTS: Son Oyunlar
+  HINT_RIPPS2_RECENTS: 'Son Oyunlar, kenar çubuğunda son başlattığınız oyunları en yenisi önde gösteren bir sayfa: kaç tane tuttuğu, 1 ile 99 arası (Üçgen sayıyı yazar). Sürücüsü El ile olan bir oyun, onu seçtiğinizde sürücüyü başlatır. 0 sayfayı kapatır.'
   RIPPS2_CATEGORY_ORDER: Kategori Sırası
-  HINT_RIPPS2_CATEGORY_ORDER: 'Hafıza Dosyaları önce, Disk Başlat en son. RIPFLOW için yapıldı (Arayüz > Tema). Tema: tema karar verir.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'Disk Başlat ile Hafıza dosyaları''nın yerini değiştirir: Hafıza dosyaları önce, Disk Başlat sonda, hem çubuğun adlarında hem kenar çubuğunun simgelerinde. RIPFLOW için yapıldı (Arayüz > Tema). Tema: tema karar verir.'
   RIPPS2_MUSIC: Müzik
   HINT_RIPPS2_MUSIC: RIPPS2'nin yanındaki AUDIO klasöründe ve başlatılan her sürücüdeki OPL'nin AUDIO klasöründe bulunan bgm dosyalarını (etiketsiz Ogg veya 16 bit WAV) çalar; Menu adlı olan önce çalar. Bir temanın kendi müziği varsa onun yerine o çalar.
   RIPPS2_BIOS_SOUNDS: BIOS Sesleri
@@ -1324,7 +1421,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: İpuçları ve Simgeler
   HINT_RIPPS2_HINTS_GLYPHS: Tuş ipuçlarının ve simgelerin görünüşü. Her satır Tema ile, yani temanın seçtiğiyle başlar; başka her seçim sizindir ve her temaya üstün gelir.
   RIPPS2_HINT_LAYOUT: İpucu Düzeni
-  HINT_RIPPS2_STARSIDE: 'Favori bir oyunun yıldızının listede durduğu yer. Sol: her satırın başında kendi sütunu. Sağ: başlıktan sonra. Gizli: yıldız yok. Tema: temanın dediği. Temanın satır simgesi diğer uca geçer, böylece hiç üst üste binmezler.'
+  HINT_RIPPS2_STARSIDE: 'Favori bir oyunun yıldızının listede nerede durduğu. Sol: her satırın başında kendi sütunu. Sağ: başlıktan sonra. Gizli (başlangıç): yıldız da sütun da yok, başlıklar tam uzunlukta. Tema: tema ne diyorsa. R3 her durumda bir oyunu favori yapar; yıldızları gizlemek ya da geri getirmek için bir listede R3''ü 4 saniye basılı tutun (bu, imlecin altındaki oyunu da favori yapar).'
   HINT_RIPPS2_HINT_LAYOUT: 'Satır: ipuçları tek satırda. Sütun: her satıra bir ipucu, temanın ipuçlarını koyduğu yerden başlayarak yanda aşağı doğru bir liste.'
   RIPPS2_HINT_LABELS: İpucu Etiketleri
   HINT_RIPPS2_HINT_LABELS: Yalnızca Simge sadece tuşları çizer, kendi yazısı olan simgeler için. Rozetler her ipucunun simgesini ve başlığını tek bir rozette birleştirir.
@@ -1345,11 +1442,11 @@ labels:
   RIPPS2_TRANSITION: Sayfa Geçişi
   HINT_RIPPS2_TRANSITION: 'Başka bir kategoriye geçtiğinizde yeni sayfanın nasıl geldiği: temanın arka plan renginden ya da bir parlamanın içinden. Tema temanın seçimini korur.'
   RIPPS2_CATEGORY_LAYOUT: Kategori Düzeni
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'Üç kategorinin yeri: adları üstte ya da kenar çubuğu boyunca simgeler, her biri kendi sayfalarının çekmecesiyle (bir listede Sol oraya götürür). Tema temanın kendisininkini korur.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'Üç kategorinin nerede durduğu: adları üstte ya da kenar çubuğu boyunca simgeler, her biri kendi sayfalarının çekmecesiyle (bir listede Sol oraya gider), ya da Menü: hiç çubuk yok, kategoriler OPL için yapılmış bir temadaki gibi START menüsünde. Tema, temanın kendi düzenini korur.'
   RIPPS2_CACHE: Önbellek
   HINT_RIPPS2_CACHE: 'Her kaynağın oyun listesinin, sayfası hemen açılsın diye nasıl saklandığı: Fast Cache, dahili HDD''nin listesi ve Otomatik Yenileme.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: Her kaynak son oyun listesini (RIPPS2.LST, CD ve DVD klasörlerinin yanında) saklar ve kaynak yanıt verir vermez gösterir, ardından kaynağı arka planda yeniden okur. Kapalı, eskisi gibi her listeyi önce kaynağından okur.
+  HINT_RIPPS2_FAST_CACHE: 'Her kaynak son oyun listesini (CD ve DVD klasörlerinin yanında RIPPS2.LST) tutar ve kaynak yanıt verir vermez gösterir. Trust Cache, kaynağın sonra yeniden okunup okunmayacağına karar verir. Kapalı: her liste önce kendi kaynağından okunur, eskisi gibi.'
   HINT_RIPPS2_VIGNETTE: Seçili olan dışında her kapağın kenarlarını karartır, böylece seçili olan öne çıkar. Zayıf, Tam'ın yarısıdır.
   RIPPS2_GRID_WIDE: Geniş Ekran Izgara Düzeni
   HINT_RIPPS2_GRID_WIDE: Izgaranın yalnızca 16:9 görüntüdeki (Geniş ekran, 720p, 1080i) sayfası; burada kapaklar daha dar çizilir ve yan yana daha fazlası sığar. Tema temanın kendisininkini kullanır; Aynı, Izgara Düzeni'ni izler.
@@ -1365,7 +1462,7 @@ labels:
   GAME_TYPE_LABELS: '[PS1]/[PS2] Etiketlerini Göster'
   NEUTRINO_CHEATS_WRITE_FAILED: Hile listesi Neutrino klasörüne kaydedilemedi, bu yüzden Neutrino onu kullanamaz. Hilesiz başlatılsın mı?
   AUTO_CREATE_VMC: İlk Başlatmada VMC Oluştur
-  HINT_AUTO_CREATE_VMC: Yuva 1'de VMC olmadan bir PS2 oyunu başlatmak, oyunun cihazında 8 MB'lık bir kart oluşturur, onu VMC ekranının önerdiği gibi adlandırır (oyunun her diski paylaşır) ve atar. Neutrino altında dahili HDD için değil.
+  HINT_AUTO_CREATE_VMC: Yuva 1'de VMC olmadan bir PS2 oyunu başlatmak, oyunun aygıtında VMC ekranının önerdiği adla (oyunun tüm diskleri paylaşır) 8 MB'lık bir kart oluşturur ve atar. Neutrino altında APA HDD'de değil (exFAT HDD çalışır).
   AUTO_VMC_CREATING: Bu oyunun VMC'si oluşturuluyor...
   AUTO_VMC_FAILED: Bu oyunun VMC'si oluşturulamadı. Oyun VMC olmadan başlar.
   RIPPS2_BIOS_MUSIC: BIOS Müziği
@@ -1402,7 +1499,7 @@ labels:
   HINT_LANGUAGE: Menü dili. Bir LNG klasörüne lang_*.lng dosyaları koyarak daha fazlasını ekleyin.
   HINT_GSM_DEFAULTS_BUTTON: Kendi GSM ayarları olmadıkça her oyunun aldığı video modu düzeltmeleri.
   HINT_DEFDEVICE: RiptOPL'nin açılışta açtığı sayfa.
-  HINT_MMCE_MODE: Bir SD2PSX veya MemCard PRO2 üzerindeki oyunlar. Otomatik açılışta, El ile sayfayı açtığınızda başlar, Kapalı onu gizler.
+  HINT_MMCE_MODE: 'SD2PSX veya MemCard PRO2 üzerindeki oyunlar. Otomatik onu açılışta başlatır: takılı bir kart için en hızlısı, oyunları baştan Tüm Oyunlar''da. El ile, sayfasını açtığınızda başlatır, Kapalı onu gizler.'
   HINT_MMCE_SETTINGS_BUTTON: MMCE için yuva, IGR bootcard, GameID ve zamanlama seçenekleri.
   HINT_ENABLE_USB: USB depolama sürücüsünü yükler.
   HINT_ENABLE_MX4SIO: MX4SIO SD kart adaptörü sürücüsünü yükler.
@@ -1582,8 +1679,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'Menünün görüntüsü: video modu, geniş ekran, televizördeki yeri (H-POS, V-POS) ve overscan.'
   HINT_RIPPS2_LAYOUT: Kategorilerin yeri ve bir sayfanın nasıl geldiği, sonra RIPFLOW'un kapakları ve RIPGRID'in ızgarası.
   HINT_RIPPS2_COLORS_TEXT: Metin kalınlığı, renk teması, renk geçişi ve her renk.
-  HINT_RIPPS2_TEXT_WEIGHT: 'RIPPS2''nin kendi metninin kalınlığı: ayarların ipuçları, DURUM ve Hakkında. Normal eskisi gibi; Orta ve Kalın yumuşak bir görüntüde daha iyi okunur.'
-  HINT_RIPPS2_HDD_START: 'Dahili HDD, APA ya da exFAT: RIPPS2 ne olursa olsun okur ve bir kez, HDD oyunları olarak gösterir. Kapalı ona dokunmaz.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'RIPPS2''nin kendi yazısının ne kadar kalın olduğu: Ayarlar ipuçları, DURUM ve Hakkında. Normal eskisi gibidir; Kalın yumuşak bir görüntüde daha iyi okunur. Bir temanın kendi yazı tipleri temanın verdiği kalınlıkları korur.'
+  HINT_RIPPS2_HDD_START: 'Dahili HDD, APA ya da exFAT: RIPPS2 hangisiyse onu okur ve bir kez, HDD Oyunlar olarak gösterir. Otomatik (takılı bir diskle en hızlısı) onu açılışta başlatır; Kapalı ona dokunmaz.'
   HINT_RIPPS2_THEME_COLOR: Renk temasının kendi rengi. Kendiniz seçmek için renk teması olarak Özel'i seçin, metin renkleri gibi.
   HINT_RIPPS2_SWEEP: Temanın yavaşça ve yumuşakça geçtiği beş renk. Gökkuşağı, her renk temasından yapılmış bir geçiş ya da sizinki. Kapalı renk temasını sabit tutar.
   HINT_RIPPS2_SWEEP_COLORS: Geçişin beş rengi ve hızı. RIPPS2'nin birini değiştirin, verdiğiniz adla sizin olarak saklanır.
@@ -1592,3 +1689,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'Bir sonraki gelmeden önce her rengin ne kadar sürdüğü. Canlı bile yumuşak kalır: renkler asla yanıp sönmez.'
   RIPPS2_HIDE_COMPRESS: Oyunu gizle ve sıkıştırma
   HINT_RIPPS2_SELECT_HOLD: 'Bir oyun listesinde SELECT 4.2 sn basılı tutulur. Liste: temalar bir panelde, birini seçin. Sırayla: sonraki tema. Kapalı: hiçbir şey (basmak yine yeniler).'
+  RIPPS2_RECENT_GAMES: Son Oyunlar
+  RIPPS2_SET_METADATA_RENAME: Meta Verileri Ayarla (Yeniden Adlandır)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: Önce Kumanda (Deneysel)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX, kumandanın paylaştığı veri yolu üzerinden okur ve bir okuma sürerken kumanda duyulmaz: kapaklar yüklenirken basışlar gecikir ya da kaybolur. Açık: kapaklar küçük parçalar hâlinde gelir, aralarında kumanda okunur, biraz daha yavaş. Kapalı: kart ne kadar hızlıysa o kadar. Kartın kaynakları Otomatik''teyken listesi bir kez, açılışta yüklenir.'
+  HINT_RIPPS2_TRUST_CACHE: 'Önbelleğinden gösterilen bir liste, siz SELECT''e basana ya da RIPPS2 o kaynağı kendisi değiştirene kadar olduğu gibi, başlatmaya hazır kalır. Kapalı: her kaynak, önbelleği göründükten sonra arka planda yeniden okunur; bu, kumandanın veri yolunu paylaşan bir MMCE veya MX4SIO kartında hissedilen bir duraklamadır.'
+  RIPPS2_STATUS_OPEN: Yükleme ve Sürücüler
+  HINT_RIPPS2_STATUS_OPEN: 'DURUM''u açar: açılışın ayarları ve oyun listelerini nereden okuduğu, hangi yerin en hızlı olduğu, bir oyunun EXIT''inin nereye gittiği ve her sürücü. Oradaki ÖNBELLEK AYARLARI buraya geri getirir.'
+  RIPPS2_BADGE_SET: Rozet Seti
+  HINT_RIPPS2_BADGE_SET: 'Bir oyunun bilgi sayfasındaki rozetler (derecelendirme, oyuncular, ESRB, video modu, tarama, en boy oranı). RIPPS2: kendi seti, her temada aynı. Tema: temanın kendi görselleri ya da tema isterse RIPPS2''ninkiler.'
+  RIPPS2_HINT_FADE: İpuçları ve Simgeler Belirsin
+  HINT_RIPPS2_HINT_FADE: 'Değişen bir tuş ipucu ya da simge, kapaklar gibi, değiştiği anda yavaşça belirir; aynı kalanlara dokunulmaz, her sayfada ve mesajda. Kapalı: sadece görünürler. Tema: tema karar verir (hints_fade=0 demedikçe açık).'
+  RIPPS2_SIDEBAR_STYLE: Kenar Çubuğu Stili
+  HINT_RIPPS2_SIDEBAR_STYLE: 'Klasik (bölünmüş): simgeler kenar çubuğunun koyu şeridinde, yanında renkli bant. XL (tek parça): daha geniş tek bir şerit, simgeler ortasında. Tema: tema karar verir.'
+  HINT_EXITPATH: 'Oyun İçi Menü''deki EXIT''in nereye gittiği. En iyisi boş bırakmak, BIBLE kurulu olarak (DURUM > Önyükleyici > Yönet ya da PS2BBL''nizde BOOT LOCK): EXIT o zaman konsolu kendi önyükleme yoluyla sıfırlar ve PS2BBL, RIPPS2''yi açılıştaki gibi başlatır; en güvenli dönüş yolu budur. Tarayıcı: PS2 tarayıcısı. Bir hafıza kartındaki (mc0:/mc1:) ya da FAT32 USB sürücüdeki (mass:/) bir ELF sıfırlamanın hemen ardından yüklenir ve her oyun konsolu buna hazır bırakmaz; MMCE''ye o zaman hiç ulaşılamaz.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO ve exFAT HDD. Otomatik onları açılışta başlatır: takılı sürücüler için en hızlısı, oyunları baştan Tüm Oyunlar''da. El ile, sayfalarını açtığınızda başlatır.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino, APA HDD''de VMC kullanamaz (exFAT, USB ve MX4SIO kullanabilir): bu oyun o yuvadaki gerçek kartla başlar.'

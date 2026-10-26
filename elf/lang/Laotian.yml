@@ -214,7 +214,6 @@ strings:
   The menu music could not be written to %s (%s). Is the drive full?: ຂຽນເພງເມນູ ໄວ້ໃນ %s ບໍ່ໄດ້ (%s). ໄດຣຟ໌ເຕັມ ບໍ?
   ? 'The menu music is a WAV of %s, and no memory card has room for it. RIPPS2 runs from a memory card here and no drive with an OPL folder is started: start one in Storage, then rip the music to it.'
   : 'ເພງເມນູ ແມ່ນ WAV ຂະໜາດ %s, ແລະ ບໍ່ມີເມມໂມຣີກາດໃດ ມີບ່ອນພໍ. ຢູ່ນີ້ RIPPS2 ເລີ່ມຈາກເມມໂມຣີກາດ ແລະ ບໍ່ມີໄດຣຟ໌ທີ່ມີໂຟນເດີ OPL ເລີ່ມຢູ່: ເລີ່ມໄດຣຟ໌ໜຶ່ງ ໃນບ່ອນເກັບຂໍ້ມູນ, ແລ້ວຖອດເພງ ໄປໃສ່ມັນ.'
-  The sounds could not be written to %s. Is the drive full or write-protected?: ຂຽນສຽງ ໄວ້ໃນ %s ບໍ່ໄດ້. ໄດຣຟ໌ເຕັມ ຫຼື ຖືກປ້ອງກັນການຂຽນ ບໍ?
   This BIOS's menu music is not the one RIPPS2 knows. Nothing was written.: ເພງເມນູ ຂອງ BIOS ນີ້ ບໍ່ແມ່ນອັນທີ່ RIPPS2 ຮູ້ຈັກ. ບໍ່ໄດ້ຂຽນຫຍັງ.
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: ຄັງສຽງ ຂອງ BIOS ນີ້ ບໍ່ແມ່ນອັນທີ່ RIPPS2 ຮູ້ຈັກ. ບໍ່ໄດ້ຂຽນຫຍັງ.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
@@ -249,16 +248,6 @@ strings:
   : '- %s (%s) ຖືກຍ້າຍ ທັງໝົດ ໄປໂຟນເດີສຳຮອງ ກ່ອນ.
 
     '
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
-
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- ເຄື່ອງ ຜູກ PS2BBL 1.2.0 ກັບກາດນີ້ ແລະ ຂຽນເປັນ %s/%s.
-
-    - ການຕັ້ງຄ່າຂອງມັນ, mc%d:/PS2BBL/CONFIG.INI, ເລີ່ມ RIPPS2 ຈາກ %s, BOOT LOCK ເປີດ.
-
-    ໂປຣເຊັສເຊີ I/O ຈະເລີ່ມໃໝ່ ສຳລັບສິ່ງນີ້; ເພງ ແລະ ໄດຣຟ໌ ກັບມາຫຼັງຈາກນັ້ນ. ໃສ່ກາດໄວ້ ແລະ ເປີດເຄື່ອງໄວ້ ຈົນກວ່າຈະຂຶ້ນວ່າ ແລ້ວ.'
   ? '- RIPPS2 is copied to %s.
 
     '
@@ -268,12 +257,10 @@ strings:
   A COPY ON MEMORY CARD %d: ສຳເນົາ ເທິງເມມໂມຣີກາດ %d
   A COPY ON MX4SIO: ສຳເນົາ ເທິງ MX4SIO
   A COPY ON THE USB DRIVE: ສຳເນົາ ເທິງ USB
-  BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.: ຂຽນ BIBLE ໃສ່ເມມໂມຣີກາດ %d ບໍ່ໄດ້, ດັ່ງນັ້ນ ກາດຖືກຄືນເປັນຄືເກົ່າ. ກວດບ່ອນວ່າງ ຂອງມັນ, ແລ້ວລອງໃໝ່.
   BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE ສຳເນົາ RIPPS2 ໄປ %s ບໍ່ໄດ້. ກວດບ່ອນວ່າງ ແລະ ວ່າມັນບໍ່ໄດ້ຖືກປ້ອງກັນການຂຽນ. ບໍ່ມີຫຍັງອື່ນ ຖືກປ່ຽນ.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE ສຳເນົາ RIPPS2 ໄປພາທິຊັນ %s ຂອງ HDD ບໍ່ໄດ້. ກວດບ່ອນວ່າງ ຂອງມັນ. ບໍ່ມີຫຍັງອື່ນ ຖືກປ່ຽນ.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE ເກັບສຳເນົາ ໂປຣແກຣມບູດ ຂອງ HDD ບໍ່ໄດ້, ດັ່ງນັ້ນ ມັນຢຸດ ກ່ອນປ່ຽນມັນ. RIPPS2 ຖືກສຳເນົາ ໄປ HDD ແລ້ວ; ບໍ່ມີຫຍັງອື່ນ ຖືກປ່ຽນ.
-  BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.: BIBLE ຍ້າຍ %s ອອກ ເພື່ອເກັບມັນ ບໍ່ໄດ້, ດັ່ງນັ້ນ ມັນຢຸດຢູ່ນັ້ນ. ບໍ່ມີຫຍັງ ເທິງກາດ ຖືກປ່ຽນ.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE ຂຽນການຕັ້ງຄ່າຂອງມັນ ບໍ່ໄດ້ (%s). ໂປຣແກຣມບູດ ບໍ່ໄດ້ຖືກປ່ຽນ.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE ຂຽນໂປຣແກຣມບູດ ຂອງ HDD ບໍ່ໄດ້ (ຂັ້ນ %d). %s
   ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
@@ -297,12 +284,6 @@ strings:
   : BOOT LOCK ເປີດ. PS2BBL ດຽວນີ້ເລີ່ມ RIPPS2 ຕອນເປີດເຄື່ອງ (%s). ກົດປຸ່ມລັດ PS2BBL ຄ້າງໄວ້ ຕອນເຄື່ອງເລີ່ມ ເພື່ອໄປສິ່ງອື່ນ.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK ເຮັດວຽກຜ່ານ PS2BBL (PlayStation 2 Basic BootLoader), ແລະ ບໍ່ມີເທິງເມມໂມຣີກາດໃດ ຢູ່ນີ້.
   INSTALL BIBLE: ຕິດຕັ້ງ BIBLE
-  ? 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  : 'ຕິດຕັ້ງ BIBLE ເທິງເມມໂມຣີກາດ %d
-
-    '
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -327,20 +308,6 @@ strings:
     ສິ່ງນີ້ ຕ້ອງການເຄື່ອງທີ່ບູດຈາກ HDD ຂອງມັນ (PS2 ລຸ້ນໜາ ທີ່ມີອະແດັບເຕີເຄືອຂ່າຍ). ເປີດເຄື່ອງໄວ້ ຈົນກວ່າຈະຂຶ້ນວ່າ ແລ້ວ.'
   INTERNAL HDD  (its boot area): HDD ພາຍໃນ  (ພື້ນທີ່ບູດ ຂອງມັນ)
   MEMORY CARD %d  (%s): ເມມໂມຣີກາດ %d  (%s)
-  ? 'MEMORY CARD 0: %s
-
-    MEMORY CARD 1: %s
-
-    %s
-
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'ເມມໂມຣີກາດ 0: %s
-
-    ເມມໂມຣີກາດ 1: %s
-
-    %s
-
-    BIBLE ແມ່ນ PS2BBL 1.2.0 ໂດຍ El Isra, ຕັ້ງໂດຍ RIPPS2: ບໍ່ຕ້ອງລໍຖ້າ ຕອນເປີດເຄື່ອງ, RIPPS2 ກ່ອນ, ແລະ ປຸ່ມທີ່ກົດຄ້າງໄວ້ ຕອນເປີດເຄື່ອງ ຍັງພາໄປ ໂຕທ່ອງ (ສາມຫຼ່ຽມ), ແຜ່ນ (START) ແລະ ສິ່ງທີ່ເຄີຍຢູ່ (ວົງມົນ). ຕິດຕັ້ງ ຫຼື ສ້ອມແປງມັນ ເທິງເມມໂມຣີກາດ ຫຼື HDD ພາຍໃນ ບໍ?'
   Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: ເມມໂມຣີກາດ %d ມີບ່ອນວ່າງ %d KB, ແລະ BIBLE ຕ້ອງການ %d KB ຢູ່ນັ້ນ. ເຮັດໃຫ້ມີບ່ອນວ່າງ, ແລ້ວລອງໃໝ່.
   Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: ເມມໂມຣີກາດ %d ມີບ່ອນວ່າງ %d KB, ແລະ ສຳເນົາ RIPPS2 ຕ້ອງການ %d KB. ເຮັດໃຫ້ມີບ່ອນວ່າງ ຫຼື ເລືອກບ່ອນອື່ນ.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: ເມມໂມຣີກາດ %d ເລີ່ມ %s ຕອນເປີດເຄື່ອງ, ແລະ BOOT LOCK ເຮັດວຽກ ຜ່ານ PS2BBL ເທົ່ານັ້ນ.
@@ -888,13 +855,9 @@ strings:
   TRAY OPEN: ຖາດເປີດຢູ່
   TREFOIL KNOT: ປົມ ສາມແສກ
   ' and ': ' ແລະ '
-  ? '%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s ຂາດຫາຍ ຈາກ %s%s. POPSTARTER ຕ້ອງການ POPS.ELF ແລະ POPS_IOX.PAK, ໂຕຈຳລອງ PS1 ຈາກເຄື່ອງຂອງທ່ານເອງ, ຢູ່ຂ້າງເກມ ເພື່ອເລີ່ມເກມໃດໜຶ່ງ.'
   ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s ຂາດຫາຍ ຈາກ %s%s. RIPPOPS ພົບ POPS.ELF ແລະ POPS_IOX.PAK, ໂຕຈຳລອງ PS1 ຂອງ Sony, ເທິງ %s: START ສຳເນົາພວກມັນ ມາທີ່ນີ້ ແລະ ເລີ່ມເກມ.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': ສຳເນົາ %s ໄປ %s%s ບໍ່ໄດ້. ໄດຣຟ໌ເຕັມ ຫຼື ຖືກປ້ອງກັນການຂຽນ ບໍ?
-  ? '%s is missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console, beside the games to start one.'
-  : '%s ຂາດຫາຍ ຈາກ %s%s. POPSTARTER ຕ້ອງການ POPS.ELF ແລະ POPS_IOX.PAK, ໂຕຈຳລອງ PS1 ຈາກເຄື່ອງຂອງທ່ານເອງ, ຢູ່ຂ້າງເກມ ເພື່ອເລີ່ມເກມໃດໜຶ່ງ.'
   ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
   : '%s ຂາດຫາຍ ຈາກ %s%s. RIPPOPS ພົບ POPS.ELF ແລະ POPS_IOX.PAK, ໂຕຈຳລອງ PS1 ຂອງ Sony, ເທິງ %s: START ສຳເນົາພວກມັນ ມາທີ່ນີ້ ແລະ ເລີ່ມເກມ.'
   COPY AND START: ສຳເນົາ ແລະ ເລີ່ມ
@@ -974,10 +937,7 @@ strings:
   'Special thanks to all the YouTube love as well:': 'ຂອບໃຈເປັນພິເສດຕໍ່ຄວາມຮັກທັງໝົດຈາກ YouTube ນຳ:'
   and its own look, launchers, file browser and save tools.: ແລະ ມີໜ້າຕາ, ຕົວເປີດ, ຕົວທ່ອງໄຟລ໌ ແລະ ເຄື່ອງມືບັນທຶກເປັນຂອງຕົນເອງ.
   glad to help however you reach me.: ຍິນດີຊ່ວຍ, ບໍ່ວ່າທ່ານຈະຕິດຕໍ່ຂ້ອຍທາງໃດ.
-  the second game core, 1.8.0 carried unmodified (AFL-3.0): ແກນເກມທີສອງ, 1.8.0 ມາພ້ອມໂດຍບໍ່ດັດແປງ (AFL-3.0)
   with rickgaiser's Neutrino inside as its second game core,: ມີ Neutrino ຂອງ rickgaiser ຢູ່ພາຍໃນເປັນແກນເກມທີສອງ,
-  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino 1.8.0 by rickgaiser (AFL-3.0): install it once, where you pick, and every Neutrino game uses it from there.'
-  : 'ເກມນີ້ເລີ່ມຜ່ານ Neutrino, ແລະ RIPPS2 ບໍ່ພົບມັນ: ບໍ່ຢູ່ທີ່ເສັ້ນທາງໃນ ການຕັ້ງຄ່າ, ບໍ່ຢູ່ໃນໄດຣຟ໌ຂອງເກມ, ບໍ່ຢູ່ໃນເມມໂມຣີກາດ ແລະ ບໍ່ຢູ່ໃນໄດຣຟ໌ທີ່ເລີ່ມແລ້ວໃດເລີຍ. RIPPS2 ມີ Neutrino 1.8.0 ຂອງ rickgaiser ມານຳ (AFL-3.0): ຕິດຕັ້ງມັນຄັ້ງໜຶ່ງ, ບ່ອນທີ່ທ່ານເລືອກ, ແລະ ທຸກເກມ Neutrino ຈະໃຊ້ມັນຈາກບ່ອນນັ້ນ.'
   STARTING THE DRIVES: ກຳລັງເລີ່ມໄດຣຟ໌
   '%d games, on the started drives': '%d ເກມ, ໃນໄດຣຟ໌ທີ່ເລີ່ມແລ້ວ'
   '%s: SOME FILES COULD NOT BE DELETED': '%s: ບາງໄຟລ໌ລົບບໍ່ໄດ້'
@@ -1057,7 +1017,6 @@ strings:
   not on a started drive: ບໍ່ຢູ່ໃນໄດຣຟ໌ທີ່ເລີ່ມແລ້ວ
   only if you have none: ສະເພາະຖ້າທ່ານບໍ່ມີ
   starts every drive first: ເລີ່ມທຸກໄດຣຟ໌ກ່ອນ
-  Drives, launchers and homebrew: ໄດຣຟ໌, ຕົວເປີດ ແລະ homebrew
   BDM Devices: ອຸປະກອນ BDM
   Color Sweep: ການປ່ຽນສີ
   Colors and Text: ສີ ແລະ ຂໍ້ຄວາມ
@@ -1079,9 +1038,7 @@ strings:
   Bold: ໜາ
   Controllers: ຕົວຄວບຄຸມ
   Lively: ມີຊີວິດຊີວາ
-  Medium: ກາງ
   PS Emulation: ການຈຳລອງ PS
-  Regular: ປົກກະຕິ
   Slow: ຊ້າ
   A MOMENT: ຈັກໜ້ອຍ
   A TASK IN THE BACKGROUND: ວຽກໃນພື້ນຫຼັງ
@@ -1146,6 +1103,146 @@ strings:
   Delete %s? RIPPS2's own sweeps stay as they are.: ລົບ %s ບໍ? ການປ່ຽນສີຂອງ RIPPS2 ເອງຍັງຄືເກົ່າ.
   Sweep: ການປ່ຽນສີ
   Badges mark the games with achievements in your lists, with how many you have unlocked. They need TELEMETRY on.: ປ້າຍໝາຍເກມທີ່ມີຄວາມສຳເລັດໃນລາຍການຂອງທ່ານ ພ້ອມຈຳນວນທີ່ປົດລັອກແລ້ວ. ຕ້ອງເປີດ ເທເລເມທຣີ.
+  Classic (Split): ຄລາສສິກ (ແຍກ)
+  Guidance: ແນະນຳ
+  OK: ຕົກລົງ
+  XL (One Piece): XL (ຊິ້ນດຽວ)
+  STARS HIDDEN: ເຊື່ອງດາວ
+  STARS SHOWN: ສະແດງດາວ
+  Asking the SD2PSX for this game's memory card...: ກຳລັງຂໍເມມໂມຣີກາດຂອງເກມນີ້ ຈາກ SD2PSX...
+  The SD2PSX is getting this game's memory card ready (%d s). The game starts when it is done; START starts it now.: SD2PSX ກຳລັງກຽມເມມໂມຣີກາດຂອງເກມນີ້ (%d ວິ). ເກມຈະເລີ່ມເມື່ອແລ້ວ; START ເລີ່ມດຽວນີ້.
+  the second game core, its newest build carried unmodified (AFL-3.0): ແກນເກມທີສອງ, ລຸ້ນໃໝ່ສຸດຂອງມັນ ມາພ້ອມໂດຍບໍ່ດັດແປງ (AFL-3.0)
+  '%s could not be written to %s (%d of the sounds were). Is the drive full or write-protected?': ຂຽນ %s ໃສ່ %s ບໍ່ໄດ້ (ຂຽນສຽງໄດ້ %d ອັນ). ໄດຣຟ໌ເຕັມ ຫຼື ຖືກປ້ອງກັນການຂຽນ ບໍ?
+  '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?': ຂຽນ %s ໃສ່ %s ບໍ່ໄດ້ (ຂຽນສຽງໄດ້ %d ອັນ, ແລະ ກາດມີບ່ອນວ່າງ %d KB ດຽວນີ້). ກາດຖືກປ້ອງກັນການຂຽນ ບໍ?
+  The folder %s could not be made. Is the drive full or write-protected? Nothing was written.: ສ້າງໂຟນເດີ %s ບໍ່ໄດ້. ໄດຣຟ໌ເຕັມ ຫຼື ຖືກປ້ອງກັນການຂຽນ ບໍ? ບໍ່ໄດ້ຂຽນຫຍັງ.
+  ? 'The sounds take %d KB and this memory card has %d KB free. Nothing was written. Free some room on the card, or start a drive in Storage and rip them again: RIPPS2 then offers the drive.'
+  : 'ສຽງໃຊ້ %d KB ແລະ ເມມໂມຣີກາດນີ້ມີບ່ອນວ່າງ %d KB. ບໍ່ໄດ້ຂຽນຫຍັງ. ເຮັດບ່ອນວ່າງໃນກາດ, ຫຼື ເລີ່ມໄດຣຟ໌ໃນ ບ່ອນເກັບຂໍ້ມູນ ແລ້ວຖອດໃໝ່: RIPPS2 ຈະສະເໜີໄດຣຟ໌ນັ້ນ.'
+  ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
+  : ສຽງໃຊ້ %d KB ແລະ ເມມໂມຣີກາດນີ້ມີບ່ອນວ່າງ %d KB. START ຂຽນມັນໃສ່ %sAUDIO/ ໃນໄດຣຟ໌ແທນ, ແລະ RIPPS2 ຫຼິ້ນມັນຈາກບ່ອນນັ້ນ.
+  There was not enough memory to make the sounds. Nothing was written.: ໜ່ວຍຄວາມຈຳບໍ່ພໍ ສຳລັບສ້າງສຽງ. ບໍ່ໄດ້ຂຽນຫຍັງ.
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+  
+    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- ເຄື່ອງ ຜູກ PS2BBL 1.2.0 ກັບກາດນີ້ ແລະ ຂຽນເປັນ %s/%s.
+  
+    - ການຕັ້ງຄ່າຂອງມັນ, mc%d:/PS2BBL/CONFIG.INI, ເລີ່ມ RIPPS2 ຈາກ %s ໂດຍບໍ່ລໍຖ້າ (0 ms, ທີ່ PS2BBL Extended ບໍ່ອະນຸຍາດ), BOOT LOCK ເປີດ.
+  
+    ໂປຣເຊັສເຊີ I/O ຈະເລີ່ມໃໝ່ ສຳລັບສິ່ງນີ້; ເພງ ແລະ ໄດຣຟ໌ ກັບມາຫຼັງຈາກນັ້ນ. ໃສ່ກາດໄວ້ ແລະ ເປີດເຄື່ອງໄວ້ ຈົນກວ່າຈະຂຶ້ນວ່າ ແລ້ວ.'
+  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : ຂຽນ BIBLE ໃສ່ເມມໂມຣີກາດ %d ບໍ່ໄດ້, ດັ່ງນັ້ນ ກາດຖືກຄືນເປັນຄືເກົ່າ. ກວດບ່ອນວ່າງ ຂອງມັນ, ແລ້ວລອງໃໝ່. (DIAG.TXT ຂ້າງ RIPPS2 ມີຄຳຕອບຂອງກາດ.)
+  ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : BIBLE ຍ້າຍ %s ອອກ ເພື່ອເກັບມັນ ບໍ່ໄດ້, ດັ່ງນັ້ນ ມັນຢຸດຢູ່ນັ້ນ. ບໍ່ມີຫຍັງ ເທິງກາດ ຖືກປ່ຽນ. (DIAG.TXT ຂ້າງ RIPPS2 ມີຄຳຕອບຂອງກາດ.)
+  ? 'MEMORY CARD 0: %s
+  
+    MEMORY CARD 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+  : 'ເມມໂມຣີກາດ 0: %s
+  
+    ເມມໂມຣີກາດ 1: %s
+  
+    %s
+  
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 ໂດຍ El Isra ທີ່ RIPPS2 ຕັ້ງ: ເລີ່ມໃນ 0 ms ຕອນເປີດເຄື່ອງ (PS2BBL Extended ບໍ່ອະນຸຍາດ 0), RIPPS2 ກ່ອນ, ແລະ ປຸ່ມທີ່ກົດຄ້າງໄວ້ ຕອນເປີດເຄື່ອງ ຍັງພາໄປ ໂຕທ່ອງ (ສາມຫຼ່ຽມ), ແຜ່ນ (START) ແລະ ສິ່ງທີ່ເຄີຍຢູ່ (ວົງມົນ). ຕິດຕັ້ງ ຫຼື ສ້ອມແປງມັນ ເທິງເມມໂມຣີກາດ ຫຼື HDD ພາຍໃນ ບໍ?'
+  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+  
+    '
+  : 'RIPPS2 BIBLE: BBL 1.20 ເທິງເມມໂມຣີກາດ %d
+  
+    '
+  ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
+  : 'ໄຟລ໌ໃນໜ່ວຍຄວາມຈຳ ເປີດດຽວນີ້, ຢູ່ MEDIA, ມີແຜ່ນຢູ່ໃນຄລິບບອດ (ຖອດແລ້ວ). ໄປທີ່ໄດຣຟ໌ ແລະ ໂຟນເດີ ທີ່ມັນຄວນຢູ່ (ໄດຣຟ໌ໃດກໍ່ໄດ້: USB, HDD, MEDIA ຂອງ SD2PSX), ກົດ ສາມຫຼ່ຽມ ເພື່ອ ການກະທຳ ແລະ ເລືອກ ວາງ. RIPDISC ຈະຖາມອີກເທື່ອໜຶ່ງ ແລະ ອ່ານແຜ່ນດ້ວຍເລເຊີຂອງ PS2 ຂອງທ່ານ, ແລ້ວຂຽນມັນໄວ້ບ່ອນນັ້ນ.'
+  RENAME THE GAME: ປ່ຽນຊື່ເກມ
+  ? 'This game starts through Neutrino, and RIPPS2 found none: not at Settings'' path, on the game''s drive, on the memory cards or on any started drive. RIPPS2 carries Neutrino by rickgaiser (AFL-3.0), its newest build: install it once, where you pick, and every Neutrino game uses it from there.'
+  : 'ເກມນີ້ເລີ່ມຜ່ານ Neutrino, ແລະ RIPPS2 ບໍ່ພົບມັນ: ບໍ່ຢູ່ທີ່ເສັ້ນທາງໃນ ການຕັ້ງຄ່າ, ບໍ່ຢູ່ໃນໄດຣຟ໌ຂອງເກມ, ບໍ່ຢູ່ໃນເມມໂມຣີກາດ ແລະ ບໍ່ຢູ່ໃນໄດຣຟ໌ທີ່ເລີ່ມແລ້ວໃດເລີຍ. RIPPS2 ມີ Neutrino ຂອງ rickgaiser ມານຳ (AFL-3.0), ລຸ້ນໃໝ່ສຸດ: ຕິດຕັ້ງມັນຄັ້ງໜຶ່ງ, ບ່ອນທີ່ທ່ານເລືອກ, ແລະ ທຸກເກມ Neutrino ຈະໃຊ້ມັນຈາກບ່ອນນັ້ນ.'
+  A PS1 disc's track list, for Ember: ລາຍການເພງຂອງແຜ່ນ PS1, ສຳລັບ Ember
+  A PS1 game for POPSTARTER: ເກມ PS1 ສຳລັບ POPSTARTER
+  A PS2 game: ເກມ PS2
+  A card the SD2PSX set aside (wrong size): ກາດທີ່ SD2PSX ແຍກໄວ້ (ຂະໜາດຜິດ)
+  'A program: Cross starts it': 'ໂປຣແກຣມ: ກາກະບາດ ເລີ່ມມັນ'
+  A save, packed in one file: ບັນທຶກເກມ, ມັດເປັນໄຟລ໌ດຽວ
+  All Games' master list: ລາຍການຫຼັກຂອງ ທຸກເກມ
+  'An SD2PSX boot card: open it to look in': 'ກາດບູດ SD2PSX: ເປີດເພື່ອເບິ່ງຂ້າງໃນ'
+  'An SD2PSX memory card: open it like a VMC': 'ເມມໂມຣີກາດ SD2PSX: ເປີດຄືກັບ VMC'
+  Cheats, a file a game: ສູດໂກງ, ໜຶ່ງໄຟລ໌ຕໍ່ເກມ
+  Each game's settings and info page: ການຕັ້ງຄ່າ ແລະ ໜ້າຂໍ້ມູນຂອງແຕ່ລະເກມ
+  Ember, its BIOS and its PS1 games: Ember, BIOS ຂອງມັນ ແລະ ເກມ PS1 ຂອງມັນ
+  Game covers and art, by game ID: ໜ້າປົກ ແລະ ຮູບເກມ, ຕາມ ID ເກມ
+  Games kept in 1 GB parts: ເກມທີ່ເກັບເປັນສ່ວນ 1 GB
+  Games that share one SD2PSX card: ເກມທີ່ໃຊ້ກາດ SD2PSX ອັນດຽວກັນ
+  Languages for RIPPS2: ພາສາສຳລັບ RIPPS2
+  Neutrino, the second game core: Neutrino, ແກນເກມທີສອງ
+  OPL's list of this folder's games: ລາຍການເກມຂອງ OPL ໃນໂຟນເດີນີ້
+  POPSTARTER and PS1 games (VCDs): POPSTARTER ແລະ ເກມ PS1 (VCD)
+  PS2 games on CD, as ISOs: ເກມ PS2 ໃນ CD, ເປັນ ISO
+  PS2 games on DVD, as ISOs: ເກມ PS2 ໃນ DVD, ເປັນ ISO
+  PS2BBL's settings: ການຕັ້ງຄ່າຂອງ PS2BBL
+  Programs to start (ELFs): ໂປຣແກຣມທີ່ຈະເລີ່ມ (ELF)
+  RIPPS2's diagnostics, for a bug report: ຂໍ້ມູນວິນິດໄສຂອງ RIPPS2, ສຳລັບລາຍງານບັນຫາ
+  RIPPS2's own folder: ໂຟນເດີຂອງ RIPPS2 ເອງ
+  RIPPS2's settings: ການຕັ້ງຄ່າຂອງ RIPPS2
+  RIPPS2's sounds and music: ສຽງ ແລະ ເພງຂອງ RIPPS2
+  Recent games: ເກມຫຼ້າສຸດ
+  RetroAchievements' files: ໄຟລ໌ຂອງ RetroAchievements
+  Ripped CDs and DVDs, pictures, video: CD ແລະ DVD ທີ່ຖອດແລ້ວ, ຮູບ, ວິດີໂອ
+  'Saving to the SD2PSX''s SD: wait %d s before turning off.': 'ກຳລັງບັນທຶກໃສ່ SD ຂອງ SD2PSX: ລໍຖ້າ %d ວິ ກ່ອນປິດເຄື່ອງ.'
+  Starred games: ເກມທີ່ມັກ
+  The SD2PSX's boot cards (PS2BBL): ກາດບູດຂອງ SD2PSX (PS2BBL)
+  The SD2PSX's boot channels and names: ຊ່ອງບູດ ແລະ ຊື່ຂອງ SD2PSX
+  The SD2PSX's memory cards: ເມມໂມຣີກາດຂອງ SD2PSX
+  The SD2PSX's own settings: ການຕັ້ງຄ່າຂອງ SD2PSX ເອງ
+  The SD2PSX's settings: ການຕັ້ງຄ່າຂອງ SD2PSX
+  Themes, a folder each: ທີມ, ອັນລະໂຟນເດີ
+  This drive's game list, for a quick boot: ລາຍການເກມຂອງໄດຣຟ໌ນີ້, ສຳລັບບູດໄວ
+  Virtual memory cards for games: ເມມໂມຣີກາດສະເໝືອນ ສຳລັບເກມ
+  What RIPPS2's last launch did: ສິ່ງທີ່ການເປີດ RIPPS2 ຄັ້ງຫຼ້າສຸດເຮັດ
+  Circle from the top   Cross close: 'ວົງມົນ: ຕັ້ງແຕ່ຕົ້ນ   ກາກະບາດ: ປິດ'
+  Cross from the top   Circle close: 'ກາກະບາດ: ຕັ້ງແຕ່ຕົ້ນ   ວົງມົນ: ປິດ'
+  ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
+  : ຫຼິ້ນເພງນີ້ບໍ່ໄດ້. RIPPS2 ຫຼິ້ນໄຟລ໌ .wav PCM 16 ບິດ (ຄືທີ່ RIPDISC ແລະ ເພງ BIOS ຖອດອອກ), ໄຟລ໌ Ogg Vorbis .ogg ແລະ MP3.
+  'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'ອ່ານຢ່າງດຽວ: ກາດບູດຂອງ SD2PSX ກຳລັງຖືກໃຊ້'
+  '%d music tracks': ເພງ %d ເພງ
+  1 music track: ເພງ 1 ເພງ
+  'A game''s EXIT: %s': 'EXIT ຂອງເກມ: %s'
+  'A game''s EXIT: the browser': 'EXIT ຂອງເກມ: ໂຕທ່ອງ'
+  'All Games: %d games kept in %s, listed at boot before any drive answers': 'ທຸກເກມ: %d ເກມ ຢູ່ໃນ %s, ສະແດງຕອນບູດ ກ່ອນໄດຣຟ໌ຕອບ'
+  'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'ທຸກເກມ: ຍັງບໍ່ມີລາຍການຫຼັກ; ຂຽນ %s ເມື່ອເກມຂຶ້ນ (Fast Cache ເປີດ)'
+  CACHE SETTINGS: ການຕັ້ງຄ່າ CACHE
+  Copies the Neutrino RIPPS2 carries to a drive or a memory card. A Neutrino of your own is used as it is.: ສຳເນົາ Neutrino ທີ່ RIPPS2 ມີມານຳ ໄປໃສ່ໄດຣຟ໌ ຫຼື ເມມໂມຣີກາດ. Neutrino ຂອງທ່ານເອງ ໃຊ້ຕາມທີ່ມັນເປັນ.
+  DIAG.TXT, for a bug report: DIAG.TXT, ສຳລັບລາຍງານບັນຫາ
+  Drives, loading, launchers and homebrew: ໄດຣຟ໌, ການໂຫຼດ, ຕົວເປີດ ແລະ homebrew
+  ? Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press SELECT. Both on, with the settings on the memory card RIPPS2 starts from, is the quickest boot.
+  : Fast Cache ສະແດງລາຍການເກມຫຼ້າສຸດຂອງແຕ່ລະໄດຣຟ໌ ທັນທີທີ່ໄດຣຟ໌ຕອບ; Trust Cache ຮັກສາມັນໄວ້ ຈົນກວ່າທ່ານກົດ SELECT. ເປີດທັງສອງ, ໂດຍມີການຕັ້ງຄ່າຢູ່ໃນເມມໂມຣີກາດ ທີ່ RIPPS2 ເລີ່ມຈາກ, ແມ່ນບູດທີ່ໄວທີ່ສຸດ.
+  Fast Cache, Trust Cache: Fast Cache, Trust Cache
+  'Game lists: Fast Cache off, so each one is read from its drive at boot': 'ລາຍການເກມ: Fast Cache ປິດ, ອ່ານແຕ່ລະອັນຈາກໄດຣຟ໌ຕອນບູດ'
+  'Game lists: each shows at once from its cache and stands until SELECT': 'ລາຍການເກມ: ຂຶ້ນທັນທີຈາກ cache ແລະ ຢູ່ຈົນ SELECT'
+  'Game lists: each shows at once from its cache, then is read again': 'ລາຍການເກມ: ຂຶ້ນທັນທີຈາກ cache, ແລ້ວອ່ານໃໝ່'
+  LOADING: ກຳລັງໂຫຼດ
+  Makes RIPPS2's sounds from this console's own BIOS and writes them to the AUDIO folder.: ສ້າງສຽງຂອງ RIPPS2 ຈາກ BIOS ຂອງເຄື່ອງນີ້ເອງ ແລະ ຂຽນໃສ່ໂຟນເດີ AUDIO.
+  'No music yet: Audio settings > BIOS Music rips this console''s menu music.': 'ຍັງບໍ່ມີເພງ: ການຕັ້ງຄ່າສຽງ > ເພງ BIOS ຖອດເພງເມນູຂອງເຄື່ອງນີ້.'
+  SAVE DIAGNOSTICS: ບັນທຶກຂໍ້ມູນວິນິດໄສ
+  Searches the drives for POPSTARTER, the POPS files, Ember, Ember's BIOS and Neutrino, and remembers where each one is.: ຊອກຫາ POPSTARTER, ໄຟລ໌ POPS, Ember, BIOS ຂອງ Ember ແລະ Neutrino ໃນໄດຣຟ໌, ແລະ ຈື່ວ່າແຕ່ລະອັນຢູ່ໃສ.
+  'Settings: %s, on a drive the boot waits for (a memory card is quicker)': 'ການຕັ້ງຄ່າ: %s, ໃນໄດຣຟ໌ທີ່ບູດລໍຖ້າ (ເມມໂມຣີກາດໄວກວ່າ)'
+  'Settings: %s, read first (the quickest place)': 'ການຕັ້ງຄ່າ: %s, ອ່ານກ່ອນ (ບ່ອນໄວທີ່ສຸດ)'
+  Starts every drive now (USB, the HDD, MMCE, MX4SIO and the network), so each one and its space shows here.: ເລີ່ມທຸກໄດຣຟ໌ດຽວນີ້ (USB, HDD, MMCE, MX4SIO ແລະ ເຄືອຂ່າຍ), ເພື່ອໃຫ້ແຕ່ລະອັນ ແລະ ບ່ອນວ່າງຂອງມັນ ຂຶ້ນຢູ່ນີ້.
+  The IP and SMB share POPSTARTER uses for PS1 games over the network.: IP ແລະ SMB share ທີ່ POPSTARTER ໃຊ້ ສຳລັບເກມ PS1 ຜ່ານເຄືອຂ່າຍ.
+  The diagnostics are in %s.: ຂໍ້ມູນວິນິດໄສຢູ່ໃນ %s.
+  The diagnostics could not be written to %s.: ຂຽນຂໍ້ມູນວິນິດໄສໃສ່ %s ບໍ່ໄດ້.
+  What each memory card starts at power on; install or repair BIBLE, PS2BBL set up to start RIPPS2.: ສິ່ງທີ່ແຕ່ລະເມມໂມຣີກາດເລີ່ມ ຕອນເປີດເຄື່ອງ; ຕິດຕັ້ງ ຫຼື ສ້ອມແປງ BIBLE, PS2BBL ທີ່ຕັ້ງໄວ້ເພື່ອເລີ່ມ RIPPS2.
+  Where POPSTARTER and Ember are, and how PS1 games start.: POPSTARTER ແລະ Ember ຢູ່ໃສ, ແລະ ເກມ PS1 ເລີ່ມແນວໃດ.
+  Where your Neutrino is, its video mode, and the arguments every Neutrino launch gets.: Neutrino ຂອງທ່ານຢູ່ໃສ, ໂໝດວິດີໂອຂອງມັນ ແລະ ອາກິວເມັນ ທີ່ທຸກການເປີດ Neutrino ໄດ້ຮັບ.
+  ? Writes what RIPPS2 noted about the pads, the drives, MMCE cards and the last launches to DIAG.TXT beside RIPPS2. Send it with a bug report.
+  : ຂຽນສິ່ງທີ່ RIPPS2 ບັນທຶກໄວ້ ກ່ຽວກັບ ຈອຍ, ໄດຣຟ໌, ກາດ MMCE ແລະ ການເປີດຫຼ້າສຸດ ໃສ່ DIAG.TXT ຂ້າງ RIPPS2. ສົ່ງມັນພ້ອມກັບລາຍງານບັນຫາ.
+  back to Cache: ກັບໄປ Cache
+  what boot reads first: ສິ່ງທີ່ບູດອ່ານກ່ອນ
+  ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
+  : Neutrino ນີ້ເກົ່າກວ່າ 1.3, ເຊິ່ງເລີ່ມເກມຈາກ HDD APA ບໍ່ໄດ້. ຊີ້ ການເປີດເກມ > Neutrino ໄປຫາ Neutrino 1.3 ຫຼື ໃໝ່ກວ່າ, ຫຼື ລຶບເສັ້ນທາງ ເພື່ອໃຊ້ອັນທີ່ RIPPS2 ມີມານຳ.
+  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+  : RIPPS2 ບໍ່ເຫັນ %s ໃນ %s%s. POPSTARTER ຕ້ອງການ POPS.ELF ແລະ POPS_IOX.PAK, ໂຕຈຳລອງ PS1 ຈາກເຄື່ອງຂອງທ່ານເອງ; ມັນອາດພົບພວກມັນ ບ່ອນທີ່ RIPPS2 ບໍ່ເບິ່ງ (ຖ້າເກມຂອງທ່ານເລີ່ມໄດ້, ມັນພົບ). START ເປີດ, ແລະ ຈະບໍ່ຖາມກ່ຽວກັບໄດຣຟ໌ນີ້ອີກ.
 labels:
   SETTINGS_SAVED: ບັນທຶກການຕັ້ງຄ່າ ໄວ້ໃນ %s ແລ້ວ
   REMOVE_ALL_SETTINGS: ລົບການຕັ້ງຄ່າ
@@ -1382,16 +1479,16 @@ labels:
   HINT_RIPPS2_COLOR_THEME: 'ສີດຽວ ສຳລັບຫໍຄອຍ, ລູກແກ້ວ, ແກ້ວ, ເຄື່ອງຫຼິ້ນ CD ແລະ ໂຕທ່ອງໄຟລ໌, ໃນທັງສາມແຖບ. ທີມ: ທີມຕັດສິນ (ສີຟ້າ RIPPS2 ບ່ອນທີ່ມັນບໍ່ຕັດສິນ).'
   RIPPS2_HINTS: ຄຳແນະນຳ ປຸ່ມ
   HINT_RIPPS2_HINTS: 'ຄຳແນະນຳປຸ່ມ ຢູ່ລຸ່ມສຸດ. ຈາງ ເມື່ອບໍ່ໄດ້ໃຊ້ ເຊື່ອງພວກມັນ ຈົນທ່ານກົດປຸ່ມ. ທີມ: ທີມຕັດສິນ.'
-  RIPPS2_CATEGORY_BAR: ແຖບໝວດ
-  HINT_RIPPS2_CATEGORY_BAR: 'ເປີດແຜ່ນ, ບ່ອນເກັບຂໍ້ມູນ ແລະ ໄຟລ໌ໃນໜ່ວຍຄວາມຈຳ ຢູ່ເທິງສຸດ. ຈາງ ເມື່ອບໍ່ໄດ້ໃຊ້ ເຊື່ອງພວກມັນ ຈົນທ່ານກົດປຸ່ມ. ທີມ: ທີມຕັດສິນ.'
+  RIPPS2_CATEGORY_BAR: ໝວດ/ແຖບຂ້າງ
+  HINT_RIPPS2_CATEGORY_BAR: 'ເປີດແຜ່ນ, ບ່ອນເກັບຂໍ້ມູນ ແລະ ໄຟລ໌ໃນໜ່ວຍຄວາມຈຳ: ຊື່ຢູ່ເທິງ, ຫຼື ແຖບຂ້າງ. ຈາງ ເມື່ອບໍ່ໄດ້ໃຊ້ ເຮັດໃຫ້ຊື່ຈາງ, ຫຼື ເລື່ອນແຖບຂ້າງອອກ, ຈົນກວ່າທ່ານກົດປຸ່ມ; ມັນກັບມາທັນທີ. ທີມ: ທີມຕັດສິນ.'
   RIPPS2_SOURCE_NAME: ຊື່ແຫຼ່ງ
   RIPPS2_STATUS: ສະຖານະ
   RIPPS2_SOURCE: ແຫຼ່ງ
   HINT_RIPPS2_SOURCE_NAME: 'ຊື່ແຫຼ່ງ ເທິງເກມ (ທຸກເກມ, ເກມ HDD ແລະ ອື່ນໆ). ຈາງ ເມື່ອບໍ່ໄດ້ໃຊ້ ເຮັດໃຫ້ມັນຈາງ ພ້ອມແຖບໝວດ; ປາກົດຂຶ້ນທັນທີ ສະແດງມັນໃຫຍ່ ກາງໜ້າແທນ, ຄືທີ່ L3 ບອກຊື່ລາຍຊື່, ໃນລາຍຊື່ທຳອິດ ຫຼັງເປີດເຄື່ອງ ແລະ ທຸກເທື່ອທີ່ແຫຼ່ງປ່ຽນ, ແລ້ວຈາງໄປ. ທີມ ເຮັດໃຫ້ ປາກົດຂຶ້ນທັນທີ ເປັນ ສະແດງ ຂອງມັນໄດ້. ທີມ: ທີມຕັດສິນ.'
-  RIPPS2_RECENTS: ສະແດງ ຫຼ້າສຸດ
-  HINT_RIPPS2_RECENTS: ສູງສຸດເທົ່ານີ້ ຂອງເກມທີ່ເປີດຫຼ້າສຸດ ຢູ່ເທິງ ເກມທີ່ມັກ, ໃໝ່ສຸດກ່ອນ. 0 ປິດມັນ.
+  RIPPS2_RECENTS: ເກມຫຼ້າສຸດ
+  HINT_RIPPS2_RECENTS: 'ເກມຫຼ້າສຸດ, ໜ້າໜຶ່ງໃນແຖບຂ້າງ ທີ່ມີເກມທີ່ທ່ານເປີດຫຼ້າສຸດ, ໃໝ່ສຸດກ່ອນ: ເກັບຈັກອັນ, 1 ຫາ 99 (ສາມຫຼ່ຽມ ພິມຕົວເລກ). ເກມທີ່ໄດຣຟ໌ເປັນ ເລືອກເອງ ຈະເລີ່ມໄດຣຟ໌ນັ້ນ ເມື່ອທ່ານເລືອກມັນ. 0 ປິດໜ້ານີ້.'
   RIPPS2_CATEGORY_ORDER: ລຳດັບໝວດ
-  HINT_RIPPS2_CATEGORY_ORDER: 'ໄຟລ໌ໃນໜ່ວຍຄວາມຈຳ ກ່ອນ ແລະ ເປີດແຜ່ນ ທ້າຍ. ເຮັດສຳລັບ RIPFLOW (ໜ້າຕາ > ທີມ). ທີມ: ທີມຕັດສິນ.'
+  HINT_RIPPS2_CATEGORY_ORDER: 'ສະຫຼັບ ເປີດແຜ່ນ ແລະ ໄຟລ໌ໃນໜ່ວຍຄວາມຈຳ: ໄຟລ໌ໃນໜ່ວຍຄວາມຈຳ ກ່ອນ ແລະ ເປີດແຜ່ນ ສຸດທ້າຍ, ທັງໃນຊື່ຂອງແຖບ ແລະ ໄອຄອນຂອງແຖບຂ້າງ. ເຮັດສຳລັບ RIPFLOW (ໜ້າຕາ > ທີມ). ທີມ: ທີມຕັດສິນ.'
   RIPPS2_MUSIC: ເພງ
   HINT_RIPPS2_MUSIC: ຫຼິ້ນໄຟລ໌ bgm ໃນໂຟນເດີ AUDIO ຂ້າງ RIPPS2 ແລະ ໃນໂຟນເດີ AUDIO ຂອງ OPL ເທິງແຕ່ລະໄດຣຟ໌ທີ່ເລີ່ມ (Ogg ທີ່ບໍ່ມີແທັກ, ຫຼື WAV 16-bit); ອັນທີ່ຊື່ Menu ຫຼິ້ນກ່ອນ. ເພງຂອງທີມເອງ ຫຼິ້ນແທນ ຖ້າມີ.
   RIPPS2_BIOS_SOUNDS: ສຽງ BIOS
@@ -1400,7 +1497,7 @@ labels:
   RIPPS2_HINTS_GLYPHS: ຄຳແນະນຳ ແລະ ສັນຍາລັກ
   HINT_RIPPS2_HINTS_GLYPHS: ຄຳແນະນຳປຸ່ມ ແລະ ສັນຍາລັກ ເບິ່ງຄືແນວໃດ. ແຕ່ລະແຖວ ເລີ່ມທີ່ ທີມ, ສິ່ງທີ່ທີມເລືອກ; ການເລືອກອື່ນ ເປັນຂອງທ່ານ ແລະ ມີສິດກ່ອນ ທຸກທີມ.
   RIPPS2_HINT_LAYOUT: ການຈັດ ຄຳແນະນຳ
-  HINT_RIPPS2_STARSIDE: 'ບ່ອນທີ່ດາວຂອງເກມທີ່ມັກ ຢູ່ໃນລາຍຊື່. ຊ້າຍ: ຖັນຂອງມັນເອງ ຢູ່ຕົ້ນທຸກແຖວ. ຂວາ: ຫຼັງຊື່. ເຊື່ອງ: ບໍ່ມີດາວ. ທີມ: ຕາມທີ່ທີມກຳນົດ. ໄອຄອນແຖວຂອງທີມ ຈະຍ້າຍໄປອີກປາຍ ເພື່ອບໍ່ໃຫ້ຊ້ອນກັນ.'
+  HINT_RIPPS2_STARSIDE: 'ດາວຂອງເກມທີ່ມັກ ຢູ່ໃສໃນລາຍການ. ຊ້າຍ: ຖັນຂອງມັນເອງ ຢູ່ຕົ້ນແຕ່ລະແຖວ. ຂວາ: ຫຼັງຊື່. ເຊື່ອງ (ເລີ່ມຕົ້ນ): ບໍ່ມີດາວ ແລະ ບໍ່ມີຖັນ, ຊື່ເຕັມ. ທີມ: ຕາມທີ່ທີມບອກ. R3 ໝາຍເກມວ່າມັກ ບໍ່ວ່າແນວໃດ; ກົດ R3 ຄ້າງ 4 ວິນາທີ ໃນລາຍການ ເພື່ອເຊື່ອງດາວ ຫຼື ເອົາກັບມາ (ອັນນີ້ ໝາຍເກມທີ່ຢູ່ໃຕ້ເຄີເຊີດ້ວຍ).'
   HINT_RIPPS2_HINT_LAYOUT: 'ແຖວ: ຄຳແນະນຳ ໃນແຖວດຽວ. ຖັນ: ໜຶ່ງຄຳແນະນຳ ຕໍ່ແຖວ, ລາຍການ ຢູ່ຂ້າງ, ເລີ່ມຈາກບ່ອນ ທີ່ທີມວາງຄຳແນະນຳ.'
   RIPPS2_HINT_LABELS: ປ້າຍ ຄຳແນະນຳ
   HINT_RIPPS2_HINT_LABELS: ສັນຍາລັກ ຢ່າງດຽວ ແຕ້ມແຕ່ປຸ່ມ, ສຳລັບສັນຍາລັກ ທີ່ມີຄຳຂອງມັນເອງ. ປ້າຍ ວາງສັນຍາລັກ ແລະ ຫົວຂໍ້ ຂອງແຕ່ລະຄຳແນະນຳ ນຳກັນ ເທິງປ້າຍດຽວ.
@@ -1421,11 +1518,11 @@ labels:
   RIPPS2_TRANSITION: ການປ່ຽນໜ້າ
   HINT_RIPPS2_TRANSITION: 'ໜ້າໃໝ່ ເຂົ້າມາແນວໃດ ເມື່ອທ່ານໄປໝວດອື່ນ: ຈາກສີພື້ນຫຼັງ ຂອງທີມ, ຫຼື ຈາກການກະພິບ. ທີມ ເກັບການເລືອກຂອງທີມ.'
   RIPPS2_CATEGORY_LAYOUT: ການຈັດວາງໝວດ
-  HINT_RIPPS2_CATEGORY_LAYOUT: 'ບ່ອນທີ່ສາມໝວດຢູ່: ຊື່ຂອງພວກມັນທາງເທິງ, ຫຼື ໄອຄອນລົງຕາມແຖບຂ້າງ, ແຕ່ລະອັນມີລິ້ນຊັກໜ້າຂອງມັນ (ຊ້າຍ ໃນລາຍການ ໄປທີ່ນັ້ນ). ທີມ ເກັບອັນຂອງທີມເອງ.'
+  HINT_RIPPS2_CATEGORY_LAYOUT: 'ສາມໝວດ ຢູ່ໃສ: ຊື່ຂອງພວກມັນຢູ່ເທິງ, ຫຼື ໄອຄອນລົງຕາມແຖບຂ້າງ, ແຕ່ລະອັນມີລິ້ນຊັກ ຂອງໜ້າຂອງມັນ (ຊ້າຍ ໃນລາຍການ ໄປບ່ອນນັ້ນ), ຫຼື ເມນູ: ບໍ່ມີແຖບເລີຍ, ໝວດຢູ່ໃນເມນູ START ຄືທີມທີ່ເຮັດສຳລັບ OPL. ທີມ ໃຊ້ຂອງທີມເອງ.'
   RIPPS2_CACHE: ແຄຊ
   HINT_RIPPS2_CACHE: 'ວິທີເກັບລາຍຊື່ເກມຂອງແຕ່ລະແຫຼ່ງ ເພື່ອໃຫ້ໜ້າຂອງມັນເປີດທັນທີ: Fast Cache, ລາຍຊື່ຂອງ HDD ພາຍໃນ ແລະ ການໂຫຼດຄືນອັດຕະໂນມັດ.'
   RIPPS2_FAST_CACHE: Fast Cache
-  HINT_RIPPS2_FAST_CACHE: ແຕ່ລະແຫຼ່ງເກັບລາຍຊື່ເກມຫຼ້າສຸດຂອງມັນ (RIPPS2.LST ຂ້າງໂຟນເດີ CD ແລະ DVD) ແລະ ສະແດງມັນທັນທີທີ່ແຫຼ່ງຕອບ, ແລ້ວອ່ານແຫຼ່ງຄືນໃໝ່ໃນພື້ນຫຼັງ. ປິດ ຈະອ່ານແຕ່ລະລາຍຊື່ຈາກແຫຼ່ງກ່ອນ ຄືເກົ່າ.
+  HINT_RIPPS2_FAST_CACHE: 'ແຕ່ລະແຫຼ່ງ ເກັບລາຍການເກມຫຼ້າສຸດຂອງມັນ (RIPPS2.LST ຂ້າງໂຟນເດີ CD ແລະ DVD) ແລະ ສະແດງມັນ ທັນທີທີ່ແຫຼ່ງຕອບ. Trust Cache ຕັດສິນວ່າ ຈະອ່ານແຫຼ່ງໃໝ່ຫຼັງຈາກນັ້ນ ຫຼື ບໍ່. ປິດ: ອ່ານແຕ່ລະລາຍການຈາກແຫຼ່ງກ່ອນ, ຄືເກົ່າ.'
   HINT_RIPPS2_VIGNETTE: ເຮັດໃຫ້ຂອບ ຂອງທຸກໜ້າປົກ ມືດລົງ ຍົກເວັ້ນອັນທີ່ເລືອກ, ເພື່ອໃຫ້ອັນທີ່ເລືອກ ເດັ່ນ. ອ່ອນ ແມ່ນເຄິ່ງໜຶ່ງ ຂອງ ເຕັມ.
   RIPPS2_GRID_WIDE: ການຈັດຕາຕະລາງ ຈໍກວ້າງ
   HINT_RIPPS2_GRID_WIDE: ໜ້າຕາຕະລາງ ເທິງພາບ 16:9 ເທົ່ານັ້ນ (ຈໍກວ້າງ, 720p, 1080i), ບ່ອນທີ່ໜ້າປົກ ແຄບລົງ ແລະ ໃສ່ໄດ້ຫຼາຍຂຶ້ນ. ທີມ ໃຊ້ອັນຂອງທີມ; ຄືກັນ ເຮັດຕາມ ການຈັດຕາຕະລາງ.
@@ -1441,7 +1538,7 @@ labels:
   GAME_TYPE_LABELS: ສະແດງປ້າຍ [PS1]/[PS2]
   NEUTRINO_CHEATS_WRITE_FAILED: ບັນທຶກລາຍການສູດໂກງ ໃສ່ໂຟນເດີ Neutrino ບໍ່ໄດ້, ດັ່ງນັ້ນ Neutrino ໃຊ້ມັນບໍ່ໄດ້. ເລີ່ມ ໂດຍບໍ່ມີສູດໂກງ ບໍ?
   AUTO_CREATE_VMC: ສ້າງ VMC ຕອນເປີດເທື່ອທຳອິດ
-  HINT_AUTO_CREATE_VMC: ການເປີດເກມ PS2 ທີ່ບໍ່ມີ VMC ໃນຊ່ອງ 1 ຈະສ້າງກາດ 8 MB ເທິງອຸປະກອນຂອງເກມ, ຕັ້ງຊື່ຕາມ ທີ່ໜ້າ VMC ແນະນຳ (ໃຊ້ຮ່ວມກັນ ທຸກແຜ່ນ ຂອງເກມ), ແລະ ກຳນົດມັນ. ບໍ່ແມ່ນສຳລັບ HDD ພາຍໃນ ພາຍໃຕ້ Neutrino.
+  HINT_AUTO_CREATE_VMC: ການເປີດເກມ PS2 ທີ່ບໍ່ມີ VMC ໃນຊ່ອງ 1 ຈະສ້າງກາດ 8 MB ໃນອຸປະກອນຂອງເກມ, ຕັ້ງຊື່ຕາມທີ່ໜ້າຈໍ VMC ແນະນຳ (ໃຊ້ຮ່ວມກັນທຸກແຜ່ນຂອງເກມ), ແລະ ກຳນົດມັນ. ພາຍໃຕ້ Neutrino ບໍ່ແມ່ນໃນ HDD APA (HDD exFAT ໃຊ້ໄດ້).
   AUTO_VMC_CREATING: ກຳລັງສ້າງ VMC ຂອງເກມນີ້...
   AUTO_VMC_FAILED: ສ້າງ VMC ຂອງເກມນີ້ ບໍ່ໄດ້. ເກມເລີ່ມ ໂດຍບໍ່ມີມັນ.
   RIPPS2_BIOS_MUSIC: ເພງ BIOS
@@ -1478,7 +1575,7 @@ labels:
   HINT_LANGUAGE: ພາສາເມນູ. ເພີ່ມອີກ ໂດຍວາງໄຟລ໌ lang_*.lng ໃນໂຟນເດີ LNG.
   HINT_GSM_DEFAULTS_BUTTON: ການແກ້ໂໝດວິດີໂອ ທີ່ທຸກເກມໄດ້ ເວັ້ນແຕ່ມັນມີ ການຕັ້ງຄ່າ GSM ຂອງມັນເອງ.
   HINT_DEFDEVICE: ໜ້າ ທີ່ RiptOPL ເປີດ ຕອນເປີດເຄື່ອງ.
-  HINT_MMCE_MODE: ເກມ ເທິງ SD2PSX ຫຼື MemCard PRO2. Auto ເລີ່ມ ຕອນເປີດເຄື່ອງ, Manual ເມື່ອທ່ານເປີດໜ້າ, ປິດ ເຊື່ອງມັນ.
+  HINT_MMCE_MODE: 'ເກມໃນ SD2PSX ຫຼື MemCard PRO2. ອັດຕະໂນມັດ ເລີ່ມມັນຕອນບູດ: ໄວທີ່ສຸດ ສຳລັບກາດທີ່ສຽບໄວ້, ເກມຂອງມັນຢູ່ໃນ ທຸກເກມ ຕັ້ງແຕ່ຕົ້ນ. ເລືອກເອງ ເລີ່ມມັນ ເມື່ອທ່ານເປີດໜ້າຂອງມັນ, ປິດ ເຊື່ອງມັນ.'
   HINT_MMCE_SETTINGS_BUTTON: ຕົວເລືອກ ຊ່ອງ, ກາດບູດ IGR, GameID ແລະ ຈັງຫວະ ສຳລັບ MMCE.
   HINT_ENABLE_USB: ໂຫຼດ ໄດຣເວີ USB storage.
   HINT_ENABLE_MX4SIO: ໂຫຼດ ໄດຣເວີ ອະແດັບເຕີກາດ SD MX4SIO.
@@ -1660,8 +1757,8 @@ labels:
   HINT_RIPPS2_SCREEN: 'ພາບຂອງເມນູ: ໂໝດວິດີໂອ, ຈໍກວ້າງ, ບ່ອນມັນຢູ່ເທິງໂທລະທັດ (H-POS, V-POS) ແລະ overscan.'
   HINT_RIPPS2_LAYOUT: ບ່ອນທີ່ໝວດໝູ່ຢູ່ ແລະ ໜ້າເຂົ້າມາແນວໃດ, ແລ້ວໜ້າປົກຂອງ RIPFLOW ແລະ ຕາຂ່າຍຂອງ RIPGRID.
   HINT_RIPPS2_COLORS_TEXT: ຄວາມໜາຂອງຕົວອັກສອນ, ທີມສີ, ການປ່ຽນສີ ແລະ ທຸກສີ.
-  HINT_RIPPS2_TEXT_WEIGHT: 'ຂໍ້ຄວາມຂອງ RIPPS2 ເອງໜາເທົ່າໃດ: ຄຳແນະນຳໃນການຕັ້ງຄ່າ, ສະຖານະ ແລະ ກ່ຽວກັບ. ປົກກະຕິຄືເກົ່າ; ກາງ ແລະ ໜາ ອ່ານງ່າຍກວ່າໃນພາບທີ່ອ່ອນ.'
-  HINT_RIPPS2_HDD_START: 'HDD ພາຍໃນ, APA ຫຼື exFAT: RIPPS2 ອ່ານມັນບໍ່ວ່າຈະເປັນແບບໃດ ແລະ ສະແດງຄັ້ງດຽວ ເປັນເກມ HDD. ປິດ ຈະບໍ່ແຕະມັນ.'
+  HINT_RIPPS2_TEXT_WEIGHT: 'ຕົວໜັງສືຂອງ RIPPS2 ເອງ ໜາເທົ່າໃດ: ຄຳແນະນຳໃນ ການຕັ້ງຄ່າ, ສະຖານະ ແລະ ກ່ຽວກັບ. ປົກກະຕິ ຄືເກົ່າ; ໜາ ອ່ານງ່າຍກວ່າ ເທິງຮູບທີ່ອ່ອນ. ຟອນຂອງທີມເອງ ຮັກສາຄວາມໜາທີ່ທີມໃຫ້.'
+  HINT_RIPPS2_HDD_START: 'HDD ພາຍໃນ, APA ຫຼື exFAT: RIPPS2 ອ່ານມັນ ບໍ່ວ່າຈະເປັນແບບໃດ ແລະ ສະແດງມັນເທື່ອດຽວ, ເປັນ ຫຼິ້ນເກມຜ່ານ Hard Disk. ອັດຕະໂນມັດ (ໄວທີ່ສຸດ ເມື່ອມີ HDD) ເລີ່ມມັນຕອນບູດ; ປິດ ປ່ອຍມັນໄວ້.'
   HINT_RIPPS2_THEME_COLOR: ສີຂອງທີມເອງ. ເລືອກ ກຳນົດເອງ ເປັນທີມສີ ເພື່ອເລືອກເອງ ຄືກັບສີຂໍ້ຄວາມ.
   HINT_RIPPS2_SWEEP: ຫ້າສີທີ່ທີມຜ່ານໄປຊ້າໆ ແລະ ລຽບ. ຮຸ້ງ, ການປ່ຽນຈາກແຕ່ລະທີມສີ, ຫຼື ຂອງເຈົ້າເອງ. ປິດ ຈະໃຫ້ທີມສີຢູ່ນິ້ງ.
   HINT_RIPPS2_SWEEP_COLORS: ຫ້າສີຂອງການປ່ຽນ ແລະ ຄວາມໄວຂອງມັນ. ປ່ຽນອັນໜຶ່ງຂອງ RIPPS2 ແລ້ວມັນຈະຖືກເກັບເປັນຂອງເຈົ້າ ດ້ວຍຊື່ທີ່ເຈົ້າຕັ້ງ.
@@ -1670,3 +1767,20 @@ labels:
   HINT_RIPPS2_SWEEP_SPEED: 'ແຕ່ລະສີຢູ່ດົນເທົ່າໃດກ່ອນສີຕໍ່ໄປຈະເຂົ້າມາ. ເຖິງ ມີຊີວິດຊີວາ ກໍຍັງລຽບ: ສີບໍ່ເຄີຍກະພິບ.'
   RIPPS2_HIDE_COMPRESS: ເຊື່ອງເກມ ແລະ ບີບອັດ
   HINT_RIPPS2_SELECT_HOLD: 'ກົດ SELECT ຄ້າງ 4.2 ວິ ໃນລາຍການເກມ. ລາຍການ: ທີມໃນແຜງ, ເລືອກອັນໜຶ່ງ. ໝຸນວຽນ: ທີມຖັດໄປ. ປິດ: ບໍ່ມີຫຍັງ (ກົດຍັງໂຫຼດຄືນ).'
+  RIPPS2_RECENT_GAMES: ເກມຫຼ້າສຸດ
+  RIPPS2_SET_METADATA_RENAME: ຕັ້ງ Metadata (ປ່ຽນຊື່)
+  RIPPS2_TRUST_CACHE: Trust Cache
+  RIPPS2_MMCE_PAD_FIRST: ຈອຍກ່ອນ (ທົດລອງ)
+  HINT_RIPPS2_MMCE_PAD_FIRST: 'SD2PSX ອ່ານຜ່ານບັສທີ່ໃຊ້ຮ່ວມກັບຈອຍ, ແລະ ລະຫວ່າງການອ່ານ ຈອຍບໍ່ຖືກໄດ້ຍິນ: ການກົດຊ້າ ຫຼື ຫາຍ ຂະນະໜ້າປົກໂຫຼດ. ເປີດ: ໜ້າປົກມາເປັນສ່ວນນ້ອຍ ໂດຍອ່ານຈອຍລະຫວ່າງນັ້ນ, ຊ້າລົງໜ້ອຍໜຶ່ງ. ປິດ: ໄວເທົ່າທີ່ກາດໄປໄດ້. ເມື່ອແຫຼ່ງຂອງກາດເປັນ ອັດຕະໂນມັດ, ລາຍການຂອງມັນໂຫຼດເທື່ອດຽວ, ຕອນບູດ.'
+  HINT_RIPPS2_TRUST_CACHE: 'ລາຍການທີ່ສະແດງຈາກ cache ຢູ່ຄືເກົ່າ, ພ້ອມເປີດ, ຈົນກວ່າທ່ານກົດ SELECT ຫຼື RIPPS2 ປ່ຽນແຫຼ່ງນັ້ນເອງ. ປິດ: ອ່ານແຕ່ລະແຫຼ່ງໃໝ່ໃນພື້ນຫຼັງ ຫຼັງຈາກ cache ຂຶ້ນ, ເຊິ່ງຢຸດໃຫ້ຮູ້ສຶກໄດ້ ໃນກາດ MMCE ຫຼື MX4SIO ທີ່ໃຊ້ບັສຂອງຈອຍຮ່ວມກັນ.'
+  RIPPS2_STATUS_OPEN: ການໂຫຼດ ແລະ ໄດຣຟ໌
+  HINT_RIPPS2_STATUS_OPEN: 'ເປີດ ສະຖານະ: ບູດອ່ານການຕັ້ງຄ່າ ແລະ ລາຍການເກມຈາກໃສ, ບ່ອນໃດໄວທີ່ສຸດ, EXIT ຂອງເກມໄປໃສ, ແລະ ທຸກໄດຣຟ໌. ການຕັ້ງຄ່າ CACHE ຢູ່ນັ້ນ ພາກັບມານີ້.'
+  RIPPS2_BADGE_SET: ຊຸດປ້າຍ
+  HINT_RIPPS2_BADGE_SET: 'ປ້າຍໃນໜ້າຂໍ້ມູນຂອງເກມ (ເລດ, ຜູ້ຫຼິ້ນ, ESRB, ໂໝດວິດີໂອ, ສະແກນ, ອັດຕາສ່ວນ). RIPPS2: ຊຸດຂອງມັນເອງ, ຄືກັນທຸກທີມ. ທີມ: ຮູບຂອງທີມເອງ, ຫຼື ຂອງ RIPPS2 ເມື່ອທີມຂໍ.'
+  RIPPS2_HINT_FADE: ຄຳແນະນຳ ແລະ ສັນຍາລັກ ຄ່ອຍໆຂຶ້ນ
+  HINT_RIPPS2_HINT_FADE: 'ຄຳແນະນຳປຸ່ມ ຫຼື ສັນຍາລັກທີ່ປ່ຽນ ຈະຄ່ອຍໆຂຶ້ນ, ຄືໜ້າປົກ, ທັນທີທີ່ມັນປ່ຽນ; ອັນທີ່ຄືເກົ່າ ບໍ່ຖືກແຕະ, ໃນທຸກໜ້າ ແລະ ຂໍ້ຄວາມ. ປິດ: ພວກມັນພຽງແຕ່ຂຶ້ນມາ. ທີມ: ທີມຕັດສິນ (ເປີດ ເວັ້ນແຕ່ມັນບອກ hints_fade=0).'
+  RIPPS2_SIDEBAR_STYLE: ຮູບແບບແຖບຂ້າງ
+  HINT_RIPPS2_SIDEBAR_STYLE: 'ຄລາສສິກ (ແຍກ): ໄອຄອນໃນແຖບມືດຂອງແຖບຂ້າງ ມີແຖບສີຢູ່ຂ້າງ. XL (ຊິ້ນດຽວ): ແຖບກວ້າງອັນດຽວ, ໄອຄອນຢູ່ກາງ. ທີມ: ທີມຕັດສິນ.'
+  HINT_EXITPATH: 'EXIT ໃນ ເມນູ ໃນເກມ ໄປໃສ. ດີທີ່ສຸດ ປ່ອຍວ່າງ, ໂດຍຕັ້ງ BIBLE ໄວ້ (ສະຖານະ > ໂຕໂຫຼດບູດ > ຈັດການ, ຫຼື BOOT LOCK ໃນ PS2BBL ຂອງທ່ານ): EXIT ຈະຣີເຊັດເຄື່ອງ ຜ່ານທາງບູດຂອງມັນເອງ ແລະ PS2BBL ເລີ່ມ RIPPS2 ຄືຕອນເປີດເຄື່ອງ, ທາງກັບທີ່ປອດໄພທີ່ສຸດ. ໂຕທ່ອງ: ໂຕທ່ອງຂອງ PS2. ELF ໃນເມມໂມຣີກາດ (mc0:/mc1:) ຫຼື ໄດຣຟ໌ USB FAT32 (mass:/) ໂຫຼດທັນທີຫຼັງຣີເຊັດ, ເຊິ່ງບໍ່ແມ່ນທຸກເກມ ທີ່ປ່ອຍເຄື່ອງໃຫ້ພ້ອມ; ຕອນນັ້ນ ເຂົ້າ MMCE ບໍ່ໄດ້ເລີຍ.'
+  HINT_BDM_START: 'USB, iLink, MX4SIO ແລະ HDD exFAT. ອັດຕະໂນມັດ ເລີ່ມພວກມັນຕອນບູດ: ໄວທີ່ສຸດ ສຳລັບໄດຣຟ໌ທີ່ສຽບໄວ້, ເກມຂອງພວກມັນຢູ່ໃນ ທຸກເກມ ຕັ້ງແຕ່ຕົ້ນ. ເລືອກເອງ ເລີ່ມພວກມັນ ເມື່ອທ່ານເປີດໜ້າຂອງພວກມັນ.'
+  NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino ໃຊ້ VMC ໃນ HDD APA ບໍ່ໄດ້ (exFAT, USB ແລະ MX4SIO ໄດ້): ເກມນີ້ເລີ່ມດ້ວຍກາດແທ້ໃນຊ່ອງນັ້ນ.'
