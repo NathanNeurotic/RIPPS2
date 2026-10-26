@@ -97,10 +97,10 @@ need(dlg, (('RIPPS2_SEANCE_ROW0', 'Cache > Launchers lines'), ('RIPPS2_SEANCE_BU
 mix = rd('src/mixsupport.c')
 need(mix, (('#define MIX_MASTER_FILE  "allgames.bin"', 'the master list beside the settings'),
            ('mixAppend(&b, NULL, -1, -1, m->kind, 100 + m->family, m->text, m->startup, m->family);', 'a waiting row: no owner, ranked after live rows'),
-           ('if (!settling && !recent)\n        mixMasterSave(b.arr, kept);', 'saved only once no started source is still to answer (build 115: by All Games only)'),
+           ('if (save && !settling && !recent)\n        mixMasterSave(b.arr, kept);', 'saved only once no started source is still to answer (build 115: by All Games only, never by a quiet look)'),
            ('itemList->updateDelay = waiting ? MENU_UPD_DELAY_GENREFRESH : MENU_UPD_DELAY_NOUPDATE;', 'polled only while games wait'),
            ('if (ripps2ShroudHas(mode, 0, name)) // build 114: hidden', 'hidden games never reach the master list')), 'mixsupport.c')
-upd = body(mix, 'static int mixUpdateItemList(')
+upd = body(mix, 'static int mixBuildRows(')  # build 115: the rows are built there
 if upd.index('mixMasterSave(') > upd.index('view == LIB_VIEW_PS1'):
     fail.append('mixUpdateItemList: the master list keeps every kind, saved before the view picks its rows')
 need(opl, (('mixSourceAnswered(mod->support->mode);', 'a source\'s list replaces its saved games'),
