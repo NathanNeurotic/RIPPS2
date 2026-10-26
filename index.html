@@ -123,7 +123,10 @@
   import { createPillars } from "./pillars.js";
   import { initMenu } from "./menu.js";
   import { createElfShelf } from "./elfshelf.js";
+  import { letterbox } from "./letterbox.js";
 
+  // a phone held upright gets the page in a letterboxed player (letterbox.js); nothing is drawn out here then
+  if (!letterbox()) {
   const hero = document.getElementById("hero");
 
   // Launch Disc sparks the field: two blasts straight into the center
@@ -143,6 +146,7 @@
     palette: "cobalt",
     interactTarget: hero,
     startTime: arrived ? 6 : Number(new URLSearchParams(location.search).get("t")) || 0,
+    maxPixelRatio: window.top !== window ? 1.5 : 2, // in the player the page is scaled down anyway
   });
   if (arrived === "launch") spark();
 
@@ -153,6 +157,7 @@
       onHatPress: (name, x, y) => pillars.colorWave(name, x, y) });
   } catch (e) { console.warn("elf shelf:", e); }
   showTab(arrived === "launch" ? "launch" : current);
+  }
 
 </script>
 </body>

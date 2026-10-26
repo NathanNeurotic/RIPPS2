@@ -103,6 +103,10 @@
   import { createOrbs, FORMATIONS } from "./orbs.js";
   import { createArrows } from "./arrows.js";
   import { initMenu } from "./menu.js";
+  import { letterbox } from "./letterbox.js";
+
+  // a phone held upright gets the page in a letterboxed player (letterbox.js); nothing is drawn out here then
+  if (!letterbox()) {
   initMenu();
 
   const $ = (id) => document.getElementById(id);
@@ -191,6 +195,7 @@
     }
     requestAnimationFrame(pollPads);
   })();
+  }
 </script>
 </body>
 </html>
