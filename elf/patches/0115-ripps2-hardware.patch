@@ -564,7 +564,7 @@ index 90fe9f6..8688937 100644
   * generation change or a deliberate settings apply -- so a stick with new art on it is picked up.
   * Cheap, and safe from any thread. */
 diff --git a/include/dialogs.h b/include/dialogs.h
-index 4970d36..7c08857 100644
+index 4970d36..cee51c1 100644
 --- a/include/dialogs.h
 +++ b/include/dialogs.h
 @@ -97,6 +97,7 @@ enum UI_ITEMS {
@@ -583,11 +583,13 @@ index 4970d36..7c08857 100644
      RIPPS2_HINT_ORDER_BUTTON, // and its Hint Order
      RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
      CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
-@@ -393,6 +395,7 @@ enum UI_ITEMS {
+@@ -393,6 +395,9 @@ enum UI_ITEMS {
      SWEEP_SPEED,
      SWEEP_DELETE, // build 114 (the user, 10/24): one of the user's own sweeps deleted
      UICFG_RIPPS2_SELECT_HOLD, // build 114: Interface > Hold SELECT (the theme list, the next theme, nothing)
 +    RIPPS2_STATUS_BUTTON,     // build 115: Cache > Status, STATUS's LOADING section (and back)
++    UICFG_RIPPS2_SBSTYLE,     // build 115: Layout > Sidebar Style
++    UICFG_RIPPS2_HINTFADE,    // build 115: Layout > Hints and Glyphs Fade
  
  #ifdef PADEMU
      PADEMU_GLOBAL_BUTTON,
@@ -606,13 +608,14 @@ index e75f52a..6e6a64d 100644
  #define FAV_MAGIC             0x4641464F // 'OFAV' (little-endian on the EE)
  #define FAV_VERSION           3          // v3 widens v2's isVcd byte to a KIND (see FAV_KIND_*)
 diff --git a/include/gui.h b/include/gui.h
-index 421bd63..8e61cb5 100644
+index 421bd63..959054d 100644
 --- a/include/gui.h
 +++ b/include/gui.h
-@@ -177,6 +177,7 @@ int guiDrawBGSettings(void);
+@@ -177,6 +177,8 @@ int guiDrawBGSettings(void);
  int guiDeviceTypeToIoMode(int deviceType);
  int guiIoModeToDeviceType(int ioMode);
  void guiShowNeutrinoDefaults(void);
++int guiDrawIconAndTextNoFade(int iconId, int textId, int font, int x, int y, u64 color, u64 iconColor); // build 115: as A, no fade-in
 +int guiShowCacheSettings(void); // RIPPS2 build 115: Game Sources > Cache from STATUS; 1 when a setting changed
  int guiNeutrinoPathHandler(char *text, int maxLen);
  int guiPopstarterPathHandler(char *text, int maxLen);
@@ -703,8 +706,20 @@ index 0f940c9..abc476d 100644
  
  /** Sets the repetition delay for the specified button
   * @param button id (KEY_XXX values)
+diff --git a/include/renderman.h b/include/renderman.h
+index 3797788..7568573 100644
+--- a/include/renderman.h
++++ b/include/renderman.h
+@@ -153,6 +153,7 @@ void rmStartFrame(void);
+ 
+ /** Ends the frame - last to call every frame */
+ void rmEndFrame(void);
++extern unsigned int gRmFrameNo; // RIPPS2 build 115: frames drawn
+ int rmQueueBusy(void); // build 74: an HD mode, or the last frame filled most of the draw queue
+ 
+ /** Sets the display offset in units of pixels */
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 131f69c..7213e49 100644
+index 131f69c..0d16f74 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -39,6 +39,8 @@ void ripps2PillarMusic(int on); // ripps2bg.c: the towers settle and light up to
@@ -716,6 +731,15 @@ index 131f69c..7213e49 100644
  void ripps2BibleManage(void);               // BOOT LOADER > MANAGE: what each card starts; BIBLE (PS2BBL 1.2.0) to install or repair
  int ripps2RebootIopWith(const void *ioprp, int size); // opl.c: the IOP rebooted from an IOPRP image, the menu taken down and back
  int ripps2GetBootPath(char *out, int size); // opl.c: the path RIPPS2 was started from; 0 when unknown
+@@ -79,7 +81,7 @@ extern int gRipps2LastDevice;  // build 96: the page (an IO mode) the last sessi
+ 
+ // RIPPSettings (Controller Settings > RIPPSettings, build 70): how RIPPS2's own pages look, saved in
+ // the settings
+-enum { RIPPS2_GLYPHS_HIDDEN = 0, RIPPS2_GLYPHS_SHOWN, RIPPS2_GLYPHS_FADE_IN, RIPPS2_GLYPHS_FADE_OUT, RIPPS2_GLYPHS_COUNT };
++enum { RIPPS2_GLYPHS_HIDDEN = 0, RIPPS2_GLYPHS_SHOWN, RIPPS2_GLYPHS_FADE_IN, RIPPS2_GLYPHS_FADE_OUT, RIPPS2_GLYPHS_GUIDANCE, RIPPS2_GLYPHS_COUNT };
+ enum { RIPPS2_SHOW_ON = 0, RIPPS2_SHOW_IDLE, RIPPS2_SHOW_OFF, RIPPS2_SHOW_COUNT }; // shown / fade when idle / hidden
+ // build 80: Source Name has one more, Pop In; build 81: the name is not drawn over the list, it plays as
+ // a view word (ALL GAMES, HDD GAMES...) in the middle of the page when it changes
 @@ -103,7 +105,7 @@ extern int gRipps2Hints;   // the button hints along the bottom of the three tab
  extern int gRipps2CatBar;  // LAUNCH DISC | STORAGE | MEMORY FILES along the top
  extern int gRipps2CatSwap; // 1: Memory Files first and Launch Disc last
@@ -725,15 +749,21 @@ index 131f69c..7213e49 100644
  float ripps2SourceNameAlpha(void);
  const char *ripps2PaletteName(int p);
  void ripps2NoteInput(void);         // every frame, once the pads are read: the idle time the fades follow
-@@ -148,6 +150,7 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
+@@ -148,7 +150,12 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
  
  // ---- build 113: the category sidebar (ripps2side.c) ----
  extern int gRipps2FastCache; // build 113: Game Sources > Cache > Fast Cache, each source's saved list (1, the default)
+-extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar
 +extern int gRipps2TrustCache; // build 115: Game Sources > Cache > Trust Cache, a cached list stands until SELECT (1)
- extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar
++extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar, 3 Menu (build 115)
++extern int gRipps2SidebarStyle; // build 115: Layout > Sidebar Style: 0 Theme, 1 Split, 2 One Piece
++extern int gRipps2HintFade;     // build 115: Layout > Hints and Glyphs Fade: 0 Theme (on unless hints_fade=0), 1 On, 2 Off
++float ripps2HintGlyphFade(int iconId, int textId); // build 115: this hint glyph's fade-in (1: as it was last frame)
++float ripps2GuidanceAlpha(void); // build 115: D-pad Glyphs > Guidance, in after GUIDANCE_IDLE_S without a press
  int ripps2SidebarOn(void);   // the categories drawn as the sidebar on this theme with this setting
  void ripps2SidebarRender(void);
-@@ -261,6 +264,7 @@ int ripps2EditMetadata(config_set_t *config, const char *gameName); // 1 when SA
+ int ripps2SidebarFocused(void); // 0 not, 1 its glyphs, 2 a drawer's list
+@@ -261,6 +268,7 @@ int ripps2EditMetadata(config_set_t *config, const char *gameName); // 1 when SA
  
  void ripps2HddManager(void); // ripps2hdd.c
  int ripps2NeutrinoInstallTo(const char *dir); // build 80: the carried Neutrino into dir ("mc0:/neutrino"...); 1 when complete
@@ -811,8 +841,29 @@ index 1e8421d..ae7f253 100644
  void sysNeutrinoWarnPadEmu(config_set_t *configSet);
  
  // Compose the exact launch argv while the GUI is still live. Refuses a launch that would exceed
+diff --git a/include/themes.h b/include/themes.h
+index e300e61..2ad5e10 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -100,6 +100,7 @@ typedef struct
+ enum { THM_STAR_LEFT = 0, THM_STAR_RIGHT, THM_STAR_HIDDEN };
+ enum { THM_HL_BAR = 0, THM_HL_LINE, THM_HL_NONE };
+ extern int gRipps2StarSide; // RIPPS2 build 106: Settings > Game Sources > Starred Games Star: 0 Theme, 1 Left, 2 Right, 3 Hidden
++extern int gRipps2StarSideLast; // build 115: the side R3's hold brings the stars back to (0 Theme, 1 Left, 2 Right)
+ 
+ // Forward declaration: an element carries a back-pointer to the family it was parsed into (see
+ // theme_element_t::family), and theme_elems_t itself is defined below, after the element.
+@@ -280,6 +281,8 @@ typedef struct theme
+     int sbBar;                          // sidebar_bar: 2 always (default), 1 on the pages without one of the theme's, 0 never
+     unsigned char sbColor[3], sbAccent[3]; // sidebar_color, sidebar_accent_color
+     int sbTint, sbAccentTint;           // sidebar_tint, sidebar_accent_tint (0..128)
++    int sbOnePiece;                     // build 115: sidebar_style=one_piece (the bar and its accent as one bar)
++    int hintsFade;                      // build 115: hints_fade (1, the default): a hint glyph that changes fades in
+     // RIPPS2 build 92: the Grid's coverless cases and the name under it (<grid>_coverless, <grid>_title...)
+     int gridCoverless;                  // 1: a case with no art shows the game's serial in the pixel font
+     int gridTitle, gridTitleY, gridTitleFont; // the chosen game's name under the grid, its line and its face
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index aef6bd1..529fc45 100644
+index aef6bd1..ae0d557 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -305,7 +305,7 @@ gui_strings:
@@ -842,6 +893,18 @@ index aef6bd1..529fc45 100644
  - label: RIPPS2_SET_METADATA
    string: Set Metadata
  - label: RIPPS2_BOOT_LOCK
+@@ -1500,9 +1502,9 @@ gui_strings:
+ - label: HINT_RIPPS2_HINTS
+   string: "The button hints along the bottom. Fade When Idle hides them until you press a button. Theme: the theme decides."
+ - label: RIPPS2_CATEGORY_BAR
+-  string: Category Bar
++  string: Category/Sidebar
+ - label: HINT_RIPPS2_CATEGORY_BAR
+-  string: "LAUNCH DISC, STORAGE and MEMORY FILES along the top. Fade When Idle hides them until you press a button. Theme: the theme decides."
++  string: "LAUNCH DISC, STORAGE and MEMORY FILES: the names along the top, or the sidebar. Fade When Idle fades the names, or slides the sidebar away, until you press a button; it comes back at once. Theme: the theme decides."
+ - label: RIPPS2_SOURCE_NAME
+   string: Source Name
+ - label: RIPPS2_STATUS
 @@ -1512,9 +1514,9 @@ gui_strings:
  - label: HINT_RIPPS2_SOURCE_NAME
    string: "The source's name over the games (ALL GAMES, HDD GAMES and so on). Fade When Idle fades it with the category bar; Pop In shows it big in the middle of the page instead, the way L3 names the list, on the first list after boot and whenever the source changes, then fades. Themes can make Pop In their Shown. Theme: the theme decides."
@@ -854,7 +917,16 @@ index aef6bd1..529fc45 100644
  - label: RIPPS2_CATEGORY_ORDER
    string: Category Order
  - label: HINT_RIPPS2_CATEGORY_ORDER
-@@ -1582,7 +1584,15 @@ gui_strings:
+@@ -1536,7 +1538,7 @@ gui_strings:
+ - label: RIPPS2_HINT_LAYOUT
+   string: Hint Layout
+ - label: HINT_RIPPS2_STARSIDE
+-  string: "Where a starred game's star sits in the games list. Left: its own column at the start of every row. Right: after the title. Hidden: no star. Theme: what the theme says. A theme's row icon moves to the other end, so the two never overlap."
++  string: "Where a starred game's star sits in the games list. Left: its own column at the start of every row. Right: after the title. Hidden (the start): no star and no column, the titles at full length. Theme: what the theme says. R3 stars a game either way; hold R3 4 seconds on a list to hide the stars or bring them back (that also stars the game under the cursor)."
+ - label: HINT_RIPPS2_HINT_LAYOUT
+   string: "Row: the hints in one line. Column: one hint a line, a list down the side, starting where the theme puts its hints."
+ - label: RIPPS2_HINT_LABELS
+@@ -1582,11 +1584,27 @@ gui_strings:
  - label: RIPPS2_FAST_CACHE
    string: Fast Cache
  - label: HINT_RIPPS2_FAST_CACHE
@@ -871,7 +943,20 @@ index aef6bd1..529fc45 100644
  - label: RIPPS2_CATEGORY_LAYOUT
    string: Category Layout
  - label: HINT_RIPPS2_CATEGORY_LAYOUT
-@@ -1618,7 +1628,7 @@ gui_strings:
+-  string: "Where the three categories sit: their names across the top, or icons down the side bar, each with a drawer of its pages (Left on a list goes there). Theme keeps the theme's own."
++  string: "Where the three categories sit: their names across the top, or icons down the side bar, each with a drawer of its pages (Left on a list goes there), or Menu: no bar at all, the categories in the START menu as on a theme made for OPL. Theme keeps the theme's own."
++- label: RIPPS2_HINT_FADE
++  string: Hints and Glyphs Fade
++- label: HINT_RIPPS2_HINT_FADE
++  string: "A button hint or glyph that changes fades in, as the covers do, the moment it changes; ones that stay are left alone, on every page and message. Off: they just appear. Theme: the theme decides (on unless it says hints_fade=0)."
++- label: RIPPS2_SIDEBAR_STYLE
++  string: Sidebar Style
++- label: HINT_RIPPS2_SIDEBAR_STYLE
++  string: "Split: the icons in the sidebar's dark bar with the colored strip beside it, as Adapt draws it. One Piece: one bar of the same width, the icons in its middle. Theme: the theme decides."
+ - label: HINT_RIPPS2_VIGNETTE
+   string: "Darkens the edges of every cover but the chosen one, so the chosen one stands out. Weak is half of Full."
+ - label: RIPPS2_GRID_WIDE
+@@ -1618,7 +1636,7 @@ gui_strings:
  - label: AUTO_CREATE_VMC
    string: Create VMC on First Launch
  - label: HINT_AUTO_CREATE_VMC
@@ -1354,7 +1439,7 @@ index 681481c..6b554ef 100644
  
      /* A focused int accepts Triangle for direct entry, and nothing on screen would otherwise say so:
 diff --git a/src/dialogs.c b/src/dialogs.c
-index 6379d40..06464f7 100644
+index 6379d40..f84bc77 100644
 --- a/src/dialogs.c
 +++ b/src/dialogs.c
 @@ -4,6 +4,7 @@
@@ -1413,6 +1498,30 @@ index 6379d40..06464f7 100644
      // RIPPS2 build 114: SEANCE (ripps2seance.c), the launchers RIPPS2 does not carry: where each was found, and the search.
      // Always in use, so there is nothing to switch: each line says Found or Not found (gui.c fills them in)
      {UI_SPLITTER},
+@@ -2229,11 +2242,23 @@ struct UIItem diaCoverflowConfig[] = {
+     {UI_ENUM, UICFG_RIPPS2_CATLAYOUT, 1, 1, _STR_HINT_RIPPS2_CATEGORY_LAYOUT, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
++    // build 115: the sidebar as Adapt draws it, or one bar
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_SIDEBAR_STYLE}}},
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_SBSTYLE, 1, 1, _STR_HINT_RIPPS2_SIDEBAR_STYLE, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_CATEGORY_BAR}}},
+     {UI_SPACER},
+     {UI_ENUM, UICFG_RIPPS2_CATBAR, 1, 1, _STR_HINT_RIPPS2_CATEGORY_BAR, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
++    // build 115: a hint glyph that changes fades in, as the covers do
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_HINT_FADE}}},
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_HINTFADE, 1, 1, _STR_HINT_RIPPS2_HINT_FADE, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
++
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_CATEGORY_ORDER}}},
+     {UI_SPACER},
+     {UI_ENUM, UICFG_RIPPS2_CATSWAP, 1, 1, _STR_HINT_RIPPS2_CATEGORY_ORDER, 0, 0, {.intvalue = {0, 0}}},
 diff --git a/src/ethsupport.c b/src/ethsupport.c
 index 642b1ff..0b2a923 100644
 --- a/src/ethsupport.c
@@ -1474,7 +1583,7 @@ index 12722ca..f63224f 100644
  {
      // Mark the FAV list stale and schedule its single canonical rebuild. The clear + re-append
 diff --git a/src/gui.c b/src/gui.c
-index fef5147..5e481f0 100644
+index fef5147..5d8d082 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -674,6 +674,7 @@ void guiExitPathBegin(struct UIItem *ui)
@@ -1599,6 +1708,75 @@ index fef5147..5e481f0 100644
                  if (lists[i] != NULL)
                      lists[i]->delay = gArtDelay;
              }
+@@ -2822,11 +2858,13 @@ void guiShowArtworkConfig(void)
+ // page under Controller Settings): the D-pad glyphs, the Color Theme, the hints, the category bar and
+ // its order. Each row shows live behind the page as it changes; Cancel puts back what was there.
+ // build 96: every row starts with Theme, the theme's own choice (RIPPS2's default where it has none)
+-static const char *guiRipps2GlyphNames[] = {N_("Theme"), N_("Hidden"), N_("Shown"), N_("Fade In"), N_("Fade Out"), NULL};
++static const char *guiRipps2GlyphNames[] = {N_("Theme"), N_("Hidden"), N_("Shown"), N_("Fade In"), N_("Fade Out"), N_("Guidance"), NULL}; // build 115: Guidance
++static const char *guiRipps2HintFadeNames[] = {N_("Theme"), N_("On"), N_("Off"), NULL}; // build 115
+ static const char *guiRipps2ShowNames[] = {N_("Theme"), N_("Shown"), N_("Fade When Idle"), N_("Hidden"), NULL};
+ static const char *guiRipps2SrcNames[] = {N_("Theme"), N_("Shown"), N_("Fade When Idle"), N_("Hidden"), N_("Pop In"), NULL}; // build 80
+ static const char *guiRipps2OrderNames[] = {N_("Theme"), N_("Launch Disc First"), N_("Memory Files First"), NULL};
+-static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), NULL}; // build 113
++static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), N_("Menu"), NULL}; // build 113; 115: Menu
++static const char *guiRipps2SbStyleNames[] = {N_("Theme"), N_("Split"), N_("One Piece"), NULL}; // build 115
+ static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 3]; // build 114: and Sweep, shown while a sweep is on
+ 
+ // build 81: a row the user picks a value on becomes theirs; build 96: picking Theme (0) gives it back to the
+@@ -2918,8 +2956,12 @@ static void guiRipps2LayoutRead(void)
+     guiRipps2Take(diaCoverflowConfig, UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
+     if (diaGetInt(diaCoverflowConfig, UICFG_RIPPS2_TRANSITION, &v) && v >= 0 && v <= 3)
+         gRipps2Transition = v; // build 92
+-    if (diaGetInt(diaCoverflowConfig, UICFG_RIPPS2_CATLAYOUT, &v) && v >= 0 && v <= 2)
+-        gRipps2CatLayout = v; // build 113: 0 Theme, 1 Across the Top, 2 Sidebar
++    if (diaGetInt(diaCoverflowConfig, UICFG_RIPPS2_CATLAYOUT, &v) && v >= 0 && v <= 3)
++        gRipps2CatLayout = v; // build 113: 0 Theme, 1 Across the Top, 2 Sidebar; 115: 3 Menu
++    if (diaGetInt(diaCoverflowConfig, UICFG_RIPPS2_SBSTYLE, &v) && v >= 0 && v <= 2)
++        gRipps2SidebarStyle = v; // build 115: 0 Theme, 1 Split, 2 One Piece
++    if (diaGetInt(diaCoverflowConfig, UICFG_RIPPS2_HINTFADE, &v) && v >= 0 && v <= 2)
++        gRipps2HintFade = v; // build 115: 0 Theme, 1 On, 2 Off
+ }
+ 
+ static int guiRipps2LayoutUpdater(int modified)
+@@ -2942,6 +2984,10 @@ static void guiRipps2LayoutSet(void)
+     diaSetInt(diaCoverflowConfig, UICFG_RIPPS2_TRANSITION, gRipps2Transition);
+     diaSetEnum(diaCoverflowConfig, UICFG_RIPPS2_CATLAYOUT, guiRipps2LayoutNames); // build 113
+     diaSetInt(diaCoverflowConfig, UICFG_RIPPS2_CATLAYOUT, gRipps2CatLayout);
++    diaSetEnum(diaCoverflowConfig, UICFG_RIPPS2_SBSTYLE, guiRipps2SbStyleNames); // build 115
++    diaSetInt(diaCoverflowConfig, UICFG_RIPPS2_SBSTYLE, gRipps2SidebarStyle);
++    diaSetEnum(diaCoverflowConfig, UICFG_RIPPS2_HINTFADE, guiRipps2HintFadeNames); // build 115
++    diaSetInt(diaCoverflowConfig, UICFG_RIPPS2_HINTFADE, gRipps2HintFade);
+ }
+ 
+ // build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
+@@ -5187,8 +5233,25 @@ int guiDrawIconAndText(int iconId, int textId, int font, int x, int y, u64 color
+     return guiDrawIconAndTextA(iconId, textId, font, x, y, color, gDefaultCol);
+ }
+ 
+-// RIPPS2 build 70: the same with the icon's colour given (the hints fade with RIPPSettings)
++// build 115: a colour's alpha times k (the hint glyphs' fade-in)
++static u64 guiAlphaTimes(u64 c, float k)
++{
++    u64 a = (c >> 24) & 0xFF;
++    if (k >= 1.0f)
++        return c;
++    a = (u64)((float)a * (k < 0.0f ? 0.0f : k));
++    return (c & ~((u64)0xFF << 24)) | (a << 24);
++}
++
++// RIPPS2 build 70: the same with the icon's colour given (the hints fade with RIPPSettings). Build 115: a hint that was not
++// here last frame fades in (ripps2HintGlyphFade)
+ int guiDrawIconAndTextA(int iconId, int textId, int font, int x, int y, u64 color, u64 iconColor)
++{
++    float k = ripps2HintGlyphFade(iconId, textId);
++    return guiDrawIconAndTextNoFade(iconId, textId, font, x, y, guiAlphaTimes(color, k), guiAlphaTimes(iconColor, k));
++}
++
++int guiDrawIconAndTextNoFade(int iconId, int textId, int font, int x, int y, u64 color, u64 iconColor)
+ {
+     GSTEXTURE *iconTex = thmGetTexture(iconId);
+     font = guiHintFont(font);
 diff --git a/src/guigame.c b/src/guigame.c
 index a7ff5de..9e3b714 100644
 --- a/src/guigame.c
@@ -1640,7 +1818,7 @@ index a7ff5de..9e3b714 100644
      // Neutrino-only row greyed even under a Neutrino global default (guiGameSetCoreAwareState reads
      // this). SMB likewise: ethsupport has no Neutrino launch leg, the effective core is always <OPL>.
 diff --git a/src/menusys.c b/src/menusys.c
-index 1f08c7e..dc59a25 100644
+index 1f08c7e..3887dfa 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -1022,6 +1022,8 @@ static int menuDevicePageRank(const menu_item_t *item)
@@ -1669,6 +1847,132 @@ index 1f08c7e..dc59a25 100644
  
  static int menuSimAt(void) // the row the drives come after; -1 while BDM Devices is Off
  {
+@@ -2401,6 +2403,20 @@ static int menuGridEdge(int dir)
+     return 1;
+ }
+ 
++// RIPPS2 build 115: the grid's cursor on its first page's first column (or no games): Left goes on to the sidebar from here
++static int menuGridAtStart(void)
++{
++    int cols = thmGridColumns(), rows = gTheme->gridRows > 0 ? gTheme->gridRows : 1, cur = 0, count = 0;
++    submenu_list_t *p;
++
++    if (cols <= 0 || selected_item == NULL || selected_item->item == NULL)
++        return 0;
++    for (p = selected_item->item->submenu; p != NULL; p = p->next, count++)
++        if (p == selected_item->item->current)
++            cur = count;
++    return count == 0 || (cur % cols == 0 && cur < cols * rows);
++}
++
+ static void menuNavigateLeft()
+ {
+     if (thmGridColumns() > 0) {
+@@ -2451,6 +2467,48 @@ static void menuNavigateDown()
+         menuNextV();
+ }
+ 
++// RIPPS2 build 115 (the user, 10/25): the stars on and off. Off: no star and no star column, the titles from the row's
++// start at full length; on: back where the theme or the user had them, and the game under the cursor starred. Starring
++// with R3 and Starred Games work the same either way, and R3's hint stays (it is the hint row's own setting).
++static void menuStarsToggle(void)
++{
++    if (gRipps2StarSide == 3) {
++        gRipps2StarSide = gRipps2StarSideLast;
++        if (selected_item != NULL && selected_item->item != NULL && selected_item->item->current != NULL &&
++            !selected_item->item->current->item.favourited && selected_item->item->fav)
++            selected_item->item->fav(selected_item->item);
++        ripps2ShowViewWord(_t("STARS SHOWN"), -1, NULL);
++    } else {
++        gRipps2StarSideLast = gRipps2StarSide;
++        gRipps2StarSide = 3;
++        ripps2ShowViewWord(_t("STARS HIDDEN"), -1, NULL);
++    }
++    sfxPlay(SFX_CONFIRM);
++    ripps2SaveSettingsInBackground();
++}
++
++// RIPPS2 build 115: R3. A press stars the game (or unstars it) when it is let go; held 4.2 s it turns the stars off or on
++// instead (menuStarsToggle), once a hold, as SELECT's hold changes the theme
++static void menuR3(int viewPending)
++{
++    static clock_t r3At = 0;
++    static int r3Held = 0;
++    if (getKeyOn(KEY_R3)) {
++        r3At = clock();
++        r3Held = 0;
++    } else if (r3At != 0 && getKeyPressed(KEY_R3)) {
++        if (!r3Held && clock() - r3At >= (clock_t)(4.2 * CLOCKS_PER_SEC)) {
++            r3Held = 1;
++            if (!viewPending)
++                menuStarsToggle();
++        }
++    } else if (r3At != 0) {
++        if (!r3Held && !viewPending && selected_item != NULL && selected_item->item != NULL && selected_item->item->fav)
++            selected_item->item->fav(selected_item->item);
++        r3At = 0;
++    }
++}
++
+ // RIPPS2: L2 + R2 together pick a random game, once per press (holding them never repeats it).
+ // Alone, L2 goes to the top of the list and R2 to the end, when released, so a chord can never
+ // set off either of them on the way in. The game list and its info page both read them.
+@@ -2484,6 +2542,7 @@ void menuHandleInputMain()
+         return;
+     }
+     menuShoulderKeys(viewPending);
++    menuR3(viewPending); // build 115: tap stars, hold shows or hides the stars
+ 
+     // RIPPS2: Random Game "Boot": each game list opens on a random game, once per session, once the
+     // list has settled (after its rebuild, so it lands after the last played game is restored)
+@@ -2501,7 +2560,16 @@ void menuHandleInputMain()
+     // one cover a press and Up / Down racing through the drives).
+     int cf = gTheme->coverflow != NULL;
+     int grid = thmGridColumns() > 0; // build 78: every arrow moves through the grid, and repeats
+-    if (getKeyOn(KEY_L1)) {
++    // RIPPS2 build 115 (the user, 10/25: one way to the sidebar on every page): in sidebar mode Left always leaves the list
++    // for the sidebar (the grid's from its first column), Right no longer steps the sources and neither do RIPFLOW's
++    // Up/Down (the sidebar's drawer has them), and RIPFLOW's covers move on L1/R1 too, one a press or repeating while
++    // held. With the sidebar off every key works as the theme has it, L1/R1 on the categories.
++    int side = ripps2SidebarOn(), flowSide = side && cf && !grid;
++    if (flowSide && getKey(KEY_L1)) {
++        menuPrevV();
++    } else if (flowSide && getKey(KEY_R1)) {
++        menuNextV();
++    } else if (getKeyOn(KEY_L1)) {
+         if (ripps2PageButtons() == 1 || ripps2Legacy())
+             menuPrevPage(); // build 96: Page Buttons L1 / R1 (build 113: and a legacy theme's, as OPL had them)
+         else
+@@ -2511,12 +2579,17 @@ void menuHandleInputMain()
+             menuNextPage();
+         else
+             ripps2StepCategory(1);
+-    } else if (!cf && !grid && ripps2SidebarOn() && getKeyOn(KEY_LEFT)) {
++    } else if (side && (!grid || menuGridAtStart()) && getKeyOn(KEY_LEFT)) {
+         ripps2SidebarOpen(0); // RIPPS2 build 113: Left on a list goes to the category sidebar (its drawer has the sources)
+     } else if ((cf || grid) ? getKey(KEY_LEFT) : getKeyOn(KEY_LEFT)) {
+-        menuNavigateLeft(); // RIPPS2 build 69: Left/Right switch drives, like the orb formations (FifthFox)
++        if (!side || grid) // build 115: RIPFLOW's held Left in sidebar mode does not walk the covers back
++            menuNavigateLeft(); // RIPPS2 build 69: Left/Right switch drives, like the orb formations (FifthFox)
++    } else if (side && !cf && !grid && getKey(KEY_RIGHT)) {
++        // build 115: a list in sidebar mode: Right steps no source
+     } else if ((cf || grid) ? getKey(KEY_RIGHT) : getKeyOn(KEY_RIGHT)) {
+         menuNavigateRight();
++    } else if (flowSide && (getKey(KEY_UP) || getKey(KEY_DOWN))) {
++        // build 115: RIPFLOW in sidebar mode: Up/Down change no source
+     } else if ((cf && !grid) ? getKeyOn(KEY_UP) : getKey(KEY_UP)) {
+         menuNavigateUp();
+     } else if ((cf && !grid) ? getKeyOn(KEY_DOWN) : getKey(KEY_DOWN)) {
+@@ -2543,9 +2616,6 @@ void menuHandleInputMain()
+         // reinit main menu - show/hide items valid in the active context
+         menuInitMainMenu();
+         guiSwitchScreen(GUI_SCREEN_MENU);
+-    } else if (getKeyOn(KEY_R3)) { // toggle favourite
+-        if (!viewPending && selected_item->item->fav)
+-            selected_item->item->fav(selected_item->item);
+     } else if (getKeyOn(KEY_L3)) { // advance the current page's library-view ring
+         if (!viewPending && selected_item->item->toggleView)
+             selected_item->item->toggleView(selected_item->item);
 diff --git a/src/mixsupport.c b/src/mixsupport.c
 index 3eb2114..9132082 100644
 --- a/src/mixsupport.c
@@ -2588,7 +2892,7 @@ index ba683b0..1cb8c7f 100644
      // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
      // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
 diff --git a/src/opl.c b/src/opl.c
-index 3b8cd19..4f37324 100644
+index 3b8cd19..512757b 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -361,7 +361,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
@@ -2763,14 +3067,20 @@ index 3b8cd19..4f37324 100644
              mixSourceAnswered(mod->support->mode);
      } else if (libViewPending(mod->support->mode)) {
          // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
-@@ -3739,14 +3753,20 @@ static void _loadConfig()
+@@ -3739,14 +3753,24 @@ static void _loadConfig()
                  gRipps2CatBar = value;
              if (configGetInt(configOPL, "ripps2_fastcache", &value))
                  gRipps2FastCache = value != 0; // build 113: Fast Cache (on unless turned off)
+-            if (configGetInt(configOPL, "ripps2_catlayout", &value) && value >= 0 && value <= 2)
+-                gRipps2CatLayout = value; // build 113: Category Layout (0 Theme, 1 Across the Top, 2 Sidebar)
 +            if (configGetInt(configOPL, "ripps2_trust_cache", &value))
 +                gRipps2TrustCache = value != 0; // build 115: Trust Cache (on unless turned off)
-             if (configGetInt(configOPL, "ripps2_catlayout", &value) && value >= 0 && value <= 2)
-                 gRipps2CatLayout = value; // build 113: Category Layout (0 Theme, 1 Across the Top, 2 Sidebar)
++            if (configGetInt(configOPL, "ripps2_catlayout", &value) && value >= 0 && value <= 3)
++                gRipps2CatLayout = value; // build 113: Category Layout (0 Theme, 1 Across the Top, 2 Sidebar; 115: 3 Menu)
++            if (configGetInt(configOPL, "ripps2_sidebar_style", &value) && value >= 0 && value <= 2)
++                gRipps2SidebarStyle = value; // build 115: Sidebar Style (0 Theme, 1 Split, 2 One Piece)
++            if (configGetInt(configOPL, "ripps2_hint_fade", &value) && value >= 0 && value <= 2)
++                gRipps2HintFade = value; // build 115: Hints and Glyphs Fade (0 Theme, 1 On, 2 Off)
              if (configGetInt(configOPL, "ripps2_catswap", &value) && (value == 0 || value == 1))
                  gRipps2CatSwap = value;
              if (configGetInt(configOPL, "ripps2_srcname", &value) && value >= 0 && value < RIPPS2_SRC_COUNT)
@@ -2785,7 +3095,7 @@ index 3b8cd19..4f37324 100644
              if (configGetInt(configOPL, "ripps2_userset", &value) && value >= 0)
                  gRipps2UserSet = value; // build 81: the rows a theme's defaults never touch
              ripps2HintsLoadConfig(configOPL); // build 90: Hints and Glyphs
-@@ -3832,7 +3852,8 @@ static void _loadConfig()
+@@ -3832,7 +3856,8 @@ static void _loadConfig()
              configGetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, &gHDDGameListCache);
              if (!configGetInt(configOPL, "ripps2_hddcache_v", &value) || value < 110)
                  gHDDGameListCache = 1; // build 110: on by default (checked in the background now); once for older configs
@@ -2795,7 +3105,7 @@ index 3b8cd19..4f37324 100644
              configGetStrCopy(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
              configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
              configGetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, &gAutoRefresh);
-@@ -3864,6 +3885,16 @@ static void _loadConfig()
+@@ -3864,6 +3889,16 @@ static void _loadConfig()
              configGetInt(configOPL, CONFIG_OPL_MMCE_SLOT, &gMMCESlot);
              configGetInt(configOPL, CONFIG_OPL_MMCEIGR_SLOT, &gMMCEIGRSlot);
              configGetInt(configOPL, CONFIG_OPL_MMCE_GAMEID, &gMMCEEnableGameID);
@@ -2812,9 +3122,34 @@ index 3b8cd19..4f37324 100644
              configGetInt(configOPL, CONFIG_OPL_MMCE_WAIT_CYCLES, &gMMCEAckWaitCycles);
              configGetInt(configOPL, CONFIG_OPL_MMCE_USE_ALARMS, &gMMCEUseAlarms);
              // SIO2 pacing migration: silently upgrade the 0/0 defaults to 5/1
-@@ -4468,9 +4499,11 @@ static void _saveConfig()
+@@ -4094,6 +4129,21 @@ static void _loadConfig()
+             configGetStrCopy(configOPL, CONFIG_OPL_DEFAULT_BGM_PATH, gDefaultBGMPath, sizeof(gDefaultBGMPath));
+             configGetStrCopy(configOPL, "ripps2_music", gRipps2Music, sizeof(gRipps2Music)); // RIPPS2
+             configGetInt(configOPL, "ripps2_star_side", &gRipps2StarSide); // build 106
++            configGetInt(configOPL, "ripps2_star_side_last", &gRipps2StarSideLast); // build 115
++            {
++                // build 115 (the user, 10/25): the stars start hidden (R3 still stars a game; holding R3 shows them), once for a
++                // settings file from before; a side chosen then is kept as the one R3's hold brings back
++                int starV = 0;
++                configGetInt(configOPL, "ripps2_star_v", &starV);
++                if (starV < 115) {
++                    if (gRipps2StarSide >= 0 && gRipps2StarSide <= 2)
++                        gRipps2StarSideLast = gRipps2StarSide;
++                    gRipps2StarSide = 3;
++                    configSetInt(configOPL, "ripps2_star_v", 115);
++                }
++            }
++            if (gRipps2StarSideLast < 0 || gRipps2StarSideLast > 2)
++                gRipps2StarSideLast = 0;
+             configGetInt(configOPL, "ripps2_select_hold", &gRipps2SelectHold); // build 114: Hold SELECT
+             if (gRipps2SelectHold < RIPPS2_HOLD_LIST || gRipps2SelectHold > RIPPS2_HOLD_OFF)
+                 gRipps2SelectHold = RIPPS2_HOLD_LIST;
+@@ -4467,10 +4517,14 @@ static void _saveConfig()
+         configSetInt(configOPL, "ripps2_hints", gRipps2Hints);
          configSetInt(configOPL, "ripps2_catbar", gRipps2CatBar);
          configSetInt(configOPL, "ripps2_catlayout", gRipps2CatLayout); // build 113
++        configSetInt(configOPL, "ripps2_sidebar_style", gRipps2SidebarStyle); // build 115
++        configSetInt(configOPL, "ripps2_hint_fade", gRipps2HintFade); // build 115
          configSetInt(configOPL, "ripps2_fastcache", gRipps2FastCache);
 +        configSetInt(configOPL, "ripps2_trust_cache", gRipps2TrustCache);
          configSetInt(configOPL, "ripps2_catswap", gRipps2CatSwap);
@@ -2824,7 +3159,15 @@ index 3b8cd19..4f37324 100644
          configSetInt(configOPL, "ripps2_userset", gRipps2UserSet); // build 81
          ripps2HintsSaveConfig(configOPL);                          // build 90: Hints and Glyphs
          ripps2ColorsSaveConfig(configOPL);                         // build 114: Custom's colour, the Color Sweep
-@@ -5661,7 +5694,7 @@ static void setDefaults(void)
+@@ -4599,6 +4653,7 @@ static void _saveConfig()
+         configSetStr(configOPL, CONFIG_OPL_DEFAULT_BGM_PATH, gDefaultBGMPath);
+         configSetStr(configOPL, "ripps2_music", gRipps2Music); // RIPPS2
+         configSetInt(configOPL, "ripps2_star_side", gRipps2StarSide); // build 106
++        configSetInt(configOPL, "ripps2_star_side_last", gRipps2StarSideLast); // build 115
+         configSetInt(configOPL, "ripps2_select_hold", gRipps2SelectHold); // build 114: Hold SELECT
+         configSetInt(configOPL, CONFIG_OPL_XSENSITIVITY, gXSensitivity);
+         configSetInt(configOPL, CONFIG_OPL_YSENSITIVITY, gYSensitivity);
+@@ -5661,7 +5716,7 @@ static void setDefaults(void)
  
      gMMCESlot = 2; // Default to first Auto slot
      gMMCEIGRSlot = 3;
@@ -2833,7 +3176,7 @@ index 3b8cd19..4f37324 100644
      gMMCEAckWaitCycles = 5;
      gMMCEUseAlarms = 1;
  
-@@ -5988,7 +6021,8 @@ static void miniInit(int mode)
+@@ -5988,7 +6043,8 @@ static void miniInit(int mode)
              config_set_t *configOPL = configGetByType(CONFIG_OPL);
  
              configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
@@ -3000,6 +3343,22 @@ index c488407..a538b31 100644
  int getKeyPressed(int id)
  {
      // old v.s. new pad data
+diff --git a/src/renderman.c b/src/renderman.c
+index 8a94c86..d65a540 100644
+--- a/src/renderman.c
++++ b/src/renderman.c
+@@ -189,8 +189,11 @@ void rmStartFrame(void)
+     order = 0;
+ }
+ 
++unsigned int gRmFrameNo = 0; // RIPPS2 build 115: frames drawn (the hint glyphs' fade compares one frame with the last)
++
+ void rmEndFrame(void)
+ {
++    gRmFrameNo++;
+     rmQueueFrameEnd();
+     if (hires) {
+         gsKit_hires_sync(gsGlobal);
 diff --git a/src/ripps2about.c b/src/ripps2about.c
 index cc7b9bf..7b953e4 100644
 --- a/src/ripps2about.c
@@ -3516,7 +3875,7 @@ index aeaa17a..b0156b4 100644
          kind = favGetItemKind(id);
          mode = favGetItemSourceMode(id);
 diff --git a/src/ripps2side.c b/src/ripps2side.c
-index 1415c7b..df7ced2 100644
+index 1415c7b..458c164 100644
 --- a/src/ripps2side.c
 +++ b/src/ripps2side.c
 @@ -43,6 +43,7 @@ int gRipps2CatLayout = 0;
@@ -3536,6 +3895,190 @@ index 1415c7b..df7ced2 100644
      if (icon == HDD_ICON || icon == HDD_BD_ICON)
          return SB_ICON_HDD;
      if (icon == MMCE_ICON || icon == MX4SIO_ICON)
+@@ -154,11 +157,14 @@ static void sbSourceName(int s, char *out, int size)
+         snprintf(out, size, "%s %d", name, nth + 1);
+ }
+ 
+-static void sbDrawer(int slot)
++// build 115: dw, how far open the drawer is (0..1, it slides open on RIPFLOW's easing); off, the bar's slide; barW, the bar
++// it opens from (Split: the dark part, the accent strip running along the drawer's edge; One Piece: the whole bar)
++static void sbDrawer(int slot, float dw, int off, int barW)
+ {
+-    int cat = ripps2CatSlot(slot), x0 = gTheme->sbX + gTheme->sbW, right = gTheme->sbDrawer, n = sbRows(cat), i;
++    int cat = ripps2CatSlot(slot), x0 = gTheme->sbX + barW + off, right = gTheme->sbDrawer + off, n = sbRows(cat), i;
+     int h = n * SB_ROW + (n > 1 ? 10 : 0), top = sbGlyphY(slot) - SB_ROW / 2, cur = menuSourceCurrent();
+     int floor = gTheme->usedHeight - 56; // clear of the hints
++    int ca = dw < 0.5f ? 0 : dw >= 1.0f ? 0x80 : (int)(0x80 * (dw - 0.5f) * 2.0f); // the words come in once it is half open
+     char name[96];
+     if (right < x0 + 80)
+         right = x0 + 80;
+@@ -179,6 +185,7 @@ static void sbDrawer(int slot)
+         top = floor - h;
+     if (top < 16)
+         top = 16;
++    right = x0 + (int)((right - x0) * dw); // build 115: sliding open
+     // the bar opened out to the drawer's edge, as the bar is: on Storage the page's frosted backdrop under a
+     // deeper tint (Adapt's bar is frosted glass), the accent along the new edge
+     if (gRipps2Category == RIPPS2_CAT_STORAGE)
+@@ -186,54 +193,129 @@ static void sbDrawer(int slot)
+     ripps2DrawPanelFlat(x0, 0, right - x0, gTheme->usedHeight, gTheme->sbColor, gTheme->sbTint + (0x80 - gTheme->sbTint) / 2, 0);
+     if (gTheme->sbAccentTint > 0)
+         ripps2DrawPanelFlat(right + 2, 0, 12, gTheme->usedHeight, gTheme->sbAccent, gTheme->sbAccentTint, 0);
++    if (ca <= 0)
++        return;
+     for (i = 0; i < n; i++) {
+         int y = top + i * SB_ROW + (i > 0 ? 10 : 0), lit = sbFocus == 2 && i == sbItem;
+         if (lit) {
+-            rmDrawRect(x0 + 6, y + 1, right - x0 - 12, SB_ROW - 2, SB_PRIM(0x1E, 0x3C, 0x96, 0x6C));
+-            rmDrawRect(x0 + 6, y + 1, 3, SB_ROW - 2, SB_PRIM(0x6A, 0x9A, 0xFF, 0x80));
++            rmDrawRect(x0 + 6, y + 1, right - x0 - 12, SB_ROW - 2, SB_PRIM(0x1E, 0x3C, 0x96, 0x6C * ca / 0x80));
++            rmDrawRect(x0 + 6, y + 1, 3, SB_ROW - 2, SB_PRIM(0x6A, 0x9A, 0xFF, ca));
+         }
+         if (i == 0) { // the category's name, the drawer's first item
+             fntRenderStringFit(sbFont(1), x0 + 16, y + SB_ROW / 2, ALIGN_VCENTER, right - x0 - 26, _t(sbNames[cat]),
+-                               SB_TEX(lit || sbFocus == 1 ? 0x80 : 0x70, 0x80), 0);
++                               SB_TEX(lit || sbFocus == 1 ? 0x80 : 0x70, ca), 0);
+             continue;
+         }
+         int s = i - 1, here = s == cur && gRipps2Category == RIPPS2_CAT_STORAGE;
+-        sbIcon(sbSourceIcon(s), x0 + 26, y + SB_ROW / 2, 16, lit, 0x80);
++        sbIcon(sbSourceIcon(s), x0 + 26, y + SB_ROW / 2, 16, lit, ca);
+         sbSourceName(s, name, sizeof(name));
+         fntRenderStringFit(sbFont(0), x0 + 42, y + SB_ROW / 2, ALIGN_VCENTER, right - x0 - 52, name,
+-                           lit ? SB_TEX(0x80, 0x80) : here ? GS_SETREG_RGBA(0x6C, 0x7C, 0x80, 0x80) : GS_SETREG_RGBA(0x55, 0x5E, 0x76, 0x80), 0);
++                           lit ? SB_TEX(0x80, ca) : here ? GS_SETREG_RGBA(0x6C, 0x7C, 0x80, ca) : GS_SETREG_RGBA(0x55, 0x5E, 0x76, ca), 0);
++    }
++}
++
++// build 115 (the user, 10/25: the sidebar "slides and fades the glyphs off when they switch", "use the slide animation
++// from the coverflow on the sidebars so the default and XL sidebars both slide open"): a value that eases to where it is
++// sent the way RIPFLOW's covers slide, a cubic ease-out over RIPFLOW's own animation time (Layout's, 0: at once); sent
++// somewhere new mid-slide, it goes on from where it is
++typedef struct
++{
++    float from, to;
++    clock_t at;
++    int set;
++} sb_tween_t;
++
++static float sbTweenAt(const sb_tween_t *tw, clock_t now)
++{
++    float dur = gCoverflowAnimSpeed > 0 ? gCoverflowAnimSpeed / 1000.0f : 0.0f, t;
++    if (dur <= 0.0f)
++        return tw->to;
++    t = (float)(now - tw->at) / (float)CLOCKS_PER_SEC / dur;
++    if (t >= 1.0f || t < 0.0f)
++        return tw->to;
++    t = 1.0f - (1.0f - t) * (1.0f - t) * (1.0f - t);
++    return tw->from + (tw->to - tw->from) * t;
++}
++
++static float sbTween(sb_tween_t *tw, float target)
++{
++    clock_t now = clock();
++    if (!tw->set) {
++        tw->from = tw->to = target;
++        tw->at = now;
++        tw->set = 1;
++    } else if (target != tw->to) {
++        tw->from = sbTweenAt(tw, now);
++        tw->to = target;
++        tw->at = now;
+     }
++    return sbTweenAt(tw, now);
+ }
+ 
++// build 115: Layout > Sidebar Style. Split (Adapt's look): the glyphs in the dark bar, the accent strip beside it. One Piece:
++// the bar and the strip as one bar of the same overall width, the glyphs in its middle
++int gRipps2SidebarStyle = 0;
++
++static int sbOnePiece(void)
++{
++    return gRipps2SidebarStyle == 2 || (gRipps2SidebarStyle == 0 && gTheme->sbOnePiece);
++}
++
++static int sbFullW(void)
++{
++    return gTheme->sbW + (gTheme->sbAccentTint > 0 ? 14 : 0);
++}
++
++static sb_tween_t sbLitTw, sbFrameTw, sbDrawerTw, sbLitFade[RIPPS2_CAT_COUNT];
++static int sbDrawerSlot = 0;
++
+ void ripps2SidebarRender(void)
+ {
+-    int size = sbGlyphSize(), cx = gTheme->sbX + gTheme->sbW / 2, slot;
+-    int alpha = (int)(0x80 * ripps2CatBarAlpha());
+-    if (sbFocus)
+-        alpha = 0x80; // a sidebar in use never fades
+-    if (gTheme->sbBar == 2 || (gTheme->sbBar == 1 && gRipps2Category != RIPPS2_CAT_STORAGE))
+-        sbBarAt(gTheme->sbX, gTheme->sbW, gTheme->sbX + gTheme->sbW + 2);
++    int size = sbGlyphSize(), one = sbOnePiece(), fullW = sbFullW(), barW = one ? fullW : gTheme->sbW, slot;
++    // build 115: Category/Sidebar's Fade When Idle slides the bar away to the left as it fades, and any press brings it back,
++    // a little quicker than it went (the idle fade's own pace); a sidebar in use is always all there
++    float show = sbFocus ? 1.0f : ripps2CatBarAlpha(), dw, litY;
++    int off = (int)((show - 1.0f) * (float)(gTheme->sbX + fullW + 16)), cx = gTheme->sbX + barW / 2 + off;
++    int alpha = (int)(0x80 * show);
++
++    if (one || gTheme->sbBar == 2 || (gTheme->sbBar == 1 && gRipps2Category != RIPPS2_CAT_STORAGE)) {
++        if (one)
++            ripps2DrawPanelFlat(gTheme->sbX + off, 0, fullW, gTheme->usedHeight, gTheme->sbColor, gTheme->sbTint, 0);
++        else
++            sbBarAt(gTheme->sbX + off, gTheme->sbW, gTheme->sbX + gTheme->sbW + 2 + off);
++    }
++    // the drawer slides open from the bar, and closed again
+     if (sbFocus)
+-        sbDrawer(sbGlyph);
++        sbDrawerSlot = sbGlyph;
++    dw = sbTween(&sbDrawerTw, sbFocus ? 1.0f : 0.0f);
++    if (dw > 0.01f)
++        sbDrawer(sbDrawerSlot, dw, off, barW);
++    // the page you are on: a lit tile under its glyph, sliding to the next page's, the glyphs crossfading as it goes
++    litY = sbTween(&sbLitTw, (float)sbGlyphY(ripps2CatSlot(gRipps2Category)));
++    rmDrawRect(gTheme->sbX + 3 + off, (int)litY - size / 2 - 5, barW - 6, size + 10, SB_PRIM(0x1E, 0x3C, 0x96, alpha * 0x6C / 0x80));
+     for (slot = 0; slot < RIPPS2_CAT_COUNT; slot++) {
+-        int cat = ripps2CatSlot(slot), cy = sbGlyphY(slot), lit = cat == gRipps2Category;
+-        if (lit) // the page you are on: a lit tile under its glyph
+-            rmDrawRect(gTheme->sbX + 3, cy - size / 2 - 5, gTheme->sbW - 6, size + 10, SB_PRIM(0x1E, 0x3C, 0x96, alpha * 0x6C / 0x80));
+-        sbIcon(cat, cx, cy, size, lit, alpha);
+-        if (sbFocus && slot == sbGlyph) { // Left's focus: RIPGRID's frame, glowing; dimmer while its drawer has the pad
+-            int l = gTheme->sbX + 1, t = cy - size / 2 - 7, w = gTheme->sbW - 2, h = size + 14;
+-            u64 c = sbFocus == 1 ? SB_PRIM(0x8F, 0xE3, 0xFF, 0x80) : SB_PRIM(0x5A, 0x8C, 0xB4, 0x60);
+-            if (sbFocus == 1) {
+-                rmSetBlendAdditive(1);
+-                rmDrawRect(l - 2, t - 2, w + 4, h + 4, SB_PRIM(0x18, 0x40, 0x60, 0x50));
+-                rmSetBlendAdditive(0);
+-            }
+-            rmDrawRect(l, t, w, 2, c);
+-            rmDrawRect(l, t + h - 2, w, 2, c);
+-            rmDrawRect(l, t, 2, h, c);
+-            rmDrawRect(l + w - 2, t, 2, h, c);
+-        }
++        int cat = ripps2CatSlot(slot), cy = sbGlyphY(slot);
++        float lit = sbTween(&sbLitFade[slot], cat == gRipps2Category ? 1.0f : 0.0f);
++        if (lit < 1.0f)
++            sbIcon(cat, cx, cy, size, 0, (int)(alpha * (1.0f - lit)));
++        if (lit > 0.0f)
++            sbIcon(cat, cx, cy, size, 1, (int)(alpha * lit));
+     }
++    if (sbFocus) { // Left's focus: RIPGRID's frame, glowing, sliding with Up/Down; dimmer while its drawer has the pad
++        int fy = (int)sbTween(&sbFrameTw, (float)sbGlyphY(sbGlyph));
++        int l = gTheme->sbX + 1 + off, t = fy - size / 2 - 7, w = barW - 2, h = size + 14;
++        u64 c = sbFocus == 1 ? SB_PRIM(0x8F, 0xE3, 0xFF, 0x80) : SB_PRIM(0x5A, 0x8C, 0xB4, 0x60);
++        if (sbFocus == 1) {
++            rmSetBlendAdditive(1);
++            rmDrawRect(l - 2, t - 2, w + 4, h + 4, SB_PRIM(0x18, 0x40, 0x60, 0x50));
++            rmSetBlendAdditive(0);
++        }
++        rmDrawRect(l, t, w, 2, c);
++        rmDrawRect(l, t + h - 2, w, 2, c);
++        rmDrawRect(l, t, 2, h, c);
++        rmDrawRect(l + w - 2, t, 2, h, c);
++    } else
++        sbFrameTw.set = 0; // the next Left starts the frame on the glyph it lands on
+ }
+ 
+ void ripps2SidebarOpen(int list)
 diff --git a/src/ripps2status.c b/src/ripps2status.c
 index c1bcf7f..6fa2db4 100644
 --- a/src/ripps2status.c
@@ -3873,7 +4416,7 @@ index c1bcf7f..6fa2db4 100644
    RIPPS2 build 85: the launch report. A PS1 game that will not start on a console says nothing about why,
    and PCSX2 starts them fine, so the only witness is the console itself. Just before the handoff RIPPS2
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 03fe071..4fe3a81 100644
+index 03fe071..cef56ee 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -108,7 +108,7 @@ static int formationDirty = 0; // changed since the last save
@@ -3885,6 +4428,134 @@ index 03fe071..4fe3a81 100644
  int gRipps2PaletteShown = 0; // build 81: the Color Theme drawn (ripps2tint.h): the setting, or the theme's color_theme
  int gRipps2UserSet = 0;      // build 81: RIPPS2_SET_* bits, the Colors and More rows the user has changed (saved)
  
+@@ -262,6 +262,74 @@ typedef struct
+ } glyph_fade_t;
+ static glyph_fade_t glyphFade[2];
+ 
++// RIPPS2 build 115 (the user, 10/25: "make all page glyph changes fade unless it's the same glyph layout, even on the
++// modals; fade the hint glyph line in with 0 ms delay but the exact same fade we use for the covers"). Each hint glyph a
++// frame draws is compared with the one drawn in the same place the frame before; a new one fades in over ART_FADE_S on
++// the covers' own curve, starting the frame it appears, and one that stayed is left alone. Layout > Hints and Glyphs
++// Fade turns it off; a theme can with hints_fade=0.
++int gRipps2HintFade = 0;
++#define HINT_FADE_SLOTS 32
++
++static int hintFadeOn(void)
++{
++    return gRipps2HintFade == 1 || (gRipps2HintFade == 0 && (gTheme == NULL || gTheme->hintsFade));
++}
++
++float ripps2HintGlyphFade(int iconId, int textId)
++{
++    static struct
++    {
++        int icon, text;
++        double at;
++    } slot[HINT_FADE_SLOTS];
++    static unsigned int frame = ~0u;
++    static int idx = 0;
++    static double lastSeen = 0.0;
++    double now = ripps2Seconds();
++    int i;
++
++    if (!hintFadeOn())
++        return 1.0f;
++    if (frame != gRmFrameNo) {
++        frame = gRmFrameNo;
++        idx = 0;
++        if (now - lastSeen > 0.5) // no hint drawn for a while (a full-screen view, a launch): every one fades in anew
++            for (i = 0; i < HINT_FADE_SLOTS; i++)
++                slot[i].icon = slot[i].text = -2;
++    }
++    lastSeen = now;
++    if (idx >= HINT_FADE_SLOTS)
++        return 1.0f;
++    i = idx++;
++    if (slot[i].icon != iconId || slot[i].text != textId) {
++        slot[i].icon = iconId;
++        slot[i].text = textId;
++        slot[i].at = now;
++    }
++    return smoothUnit((float)((now - slot[i].at) / ART_FADE_S));
++}
++
++// build 115: D-pad Glyphs > Guidance. The glyphs come in once the pad has been left alone GUIDANCE_IDLE_S (showing what
++// to press now), and go at the first press
++#define GUIDANCE_IDLE_S 4.2
++float ripps2GuidanceAlpha(void)
++{
++    static double seen = 0.0;
++    static float a = 0.0f;
++    double now = ripps2Seconds();
++    float dt = (float)(now - seen);
++    if (seen == 0.0 || dt > 0.5f || dt < 0.0f)
++        dt = 0.0f;
++    seen = now;
++    if (glyphsMode() != RIPPS2_GLYPHS_GUIDANCE)
++        return 0.0f;
++    if (now - inputAt >= GUIDANCE_IDLE_S)
++        a = fminf(1.0f, a + dt / ART_FADE_S);
++    else
++        a = 0.0f; // a press: gone at once
++    return smoothUnit(a);
++}
++
+ void ripps2GlyphsPoke(int which)
+ {
+     glyph_fade_t *g = &glyphFade[which ? 1 : 0];
+@@ -284,6 +352,8 @@ float ripps2GlyphsAlpha(int which)
+     g->seenAt = now;
+     if (glyphsMode() == RIPPS2_GLYPHS_SHOWN)
+         return 1.0f;
++    if (glyphsMode() == RIPPS2_GLYPHS_GUIDANCE)
++        return ripps2GuidanceAlpha(); // build 115
+     if (glyphsMode() != RIPPS2_GLYPHS_FADE_IN && glyphsMode() != RIPPS2_GLYPHS_FADE_OUT)
+         return 0.0f;
+     if (now - g->pokedAt < GLYPH_HOLD_S)
+@@ -847,7 +917,9 @@ static void catTransitionDraw(void)
+ 
+ int ripps2Legacy(void)
+ {
+-    return gTheme != NULL && gTheme->catLegacy;
++    // build 115: Layout > Category Layout's Menu: no bar and no sidebar on any theme, the categories in the START menu as on
++    // a theme made for OPL
++    return (gTheme != NULL && gTheme->catLegacy) || gRipps2CatLayout == 3;
+ }
+ 
+ void ripps2RenderCategoryBar(void)
+@@ -1933,6 +2005,13 @@ void ripps2RenderMemory(void)
+ 
+     const char *name = formationName[gRipps2Formation];
+     int half = fntCalcDimensions(gTheme->fonts[3], name) / 2, g = GLYPH_H * 3 / 4;
++    if (ripps2SidebarOn()) { // build 115: in sidebar mode the formations are on L1/R1 (Left is the sidebar's)
++        GSTEXTURE *l1 = thmGetTexture(L1_ICON), *r1 = thmGetTexture(R1_ICON);
++        if (l1 != NULL && r1 != NULL) {
++            lt = l1;
++            rt = r1;
++        }
++    }
+     int ga = (int)(a * glyphA);
+     u64 soft = GS_SETREG_RGBA(0x67, 0x6C, 0x7A, a), dim = GS_SETREG_RGBA(0x37, 0x3B, 0x4A, a), tex = GS_SETREG_RGBA(0x80, 0x80, 0x80, ga);
+     fntRenderString(gTheme->fonts[3], 320, 450, ALIGN_CENTER, 0, 0, name, soft);
+@@ -1953,8 +2032,16 @@ void ripps2HandleInputMemory(void)
+         ripps2SidebarInput();
+         return;
+     }
+-    if (ripps2SidebarOn() && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
+-        ripps2SidebarOpen(0); // the cancel button (Left / Right keep the formations)
++    if (ripps2SidebarOn() && (getKeyOn(KEY_LEFT) || getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE))) {
++        ripps2SidebarOpen(0); // build 115: Left or the cancel button, as on Launch Disc (L1/R1 take the formations)
++        return;
++    }
++    if (ripps2SidebarOn() && (getKeyOn(KEY_L1) || getKeyOn(KEY_R1) || getKeyOn(KEY_RIGHT))) {
++        gRipps2Formation = ripps2FormationStep(gRipps2Formation, getKeyOn(KEY_L1) ? -1 : 1);
++        formationDirty = 1;
++        formationNameShow();
++        ripps2GlyphsPoke(RIPPS2_GLYPH_FORMATIONS);
++        sfxPlay(SFX_CURSOR);
+         return;
+     }
+     if (ripps2Legacy() && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
 diff --git a/src/sound.c b/src/sound.c
 index f4d22b4..5d51c70 100644
 --- a/src/sound.c
@@ -4657,7 +5328,7 @@ index 2da860e..6c650e0 100644
      return (result >= 0) ? 0 : result;
  }
 diff --git a/src/themes.c b/src/themes.c
-index fa854fb..92c9ef8 100644
+index fa854fb..046f67b 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -15,6 +15,7 @@
@@ -4668,7 +5339,81 @@ index fa854fb..92c9ef8 100644
  #include "include/metadb.h"     // RIPPS2: attributes fall back to the metadata database
  #include "include/saveicon.h"   // SaveIcon: the selected game's 3D save icon
  #include "include/cuesupport.h"
-@@ -4655,6 +4656,13 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -2523,6 +2524,7 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+         return;
+ 
+     int coverSpacing = (screenWidth - coverCount * coverWidth) / (coverCount + 1);
++    int guideX = 0, guideY = 0, guideW = 0; // build 115: the centre cover, for Guidance's L1/R1
+     if (coverSpacing < 0)
+         coverSpacing = 0;
+     int coverDistance = coverWidth + coverSpacing;
+@@ -2820,6 +2822,25 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+             ripps2TiltEnd();
+         if (gRipps2Vignette && i != centerIdx)
+             drawCoverVignette(posX, posY, rmWideScale(drawW), drawH, 1.0f);
++        if (i == centerIdx) {
++            guideX = posX;
++            guideY = posY;
++            guideW = rmWideScale(drawW);
++        }
++    }
++
++    // build 115 (the user, 10/25): D-pad Glyphs' Guidance on RIPFLOW: with the sidebar on, the covers move on L1/R1 (Left is
++    // the sidebar's), and after a while with no press their glyphs fade in beside the centre cover, so what to press shows
++    if (guideW > 0 && ripps2SidebarOn() && gTheme->grid == NULL) {
++        float ga = ripps2GuidanceAlpha();
++        GSTEXTURE *l1 = thmGetTexture(L1_ICON), *r1 = thmGetTexture(R1_ICON);
++        if (ga > 0.0f && l1 != NULL && r1 != NULL && l1->Mem != NULL && r1->Mem != NULL) {
++            u64 c = GS_SETREG_RGBA(0x80, 0x80, 0x80, (int)(0x80 * ga));
++            int gw = (l1->Width * 22) / l1->Height;
++            rmDrawPixmap(l1, guideX - guideW / 2 - 10 - rmWideScale(gw) / 2, guideY, ALIGN_CENTER, gw, 22, SCALING_RATIO, c, 0);
++            gw = (r1->Width * 22) / r1->Height;
++            rmDrawPixmap(r1, guideX + guideW / 2 + 10 + rmWideScale(gw) / 2, guideY, ALIGN_CENTER, gw, 22, SCALING_RATIO, c, 0);
++        }
+     }
+ 
+     rmSetReflectionYOffset(0); // don't leak the offset to any other reflection draw
+@@ -4158,7 +4179,8 @@ static void drawBDMIndex(struct menu_list *menu, struct submenu_list *item, conf
+         rmDrawPixmap(indexTex, elem->posX, elem->posY, elem->aligned, elem->width, elem->height, elem->scaled, gDefaultCol, 0);
+ }
+ 
+-int gRipps2StarSide = 0; // RIPPS2 build 106: 0 follows the list's <name>_star key
++int gRipps2StarSide = 3; // RIPPS2 build 106: 0 follows the list's <name>_star key. Build 115: Hidden to start with
++int gRipps2StarSideLast = 0; // build 115: where R3's hold puts them back
+ 
+ // RIPPS2 build 106: which of a list's per-kind row icons a row takes: 0 a PS2 game, 1 a PS1 one, 2 an app
+ static int thmRowKind(item_list_t *list, submenu_list_t *row)
+@@ -4582,6 +4604,11 @@ static int hintEntryWidth(menu_hint_item_t *h, int labels, int font)
+ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y, u64 col, u64 iconCol)
+ {
+     GSTEXTURE *badge = hintBadge(labels);
++    float fadeK = ripps2HintGlyphFade(h->icon_id, h->text_id); // build 115: a hint new here fades in
++    if (fadeK < 1.0f) {
++        col = hintFade(col, fadeK);
++        iconCol = hintFade(iconCol, fadeK);
++    }
+     if (badge != NULL) {
+         int w = hintEntryWidth(h, labels, font);
+         float half = badge->Width / 2.0f;
+@@ -4591,7 +4618,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
+         if (mid > 0)
+             rmDrawPixmapPart(badge, x + cap, by, ALIGN_NONE, mid, HINT_BADGE_H, SCALING_NONE, iconCol, half - 0.5f, 0, half + 0.5f, badge->Height);
+         rmDrawPixmapPart(badge, x + cap + (mid > 0 ? mid : 0), by, ALIGN_NONE, capW, HINT_BADGE_H, SCALING_RATIO, iconCol, half, 0, badge->Width, badge->Height);
+-        guiDrawIconAndTextA(h->icon_id, h->text_id, font, x + HINT_BADGE_PAD_L, y, col, iconCol);
++        guiDrawIconAndTextNoFade(h->icon_id, h->text_id, font, x + HINT_BADGE_PAD_L, y, col, iconCol);
+         return x + w;
+     }
+     if (hintGlyphOnly(h, labels)) {
+@@ -4600,7 +4627,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
+         rmDrawPixmap(t, x, y + 10, ALIGN_VCENTER, w, 20, SCALING_RATIO, iconCol, 0);
+         return x + rmWideScale(w) + 2;
+     }
+-    return guiDrawIconAndTextA(h->icon_id, h->text_id, font, x, y, col, iconCol);
++    return guiDrawIconAndTextNoFade(h->icon_id, h->text_id, font, x, y, col, iconCol);
+ }
+ 
+ static void drawHintText(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
+@@ -4655,6 +4682,13 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
              row[j] = k;
          }
          u64 col = hintFade(elem->color, hintA), iconCol = hintFade(gDefaultCol, hintA);
@@ -4682,7 +5427,7 @@ index fa854fb..92c9ef8 100644
  
          if (ripps2HintColumn()) {
              // one hint a line from the element's x/y down; a column that would run off the bottom (the
-@@ -4665,7 +4673,7 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4665,7 +4699,7 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
              if (y < 0)
                  y = 0;
              for (i = 0; i < n; i++)
@@ -4691,7 +5436,7 @@ index fa854fb..92c9ef8 100644
          } else {
              // RIPPS2: fit the row between the screen margins. A full row (Menu, Run, Info, Options,
              // Refresh, Favorite, PS1) is wider than a gap of elem->width allows, so the gap tightens
-@@ -4695,7 +4703,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4695,7 +4729,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
                  x = 4;
  
              for (i = 0; i < n; i++)
@@ -4702,3 +5447,36 @@ index fa854fb..92c9ef8 100644
          }
          if (showSource) {
              menu_hint_item_t *h2 = menu->item->hints;
+@@ -6455,7 +6491,7 @@ static int thmLoad(const char *themePath)
+     newT->paletteDef = newT->catBarDef = newT->hintsDef = newT->glyphsDef = newT->srcNameDef = newT->catSwapDef = -1;
+     {
+         static const char *const showNames[] = {"shown", "fade", "hidden"};
+-        static const char *const glyphNames[] = {"hidden", "shown", "fade_in", "fade_out"};
++        static const char *const glyphNames[] = {"hidden", "shown", "fade_in", "fade_out", "guidance"}; // build 115: guidance
+         const char *v = NULL;
+         int i;
+         if (configGetStr(themeConfig, "color_theme", &v) && v != NULL)
+@@ -6470,9 +6506,12 @@ static int thmLoad(const char *themePath)
+             if (configGetStr(themeConfig, "source_name", &v) && v != NULL && !strcasecmp(v, showNames[i]))
+                 newT->srcNameDef = i;
+         }
+-        for (i = 0; i < 4; i++)
++        for (i = 0; i < 5; i++)
+             if (configGetStr(themeConfig, "dpad_glyphs", &v) && v != NULL && !strcasecmp(v, glyphNames[i]))
+                 newT->glyphsDef = i;
++        newT->hintsFade = 1; // build 115: hints_fade=1 (the default): a hint glyph that changes fades in; 0: it just appears
++        if (configGetInt(themeConfig, "hints_fade", &intValue))
++            newT->hintsFade = intValue != 0;
+         if (configGetStr(themeConfig, "category_order", &v) && v != NULL) // launch_disc_first | memory_files_first
+             newT->catSwapDef = !strcasecmp(v, "memory_files_first") ? 1 : !strcasecmp(v, "launch_disc_first") ? 0 : -1;
+     }
+@@ -6561,6 +6600,9 @@ static int thmLoad(const char *themePath)
+             newT->sbDrawer = intValue;
+         if (configGetStr(themeConfig, "sidebar_bar", &v) && v != NULL)
+             newT->sbBar = !strcasecmp(v, "never") ? 0 : !strcasecmp(v, "pages") ? 1 : 2;
++        newT->sbOnePiece = 0; // build 115: sidebar_style=split (the default) or one_piece
++        if (configGetStr(themeConfig, "sidebar_style", &v) && v != NULL)
++            newT->sbOnePiece = !strcasecmp(v, "one_piece") || !strcasecmp(v, "one") || !strcasecmp(v, "full");
+         configGetColor(themeConfig, "sidebar_color", newT->sbColor);
+         configGetColor(themeConfig, "sidebar_accent_color", newT->sbAccent);
+         if (configGetInt(themeConfig, "sidebar_tint", &intValue) && intValue >= 0 && intValue <= 128)

@@ -61,7 +61,7 @@ dev = dia[dia.index('{UI_ENUM, CFG_FAVMODE'):]
 check(dev.index('CFG_RIPPS2_STARSIDE') < dev.index('UI_OK'), 'Starred Games Star sits under the Starred Games start mode')
 check('N_("Theme"), N_("Left"), N_("Right"), N_("Hidden")' in gui, 'Theme, Left, Right, Hidden')
 check(gui.count('CFG_RIPPS2_STARSIDE, &gRipps2StarSide') == 2, 'both Game Sources pages save it')
-check('"ripps2_star_side"' in opl and opl.count('ripps2_star_side') == 2, 'the setting loads and saves')
+check(opl.count('"ripps2_star_side"') == 2, 'the setting loads and saves')  # build 115: and ripps2_star_side_last
 check('label: HINT_RIPPS2_STARSIDE' in base, 'the row has its hint')
 
 if fail:

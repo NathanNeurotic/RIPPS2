@@ -45,7 +45,7 @@ need(side, (('if (gRipps2CatLayout == 1)\n        return 0;\n    if (gRipps2CatL
 need(side, (('top = sbGlyphY(slot) - SB_ROW / 2', "a drawer's name beside its glyph"),
             ('int floor = gTheme->usedHeight - 56; // clear of the hints', 'the list kept above the hints'),
             ('        thmDrawMainFrost(x0, 0, right - x0, gTheme->usedHeight);', 'the frosted backdrop under the drawer on Storage'),
-            ('if (sbFocus && slot == sbGlyph) {', "the glyph keeps its frame while its drawer has the pad"),
+            ('int fy = (int)sbTween(&sbFrameTw, (float)sbGlyphY(sbGlyph));', "the glyph keeps its frame while its drawer has the pad (build 115: sliding)"),
             ('snprintf(out, size, "%s (%s)", name, icon == HDD_BD_ICON ? "exFAT" : "APA");', 'HDD Games (exFAT) and HDD Games (APA)'),
             ('right = x0 + w > 320 ? 320 : x0 + w;', 'the drawer as wide as its longest name (the second lab pass)')), 'ripps2side.c')
 need(themes, (('int thmDrawMainFrost(int x, int y, int w, int h)', 'the frost a blur panel draws, for the drawer'),), 'themes.c')
@@ -62,7 +62,7 @@ if not atlas.exists():
 # Colors and More > Category Layout (Theme, Across the Top, Sidebar), with the other category rows; Cancel puts it back
 need(rd('src/dialogs.c'), (('{UI_ENUM, UICFG_RIPPS2_CATLAYOUT, 1, 1, _STR_HINT_RIPPS2_CATEGORY_LAYOUT, 0, 0, {.intvalue = {0, 0}}},', 'the Category Layout row'),), 'dialogs.c')
 gui = rd('src/gui.c')
-need(gui, (('static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), NULL};', 'its three choices'),
+need(gui, (('static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), N_("Menu"), NULL};', 'its choices (build 115: Menu too)'),
            ('        gRipps2CatLayout = v; // build 113', 'it is read as it changes (the page behind shows it)'),
            # build 114 (the settings audit): the category rows are Layout's; Back there puts them back, a change is saved
            ('        gRipps2CatLayout = keepCat[4];', 'Cancel puts it back'),
