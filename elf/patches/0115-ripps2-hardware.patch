@@ -604,6 +604,16 @@ index 90fe9f6..8688937 100644
  /* Drop every cached listing. Call wherever the "art may have appeared" epoch is bumped -- a device
   * generation change or a deliberate settings apply -- so a stick with new art on it is picked up.
   * Cheap, and safe from any thread. */
+diff --git a/include/bdmsupport.h b/include/bdmsupport.h
+index 844270a..d09e5bf 100644
+--- a/include/bdmsupport.h
++++ b/include/bdmsupport.h
+@@ -223,4 +223,5 @@ int bdmReadDriverName(int dir, char *driverName, int driverNameLength);
+  * private bdm_device_data_t, which a background rescan rewrites.
+  */
+ int bdmModeIsSIO2(int mode);
++void bdmIopWasReset(void); // RIPPS2 build 115: after an IOP reset, the transports load again
+ #endif
 diff --git a/include/dialogs.h b/include/dialogs.h
 index 4970d36..cd9e856 100644
 --- a/include/dialogs.h
@@ -679,6 +689,17 @@ index 421bd63..4696282 100644
  int guiNeutrinoPathHandler(char *text, int maxLen);
  int guiPopstarterPathHandler(char *text, int maxLen);
  int guiExitPathHandler(char *text, int maxLen);
+diff --git a/include/hddsupport.h b/include/hddsupport.h
+index 7064020..a169beb 100644
+--- a/include/hddsupport.h
++++ b/include/hddsupport.h
+@@ -184,4 +184,6 @@ void hddLaunchGame(item_list_t *itemList, int id, config_set_t *configSet);
+ int hddIsPresent();
+ int hddGetArtArchivePath(item_list_t *itemList, char *out, int outSize);
+ 
++void hddIopWasReset(void); // RIPPS2 build 115: after an IOP reset, the HDD modules load again
++
+ #endif
 diff --git a/include/iosupport.h b/include/iosupport.h
 index 633b8fd..ccc0412 100644
 --- a/include/iosupport.h
@@ -744,10 +765,18 @@ index 837615b..df8cd54 100644
  // Favourite stars on All Games rows, kept by the Favourites rebuild (favsupport.c)
  void mixClearStars(void);
 diff --git a/include/mmcesupport.h b/include/mmcesupport.h
-index abd65f5..dafc73d 100644
+index abd65f5..f9c43c8 100644
 --- a/include/mmcesupport.h
 +++ b/include/mmcesupport.h
-@@ -30,6 +30,8 @@ int mmceSendGameID(const char *startup, const char *protectMcPath, int vmcSlotMa
+@@ -17,6 +17,7 @@ typedef struct
+ void mmceInit(item_list_t *itemList);
+ item_list_t *mmceGetObject(int initOnly);
+ void mmceLoadModules(void);
++void mmceIopWasReset(void); // RIPPS2 build 115: after an IOP reset, the module loads again
+ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet);
+ // Push the selected game's disc id to a present MMCE card (SD2PSX/MemCard PRO2) for per-game folder
+ // switching. Self-probes mmce0:/mmce1: when no MMCE-tab prefix is set, so it works on ALL launch
+@@ -30,6 +31,8 @@ int mmceSendGameID(const char *startup, const char *protectMcPath, int vmcSlotMa
  // Bounded post-GameID settle for cross-device launches sharing SIO2 with the MMCE (MX4SIO, batch S7).
  // Polls the device the last send targeted; 0 = settled, -1 = expired. Caller warns + proceeds.
  int mmceGameIdSettle(int timeoutMs);
@@ -911,10 +940,19 @@ index 0000000..42b838a
 +
 +#endif
 diff --git a/include/sound.h b/include/sound.h
-index 5c9c5c4..9e9eb78 100644
+index 5c9c5c4..3538c42 100644
 --- a/include/sound.h
 +++ b/include/sound.h
-@@ -62,6 +62,9 @@ void sfxGetPlayDiag(unsigned int *lastMs, unsigned int *maxMs);
+@@ -31,6 +31,8 @@ enum SFX {
+ int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max); // AUDIO bgm*.ogg / .wav beside RIPPS2 and in OPL's resources
+ void bgmAddMusicHome(const char *prefix);                    // build 100: a started drive's OPL root ("mass0:/"), from its update
+ int bgmMusicHome(int i, char *out, int size);                // build 100: the i-th such root apart from RIPPS2's own
++int bgmMusicPickPath(const char *full);                      // build 115: that track becomes the pick (1 when listed)
++void bgmMusicHomeAdd(const char *audioDir);                  // build 115: a rip's "<base>AUDIO/" joins the music list
+ void bgmMusicTitle(const char *file, char *out, int size);
+ int bgmMusicDefault(char (*names)[RIPPS2_MUSIC_NAME], int n); // build 88: the track called Menu, else the first   // "01 Slideshow.ogg" -> "Slideshow"
+ 
+@@ -62,6 +64,9 @@ void sfxGetPlayDiag(unsigned int *lastMs, unsigned int *maxMs);
  void sfxGetDropDiag(unsigned int *staleDrops, unsigned int *fullDrops);
  
  void bgmStart(void);
@@ -924,7 +962,7 @@ index 5c9c5c4..9e9eb78 100644
  void sfxBootStart(void);        // RIPPS2: the main thread, as the towers rise: audio up, the boot sound playing
  void sfxBootSoundsLoaded(void); // RIPPS2: the IO worker, every sound loaded: the music may start
  void bgmBootTick(void);         // RIPPS2: every GUI frame: starts the music once the sounds are in, then fades it in
-@@ -89,5 +92,6 @@ extern volatile int gBgmInRead;
+@@ -89,5 +94,6 @@ extern volatile int gBgmInRead;
  
  void ripps2QuietBootMark(int bootSoundOn); // build 75: mc0:/RIPPS2/QUIETBOOT follows the boot sound setting
  int ripps2AudioBase(char *out, int size, int searchDrives); // build 74: the folder the AUDIO folder is in
@@ -1031,6 +1069,17 @@ index e300e61..b490c70 100644
  // RIPPS2 build 70: the same lowercase face, large (theme font9): a title in true case (RetroAchievements)
  #define RIPPS2_CASE_TITLE_FONT (gTheme->fonts[9])
  
+diff --git a/include/udpfssupport.h b/include/udpfssupport.h
+index cf04f22..dd3f1a6 100644
+--- a/include/udpfssupport.h
++++ b/include/udpfssupport.h
+@@ -15,4 +15,6 @@ void udpfsShowPendingNotice(void);
+ int udpfsEnsureReady(u32 timeoutMs);
+ item_list_t *udpfsGetObject(int initOnly);
+ 
++void udpfsIopWasReset(void); // RIPPS2 build 115
++
+ #endif
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
 index aef6bd1..4d591ec 100644
 --- a/lng_tmpl/_base.yml
@@ -1461,7 +1510,7 @@ index 51dd1df..6aa8d21 100644
  {
      int i;
 diff --git a/src/bdmsupport.c b/src/bdmsupport.c
-index 7894802..f3fa2e6 100644
+index 7894802..134b7c3 100644
 --- a/src/bdmsupport.c
 +++ b/src/bdmsupport.c
 @@ -1,4 +1,5 @@
@@ -1470,7 +1519,23 @@ index 7894802..f3fa2e6 100644
  #ifdef RETROACHIEVEMENTS
  #include "include/achievements.h"
  #endif
-@@ -903,6 +904,37 @@ static void bdmDiagFlushPendingIopState(item_list_t *itemList)
+@@ -54,6 +55,15 @@ static volatile unsigned int pccfProbeGeneration = 1;
+ static unsigned int pccfAttemptGeneration;
+ static int hddModLoaded = 0;
+ static int udpbdModLoaded = 0;
++
++// RIPPS2 build 115 (the user, 10/26 evening: after BIBLE the memory card and MMCE were gone, and the HDD said it was
++// empty, until the console was turned off): an IOP reset (BIBLE, the NBD server) unloads every module, and these
++// latches kept saying "loaded", so nothing was loaded again. sysReset clears its own table; opl.c reset() calls this.
++void bdmIopWasReset(void)
++{
++    iUSBModLoaded = iLinkModLoaded = iLinkManModLoaded = ieee1394ModLoaded = mx4sioModLoaded = 0;
++    pccfModLoaded = hddModLoaded = udpbdModLoaded = 0;
++}
+ static int udpbdNicClaimed = 0; // first SMAP module loaded, even if later block modules fail
+ /*
+   WHICH network block transport is actually resident, as NET_BOOT_UDPBD / NET_BOOT_UDPFS, or -1
+@@ -903,6 +913,37 @@ static void bdmDiagFlushPendingIopState(item_list_t *itemList)
  }
  #endif
  
@@ -1508,7 +1573,7 @@ index 7894802..f3fa2e6 100644
  // Bump the device generation the per-device refresh latch keys off, exactly as a real hotplug event
  // (bdmEventHandler) does. This invalidates every device's bdmDeviceTick so the next bdmNeedsUpdate
  // pass re-evaluates presence + page visibility instead of short-circuiting on the latch. Called when
-@@ -911,7 +943,7 @@ static void bdmDiagFlushPendingIopState(item_list_t *itemList)
+@@ -911,7 +952,7 @@ static void bdmDiagFlushPendingIopState(item_list_t *itemList)
  // without needing a physical replug.
  void bdmRequestPccfProbe(void)
  {
@@ -1517,7 +1582,7 @@ index 7894802..f3fa2e6 100644
          return;
      // A separate generation prevents hotplug/automatic refresh from retrying hardware init.
      // A request during an in-flight attempt remains pending for the next worker pass.
-@@ -1163,7 +1195,7 @@ static int bdmShouldQueueModuleLoad(void)
+@@ -1163,7 +1204,7 @@ static int bdmShouldQueueModuleLoad(void)
          return 1;
      if (gEnableMX4SIO && !mx4sioModLoaded)
          return 1;
@@ -1526,7 +1591,7 @@ index 7894802..f3fa2e6 100644
          return 1;
      if (gEnableBdmHDD && !hddModLoaded)
          return 1;
-@@ -1173,32 +1205,10 @@ static int bdmShouldQueueModuleLoad(void)
+@@ -1173,32 +1214,10 @@ static int bdmShouldQueueModuleLoad(void)
      return 0;
  }
  
@@ -1560,7 +1625,7 @@ index 7894802..f3fa2e6 100644
  }
  
  int bdmModeIsPCCF(int mode)
-@@ -1211,7 +1221,7 @@ int bdmModeIsPCCF(int mode)
+@@ -1211,7 +1230,7 @@ int bdmModeIsPCCF(int mode)
  
  static void bdmLoadPccfModule(void)
  {
@@ -1569,7 +1634,7 @@ index 7894802..f3fa2e6 100644
          pccfAttemptGeneration = pccfProbeGeneration;
          if (bdmPccfCandidate() && sysTryClaimPccf()) {
              if (bdmLoadOptionalModule("PCCF_BD", &pccf_bd_irx, size_pccf_bd_irx) >= 0)
-@@ -1574,7 +1584,7 @@ static void bdmInit(item_list_t *itemList)
+@@ -1574,7 +1593,7 @@ static void bdmInit(item_list_t *itemList)
  // the UDPFS_MODE derivation; the user's saved gBDMStartMode is never modified or persisted.
  int bdmEffectiveStartMode(void)
  {
@@ -1578,7 +1643,7 @@ index 7894802..f3fa2e6 100644
          return START_MODE_AUTO;
      // RIPPS2 build 96: Default Menu > Last Used, last on a drive page: the drives start with the boot
      if (gRipps2StartLast && gBDMStartMode == START_MODE_MANUAL && gRipps2LastDevice >= BDM_MODE && gRipps2LastDevice < ETH_MODE)
-@@ -1598,7 +1608,7 @@ static int bdmTransportEnabled(int bdmDeviceType)
+@@ -1598,7 +1617,7 @@ static int bdmTransportEnabled(int bdmDeviceType)
          case BDM_TYPE_SDC:
              return gEnableMX4SIO ? 1 : 0;
          case BDM_TYPE_PCCF:
@@ -1587,7 +1652,7 @@ index 7894802..f3fa2e6 100644
          case BDM_TYPE_ATA:
              return gEnableBdmHDD ? 1 : 0;
          case BDM_TYPE_UDPBD:
-@@ -1675,13 +1685,6 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+@@ -1675,13 +1694,6 @@ static int bdmNeedsUpdate(item_list_t *itemList)
          return 1;
      }
  
@@ -1601,7 +1666,7 @@ index 7894802..f3fa2e6 100644
      // If the device menu is visible double check the device type and if support for this device type is enabled. If the user switches device support
      // to off for a bdm device we want to hide the menu even though the drivers are still loaded and the device is being detected by bdm.
      opl_io_module_t *pOwner = (opl_io_module_t *)itemList->owner;
-@@ -1709,6 +1712,16 @@ static int bdmNeedsUpdate(item_list_t *itemList)
+@@ -1709,6 +1721,16 @@ static int bdmNeedsUpdate(item_list_t *itemList)
      if (folderConsumeDirty(itemList->mode))
          return 1;
  
@@ -1618,7 +1683,7 @@ index 7894802..f3fa2e6 100644
      if (pDeviceData->bdmDeviceTick != BdmGeneration)
          pDeviceData->bdmPs1RetryCount = pDeviceData->bdmPs1RetryPending = 0;
      // At most two extra scans on the normal idle-refresh cadence. This does
-@@ -1846,7 +1859,8 @@ static int bdmUpdateGameList(item_list_t *itemList)
+@@ -1846,7 +1868,8 @@ static int bdmUpdateGameList(item_list_t *itemList)
      // bdmGames, so a VCD scan reporting failure (r < 0) left the ISO list published under the VCD
      // view -- the L3 toggle then "never changed the list" (Nathan, HW, ATA/HDD_BD), and a device with
      // no POPS folder hit that on every single toggle.
@@ -1628,7 +1693,7 @@ index 7894802..f3fa2e6 100644
          char ps1Prefix[BDM_DEVICE_ROOT_MAX + 2];
          bdmBuildPs1Prefix(ps1Prefix, sizeof(ps1Prefix), itemList->mode); // device root, NOT gBDMPrefix
          // Ordinary BDM devices merge both cores. UDPBD deliberately publishes Ember ONLY:
-@@ -1863,7 +1877,8 @@ static int bdmUpdateGameList(item_list_t *itemList)
+@@ -1863,7 +1886,8 @@ static int bdmUpdateGameList(item_list_t *itemList)
              pDeviceData->bdmPs1RetryCount++;
          else if (!incomplete)
              pDeviceData->bdmPs1RetryCount = 0;
@@ -2525,7 +2590,7 @@ index a7ff5de..9e3b714 100644
      // Neutrino-only row greyed even under a Neutrino global default (guiGameSetCoreAwareState reads
      // this). SMB likewise: ethsupport has no Neutrino launch leg, the effective core is always <OPL>.
 diff --git a/src/hddsupport.c b/src/hddsupport.c
-index c825958..286f288 100644
+index c825958..ac42a1f 100644
 --- a/src/hddsupport.c
 +++ b/src/hddsupport.c
 @@ -1,5 +1,6 @@
@@ -2535,7 +2600,22 @@ index c825958..286f288 100644
  #ifdef RETROACHIEVEMENTS
  #include "include/achievements.h"
  #endif
-@@ -1652,7 +1653,7 @@ static int hddUpdateGameList(item_list_t *itemList)
+@@ -219,6 +220,14 @@ static int hddDvrGameCount = 0;
+ static unsigned char hddDvrMounted[2] = {0, 0};
+ static unsigned char hddDvrDriverTried = 0;
+ static unsigned char hddDvrDrvLoaded = 0;
++
++// RIPPS2 build 115 (the user, 10/26 evening: after BIBLE the memory card and MMCE were gone, and the HDD said it was
++// empty, until the console was turned off): an IOP reset (BIBLE, the NBD server) unloads every module, and these
++// latches kept saying "loaded", so nothing was loaded again. sysReset clears its own table; opl.c reset() calls this.
++void hddIopWasReset(void)
++{
++    hddModulesLoaded = hddSupportModulesLoaded = hddDvrDrvLoaded = 0;
++}
+ static unsigned char hddDvrDriverReady = 0;
+ static unsigned char hddDvrReadableDirs = 0;
+ 
+@@ -1652,7 +1661,7 @@ static int hddUpdateGameList(item_list_t *itemList)
      if (!hddSupportModulesLoaded)
          LOG("HDDSUPPORT UpdateGameList: PFS support incomplete; attempting read-only APA enumeration anyway\n");
  
@@ -2545,14 +2625,23 @@ index c825958..286f288 100644
          // built, invalidated (first-disc-only change), or freed by teardown (hddFreeVcdGameList).
          if (!hddVcdListBuilt)
 diff --git a/src/menusys.c b/src/menusys.c
-index 1f08c7e..0233e82 100644
+index 1f08c7e..0ea616c 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
-@@ -812,13 +812,14 @@ void menuReinitMainMenu(void)
+@@ -96,6 +96,7 @@ enum APP_MENU_IDs {
+     APP_EMBER_GAME_SETTINGS,
+     APP_CASE_SHAPE, // RIPPS2 build 102
+     APP_HIDE,       // RIPPS2 build 114: a PS1 game's Hide Game
++    APP_SET_METADATA, // RIPPS2 build 115: Set Metadata (Rename), as the PS2 games' menu has it
+ };
+ 
+ // global menu variables
+@@ -812,13 +813,15 @@ void menuReinitMainMenu(void)
      menuInitMainMenu();
  }
  
 +static int gameMenuCanRename = 0; // build 115: Set Metadata (Rename) offers the rename (menuInitGameMenu)
++static int appMenuCanRename = 0;  // build 115: the same for apps and PS1 games (menuInitAppMenu, menuInitVcdMenu)
 +
  void menuInitGameMenu(item_list_t *support)
  {
@@ -2564,7 +2653,7 @@ index 1f08c7e..0233e82 100644
      submenuAppendItem(&gameMenu, -1, NULL, GAME_COMPAT_SETTINGS, _STR_COMPAT_SETTINGS);
      submenuAppendItem(&gameMenu, -1, NULL, GAME_CHEAT_SETTINGS, _STR_CHEAT_SETTINGS);
      submenuAppendItem(&gameMenu, -1, NULL, GAME_GSM_SETTINGS, _STR_GSCONFIG);
-@@ -831,12 +832,16 @@ void menuInitGameMenu(item_list_t *support)
+@@ -831,12 +834,16 @@ void menuInitGameMenu(item_list_t *support)
      submenuAppendItem(&gameMenu, -1, NULL, GAME_SAVE_CHANGES, _STR_SAVE_CHANGES);
      submenuAppendItem(&gameMenu, -1, NULL, GAME_TEST_CHANGES, _STR_TEST);
      submenuAppendItem(&gameMenu, -1, NULL, GAME_REMOVE_CHANGES, _STR_REMOVE_ALL_SETTINGS);
@@ -2586,7 +2675,39 @@ index 1f08c7e..0233e82 100644
          // RIPPS2 build 114: LAST RITES deletes on every source but Apps (the APA HDD by its partition), and Hide Game
          if (support != NULL && support->mode != APP_MODE) {
              submenuAppendItem(&gameMenu, -1, NULL, GAME_DELETE_GAME, _STR_DELETE);
-@@ -1022,6 +1027,8 @@ static int menuDevicePageRank(const menu_item_t *item)
+@@ -858,14 +865,15 @@ void menuInitAppMenu(void)
+     if (appMenu)
+         submenuDestroy(&appMenu);
+ 
+-    // initialize the menu. Build 102: Case Shape always; Rename and Delete only where RIPPS2 may write
++    // initialize the menu. Build 102: Case Shape always; Rename and Delete only where RIPPS2 may write. Build 115 (the
++    // user, 10/26 evening): Rename's row is the PS2 games' "Set Metadata (Rename)", just above Delete, on every game menu
+     appCaseLabelUpdate();
+     appCaseChanged = 0;
+     submenuAppendItem(&appMenu, -1, appCaseLabel, APP_CASE_SHAPE, -1);
+-    if (gEnableWrite) {
+-        submenuAppendItem(&appMenu, -1, NULL, APP_RENAME, _STR_RENAME);
++    appMenuCanRename = gEnableWrite;
++    submenuAppendItem(&appMenu, -1, NULL, APP_SET_METADATA, appMenuCanRename ? _STR_RIPPS2_SET_METADATA_RENAME : _STR_RIPPS2_SET_METADATA);
++    if (gEnableWrite)
+         submenuAppendItem(&appMenu, -1, NULL, APP_DELETE, _STR_DELETE);
+-    }
+ 
+     appMenuCurrent = appMenu;
+ }
+@@ -882,7 +890,10 @@ void menuInitVcdMenu(int isEmber)
+     // Ember reads a per-game settings.txt; POPSTARTER has nothing equivalent, so only Ember rows get it.
+     if (isEmber)
+         submenuAppendItem(&appMenu, -1, NULL, APP_EMBER_GAME_SETTINGS, _STR_EMBER_GAME_SETTINGS);
+-    submenuAppendItem(&appMenu, -1, NULL, APP_RENAME, _STR_RENAME);
++    // build 115: the PS2 games' row in Rename's place. A PS1 game's details go in its own CFG (CFG/<name>.cfg), which only
++    // this row reads or writes; the rename stays offered as it always was here
++    appMenuCanRename = 1;
++    submenuAppendItem(&appMenu, -1, NULL, APP_SET_METADATA, _STR_RIPPS2_SET_METADATA_RENAME);
+     if (gEnableWrite) { // RIPPS2 build 114
+         submenuAppendItem(&appMenu, -1, NULL, APP_DELETE, _STR_DELETE);
+         submenuAppendItem(&appMenu, -1, NULL, APP_HIDE, _STR_RIPPS2_HIDE_GAME);
+@@ -1022,6 +1033,8 @@ static int menuDevicePageRank(const menu_item_t *item)
  
      if (support->mode == MIX_MODE)
          return -1; // RIPPS2: All Games leads
@@ -2595,7 +2716,7 @@ index 1f08c7e..0233e82 100644
      if (support->mode >= BDM_MODE && support->mode <= BDM_MODE_LAST)
          return 0;
      if (support->mode == MMCE_MODE)
-@@ -2219,13 +2226,13 @@ static menu_list_t *menuSourceAt(int i)
+@@ -2219,13 +2232,13 @@ static menu_list_t *menuSourceAt(int i)
  
  #ifdef RIPPS2_GUARD_TEST
  // the reel's test build (build 114; the user, 10/23: every drive a viewer might own, in the side bar): the lab has only the
@@ -2612,7 +2733,40 @@ index 1f08c7e..0233e82 100644
  
  static int menuSimAt(void) // the row the drives come after; -1 while BDM Devices is Off
  {
-@@ -2401,6 +2408,20 @@ static int menuGridEdge(int dir)
+@@ -2331,8 +2344,8 @@ void menuSourceSelect(int i)
+ }
+ 
+ // RIPPS2 build 78: a Grid theme moves in two dimensions. Left/Right step one cover; Up/Down one row
+-// (a whole row of steps, so the list's own paging still follows); past the top or bottom row they
+-// switch drive, as Up/Down do on Coverflow. A short last row is reached by its last cover.
++// (a whole row of steps, so the list's own paging still follows); at the top or bottom row they stop
++// (build 115; they switched drive before). A short last row is reached by its last cover.
+ static void menuGridStep(int dir)
+ {
+     int cols = thmGridColumns(), cur = 0, count = 0, i;
+@@ -2341,16 +2354,13 @@ static void menuGridStep(int dir)
+     for (p = selected_item->item->submenu; p != NULL; p = p->next, count++)
+         if (p == selected_item->item->current)
+             cur = count;
+-    if (dir < 0 && cur < cols) {
+-        if (getKeyOn(KEY_UP)) // a held arrow stops at the edge; a new press changes drive
+-            menuDriveStep(-1);
++    // build 115 (the user, 10/26 evening: "block the game sources from cycling if you go through the list ... so it's
++    // forced through the circle button"): the first and the last row are the list's ends. The source changes with Circle
++    // (the Storage drawer) or the sidebar, never by running off the list
++    if (dir < 0 && cur < cols)
+         return;
+-    }
+-    if (dir > 0 && cur / cols == (count - 1) / cols) {
+-        if (getKeyOn(KEY_DOWN))
+-            menuDriveStep(1);
++    if (dir > 0 && cur / cols == (count - 1) / cols)
+         return;
+-    }
+     int target = cur + dir * cols;
+     if (target > count - 1)
+         target = count - 1;
+@@ -2401,6 +2411,20 @@ static int menuGridEdge(int dir)
      return 1;
  }
  
@@ -2633,7 +2787,7 @@ index 1f08c7e..0233e82 100644
  static void menuNavigateLeft()
  {
      if (thmGridColumns() > 0) {
-@@ -2451,6 +2472,48 @@ static void menuNavigateDown()
+@@ -2451,6 +2475,48 @@ static void menuNavigateDown()
          menuNextV();
  }
  
@@ -2682,7 +2836,7 @@ index 1f08c7e..0233e82 100644
  // RIPPS2: L2 + R2 together pick a random game, once per press (holding them never repeats it).
  // Alone, L2 goes to the top of the list and R2 to the end, when released, so a chord can never
  // set off either of them on the way in. The game list and its info page both read them.
-@@ -2484,6 +2547,7 @@ void menuHandleInputMain()
+@@ -2484,6 +2550,7 @@ void menuHandleInputMain()
          return;
      }
      menuShoulderKeys(viewPending);
@@ -2690,7 +2844,7 @@ index 1f08c7e..0233e82 100644
  
      // RIPPS2: Random Game "Boot": each game list opens on a random game, once per session, once the
      // list has settled (after its rebuild, so it lands after the last played game is restored)
-@@ -2501,7 +2565,16 @@ void menuHandleInputMain()
+@@ -2501,7 +2568,16 @@ void menuHandleInputMain()
      // one cover a press and Up / Down racing through the drives).
      int cf = gTheme->coverflow != NULL;
      int grid = thmGridColumns() > 0; // build 78: every arrow moves through the grid, and repeats
@@ -2708,7 +2862,7 @@ index 1f08c7e..0233e82 100644
          if (ripps2PageButtons() == 1 || ripps2Legacy())
              menuPrevPage(); // build 96: Page Buttons L1 / R1 (build 113: and a legacy theme's, as OPL had them)
          else
-@@ -2511,12 +2584,17 @@ void menuHandleInputMain()
+@@ -2511,12 +2587,17 @@ void menuHandleInputMain()
              menuNextPage();
          else
              ripps2StepCategory(1);
@@ -2728,7 +2882,7 @@ index 1f08c7e..0233e82 100644
      } else if ((cf && !grid) ? getKeyOn(KEY_UP) : getKey(KEY_UP)) {
          menuNavigateUp();
      } else if ((cf && !grid) ? getKeyOn(KEY_DOWN) : getKey(KEY_DOWN)) {
-@@ -2524,7 +2602,8 @@ void menuHandleInputMain()
+@@ -2524,7 +2605,8 @@ void menuHandleInputMain()
      } else if ((menuSourceCycleActive() || ripps2SidebarOn()) && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE) &&
                 (support == NULL || folderDepth(support->mode) == 0)) {
          if (ripps2SidebarOn())
@@ -2738,7 +2892,7 @@ index 1f08c7e..0233e82 100644
          else
              menuSourceCycle(); // build 80: the cancel button cycles the sources on Coverflow / Grid
      } else if (getKeyOn(KEY_CROSS)) {
-@@ -2543,9 +2622,6 @@ void menuHandleInputMain()
+@@ -2543,9 +2625,6 @@ void menuHandleInputMain()
          // reinit main menu - show/hide items valid in the active context
          menuInitMainMenu();
          guiSwitchScreen(GUI_SCREEN_MENU);
@@ -2748,7 +2902,7 @@ index 1f08c7e..0233e82 100644
      } else if (getKeyOn(KEY_L3)) { // advance the current page's library-view ring
          if (!viewPending && selected_item->item->toggleView)
              selected_item->item->toggleView(selected_item->item);
-@@ -2563,6 +2639,9 @@ void menuHandleInputMain()
+@@ -2563,6 +2642,9 @@ void menuHandleInputMain()
              selectCycled = 0;
              selectSince = clock();
          } else if (selectHeld && getKeyPressed(KEY_SELECT)) {
@@ -2758,7 +2912,7 @@ index 1f08c7e..0233e82 100644
              if (!selectCycled && gRipps2SelectHold != RIPPS2_HOLD_OFF && (clock() - selectSince) >= (clock_t)(4.2f * CLOCKS_PER_SEC)) {
                  selectCycled = 1;
                  if (gRipps2SelectHold == RIPPS2_HOLD_CYCLE)
-@@ -2572,6 +2651,7 @@ void menuHandleInputMain()
+@@ -2572,6 +2654,7 @@ void menuHandleInputMain()
              }
          } else if (selectHeld) {
              selectHeld = 0;
@@ -2766,7 +2920,7 @@ index 1f08c7e..0233e82 100644
              if (!selectCycled && !viewPending)
                  selected_item->item->refresh(selected_item->item);
          }
-@@ -2612,11 +2692,31 @@ void menuRenderInfo(void)
+@@ -2612,11 +2695,31 @@ void menuRenderInfo(void)
          menuRenderElements(menuGetInfoElems(list));
          gTheme->itemsList = thmResolveItemsList(&gTheme->infoElems, gTheme->gamesItemsList, selected_item->item->icon_id);
      }
@@ -2799,7 +2953,7 @@ index 1f08c7e..0233e82 100644
      if (getKeyOn(KEY_CROSS)) {
          if (gSelectButton == KEY_CIRCLE)
              guiSwitchScreen(GUI_SCREEN_MAIN);
-@@ -2696,15 +2796,16 @@ void menuRenderGameMenu()
+@@ -2696,15 +2799,16 @@ void menuRenderGameMenu()
      int y = (gTheme->usedHeight >> 1) - (spacing * (count >> 1));
      int cp = 0; // current position
  
@@ -2819,7 +2973,7 @@ index 1f08c7e..0233e82 100644
  
      // settings list
      for (it = gameMenu; it; it = it->next, cp++) {
-@@ -2887,10 +2988,16 @@ void menuHandleInputGameMenu()
+@@ -2887,10 +2991,16 @@ void menuHandleInputGameMenu()
          } else
  #endif
              if (menuID == GAME_SET_METADATA) {
@@ -2838,7 +2992,7 @@ index 1f08c7e..0233e82 100644
              }
          } else if (menuID == GAME_COMPAT_SETTINGS) {
              guiGameShowCompatConfig(selected_item->item->current->item.id, selected_item->item->userdata, itemConfig);
-@@ -2995,16 +3102,17 @@ void menuRenderAppMenu()
+@@ -2995,16 +3105,17 @@ void menuRenderAppMenu()
      int y = (gTheme->usedHeight >> 1) - (spacing * (count >> 1));
      int cp = 0; // current position
  
@@ -2859,6 +3013,27 @@ index 1f08c7e..0233e82 100644
                             _l(_STR_PS1_SAVE_GUIDANCE), gTheme->textColor, 0);
  
      for (it = appMenu; it; it = it->next, cp++) {
+@@ -3108,6 +3219,20 @@ void menuHandleInputAppMenu()
+             appCaseChanged = 1;
+         } else if (menuID == APP_RENAME) {
+             menuRenameGame(&appMenu);
++        } else if (menuID == APP_SET_METADATA) {
++            // build 115: the PS2 games' editor, on the app's own title.cfg or the PS1 game's CFG; its ACTIONS rename
++            config_set_t *cfg = gameMenuLoadConfig(NULL);
++            int r = cfg != NULL ? ripps2EditMetadata(cfg, selected_item->item->current->item.text, appMenuCanRename) : -1;
++            if (r < 0)
++                guiMsgBox(_l(_STR_ERROR_SAVING_SETTINGS), 0, NULL);
++            else if (r == 1) {
++                if (menuSaveConfig())
++                    guiMsgBox(_l(_STR_GAME_SETTINGS_SAVED), 0, NULL);
++            } else if (r >= 2) {
++                if (r == 3)
++                    menuSaveConfig();
++                menuRenameGame(&appMenu);
++            }
+         } else if (menuID == APP_DELETE) {
+             menuDeleteGame(&appMenu);
+         } else if (menuID == APP_HIDE) { // RIPPS2 build 114
 diff --git a/src/mixsupport.c b/src/mixsupport.c
 index 3eb2114..2c0d92a 100644
 --- a/src/mixsupport.c
@@ -3541,7 +3716,7 @@ index 3eb2114..2c0d92a 100644
 +    &mixGetConfig, &mixGetImage, &mixCleanUp, &mixShutdown, &mixCheckVMC, &mixGetIconId,
 +    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &mixGetRowView, NULL};
 diff --git a/src/mmcesupport.c b/src/mmcesupport.c
-index ba683b0..7110e04 100644
+index ba683b0..8c26291 100644
 --- a/src/mmcesupport.c
 +++ b/src/mmcesupport.c
 @@ -1,4 +1,5 @@
@@ -3750,7 +3925,22 @@ index ba683b0..7110e04 100644
  static void mmceGetDeviceRoot(char *root, size_t size)
  {
      const char *separator = strstr(mmcePrefix, ":/");
-@@ -566,6 +695,15 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+@@ -460,6 +589,14 @@ void mmceSetPrefix(void)
+     mmceRefreshArtRoots();
+ }
+ 
++// RIPPS2 build 115 (the user, 10/26 evening: after BIBLE the memory card and MMCE were gone, and the HDD said it was
++// empty, until the console was turned off): an IOP reset (BIBLE, the NBD server) unloads every module, and these
++// latches kept saying "loaded", so nothing was loaded again. sysReset clears its own table; opl.c reset() calls this.
++void mmceIopWasReset(void)
++{
++    mmceModLoaded = 0;
++}
++
+ void mmceLoadModules(void)
+ {
+     // mmceman is a singleton, and this is called from several places -- mmceInit, the BDMA equip
+@@ -566,6 +703,15 @@ static int mmceNeedsUpdate(item_list_t *itemList)
          return (mmceGameCount > 0 || mmcePs1GameCount > 0);
      }
  
@@ -3766,7 +3956,7 @@ index ba683b0..7110e04 100644
      mmceGameList.updateDelay = MENU_UPD_DELAY_NOUPDATE;
  
      // Register the card's THM/LNG dirs BEFORE the VCD-view early returns (#152, AndrewBento). These
-@@ -612,6 +750,10 @@ static int mmceNeedsUpdate(item_list_t *itemList)
+@@ -612,6 +758,10 @@ static int mmceNeedsUpdate(item_list_t *itemList)
              return result;
      }
  
@@ -3777,7 +3967,7 @@ index ba683b0..7110e04 100644
      if (mmceSnap.shown) { // build 109: the games on screen came from the card's list: read the card once, in the background
          mmceSnap.shown = 0;
          mmceGameList.updateDelay = MMCE_MODE_UPDATE_DELAY;
-@@ -725,7 +867,7 @@ static int mmceUpdateGameList(item_list_t *itemList)
+@@ -725,7 +875,7 @@ static int mmceUpdateGameList(item_list_t *itemList)
  
      // Each view scans into its OWN array (#120): a failed rescan preserves only that view's last-good and
      // can never resurrect the other view's list (see the mmcePs1Games comment at the declarations).
@@ -3786,7 +3976,7 @@ index ba683b0..7110e04 100644
          // ONE list, BOTH cores -- POPS/*.VCD unioned with EMBER/games/*, both at the card root.
          char ps1Root[sizeof(mmcePrefix)];
          mmceGetDeviceRoot(ps1Root, sizeof(ps1Root));
-@@ -739,7 +881,8 @@ static int mmceUpdateGameList(item_list_t *itemList)
+@@ -739,7 +889,8 @@ static int mmceUpdateGameList(item_list_t *itemList)
              mmcePs1Scanned = 0;
              mmcePs1ScanFailed = 1; // arm mmceNeedsUpdate's bounded retry (S6)
          }
@@ -3796,7 +3986,7 @@ index ba683b0..7110e04 100644
      }
      if (view == LIB_VIEW_ISO || view == LIB_VIEW_MIXED) {
          const char *sub = folderGetSub(itemList->mode);
-@@ -750,13 +893,55 @@ static int mmceUpdateGameList(item_list_t *itemList)
+@@ -750,13 +901,55 @@ static int mmceUpdateGameList(item_list_t *itemList)
              return result + mmceGameCount;
          }
          sbReadList(&mmceGames, mmcePrefix, sub, &mmceULSizePrev, &mmceGameCount);
@@ -3853,7 +4043,7 @@ index ba683b0..7110e04 100644
  static int mmceGetGameCount(item_list_t *itemList)
  {
      int view = libListViewActive(itemList);
-@@ -1011,9 +1196,15 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -1011,9 +1204,15 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
      if (!cacheAbortMmceImageLoadsTimed(MMCE_ART_ABORT_WAIT_TICKS)) {
          // The card is still busy. Leave the menu and worker intact so the user
          // can retry after the current read returns.
@@ -3869,7 +4059,7 @@ index ba683b0..7110e04 100644
  
      // VCD view: hand off to POPSTARTER (by name) instead of the disc path below. Menu-launch only.
      if (gAutoLaunchBDMGame == NULL && game != NULL && (mmceGetItemView(itemList, id) == LIB_VIEW_PS1)) {
-@@ -1066,8 +1257,11 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+@@ -1066,8 +1265,11 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
              }
              // protectMcPath=NULL: the native path loads no ELF from mcN: mid-launch (ee_core is
              // embedded; sysLaunchLoaderElf reads rom0: only).
@@ -3882,7 +4072,7 @@ index ba683b0..7110e04 100644
          }
      }
  
-@@ -1395,6 +1589,8 @@ static config_set_t *mmceGetConfig(item_list_t *itemList, int id)
+@@ -1395,6 +1597,8 @@ static config_set_t *mmceGetConfig(item_list_t *itemList, int id)
  
  static int mmceGetImage(item_list_t *itemList, char *folder, int isRelative, char *value, char *suffix, GSTEXTURE *resultTex, short psm)
  {
@@ -3892,7 +4082,7 @@ index ba683b0..7110e04 100644
      // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
      // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
 diff --git a/src/opl.c b/src/opl.c
-index 3b8cd19..2610769 100644
+index 3b8cd19..f114b16 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -184,6 +184,7 @@ int gMMCEIGRSlot;
@@ -4231,7 +4421,19 @@ index 3b8cd19..2610769 100644
          configSetInt(configOPL, "ripps2_select_hold", gRipps2SelectHold); // build 114: Hold SELECT
          configSetInt(configOPL, CONFIG_OPL_XSENSITIVITY, gXSensitivity);
          configSetInt(configOPL, CONFIG_OPL_YSENSITIVITY, gYSensitivity);
-@@ -5661,7 +5727,7 @@ static void setDefaults(void)
+@@ -5272,6 +5338,11 @@ int ripps2RebootIopWith(const void *ioprp, int size)
+ static void reset(void)
+ {
+     sysReset(SYS_LOAD_MC_MODULES | SYS_LOAD_USB_MODULES | SYS_LOAD_ISOFS_MODULE);
++    // RIPPS2 build 115: the drives' own "module loaded" latches go with the IOP, so initAllSupport loads them again
++    bdmIopWasReset();
++    hddIopWasReset();
++    mmceIopWasReset();
++    udpfsIopWasReset();
+ 
+     mcInit(MC_TYPE_XMC);
+ }
+@@ -5661,7 +5732,7 @@ static void setDefaults(void)
  
      gMMCESlot = 2; // Default to first Auto slot
      gMMCEIGRSlot = 3;
@@ -4240,7 +4442,7 @@ index 3b8cd19..2610769 100644
      gMMCEAckWaitCycles = 5;
      gMMCEUseAlarms = 1;
  
-@@ -5801,8 +5867,13 @@ static void init(void)
+@@ -5801,8 +5872,13 @@ static void init(void)
          // and would draw the not-yet-ready main menu as a garbled landing page
          // before the intro splash) while the config loads.
          guiSetBootStatus(_l(_STR_BOOT_LOADING_CONFIG));
@@ -4255,7 +4457,7 @@ index 3b8cd19..2610769 100644
  #ifdef __OPLDIAG
          // #545: which settings home this boot chose, and why, before the menu covers it. Untranslated
          // developer text, diagnostic builds only -- a tester's photo answers what a log cannot.
-@@ -5988,7 +6059,8 @@ static void miniInit(int mode)
+@@ -5988,7 +6064,8 @@ static void miniInit(int mode)
              config_set_t *configOPL = configGetByType(CONFIG_OPL);
  
              configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
@@ -4486,7 +4688,7 @@ index 668955a..8e3f858 100644
      if (towerCount == 0)
          pillarsInit();
 diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
-index 11d84ce..785972a 100644
+index 11d84ce..9b611fb 100644
 --- a/src/ripps2biossnd.c
 +++ b/src/ripps2biossnd.c
 @@ -41,6 +41,7 @@
@@ -4726,15 +4928,32 @@ index 11d84ce..785972a 100644
      sfxReload(SFX_CONFIRM); // the new sounds, loaded on the IO worker, and a confirm in them
      snprintf(msg, sizeof(msg), _t("%d sounds from this console's BIOS are in %s and playing now."), n, dir);
      guiMsgBox(msg, 0, NULL);
-@@ -1495,8 +1628,15 @@ void ripps2RipBiosMusicDialog(void)
+@@ -1488,15 +1621,31 @@ void ripps2RipBiosMusicDialog(void)
+     if (wasPlaying)
+         bgmStop(); // the music may be playing this very file: it lets go while it is rewritten
+     done[0][0] = done[1][0] = '\0';
++    int ripped = -1; // the piece that becomes the pick: the menu's when it was ripped, else the red screen's
+     for (k = 0; k < RIPPS2_BIOSMUSIC_COUNT; k++) {
+         if (!(want & (1 << k)))
+             continue;
+-        rbsRipPiece(img, imgSize, k, len[k], dirs[pick - 1], done[k], sizeof(done[k]));
++        if (rbsRipPiece(img, imgSize, k, len[k], dirs[pick - 1], done[k], sizeof(done[k])) && (ripped < 0 || k == RIPPS2_BIOSMUSIC_MENU))
++            ripped = k;
      }
      free(img);
      snprintf(msg, sizeof(msg), "%s%s%s", done[0], done[0][0] && done[1][0] ? " " : "", done[1]);
 -    if (gEnableBGM && !isBgmPlaying())
 +    // build 115 (the user, 10/26: the menu and red screen music only played after the music was turned off and on): the
-+    // pick goes back to the default, which is the Menu track when it was ripped (on every theme: the pick is not a
-+    // theme's), and the music starts again whatever it was doing (a start the rip's stop left half done included)
++    // music starts again whatever it was doing (a start the rip's stop left half done included). 10/26 evening (it played
++    // under the message, then had to be picked by hand): the ripped track IS the pick, Menu when both were ripped, saved at
++    // once so the next boot plays it too (on every theme: the pick is not a theme's)
 +    gRipps2Music[0] = '\0';
++    if (ripped >= 0) {
++        snprintf(path, sizeof(path), "%s%s", dirs[pick - 1], ripped == RIPPS2_BIOSMUSIC_MENU ? RBS_MUSIC_FILE : RBS_RED_FILE);
++        bgmMusicHomeAdd(dirs[pick - 1]);
++        bgmMusicPickPath(path);
++        ripps2SaveSettingsInBackground();
++    }
 +    if (gEnableBGM) {
 +        if (isBgmPlaying())
 +            bgmStop();
@@ -4744,7 +4963,7 @@ index 11d84ce..785972a 100644
  }
  
 diff --git a/src/ripps2boot.c b/src/ripps2boot.c
-index a191468..a99f580 100644
+index a191468..3750cb0 100644
 --- a/src/ripps2boot.c
 +++ b/src/ripps2boot.c
 @@ -57,6 +57,8 @@
@@ -4790,7 +5009,25 @@ index a191468..a99f580 100644
  // 1 when the lock is in a PS2BBL config AND what the console starts at power on is PS2BBL (or no card
  // says otherwise: PS2BBL may start from the HDD). A lock in the config of a card FMCB starts past is
  // no lock at all, so it shows off, and turning it on says why and offers BIBLE.
-@@ -842,6 +871,23 @@ static int blMcRename(int port, const char *from, const char *to)
+@@ -621,6 +650,8 @@ static void blApplyAll(int on, int *changed, int *failed, int *unreachable, char
+ }
+ 
+ static void blInstall(void);
++static int blBackupOf(int port, char *out, int size); // build 115
++static void blRestoreCard(int port);                   // build 115
+ 
+ void ripps2BootLockApply(int on)
+ {
+@@ -651,7 +682,7 @@ void ripps2BootLockApply(int on)
+     if (!changed && !failed && !unreachable)
+         snprintf(msg, sizeof(msg), _t("BOOT LOCK found no PS2BBL config to change."));
+     else if (unreachable && !changed && !failed)
+-        snprintf(msg, sizeof(msg), _t("PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO). BOOT LOADER > MANAGE can copy RIPPS2 to a memory card or a USB drive for it."));
++        snprintf(msg, sizeof(msg), _t("PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD."));
+     else if (failed && !changed)
+         snprintf(msg, sizeof(msg), _t("BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again."));
+     else if (on)
+@@ -842,6 +873,23 @@ static int blMcRename(int port, const char *from, const char *to)
      if (mcRename(port, 0, path, to) != 0)
          return 0;
      mcSync(0, NULL, &res);
@@ -4814,7 +5051,48 @@ index a191468..a99f580 100644
      return res == 0;
  }
  
-@@ -956,7 +1002,9 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+@@ -887,27 +935,11 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+     blCard_t *c = &blCards[port];
+     sceMcTblGetDir info;
+ 
+-    // RIPPS2 first, while every drive is up
+-    if (w->copyTo[0]) {
+-        char parent[160], *slash;
+-        snprintf(parent, sizeof(parent), "%s", w->copyTo);
+-        if ((slash = strrchr(parent, '/')) != NULL) {
+-            *slash = '\0';
+-            mkdir(parent, 0777);
+-            if (!strncmp(parent, "mc", 2))
+-                ripps2CardFolderIcon(parent); // build 98: the hat (was OPL's icon, "RIPPS2 for BIBLE")
+-        }
+-        char boot[256];
+-        if (!ripps2GetBootPath(boot, sizeof(boot)) || !blCopy(boot, w->copyTo, w->copyWhat)) {
+-            guiMsgBoxSound(SFX_ERROR);
+-            snprintf(msg, sizeof(msg), _t("BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed."), w->copyTo);
+-            guiMsgBox(msg, 0, NULL);
+-            return;
+-        }
+-    }
++    // build 115 (the user, 10/26 evening): RIPPS2 is never copied anywhere for BIBLE; PS2BBL starts it where it is
+ 
+-    // the IOP again, with ps2sdk's SECRMAN in the ROM's place: the console binds a KELF through it
+-    guiRenderTextScreen(_t("BIBLE: restarting the I/O processor with the security module"));
++    // the IOP again, with ps2sdk's SECRMAN in the ROM's place: the console binds a KELF through it. ripps2RebootIopWith
++    // stops every drive read first (art, lists, music), so nothing else is on the card while it is written
++    guiRenderTextScreen(_t("RIPPS2: Setting up BBL 1.20 (restarting the I/O processor)"));
+     if ((img = blMakeIoprp("SECRMAN", secrman_irx, size_secrman_irx, &imgSize)) == NULL) {
+         guiMsgBoxSound(SFX_ERROR);
+         guiMsgBox(_t("BIBLE ran out of memory before it started. Nothing was changed."), 0, NULL);
+@@ -920,7 +952,7 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+         guiMsgBox(_t("RIPPS2 was busy reading a drive and could not restart the I/O processor. Nothing was changed: try again in a moment."), 0, NULL);
+         return;
+     }
+-    guiRenderTextScreen(_t("BIBLE: binding PS2BBL to the memory card"));
++    guiRenderTextScreen(_t("RIPPS2: Setting up BBL 1.20 (binding PS2BBL to the memory card)"));
+     if (sysLoadModuleBuffer(secrsif_irx, size_secrsif_irx, 0, NULL) != 0) {
+         guiMsgBoxSound(SFX_ERROR);
+         guiMsgBox(_t("The security module would not start on this console. Nothing on the memory card was changed."), 0, NULL);
+@@ -956,7 +988,9 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
          if (!blMcRename(port, blSysFolder, backup) || blDirExists(dir)) {
              free(buf);
              guiMsgBoxSound(SFX_ERROR);
@@ -4825,7 +5103,11 @@ index a191468..a99f580 100644
              guiMsgBox(msg, 0, NULL);
              return;
          }
-@@ -968,6 +1016,7 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+@@ -965,9 +999,11 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+     }
+ 
+     // BIBLE: the bound file, read back to be sure, its icon, and the folder marked as a system one
++    guiRenderTextScreen(_t("RIPPS2: Setting up BBL 1.20 (writing it to the memory card)"));
      mkdir(dir, 0777);
      snprintf(path, sizeof(path), "%s/%s", dir, blSysFile);
      ok = blWrite(path, (const char *)buf, kelfSize) == 0;
@@ -4833,41 +5115,290 @@ index a191468..a99f580 100644
      if (ok && (check = malloc(kelfSize)) != NULL) {
          fd = open(path, O_RDONLY);
          ok = fd >= 0 && read(fd, check, kelfSize) == kelfSize && !memcmp(check, buf, kelfSize);
-@@ -989,7 +1038,8 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+@@ -989,7 +1025,10 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
              blMcRename(port, backup, blSysFolder);
          }
          guiMsgBoxSound(SFX_ERROR);
 -        snprintf(msg, sizeof(msg), _t("BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again."), port);
-+        snprintf(msg, sizeof(msg), _t("BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)"), port);
++        // build 115 (the user, 10/26 evening: after a failed write the memory card and MMCE were gone until a power cycle)
++        snprintf(msg, sizeof(msg), _t("The memory card in slot %d refused PS2BBL, so RIPPS2 put the card back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)"), port + 1);
++        snprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), " %s", _t("An SD2PSX or MMCE card may protect itself after a refused write: if the memory card or the MMCE drive is missing now, turn the console off and on."));
 +        ripps2DiagBeforeLaunch();
          guiMsgBox(msg, 0, NULL);
          return;
      }
-@@ -1543,7 +1593,8 @@ static void blInstall(void)
+@@ -1030,8 +1069,8 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+ 
+     guiMsgBoxSound(SFX_SAVE);
+     {
+-        int n = snprintf(msg, sizeof(msg), _t("BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once."),
+-                         port, port, blSysFolder, blSysFile, w->path);
++        int n = snprintf(msg, sizeof(msg), _t("RIPPS2: BBL 1.20 is set up on the memory card in slot %d (mc%d:/%s/%s), BOOT LOCK on: at power on it starts RIPPS2 from %s, at once."),
++                         port + 1, port, blSysFolder, blSysFile, w->path);
+         if (n < (int)sizeof(msg) && backup[0])
+             n += snprintf(msg + n, sizeof(msg) - n, _t(" What was there before is kept in mc%d:/%s%s."), port, backup, backupKelf[0] ? _t(" (hold CIRCLE at power on to start it)") : "");
+         if (n < (int)sizeof(msg) && keptConfig)
+@@ -1260,7 +1299,7 @@ static void blHddInstall(void)
+              blHddElf, blHddPart, mcConfig ? conf : "hdd0:__sysconf:pfs:/PS2BBL/CONFIG.INI", first,
+              second[0] ? _t(", then ") : "", second);
+     guiMsgBoxSound(SFX_MESSAGE);
+-    guiMsgBoxStartOption(_t("INSTALL BIBLE"));
++    guiMsgBoxStartOption(_t("SET UP BBL 1.20"));
+     if (guiMsgBox(msg, 0, NULL) != 2)
+         return;
+ 
+@@ -1420,10 +1459,10 @@ static int blHddHasBackup(void)
+ static void blInstall(void)
+ {
+     char items[2][64], what[64], boot[256], msg[900], alt[160] = "";
+-    const char *list[6];
+-    int ports[4], n = 0, i, port, pick, bootPort, current = -1, hdd = blHddUsable();
++    const char *list[8];
++    int ports[8], n = 0, port, pick, bootPort, current = -1, hdd = blHddUsable();
+     blWhere_t where[5];
+-    int count = 0, elfKb = 0, fd;
++    int count = 0;
+ 
+     bootPort = blScan();
+     if (!blSysFolder[0]) {
+@@ -1434,10 +1473,19 @@ static void blInstall(void)
+     for (port = 0; port < 2; port++)
+         if (blCards[port].present) {
+             blCardWhat(port, bootPort, what, sizeof(what));
+-            snprintf(items[n], sizeof(items[n]), _t("MEMORY CARD %d  (%s)"), port, what);
++            snprintf(items[n], sizeof(items[n]), _t("MEMORY CARD IN SLOT %d  (%s)"), port + 1, what); // build 115: slots 1 and 2
+             list[n] = items[n];
+             ports[n++] = port;
+         }
++    static char restoreItems[2][64];
++    for (port = 0; port < 2; port++) { // build 115: put back what BIBLE replaced
++        char b[32];
++        if (blCards[port].present && blCards[port].bible && blBackupOf(port, b, sizeof(b))) {
++            snprintf(restoreItems[port], sizeof(restoreItems[port]), _t("RESTORE SLOT %d'S OLD BOOT LOADER"), port + 1);
++            list[n] = restoreItems[port];
++            ports[n++] = 4 + port;
++        }
++    }
+     if (hdd) { // build 73: the internal HDD too, and what it booted before BIBLE when that is kept
+         list[n] = _t("INTERNAL HDD  (its boot area)");
+         ports[n++] = 2;
+@@ -1462,79 +1510,57 @@ static void blInstall(void)
+         blHddRestore();
+         return;
+     }
++    if (port == 4 || port == 5) {
++        blRestoreCard(port - 4);
++        return;
++    }
+ 
+-    // where RIPPS2 starts from: as it is now when PS2BBL 1.2.0 reaches it, or a copy
++    // where RIPPS2 starts from: where it is now, when PS2BBL 1.2.0 reaches it. Build 115 (the user, 10/26 evening: "it should
++    // just write the bbl files in and set config to the running RIPPS2.elf like bootlock does ... we aren't going to have
++    // RIPPS2 clone itself"): no copies, so a card's room is BIBLE's own few hundred KB
+     memset(where, 0, sizeof(where));
+-    if (ripps2GetBootPath(boot, sizeof(boot)) && (fd = open(boot, O_RDONLY)) >= 0) {
+-        elfKb = (lseek(fd, 0, SEEK_END) + 1023) / 1024;
+-        close(fd);
+-    } else
++    if (!ripps2GetBootPath(boot, sizeof(boot)))
+         boot[0] = '\0';
+     // (an HDD path is not one: BIBLE is the memory card build of PS2BBL, which has no HDD driver)
+     if (boot[0] && strncmp(boot, "hdd", 3) && blPathFor(0, boot, ripps2GetBootBdmType(), where[count].path, sizeof(where[count].path)) &&
+         !(ripps2GetBootBdmType() == BDM_TYPE_SDC && port != 0)) {
+-        snprintf(where[count].label, sizeof(where[count].label), _t("WHERE IT IS NOW (%.40s)"), where[count].path);
+         where[count].mx4sio = !strncmp(where[count].path, "massX:", 6);
+         current = count++;
+     }
+-    if (boot[0] && elfKb > 0) {
+-        const char *name = strrchr(boot, '/');
+-        name = name ? name + 1 : strchr(boot, ':') + 1;
+-        for (i = 0; i < 2; i++) {
+-            if (!blCards[i].present || !strncmp(boot, i ? "mc1:" : "mc0:", 4))
+-                continue;
+-            snprintf(where[count].label, sizeof(where[count].label), _t("A COPY ON MEMORY CARD %d"), i);
+-            snprintf(where[count].path, sizeof(where[count].path), "mc?:/RIPPS2/%s", name);
+-            snprintf(where[count].copyTo, sizeof(where[count].copyTo), "mc%d:/RIPPS2/%s", i, name);
+-            snprintf(where[count].copyWhat, sizeof(where[count].copyWhat), _t("memory card %d"), i);
+-            where[count].cardKb = elfKb + 16;
+-            where[count].cardPort = i;
+-            count++;
+-        }
+-        char root[16];
+-        if (bdmGetDeviceRootByType(BDM_TYPE_USB, root, sizeof(root)) &&
+-            !(ripps2GetBootBdmType() == BDM_TYPE_USB && !strncmp(boot, "mass", 4))) {
+-            snprintf(where[count].label, sizeof(where[count].label), _t("A COPY ON THE USB DRIVE"));
+-            snprintf(where[count].path, sizeof(where[count].path), "mass:/RIPPS2/%s", name);
+-            snprintf(where[count].copyTo, sizeof(where[count].copyTo), "%sRIPPS2/%s", root, name);
+-            snprintf(where[count].copyWhat, sizeof(where[count].copyWhat), _t("the USB drive"));
+-            count++;
+-        }
+-        if (port == 0 && bdmGetDeviceRootByType(BDM_TYPE_SDC, root, sizeof(root)) &&
+-            !(ripps2GetBootBdmType() == BDM_TYPE_SDC && !strncmp(boot, "mass", 4))) {
+-            snprintf(where[count].label, sizeof(where[count].label), _t("A COPY ON MX4SIO"));
+-            snprintf(where[count].path, sizeof(where[count].path), "massX:/RIPPS2/%s", name);
+-            snprintf(where[count].copyTo, sizeof(where[count].copyTo), "%sRIPPS2/%s", root, name);
+-            snprintf(where[count].copyWhat, sizeof(where[count].copyWhat), "MX4SIO");
+-            where[count].mx4sio = 1;
+-            count++;
+-        }
+-    }
+     if (count == 0) {
++        // RIPPS2 runs from a drive PS2BBL 1.2.0 cannot read (MMCE, the HDD, a network share). A PS2BBL Extended config (an
++        // SD2PSX BOOT card has one) reaches MMCE and more: BOOT LOCK sets it. Else, where RIPPS2 has to be for BIBLE
++        char ext[256];
++        int i2;
++        for (i2 = 0; blConfigs[i2] != NULL; i2++)
++            if (blRead(blConfigs[i2]) >= 0 && blIsExtended(blConfigs[i2], blText))
++                break;
++        if (blConfigs[i2] != NULL && blRipps2Path(1, ext, sizeof(ext))) {
++            snprintf(msg, sizeof(msg),
++                     _t("RIPPS2: Setting up BBL 1.20\nRIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read (it reads memory cards, USB and MX4SIO), and RIPPS2 does not copy itself. The PS2BBL Extended config on this card (%s) reads it: START turns BOOT LOCK on, so it starts RIPPS2 from %s at power on. Nothing else on the card changes."),
++                     boot[0] ? boot : "?", blConfigs[i2], ext);
++            guiMsgBoxSound(SFX_MESSAGE);
++            guiMsgBoxStartOption(_t("BOOT LOCK ON"));
++            if (guiMsgBox(msg, 0, NULL) == 2)
++                ripps2BootLockApply(1);
++            return;
++        }
+         guiMsgBoxSound(SFX_ERROR);
+-        guiMsgBox(_t("PS2BBL starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 could not read itself to copy there. Start RIPPS2 from one of those, then try again."), 0, NULL);
++        snprintf(msg, sizeof(msg),
++                 _t("RIPPS2: Setting up BBL 1.20\nRIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read: it starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 does not copy itself. Put RIPPS2.ELF on one of those (a memory card's APPS folder, or a USB drive), start it from there, then set up BIBLE again."),
++                 boot[0] ? boot : "?");
++        guiMsgBox(msg, 0, NULL);
+         return;
+     }
+-    for (i = 0; i < count; i++)
+-        list[i] = where[i].label;
+-    if ((pick = ripps2PickList(list, count)) < 0)
+-        return;
+-    if (pick != current && current >= 0)
+-        snprintf(alt, sizeof(alt), "%s", where[current].path); // the copy first, the original after it
++    pick = current;
+ 
+-    // room on the card: BIBLE, two icons, a config, and a copy of RIPPS2 if it goes there too
++    // room on the card: BIBLE, two icons and a config (build 115: never a copy of RIPPS2)
+     {
+         int kelfKb = ((where[pick].mx4sio ? size_bible_mx4sio_xlf : size_bible_xlf) + 1023) / 1024;
+-        int need = kelfKb + (size_save_icn + 1023) / 1024 + 2 + (size_ripps2_icn + 1023) / 1024 + 2 + 4 + (where[pick].cardKb && where[pick].cardPort == port ? where[pick].cardKb : 0);
++        int need = kelfKb + (size_save_icn + 1023) / 1024 + 2 + (size_ripps2_icn + 1023) / 1024 + 2 + 4;
+         if (blCards[port].freeKb < need) {
+             guiMsgBoxSound(SFX_ERROR);
+-            snprintf(msg, sizeof(msg), _t("Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again."), port, blCards[port].freeKb, need);
+-            guiMsgBox(msg, 0, NULL);
+-            return;
+-        }
+-        if (where[pick].cardKb && where[pick].cardPort != port && blCards[where[pick].cardPort].freeKb < where[pick].cardKb) {
+-            guiMsgBoxSound(SFX_ERROR);
+-            snprintf(msg, sizeof(msg), _t("Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place."), where[pick].cardPort, blCards[where[pick].cardPort].freeKb, where[pick].cardKb);
++            snprintf(msg, sizeof(msg), _t("The memory card in slot %d has %d KB free, and BBL 1.20 needs %d KB there. Free some space, then try again."), port + 1, blCards[port].freeKb, need);
+             guiMsgBox(msg, 0, NULL);
+             return;
+         }
+@@ -1543,25 +1569,91 @@ static void blInstall(void)
      // everything, said once, and only START goes ahead
      {
          const blCard_t *c = &blCards[port];
 -        int o = snprintf(msg, sizeof(msg), _t("INSTALL BIBLE ON MEMORY CARD %d\n"), port);
-+        // build 115 (the user, 10/26): the title names what goes on, RIPPS2 BIBLE: BBL 1.20
-+        int o = snprintf(msg, sizeof(msg), _t("RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d\n"), port);
++        // build 115 (the user, 10/26): the title names what goes on. 10/26 evening: "RIPPS2: Setting up BBL 1.20", for an
++        // 8 MB memory card, and which slot
++        int o = snprintf(msg, sizeof(msg), _t("RIPPS2: Setting up BBL 1.20\n"));
++        o += snprintf(msg + o, sizeof(msg) - o, _t("For a standard 8 MB PS2 memory card (a MagicGate card, or an SD2PSX or MMCE BOOT card): the one in slot %d. At power on PS2BBL reads slot 2's config before slot 1's.\n"), port + 1);
          char sysDir[48];
          snprintf(sysDir, sizeof(sysDir), "mc%d:/%s", port, blSysFolder);
          if (blDirExists(sysDir) && !(c->bible && !strcmp(c->folder, blSysFolder)))
-@@ -1551,7 +1602,7 @@ static void blInstall(void)
-         if (where[pick].copyTo[0] && o < (int)sizeof(msg))
-             o += snprintf(msg + o, sizeof(msg) - o, _t("- RIPPS2 is copied to %s.\n"), where[pick].copyTo);
+             o += snprintf(msg + o, sizeof(msg) - o, _t("- %s (%s) moves to a backup folder first, whole.\n"), sysDir, _t(blKindName[c->kind]));
+-        if (where[pick].copyTo[0] && o < (int)sizeof(msg))
+-            o += snprintf(msg + o, sizeof(msg) - o, _t("- RIPPS2 is copied to %s.\n"), where[pick].copyTo);
          if (o < (int)sizeof(msg))
 -            o += snprintf(msg + o, sizeof(msg) - o, _t("- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.\n- Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.\n"
-+            o += snprintf(msg + o, sizeof(msg) - o, _t("- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.\n- Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.\n"
-                                                     "The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done."),
+-                                                    "The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done."),
++            o += snprintf(msg + o, sizeof(msg) - o, _t("- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.\n- Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 where it is (%s) with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on. RIPPS2 itself is not copied.\n"
++                                                    "The I/O processor restarts for this and every drive read stops until it is done; music and drives come back after. Keep the card in and the console on until it says done."),
                            sysDir, blSysFile, port, where[pick].path);
      }
-@@ -1575,7 +1626,7 @@ void ripps2BibleManage(void)
+     guiMsgBoxSound(SFX_MESSAGE);
+-    guiMsgBoxStartOption(_t("INSTALL BIBLE"));
++    guiMsgBoxStartOption(_t("SET UP BBL 1.20"));
+     if (guiMsgBox(msg, 0, NULL) != 2)
+         return;
+     blInstallOn(port, &where[pick], alt);
+ }
+ 
++// build 115 (the user, 10/26 evening: "so the BBL injector can successfully rollback the BBL install"): the newest folder
++// BIBLE moved aside on this card (RIPPS2-OLD-<folder>, -2 ...), or 0
++static int blBackupOf(int port, char *out, int size)
++{
++    char path[48];
++    int i;
++    for (i = 9; i >= 1; i--) {
++        if (i == 1)
++            snprintf(out, size, "RIPPS2-OLD-%.6s", blSysFolder);
++        else
++            snprintf(out, size, "RIPPS2-OLD-%.6s-%d", blSysFolder, i);
++        snprintf(path, sizeof(path), "mc%d:/%s", port, out);
++        if (blDirExists(path))
++            return 1;
++    }
++    return 0;
++}
++
++// BIBLE's folder moves aside (RIPPS2-BIBLE-<folder>; nothing is deleted) and the one it replaced goes back. The KELF the
++// card had is bound to the card, not to a folder name, so it starts again as it did
++static void blRestoreCard(int port)
++{
++    char msg[600], backup[32], aside[32], path[48];
++    int i;
++
++    if (!blBackupOf(port, backup, sizeof(backup)))
++        return;
++    snprintf(msg, sizeof(msg),
++             _t("RIPPS2: Setting up BBL 1.20\nThe memory card in slot %d: BBL 1.20 (mc%d:/%s) moves aside, and what it replaced (mc%d:/%s) goes back in its place. Nothing is deleted. The PS2BBL config stays as it is (BOOT LOCK can turn the lock off)."),
++             port + 1, port, blSysFolder, port, backup);
++    guiMsgBoxSound(SFX_MESSAGE);
++    guiMsgBoxStartOption(_t("RESTORE"));
++    if (guiMsgBox(msg, 0, NULL) != 2)
++        return;
++    for (i = 1; i < 10; i++) {
++        if (i == 1)
++            snprintf(aside, sizeof(aside), "RIPPS2-BIBLE-%.6s", blSysFolder);
++        else
++            snprintf(aside, sizeof(aside), "RIPPS2-BIBLE-%.6s-%d", blSysFolder, i);
++        snprintf(path, sizeof(path), "mc%d:/%s", port, aside);
++        if (!blDirExists(path))
++            break;
++    }
++    guiRenderTextScreen(_t("RIPPS2: Setting up BBL 1.20 (putting back what was there)"));
++    blScan(); // waits for the IO worker's own card work to finish first
++    if (!blMcRename(port, blSysFolder, aside)) {
++        guiMsgBoxSound(SFX_ERROR);
++        snprintf(msg, sizeof(msg), _t("The memory card in slot %d would not move BBL 1.20 aside, so nothing was changed. (DIAG.TXT beside RIPPS2 has what the card said.)"), port + 1);
++        ripps2DiagBeforeLaunch();
++        guiMsgBox(msg, 0, NULL);
++        return;
++    }
++    if (!blMcRename(port, backup, blSysFolder)) {
++        blMcRename(port, aside, blSysFolder); // as it was
++        guiMsgBoxSound(SFX_ERROR);
++        snprintf(msg, sizeof(msg), _t("The memory card in slot %d would not take %s back, so BBL 1.20 stayed. (DIAG.TXT beside RIPPS2 has what the card said.)"), port + 1, backup);
++        ripps2DiagBeforeLaunch();
++        guiMsgBox(msg, 0, NULL);
++        return;
++    }
++    guiMsgBoxSound(SFX_SAVE);
++    snprintf(msg, sizeof(msg), _t("Done: the memory card in slot %d starts what it started before BBL 1.20. BBL 1.20 is kept in mc%d:/%s."), port + 1, port, aside);
++    guiMsgBox(msg, 0, NULL);
++}
++
+ // BOOT LOADER > MANAGE: what each card starts, and BIBLE to install or repair
+ void ripps2BibleManage(void)
+ {
+@@ -1575,7 +1667,7 @@ void ripps2BibleManage(void)
          blCardWhat(port, boot, what[port], sizeof(what[port]));
      snprintf(msg, sizeof(msg),
               _t("MEMORY CARD 0: %s\nMEMORY CARD 1: %s\n%s\n"
 -             "BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?"),
-+             "RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?"),
++             "RIPPS2: Setting up BBL 1.20. PS2BBL 1.2.0 by El Isra, set up by RIPPS2 on a standard 8 MB PS2 memory card or the internal HDD: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first from where it is (it is never copied), and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Set it up, repair it or restore what it replaced?"),
               what[0], what[1],
               removed ? _t("(Removed a SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it.)\n") : "");
      guiMsgBoxSound(SFX_MESSAGE);
@@ -5522,10 +6053,67 @@ index 604ed5a..f801a1d 100644
      if (v->fd < 0)
          return r2Fail(_t("CANNOT OPEN THE IMAGE"));
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
-index aeaa17a..b0156b4 100644
+index aeaa17a..b4437de 100644
 --- a/src/ripps2seance.c
 +++ b/src/ripps2seance.c
-@@ -568,9 +568,9 @@ void seancePreLaunch(item_list_t *support, int id)
+@@ -199,7 +199,7 @@ int seanceState(int what, char *where, int whereSize)
+     return seWhere[what][0] ? 1 : seLooked ? 0 : -1;
+ }
+ 
+-// Where it was found, there now. The POPS folder is read back by its POPS.ELF. A launch may bring the drive's
++// Where it was found, there now. The POPS folder is read back by its POPS_IOX.PAK (in both of POPSTARTER's sets, build 115). A launch may bring the drive's
+ // transport up for it, as a path typed in Settings does.
+ int seanceGet(int what, char *out, int outSize)
+ {
+@@ -213,7 +213,7 @@ int seanceGet(int what, char *out, int outSize)
+         return 0;
+     if (what == SEANCE_POPS) {
+         char *slash;
+-        snprintf(probe, sizeof(probe), "%sPOPS.ELF", seWhere[what]);
++        snprintf(probe, sizeof(probe), "%sPOPS_IOX.PAK", seWhere[what]);
+         if (!sbResolveCustomLoaderPath(probe, out, outSize))
+             return 0;
+         if ((slash = strrchr(out, '/')) != NULL)
+@@ -332,7 +332,7 @@ static void seLookIn(const char *dir, const char names[][64], const unsigned cha
+         seanceNote(SEANCE_POPSTARTER, path);
+         seFoundNow[SEANCE_POPSTARTER] = 1;
+     }
+-    if (has[1] && has[2] && !seFoundNow[SEANCE_POPS]) {
++    if ((has[1] || has[7]) && has[2] && !seFoundNow[SEANCE_POPS]) {
+         seanceNote(SEANCE_POPS, dir);
+         seFoundNow[SEANCE_POPS] = 1;
+     }
+@@ -363,7 +363,8 @@ static void seLookIn(const char *dir, const char names[][64], const unsigned cha
+ // The walk, breadth first, every started drive in turn; 0 when the back button stopped it
+ static int seWalk(void)
+ {
+-    static const char *const files[] = {"POPSTARTER.ELF", "POPS.ELF", "POPS_IOX.PAK", "ember.elf", "bios.bin", "neutrino.elf", "system.toml"};
++    // build 115: POPS.PAK too (POPSTARTER's other set: POPS_IOX.PAK with POPS.PAK, no POPS.ELF)
++    static const char *const files[] = {"POPSTARTER.ELF", "POPS.ELF", "POPS_IOX.PAK", "ember.elf", "bios.bin", "neutrino.elf", "system.toml", "POPS.PAK"};
+     se_node_t *q = malloc(SE_QUEUE * sizeof(se_node_t));
+     char roots[16][16];
+     int nRoots, head = 0, tail = 0, i, k, stopped = 0, dirs = 0, all;
+@@ -381,8 +382,8 @@ static int seWalk(void)
+     seFrame("", 0);
+     while (head < tail) {
+         se_node_t n = q[head++ % SE_QUEUE];
+-        char names[7][64];
+-        unsigned char has[7] = {0, 0, 0, 0, 0, 0, 0};
++        char names[8][64];
++        unsigned char has[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+         int hasConfig = 0;
+         DIR *d;
+         struct dirent *e;
+@@ -413,7 +414,7 @@ static int seWalk(void)
+             isDir = seIsDir(n.dir, e->d_name);
+ #endif
+             if (!isDir) {
+-                for (k = 0; k < 7; k++)
++                for (k = 0; k < 8; k++)
+                     if (!has[k] && !strcasecmp(e->d_name, files[k])) {
+                         has[k] = 1;
+                         snprintf(names[k], sizeof(names[k]), "%s", e->d_name);
+@@ -568,9 +569,9 @@ void seancePreLaunch(item_list_t *support, int id)
      if (support == NULL)
          return;
      mode = support->mode;
@@ -5788,7 +6376,7 @@ index 1415c7b..8b1e237 100644
              sfxPlay(SFX_CONFIRM);
              sbClose();
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index c1bcf7f..69edb30 100644
+index c1bcf7f..15a5a8d 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -14,7 +14,7 @@
@@ -6142,6 +6730,18 @@ index c1bcf7f..69edb30 100644
  /*
    RIPPS2 build 85: the launch report. A PS1 game that will not start on a console says nothing about why,
    and PCSX2 starts them fine, so the only witness is the console itself. Just before the handoff RIPPS2
+@@ -597,8 +784,9 @@ void ripps2LaunchReport(const char *what, const char *elf, int argc, char **argv
+ 
+     LR_ADD("\r\nbeside it (%s)\r\n", dir);
+     if (!strcmp(what, "POPSTARTER")) {
+-        static const char *const pops[] = {"POPS.ELF", "POPS_IOX.PAK"};
+-        for (i = 0; i < 2; i++) {
++        // build 115: both of POPSTARTER's sets (POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG)
++        static const char *const pops[] = {"POPS_IOX.PAK", "POPS.ELF", "IOPRP252.IMG", "POPS.PAK"};
++        for (i = 0; i < 4; i++) {
+             snprintf(path, sizeof(path), "%s%s", dir, pops[i]);
+             size = lrFile(path, NULL, NULL);
+             if (size < 0)
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
 index 03fe071..b5e1891 100644
 --- a/src/ripps2ui.c
@@ -6375,7 +6975,7 @@ index 03fe071..b5e1891 100644
          now = ripps2Seconds();
          readPads();
 diff --git a/src/sound.c b/src/sound.c
-index f4d22b4..a05a49d 100644
+index f4d22b4..66e4d0c 100644
 --- a/src/sound.c
 +++ b/src/sound.c
 @@ -434,6 +434,14 @@ int ripps2AudioBase(char *out, int size, int searchDrives)
@@ -6393,7 +6993,29 @@ index f4d22b4..a05a49d 100644
  // RIPPS2: the boot sound opens the show and the music follows it in. From build 95 it is the first sound the
  // IO worker loads (deferredAudioInit, sfxInit(1)) and it plays the moment it is in, on voice 0, which nothing
  // else uses; the rest load after it. Once they are in, the music starts from a thread of its own (never the
-@@ -1254,6 +1262,7 @@ static OggVorbis_File *vorbisFile;
+@@ -1086,7 +1094,9 @@ void sfxBootSoundsLoaded(void)
+     bootAudioReady = 1;
+ }
+ 
+-static u8 bgmStarterStack[0x2000] __attribute__((aligned(16)));
++// build 115: 32 KB, as the music threads: the start decodes an MP3's first frame here, and minimp3 keeps ~16 KB of
++// scratch on the stack for every frame (8 KB ran over into the statics below it)
++static u8 bgmStarterStack[0x8000] __attribute__((aligned(16)));
+ 
+ static void bgmStarterThread(void *arg)
+ {
+@@ -1165,7 +1175,9 @@ void bgmBootTick(void)
+ // background queue from starving refills; the larger ring also covers stalls that are IOP-bound,
+ // where EE thread priority cannot help.
+ #define BGM_THREAD_BASE_PRIO       0x1E
+-#define BGM_THREAD_STACK_SIZE      0x1000
++// build 115: 32 KB (was 4 KB): the I/O thread decodes MP3 frames, and minimp3's frame decoder alone puts ~16 KB of
++// scratch on the stack; 4 KB ran over into the statics below (a lab crash closing the player, its text gone)
++#define BGM_THREAD_STACK_SIZE      0x8000
+ // Sleep bounds while audsrv's ring has no room for the next piece (see bgmWaitForRoom). The sleep is the
+ // time the missing room takes to play out, but never under one SPU2 block -- 512 samples at 48 kHz,
+ // 10.7 ms -- because the IOP frees room a block at a time and a shorter sleep only re-reads the same
+@@ -1254,6 +1266,7 @@ static OggVorbis_File *vorbisFile;
  // the stream 16-bit samples; 0 ends it (what is queued plays out, then the music stops), < 0 is an
  // error. bgmPcmExternal is the CD player's, set through bgmStartPcm; a .wav track's is the file reader.
  static int (*bgmPcmRead)(char *buf, int size) = NULL;
@@ -6401,7 +7023,19 @@ index f4d22b4..a05a49d 100644
  static int (*bgmPcmExternal)(char *buf, int size) = NULL;
  static int bgmPcmRate = 44100, bgmPcmChannels = 2;
  static volatile int bgmPcmEnded = 0;
-@@ -1482,6 +1491,184 @@ bad:
+@@ -1369,7 +1382,10 @@ unsigned int bgmPlayedBytes(void)
+ static FILE *wavFile = NULL;
+ static long wavData = 0, wavSize = 0, wavPos = 0;
+ static int wavSrcRate = 48000, wavSrcCh = 2;
+-static unsigned char wavIn[4096]; // the file read in blocks, not a frame at a time
++// the file read in blocks, not a frame at a time. Build 115 (the user, 10/26: a CD track in the MMCE's AUDIO stuttered as music
++// and played clean in the media player): 32 KB, so CD audio is 6 reads a second, not 43, each one waiting its turn on a
++// bus the pads and the art share
++static unsigned char wavIn[32768] __attribute__((aligned(64)));
+ static int wavInLen = 0, wavInPos = 0;
+ static unsigned int wavPhase = 0; // where the next 48 kHz frame falls between wavPrev and wavCur, 16.16
+ static short wavPrev[2], wavCur[2];
+@@ -1482,6 +1498,184 @@ bad:
      return 0;
  }
  
@@ -6586,7 +7220,7 @@ index f4d22b4..a05a49d 100644
  // PCM bytes the stream plays per millisecond, set by bgmStart from its format.
  static int bgmBytesPerMs = 0;
  /* RIPPS2 build 102 (user: "a crazy audio beeping bug ... happens when loading is stuck, and switching can cause a long
-@@ -2185,22 +2372,31 @@ static int bgmHomeHasMusic(const char *prefix)
+@@ -2185,22 +2379,45 @@ static int bgmHomeHasMusic(const char *prefix)
      return bgmMusicScan("", sub, 0, names, 0, RIPPS2_MUSIC_MAX) > 0;
  }
  
@@ -6613,6 +7247,20 @@ index f4d22b4..a05a49d 100644
 +    return 1;
 +}
 +
++// build 115: an AUDIO folder a rip just wrote ("<base>AUDIO/") is listed from now on, whether or not its drive's list ever
++// registered it (bgmMusicPickPath can then make its track the pick)
++void bgmMusicHomeAdd(const char *audioDir)
++{
++    char base[48];
++    int n = (int)strlen(audioDir);
++
++    if (n >= 6 && n - 6 < (int)sizeof(base) && !strcasecmp(audioDir + n - 6, "AUDIO/")) {
++        memcpy(base, audioDir, n - 6);
++        base[n - 6] = '\0';
++        bgmHomeRegister(base);
++    }
++}
++
 +// a drive's OPL root ("mass0:/", "pfs0:/"), from its update (the IO worker)
 +void bgmAddMusicHome(const char *prefix)
 +{
@@ -6624,7 +7272,7 @@ index f4d22b4..a05a49d 100644
          bgmFadeIn = 1;
          bgmFadeAt = clock();
          bgmStart();
-@@ -2240,7 +2436,8 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
+@@ -2240,7 +2457,8 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
          int len = strlen(e->d_name);
          if (e->d_name[0] == '.' || len <= 4 || len + (int)strlen(sub) + 2 > RIPPS2_MUSIC_NAME)
              continue;
@@ -6634,7 +7282,7 @@ index f4d22b4..a05a49d 100644
              continue;
          if (bgmOnly && strncasecmp(e->d_name, "bgm", 3))
              continue;
-@@ -2250,6 +2447,26 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
+@@ -2250,6 +2468,26 @@ static int bgmMusicScan(const char *dir, const char *sub, int bgmOnly, char (*na
      return n;
  }
  
@@ -6661,7 +7309,7 @@ index f4d22b4..a05a49d 100644
  int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
  {
      char dir[256], sub[64];
-@@ -2260,6 +2477,7 @@ int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
+@@ -2260,6 +2498,7 @@ int bgmMusicList(char (*names)[RIPPS2_MUSIC_NAME], int max)
          n = bgmMusicScan(dir, "MUSIC", 0, names, n, max);
      } else
          dir[0] = '\0';
@@ -6669,7 +7317,38 @@ index f4d22b4..a05a49d 100644
      for (i = 0; i < bgmHomeCount && n < max; i++) { // build 100: OPL's resources AUDIO on each started drive
          if (!strcmp(bgmHomes[i], dir))
              continue; // RIPPS2's own folder, read above
-@@ -2350,6 +2568,23 @@ static int bgmLoad(void)
+@@ -2313,6 +2552,30 @@ int bgmMusicDefault(char (*names)[RIPPS2_MUSIC_NAME], int n)
+     return 0;
+ }
+ 
++// build 115 (the user, 10/26 evening: after a rip the music played under the message, then had to be picked by hand):
++// the track at this full path becomes the pick, as the music list names it (beside RIPPS2 relative, elsewhere whole).
++// 1 when it is in the list
++int bgmMusicPickPath(const char *full)
++{
++    static char names[RIPPS2_MUSIC_MAX][RIPPS2_MUSIC_NAME];
++    char dir[256], path[320];
++    int n = bgmMusicList(names, RIPPS2_MUSIC_MAX), i;
++
++    if (!ripps2AudioBase(dir, sizeof(dir), 0))
++        dir[0] = '\0';
++    for (i = 0; i < n; i++) {
++        if (strchr(names[i], ':') != NULL)
++            snprintf(path, sizeof(path), "%s", names[i]);
++        else
++            snprintf(path, sizeof(path), "%s%s", dir, names[i]);
++        if (!strcasecmp(path, full)) {
++            snprintf(gRipps2Music, sizeof(gRipps2Music), "%s", names[i]);
++            return 1;
++        }
++    }
++    return 0;
++}
++
+ static int bgmMusicPath(char *out, int size)
+ {
+     static char names[RIPPS2_MUSIC_MAX][RIPPS2_MUSIC_NAME];
+@@ -2350,6 +2613,23 @@ static int bgmLoad(void)
  
      memset(vorbisFile, 0, sizeof(OggVorbis_File));
  
@@ -6693,7 +7372,7 @@ index f4d22b4..a05a49d 100644
      themeID = thmGetGuiValue();
      char *thmPath = thmGetFilePath(themeID);
      if (thmPath != NULL) { // NULL for <OPL> + the built-in <Coverflow>
-@@ -2368,9 +2603,8 @@ static int bgmLoad(void)
+@@ -2368,9 +2648,8 @@ static int bgmLoad(void)
      // configured file. Up to build 110 only the built-in themes got here, so on Adapt or Adapt Rx (no bgm.ogg since
      // edition 100) no music played at all, the ripped Menu music included (testers: "missing menu bgm after its rip").
      if (bgmMusicPath(bgmPath, sizeof(bgmPath))) {
@@ -6705,7 +7384,7 @@ index f4d22b4..a05a49d 100644
                  free(vorbisFile);
                  vorbisFile = NULL;
                  snprintf(bgmOpenPath, sizeof(bgmOpenPath), "%s", bgmPath);
-@@ -2483,6 +2717,7 @@ static void bgmDeinit(void)
+@@ -2483,6 +2762,7 @@ static void bgmDeinit(void)
          vorbisFile = NULL;
      }
      wavClose(); // RIPPS2
@@ -6713,7 +7392,7 @@ index f4d22b4..a05a49d 100644
      bgmOpenPath[0] = '\0'; // build 98: closed
      bgmPcmRead = NULL;
      bgmPcmEnded = 0;
-@@ -2564,7 +2799,7 @@ void bgmStart(void)
+@@ -2564,7 +2844,7 @@ void bgmStart(void)
              bgmRoomTarget = BGM_RING_BUFFER_SIZE;
          LOG("BGM: %ld Hz, %d ch, audsrv ring %d bytes, queue up to %d at a time\n", rate, channels, ring, bgmRoomTarget);
          // RIPPS2: a CD plays at full; the boot music starts silent and bgmBootTick raises it
@@ -6722,7 +7401,7 @@ index f4d22b4..a05a49d 100644
  
          bgmIsPlaying = 1;
  
-@@ -2580,7 +2815,51 @@ void bgmStart(void)
+@@ -2580,9 +2860,53 @@ void bgmStart(void)
  
          if (!terminateFlag && bgmIoThreadRunning)
              StartThread(bgmThreadID, NULL);
@@ -6734,9 +7413,9 @@ index f4d22b4..a05a49d 100644
 +            bgmDeinit();
 +            LOG("BGM: the track did not start\n");
 +        }
-+    }
-+}
-+
+     }
+ }
+ 
 +// build 115: the media player plays a .wav or .ogg as the music, at full volume; closing it brings the menu music back
 +int bgmPlayFile(const char *path)
 +{
@@ -6753,7 +7432,7 @@ index f4d22b4..a05a49d 100644
 +    if (!isBgmPlaying()) {
 +        bgmOverride[0] = '\0';
 +        return -1;
-     }
++    }
 +    return 0;
 +}
 +
@@ -6771,10 +7450,12 @@ index f4d22b4..a05a49d 100644
 +unsigned int bgmPlayedMs(void)
 +{
 +    return bgmBytesPerMs > 0 ? bgmPlayedBytes() / (unsigned int)bgmBytesPerMs : 0;
- }
- 
++}
++
  // RIPPS2: the CD player's stream. Whatever music was playing stops; bgmStopPcm ends it again, and the
-@@ -2685,6 +2964,7 @@ void bgmStop(void)
+ // menu music starts over once the player is closed (bgmBootTick's job is done by then, so the caller
+ // restarts it).
+@@ -2685,6 +3009,7 @@ void bgmStop(void)
          return;
      }
      bgmAbandoned = 0; // build 102: everything stopped: what the old stream held goes now
@@ -7583,7 +8264,7 @@ index 2da860e..403aa1e 100644
      return (result >= 0) ? 0 : result;
  }
 diff --git a/src/themes.c b/src/themes.c
-index fa854fb..8e0cbf7 100644
+index fa854fb..14c299a 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -15,6 +15,7 @@
@@ -7698,6 +8379,15 @@ index fa854fb..8e0cbf7 100644
      }
  
      rmSetReflectionYOffset(0); // don't leak the offset to any other reflection draw
+@@ -2831,7 +2889,7 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+ // <name>_spacing pixels between them (default 14). x is the grid's horizontal centre (POS_MID by
+ // default), y the top of its first row, width/height one cover; overlay=, default= and reflection=
+ // work as on ItemCover. The selection is the cover drawn larger, framed, and last. Left/Right step one
+-// cover, Up/Down one row, and past the top or bottom row they switch drive (menusys.c, menuGridStep).
++// cover, Up/Down one row, stopping at the top and bottom rows (menusys.c, menuGridStep; build 115).
+ // Build 82: the grid shows whole pages, and moving to another page slides the old one away and the new
+ // one in, a carousel eased as RIPFLOW's is; the chosen case can be flipped over to its back cover.
+ 
 @@ -3793,8 +3851,14 @@ static void drawAttributeImage(struct menu_list *menu, struct submenu_list *item
              metaDbGetStr(config, attributeImage->cache->suffix, (const char **)&attributeImage->currentValue);
          }
@@ -7972,7 +8662,7 @@ index fa854fb..8e0cbf7 100644
          configGetColor(themeConfig, "sidebar_accent_color", newT->sbAccent);
          if (configGetInt(themeConfig, "sidebar_tint", &intValue) && intValue >= 0 && intValue <= 128)
 diff --git a/src/udpfssupport.c b/src/udpfssupport.c
-index 2145824..7ed5496 100644
+index 2145824..103f7ac 100644
 --- a/src/udpfssupport.c
 +++ b/src/udpfssupport.c
 @@ -1,4 +1,5 @@
@@ -7981,7 +8671,22 @@ index 2145824..7ed5496 100644
  #include "include/saveicon.h"
  #include "include/lang.h"
  #include "include/gui.h"
-@@ -599,7 +600,7 @@ static int udpfsUpdateGameList(item_list_t *itemList)
+@@ -42,6 +43,14 @@ static base_game_info_t *udpfsGames = NULL;
+ static int udpfsPs1GameCount = 0;
+ static base_game_info_t *udpfsPs1Games = NULL;
+ static int udpfsIomanModLoaded = 0;
++
++// RIPPS2 build 115 (the user, 10/26 evening: after BIBLE the memory card and MMCE were gone, and the HDD said it was
++// empty, until the console was turned off): an IOP reset (BIBLE, the NBD server) unloads every module, and these
++// latches kept saying "loaded", so nothing was loaded again. sysReset clears its own table; opl.c reset() calls this.
++void udpfsIopWasReset(void)
++{
++    udpfsIomanModLoaded = 0;
++}
+ static int udpfsNicClaimed = 0;       // SMAP resident, even if later modules fail; requires IOP reset
+ static int udpfsWaitingForServer = 0; // the last scan got no answer from the server; see udpfsSetWaitingForServer
+ static int udpfsThemesScanned = 0;    // THM is registered once per active UDPFS session, after THM opens
+@@ -599,7 +608,7 @@ static int udpfsUpdateGameList(item_list_t *itemList)
      if (answeredBefore)
          udpfsDiscoverLanguages();
  
@@ -7991,10 +8696,158 @@ index 2145824..7ed5496 100644
          int r = ps1FillGameList(udpfsPrefix, &udpfsPs1Games);
          if (answeredBefore && r >= 0 && !ps1GameListNeedsRetry())
 diff --git a/src/vcdsupport.c b/src/vcdsupport.c
-index 8423f86..226fb17 100644
+index 8423f86..e4f5a95 100644
 --- a/src/vcdsupport.c
 +++ b/src/vcdsupport.c
-@@ -1047,14 +1047,27 @@ int vcdConfirmPopsFiles(const char *devPrefix)
+@@ -936,12 +936,40 @@ int vcdResolvePopstarterFor(const char *devPrefix, const char *prefix, const cha
+ // RIPPS2 build 89, RIPPOPS: Sony's POPS files are not in any PS2 ROM, so they cannot be ripped from the console;
+ // a copy the user already has on another drive (a POPS folder at its top) can be brought over. Build 114: the folder the
+ // two files are in (with its '/'), and SEANCE's first: a search may have found them anywhere on a started drive
++// build 115 (the user, 10/26 evening: POPSTARTER from MMCE started once the rest of Sony's files were beside it, as
++// AnimMouse's POPS-binaries and POPSLoader's layout have them): the emulator comes as POPS.PAK, or as POPS.ELF with
++// IOPRP252.IMG, and POPS_IOX.PAK goes with either. A bit per file in vcdPopsFiles' order
++static const char *const vcdPopsFiles[] = {"POPS_IOX.PAK", "POPS.ELF", "POPS.PAK", "IOPRP252.IMG"};
++#define VCD_POPS_FILES 4
++#define VCD_POPS_IOX   1
++#define VCD_POPS_ELF   2
++#define VCD_POPS_PAK   4
++
++static int vcdPopsHave(const char *folder) // folder ends in its separator
++{
++    char path[300];
++    int k, fd, have = 0;
++
++    for (k = 0; k < VCD_POPS_FILES; k++) {
++        snprintf(path, sizeof(path), "%s%s", folder, vcdPopsFiles[k]);
++        if ((fd = open(path, O_RDONLY)) >= 0) {
++            close(fd);
++            have |= 1 << k;
++        }
++    }
++    return have;
++}
++
++static int vcdPopsComplete(int have)
++{
++    return (have & VCD_POPS_IOX) && (have & (VCD_POPS_ELF | VCD_POPS_PAK));
++}
++
+ static const char *vcdFindPopsElsewhere(const char *devPrefix)
+ {
+     static const char *const places[] = {"mass0:/", "mass1:/", "mass2:/", "mass3:/", "mmce0:/", "mmce1:/", "pfs0:/", "mc0:/", "mc1:/"};
+     static char folder[256];
+-    char path[300];
+-    int i, k, fd;
++    int i;
+ 
+     if (seanceHook != NULL && seanceHook(SEANCE_POPS, SEANCE_MODE_LOOKUP, devPrefix, folder, sizeof(folder)) &&
+         strncmp(folder, devPrefix, strlen(devPrefix)) != 0)
+@@ -949,16 +977,9 @@ static const char *vcdFindPopsElsewhere(const char *devPrefix)
+     for (i = 0; i < (int)(sizeof(places) / sizeof(places[0])); i++) {
+         if (!strncmp(devPrefix, places[i], strlen(places[i])))
+             continue;
+-        for (k = 0; k < 2; k++) {
+-            snprintf(path, sizeof(path), "%s%s/%s", places[i], POPS_FOLDER, k ? "POPS_IOX.PAK" : "POPS.ELF");
+-            if ((fd = open(path, O_RDONLY)) < 0)
+-                break;
+-            close(fd);
+-        }
+-        if (k == 2) {
+-            snprintf(folder, sizeof(folder), "%s%s/", places[i], POPS_FOLDER);
++        snprintf(folder, sizeof(folder), "%s%s/", places[i], POPS_FOLDER);
++        if (vcdPopsComplete(vcdPopsHave(folder)))
+             return folder;
+-        }
+     }
+     if (seanceHook != NULL && seanceHook(SEANCE_POPS, SEANCE_MODE_LAST, devPrefix, folder, sizeof(folder)) &&
+         strncmp(folder, devPrefix, strlen(devPrefix)) != 0)
+@@ -995,51 +1016,56 @@ static int vcdCopyFile(const char *src, const char *dst)
+ 
+ int vcdConfirmPopsFiles(const char *devPrefix)
+ {
+-    static const char *const files[] = {"POPS.ELF", "POPS_IOX.PAK"};
+-    char missing[64] = "", path[256], msg[384];
++    char missing[96] = "", found[96] = "", path[256], here[256], msg[512];
+     const char *from;
+-    int i, n = 0;
++    int i, n = 0, have, there, take;
+ 
+     if (devPrefix == NULL || devPrefix[0] == '\0')
+         return 1;
+-    for (i = 0; i < 2; i++) {
+-        snprintf(path, sizeof(path), "%s%s%c%s", devPrefix, POPS_FOLDER, vcdSep(devPrefix), files[i]);
+-        int fd = open(path, O_RDONLY);
+-        if (fd >= 0) {
+-            close(fd);
+-            continue;
+-        }
+-        snprintf(missing + strlen(missing), sizeof(missing) - strlen(missing), "%s%s", n ? _t(" and ") : "", files[i]);
+-        n++;
+-    }
+-    if (n == 0) {
++    snprintf(here, sizeof(here), "%s%s%c", devPrefix, POPS_FOLDER, vcdSep(devPrefix));
++    have = vcdPopsHave(here);
++    if (vcdPopsComplete(have)) {
+         // build 114: SEANCE remembers where they are, for a game on another drive
+-        snprintf(path, sizeof(path), "%s%s%c", devPrefix, POPS_FOLDER, vcdSep(devPrefix));
+         if (seanceHook != NULL)
+-            seanceHook(SEANCE_POPS, SEANCE_MODE_NOTE, devPrefix, path, sizeof(path));
++            seanceHook(SEANCE_POPS, SEANCE_MODE_NOTE, devPrefix, here, sizeof(here));
+         return 1;
+     }
+-    // build 89, RIPPOPS: your own copy on another drive is copied here
++    // build 115: what is missing, by name: POPS_IOX.PAK, and POPS.ELF with IOPRP252.IMG when no emulator file is there
++    for (i = 0; i < VCD_POPS_FILES; i++) {
++        int want = i == 0 ? !(have & VCD_POPS_IOX) : i == 1 ? !(have & (VCD_POPS_ELF | VCD_POPS_PAK)) :
++                   i == 3 ? !(have & (VCD_POPS_ELF | VCD_POPS_PAK)) && !(have & (1 << 3)) : 0;
++        if (!want)
++            continue;
++        snprintf(missing + strlen(missing), sizeof(missing) - strlen(missing), "%s%s", n ? ", " : "", vcdPopsFiles[i]);
++        n++;
++    }
++    // build 89, RIPPOPS: your own copy on another drive is copied here. Build 115: every file of the set it has that this
++    // drive lacks (IOPRP252.IMG and POPS.PAK too), so the drive ends up with what POPSTARTER may look for
+     if ((from = vcdFindPopsElsewhere(devPrefix)) != NULL) {
+-        // RIPPS2 build 104: one sentence each for one file and both, so a translation need not build "is" / "are"
++        there = vcdPopsHave(from);
++        take = there & ~have;
++        for (i = 0, n = 0; i < VCD_POPS_FILES; i++)
++            if (take & (1 << i)) {
++                snprintf(found + strlen(found), sizeof(found) - strlen(found), "%s%s", n ? ", " : "", vcdPopsFiles[i]);
++                n++;
++            }
+         snprintf(msg, sizeof(msg),
+-                 n == 1 ? _t("%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony's PS1 emulator, on %s: "
+-                             "START copies them here and starts the game.") :
+-                          _t("%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony's PS1 emulator, on %s: "
+-                             "START copies them here and starts the game."),
+-                 missing, devPrefix, POPS_FOLDER, from);
++                 _t("%s%s has no %s. RIPPOPS found Sony's PS1 emulator on %s: START copies %s here and starts the game."),
++                 devPrefix, POPS_FOLDER, missing, from, found);
+         guiMsgBoxStartOption(_t("COPY AND START"));
+         if (guiMsgBox(msg, 0, NULL) != 2)
+             return 0;
+-        for (i = 0; i < 2; i++) {
++        for (i = 0; i < VCD_POPS_FILES; i++) {
+             char src[256];
+-            snprintf(src, sizeof(src), "%s%s", from, files[i]); // build 114: from is the folder
+-            snprintf(path, sizeof(path), "%s%s%c%s", devPrefix, POPS_FOLDER, vcdSep(devPrefix), files[i]);
+-            snprintf(msg, sizeof(msg), _t("Copying %s"), files[i]);
++            if (!(take & (1 << i)))
++                continue;
++            snprintf(src, sizeof(src), "%s%s", from, vcdPopsFiles[i]); // build 114: from is the folder
++            snprintf(path, sizeof(path), "%s%s", here, vcdPopsFiles[i]);
++            snprintf(msg, sizeof(msg), _t("Copying %s"), vcdPopsFiles[i]);
+             guiRenderTextScreen(msg);
+             // RIPPS2 build 114: with the progress bar (weak: the host harnesses copy plainly)
+-            if (!(ripps2CopyFile != NULL ? ripps2CopyFile(src, path, files[i]) : vcdCopyFile(src, path))) {
+-                snprintf(msg, sizeof(msg), _t("%s could not be copied to %s%s. Is the drive full or write-protected?"), files[i],
++            if (!(ripps2CopyFile != NULL ? ripps2CopyFile(src, path, vcdPopsFiles[i]) : vcdCopyFile(src, path))) {
++                snprintf(msg, sizeof(msg), _t("%s could not be copied to %s%s. Is the drive full or write-protected?"), vcdPopsFiles[i],
+                          devPrefix, POPS_FOLDER);
+                 guiMsgBox(msg, 0, NULL);
+                 return 0;
+@@ -1047,14 +1073,24 @@ int vcdConfirmPopsFiles(const char *devPrefix)
          }
          return 1;
      }
@@ -8009,12 +8862,9 @@ index 8423f86..226fb17 100644
 -                         "your own console, beside the games to start one.") :
 -                      _t("%s are missing from %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from "
 -                         "your own console, beside the games to start one."),
-+             n == 1 ? _t("RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from "
-+                         "your own console; it may find them where RIPPS2 does not look (if your games start, it does). "
-+                         "START launches, and this drive is not asked about again.") :
-+                      _t("RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from "
-+                         "your own console; it may find them where RIPPS2 does not look (if your games start, it does). "
-+                         "START launches, and this drive is not asked about again."),
++             _t("RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: "
++                "Sony's PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it "
++                "does). START launches, and this drive is not asked about again."),
               missing, devPrefix, POPS_FOLDER);
      guiMsgBoxStartOption(_t("LAUNCH ANYWAY"));
 -    return guiMsgBox(msg, 0, NULL) == 2;

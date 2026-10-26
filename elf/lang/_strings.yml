@@ -462,7 +462,6 @@ strings:
 - en: the USB drive
   in:
   - mixsupport.c
-  - ripps2boot.c
   - ripps2games.c
 - en: the drive
   in:
@@ -1052,29 +1051,12 @@ strings:
   - ripps2boot.c
 - en: '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
 
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 where it is (%s) with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on. RIPPS2 itself is not copied.
 
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
+    The I/O processor restarts for this and every drive read stops until it is done; music and drives come back after. Keep the card in and the console on until it says done.'
   in:
   - ripps2boot.c
-- en: '- RIPPS2 is copied to %s.
-
-    '
-  in:
-  - ripps2boot.c
-- en: A COPY ON MEMORY CARD %d
-  in:
-  - ripps2boot.c
-- en: A COPY ON MX4SIO
-  in:
-  - ripps2boot.c
-- en: A COPY ON THE USB DRIVE
-  in:
-  - ripps2boot.c
-- en: BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
-  in:
-  - ripps2boot.c
-- en: BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.
+- en: 'An SD2PSX or MMCE card may protect itself after a refused write: if the memory card or the MMCE drive is missing now, turn the console off and on.'
   in:
   - ripps2boot.c
 - en: BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.
@@ -1092,9 +1074,6 @@ strings:
 - en: BIBLE could not write the HDD's boot program (step %d). %s
   in:
   - ripps2boot.c
-- en: 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
-  in:
-  - ripps2boot.c
 - en: 'BIBLE is installed on the internal HDD and BOOT LOCK is on: at power on the console starts RIPPS2 from %s%s%s%s, at once. Config: %s.%s%s'
   in:
   - ripps2boot.c
@@ -1107,9 +1086,6 @@ strings:
 - en: BIBLE ran out of memory. Nothing on the memory card was changed.
   in:
   - ripps2boot.c
-- en: 'BIBLE: binding PS2BBL to the memory card'
-  in:
-  - ripps2boot.c
 - en: 'BIBLE: copying RIPPS2 to %s (%d%%)'
   in:
   - ripps2boot.c
@@ -1119,10 +1095,10 @@ strings:
 - en: 'BIBLE: putting the HDD''s boot program back'
   in:
   - ripps2boot.c
-- en: 'BIBLE: restarting the I/O processor with the security module'
+- en: 'BIBLE: writing PS2BBL to the HDD''s boot area'
   in:
   - ripps2boot.c
-- en: 'BIBLE: writing PS2BBL to the HDD''s boot area'
+- en: BOOT LOCK ON
   in:
   - ripps2boot.c
 - en: BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.
@@ -1140,7 +1116,12 @@ strings:
 - en: BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.
   in:
   - ripps2boot.c
-- en: INSTALL BIBLE
+- en: 'Done: the memory card in slot %d starts what it started before BBL 1.20. BBL 1.20 is kept in mc%d:/%s.'
+  in:
+  - ripps2boot.c
+- en: 'For a standard 8 MB PS2 memory card (a MagicGate card, or an SD2PSX or MMCE BOOT card): the one in slot %d. At power on PS2BBL reads slot 2''s config before slot 1''s.
+
+    '
   in:
   - ripps2boot.c
 - en: 'INSTALL BIBLE ON THE INTERNAL HDD
@@ -1159,31 +1140,22 @@ strings:
 - en: INTERNAL HDD  (its boot area)
   in:
   - ripps2boot.c
-- en: MEMORY CARD %d  (%s)
-  in:
-  - ripps2boot.c
 - en: 'MEMORY CARD 0: %s
 
     MEMORY CARD 1: %s
 
     %s
 
-    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+    RIPPS2: Setting up BBL 1.20. PS2BBL 1.2.0 by El Isra, set up by RIPPS2 on a standard 8 MB PS2 memory card or the internal HDD: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first from where it is (it is never copied), and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Set it up, repair it or restore what it replaced?'
   in:
   - ripps2boot.c
-- en: Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.
-  in:
-  - ripps2boot.c
-- en: Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.
+- en: MEMORY CARD IN SLOT %d  (%s)
   in:
   - ripps2boot.c
 - en: Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.
   in:
   - ripps2boot.c
-- en: PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO). BOOT LOADER > MANAGE can copy RIPPS2 to a memory card or a USB drive for it.
-  in:
-  - ripps2boot.c
-- en: PS2BBL starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 could not read itself to copy there. Start RIPPS2 from one of those, then try again.
+- en: PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD.
   in:
   - ripps2boot.c
 - en: 'PUT BACK THE HDD''S OLD BOOT PROGRAM
@@ -1194,12 +1166,10 @@ strings:
 - en: RESTORE
   in:
   - ripps2boot.c
-- en: RESTORE THE HDD'S OLD BOOT PROGRAM
+- en: RESTORE SLOT %d'S OLD BOOT LOADER
   in:
   - ripps2boot.c
-- en: 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
-
-    '
+- en: RESTORE THE HDD'S OLD BOOT PROGRAM
   in:
   - ripps2boot.c
 - en: RIPPS2 cannot tell this console's region from its ROM, so it does not know which system-update folder it reads. BIBLE was not installed.
@@ -1217,7 +1187,45 @@ strings:
 - en: 'RIPPS2 was busy reading a drive and could not restart the I/O processor. Nothing was changed: try again in a moment.'
   in:
   - ripps2boot.c
+- en: 'RIPPS2: BBL 1.20 is set up on the memory card in slot %d (mc%d:/%s/%s), BOOT LOCK on: at power on it starts RIPPS2 from %s, at once.'
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2: Setting up BBL 1.20
+
+    '
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2: Setting up BBL 1.20
+
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read (it reads memory cards, USB and MX4SIO), and RIPPS2 does not copy itself. The PS2BBL Extended config on this card (%s) reads it: START turns BOOT LOCK on, so it starts RIPPS2 from %s at power on. Nothing else on the card changes.'
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2: Setting up BBL 1.20
+
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read: it starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 does not copy itself. Put RIPPS2.ELF on one of those (a memory card''s APPS folder, or a USB drive), start it from there, then set up BIBLE again.'
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2: Setting up BBL 1.20
+
+    The memory card in slot %d: BBL 1.20 (mc%d:/%s) moves aside, and what it replaced (mc%d:/%s) goes back in its place. Nothing is deleted. The PS2BBL config stays as it is (BOOT LOCK can turn the lock off).'
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2: Setting up BBL 1.20 (binding PS2BBL to the memory card)'
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2: Setting up BBL 1.20 (putting back what was there)'
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2: Setting up BBL 1.20 (restarting the I/O processor)'
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2: Setting up BBL 1.20 (writing it to the memory card)'
+  in:
+  - ripps2boot.c
 - en: Reading the memory cards
+  in:
+  - ripps2boot.c
+- en: SET UP BBL 1.20
   in:
   - ripps2boot.c
 - en: The HDD partition BIBLE uses went away. Nothing was changed.
@@ -1227,6 +1235,18 @@ strings:
   in:
   - ripps2boot.c
 - en: The console would not bind BIBLE to memory card %d (its MagicGate step failed). Nothing on the card was changed. A card that is not a genuine or MagicGate-compatible one cannot hold a system update.
+  in:
+  - ripps2boot.c
+- en: The memory card in slot %d has %d KB free, and BBL 1.20 needs %d KB there. Free some space, then try again.
+  in:
+  - ripps2boot.c
+- en: The memory card in slot %d refused PS2BBL, so RIPPS2 put the card back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  in:
+  - ripps2boot.c
+- en: The memory card in slot %d would not move BBL 1.20 aside, so nothing was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  in:
+  - ripps2boot.c
+- en: The memory card in slot %d would not take %s back, so BBL 1.20 stayed. (DIAG.TXT beside RIPPS2 has what the card said.)
   in:
   - ripps2boot.c
 - en: 'The one that was there is kept in RIPPS2/MBR-BACKUP.KELF on the HDD: BOOT LOADER > MANAGE > RESTORE puts it back.'
@@ -1244,13 +1264,7 @@ strings:
 - en: This HDD has no __sysconf partition, so BIBLE's config has to go on a memory card (PS2BBL reads a card's first), and there is none in either slot. Insert one, then try again.
   in:
   - ripps2boot.c
-- en: WHERE IT IS NOW (%.40s)
-  in:
-  - ripps2boot.c
 - en: a boot loader RIPPS2 does not know
-  in:
-  - ripps2boot.c
-- en: memory card %d
   in:
   - ripps2boot.c
 - en: no boot loader
@@ -2364,7 +2378,6 @@ strings:
 - en: ' and '
   in:
   - ripps2games.c
-  - vcdsupport.c
 - en: '%d games, on the started drives'
   in:
   - ripps2games.c
@@ -3544,18 +3557,15 @@ strings:
 - en: This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
   in:
   - system.c
-- en: '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  in:
-  - vcdsupport.c
 - en: '%s could not be copied to %s%s. Is the drive full or write-protected?'
   in:
   - vcdsupport.c
-- en: '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
+- en: '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.'
   in:
   - vcdsupport.c
 - en: LAUNCH ANYWAY
   in:
   - vcdsupport.c
-- en: RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
+- en: 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   in:
   - vcdsupport.c
