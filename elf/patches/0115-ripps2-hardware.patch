@@ -842,7 +842,7 @@ index 1e8421d..ae7f253 100644
  
  // Compose the exact launch argv while the GUI is still live. Refuses a launch that would exceed
 diff --git a/include/themes.h b/include/themes.h
-index e300e61..2ad5e10 100644
+index e300e61..c7c6da7 100644
 --- a/include/themes.h
 +++ b/include/themes.h
 @@ -100,6 +100,7 @@ typedef struct
@@ -862,8 +862,25 @@ index e300e61..2ad5e10 100644
      // RIPPS2 build 92: the Grid's coverless cases and the name under it (<grid>_coverless, <grid>_title...)
      int gridCoverless;                  // 1: a case with no art shows the game's serial in the pixel font
      int gridTitle, gridTitleY, gridTitleFont; // the chosen game's name under the grid, its line and its face
+@@ -299,6 +302,7 @@ typedef struct theme
+     GSTEXTURE textures[TEXTURES_COUNT];
+     int fonts[THM_MAX_FONTS]; //!< Storage of font handles for removal once not needed
+     int diaFont, diaTipFont;  // RIPPS2 build 96: the settings pages' faces, the same on every theme
++    int rowFont, noteFont;    // build 115: STATUS's and ACHIEVEMENTS' option names; every notification (row_font / notice_font)
+ } theme_t;
+ 
+ extern theme_t *gTheme;
+@@ -314,6 +318,8 @@ extern theme_t *gTheme;
+ #define RIPPS2_MENU_FONT RIPPS2_DIA_FONT
+ // RIPPS2: Sleek Bold with a true lowercase (builtin:ripps2sleekcase, theme font15), for typed text
+ #define RIPPS2_CASE_FONT (gTheme->fonts[15])
++#define RIPPS2_ROW_FONT  (gTheme->rowFont)  // build 115: an option's name on STATUS and ACHIEVEMENTS (Roboto, as Settings' rows)
++#define RIPPS2_NOTE_FONT (gTheme->noteFont) // build 115: a notification (built-in Roboto Condensed Bold)
+ // RIPPS2 build 70: the same lowercase face, large (theme font9): a title in true case (RetroAchievements)
+ #define RIPPS2_CASE_TITLE_FONT (gTheme->fonts[9])
+ 
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index aef6bd1..ae0d557 100644
+index aef6bd1..a04b86e 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -305,7 +305,7 @@ gui_strings:
@@ -965,6 +982,15 @@ index aef6bd1..ae0d557 100644
  - label: AUTO_VMC_CREATING
    string: "Creating this game's VMC..."
  - label: AUTO_VMC_FAILED
+@@ -2178,7 +2196,7 @@ gui_strings:
+   string: "Text Weight, the Color Theme, the Color Sweep and every color."
+ 
+ - label: HINT_RIPPS2_TEXT_WEIGHT
+-  string: "How heavy RIPPS2's own text is: the Settings tooltips, STATUS and About. Regular is as it was; Medium and Bold read better on a soft picture."
++  string: "How heavy RIPPS2's own text is: the Settings tooltips, STATUS and About. Normal is as it was; Bold reads better on a soft picture. A theme's own fonts keep the weights it gives them."
+ 
+ - label: HINT_RIPPS2_HDD_START
+   string: "The internal HDD, APA or exFAT: RIPPS2 reads whichever it is and shows it once, as HDD Games. Off leaves it alone."
 diff --git a/src/artindex.c b/src/artindex.c
 index 51dd1df..6aa8d21 100644
 --- a/src/artindex.c
@@ -1583,9 +1609,22 @@ index 12722ca..f63224f 100644
  {
      // Mark the FAV list stale and schedule its single canonical rebuild. The clear + re-append
 diff --git a/src/gui.c b/src/gui.c
-index fef5147..5d8d082 100644
+index fef5147..a51955d 100644
 --- a/src/gui.c
 +++ b/src/gui.c
+@@ -443,10 +443,10 @@ static void guiRenderNotifications(char *string, int y)
+ {
+     int x;
+ 
+-    x = screenWidth - rmUnScaleX(fntCalcDimensions(RIPPS2_UI_FONT, string)) - 10;
++    x = screenWidth - rmUnScaleX(fntCalcDimensions(RIPPS2_NOTE_FONT, string)) - 10; // build 115: the notifications' face
+ 
+     rmDrawRect(x - 10, y, screenWidth - x, MENU_ITEM_HEIGHT + 10, gColDarker);
+-    fntRenderString(RIPPS2_UI_FONT, x - 5, y + 5, ALIGN_NONE, 0, 0, string, gTheme->textColor);
++    fntRenderString(RIPPS2_NOTE_FONT, x - 5, y + 5, ALIGN_NONE, 0, 0, string, gTheme->textColor);
+ }
+ 
+ // Feedback for a user action; independent of courtesy notification preferences.
 @@ -674,6 +674,7 @@ void guiExitPathBegin(struct UIItem *ui)
  void guiExitPathEnd(void)
  {
@@ -1724,6 +1763,15 @@ index fef5147..5d8d082 100644
  static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 3]; // build 114: and Sweep, shown while a sweep is on
  
  // build 81: a row the user picks a value on becomes theirs; build 96: picking Theme (0) gives it back to the
+@@ -2902,7 +2940,7 @@ static void guiRipps2SettingsRead(void)
+     if ((gRipps2Sweep > 0) != (sweepWas > 0))
+         guiRipps2PaletteSweepRow();
+     guiRipps2ThemeColorRow();
+-    if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, &v) && v >= 0 && v <= 2 && v != gRipps2TextWeight) {
++    if (diaGetInt(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, &v) && v >= 0 && v <= 1 && v != gRipps2TextWeight) {
+         gRipps2TextWeight = v; // build 114: Text Weight, shown at once
+         ripps2ApplyTextWeight();
+     }
 @@ -2918,8 +2956,12 @@ static void guiRipps2LayoutRead(void)
      guiRipps2Take(diaCoverflowConfig, UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
      if (diaGetInt(diaCoverflowConfig, UICFG_RIPPS2_TRANSITION, &v) && v >= 0 && v <= 3)
@@ -1750,6 +1798,15 @@ index fef5147..5d8d082 100644
  }
  
  // build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
+@@ -3070,7 +3116,7 @@ static void guiRipps2SettingsSet(void)
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2PaletteNames);
+     // build 81: each row shows what is in effect, a theme's default included
+     diaSetInt(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2Shown(RIPPS2_SET_PALETTE, gRipps2Palette, 0));
+-    static const char *weights[] = {N_("Regular"), N_("Medium"), N_("Bold"), NULL}; // build 114: Text Weight
++    static const char *weights[] = {N_("Normal"), N_("Bold"), NULL}; // build 114: Text Weight; 115: Normal or Bold
+     diaSetEnum(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, weights);
+     diaSetInt(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, gRipps2TextWeight);
+     guiRipps2SweepRows();
 @@ -5187,8 +5233,25 @@ int guiDrawIconAndText(int iconId, int textId, int font, int x, int y, u64 color
      return guiDrawIconAndTextA(iconId, textId, font, x, y, color, gDefaultCol);
  }
@@ -2892,7 +2949,7 @@ index ba683b0..1cb8c7f 100644
      // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
      // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
 diff --git a/src/opl.c b/src/opl.c
-index 3b8cd19..512757b 100644
+index 3b8cd19..4df3af3 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -361,7 +361,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
@@ -3067,7 +3124,7 @@ index 3b8cd19..512757b 100644
              mixSourceAnswered(mod->support->mode);
      } else if (libViewPending(mod->support->mode)) {
          // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
-@@ -3739,14 +3753,24 @@ static void _loadConfig()
+@@ -3739,20 +3753,30 @@ static void _loadConfig()
                  gRipps2CatBar = value;
              if (configGetInt(configOPL, "ripps2_fastcache", &value))
                  gRipps2FastCache = value != 0; // build 113: Fast Cache (on unless turned off)
@@ -3095,6 +3152,13 @@ index 3b8cd19..512757b 100644
              if (configGetInt(configOPL, "ripps2_userset", &value) && value >= 0)
                  gRipps2UserSet = value; // build 81: the rows a theme's defaults never touch
              ripps2HintsLoadConfig(configOPL); // build 90: Hints and Glyphs
+             ripps2ColorsLoadConfig(configOPL); // build 114: Custom's colour and the Color Sweep
+             if (configGetInt(configOPL, "ripps2_text_weight", &value) && value >= 0 && value <= 2) {
+-                gRipps2TextWeight = value; // build 114: Text Weight, on the faces already loaded (the settings come after them)
++                gRipps2TextWeight = value > 0; // build 114: Text Weight, on the faces already loaded; 115: Medium is Bold now
+                 ripps2ApplyTextWeight();
+             }
+             if (configGetInt(configOPL, "ripps2_launch_disc", &value) && value >= 0 && value <= 3)
 @@ -3832,7 +3856,8 @@ static void _loadConfig()
              configGetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, &gHDDGameListCache);
              if (!configGetInt(configOPL, "ripps2_hddcache_v", &value) || value < 110)
@@ -3634,6 +3698,19 @@ index a191468..67e986b 100644
  // 1 when the lock is in a PS2BBL config AND what the console starts at power on is PS2BBL (or no card
  // says otherwise: PS2BBL may start from the HDD). A lock in the config of a card FMCB starts past is
  // no lock at all, so it shows off, and turning it on says why and offers BIBLE.
+diff --git a/src/ripps2card.c b/src/ripps2card.c
+index 9277d80..d133466 100644
+--- a/src/ripps2card.c
++++ b/src/ripps2card.c
+@@ -472,7 +472,7 @@ void ripps2CardManager(int slot, const char *image)
+         if (cmCount == 0)
+             fntRenderString(gTheme->fonts[4], 320, 200, ALIGN_CENTER, 0, 0, cmReady ? _t("NO SAVES") : _t("FORMAT IT TO USE IT"), CM_DIM);
+         if (toast[0])
+-            fntRenderStringFit(gTheme->fonts[5], CM_X, 432, ALIGN_VCENTER, CM_RIGHT - CM_X, toast, CM_SOFT, 1);
++            fntRenderStringFit(RIPPS2_NOTE_FONT, CM_X, 432, ALIGN_VCENTER, CM_RIGHT - CM_X, toast, CM_SOFT, 1); // build 115
+         int hx = 44;
+         cmHint(TRIANGLE_ICON, _t("ACTIONS"), &hx, 448);
+         cmHint(SELECT_ICON, _t("REFRESH"), &hx, 448);
 diff --git a/src/ripps2ember.c b/src/ripps2ember.c
 index 5651a19..8b2e109 100644
 --- a/src/ripps2ember.c
@@ -3670,7 +3747,7 @@ index 5651a19..8b2e109 100644
      guiMsgBoxSound(SFX_MESSAGE);
      if (guiMsgBox(msg, 1, NULL) != 1)
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 0225897..749ae15 100644
+index 0225897..becdfdd 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -39,6 +39,7 @@
@@ -3760,6 +3837,31 @@ index 0225897..749ae15 100644
          left += there[i];
      }
      for (i = 0; i < fbClipCount; i++) {
+@@ -2377,7 +2417,7 @@ static void fbOrbitsPage(void)
+             }
+         }
+         if (toast[0] && clock() - toastAt < 2 * CLOCKS_PER_SEC)
+-            fntRenderString(gTheme->fonts[5], OB_X, 432, ALIGN_VCENTER, 0, 0, toast, FB_SOFT);
++            fntRenderString(RIPPS2_NOTE_FONT, OB_X, 432, ALIGN_VCENTER, 0, 0, toast, FB_SOFT); // build 115: the notifications' face
+         {
+             int hx = OB_X, hy = 448;
+             if (sel < 4)
+@@ -3011,10 +3051,12 @@ void ripps2RenderFiles(void)
+         snprintf(buf, sizeof(buf), _t("%u KB FREE%s"), fbVmcFreeKb, fbVmcRO ? _t(", READ ONLY") : "");
+     else
+         buf[0] = '\0';
+-    if (buf[0])
+-        fntRenderString(uiFont, FB_RIGHT - fntCalcDimensions(uiFont, buf), 30, ALIGN_VCENTER, 0, 0, buf, FB_SOFT);
++    if (buf[0]) { // build 115: a toast in the notifications' face
++        int bf = fbToastAt != 0 && (float)(clock() - fbToastAt) / CLOCKS_PER_SEC < 2.5f ? RIPPS2_NOTE_FONT : uiFont;
++        fntRenderString(bf, FB_RIGHT - fntCalcDimensions(bf, buf), 30, ALIGN_VCENTER, 0, 0, buf, FB_SOFT);
++    }
+     if (fbToastDetail[0] && fbToastAt != 0 && (float)(clock() - fbToastAt) / CLOCKS_PER_SEC < 6.0f) // what failed
+-        fntRenderString(smallFont, FB_RIGHT - fntCalcDimensions(smallFont, fbToastDetail), 432, ALIGN_VCENTER, 0, 0, fbToastDetail, FB_SOFT);
++        fntRenderString(RIPPS2_NOTE_FONT, FB_RIGHT - fntCalcDimensions(RIPPS2_NOTE_FONT, fbToastDetail), 432, ALIGN_VCENTER, 0, 0, fbToastDetail, FB_SOFT);
+     rmDrawLine(FB_X, 46, FB_RIGHT, 46, FB_PRIM(0x4A, 0x72, 0xDC, 0x60));
+ 
+     if (fbBusy) {
 diff --git a/src/ripps2games.c b/src/ripps2games.c
 index 5a5580f..386b7d3 100644
 --- a/src/ripps2games.c
@@ -3857,6 +3959,50 @@ index 5a5580f..386b7d3 100644
      } else {
          int v = support->itemGetView != NULL ? support->itemGetView(support, id) : libListViewActive(support);
          r->mode = support->mode;
+diff --git a/src/ripps2hdd.c b/src/ripps2hdd.c
+index 3b36c8e..bf28148 100644
+--- a/src/ripps2hdd.c
++++ b/src/ripps2hdd.c
+@@ -225,7 +225,7 @@ void ripps2HddManager(void)
+         if (hmCount == 0)
+             fntRenderString(gTheme->fonts[4], 320, 200, ALIGN_CENTER, 0, 0, _t("NO PARTITIONS READ"), HM_DIM);
+         if (toast[0])
+-            fntRenderString(gTheme->fonts[5], HM_RIGHT - fntCalcDimensions(gTheme->fonts[5], toast), 432, ALIGN_VCENTER, 0, 0, toast, HM_SOFT);
++            fntRenderString(RIPPS2_NOTE_FONT, HM_RIGHT - fntCalcDimensions(RIPPS2_NOTE_FONT, toast), 432, ALIGN_VCENTER, 0, 0, toast, HM_SOFT); // build 115
+         int hx = 44;
+         if (hmCount > 0 && hmKept(&hmParts[cursor]) == NULL)
+             hmHint(TRIANGLE_ICON, _t("REMOVE"), &hx, 448);
+diff --git a/src/ripps2ra.c b/src/ripps2ra.c
+index 4ddf14c..49e0941 100644
+--- a/src/ripps2ra.c
++++ b/src/ripps2ra.c
+@@ -339,7 +339,7 @@ static void raHuntPage(const ra_game_t *g)
+                 }
+                 snprintf(buf, sizeof(buf), "%d %s", h->points, h->points == 1 ? "point" : "points");
+                 int pw = rmUnScaleX(fntCalcDimensions(RIPPS2_CASE_FONT, buf));
+-                fntRenderStringFit(gTheme->fonts[8], 40, y + 8, ALIGN_VCENTER, 560 - pw - 50, h->title, cur ? RA_LIT : RA_SOFT, cur);
++                fntRenderStringFit(RIPPS2_ROW_FONT, 40, y + 8, ALIGN_VCENTER, 560 - pw - 50, h->title, cur ? RA_LIT : RA_SOFT, cur); // build 115
+                 fntRenderString(RIPPS2_CASE_FONT, 600 - pw, y + 8, ALIGN_VCENTER, 0, 0, buf, RA_GOLD);
+                 raWrapLines(RIPPS2_CASE_FONT, 40, y + 28, 540, 18, raHuntDesc(h), h->desc[0] ? (cur ? RA_SOFT : RA_DIM) : RA_DIM, 1);
+                 y += eh;
+@@ -457,7 +457,7 @@ static void raAccount(void)
+                 int cw0 = rmUnScaleX(fntCalcDimensions(RIPPS2_CASE_FONT, buf));
+                 fntRenderString(RIPPS2_CASE_FONT, 330 - cw0, y + 9, ALIGN_VCENTER, 0, 0, buf,
+                                 g->total > 0 && g->unlocked >= g->total ? RA_GOLD : (cur ? RA_SOFT : RA_DIM));
+-                fntRenderStringFit(RIPPS2_CASE_FONT, 32, y + 9, ALIGN_VCENTER, 290 - cw0 - 16, g->title, cur ? RA_LIT : RA_SOFT, cur);
++                fntRenderStringFit(RIPPS2_ROW_FONT, 32, y + 9, ALIGN_VCENTER, 290 - cw0 - 16, g->title, cur ? RA_LIT : RA_SOFT, cur); // build 115
+                 raAcctBar(32, y + 19, 298, 2, g->unlocked, g->total, cur ? a : a / 2);
+             }
+ 
+@@ -576,7 +576,7 @@ void ripps2Achievements(void)
+             }
+             // build 114: BADGES greys out while TELEMETRY is off (it cannot engage without it), and says OFF
+             int grey = i == RA_ROW_BADGES && !gRATelemetry;
+-            fntRenderString(gTheme->fonts[8], RA_X + 6, y + 11, ALIGN_VCENTER, 0, 0, _t(raRowName[i]), grey ? RA_DIM : cur ? RA_LIT : RA_SOFT);
++            fntRenderString(RIPPS2_ROW_FONT, RA_X + 6, y + 11, ALIGN_VCENTER, 0, 0, _t(raRowName[i]), grey ? RA_DIM : cur ? RA_LIT : RA_SOFT); // build 115
+             if (i == RA_ROW_TELEMETRY || i == RA_ROW_BADGES) {
+                 int on = i == RA_ROW_TELEMETRY ? gRATelemetry : gRABadges && gRATelemetry;
+                 const char *v = on ? _t("ON") : _t("OFF");
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
 index aeaa17a..b0156b4 100644
 --- a/src/ripps2seance.c
@@ -3874,6 +4020,19 @@ index aeaa17a..b0156b4 100644
      } else if (mode == FAV_MODE) {
          kind = favGetItemKind(id);
          mode = favGetItemSourceMode(id);
+diff --git a/src/ripps2shot.c b/src/ripps2shot.c
+index 3d816a2..e4c5242 100644
+--- a/src/ripps2shot.c
++++ b/src/ripps2shot.c
+@@ -1016,7 +1016,7 @@ static void rpDraw(const char *head, const char *right, const char *const *left,
+     if (count == 0)
+         fntRenderString(gTheme->fonts[4], 320, 200, ALIGN_CENTER, 0, 0, _t("NO SHOTS WAITING"), RP_DIM);
+     if (toast != NULL && toast[0])
+-        fntRenderString(gTheme->fonts[5], RP_RIGHT - fntCalcDimensions(gTheme->fonts[5], toast), 432, ALIGN_VCENTER, 0, 0, toast, RP_SOFT);
++        fntRenderString(RIPPS2_NOTE_FONT, RP_RIGHT - fntCalcDimensions(RIPPS2_NOTE_FONT, toast), 432, ALIGN_VCENTER, 0, 0, toast, RP_SOFT); // build 115
+     if (count > 0) {
+         rpHint(rpOkIcon(), okWord, &hx, 448);
+         rpHint(TRIANGLE_ICON, triWord, &hx, 448);
 diff --git a/src/ripps2side.c b/src/ripps2side.c
 index 1415c7b..458c164 100644
 --- a/src/ripps2side.c
@@ -4080,7 +4239,7 @@ index 1415c7b..458c164 100644
  
  void ripps2SidebarOpen(int list)
 diff --git a/src/ripps2status.c b/src/ripps2status.c
-index c1bcf7f..6fa2db4 100644
+index c1bcf7f..9366fb6 100644
 --- a/src/ripps2status.c
 +++ b/src/ripps2status.c
 @@ -14,7 +14,7 @@
@@ -4286,6 +4445,15 @@ index c1bcf7f..6fa2db4 100644
          rmDrawLine(ST_X, 82, ST_X + ST_W, 82, ST_PRIM(0x4A, 0x72, 0xDC, 0x60));
  
          // keep the chosen row in the viewport, its section's name with it where it fits; build 96: the right
+@@ -444,7 +518,7 @@ void ripps2Status(void)
+                         rmDrawRect(ST_X - 8, y, ST_W + 16, h - 4, ST_PRIM(0x1E, 0x3C, 0x96, 0x58));
+                         rmDrawRect(ST_X - 8, y, 3, h - 4, ST_PRIM(0x6A, 0x9A, 0xFF, 0x80));
+                     }
+-                    fntRenderString(thmPageFont(8), ST_X + 14, y + 12, ALIGN_VCENTER, 0, 0, r->text, cur ? ST_LIT : ST_SOFT);
++                    fntRenderString(RIPPS2_ROW_FONT, ST_X + 14, y + 12, ALIGN_VCENTER, 0, 0, r->text, cur ? ST_LIT : ST_SOFT); // build 115
+                     fntRenderString(thmPageFont(15), ST_X + ST_W - rmUnScaleX(fntCalcDimensions(thmPageFont(15), r->aside)), y + 12, ALIGN_VCENTER, 0, 0, r->aside,
+                                     cur ? ST_SOFT : ST_DIM);
+                 }
 @@ -478,9 +552,28 @@ void ripps2Status(void)
                  sfxPlay(SFX_CURSOR);
              }
@@ -5328,7 +5496,7 @@ index 2da860e..6c650e0 100644
      return (result >= 0) ? 0 : result;
  }
 diff --git a/src/themes.c b/src/themes.c
-index fa854fb..046f67b 100644
+index fa854fb..4fb8c08 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -15,6 +15,7 @@
@@ -5447,7 +5615,46 @@ index fa854fb..046f67b 100644
          }
          if (showSource) {
              menu_hint_item_t *h2 = menu->item->hints;
-@@ -6455,7 +6491,7 @@ static int thmLoad(const char *themePath)
+@@ -6003,6 +6039,21 @@ static void thmLoadFonts(config_set_t *themeConfig, const char *themePath, theme
+     }
+     theme->diaFont = diaFont != FNT_ERROR ? diaFont : theme->fonts[4];
+     theme->diaTipFont = thmDiaTipFont != FNT_ERROR ? thmDiaTipFont : theme->fonts[15];
++
++    // build 115 (the user, 10/25): STATUS's and ACHIEVEMENTS' option names read in the Settings rows' Roboto, and every
++    // notification (the toasts along the top and the bottom) in the built-in Roboto Condensed Bold, the same on every
++    // theme until a theme names one of its own slots for them: row_font=<slot>, notice_font=<slot>
++    static int noteFont = FNT_ERROR;
++    int slot = -1;
++    if (noteFont == FNT_ERROR)
++        noteFont = fntLoadFile("builtin:ripflowbold", 17);
++    theme->rowFont = theme->diaFont;
++    if (configGetInt(themeConfig, "row_font", &slot) && slot >= 0 && slot < THM_MAX_FONTS)
++        theme->rowFont = theme->fonts[slot];
++    theme->noteFont = noteFont != FNT_ERROR ? noteFont : theme->fonts[4];
++    slot = -1;
++    if (configGetInt(themeConfig, "notice_font", &slot) && slot >= 0 && slot < THM_MAX_FONTS)
++        theme->noteFont = theme->fonts[slot];
+ }
+ 
+ /* RIPPS2 build 102 (user: "ripflow status page font and ripps2 about pages font slots on all themes"). About and
+@@ -6040,12 +6091,14 @@ int gRipps2TextWeight = 0;
+ void ripps2ApplyTextWeight(void)
+ {
+     int i;
++    // build 115: Normal or Bold (the user, 10/25: three weights showed no difference): the tooltips' variable Roboto at 400
++    // or 700, the pages' faces as drawn or 300 heavier. A theme's own slots keep their font<N>_weight
+     if (thmDiaTipFont != FNT_ERROR)
+-        fntSetWeight(thmDiaTipFont, 400 + 100 * gRipps2TextWeight);
++        fntSetWeight(thmDiaTipFont, gRipps2TextWeight ? 700 : 400);
+     if (thmPageFontsDepth > 0)
+         for (i = 0; i < THM_PAGE_FACES; i++)
+             if (thmPageHandle[i] != FNT_ERROR)
+-                fntSetWeight(thmPageHandle[i], gRipps2TextWeight > 0 ? fntGetOwnWeight(thmPageHandle[i]) + 100 * gRipps2TextWeight : 0);
++                fntSetWeight(thmPageHandle[i], gRipps2TextWeight ? fntGetOwnWeight(thmPageHandle[i]) + 300 : 0);
+ }
+ 
+ void thmPageFontsEnd(void)
+@@ -6455,7 +6508,7 @@ static int thmLoad(const char *themePath)
      newT->paletteDef = newT->catBarDef = newT->hintsDef = newT->glyphsDef = newT->srcNameDef = newT->catSwapDef = -1;
      {
          static const char *const showNames[] = {"shown", "fade", "hidden"};
@@ -5456,7 +5663,7 @@ index fa854fb..046f67b 100644
          const char *v = NULL;
          int i;
          if (configGetStr(themeConfig, "color_theme", &v) && v != NULL)
-@@ -6470,9 +6506,12 @@ static int thmLoad(const char *themePath)
+@@ -6470,9 +6523,12 @@ static int thmLoad(const char *themePath)
              if (configGetStr(themeConfig, "source_name", &v) && v != NULL && !strcasecmp(v, showNames[i]))
                  newT->srcNameDef = i;
          }
@@ -5470,7 +5677,7 @@ index fa854fb..046f67b 100644
          if (configGetStr(themeConfig, "category_order", &v) && v != NULL) // launch_disc_first | memory_files_first
              newT->catSwapDef = !strcasecmp(v, "memory_files_first") ? 1 : !strcasecmp(v, "launch_disc_first") ? 0 : -1;
      }
-@@ -6561,6 +6600,9 @@ static int thmLoad(const char *themePath)
+@@ -6561,6 +6617,9 @@ static int thmLoad(const char *themePath)
              newT->sbDrawer = intValue;
          if (configGetStr(themeConfig, "sidebar_bar", &v) && v != NULL)
              newT->sbBar = !strcasecmp(v, "never") ? 0 : !strcasecmp(v, "pages") ? 1 : 2;
