@@ -528,6 +528,39 @@ index 7216752..37e1c4e 100644
  
  if failures:
      print("UDPFS ART checks FAILED:")
+diff --git a/Makefile b/Makefile
+index b1be2f3..f100a32 100644
+--- a/Makefile
++++ b/Makefile
+@@ -174,6 +174,8 @@ PNG_ASSETS = load0 load1 load2 load3 load4 load5 load6 load7 usb usb_bd ilk_bd \
+ PNG_ASSETS += ripps2_glass ripps2_mark ripps2_mark_glow L2R2 ripps2_ps1logo ripps2_ps2logo ripps2_grid_icons ripps2_up ripps2_down hint_badge ripps2_disc ripps2_pixfont
+ # RIPPS2 build 113: the category sidebar's glyphs (ps2-pillars elf/theme/make_sidebar_icons.py)
+ PNG_ASSETS += ripps2_sidebar_icons
++# RIPPS2 build 115: Players and ESRB badges for RIPPS2's badge set (badge_set=ripps2)
++PNG_ASSETS += Players_1 Players_2 Players_3 Players_4 Parental_3 Parental_10 Parental_17 Parental_18 Parental_e Parental_teen
+ # RIPPS2 build 90: the Standard and White glyph sets (glyph_set=, Controller Settings > Hints and Glyphs)
+ PNG_ASSETS += glyph_standard_cross glyph_standard_circle glyph_standard_square glyph_standard_triangle glyph_standard_start glyph_standard_select glyph_standard_L1 glyph_standard_R1 glyph_standard_L2R2 glyph_standard_L3 glyph_standard_R3 glyph_standard_up glyph_standard_down glyph_standard_left glyph_standard_right glyph_standard_badge \
+ 	glyph_white_cross glyph_white_circle glyph_white_square glyph_white_triangle glyph_white_start glyph_white_select glyph_white_L1 glyph_white_R1 glyph_white_L2R2 glyph_white_L3 glyph_white_R3 glyph_white_up glyph_white_down glyph_white_left glyph_white_right glyph_white_badge
+@@ -200,7 +202,7 @@ AUDIO_OBJS =
+ # icon_sys.o + save_icn.o are the memory-card browser save icon for the settings folder.
+ # icon.sys names list.icn, copy.icn and del.icn; all three are the same artwork, so ONE blob is
+ # embedded and util.c writes it out under all three names (see saveIconName in src/util.c).
+-MISC_OBJS =	icon_sys.o save_icn.o ripps2_icn.o icon_sys_A.o icon_sys_J.o icon_sys_C.o bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o conf_theme_OPL.o theme_coverflow.o theme_ripgrid.o ripps2_font.o ripps2_sleek.o ripps2_sleekbold.o ripps2_sleekcase.o ripps2_one.o ripps2roboto.o neutrino_tgz.o
++MISC_OBJS =	icon_sys.o save_icn.o ripps2_icn.o icon_sys_A.o icon_sys_J.o icon_sys_C.o bible_xlf.o bible_mx4sio_xlf.o bible_hdd_xlf.o conf_theme_OPL.o theme_coverflow.o theme_ripgrid.o ripps2_font.o ripps2_sleek.o ripps2_sleekbold.o ripps2_sleekcase.o ripps2_one.o ripps2roboto.o ripps2_condensed.o neutrino_tgz.o
+ 
+ TRANSLATIONS = Albanian Arabic Bulgarian Cebuano Croatian Czech Danish Dutch Filipino French \
+ 	Galician German Greek Hungarian Indonesian Italian Japanese Korean Laotian Persian Polish Portuguese \
+@@ -1304,6 +1306,10 @@ $(EE_ASM_DIR)ripps2roboto.c: misc/ripps2roboto.ttf | $(EE_ASM_DIR)
+ $(EE_ASM_DIR)ripps2_one.c: misc/ripps2_one.ttf | $(EE_ASM_DIR)
+ 	$(BIN2C) $< $@ $(*F)_raw
+ 
++# RIPPS2 build 115: Planet N Condensed (misc/ripps2_condensed.ttf, copied in by RIPPS2's build.sh), Adapt's list face
++$(EE_ASM_DIR)ripps2_condensed.c: misc/ripps2_condensed.ttf | $(EE_ASM_DIR)
++	$(BIN2C) $< $@ $(*F)_raw
++
+ $(EE_ASM_DIR)boot.c: audio/boot.adp | $(EE_ASM_DIR)
+ 	$(BIN2C) $< $@ $(*F)_adp
+ 
 diff --git a/docs/PC-CARD-CF.md b/docs/PC-CARD-CF.md
 index fdc0901..31b2d30 100644
 --- a/docs/PC-CARD-CF.md
@@ -564,7 +597,7 @@ index 90fe9f6..8688937 100644
   * generation change or a deliberate settings apply -- so a stick with new art on it is picked up.
   * Cheap, and safe from any thread. */
 diff --git a/include/dialogs.h b/include/dialogs.h
-index 4970d36..cee51c1 100644
+index 4970d36..716feb1 100644
 --- a/include/dialogs.h
 +++ b/include/dialogs.h
 @@ -97,6 +97,7 @@ enum UI_ITEMS {
@@ -583,13 +616,14 @@ index 4970d36..cee51c1 100644
      RIPPS2_HINT_ORDER_BUTTON, // and its Hint Order
      RIPPS2_IGR_BUTTON,        // RIPPS2 build 108: Settings > General > In-Game Menu
      CFG_RIPPS2_PAGE_BUTTONS,  // RIPPS2 build 96: Controller Settings > Page Buttons
-@@ -393,6 +395,9 @@ enum UI_ITEMS {
+@@ -393,6 +395,10 @@ enum UI_ITEMS {
      SWEEP_SPEED,
      SWEEP_DELETE, // build 114 (the user, 10/24): one of the user's own sweeps deleted
      UICFG_RIPPS2_SELECT_HOLD, // build 114: Interface > Hold SELECT (the theme list, the next theme, nothing)
 +    RIPPS2_STATUS_BUTTON,     // build 115: Cache > Status, STATUS's LOADING section (and back)
 +    UICFG_RIPPS2_SBSTYLE,     // build 115: Layout > Sidebar Style
 +    UICFG_RIPPS2_HINTFADE,    // build 115: Layout > Hints and Glyphs Fade
++    UICFG_RIPPS2_BADGE_SET,   // build 115: Hints and Glyphs > Badge Set
  
  #ifdef PADEMU
      PADEMU_GLOBAL_BUTTON,
@@ -608,10 +642,18 @@ index e75f52a..6e6a64d 100644
  #define FAV_MAGIC             0x4641464F // 'OFAV' (little-endian on the EE)
  #define FAV_VERSION           3          // v3 widens v2's isVcd byte to a KIND (see FAV_KIND_*)
 diff --git a/include/gui.h b/include/gui.h
-index 421bd63..959054d 100644
+index 421bd63..d2fb43e 100644
 --- a/include/gui.h
 +++ b/include/gui.h
-@@ -177,6 +177,8 @@ int guiDrawBGSettings(void);
+@@ -130,6 +130,7 @@ void guiCycleTheme(void); // build 79: the next theme (SELECT held 4.2 s)
+ enum { RIPPS2_HOLD_LIST = 0, RIPPS2_HOLD_CYCLE, RIPPS2_HOLD_OFF };
+ extern int gRipps2SelectHold; // build 114: Settings > Interface > Hold SELECT (SELECT held 4.2 s on a list)
+ void guiRenderPage(void); // build 114: the current page drawn once (under a panel)
++int guiThemeCount(void);  // build 115: how many themes the theme list shows
+ int guiPickTheme(void);   // build 114: the theme list (SELECT held 4.2 s, Hold SELECT: List); 0: the one in use, refresh
+ void guiMsgBoxStartOption(const char *label); // RIPPS2: the next guiMsgBox offers START (returns 2)
+ void guiMsgBoxBackLabel(const char *label);   // build 114: the next guiMsgBox's Back hint reads this ("Back (keeps both)")
+@@ -177,6 +178,8 @@ int guiDrawBGSettings(void);
  int guiDeviceTypeToIoMode(int deviceType);
  int guiIoModeToDeviceType(int ioMode);
  void guiShowNeutrinoDefaults(void);
@@ -719,7 +761,7 @@ index 3797788..7568573 100644
  
  /** Sets the display offset in units of pixels */
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 131f69c..0d16f74 100644
+index 131f69c..f7a41d6 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -39,6 +39,8 @@ void ripps2PillarMusic(int on); // ripps2bg.c: the towers settle and light up to
@@ -749,7 +791,15 @@ index 131f69c..0d16f74 100644
  float ripps2SourceNameAlpha(void);
  const char *ripps2PaletteName(int p);
  void ripps2NoteInput(void);         // every frame, once the pads are read: the idle time the fades follow
-@@ -148,7 +150,12 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
+@@ -124,6 +126,7 @@ extern int gRipps2HintLabels;  // 0 Theme, 1 Glyph and Label, 2 Glyph Only, 3 Ba
+ extern int gRipps2HintPick[RIPPS2_HINT_COUNT]; // RIPPS2_PICK_*; rows for Menu, Refresh, Star and View
+ extern char gRipps2HintOrder[48]; // "" follows the theme; else hint names, comma separated, first to last
+ extern int gRipps2GlyphSet;    // RIPPS2_GLYPHSET_*
++extern int gRipps2BadgeSet;    // build 115: Hints and Glyphs > Badge Set: 0 the theme's (badge_set=), 1 RIPPS2's built-in set
+ int ripps2HintToken(int textId, int iconId);              // which hint a hint bar entry is (RIPPS2_HINT_*)
+ int ripps2HintShown(int token);                           // the user's pick, else the theme's hints_hide
+ int ripps2HintLabels(void);                               // 1: glyph and label, 0: glyph only, 2: badges
+@@ -148,7 +151,12 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
  
  // ---- build 113: the category sidebar (ripps2side.c) ----
  extern int gRipps2FastCache; // build 113: Game Sources > Cache > Fast Cache, each source's saved list (1, the default)
@@ -763,7 +813,7 @@ index 131f69c..0d16f74 100644
  int ripps2SidebarOn(void);   // the categories drawn as the sidebar on this theme with this setting
  void ripps2SidebarRender(void);
  int ripps2SidebarFocused(void); // 0 not, 1 its glyphs, 2 a drawer's list
-@@ -261,6 +268,7 @@ int ripps2EditMetadata(config_set_t *config, const char *gameName); // 1 when SA
+@@ -261,6 +269,7 @@ int ripps2EditMetadata(config_set_t *config, const char *gameName); // 1 when SA
  
  void ripps2HddManager(void); // ripps2hdd.c
  int ripps2NeutrinoInstallTo(const char *dir); // build 80: the carried Neutrino into dir ("mc0:/neutrino"...); 1 when complete
@@ -771,6 +821,15 @@ index 131f69c..0d16f74 100644
  void ripps2Status(void);                    // ripps2status.c (build 80): the main menu's STATUS page, RIPPS2's homebrew
  int ripps2NeutrinoOffer(const char *activePrefix, char *out, int outSize); // ripps2ember.c (build 77): install the Neutrino RIPPS2 carries, where the user picks
  void ripps2ArtDownload(void); // ripps2art.c (build 73): covers for the games without one, over HTTPS
+@@ -310,6 +319,8 @@ void ripps2LaunchPump(void);         // build 70: one more frame of it, with the
+ void ripps2LaunchAborted(void);      // the launch failed and returned to the menu
+ int ripps2LaunchGuard(void);         // build 114: 1 to start; 0 when the user backed out (ripps2games.c)
+ void ripps2NotchRing(int cx, int cy, float p, int a); // build 114: RIPDISC's notches (ripps2disc.c)
++void ripps2ThemeHold(float heldS);   // build 115: how long SELECT has been held on a list (-1: let go)
++void ripps2ThemeHoldRender(void);    // build 115: the themes' window it brings up, over the page
+ void ripps2HintPairA(int iconA, const char *a, int iconB, const char *b, int y, int alpha);
+ void ripps2HintOneA(int icon, const char *a, int y, int alpha); // build 114: one hint, centred
+ int ripps2ThemePanel(const char **names, int cur); // build 114: the theme list (SELECT held, Hold SELECT: List)
 diff --git a/include/ripps2diag.h b/include/ripps2diag.h
 new file mode 100644
 index 0000000..42b838a
@@ -841,8 +900,31 @@ index 1e8421d..ae7f253 100644
  void sysNeutrinoWarnPadEmu(config_set_t *configSet);
  
  // Compose the exact launch argv while the GUI is still live. Refuses a launch that would exceed
+diff --git a/include/textures.h b/include/textures.h
+index be2df16..cf46c88 100644
+--- a/include/textures.h
++++ b/include/textures.h
+@@ -133,6 +133,18 @@ enum INTERNAL_TEXTURE {
+     RIPPS2_LAUNCH_DISC, // RIPPS2 build 91: the disc a launch pops in when the game has no ICO art (image launch_disc)
+     RIPPS2_PIXFONT,     // RIPPS2 build 92: the in-game menu's 5x7 font, ASCII 32..95 in 6 x 8 cells (image ripps2_pixfont)
+     RIPPS2_SIDEBAR_ICONS, // RIPPS2 build 113: the category sidebar's glyphs and their glows, one atlas (image ripps2_sidebar_icons)
++    // RIPPS2 build 115: the badges RIPPS2's set had none of, Players (make_glyphs.py, RIPFLOW's badge look) and the ESRB rating (Adapt's art), so a theme on
++    // RIPPS2's badge set (badge_set=ripps2) needs no badge images of its own
++    RIPPS2_PLAYERS_1,
++    RIPPS2_PLAYERS_2,
++    RIPPS2_PLAYERS_3,
++    RIPPS2_PLAYERS_4,
++    RIPPS2_PARENTAL_3,
++    RIPPS2_PARENTAL_10,
++    RIPPS2_PARENTAL_17,
++    RIPPS2_PARENTAL_18,
++    RIPPS2_PARENTAL_E,
++    RIPPS2_PARENTAL_TEEN,
+     PSBBN_BACKGROUND, // <PSBBN Flow> nebula stage (theme override "psbbn_bg")
+ #ifdef RETROACHIEVEMENTS
+     // RA mark over a tracked game's cover (theme override "ra_mark"). Appended last:
 diff --git a/include/themes.h b/include/themes.h
-index e300e61..c7c6da7 100644
+index e300e61..1d4cd95 100644
 --- a/include/themes.h
 +++ b/include/themes.h
 @@ -100,6 +100,7 @@ typedef struct
@@ -853,34 +935,38 @@ index e300e61..c7c6da7 100644
  
  // Forward declaration: an element carries a back-pointer to the family it was parsed into (see
  // theme_element_t::family), and theme_elems_t itself is defined below, after the element.
-@@ -280,6 +281,8 @@ typedef struct theme
+@@ -280,6 +281,10 @@ typedef struct theme
      int sbBar;                          // sidebar_bar: 2 always (default), 1 on the pages without one of the theme's, 0 never
      unsigned char sbColor[3], sbAccent[3]; // sidebar_color, sidebar_accent_color
      int sbTint, sbAccentTint;           // sidebar_tint, sidebar_accent_tint (0..128)
 +    int sbOnePiece;                     // build 115: sidebar_style=one_piece (the bar and its accent as one bar)
 +    int hintsFade;                      // build 115: hints_fade (1, the default): a hint glyph that changes fades in
++    int badgeSet;                       // build 115: badge_set=ripps2 (1): RIPPS2's built-in badges, none of its own
++    int loadingMark;                    // build 115: loading_mark: 0 the LoadingIcon element's place, 1 center, 2 corner
      // RIPPS2 build 92: the Grid's coverless cases and the name under it (<grid>_coverless, <grid>_title...)
      int gridCoverless;                  // 1: a case with no art shows the game's serial in the pixel font
      int gridTitle, gridTitleY, gridTitleFont; // the chosen game's name under the grid, its line and its face
-@@ -299,6 +302,7 @@ typedef struct theme
+@@ -299,6 +304,8 @@ typedef struct theme
      GSTEXTURE textures[TEXTURES_COUNT];
      int fonts[THM_MAX_FONTS]; //!< Storage of font handles for removal once not needed
      int diaFont, diaTipFont;  // RIPPS2 build 96: the settings pages' faces, the same on every theme
 +    int rowFont, noteFont;    // build 115: STATUS's and ACHIEVEMENTS' option names; every notification (row_font / notice_font)
++    int msgFont;              // build 115: every message (the boxes that ask or tell, the waits), message_font
  } theme_t;
  
  extern theme_t *gTheme;
-@@ -314,6 +318,8 @@ extern theme_t *gTheme;
+@@ -314,6 +321,9 @@ extern theme_t *gTheme;
  #define RIPPS2_MENU_FONT RIPPS2_DIA_FONT
  // RIPPS2: Sleek Bold with a true lowercase (builtin:ripps2sleekcase, theme font15), for typed text
  #define RIPPS2_CASE_FONT (gTheme->fonts[15])
 +#define RIPPS2_ROW_FONT  (gTheme->rowFont)  // build 115: an option's name on STATUS and ACHIEVEMENTS (Roboto, as Settings' rows)
 +#define RIPPS2_NOTE_FONT (gTheme->noteFont) // build 115: a notification (built-in Roboto Condensed Bold)
++#define RIPPS2_MSG_FONT  (gTheme->msgFont)  // build 115: a message (built-in Roboto Condensed at 400, its own case)
  // RIPPS2 build 70: the same lowercase face, large (theme font9): a title in true case (RetroAchievements)
  #define RIPPS2_CASE_TITLE_FONT (gTheme->fonts[9])
  
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index aef6bd1..a04b86e 100644
+index aef6bd1..9b0fd6a 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -305,7 +305,7 @@ gui_strings:
@@ -943,7 +1029,7 @@ index aef6bd1..a04b86e 100644
  - label: HINT_RIPPS2_HINT_LAYOUT
    string: "Row: the hints in one line. Column: one hint a line, a list down the side, starting where the theme puts its hints."
  - label: RIPPS2_HINT_LABELS
-@@ -1582,11 +1584,27 @@ gui_strings:
+@@ -1582,11 +1584,31 @@ gui_strings:
  - label: RIPPS2_FAST_CACHE
    string: Fast Cache
  - label: HINT_RIPPS2_FAST_CACHE
@@ -962,6 +1048,10 @@ index aef6bd1..a04b86e 100644
  - label: HINT_RIPPS2_CATEGORY_LAYOUT
 -  string: "Where the three categories sit: their names across the top, or icons down the side bar, each with a drawer of its pages (Left on a list goes there). Theme keeps the theme's own."
 +  string: "Where the three categories sit: their names across the top, or icons down the side bar, each with a drawer of its pages (Left on a list goes there), or Menu: no bar at all, the categories in the START menu as on a theme made for OPL. Theme keeps the theme's own."
++- label: RIPPS2_BADGE_SET
++  string: Badge Set
++- label: HINT_RIPPS2_BADGE_SET
++  string: "The badges on a game's info page (rating, players, ESRB, video mode, scan, aspect). RIPPS2: its own set, the same on every theme. Theme: the theme's own pictures, or RIPPS2's when the theme asks for them."
 +- label: RIPPS2_HINT_FADE
 +  string: Hints and Glyphs Fade
 +- label: HINT_RIPPS2_HINT_FADE
@@ -973,7 +1063,7 @@ index aef6bd1..a04b86e 100644
  - label: HINT_RIPPS2_VIGNETTE
    string: "Darkens the edges of every cover but the chosen one, so the chosen one stands out. Weak is half of Full."
  - label: RIPPS2_GRID_WIDE
-@@ -1618,7 +1636,7 @@ gui_strings:
+@@ -1618,7 +1640,7 @@ gui_strings:
  - label: AUTO_CREATE_VMC
    string: Create VMC on First Launch
  - label: HINT_AUTO_CREATE_VMC
@@ -982,7 +1072,7 @@ index aef6bd1..a04b86e 100644
  - label: AUTO_VMC_CREATING
    string: "Creating this game's VMC..."
  - label: AUTO_VMC_FAILED
-@@ -2178,7 +2196,7 @@ gui_strings:
+@@ -2178,7 +2200,7 @@ gui_strings:
    string: "Text Weight, the Color Theme, the Color Sweep and every color."
  
  - label: HINT_RIPPS2_TEXT_WEIGHT
@@ -1574,7 +1664,7 @@ index 681481c..d0fbada 100644
  
      /* A focused int accepts Triangle for direct entry, and nothing on screen would otherwise say so:
 diff --git a/src/dialogs.c b/src/dialogs.c
-index 6379d40..f84bc77 100644
+index 6379d40..e84d724 100644
 --- a/src/dialogs.c
 +++ b/src/dialogs.c
 @@ -4,6 +4,7 @@
@@ -1633,7 +1723,18 @@ index 6379d40..f84bc77 100644
      // RIPPS2 build 114: SEANCE (ripps2seance.c), the launchers RIPPS2 does not carry: where each was found, and the search.
      // Always in use, so there is nothing to switch: each line says Found or Not found (gui.c fills them in)
      {UI_SPLITTER},
-@@ -2229,11 +2242,23 @@ struct UIItem diaCoverflowConfig[] = {
+@@ -2168,6 +2181,10 @@ struct UIItem diaHintsConfig[] = {
+     {UI_SPACER},
+     {UI_ENUM, UICFG_RIPPS2_GLYPH_SET, 1, 1, _STR_HINT_RIPPS2_GLYPH_SET, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_BADGE_SET}}}, // build 115
++    {UI_SPACER},
++    {UI_ENUM, UICFG_RIPPS2_BADGE_SET, 1, 1, _STR_HINT_RIPPS2_BADGE_SET, 0, 0, {.intvalue = {0, 0}}},
++    {UI_BREAK},
+     {UI_BUTTON, RIPPS2_HINT_ORDER_BUTTON, 1, 1, _STR_HINT_RIPPS2_HINT_ORDER, 0, 0, {.label = {NULL, _STR_RIPPS2_HINT_ORDER}}},
+     {UI_BREAK},
+ 
+@@ -2229,11 +2246,23 @@ struct UIItem diaCoverflowConfig[] = {
      {UI_ENUM, UICFG_RIPPS2_CATLAYOUT, 1, 1, _STR_HINT_RIPPS2_CATEGORY_LAYOUT, 0, 0, {.intvalue = {0, 0}}},
      {UI_BREAK},
  
@@ -1717,8 +1818,44 @@ index 12722ca..f63224f 100644
  void loadFavourites(void)
  {
      // Mark the FAV list stale and schedule its single canonical rebuild. The clear + re-append
+diff --git a/src/fntsys.c b/src/fntsys.c
+index 7a1b2b6..d71c0fc 100644
+--- a/src/fntsys.c
++++ b/src/fntsys.c
+@@ -75,6 +75,8 @@ extern void *ripps2_one_raw;
+ extern int size_ripps2_one_raw;
+ extern void *ripps2roboto_raw; // RIPPS2 build 114: Roboto Condensed 3.015, variable (weights 400 to 700)
+ extern int size_ripps2roboto_raw;
++extern void *ripps2_condensed_raw; // RIPPS2 build 115: Planet N Condensed (Adapt's list face, built in)
++extern int size_ripps2_condensed_raw;
+ 
+ // RIPPS2 build 70: a caps font draws a-z as A-Z; build 104: and every other lowercase letter as its capital
+ #define FNT_CAPS(f, c) ((f)->caps ? ripps2Upper(c) : (c))
+@@ -164,8 +166,9 @@ typedef struct
+ // RIPPS2 build 70: 32 (was 16). A theme switch loads the new theme's fonts before it frees the old
+ // one's, and the RIPPS2 theme alone used 15 of the 16: RIPFLOW's fonts all failed and it fell back to
+ // the thin default face. Build 81: 40, two full themes of 16 mid-switch plus RIPPS2's own faces that
+-// outlive a theme (the Pop In toast's) and a theme's font14 stand-in.
+-#define FNT_MAX_COUNT (40)
++// outlive a theme (the Pop In toast's) and a theme's font14 stand-in. Build 115: 44, room for the faces RIPPS2 keeps for
++// the whole run (Settings' two, the notifications', the messages', the bar's smaller sizes) beside two themes of 16.
++#define FNT_MAX_COUNT (44)
+ 
+ /// Array of font definitions
+ static font_t fonts[FNT_MAX_COUNT];
+@@ -498,6 +501,10 @@ static void *fntReadData(char *path, int *bufferSize, int *owned)
+         *bufferSize = size_ripps2_sleekcase_raw;
+         return &ripps2_sleekcase_raw;
+     }
++    if (strcmp(path, "builtin:ripps2condensed") == 0) { // build 115: Planet N Condensed, so Adapt carries no font file
++        *bufferSize = size_ripps2_condensed_raw;
++        return &ripps2_condensed_raw;
++    }
+     // RIPPS2 build 114: one variable Roboto Condensed for RIPFLOW's text (builtin:ripflow, 400), its menus and the
+     // Settings rows (builtin:ripflowbold, 700) and a theme's own pick of weight (builtin:roboto, font<N>_weight)
+     if (strcmp(path, "builtin:ripflow") == 0 || strcmp(path, "builtin:ripflowbold") == 0 || strcmp(path, "builtin:roboto") == 0) {
 diff --git a/src/gui.c b/src/gui.c
-index fef5147..a51955d 100644
+index fef5147..e9d3169 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -443,10 +443,10 @@ static void guiRenderNotifications(char *string, int y)
@@ -1845,7 +1982,37 @@ index fef5147..a51955d 100644
      }
  }
  
-@@ -2807,8 +2843,8 @@ void guiShowArtworkConfig(void)
+@@ -1511,6 +1547,20 @@ void guiCycleTheme(void)
+ 
+ // build 114 (the user, 10/23): Hold SELECT on List: the themes in a panel. The one in use picked: 0, the caller refreshes
+ // the list as a SELECT press would; another: loaded, 1; backed out of: 1 (nothing to refresh)
++// build 115: how many themes the theme list shows (the held SELECT's window is sized for them)
++int guiThemeCount(void)
++{
++    const char **names;
++    int n = 0;
++
++    guiLock();
++    names = thmGetGuiList();
++    while (names != NULL && names[n] != NULL)
++        n++;
++    guiUnlock();
++    return n;
++}
++
+ int guiPickTheme(void)
+ {
+     const char **names;
+@@ -2334,7 +2384,7 @@ static int guiReadPopsNet(int source, vcd_popsnet_t *out)
+         if (guiDrawBGSettings() == 0)
+             guiDrawBGPlasma();
+         rmDrawRect(0, 0, screenWidth, screenHeight, gColDarker);
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, gTheme->usedHeight >> 1,
++        fntRenderString(RIPPS2_MSG_FONT, screenWidth >> 1, gTheme->usedHeight >> 1,
+                         ALIGN_CENTER, 0, 0, _l(_STR_POPS_LOADING_SETTINGS), gTheme->textColor);
+         guiDrawOverlays();
+         guiEndFrame();
+@@ -2807,8 +2857,8 @@ void guiShowArtworkConfig(void)
          diaGetInt(diaArtworkConfig, UICFG_ART_DELAY, &artDelayIdx);
          if (artDelayIdx >= 0 && artDelayIdx < 4) {
              gArtDelay = artDelayValues[artDelayIdx];
@@ -1856,7 +2023,7 @@ index fef5147..a51955d 100644
                  if (lists[i] != NULL)
                      lists[i]->delay = gArtDelay;
              }
-@@ -2822,11 +2858,13 @@ void guiShowArtworkConfig(void)
+@@ -2822,11 +2872,13 @@ void guiShowArtworkConfig(void)
  // page under Controller Settings): the D-pad glyphs, the Color Theme, the hints, the category bar and
  // its order. Each row shows live behind the page as it changes; Cancel puts back what was there.
  // build 96: every row starts with Theme, the theme's own choice (RIPPS2's default where it has none)
@@ -1872,7 +2039,7 @@ index fef5147..a51955d 100644
  static const char *guiRipps2PaletteNames[RIPPS2_PALETTE_COUNT + 3]; // build 114: and Sweep, shown while a sweep is on
  
  // build 81: a row the user picks a value on becomes theirs; build 96: picking Theme (0) gives it back to the
-@@ -2902,7 +2940,7 @@ static void guiRipps2SettingsRead(void)
+@@ -2902,7 +2954,7 @@ static void guiRipps2SettingsRead(void)
      if ((gRipps2Sweep > 0) != (sweepWas > 0))
          guiRipps2PaletteSweepRow();
      guiRipps2ThemeColorRow();
@@ -1881,7 +2048,7 @@ index fef5147..a51955d 100644
          gRipps2TextWeight = v; // build 114: Text Weight, shown at once
          ripps2ApplyTextWeight();
      }
-@@ -2918,8 +2956,12 @@ static void guiRipps2LayoutRead(void)
+@@ -2918,8 +2970,12 @@ static void guiRipps2LayoutRead(void)
      guiRipps2Take(diaCoverflowConfig, UICFG_RIPPS2_SRCNAME, RIPPS2_SET_SRCNAME, RIPPS2_SRC_COUNT, &gRipps2SrcName, RIPPS2_SHOW_ON);
      if (diaGetInt(diaCoverflowConfig, UICFG_RIPPS2_TRANSITION, &v) && v >= 0 && v <= 3)
          gRipps2Transition = v; // build 92
@@ -1896,7 +2063,7 @@ index fef5147..a51955d 100644
  }
  
  static int guiRipps2LayoutUpdater(int modified)
-@@ -2942,6 +2984,10 @@ static void guiRipps2LayoutSet(void)
+@@ -2942,6 +2998,10 @@ static void guiRipps2LayoutSet(void)
      diaSetInt(diaCoverflowConfig, UICFG_RIPPS2_TRANSITION, gRipps2Transition);
      diaSetEnum(diaCoverflowConfig, UICFG_RIPPS2_CATLAYOUT, guiRipps2LayoutNames); // build 113
      diaSetInt(diaCoverflowConfig, UICFG_RIPPS2_CATLAYOUT, gRipps2CatLayout);
@@ -1907,7 +2074,7 @@ index fef5147..a51955d 100644
  }
  
  // build 113 (the user's settings moves): D-pad Glyphs and Button Hints are Hints and Glyphs' rows now (ripps2hints.c),
-@@ -3070,7 +3116,7 @@ static void guiRipps2SettingsSet(void)
+@@ -3070,7 +3130,7 @@ static void guiRipps2SettingsSet(void)
      diaSetEnum(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2PaletteNames);
      // build 81: each row shows what is in effect, a theme's default included
      diaSetInt(diaColorsConfig, UICFG_RIPPS2_PALETTE, guiRipps2Shown(RIPPS2_SET_PALETTE, gRipps2Palette, 0));
@@ -1916,7 +2083,7 @@ index fef5147..a51955d 100644
      diaSetEnum(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, weights);
      diaSetInt(diaColorsConfig, UICFG_RIPPS2_TEXTWEIGHT, gRipps2TextWeight);
      guiRipps2SweepRows();
-@@ -5187,8 +5233,25 @@ int guiDrawIconAndText(int iconId, int textId, int font, int x, int y, u64 color
+@@ -5187,8 +5247,25 @@ int guiDrawIconAndText(int iconId, int textId, int font, int x, int y, u64 color
      return guiDrawIconAndTextA(iconId, textId, font, x, y, color, gDefaultCol);
  }
  
@@ -1943,6 +2110,100 @@ index fef5147..a51955d 100644
  {
      GSTEXTURE *iconTex = thmGetTexture(iconId);
      font = guiHintFont(font);
+@@ -5572,9 +5649,11 @@ static void guiShow()
+                 screenHandlerTarget = NULL;
+             }
+         }
+-    } else
++    } else {
+         // render with the set screen handler
+         screenHandler->renderScreen();
++        ripps2ThemeHoldRender(); // build 115: the held SELECT's themes window, over the page
++    }
+ }
+ 
+ // build 114: the page as it stands (the theme list fades in over it, whatever the theme)
+@@ -5747,7 +5826,7 @@ void guiUpdateScreenScale(void)
+ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
+ {
+     int wlen = 0, lineW = 0, lines = 1;
+-    int spaceW = rmUnScaleX(fntCalcDimensions(RIPPS2_UI_FONT, " "));
++    int spaceW = rmUnScaleX(fntCalcDimensions(RIPPS2_MSG_FONT, " ")); // build 115: measured in the face it is drawn in
+     const char *p = text;
+ 
+     if (out == NULL || outSize <= 0)
+@@ -5774,7 +5853,7 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
+         while (*p && *p != ' ' && *p != '\n' && k < (int)sizeof(word) - 1)
+             word[k++] = *p++;
+         word[k] = '\0';
+-        int wordW = rmUnScaleX(fntCalcDimensions(RIPPS2_UI_FONT, word));
++        int wordW = rmUnScaleX(fntCalcDimensions(RIPPS2_MSG_FONT, word));
+ 
+         if (lineW > 0 && (lineW + spaceW + wordW) > innerW) { // does not fit -> break the line
+             if (wlen < outSize - 1)
+@@ -5892,7 +5971,7 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+                     n = (int)sizeof(line) - 1;
+                 memcpy(line, ls, n);
+                 line[n] = '\0';
+-                fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, ly, ALIGN_CENTER, 0, 0, line, gTheme->textColor);
++                fntRenderString(RIPPS2_MSG_FONT, screenWidth >> 1, ly, ALIGN_CENTER, 0, 0, line, gTheme->textColor);
+                 ly += lineH;
+                 ls = eol ? eol + 1 : NULL;
+             }
+@@ -5996,7 +6075,7 @@ int guiPromptRebootIop(void)
+ 
+         guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
+ 
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, 0, 0, _t("REBOOT IOP?"), gTheme->textColor);
++        fntRenderString(RIPPS2_MSG_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, 0, 0, _t("REBOOT IOP?"), gTheme->textColor);
+ 
+         guiDrawIconAndLiteralText(guiConfirmIcon(), _t("Yes"), RIPPS2_UI_FONT, 70, 417, gTheme->textColor);
+         guiDrawIconAndLiteralText(TRIANGLE_ICON, _l(_STR_CANCEL), RIPPS2_UI_FONT, 285, 417, gTheme->textColor);
+@@ -6181,7 +6260,7 @@ void guiRenderTextScreen(const char *message)
+     // background); the video-mode, remove-settings and cheat-selection screens went opaque too.
+     guiDrawStatusBackdrop(); // RIPPS2: was opaque black
+ 
+-    fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, 0, 0, message, gTheme->textColor);
++    fntRenderString(RIPPS2_MSG_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, 0, 0, message, gTheme->textColor);
+ 
+     guiDrawOverlays();
+ 
+@@ -6362,7 +6441,7 @@ void guiWarning(const char *text, int count)
+     // fixed number of frames, so it gets an opaque backdrop rather than a ~75% wash.
+     guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
+ 
+-    fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, screenWidth, screenHeight, text, gTheme->textColor);
++    fntRenderString(RIPPS2_MSG_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, screenWidth, screenHeight, text, gTheme->textColor);
+ 
+     guiEndFrame();
+ 
+@@ -6424,7 +6503,7 @@ int guiConfirmVideoMode(void)
+         // steps and the keep landed while it still looked 4/5 full (zackcage6, 09-26).
+         guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
+ 
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, 0, 0, _l(_STR_CFM_VMODE_CHG), gTheme->textColor);
++        fntRenderString(RIPPS2_MSG_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, 0, 0, _l(_STR_CFM_VMODE_CHG), gTheme->textColor);
+         // How long until the automatic revert (zackcage6's idea). Hidden during a hold. A hold does NOT
+         // pause the deadline -- it only defers the revert check so a started hold can finish; let go
+         // early after the deadline and the next pass reverts. Whole seconds rounded up, so it reads
+@@ -6433,7 +6512,7 @@ int guiConfirmVideoMode(void)
+             int leftMs = OPL_VMODE_CHANGE_CONFIRMATION_TIMEOUT_MS - (int)((clock() - timeStart) / (CLOCKS_PER_SEC / 1000));
+             char countdown[64];
+             snprintf(countdown, sizeof(countdown), _l(_STR_CFM_VMODE_REVERT_IN), leftMs > 0 ? (leftMs + 999) / 1000 : 1);
+-            fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, (gTheme->usedHeight >> 1) + 32, ALIGN_CENTER, 0, 0, countdown, gTheme->textColor);
++            fntRenderString(RIPPS2_MSG_FONT, screenWidth >> 1, (gTheme->usedHeight >> 1) + 32, ALIGN_CENTER, 0, 0, countdown, gTheme->textColor);
+         }
+         guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_BACK, RIPPS2_UI_FONT, 500, 417, gTheme->textColor);
+         guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, _STR_CFM_VMODE_HOLD_KEEP, RIPPS2_UI_FONT, 70, 417, gTheme->textColor);
+@@ -6484,7 +6563,7 @@ int guiGameShowRemoveSettings(config_set_t *configSet, config_set_t *configGame)
+         // Opaque for the same reason as guiConfirmVideoMode: the backdrop is just guiShow().
+         guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
+ 
+-        fntRenderString(RIPPS2_UI_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, 0, 0, _l(_STR_GAME_SETTINGS_PROMPT), gTheme->textColor);
++        fntRenderString(RIPPS2_MSG_FONT, screenWidth >> 1, gTheme->usedHeight >> 1, ALIGN_CENTER, 0, 0, _l(_STR_GAME_SETTINGS_PROMPT), gTheme->textColor);
+ 
+         guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_BACK, RIPPS2_UI_FONT, 500, 417, gTheme->textColor);
+         guiDrawIconAndText(SQUARE_ICON, _STR_GLOBAL_SETTINGS, RIPPS2_UI_FONT, 213, 417, gTheme->textColor);
 diff --git a/src/guigame.c b/src/guigame.c
 index a7ff5de..9e3b714 100644
 --- a/src/guigame.c
@@ -1984,7 +2245,7 @@ index a7ff5de..9e3b714 100644
      // Neutrino-only row greyed even under a Neutrino global default (guiGameSetCoreAwareState reads
      // this). SMB likewise: ethsupport has no Neutrino launch leg, the effective core is always <OPL>.
 diff --git a/src/menusys.c b/src/menusys.c
-index 1f08c7e..a71288d 100644
+index 1f08c7e..254e4f5 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -1022,6 +1022,8 @@ static int menuDevicePageRank(const menu_item_t *item)
@@ -2139,7 +2400,25 @@ index 1f08c7e..a71288d 100644
      } else if (getKeyOn(KEY_L3)) { // advance the current page's library-view ring
          if (!viewPending && selected_item->item->toggleView)
              selected_item->item->toggleView(selected_item->item);
-@@ -2696,15 +2766,16 @@ void menuRenderGameMenu()
+@@ -2563,6 +2633,9 @@ void menuHandleInputMain()
+             selectCycled = 0;
+             selectSince = clock();
+         } else if (selectHeld && getKeyPressed(KEY_SELECT)) {
++            // build 115: on List, the themes' window comes up empty from 1 s, its wheel filling toward the 4.2 s
++            if (!selectCycled && gRipps2SelectHold == RIPPS2_HOLD_LIST)
++                ripps2ThemeHold((float)(clock() - selectSince) / (float)CLOCKS_PER_SEC);
+             if (!selectCycled && gRipps2SelectHold != RIPPS2_HOLD_OFF && (clock() - selectSince) >= (clock_t)(4.2f * CLOCKS_PER_SEC)) {
+                 selectCycled = 1;
+                 if (gRipps2SelectHold == RIPPS2_HOLD_CYCLE)
+@@ -2572,6 +2645,7 @@ void menuHandleInputMain()
+             }
+         } else if (selectHeld) {
+             selectHeld = 0;
++            ripps2ThemeHold(-1.0f); // the window fades away; the list refreshes as for a press
+             if (!selectCycled && !viewPending)
+                 selected_item->item->refresh(selected_item->item);
+         }
+@@ -2696,15 +2770,16 @@ void menuRenderGameMenu()
      int y = (gTheme->usedHeight >> 1) - (spacing * (count >> 1));
      int cp = 0; // current position
  
@@ -2159,7 +2438,7 @@ index 1f08c7e..a71288d 100644
  
      // settings list
      for (it = gameMenu; it; it = it->next, cp++) {
-@@ -2995,16 +3066,17 @@ void menuRenderAppMenu()
+@@ -2995,16 +3070,17 @@ void menuRenderAppMenu()
      int y = (gTheme->usedHeight >> 1) - (spacing * (count >> 1));
      int cp = 0; // current position
  
@@ -3099,7 +3378,7 @@ index ba683b0..1cb8c7f 100644
      // ART LIVES IN THE ART FOLDER, and nowhere else. A PS1 cover is
      // ART/<name>_COV.png -- the same rule as a PS2 title -- which the texDiscoverLoad
 diff --git a/src/opl.c b/src/opl.c
-index 3b8cd19..4df3af3 100644
+index 3b8cd19..91033a1 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -361,7 +361,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
@@ -3390,7 +3669,22 @@ index 3b8cd19..4df3af3 100644
      gMMCEAckWaitCycles = 5;
      gMMCEUseAlarms = 1;
  
-@@ -5988,7 +6043,8 @@ static void miniInit(int mode)
+@@ -5801,8 +5856,13 @@ static void init(void)
+         // and would draw the not-yet-ready main menu as a garbled landing page
+         // before the intro splash) while the config loads.
+         guiSetBootStatus(_l(_STR_BOOT_LOADING_CONFIG));
+-        guiRenderGreetingScreen();
++        // build 115 (the user, 10/26: the boot colour of the pillars from the Color Theme): the towers' first pose waits
++        // for the settings, so it is in the user's Color Theme (or Color Sweep) from its first frame instead of RIPPS2's
++        // blue until the menu; a black frame while they load
++        guiStartFrame();
++        guiEndFrame();
+         _loadConfig(); // only try to restore config if emergency key is not being pressed
++        guiRenderGreetingScreen();
+ #ifdef __OPLDIAG
+         // #545: which settings home this boot chose, and why, before the menu covers it. Untranslated
+         // developer text, diagnostic builds only -- a tester's photo answers what a log cannot.
+@@ -5988,7 +6048,8 @@ static void miniInit(int mode)
              config_set_t *configOPL = configGetByType(CONFIG_OPL);
  
              configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
@@ -3599,6 +3893,20 @@ index 68b685e..110ea59 100644
              continue; // apps have no covers here; Favorites and All Games repeat other lists
          opl_io_module_t *mod = oplGetModule(mode);
          item_list_t *list = mod != NULL ? mod->support : NULL;
+diff --git a/src/ripps2bg.c b/src/ripps2bg.c
+index 668955a..8e3f858 100644
+--- a/src/ripps2bg.c
++++ b/src/ripps2bg.c
+@@ -621,6 +621,9 @@ void ripps2DrawPillars(void)
+     int i, j, k;
+     float t = sceneTime();
+     wideUpdate();
++    // build 115: the Color Theme (and the Color Sweep's moving colour) every frame the towers draw, the boot pose and the
++    // boot zoom included: until now it was set by the menu's input, so the boot ran in RIPPS2's blue and snapped
++    ripps2PaletteSync();
+ 
+     if (towerCount == 0)
+         pillarsInit();
 diff --git a/src/ripps2biossnd.c b/src/ripps2biossnd.c
 index 11d84ce..3131a81 100644
 --- a/src/ripps2biossnd.c
@@ -3897,7 +4205,7 @@ index 5651a19..8b2e109 100644
      guiMsgBoxSound(SFX_MESSAGE);
      if (guiMsgBox(msg, 1, NULL) != 1)
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 0225897..becdfdd 100644
+index 0225897..f2b031e 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -39,6 +39,7 @@
@@ -3917,7 +4225,25 @@ index 0225897..becdfdd 100644
  
  static void fbSetToast(const char *text)
  {
-@@ -874,6 +875,26 @@ static int fbExists(const char *path)
+@@ -516,14 +517,15 @@ static void fbScanDevices(void)
+ }
+ 
+ // A PS2 card image: a .vmc / .ps2 / .mc2, or a .bin of a card's size (OPL's VMC folder) that starts with
+-// the card format's own words (so a PS1 game's .bin is not taken for one)
++// the card format's own words (so a PS1 game's .bin is not taken for one). Build 115: an SD2PSX's own cards too, the
++// .mcd files of MemoryCards/PS2 on its SD (the same raw format; its PS1 cards are 128 KB and stay files)
+ static int fbIsCardImage(const char *path, const char *name, u32 size)
+ {
+     char magic[28];
+     int fd, ok;
+     if (fbHasSuffix(name, ".vmc") || fbHasSuffix(name, ".ps2") || fbHasSuffix(name, ".mc2"))
+         return 1;
+-    if (!fbHasSuffix(name, ".bin") || size < 1024 * 1024 || size > 70 * 1024 * 1024)
++    if ((!fbHasSuffix(name, ".bin") && !fbHasSuffix(name, ".mcd")) || size < 1024 * 1024 || size > 70 * 1024 * 1024)
+         return 0;
+     fd = open(path, O_RDONLY);
+     if (fd < 0)
+@@ -874,6 +876,26 @@ static int fbExists(const char *path)
      return 0;
  }
  
@@ -3944,7 +4270,7 @@ index 0225897..becdfdd 100644
  static int fbFolderHasIconSys(const char *folder)
  {
      char path[320];
-@@ -994,6 +1015,13 @@ static void fbPasteWork(void)
+@@ -994,6 +1016,13 @@ static void fbPasteWork(void)
              fbMcRoot(fbPath, destDir, sizeof(destDir));
          snprintf(dst, sizeof(dst), "%s%s", destDir, fbClip[i]);
          int there = strcmp(src, dst) != 0 && fbExists(dst), ok = 1;
@@ -3958,7 +4284,7 @@ index 0225897..becdfdd 100644
          if (!strcmp(src, dst) || (there && !fbClipReplace[i])) {
              fbSkipped++; // never over the top of something, unless the user said replace it
              fbDoneItems++;
-@@ -1110,8 +1138,16 @@ static void fbReport(const char *verb, int done)
+@@ -1110,8 +1139,16 @@ static void fbReport(const char *verb, int done)
      fbSetToast(text);
      if (fbFailWhat[0]) // the first failure, named under it for longer
          snprintf(fbToastDetail, sizeof(fbToastDetail), "%s", fbFailWhat);
@@ -3976,7 +4302,7 @@ index 0225897..becdfdd 100644
  }
  
  static void fbWorker(void)
-@@ -1218,6 +1254,10 @@ static void fbPasteAskReplace(void)
+@@ -1218,6 +1255,10 @@ static void fbPasteAskReplace(void)
              fbMcRoot(fbPath, destDir, sizeof(destDir));
          snprintf(dst, sizeof(dst), "%s%s", destDir, fbClip[i]);
          there[i] = strcmp(src, dst) != 0 && fbExists(dst);
@@ -3987,7 +4313,7 @@ index 0225897..becdfdd 100644
          left += there[i];
      }
      for (i = 0; i < fbClipCount; i++) {
-@@ -2377,7 +2417,7 @@ static void fbOrbitsPage(void)
+@@ -2377,7 +2418,7 @@ static void fbOrbitsPage(void)
              }
          }
          if (toast[0] && clock() - toastAt < 2 * CLOCKS_PER_SEC)
@@ -3996,7 +4322,98 @@ index 0225897..becdfdd 100644
          {
              int hx = OB_X, hy = 448;
              if (sel < 4)
-@@ -3011,10 +3051,12 @@ void ripps2RenderFiles(void)
+@@ -2931,6 +2972,71 @@ static void fbTipWork(void)
+     fbTipState = 2;
+ }
+ 
++// RIPPS2 build 115 (the user, 10/25: "tooltip the folders, it can help id the loose files inside, their purpose"): what a
++// folder or file RIPPS2, OPL or an SD2PSX keeps on a drive is for, by its name, else by its kind
++static const struct
++{
++    const char *name, *what;
++} fbKnown[] = {
++    {"ART", N_("Game covers and art, by game ID")},
++    {"CFG", N_("Each game's settings and info page")},
++    {"CHT", N_("Cheats, a file a game")},
++    {"CD", N_("PS2 games on CD, as ISOs")},
++    {"DVD", N_("PS2 games on DVD, as ISOs")},
++    {"VMC", N_("Virtual memory cards for games")},
++    {"THM", N_("Themes, a folder each")},
++    {"LNG", N_("Languages for RIPPS2")},
++    {"APPS", N_("Programs to start (ELFs)")},
++    {"POPS", N_("POPSTARTER and PS1 games (VCDs)")},
++    {"EMBER", N_("Ember, its BIOS and its PS1 games")},
++    {"RA", N_("RetroAchievements' files")},
++    {"RIPPS2", N_("RIPPS2's own folder")},
++    {"AUDIO", N_("RIPPS2's sounds and music")},
++    {"MEDIA", N_("Ripped CDs and DVDs, pictures, video")},
++    {"MemoryCards", N_("The SD2PSX's memory cards")},
++    {"BOOT", N_("The SD2PSX's boot cards (PS2BBL)")},
++    {".sd2psx", N_("The SD2PSX's own settings")},
++    {"neutrino", N_("Neutrino, the second game core")},
++    {"PS2BBL", N_("PS2BBL's settings")},
++    {"RIPPS2.LST", N_("This drive's game list, for a quick boot")},
++    {"games.bin", N_("OPL's list of this folder's games")},
++    {"settings.ini", N_("The SD2PSX's settings")},
++    {"BootCard.ini", N_("The SD2PSX's boot channels and names")},
++    {"Game2Folder.ini", N_("Games that share one SD2PSX card")},
++    {"ul.cfg", N_("Games kept in 1 GB parts")},
++    {"DIAG.TXT", N_("RIPPS2's diagnostics, for a bug report")},
++    {"LAUNCH.TXT", N_("What RIPPS2's last launch did")},
++    {"allgames.bin", N_("All Games' master list")},
++    {"favourites.bin", N_("Starred games")},
++    {"recents.bin", N_("Recent games")},
++    {"settings_riptopl.cfg", N_("RIPPS2's settings")},
++};
++
++static const char *fbWhatIs(const char *name, int isDir)
++{
++    int i;
++    for (i = 0; i < (int)(sizeof(fbKnown) / sizeof(fbKnown[0])); i++)
++        if (!strcasecmp(name, fbKnown[i].name))
++            return _t(fbKnown[i].what);
++    if (isDir)
++        return NULL;
++    if (fbHasSuffix(name, ".mcd"))
++        return strstr(fbPath, "/BOOT/") != NULL ? _t("An SD2PSX boot card: open it to look in") : _t("An SD2PSX memory card: open it like a VMC");
++    if (fbHasSuffix(name, ".crp"))
++        return _t("A card the SD2PSX set aside (wrong size)");
++    if (fbHasSuffix(name, ".iso") || fbHasSuffix(name, ".zso"))
++        return _t("A PS2 game");
++    if (fbHasSuffix(name, ".vcd"))
++        return _t("A PS1 game for POPSTARTER");
++    if (fbHasSuffix(name, ".cue"))
++        return _t("A PS1 disc's track list, for Ember");
++    if (fbHasSuffix(name, ".elf"))
++        return _t("A program: Cross starts it");
++    if (fbHasSuffix(name, ".psu"))
++        return _t("A save, packed in one file");
++    return NULL;
++}
++
+ static void fbDrawTip(void)
+ {
+     fb_entry_t *e;
+@@ -2961,7 +3067,8 @@ static void fbDrawTip(void)
+     }
+     if (fbTipState != 2 || strcmp(fbTipKey, path) != 0)
+         return;
+-    int row = fbCursor - fbTop, y = FB_LIST_Y + (row + 1) * FB_ROW_H + 2, w = 330, h = 4 * 17 + 10, x = FB_RIGHT - w;
++    const char *what = fbWhatIs(e->name, e->kind == FB_KIND_DIR); // build 115
++    int row = fbCursor - fbTop, y = FB_LIST_Y + (row + 1) * FB_ROW_H + 2, w = 330, h = (what ? 5 : 4) * 17 + 10, x = FB_RIGHT - w;
+     if (y + h > FB_LIST_Y + FB_ROWS * FB_ROW_H)
+         y = FB_LIST_Y + row * FB_ROW_H - h - 4; // above the row near the bottom
+     rmDrawRect(x, y, w, h, FB_PRIM(0x03, 0x08, 0x22, 0x7A));
+@@ -2973,6 +3080,8 @@ static void fbDrawTip(void)
+     for (i = 0; i < 3; i++)
+         if (fbTipLine[i][0])
+             fntRenderString(smallFont, x + 10, y + 13 + (i + 1) * 17, ALIGN_VCENTER, 0, 0, fbTipLine[i], FB_SOFT);
++    if (what != NULL)
++        fntRenderStringFit(smallFont, x + 10, y + 13 + 4 * 17, ALIGN_VCENTER, w - 20, what, FB_LIT, 1);
+ }
+ 
+ void ripps2RenderFiles(void)
+@@ -3011,10 +3120,12 @@ void ripps2RenderFiles(void)
          snprintf(buf, sizeof(buf), _t("%u KB FREE%s"), fbVmcFreeKb, fbVmcRO ? _t(", READ ONLY") : "");
      else
          buf[0] = '\0';
@@ -4122,6 +4539,85 @@ index 3b36c8e..bf28148 100644
          int hx = 44;
          if (hmCount > 0 && hmKept(&hmParts[cursor]) == NULL)
              hmHint(TRIANGLE_ICON, _t("REMOVE"), &hx, 448);
+diff --git a/src/ripps2hints.c b/src/ripps2hints.c
+index b6ab16a..84ccb04 100644
+--- a/src/ripps2hints.c
++++ b/src/ripps2hints.c
+@@ -36,6 +36,7 @@
+ #include "include/ripps2tr.h" // build 104: N_ (the PC test builds this file too)
+ 
+ int gRipps2HintLayout = 0, gRipps2HintLabels = 0, gRipps2GlyphSet = RIPPS2_GLYPHSET_THEME;
++int gRipps2BadgeSet = 0; // build 115: 0 the theme's badges (its badge_set=), 1 RIPPS2's built-in set
+ int gRipps2HintPick[RIPPS2_HINT_COUNT] = {0};
+ char gRipps2HintOrder[48] = "";
+ 
+@@ -177,6 +178,7 @@ static const char *pickLayout[] = {N_("Theme"), N_("Row"), N_("Column"), NULL};
+ static const char *pickLabels[] = {N_("Theme"), N_("Glyph and Label"), N_("Glyph Only"), N_("Badges"), NULL};
+ static const char *pickShow[] = {N_("Theme"), N_("Shown"), N_("Hidden"), NULL};
+ static const char *pickGlyphs[] = {N_("Theme"), "RIPPS2", N_("Standard"), N_("White"), NULL};
++static const char *pickBadges[] = {N_("Theme"), "RIPPS2", NULL}; // build 115: Badge Set
+ static const char *pickFollow[] = {N_("Theme"), N_("Your Order"), NULL};
+ 
+ // the four hints with a row of their own, and those rows
+@@ -195,6 +197,8 @@ static void hintsRead(void)
+             gRipps2HintPick[pickHints[i]] = v;
+     if (diaGetInt(diaHintsConfig, UICFG_RIPPS2_GLYPH_SET, &v) && v >= 0 && v < RIPPS2_GLYPHSET_COUNT)
+         gRipps2GlyphSet = v; // the next frame loads it (thmGlyphSetRefresh), so the page behind shows it
++    if (diaGetInt(diaHintsConfig, UICFG_RIPPS2_BADGE_SET, &v) && v >= 0 && v <= 1)
++        gRipps2BadgeSet = v; // build 115: the next frame draws from it
+     guiRipps2HintRowsRead(diaHintsConfig); // build 113: Button Hints and D-pad Glyphs, from Colors and More
+ }
+ 
+@@ -276,6 +280,7 @@ static void showOrder(void)
+ int ripps2ShowHintsConfig(void)
+ {
+     int keepLayout = gRipps2HintLayout, keepLabels = gRipps2HintLabels, keepSet = gRipps2GlyphSet, keepPick[RIPPS2_HINT_COUNT];
++    int keepBadges = gRipps2BadgeSet; // build 115
+     int keepHints = gRipps2Hints, keepGlyphs = gRipps2Glyphs, keepUserSet = gRipps2UserSet; // build 113
+     char keepOrder[sizeof(gRipps2HintOrder)];
+     int i, ret;
+@@ -288,6 +293,8 @@ int ripps2ShowHintsConfig(void)
+     diaSetInt(diaHintsConfig, UICFG_RIPPS2_HINT_LAYOUT, gRipps2HintLayout);
+     diaSetInt(diaHintsConfig, UICFG_RIPPS2_HINT_LABELS, gRipps2HintLabels);
+     diaSetInt(diaHintsConfig, UICFG_RIPPS2_GLYPH_SET, gRipps2GlyphSet);
++    diaSetEnum(diaHintsConfig, UICFG_RIPPS2_BADGE_SET, pickBadges); // build 115
++    diaSetInt(diaHintsConfig, UICFG_RIPPS2_BADGE_SET, gRipps2BadgeSet);
+     for (i = 0; i < 4; i++) {
+         diaSetEnum(diaHintsConfig, pickRows[i], pickShow);
+         diaSetInt(diaHintsConfig, pickRows[i], gRipps2HintPick[pickHints[i]]);
+@@ -311,13 +318,14 @@ int ripps2ShowHintsConfig(void)
+         gRipps2HintLayout = keepLayout;
+         gRipps2HintLabels = keepLabels;
+         gRipps2GlyphSet = keepSet;
++        gRipps2BadgeSet = keepBadges;
+         memcpy(gRipps2HintPick, keepPick, sizeof(keepPick));
+         snprintf(gRipps2HintOrder, sizeof(gRipps2HintOrder), "%s", keepOrder);
+         gRipps2Hints = keepHints;
+         gRipps2Glyphs = keepGlyphs;
+         gRipps2UserSet = keepUserSet;
+     }
+-    return gRipps2Hints != keepHints || gRipps2Glyphs != keepGlyphs || gRipps2UserSet != keepUserSet || gRipps2HintLayout != keepLayout || gRipps2HintLabels != keepLabels || gRipps2GlyphSet != keepSet ||
++    return gRipps2Hints != keepHints || gRipps2Glyphs != keepGlyphs || gRipps2UserSet != keepUserSet || gRipps2HintLayout != keepLayout || gRipps2HintLabels != keepLabels || gRipps2GlyphSet != keepSet || gRipps2BadgeSet != keepBadges ||
+            memcmp(gRipps2HintPick, keepPick, sizeof(keepPick)) || strcmp(gRipps2HintOrder, keepOrder);
+ }
+ 
+@@ -336,6 +344,8 @@ void ripps2HintsLoadConfig(config_set_t *config)
+             gRipps2HintPick[pickHints[i]] = v;
+     if (configGetInt(config, "ripps2_glyph_set", &v) && v >= 0 && v < RIPPS2_GLYPHSET_COUNT)
+         gRipps2GlyphSet = v;
++    if (configGetInt(config, "ripps2_badge_set", &v) && v >= 0 && v <= 1)
++        gRipps2BadgeSet = v; // build 115
+     if (!configGetStrCopy(config, "ripps2_hint_order", gRipps2HintOrder, sizeof(gRipps2HintOrder)))
+         gRipps2HintOrder[0] = '\0';
+ }
+@@ -349,6 +359,7 @@ void ripps2HintsSaveConfig(config_set_t *config)
+     for (i = 0; i < 4; i++)
+         configSetInt(config, keys[i], gRipps2HintPick[pickHints[i]]);
+     configSetInt(config, "ripps2_glyph_set", gRipps2GlyphSet);
++    configSetInt(config, "ripps2_badge_set", gRipps2BadgeSet); // build 115
+     configSetStr(config, "ripps2_hint_order", gRipps2HintOrder);
+ }
+ #endif // RIPPS2_HINTS_HOST_TEST
 diff --git a/src/ripps2ra.c b/src/ripps2ra.c
 index 4ddf14c..49e0941 100644
 --- a/src/ripps2ra.c
@@ -4153,6 +4649,36 @@ index 4ddf14c..49e0941 100644
              if (i == RA_ROW_TELEMETRY || i == RA_ROW_BADGES) {
                  int on = i == RA_ROW_TELEMETRY ? gRATelemetry : gRABadges && gRATelemetry;
                  const char *v = on ? _t("ON") : _t("OFF");
+diff --git a/src/ripps2saves.c b/src/ripps2saves.c
+index 604ed5a..f801a1d 100644
+--- a/src/ripps2saves.c
++++ b/src/ripps2saves.c
+@@ -214,6 +214,15 @@ static void r2VmcClose(r2_vmc_t *v)
+     v->fd = -1;
+ }
+ 
++// build 115: an SD2PSX's boot card (MemoryCards/PS2/BOOT/BootCard-N.mcd on its SD) is the card in the device's own memory
++// while RIPPS2 runs from it: the device writes that memory back over the file, so a save written into the file would be
++// lost, or would tear the card. It opens to look at and copy from; never to write
++static int r2IsSd2psxBootCard(const char *image)
++{
++    size_t n = strlen(image);
++    return !strncmp(image, "mmce", 4) && strstr(image, "/BOOT/") != NULL && n > 4 && !strcasecmp(image + n - 4, ".mcd");
++}
++
+ // 1 = open; 0 = not a PS2 card image (r2Err says why)
+ static int r2VmcOpen(r2_vmc_t *v, const char *image, int forWrite)
+ {
+@@ -222,6 +231,9 @@ static int r2VmcOpen(r2_vmc_t *v, const char *image, int forWrite)
+     s64 size;
+ 
+     memset(v, 0, sizeof(*v));
++    v->fd = -1;
++    if (forWrite && r2IsSd2psxBootCard(image))
++        return r2Fail(_t("READ ONLY: THE SD2PSX'S BOOT CARD IS IN USE"));
+     v->fd = open(image, forWrite ? O_RDWR : O_RDONLY);
+     if (v->fd < 0)
+         return r2Fail(_t("CANNOT OPEN THE IMAGE"));
 diff --git a/src/ripps2seance.c b/src/ripps2seance.c
 index aeaa17a..b0156b4 100644
 --- a/src/ripps2seance.c
@@ -4734,7 +5260,7 @@ index c1bcf7f..9366fb6 100644
    RIPPS2 build 85: the launch report. A PS1 game that will not start on a console says nothing about why,
    and PCSX2 starts them fine, so the only witness is the console itself. Just before the handoff RIPPS2
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 03fe071..cef56ee 100644
+index 03fe071..619c08b 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
 @@ -108,7 +108,7 @@ static int formationDirty = 0; // changed since the last save
@@ -4830,18 +5356,39 @@ index 03fe071..cef56ee 100644
      if (glyphsMode() != RIPPS2_GLYPHS_FADE_IN && glyphsMode() != RIPPS2_GLYPHS_FADE_OUT)
          return 0.0f;
      if (now - g->pokedAt < GLYPH_HOLD_S)
-@@ -847,7 +917,9 @@ static void catTransitionDraw(void)
+@@ -847,7 +917,11 @@ static void catTransitionDraw(void)
  
  int ripps2Legacy(void)
  {
 -    return gTheme != NULL && gTheme->catLegacy;
 +    // build 115: Layout > Category Layout's Menu: no bar and no sidebar on any theme, the categories in the START menu as on
-+    // a theme made for OPL
++    // a theme made for OPL; Across the Top or Sidebar bring them onto a theme that has them in the menu
++    if (gRipps2CatLayout == 1 || gRipps2CatLayout == 2)
++        return 0;
 +    return (gTheme != NULL && gTheme->catLegacy) || gRipps2CatLayout == 3;
  }
  
  void ripps2RenderCategoryBar(void)
-@@ -1933,6 +2005,13 @@ void ripps2RenderMemory(void)
+@@ -976,9 +1050,17 @@ void ripps2DrawBusy(int alpha)
+         w = markDrawW;
+         h = MARK_H;
+     } else {
+-        // where the theme puts its loading icon, but never closer to the edges than this
++        // where the theme puts its loading icon, but never closer to the edges than this. Build 115: or where its
++        // loading_mark says, centred over the hints or in the corner, so a theme needs no loading images of its own
+         x = gTheme->loadingIcon ? gTheme->loadingIcon->posX : 544;
+         y = gTheme->loadingIcon ? gTheme->loadingIcon->posY : 426;
++        if (gTheme->loadingMark == 1) {
++            x = 320;
++            y = 426;
++        } else if (gTheme->loadingMark == 2) {
++            x = 544;
++            y = 426;
++        }
+         w = MARK_W;
+         h = MARK_H;
+         if (x > 640 - 48 - w / 2)
+@@ -1933,6 +2015,13 @@ void ripps2RenderMemory(void)
  
      const char *name = formationName[gRipps2Formation];
      int half = fntCalcDimensions(gTheme->fonts[3], name) / 2, g = GLYPH_H * 3 / 4;
@@ -4855,7 +5402,7 @@ index 03fe071..cef56ee 100644
      int ga = (int)(a * glyphA);
      u64 soft = GS_SETREG_RGBA(0x67, 0x6C, 0x7A, a), dim = GS_SETREG_RGBA(0x37, 0x3B, 0x4A, a), tex = GS_SETREG_RGBA(0x80, 0x80, 0x80, ga);
      fntRenderString(gTheme->fonts[3], 320, 450, ALIGN_CENTER, 0, 0, name, soft);
-@@ -1953,8 +2032,16 @@ void ripps2HandleInputMemory(void)
+@@ -1953,8 +2042,16 @@ void ripps2HandleInputMemory(void)
          ripps2SidebarInput();
          return;
      }
@@ -4874,6 +5421,74 @@ index 03fe071..cef56ee 100644
          return;
      }
      if (ripps2Legacy() && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
+@@ -2406,12 +2503,58 @@ static void tpDraw(const char **names, int n, int cur, int sel, float a)
+     rmEndFrame();
+ }
+ 
++// ---- build 115: the themes' window while SELECT is held (the user, 10/26: "make its window fade in and appear empty
++// with the wheel at 1s so it shows you filling in the wheel then displays the pages of themes") ----
++// SELECT held on a list with Hold SELECT on List: at 1 s the panel the themes open in fades in, empty but for its title,
++// THEMES, and RIPDISC's notch wheel filling toward 4.2 s, where the themes fill the same panel (ripps2ThemePanel takes
++// it over as it stands). Let go before then, it fades away and the list refreshes as a press does (menusys.c).
++#define TH_SHOW_S 1.0f
++#define TH_OPEN_S 4.2f
++static float thHeld = -1.0f, thShown = 0.0f, thWheel = 0.0f;
++static int thRows = TP_ROWS;
++static double thLast = 0.0;
++
++void ripps2ThemeHold(float heldS)
++{
++    thHeld = heldS;
++}
++
++void ripps2ThemeHoldRender(void)
++{
++    double now = ripps2Seconds();
++    float dt = thLast > 0.0 ? (float)(now - thLast) : 0.0f, a;
++    int w = 580, h, x = (640 - 580) / 2, y = 134, ia, n;
++
++    thLast = now;
++    if (thHeld >= TH_SHOW_S) {
++        if (thShown <= 0.0f) { // the panel's height as the themes will fill it, counted once a hold
++            n = guiThemeCount();
++            thRows = n < 1 ? 1 : n < TP_ROWS ? n : TP_ROWS;
++        }
++        thShown = fminf(1.0f, thShown + dt / 0.35f);
++        thWheel = fminf(1.0f, (thHeld - TH_SHOW_S) / (TH_OPEN_S - TH_SHOW_S));
++    } else
++        thShown = fmaxf(0.0f, thShown - dt / 0.3f);
++    if (thShown <= 0.0f)
++        return;
++    a = thShown * thShown * (3.0f - 2.0f * thShown);
++    ia = (int)(0x80 * a);
++    h = 84 + thRows * 24;
++    ripps2DrawHintBoxA(x, y, w, h, a);
++    fntRenderString(gTheme->fonts[4], 320, y + 26, ALIGN_CENTER, 0, 0, _t("THEMES"), tpAlpha(TP_LIT, ia));
++    ripps2NotchRing(320, y + 44 + thRows * 12, thWheel, ia);
++}
++
+ int ripps2ThemePanel(const char **names, int cur)
+ {
+     int n = 0, sel = cur, picked = -1, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    int fromHold = thShown >= 0.99f; // build 115: the held SELECT's window is up: the themes fill it, no second fade
+     double t0, outAt = 0.0, now;
+     float a;
+ 
++    thHeld = -1.0f;
++    thShown = 0.0f;
++
+     while (names != NULL && names[n] != NULL)
+         n++;
+     if (n < 1)
+@@ -2419,7 +2562,7 @@ int ripps2ThemePanel(const char **names, int cur)
+     if (sel < 0 || sel >= n)
+         sel = 0;
+     sfxPlay(SFX_TRANSITION);
+-    t0 = ripps2Seconds();
++    t0 = ripps2Seconds() - (fromHold ? 0.35 : 0.0);
+     for (;;) {
+         now = ripps2Seconds();
+         readPads();
 diff --git a/src/sound.c b/src/sound.c
 index f4d22b4..5d51c70 100644
 --- a/src/sound.c
@@ -5418,7 +6033,7 @@ index 321b35b..272c5c8 100644
              mode = src;
      }
 diff --git a/src/textures.c b/src/textures.c
-index 2da860e..6c650e0 100644
+index 2da860e..fe0b615 100644
 --- a/src/textures.c
 +++ b/src/textures.c
 @@ -8,6 +8,10 @@
@@ -5432,7 +6047,41 @@ index 2da860e..6c650e0 100644
  
  extern void *load0_png;
  extern void *load1_png;
-@@ -643,6 +647,17 @@ static int texStageExternalFileIntoMemory(int fd, void **buffer, u32 *stagedSize
+@@ -119,6 +123,16 @@ extern void *ripps2_ps1logo_png; // RIPPS2: the L3 filter splashes
+ extern void *ripps2_ps2logo_png;
+ extern void *ripps2_grid_icons_png; // RIPPS2: made by ps2-pillars elf/theme/make_grid_icons.py
+ extern void *ripps2_sidebar_icons_png; // RIPPS2 build 113: made by ps2-pillars elf/theme/make_sidebar_icons.py
++extern void *Players_1_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Players_2_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Players_3_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Players_4_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Parental_3_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Parental_10_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Parental_17_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Parental_18_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Parental_e_png; // RIPPS2 build 115: RIPPS2's badge set
++extern void *Parental_teen_png; // RIPPS2 build 115: RIPPS2's badge set
+ extern void *ripps2_up_png;   // RIPPS2 build 70: D-pad glyphs, ps2-pillars elf/theme/tools/make_glyphs.py
+ extern void *ripps2_down_png;
+ extern void *hint_badge_png; // RIPPS2 build 90: hint badges (hints_labels=badge)
+@@ -301,6 +315,16 @@ static texture_t internalDefault[TEXTURES_COUNT] = {
+     {RIPPS2_LAUNCH_DISC, "launch_disc", &ripps2_disc_png},
+     {RIPPS2_PIXFONT, "ripps2_pixfont", &ripps2_pixfont_png},
+     {RIPPS2_SIDEBAR_ICONS, "ripps2_sidebar_icons", &ripps2_sidebar_icons_png},
++    {RIPPS2_PLAYERS_1, "Players_1", &Players_1_png},
++    {RIPPS2_PLAYERS_2, "Players_2", &Players_2_png},
++    {RIPPS2_PLAYERS_3, "Players_3", &Players_3_png},
++    {RIPPS2_PLAYERS_4, "Players_4", &Players_4_png},
++    {RIPPS2_PARENTAL_3, "Parental_3", &Parental_3_png},
++    {RIPPS2_PARENTAL_10, "Parental_10", &Parental_10_png},
++    {RIPPS2_PARENTAL_17, "Parental_17", &Parental_17_png},
++    {RIPPS2_PARENTAL_18, "Parental_18", &Parental_18_png},
++    {RIPPS2_PARENTAL_E, "Parental_e", &Parental_e_png},
++    {RIPPS2_PARENTAL_TEEN, "Parental_teen", &Parental_teen_png},
+     {PSBBN_BACKGROUND, "psbbn_bg", &psbbn_bg_png},
+ #ifdef RETROACHIEVEMENTS
+     // Positional: guarded by the same #ifdef as RA_MARK in enum INTERNAL_TEXTURE. Without
+@@ -643,6 +667,17 @@ static int texStageExternalFileIntoMemory(int fd, void **buffer, u32 *stagedSize
              return ERR_LOAD_ABORTED;
          }
  
@@ -5450,7 +6099,7 @@ index 2da860e..6c650e0 100644
          if (capacity - bytesRead < TEX_MMCE_STAGE_READ_SIZE) {
              unsigned char *grown;
  
-@@ -1109,16 +1124,20 @@ void texSetProbe(char *out, int size)
+@@ -1109,16 +1144,20 @@ void texSetProbe(char *out, int size)
  }
  
  // RIPPS2 build 95: game art as JPG. RiptOPL reads PNG only, and old OPL art packs are JPG, so every theme showed
@@ -5476,7 +6125,7 @@ index 2da860e..6c650e0 100644
      size = lseek(fd, 0, SEEK_END);
      lseek(fd, 0, SEEK_SET);
      if (size <= 0 || size > TEX_JPG_MAX_FILE || (buf = malloc(size)) == NULL) {
-@@ -1128,7 +1147,11 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
+@@ -1128,7 +1167,11 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
      while (got < size && (r = read(fd, buf + got, size - got)) > 0)
          got += r;
      close(fd);
@@ -5489,7 +6138,7 @@ index 2da860e..6c650e0 100644
          free(buf);
          return ERR_BAD_FILE;
      }
-@@ -1145,6 +1168,121 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
+@@ -1145,6 +1188,121 @@ static int texLoadJpg(GSTEXTURE *texture, const char *filePath)
      return 0;
  }
  
@@ -5611,7 +6260,7 @@ index 2da860e..6c650e0 100644
  int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
  {
      char filePath[256];
-@@ -1171,15 +1309,28 @@ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
+@@ -1171,15 +1329,28 @@ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId)
      //
      // Only ever skips work: artIndexMayExist returns 1 for anything it is not certain about, so the
      // worst case is exactly the behaviour that was here before.
@@ -5646,7 +6295,7 @@ index 2da860e..6c650e0 100644
      return (result >= 0) ? 0 : result;
  }
 diff --git a/src/themes.c b/src/themes.c
-index fa854fb..4fb8c08 100644
+index fa854fb..b525fe5 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -15,6 +15,7 @@
@@ -5657,7 +6306,77 @@ index fa854fb..4fb8c08 100644
  #include "include/metadb.h"     // RIPPS2: attributes fall back to the metadata database
  #include "include/saveicon.h"   // SaveIcon: the selected game's 3D save icon
  #include "include/cuesupport.h"
-@@ -2523,6 +2524,7 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+@@ -859,6 +860,21 @@ static void freeImageTexture(image_texture_t *texture)
+     }
+ }
+ 
++/* RIPPS2 build 115 (the user, 10/26: a theme down to its config and its screenshot frame): RIPPS2's own image for a
++   name a theme uses: the name itself (case, case_overlay, the glyphs...), or a badge as a theme's badge folders name
++   it, "rating/0_Rating" being RIPPS2's "Rating_0". -1 when RIPPS2 has none. */
++static int thmInternalIdFor(const char *imgName)
++{
++    char alt[64];
++    const char *slash, *under;
++    int id = texLookupInternalTexId(imgName);
++
++    if (id >= 0 || (slash = strchr(imgName, '/')) == NULL || (under = strrchr(slash, '_')) == NULL || under == slash + 1)
++        return id;
++    snprintf(alt, sizeof(alt), "%s_%.*s", under + 1, (int)(under - slash - 1), slash + 1);
++    return texLookupInternalTexId(alt);
++}
++
+ static image_texture_t *initImageTexture(const char *themePath, config_set_t *themeConfig, const char *name, const char *imgName, int isOverlay)
+ {
+     // calloc so omitted overlay coordinate keys default to 0 instead of
+@@ -876,6 +892,13 @@ static image_texture_t *initImageTexture(const char *themePath, config_set_t *th
+         char path[256];
+         snprintf(path, sizeof(path), "%s%s", themePath, imgName);
+         result = (texDiscoverLoad(&texture->source, path, texId) >= 0);
++        if (!result && (texId = thmInternalIdFor(imgName)) >= 0) { // build 115: not in the theme's folder: RIPPS2's own
++            int useDefault = 1;
++            if (themeConfig != NULL)
++                configGetInt(themeConfig, "use_default", &useDefault);
++            if (useDefault) // a theme with use_default=0 keeps an image it does not ship empty
++                result = (texLoadInternal(&texture->source, texId) >= 0);
++        }
+     } else {
+         texId = texLookupInternalTexId(imgName);
+         result = (texLoadInternal(&texture->source, texId) >= 0);
+@@ -2424,6 +2447,16 @@ static int thmItemIsApp(struct menu_list *menu, struct submenu_list *item)
+            (menuList->mode == FAV_MODE && favGetItemSourceMode(item->item.id) == APP_MODE);
+ }
+ 
++// build 115: is this row a PS1 game (a VCD or an Ember CUE)? Its cover takes the square PS1 case
++static int thmItemIsPs1(struct menu_list *menu, struct submenu_list *item)
++{
++    item_list_t *menuList;
++
++    if (item == NULL || item->item.isFolder || menu == NULL || menu->item == NULL || (menuList = (item_list_t *)menu->item->userdata) == NULL)
++        return 0;
++    return libListRowView(menuList, item->item.id) == LIB_VIEW_PS1;
++}
++
+ /* build 102: the box an app's case draws in, by its Case Shape: PS1 (the default) makes a tall box square, as wide as
+    it was; PS2 makes a square or wide one a PS2 case (143 x 201), as high as it was. Only a cover (COV, COV2) is
+    shaped, never an app's background or screenshots. The bottom edge stays where it was (aligned: the centre moves by
+@@ -2435,9 +2468,14 @@ static int thmAppShapeBox(struct menu_list *menu, struct submenu_list *item, the
+     int nw = *w, nh = *h, shape;
+ 
+     if (*w <= 0 || *h <= 0 || img == NULL || img->cache == NULL || img->cache->suffix == NULL ||
+-        strncmp(img->cache->suffix, "COV", 3) != 0 || !thmItemIsApp(menu, item))
++        strncmp(img->cache->suffix, "COV", 3) != 0)
++        return 0;
++    if (thmItemIsApp(menu, item))
++        shape = thmAppCaseShape(item->item.text);
++    else if (thmItemIsPs1(menu, item))
++        shape = THM_APP_CASE_PS1; // build 115: a PS1 game's cover in the square PS1 case, on every theme (legacy ones too)
++    else
+         return 0;
+-    shape = thmAppCaseShape(item->item.text);
+     if (shape == THM_APP_CASE_PS1 && nh > nw)
+         nh = nw;
+     else if (shape == THM_APP_CASE_PS2 && nh * 143 < nw * 201)
+@@ -2523,6 +2561,7 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
          return;
  
      int coverSpacing = (screenWidth - coverCount * coverWidth) / (coverCount + 1);
@@ -5665,7 +6384,7 @@ index fa854fb..4fb8c08 100644
      if (coverSpacing < 0)
          coverSpacing = 0;
      int coverDistance = coverWidth + coverSpacing;
-@@ -2820,6 +2822,25 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+@@ -2820,6 +2859,25 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
              ripps2TiltEnd();
          if (gRipps2Vignette && i != centerIdx)
              drawCoverVignette(posX, posY, rmWideScale(drawW), drawH, 1.0f);
@@ -5691,7 +6410,24 @@ index fa854fb..4fb8c08 100644
      }
  
      rmSetReflectionYOffset(0); // don't leak the offset to any other reflection draw
-@@ -4158,7 +4179,8 @@ static void drawBDMIndex(struct menu_list *menu, struct submenu_list *item, conf
+@@ -3793,8 +3851,14 @@ static void drawAttributeImage(struct menu_list *menu, struct submenu_list *item
+             metaDbGetStr(config, attributeImage->cache->suffix, (const char **)&attributeImage->currentValue);
+         }
+         if (attributeImage->currentValue) {
+-            if (thmGetGuiValue() == 0 || thmGetGuiValue() == nThemes + 1 || thmGetGuiValue() == nThemes + 2) {
+-                GSTEXTURE *texture = thmGetTexture(thmAttributeTexId(attributeImage));
++            // build 115: or a theme on RIPPS2's badge set (badge_set=ripps2, or the user's Badge Set), whose badges are decoded
++            // the first time one is wanted
++            int badgesBuiltin = gRipps2BadgeSet == 1 || (gRipps2BadgeSet == 0 && gTheme->badgeSet);
++            if (thmGetGuiValue() == 0 || thmGetGuiValue() == nThemes + 1 || thmGetGuiValue() == nThemes + 2 || badgesBuiltin) {
++                int badgeId = thmAttributeTexId(attributeImage);
++                if (badgesBuiltin && badgeId >= 0 && badgeId < TEXTURES_COUNT && gTheme->textures[badgeId].Mem == NULL)
++                    texLoadInternal(&gTheme->textures[badgeId], badgeId);
++                GSTEXTURE *texture = thmGetTexture(badgeId);
+                 if (texture && texture->Mem)
+                     rmDrawPixmap(texture, elem->posX, elem->posY, elem->aligned, elem->width, elem->height, elem->scaled, gDefaultCol, 0);
+ 
+@@ -4158,7 +4222,8 @@ static void drawBDMIndex(struct menu_list *menu, struct submenu_list *item, conf
          rmDrawPixmap(indexTex, elem->posX, elem->posY, elem->aligned, elem->width, elem->height, elem->scaled, gDefaultCol, 0);
  }
  
@@ -5701,7 +6437,7 @@ index fa854fb..4fb8c08 100644
  
  // RIPPS2 build 106: which of a list's per-kind row icons a row takes: 0 a PS2 game, 1 a PS1 one, 2 an app
  static int thmRowKind(item_list_t *list, submenu_list_t *row)
-@@ -4582,6 +4604,11 @@ static int hintEntryWidth(menu_hint_item_t *h, int labels, int font)
+@@ -4582,6 +4647,11 @@ static int hintEntryWidth(menu_hint_item_t *h, int labels, int font)
  static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y, u64 col, u64 iconCol)
  {
      GSTEXTURE *badge = hintBadge(labels);
@@ -5713,7 +6449,7 @@ index fa854fb..4fb8c08 100644
      if (badge != NULL) {
          int w = hintEntryWidth(h, labels, font);
          float half = badge->Width / 2.0f;
-@@ -4591,7 +4618,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
+@@ -4591,7 +4661,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
          if (mid > 0)
              rmDrawPixmapPart(badge, x + cap, by, ALIGN_NONE, mid, HINT_BADGE_H, SCALING_NONE, iconCol, half - 0.5f, 0, half + 0.5f, badge->Height);
          rmDrawPixmapPart(badge, x + cap + (mid > 0 ? mid : 0), by, ALIGN_NONE, capW, HINT_BADGE_H, SCALING_RATIO, iconCol, half, 0, badge->Width, badge->Height);
@@ -5722,7 +6458,7 @@ index fa854fb..4fb8c08 100644
          return x + w;
      }
      if (hintGlyphOnly(h, labels)) {
-@@ -4600,7 +4627,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
+@@ -4600,7 +4670,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
          rmDrawPixmap(t, x, y + 10, ALIGN_VCENTER, w, 20, SCALING_RATIO, iconCol, 0);
          return x + rmWideScale(w) + 2;
      }
@@ -5731,7 +6467,7 @@ index fa854fb..4fb8c08 100644
  }
  
  static void drawHintText(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
-@@ -4655,6 +4682,13 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4655,6 +4725,13 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
              row[j] = k;
          }
          u64 col = hintFade(elem->color, hintA), iconCol = hintFade(gDefaultCol, hintA);
@@ -5745,7 +6481,7 @@ index fa854fb..4fb8c08 100644
  
          if (ripps2HintColumn()) {
              // one hint a line from the element's x/y down; a column that would run off the bottom (the
-@@ -4665,7 +4699,7 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4665,7 +4742,7 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
              if (y < 0)
                  y = 0;
              for (i = 0; i < n; i++)
@@ -5754,7 +6490,7 @@ index fa854fb..4fb8c08 100644
          } else {
              // RIPPS2: fit the row between the screen margins. A full row (Menu, Run, Info, Options,
              // Refresh, Favorite, PS1) is wider than a gap of elem->width allows, so the gap tightens
-@@ -4695,7 +4729,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4695,7 +4772,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
                  x = 4;
  
              for (i = 0; i < n; i++)
@@ -5765,7 +6501,7 @@ index fa854fb..4fb8c08 100644
          }
          if (showSource) {
              menu_hint_item_t *h2 = menu->item->hints;
-@@ -6003,6 +6039,21 @@ static void thmLoadFonts(config_set_t *themeConfig, const char *themePath, theme
+@@ -6003,6 +6082,36 @@ static void thmLoadFonts(config_set_t *themeConfig, const char *themePath, theme
      }
      theme->diaFont = diaFont != FNT_ERROR ? diaFont : theme->fonts[4];
      theme->diaTipFont = thmDiaTipFont != FNT_ERROR ? thmDiaTipFont : theme->fonts[15];
@@ -5784,10 +6520,25 @@ index fa854fb..4fb8c08 100644
 +    slot = -1;
 +    if (configGetInt(themeConfig, "notice_font", &slot) && slot >= 0 && slot < THM_MAX_FONTS)
 +        theme->noteFont = theme->fonts[slot];
++
++    // build 115 (the user, 10/26: "force them all to use the roboto normal weight case sensitive for readability"): every
++    // message box and wait screen in the built-in Roboto Condensed at 400, whatever Text Weight says, upper and lower case
++    // as written (the theme's menu face drew them in its own capitals), the other scripts from the language's font as
++    // the notifications have them; message_font=<slot> gives a theme's own
++    static int msgFont = FNT_ERROR;
++    if (msgFont == FNT_ERROR) {
++        msgFont = fntLoadFile("builtin:ripflow", 18);
++        if (msgFont != FNT_ERROR)
++            fntSetWeight(msgFont, 400);
++    }
++    theme->msgFont = msgFont != FNT_ERROR ? msgFont : theme->fonts[4];
++    slot = -1;
++    if (configGetInt(themeConfig, "message_font", &slot) && slot >= 0 && slot < THM_MAX_FONTS)
++        theme->msgFont = theme->fonts[slot];
  }
  
  /* RIPPS2 build 102 (user: "ripflow status page font and ripps2 about pages font slots on all themes"). About and
-@@ -6040,12 +6091,14 @@ int gRipps2TextWeight = 0;
+@@ -6040,12 +6149,14 @@ int gRipps2TextWeight = 0;
  void ripps2ApplyTextWeight(void)
  {
      int i;
@@ -5804,7 +6555,7 @@ index fa854fb..4fb8c08 100644
  }
  
  void thmPageFontsEnd(void)
-@@ -6455,7 +6508,7 @@ static int thmLoad(const char *themePath)
+@@ -6455,7 +6566,7 @@ static int thmLoad(const char *themePath)
      newT->paletteDef = newT->catBarDef = newT->hintsDef = newT->glyphsDef = newT->srcNameDef = newT->catSwapDef = -1;
      {
          static const char *const showNames[] = {"shown", "fade", "hidden"};
@@ -5813,7 +6564,7 @@ index fa854fb..4fb8c08 100644
          const char *v = NULL;
          int i;
          if (configGetStr(themeConfig, "color_theme", &v) && v != NULL)
-@@ -6470,9 +6523,12 @@ static int thmLoad(const char *themePath)
+@@ -6470,9 +6581,12 @@ static int thmLoad(const char *themePath)
              if (configGetStr(themeConfig, "source_name", &v) && v != NULL && !strcasecmp(v, showNames[i]))
                  newT->srcNameDef = i;
          }
@@ -5827,7 +6578,49 @@ index fa854fb..4fb8c08 100644
          if (configGetStr(themeConfig, "category_order", &v) && v != NULL) // launch_disc_first | memory_files_first
              newT->catSwapDef = !strcasecmp(v, "memory_files_first") ? 1 : !strcasecmp(v, "launch_disc_first") ? 0 : -1;
      }
-@@ -6561,6 +6617,9 @@ static int thmLoad(const char *themePath)
+@@ -6522,27 +6636,29 @@ static int thmLoad(const char *themePath)
+         newT->catX = newT->catY = newT->catSpacing = newT->catTransitionDef = -1;
+         if (configGetStr(themeConfig, "category_font", &v) && v != NULL)
+             newT->catFontTheme = !strcasecmp(v, "theme");
+-        // build 113 (the user's legacy key): categories=three is a theme made for RIPPS2's three categories; a theme
+-        // without it (one made for Open PS2 Loader) shows Storage alone, with Launch Disc and Memory Files in the
+-        // START menu. A theme made for RIPPS2 before the key (any of RIPPS2's own keys) keeps the three, so an older
+-        // theme pack is not cut down; categories=storage asks for Storage alone. The built-in looks have the three.
++        // build 115 (the user, 10/26: one key for it): category_layout says where the three categories go: row (their names
++        // across the top), sidebar (glyphs down the side bar, a drawer each; column is sidebar too) or menu (no bar: Storage
++        // alone, Launch Disc and Memory Files in the START menu, as a theme made for Open PS2 Loader has them). A theme
++        // that does not say is menu: it shows the categories only by asking. Build 113's categories=three still means row
++        // where category_layout is not set (and storage, menu). The built-in looks have the three, across the top.
+         if (themePath == NULL)
+             newT->catLegacy = 0;
+-        else if (configGetStr(themeConfig, "categories", &v) && v != NULL)
+-            newT->catLegacy = !strcasecmp(v, "storage");
+         else {
+-            static const char *const ripps2Keys[] = {"towers", "bg_blur", "source_name", "glyph_set", "sounds", "color_theme",
+-                                                     "category_order", "category_layout", "category_font", "page_buttons", "launch_disc"};
+-            int k;
+             newT->catLegacy = 1;
+-            for (k = 0; k < (int)(sizeof(ripps2Keys) / sizeof(ripps2Keys[0])); k++)
+-                if (configGetStr(themeConfig, ripps2Keys[k], &v))
+-                    newT->catLegacy = 0;
++            if (configGetStr(themeConfig, "categories", &v) && v != NULL && !strcasecmp(v, "three"))
++                newT->catLegacy = 0;
+         }
+         if (configGetStr(themeConfig, "category_layout", &v) && v != NULL) {
+             newT->catColumn = !strcasecmp(v, "column");
+             newT->catSidebar = newT->catColumn || !strcasecmp(v, "sidebar"); // build 113: vertical is the sidebar now
++            if (themePath != NULL)
++                newT->catLegacy = !strcasecmp(v, "menu");
+         }
++        // build 115: RIPPS2's badges (badge_set=ripps2) and where its busy mark sits (loading_mark=corner|center)
++        newT->badgeSet = configGetStr(themeConfig, "badge_set", &v) && v != NULL && !strcasecmp(v, "ripps2");
++        newT->loadingMark = 0;
++        if (configGetStr(themeConfig, "loading_mark", &v) && v != NULL)
++            newT->loadingMark = !strcasecmp(v, "center") ? 1 : !strcasecmp(v, "corner") ? 2 : 0;
+         // build 113: the sidebar's bar, by default Adapt's (its main2 at x 0, 26 wide, #01040F at 88, and main3's
+         // #28C5F9 accent at 22 beside it); a theme that draws its own bar on Storage says sidebar_bar=pages
+         newT->sbX = 0;
+@@ -6561,6 +6677,9 @@ static int thmLoad(const char *themePath)
              newT->sbDrawer = intValue;
          if (configGetStr(themeConfig, "sidebar_bar", &v) && v != NULL)
              newT->sbBar = !strcasecmp(v, "never") ? 0 : !strcasecmp(v, "pages") ? 1 : 2;

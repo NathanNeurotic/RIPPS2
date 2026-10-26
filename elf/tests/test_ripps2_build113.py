@@ -68,11 +68,15 @@ need(gui, (('static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Acros
            ('        gRipps2CatLayout = keepCat[4];', 'Cancel puts it back'),
            ('gRipps2CatLayout != keepCat[4]', 'a change is saved')), 'gui.c')
 need(rd('lng_tmpl/_base.yml'), (('- label: RIPPS2_CATEGORY_LAYOUT\n  string: Category Layout\n', 'its label'),), '_base.yml')
-# The legacy key (the user): categories=three; a theme made for OPL shows Storage alone, Launch Disc and Memory Files in
-# the START menu; a RIPPS2 theme from before the key (any RIPPS2 key) keeps the three
-need(themes, (('newT->catLegacy = !strcasecmp(v, "storage");', 'categories=storage asks for Storage alone'),
-              ('static const char *const ripps2Keys[] = {"towers", "bg_blur",', "an older RIPPS2 theme keeps the three"),
+# The legacy key (the user): a theme made for OPL shows Storage alone, Launch Disc and Memory Files in the START menu.
+# Build 115 (the user, 10/26): category_layout alone says it (row, sidebar or menu); a disk theme that says neither row
+# nor sidebar is menu; build 113's categories=three still reads as row where category_layout is not set
+need(themes, (('                newT->catLegacy = !strcasecmp(v, "menu");', 'category_layout=menu asks for Storage alone'),
+              ('            newT->catLegacy = 1;\n            if (configGetStr(themeConfig, "categories", &v) && v != NULL && !strcasecmp(v, "three"))\n                newT->catLegacy = 0;',
+               'unset is menu; categories=three is still the bar'),
               ('if (themePath == NULL)\n            newT->catLegacy = 0;', 'the built-in looks keep the three')), 'themes.c')
+if 'ripps2Keys[]' in themes:
+    fail.append('themes.c: build 115 dropped the guess from RIPPS2 keys (a theme says category_layout)')
 need(ui, (('    if (ripps2Legacy()) // build 113: a legacy theme has no bar', 'a legacy theme has no category bar'),
           ('    if (ripps2Legacy()) { // build 113: no bar to step along', 'L1 / R1 go back to Storage from the other two')), 'ripps2ui.c')
 if ui.count('if (ripps2Legacy() && getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {') != 2:

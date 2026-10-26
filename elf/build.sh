@@ -52,10 +52,13 @@ cp -f "$HERE/theme/fonts/ripps2_one.ttf" "$SRC/misc/ripps2_one.ttf"
 # RIPFLOW's and Settings' font (build 114): Roboto Condensed 3.015, variable (weights 400 to 700), cut to Latin-1,
 # SIL OFL 1.1 (theme/fonts/ROBOTO-OFL.txt); made by theme/tools/make_roboto.py
 cp -f "$HERE/theme/fonts/ripps2_roboto.ttf" "$SRC/misc/ripps2roboto.ttf"
+# build 115: Planet N Condensed by Iconian Fonts, Adapt's list face, built in (builtin:ripps2condensed) so the theme carries
+# no font file
+cp -f "$HERE/theme/fonts/ripps2_condensed.ttf" "$SRC/misc/ripps2_condensed.ttf"
 # build 114: the compiled-in fonts without what FreeType never reads (glyph names, extra name records, signatures,
 # substitution tables); outlines, hinting and kerning stay, and a font whose outlines would change is left whole
 python3 -c "import fontTools" 2>/dev/null || pip3 install --quiet --break-system-packages fonttools || true
-python3 "$HERE/theme/tools/strip_fonts.py" "$SRC"/misc/ripps2_font.ttf "$SRC"/misc/ripps2_sleek*.ttf "$SRC"/misc/ripps2_one.ttf "$SRC"/misc/ripps2roboto.ttf || true
+python3 "$HERE/theme/tools/strip_fonts.py" "$SRC"/misc/ripps2_font.ttf "$SRC"/misc/ripps2_sleek*.ttf "$SRC"/misc/ripps2_one.ttf "$SRC"/misc/ripps2roboto.ttf "$SRC"/misc/ripps2_condensed.ttf || true
 # The Memory Files ELF, compiled in and launched from RAM (patch 0004)
 # Built-in textures: glass info panel and PS2 selector mark (patch 0006)
 cp -f "$HERE"/theme/gfx/*.png "$SRC/gfx/"

@@ -178,6 +178,8 @@ BADGES = {
     'Scan_480p1': '480p', 'Scan_480p2': '480p', 'Scan_480p3': '480p', 'Scan_480p4': '480p', 'Scan_480p5': '480p',
     'Scan_576i': '576i', 'Scan_576p': '576p', 'Scan_720p': '720p',
     'Scan_1080i': '1080i', 'Scan_1080i2': '1080i', 'Scan_1080p': '1080p',
+    # build 115: Players, for RIPPS2's badge set (badge_set=ripps2) beside the ESRB ratings (Parental_*, Adapt's art)
+    'Players_1': '1P', 'Players_2': '2P', 'Players_3': '3P', 'Players_4': '4P',
     'missing': '?',
 }
 PILLS = ('L1', 'R1', 'L3', 'R3')

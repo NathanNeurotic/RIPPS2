@@ -117,6 +117,27 @@ MMCE beta 2 is on the SD as PS2BBL's R1).
 4. Network: the title and its line spaced like the other pages. Audio: the divider lines moved to fit the text, which
    stays where it is.
 
+### Round 3b: slim themes and the theme engine (the user, 10/26)
+1. A theme of two files: an image a theme names but does not ship is RIPPS2's own of that name (badge folder names read
+   as RIPPS2's: rating/0_Rating is Rating_0), unless use_default=0. Planet N Condensed built in
+   (builtin:ripps2condensed). Adapt and Adapt Rx edition 115 are conf_theme.cfg + SCR43.png (themes repo b31725b,
+   pushed with the release: it needs this build).
+2. RIPPS2's badge set: badge_set=ripps2 and Hints and Glyphs > Badge Set (Theme / RIPPS2, config ripps2_badge_set);
+   Players_1..4 drawn in RIPFLOW's style (make_glyphs.py), Parental_* from Adapt; all 8-bit.
+3. loading_mark=corner|center places the busy mark; load0..7 never drawn.
+4. category_layout=row|sidebar|menu is the one key; unset is menu for disk themes; categories=three|storage read only
+   where it is unset; Layout > Category Layout's Across the Top / Sidebar bring the bar onto a menu theme.
+5. PS1 rows' covers in the square PS1 case on every theme (thmItemIsPs1).
+6. Held SELECT on List: the THEMES window fades in empty at 1 s with the notch wheel filling to 4.2 s, where the
+   themes fill it; let go and it fades, the list refreshes (ripps2ThemeHold / ripps2ThemeHoldRender).
+7. Every message box and wait screen in Roboto Condensed 400, its own case (RIPPS2_MSG_FONT, message_font=<slot>).
+8. Boot: a black frame while the settings load, then the towers in the Color Theme from their first pose;
+   ripps2PaletteSync every pillars frame, so the Color Sweep moves through the boot zoom.
+9. Themes releases: one rolling release, "RIPPS2 Themes" on tag `rolling` (10/26; the numbered ones deleted, tags kept,
+   notes in B:/Webpages - Projects/RIPPS2-themes-releases-archive-2026-10-26). Update it in place for edition 115.
+Site (pushed 10/26): the shelf's ten hats, each a Color Theme wave on the towers; portrait phones get the letterboxed
+player (letterbox.js).
+
 ### Round 4: release
 - Translations: build 115's 58 strings and its new labels in the 32 languages.
 - Lab rounds in PCSX2: navigation and sidebar, Recent Games, the list pulse, STATUS LOADING, the BIOS Sounds room check,
