@@ -1405,7 +1405,7 @@ index 7894802..fa38966 100644
          pDeviceData->bdmPs1RetryCount = pDeviceData->bdmPs1RetryPending = 0;
      // At most two extra scans on the normal idle-refresh cadence. This does
 diff --git a/src/dia.c b/src/dia.c
-index 681481c..6b554ef 100644
+index 681481c..d0fbada 100644
 --- a/src/dia.c
 +++ b/src/dia.c
 @@ -844,7 +844,34 @@ static void diaHintEllipsize(char *wrapped, int *wlen, int lineStart, int innerW
@@ -1455,7 +1455,116 @@ index 681481c..6b554ef 100644
  
      // render hint on the lower side of the screen, on RIPPS2's deep glass (was a flat dark box)
      ripps2DrawHintBoxA(x, y, boxW, boxH, tipA);
-@@ -1568,7 +1593,7 @@ void diaRenderUI(struct UIItem *ui, short inMenu, struct UIItem *cur, int haveFo
+@@ -1064,6 +1089,27 @@ static void diaDrawHint(const struct UIItem *item)
+ // RIPPS2 build 109: room between a page's title and the line under it (the title stood on the line, its descenders cut)
+ #define DIA_HEADER_GAP 8
+ 
++/* RIPPS2 build 115 (the user, 10/25: "make the network page's title and line match the other pages' spacing, and
++   normalize the audio lines ... keep the text where it is, just adjust the white lines"). Two things about lines:
++   - A page's title and the line under it (and the gap to the first row) keep the standard gap on every page. Only the
++     rows below tighten when a page is fitted to the screen; tightening the title with them put Network's line 6 pixels
++     higher than every other page's.
++   - A line that follows a row directly ({row}, {UI_SPLITTER}: Audio's groups) sits in the middle of the gap between that
++     row and the next, as a line after a break ({UI_BREAK}, {UI_SPLITTER}) always has. Drawn at the top of its own space,
++     it touched the letters above. diaSplitDrop moves it there; the text does not move. */
++static int diaSplitDrop = 0;
++
++// a line is advanced past: the gap, the standard one while still in a page's title (inHead counts the title row and the
++// line under it down)
++static int diaLineGap(int *inHead, int gap, int stdGap)
++{
++    if (*inHead > 0) {
++        (*inHead)--;
++        return stdGap;
++    }
++    return gap;
++}
++
+ static int diaItemHeight(struct UIItem *item, int spacingH)
+ {
+     int h;
+@@ -1156,7 +1202,7 @@ static void diaRenderItem(int x, int y, struct UIItem *item, int selected, int h
+         case UI_SPLITTER: {
+             // a line. Thanks to the font rendering, we need to shift up by one font line
+             *w = 0;                          // nothing to render at all
+-            int ypos = y - UI_SPACING_V / 2; //  gsFont->CharHeight +
++            int ypos = y - UI_SPACING_V / 2 + diaSplitDrop; //  gsFont->CharHeight + (build 115: diaSplitDrop)
+ 
+             // to ODD lines
+             ypos &= ~1;
+@@ -1378,7 +1424,7 @@ static int diaRowCollapses(struct UIItem *ui, int rowHidden, int rowShown)
+ 
+ static int diaLayoutBottom(struct UIItem *ui, int spacingH, int gap, int top)
+ {
+-    int y = top, hmax = 0, bottom = top, rowHidden = 0, rowShown = 0;
++    int y = top, hmax = 0, bottom = top, rowHidden = 0, rowShown = 0, inHead = 0;
+ 
+     for (; ui->type != UI_TERMINATOR; ui++) {
+         int h;
+@@ -1392,17 +1438,19 @@ static int diaLayoutBottom(struct UIItem *ui, int spacingH, int gap, int top)
+         diaRowState(ui, &rowHidden, &rowShown);
+         if (diaShouldBreakLine(ui)) {
+             if (hmax > 0)
+-                y += hmax + gap;
++                y += hmax + diaLineGap(&inHead, gap, spacingH);
+             hmax = 0;
+         }
+         h = diaItemHeight(ui, spacingH);
++        if (ui->type == UI_HEADER)
++            inHead = 2; // build 115: the title row and its line keep the standard gap
+         if (h > hmax)
+             hmax = h;
+         if (y + h > bottom)
+             bottom = y + h;
+         if (diaShouldBreakLineAfter(ui)) {
+             if (hmax > 0)
+-                y += hmax + gap;
++                y += hmax + diaLineGap(&inHead, gap, spacingH);
+             hmax = 0;
+         }
+     }
+@@ -1444,6 +1492,7 @@ void diaRenderUI(struct UIItem *ui, short inMenu, struct UIItem *cur, int haveFo
+     int curTop = y0, curBot = y0; // rendered extent of the focused row, for cursor-follow scroll
+     int contentBottom = y0;       // lowest rendered pixel (screen-space), for the maxScroll upper clamp
+     int rowHidden = 0, rowShown = 0; // build 91: a row of hidden controls takes no line (diaRowCollapses)
++    int inHead = 0, afterBreak = 0;  // build 115: the title's standard gaps; the last item was a UI_BREAK
+ 
+     while (rc->type != UI_TERMINATOR) {
+         int w = 0, h = 0;
+@@ -1462,10 +1511,15 @@ void diaRenderUI(struct UIItem *ui, short inMenu, struct UIItem *cur, int haveFo
+             x = x0;
+ 
+             if (hmax > 0)
+-                y += hmax + gapH;
++                y += hmax + diaLineGap(&inHead, gapH, spacingH);
+ 
+             hmax = 0;
+         }
++        // build 115: a line straight after a row (not after a break, not the title's own) drops to the middle of its gap
++        diaSplitDrop = (rc->type == UI_SPLITTER && !afterBreak && inHead == 0) ? (spacingH + gapH) / 2 : 0;
++        afterBreak = rc->type == UI_BREAK;
++        if (rc->type == UI_HEADER)
++            inHead = 2;
+ 
+         // Viewport clip for scrolled dialogs (FifthFox HW: "scrolled text moves out of the background
+         // image ... clearing the entire screen removes the stray text"). diaScrollOffset shifts rows
+@@ -1511,13 +1565,14 @@ void diaRenderUI(struct UIItem *ui, short inMenu, struct UIItem *cur, int haveFo
+             x = x0;
+ 
+             if (hmax > 0)
+-                y += hmax + gapH;
++                y += hmax + diaLineGap(&inHead, gapH, spacingH);
+ 
+             hmax = 0;
+         }
+ 
+         rc++;
+     }
++    diaSplitDrop = 0;
+ 
+     // Cursor-follow scroll: re-clamp the offset so the focused row stays on-screen, above the
+     // bottom hint bar. Self-correcting each frame; remains 0 for dialogs that fit (no scroll).
+@@ -1568,7 +1623,7 @@ void diaRenderUI(struct UIItem *ui, short inMenu, struct UIItem *cur, int haveFo
      }
  
      if ((cur != NULL) && (!haveFocus || (cur->type == UI_ENUM && cur->enumHints != NULL)) && (cur->hintId != -1)) {
@@ -1875,7 +1984,7 @@ index a7ff5de..9e3b714 100644
      // Neutrino-only row greyed even under a Neutrino global default (guiGameSetCoreAwareState reads
      // this). SMB likewise: ethsupport has no Neutrino launch leg, the effective core is always <OPL>.
 diff --git a/src/menusys.c b/src/menusys.c
-index 1f08c7e..3887dfa 100644
+index 1f08c7e..a71288d 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -1022,6 +1022,8 @@ static int menuDevicePageRank(const menu_item_t *item)
@@ -2030,6 +2139,47 @@ index 1f08c7e..3887dfa 100644
      } else if (getKeyOn(KEY_L3)) { // advance the current page's library-view ring
          if (!viewPending && selected_item->item->toggleView)
              selected_item->item->toggleView(selected_item->item);
+@@ -2696,15 +2766,16 @@ void menuRenderGameMenu()
+     int y = (gTheme->usedHeight >> 1) - (spacing * (count >> 1));
+     int cp = 0; // current position
+ 
+-    // game title
+-    fntRenderString(RIPPS2_MENU_FONT, 320, 20, ALIGN_CENTER, 0, 0,
++    // game title. Build 115 (the user, 10/25: "make sure the titles all have a uniform placement from the top margin on our
++    // pages that resemble each other"): where the Settings hub has its title, and the line under it in its face, fitted
++    fntRenderString(RIPPS2_MENU_FONT, 320, 50, ALIGN_CENTER, 0, 0,
+                     cfgTitleDisplayName((item_list_t *)selected_item->item->userdata, selected_item->item->current->item.id,
+                                         selected_item->item->current->item.text),
+                     gTheme->selTextColor);
+ 
+     // config source
+     char *cfgSource = gameConfigSource();
+-    fntRenderString(RIPPS2_MENU_FONT, 320, 40, ALIGN_CENTER, 0, 0, cfgSource, gTheme->textColor);
++    fntRenderStringFit(gTheme->diaTipFont, 320, 72, ALIGN_CENTER, 600, cfgSource, gTheme->textColor, 0);
+ 
+     // settings list
+     for (it = gameMenu; it; it = it->next, cp++) {
+@@ -2995,16 +3066,17 @@ void menuRenderAppMenu()
+     int y = (gTheme->usedHeight >> 1) - (spacing * (count >> 1));
+     int cp = 0; // current position
+ 
+-    // app title
+-    fntRenderString(RIPPS2_MENU_FONT, 320, 20, ALIGN_CENTER, 0, 0,
++    // app title (build 115: at the Settings hub's place, as the game menu's)
++    fntRenderString(RIPPS2_MENU_FONT, 320, 50, ALIGN_CENTER, 0, 0,
+                     cfgTitleDisplayName((item_list_t *)selected_item->item->userdata, selected_item->item->current->item.id,
+                                         selected_item->item->current->item.text),
+                     gTheme->selTextColor);
+ 
+     // A PS1 row opens this smaller menu, not the PS2 VMC editor. Say why the missing PS2 control
+     // is intentional without claiming that Ember and POPSTARTER store their cards identically.
++    // Build 115: in the Settings hub's line face (the theme's default face drew it in big capitals and it ran off)
+     if (appMenu->item.id == APP_GLOBAL_PS_SETTINGS)
+-        fntRenderStringFit(gTheme->fonts[0], 320, 43, ALIGN_CENTER, 600,
++        fntRenderStringFit(gTheme->diaTipFont, 320, 72, ALIGN_CENTER, 600,
+                            _l(_STR_PS1_SAVE_GUIDANCE), gTheme->textColor, 0);
+ 
+     for (it = appMenu; it; it = it->next, cp++) {
 diff --git a/src/mixsupport.c b/src/mixsupport.c
 index 3eb2114..9132082 100644
 --- a/src/mixsupport.c
