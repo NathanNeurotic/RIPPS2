@@ -5512,7 +5512,7 @@ index 11d84ce..7e699a7 100644
  }
  
 diff --git a/src/ripps2boot.c b/src/ripps2boot.c
-index a191468..3750cb0 100644
+index a191468..70ef86d 100644
 --- a/src/ripps2boot.c
 +++ b/src/ripps2boot.c
 @@ -57,6 +57,8 @@
@@ -5942,11 +5942,13 @@ index a191468..3750cb0 100644
  // BOOT LOADER > MANAGE: what each card starts, and BIBLE to install or repair
  void ripps2BibleManage(void)
  {
-@@ -1575,7 +1667,7 @@ void ripps2BibleManage(void)
+@@ -1574,8 +1666,8 @@ void ripps2BibleManage(void)
+     for (port = 0; port < 2; port++)
          blCardWhat(port, boot, what[port], sizeof(what[port]));
      snprintf(msg, sizeof(msg),
-              _t("MEMORY CARD 0: %s\nMEMORY CARD 1: %s\n%s\n"
+-             _t("MEMORY CARD 0: %s\nMEMORY CARD 1: %s\n%s\n"
 -             "BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?"),
++             _t("SLOT 1: %s\nSLOT 2: %s\n%s\n"
 +             "RIPPS2: Setting up BBL 1.20. PS2BBL 1.2.0 by El Isra, set up by RIPPS2 on a standard 8 MB PS2 memory card or the internal HDD: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first from where it is (it is never copied), and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Set it up, repair it or restore what it replaced?"),
               what[0], what[1],
               removed ? _t("(Removed a SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it.)\n") : "");

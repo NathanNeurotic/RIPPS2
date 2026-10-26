@@ -1,0 +1,40 @@
+{
+ "s": {
+  "0": "、音效",
+  "1": "Fast Boot 已开启。RIPPS2 从自己的驱动器 (%s) 启动：设置%s 和每个列表都从缓存读取。其他驱动器在你于其页面按 SELECT 或启动其中的游戏时才启动。",
+  "2": "Fast Boot 已开启。音效需要 %d KB，而 RIPPS2 所在的记忆卡只剩 %d KB，所以音效留在 %s。",
+  "3": " (剩余 %d KB)",
+  "4": " (剩余 %u MB)",
+  "5": "RIPPS2 旁边：%sAUDIO%s，启动时最先读取",
+  "6": "- 主机把 PS2BBL 1.2.0 绑定到这张卡，写为 %s/%s。\n- 它的设置 mc%d:/PS2BBL/CONFIG.INI 从 RIPPS2 现在的位置 (%s) 无等待启动它 (0 ms，PS2BBL Extended 不允许)，BOOT LOCK 开启。RIPPS2 本身不会被复制。\n为此 I/O 处理器会重启，所有驱动器读取会暂停直到完成；音乐和驱动器随后恢复。在提示完成之前，请保持卡插着、主机开着。",
+  "7": "SD2PSX 或 MMCE 卡在写入被拒后可能会自我保护：如果现在记忆卡或 MMCE 驱动器不见了，请关闭主机再打开。",
+  "8": "BOOT LOCK 开启",
+  "9": "完成：插槽 %d 的记忆卡会启动 BBL 1.20 之前启动的内容。BBL 1.20 保留在 mc%d:/%s。",
+  "10": "适用于标准 8 MB PS2 记忆卡 (MagicGate 卡，或 SD2PSX、MMCE 的 BOOT 卡)：插槽 %d 中的那张。开机时 PS2BBL 先读插槽 2 的设置，再读插槽 1 的。\n",
+  "11": "插槽 %d 的记忆卡  (%s)",
+  "12": "PS2BBL 1.2.0 无法从 RIPPS2 现在的位置启动它 (它只能访问记忆卡、USB 驱动器和 MX4SIO)，而 RIPPS2 不会复制自己。请把 RIPPS2.ELF 放到记忆卡或 USB 驱动器上并从那里启动，或使用能读取 MMCE 和硬盘的 PS2BBL Extended。",
+  "13": "恢复插槽 %d 原来的启动程序",
+  "14": "RIPPS2：BBL 1.20 已设置在插槽 %d 的记忆卡上 (mc%d:/%s/%s)，BOOT LOCK 开启：开机时立即从 %s 启动 RIPPS2。",
+  "15": "RIPPS2：正在设置 BBL 1.20\n",
+  "16": "RIPPS2：正在设置 BBL 1.20\nRIPPS2 正在从 %s 运行，而 PS2BBL 1.2.0 读不了那里 (它读取记忆卡、USB 和 MX4SIO)，RIPPS2 也不会复制自己。这张卡上的 PS2BBL Extended 设置 (%s) 可以读取：START 会开启 BOOT LOCK，让它在开机时从 %s 启动 RIPPS2。卡上的其他内容不变。",
+  "17": "RIPPS2：正在设置 BBL 1.20\nRIPPS2 正在从 %s 运行，而 PS2BBL 1.2.0 读不了那里：它只从记忆卡、USB 驱动器或 MX4SIO 启动程序，RIPPS2 也不会复制自己。请把 RIPPS2.ELF 放到其中之一 (记忆卡的 APPS 文件夹或 USB 驱动器)，从那里启动，然后再设置一次 BIBLE。",
+  "18": "RIPPS2：正在设置 BBL 1.20\n插槽 %d 的记忆卡：BBL 1.20 (mc%d:/%s) 会移到一边，它替换掉的内容 (mc%d:/%s) 回到原位。不会删除任何东西。PS2BBL 设置保持不变 (BOOT LOCK 可以关闭锁定)。",
+  "19": "RIPPS2：正在设置 BBL 1.20 (正在把 PS2BBL 绑定到记忆卡)",
+  "20": "RIPPS2：正在设置 BBL 1.20 (正在放回原来的内容)",
+  "21": "RIPPS2：正在设置 BBL 1.20 (正在重启 I/O 处理器)",
+  "22": "RIPPS2：正在设置 BBL 1.20 (正在写入记忆卡)",
+  "23": "设置 BBL 1.20",
+  "24": "插槽 1：%s\n插槽 2：%s\n%s\nRIPPS2：正在设置 BBL 1.20。El Isra 的 PS2BBL 1.2.0，由 RIPPS2 设置在标准 8 MB PS2 记忆卡或内置硬盘上：开机 0 ms 启动 (PS2BBL Extended 不允许 0)，先从 RIPPS2 所在的位置启动它 (从不复制)，开机时按住按钮仍可进入浏览器 (TRIANGLE)、光盘 (START) 和原来的内容 (CIRCLE)。要设置、修复，还是恢复被它替换的内容？",
+  "25": "插槽 %d 的记忆卡剩余 %d KB，而 BBL 1.20 需要 %d KB。请腾出一些空间后再试。",
+  "26": "插槽 %d 的记忆卡拒绝了 PS2BBL，所以 RIPPS2 让卡保持原样。请检查剩余空间后再试。(卡的回应在 RIPPS2 旁边的 DIAG.TXT 里。)",
+  "27": "插槽 %d 的记忆卡没能把 BBL 1.20 移开，所以没有任何改动。(卡的回应在 RIPPS2 旁边的 DIAG.TXT 里。)",
+  "28": "插槽 %d 的记忆卡没能取回 %s，所以 BBL 1.20 保留了下来。(卡的回应在 RIPPS2 旁边的 DIAG.TXT 里。)",
+  "29": "音乐",
+  "30": "%s%s 里没有 %s。RIPPOPS 在 %s 找到了 Sony 的 PS1 模拟器：START 会把 %s 复制到这里并启动游戏。",
+  "31": "RIPPS2 没有看到 %s (在 %s%s)。POPSTARTER 需要 POPS_IOX.PAK 加 POPS.PAK，或 POPS_IOX.PAK 加 POPS.ELF 和 IOPRP252.IMG：来自你自己主机的 Sony PS1 模拟器。它可能在 RIPPS2 不找的地方找到它们 (如果你的游戏能启动，就是找到了)。START 启动，之后不会再询问这个驱动器。"
+ },
+ "l": {
+  "RIPPS2_FAST_BOOT": "Fast Boot",
+  "HINT_RIPPS2_FAST_BOOT": "启动时只读取 RIPPS2 自己的驱动器：RIPPS2.ELF 旁边的设置和音效 (位置由那里的 RIPPS2.FB 说明)，以及每个列表的缓存。其他驱动器会等待：在页面上按 SELECT 会启动其驱动器并载入图片 (开启自动刷新时它们在启动时就会启动)。开启后会把你的音效，以及空间足够时的音乐，复制到 RIPPS2 旁边的 AUDIO。"
+ }
+}

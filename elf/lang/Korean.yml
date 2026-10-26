@@ -198,12 +198,9 @@ strings:
   '%s could not be made. Is the drive write-protected?': '%s을(를) 만들 수 없었습니다. 드라이브가 쓰기 금지되어 있나요?'
   '%u.%u MB': '%u.%u MB'
   RIP: 추출
-  RIP TO OPL'S AUDIO: OPL의 AUDIO로 추출
   RIPPS2 cannot tell where its folder is, so there is nowhere to put the sounds.: RIPPS2가 자신의 폴더 위치를 알 수 없어서 사운드를 둘 곳이 없습니다.
   ? RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
   : RIPPS2는 이 본체의 메뉴 음악(브라우저의 배경 음악, %d:%02d)을 BIOS 자체의 음표로 연주해 %s 크기의 WAV로 %s에 씁니다. 메모리 카드에는 들어가지 않습니다. 이미 있는 %s은(는) 교체됩니다. 1~2분 걸립니다.
-  ? RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
-  : RIPPS2는 이 본체의 메뉴 음악(브라우저의 배경 음악, %d:%02d)을 BIOS 자체의 음표로 연주해 %s 크기의 WAV로 씁니다. 메모리 카드에는 들어가지 않습니다. 확인을 누르면 RIPPS2 옆의 %s에, START를 누르면 그 드라이브의 OPL 리소스인 %s에 씁니다. 이미 있는 %s은(는) 교체됩니다. 1~2분 걸립니다.
   ? 'RIPPS2 reads the sounds from this console''s own BIOS and writes them to %s as its sounds: cursor, confirm, cancel, pages, category, messages, disc, error, save, drives and random, and the boot and game launch music, played from the BIOS''s own notes. Files of those names already there are replaced.'
   : 'RIPPS2는 이 본체의 BIOS에서 사운드를 읽어 자신의 사운드로 %s에 씁니다: 커서, 확인, 취소, 페이지, 카테고리, 메시지, 디스크, 오류, 저장, 드라이브, 무작위, 그리고 BIOS 자체의 음표로 연주한 부팅 음악과 게임 실행 음악입니다. 이미 있는 같은 이름의 파일은 교체됩니다.'
   Reading this console's menu music: 이 본체의 메뉴 음악을 읽는 중
@@ -248,34 +245,20 @@ strings:
   : '- %s(%s)을(를) 먼저 통째로 백업 폴더로 옮김.
 
     '
-  ? '- RIPPS2 is copied to %s.
-
-    '
-  : '- RIPPS2를 %s에 복사.
-
-    '
-  A COPY ON MEMORY CARD %d: 메모리 카드 %d의 사본
-  A COPY ON MX4SIO: MX4SIO의 사본
-  A COPY ON THE USB DRIVE: USB 드라이브의 사본
-  BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE이 RIPPS2를 %s에 복사할 수 없었습니다. 공간과 쓰기 금지 여부를 확인하세요. 다른 것은 바꾸지 않았습니다.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE이 RIPPS2를 HDD의 %s 파티션에 복사할 수 없었습니다. 남은 공간을 확인하세요. 다른 것은 바꾸지 않았습니다.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE이 HDD 부트 프로그램의 사본을 보관할 수 없어서 바꾸기 전에 멈췄습니다. RIPPS2는 HDD에 복사되었고, 다른 것은 바꾸지 않았습니다.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE이 설정(%s)을 쓸 수 없었습니다. 부트 프로그램은 바꾸지 않았습니다.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE이 HDD의 부트 프로그램을 쓸 수 없었습니다 (%d단계). %s
-  ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
-  : 'BIBLE이 메모리 카드 %d(mc%d:/%s/%s)에 설치되었고 BOOT LOCK이 켜져 있습니다: 전원을 켜면 본체가 곧바로 %s에서 RIPPS2를 시작합니다.'
   ? 'BIBLE is installed on the internal HDD and BOOT LOCK is on: at power on the console starts RIPPS2 from %s%s%s%s, at once. Config: %s.%s%s'
   : 'BIBLE이 내장 HDD에 설치되었고 BOOT LOCK이 켜져 있습니다: 전원을 켜면 본체가 곧바로 %s%s%s%s에서 RIPPS2를 시작합니다. 설정: %s.%s%s'
   ? BIBLE is on memory card %d, but its config (%s) could not be written, so it starts the browser. Free some space and run MANAGE again to finish.
   : BIBLE은 메모리 카드 %d에 있지만 설정(%s)을 쓸 수 없어서 브라우저를 시작합니다. 공간을 비운 뒤 관리를 다시 실행해 마무리하세요.
   BIBLE ran out of memory before it started. Nothing was changed.: BIBLE이 시작하기 전에 메모리가 부족해졌습니다. 아무것도 바꾸지 않았습니다.
   BIBLE ran out of memory. Nothing on the memory card was changed.: BIBLE의 메모리가 부족해졌습니다. 메모리 카드에서는 아무것도 바꾸지 않았습니다.
-  'BIBLE: binding PS2BBL to the memory card': 'BIBLE: PS2BBL을 메모리 카드에 연결하는 중'
   'BIBLE: copying RIPPS2 to %s (%d%%)': 'BIBLE: RIPPS2를 %s에 복사하는 중 (%d%%)'
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: HDD의 부트 프로그램을 보관하는 중'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: HDD의 부트 프로그램을 되돌리는 중'
-  'BIBLE: restarting the I/O processor with the security module': 'BIBLE: 보안 모듈로 I/O 프로세서를 재시작하는 중'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: PS2BBL을 HDD 부트 영역에 쓰는 중'
   BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK이 PS2BBL 설정을 쓸 수 없었습니다. 메모리 카드나 드라이브가 쓰기 금지되어 있지 않은지 확인한 뒤 다시 시도하세요.
   BOOT LOCK found no PS2BBL config to change.: BOOT LOCK이 바꿀 PS2BBL 설정을 찾지 못했습니다.
@@ -283,7 +266,6 @@ strings:
   ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
   : BOOT LOCK이 켜져 있습니다. 이제 PS2BBL은 전원을 켤 때 RIPPS2를 시작합니다 (%s). 다른 것으로 가려면 본체가 시작될 때 PS2BBL 단축키를 누르고 있으세요.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK은 PS2BBL(PlayStation 2 Basic BootLoader)을 통해 작동하는데, 여기 있는 메모리 카드에는 없습니다.
-  INSTALL BIBLE: BIBLE 설치
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -307,14 +289,7 @@ strings:
 
     HDD로 부팅하는 본체(네트워크 어댑터가 있는 구형 PS2)가 필요합니다. 완료라고 표시될 때까지 켜 두세요.'
   INTERNAL HDD  (its boot area): 내장 HDD  (부트 영역)
-  MEMORY CARD %d  (%s): 메모리 카드 %d  (%s)
-  Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: 메모리 카드 %d의 남은 공간은 %d KB이고, BIBLE은 그곳에 %d KB가 필요합니다. 공간을 비운 뒤 다시 시도하세요.
-  Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: 메모리 카드 %d의 남은 공간은 %d KB이고, RIPPS2 사본에는 %d KB가 필요합니다. 공간을 비우거나 다른 곳을 고르세요.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: 메모리 카드 %d은(는) 전원을 켤 때 %s을(를) 시작하는데, BOOT LOCK은 PS2BBL을 통해서만 작동합니다.
-  ? PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO). BOOT LOADER > MANAGE can copy RIPPS2 to a memory card or a USB drive for it.
-  : PS2BBL 1.2.0은 RIPPS2를 지금 있는 곳에서 시작할 수 없습니다 (메모리 카드, USB 드라이브, MX4SIO는 읽을 수 있음). 부트 로더 > 관리에서 RIPPS2를 메모리 카드나 USB 드라이브에 복사할 수 있습니다.
-  ? PS2BBL starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 could not read itself to copy there. Start RIPPS2 from one of those, then try again.
-  : PS2BBL은 메모리 카드, USB 드라이브, MX4SIO에서 프로그램을 시작하는데, RIPPS2가 자기 자신을 읽어 그곳에 복사할 수 없었습니다. 그중 하나에서 RIPPS2를 시작한 뒤 다시 시도하세요.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -342,9 +317,7 @@ strings:
   There is no kept boot program on this HDD. Nothing was changed.: 이 HDD에는 보관된 부트 프로그램이 없습니다. 아무것도 바꾸지 않았습니다.
   ? This HDD has no __sysconf partition, so BIBLE's config has to go on a memory card (PS2BBL reads a card's first), and there is none in either slot. Insert one, then try again.
   : 이 HDD에는 __sysconf 파티션이 없어서 BIBLE의 설정은 메모리 카드에 있어야 하는데(PS2BBL은 카드의 것을 먼저 읽음), 두 슬롯 모두에 카드가 없습니다. 하나를 넣은 뒤 다시 시도하세요.
-  WHERE IT IS NOW (%.40s): 지금 있는 곳 (%.40s)
   a boot loader RIPPS2 does not know: RIPPS2가 모르는 부트 로더
-  memory card %d: 메모리 카드 %d
   no boot loader: 부트 로더 없음
   no memory card: 메모리 카드 없음
   the HDD: HDD
@@ -855,11 +828,7 @@ strings:
   TRAY OPEN: 트레이 열림
   TREFOIL KNOT: 세잎 매듭
   ' and ': ' 그리고 '
-  ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  : '%s이(가) %s%s에 없습니다. RIPPOPS가 %s에서 POPS.ELF와 POPS_IOX.PAK(Sony의 PS1 에뮬레이터)를 찾았습니다: START를 누르면 여기로 복사하고 게임을 시작합니다.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s을(를) %s%s에 복사할 수 없었습니다. 드라이브가 가득 찼거나 쓰기 금지되어 있나요?'
-  ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  : '%s이(가) %s%s에 없습니다. RIPPOPS가 %s에서 POPS.ELF와 POPS_IOX.PAK(Sony의 PS1 에뮬레이터)를 찾았습니다: START를 누르면 여기로 복사하고 게임을 시작합니다.'
   COPY AND START: 복사하고 시작
   Copying %s: '%s 복사 중'
   LAUNCH ANYWAY: 그래도 실행
@@ -909,12 +878,8 @@ strings:
   THE RED SCREEN MUSIC (DISC WARNING): 빨간 화면 음악(디스크 경고)
   'Ripping this console''s red screen music: %d%%': '이 본체의 빨간 화면 음악을 추출하는 중: %d%%'
   The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: 빨간 화면 음악(%s)은 %s에 %s(으)로 있습니다. 오디오 설정 > 음악에 Red Screen으로 표시됩니다.
-  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
-  : RIPPS2는 이 본체의 빨간 화면 음악(디스크 경고의 배경 음악, %d:%02d)을 BIOS 자체의 음표로 연주해 %s 크기의 WAV로 씁니다. 메모리 카드에는 들어가지 않습니다. 확인을 누르면 RIPPS2 옆의 %s에, START를 누르면 그 드라이브의 OPL 리소스인 %s에 씁니다. 이미 있는 %s은(는) 교체됩니다. 1~2분 걸립니다.
   ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
   : RIPPS2는 이 본체의 빨간 화면 음악(디스크 경고의 배경 음악, %d:%02d)을 BIOS 자체의 음표로 연주해 %s 크기의 WAV로 %s에 씁니다. 메모리 카드에는 들어가지 않습니다. 이미 있는 %s은(는) 교체됩니다. 1~2분 걸립니다.
-  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
-  : RIPPS2는 이 본체의 메뉴 음악(%d:%02d)과 빨간 화면 음악(%d:%02d)을 BIOS 자체의 음표로 연주해 WAV 두 개(합계 %s)로 씁니다. 메모리 카드에는 들어가지 않습니다. 확인을 누르면 RIPPS2 옆의 %s에, START를 누르면 그 드라이브의 OPL 리소스인 %s에 씁니다. 이미 있는 같은 이름의 파일은 교체됩니다. 각각 1~2분 걸립니다.
   ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
   : RIPPS2는 이 본체의 메뉴 음악(%d:%02d)과 빨간 화면 음악(%d:%02d)을 BIOS 자체의 음표로 연주해 WAV 두 개(합계 %s)로 %s에 씁니다. 메모리 카드에는 들어가지 않습니다. 이미 있는 같은 이름의 파일은 교체됩니다. 각각 1~2분 걸립니다.
   Across the Top: 위쪽에 가로로
@@ -1120,40 +1085,8 @@ strings:
   ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
   : 사운드는 %d KB가 필요하고 이 메모리 카드의 남은 공간은 %d KB입니다. START를 누르면 대신 드라이브의 %sAUDIO/에 쓰고, RIPPS2는 거기서 재생합니다.
   There was not enough memory to make the sounds. Nothing was written.: 사운드를 만들 메모리가 부족했습니다. 아무것도 쓰지 않았습니다.
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-  
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
-  
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- 본체가 PS2BBL 1.2.0을 이 카드에 연결하고 %s/%s(으)로 씀.
-  
-    - 그 설정 mc%d:/PS2BBL/CONFIG.INI가 %s에서 RIPPS2를 기다림 없이 시작하며(0 ms, PS2BBL Extended는 허용하지 않음) BOOT LOCK은 켜짐.
-  
-    이를 위해 I/O 프로세서가 재시작되고, 음악과 드라이브는 나중에 돌아옵니다. 완료라고 표시될 때까지 카드를 꽂아 두고 본체를 켜 두세요.'
-  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
-  : BIBLE을 메모리 카드 %d에 쓸 수 없어서 카드를 원래대로 되돌렸습니다. 남은 공간을 확인한 뒤 다시 시도하세요. (RIPPS2 옆의 DIAG.TXT에 카드의 응답이 있습니다.)
   ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
   : BIBLE이 %s을(를) 따로 옮겨 보관할 수 없어서 거기서 멈췄습니다. 카드에서는 아무것도 바꾸지 않았습니다. (RIPPS2 옆의 DIAG.TXT에 카드의 응답이 있습니다.)
-  ? 'MEMORY CARD 0: %s
-  
-    MEMORY CARD 1: %s
-  
-    %s
-  
-    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : '메모리 카드 0: %s
-  
-    메모리 카드 1: %s
-  
-    %s
-  
-    RIPPS2 BIBLE: BBL 1.20, El Isra의 PS2BBL 1.2.0을 RIPPS2가 설정한 것: 전원을 켜면 0 ms 만에 시작(PS2BBL Extended는 0을 허용하지 않음), RIPPS2부터 시작하며, 전원을 켤 때 버튼을 누르고 있으면 브라우저(세모), 디스크(START), 원래 있던 것(동그라미)으로도 갈 수 있습니다. 메모리 카드나 내장 HDD에 설치하거나 복구할까요?'
-  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
-  
-    '
-  : 'RIPPS2 BIBLE: 메모리 카드 %d에 BBL 1.20
-  
-    '
   ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
   : '이제 메모리 파일이 MEDIA에서 열리고, 디스크가 클립보드에 있습니다(추출됨). 넣을 드라이브와 폴더로 가서(어느 드라이브든: USB, HDD, SD2PSX의 MEDIA) 세모를 눌러 작업을 열고 붙여넣기를 고르세요. RIPDISC가 한 번 더 묻고 PS2의 레이저로 디스크를 읽어 거기에 씁니다.'
   RENAME THE GAME: 게임 이름 바꾸기
@@ -1200,8 +1133,6 @@ strings:
   This drive's game list, for a quick boot: 이 드라이브의 게임 목록 (빠른 부팅용)
   Virtual memory cards for games: 게임용 가상 메모리 카드
   What RIPPS2's last launch did: RIPPS2의 마지막 실행이 한 일
-  Circle from the top   Cross close: '동그라미: 처음부터   가위표: 닫기'
-  Cross from the top   Circle close: '가위표: 처음부터   동그라미: 닫기'
   ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
   : 이 트랙을 재생할 수 없었습니다. RIPPS2는 16비트 PCM .wav 파일(RIPDISC와 BIOS 음악이 추출하는 형식), Ogg Vorbis .ogg 파일, MP3를 재생합니다.
   'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': '읽기 전용: SD2PSX의 부트 카드가 사용 중입니다'
@@ -1241,8 +1172,92 @@ strings:
   what boot reads first: 부팅이 먼저 읽는 것
   ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
   : 이 Neutrino는 1.3보다 오래되어 APA HDD에서 게임을 시작할 수 없습니다. 게임 실행 > Neutrino를 Neutrino 1.3 이상으로 지정하거나, 경로를 비워 RIPPS2에 든 것을 쓰세요.
-  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
-  : RIPPS2에서는 %s이(가) %s%s에 보이지 않습니다. POPSTARTER에는 POPS.ELF와 POPS_IOX.PAK(내 본체의 PS1 에뮬레이터)가 필요하며, RIPPS2가 보지 않는 곳에서 찾을 수도 있습니다(게임이 시작되면 찾은 것입니다). START로 실행하며, 이 드라이브는 다시 묻지 않습니다.
+  ', the sounds': ', 사운드'
+  ? 'Fast Boot is on. RIPPS2 boots from its own drive (%s): the settings%s and every list from its cache. The other drives start when you press SELECT on their page, or launch one of their games.'
+  : 'Fast Boot가 켜져 있습니다. RIPPS2는 자신의 드라이브(%s)에서 시작합니다: 설정%s 및 모든 목록은 캐시에서 읽습니다. 다른 드라이브는 해당 페이지에서 SELECT를 누르거나 그 게임을 실행하면 시작됩니다.'
+  Fast Boot is on. The sounds take %d KB and the memory card RIPPS2 runs from has %d KB free, so they stay in %s.: Fast Boot가 켜져 있습니다. 사운드는 %d KB이고 RIPPS2가 실행 중인 메모리 카드의 여유 공간은 %d KB라서, 사운드는 %s에 그대로 둡니다.
+  ' (%d KB free)': ' (여유 %d KB)'
+  ' (%u MB free)': ' (여유 %u MB)'
+  'BESIDE RIPPS2: %sAUDIO%s, read first at boot': 'RIPPS2 옆: %sAUDIO%s, 시작할 때 가장 먼저 읽음'
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 where it is (%s) with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on. RIPPS2 itself is not copied.
+  
+    The I/O processor restarts for this and every drive read stops until it is done; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- 콘솔이 PS2BBL 1.2.0을 이 카드에 묶고 %s/%s(으)로 기록합니다.
+  
+    - 그 설정 mc%d:/PS2BBL/CONFIG.INI는 RIPPS2를 지금 있는 곳(%s)에서 기다림 없이 시작합니다(0 ms, PS2BBL Extended에서는 불가). BOOT LOCK 켜짐. RIPPS2 자체는 복사하지 않습니다.
+  
+    이를 위해 I/O 프로세서가 다시 시작되고 끝날 때까지 모든 드라이브 읽기가 멈춥니다. 음악과 드라이브는 그 뒤에 돌아옵니다. 완료라고 나올 때까지 카드를 꽂고 콘솔을 켜 두세요.'
+  ? 'An SD2PSX or MMCE card may protect itself after a refused write: if the memory card or the MMCE drive is missing now, turn the console off and on.'
+  : 'SD2PSX 또는 MMCE 카드는 쓰기가 거부된 뒤 스스로를 보호할 수 있습니다: 지금 메모리 카드나 MMCE 드라이브가 보이지 않으면 콘솔을 껐다 켜세요.'
+  BOOT LOCK ON: BOOT LOCK 켜짐
+  'Done: the memory card in slot %d starts what it started before BBL 1.20. BBL 1.20 is kept in mc%d:/%s.': '완료: 슬롯 %d의 메모리 카드는 BBL 1.20 전에 시작하던 것을 시작합니다. BBL 1.20은 mc%d:/%s에 남겨 둡니다.'
+  ? 'For a standard 8 MB PS2 memory card (a MagicGate card, or an SD2PSX or MMCE BOOT card): the one in slot %d. At power on PS2BBL reads slot 2''s config before slot 1''s.
+  
+    '
+  : '표준 8 MB PS2 메모리 카드(MagicGate 카드, 또는 SD2PSX나 MMCE의 BOOT 카드)용입니다: 슬롯 %d의 카드. 전원을 켜면 PS2BBL은 슬롯 2의 설정을 슬롯 1보다 먼저 읽습니다.
+  
+    '
+  MEMORY CARD IN SLOT %d  (%s): 슬롯 %d의 메모리 카드  (%s)
+  ? PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD.
+  : PS2BBL 1.2.0은 RIPPS2를 지금 위치에서 시작할 수 없습니다(닿는 곳은 메모리 카드, USB 드라이브, MX4SIO). 그리고 RIPPS2는 자신을 복사하지 않습니다. RIPPS2.ELF를 메모리 카드나 USB 드라이브에 넣고 거기서 시작하거나, MMCE와 HDD를 읽는 PS2BBL Extended를 쓰세요.
+  RESTORE SLOT %d'S OLD BOOT LOADER: 슬롯 %d의 예전 부트 로더로 되돌리기
+  ? 'RIPPS2: BBL 1.20 is set up on the memory card in slot %d (mc%d:/%s/%s), BOOT LOCK on: at power on it starts RIPPS2 from %s, at once.'
+  : 'RIPPS2: 슬롯 %d의 메모리 카드에 BBL 1.20을 설정했습니다(mc%d:/%s/%s). BOOT LOCK 켜짐: 전원을 켜면 바로 %s에서 RIPPS2를 시작합니다.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    '
+  : 'RIPPS2: BBL 1.20 설정 중
+  
+    '
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read (it reads memory cards, USB and MX4SIO), and RIPPS2 does not copy itself. The PS2BBL Extended config on this card (%s) reads it: START turns BOOT LOCK on, so it starts RIPPS2 from %s at power on. Nothing else on the card changes.'
+  : 'RIPPS2: BBL 1.20 설정 중
+  
+    RIPPS2는 %s에서 실행 중인데, PS2BBL 1.2.0은 그곳을 읽지 못합니다(메모리 카드, USB, MX4SIO만 읽음). 그리고 RIPPS2는 자신을 복사하지 않습니다. 이 카드의 PS2BBL Extended 설정(%s)은 읽을 수 있습니다: START로 BOOT LOCK을 켜면 전원을 켤 때 %s에서 RIPPS2를 시작합니다. 카드의 다른 것은 바뀌지 않습니다.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read: it starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 does not copy itself. Put RIPPS2.ELF on one of those (a memory card''s APPS folder, or a USB drive), start it from there, then set up BIBLE again.'
+  : 'RIPPS2: BBL 1.20 설정 중
+  
+    RIPPS2는 %s에서 실행 중인데, PS2BBL 1.2.0은 그곳을 읽지 못합니다: 프로그램은 메모리 카드, USB 드라이브, MX4SIO에서만 시작하며, RIPPS2는 자신을 복사하지 않습니다. RIPPS2.ELF를 그중 하나(메모리 카드의 APPS 폴더 또는 USB 드라이브)에 넣고 거기서 시작한 다음 BIBLE을 다시 설정하세요.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    The memory card in slot %d: BBL 1.20 (mc%d:/%s) moves aside, and what it replaced (mc%d:/%s) goes back in its place. Nothing is deleted. The PS2BBL config stays as it is (BOOT LOCK can turn the lock off).'
+  : 'RIPPS2: BBL 1.20 설정 중
+  
+    슬롯 %d의 메모리 카드: BBL 1.20(mc%d:/%s)을 옆으로 옮기고, 그것이 대신했던 것(mc%d:/%s)을 제자리로 돌립니다. 아무것도 지우지 않습니다. PS2BBL 설정은 그대로입니다(잠금은 BOOT LOCK으로 끌 수 있습니다).'
+  'RIPPS2: Setting up BBL 1.20 (binding PS2BBL to the memory card)': 'RIPPS2: BBL 1.20 설정 중(PS2BBL을 메모리 카드에 묶는 중)'
+  'RIPPS2: Setting up BBL 1.20 (putting back what was there)': 'RIPPS2: BBL 1.20 설정 중(이전 것을 되돌리는 중)'
+  'RIPPS2: Setting up BBL 1.20 (restarting the I/O processor)': 'RIPPS2: BBL 1.20 설정 중(I/O 프로세서를 다시 시작하는 중)'
+  'RIPPS2: Setting up BBL 1.20 (writing it to the memory card)': 'RIPPS2: BBL 1.20 설정 중(메모리 카드에 쓰는 중)'
+  SET UP BBL 1.20: BBL 1.20 설정
+  ? 'SLOT 1: %s
+  
+    SLOT 2: %s
+  
+    %s
+  
+    RIPPS2: Setting up BBL 1.20. PS2BBL 1.2.0 by El Isra, set up by RIPPS2 on a standard 8 MB PS2 memory card or the internal HDD: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first from where it is (it is never copied), and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Set it up, repair it or restore what it replaced?'
+  : '슬롯 1: %s
+  
+    슬롯 2: %s
+  
+    %s
+  
+    RIPPS2: BBL 1.20 설정 중. El Isra의 PS2BBL 1.2.0을 RIPPS2가 표준 8 MB PS2 메모리 카드나 내장 HDD에 설정합니다: 전원을 켜고 0 ms 만에 시작(PS2BBL Extended는 0 불가), 먼저 RIPPS2를 지금 있는 곳에서(복사하지 않음). 전원을 켤 때 버튼을 누르고 있으면 브라우저(TRIANGLE), 디스크(START), 이전 것(CIRCLE)으로도 갈 수 있습니다. 설정할까요, 고칠까요, 아니면 대신했던 것을 되돌릴까요?'
+  The memory card in slot %d has %d KB free, and BBL 1.20 needs %d KB there. Free some space, then try again.: 슬롯 %d의 메모리 카드 여유 공간은 %d KB이고, BBL 1.20에는 %d KB가 필요합니다. 공간을 확보한 뒤 다시 시도하세요.
+  ? The memory card in slot %d refused PS2BBL, so RIPPS2 put the card back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : 슬롯 %d의 메모리 카드가 PS2BBL을 거부해서 RIPPS2가 카드를 원래대로 두었습니다. 여유 공간을 확인하고 다시 시도하세요. (카드의 응답은 RIPPS2 옆의 DIAG.TXT에 있습니다.)
+  ? The memory card in slot %d would not move BBL 1.20 aside, so nothing was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : 슬롯 %d의 메모리 카드가 BBL 1.20을 옮기지 못해서 아무것도 바뀌지 않았습니다. (카드의 응답은 RIPPS2 옆의 DIAG.TXT에 있습니다.)
+  The memory card in slot %d would not take %s back, so BBL 1.20 stayed. (DIAG.TXT beside RIPPS2 has what the card said.): 슬롯 %d의 메모리 카드가 %s을(를) 되돌려 받지 못해서 BBL 1.20이 남아 있습니다. (카드의 응답은 RIPPS2 옆의 DIAG.TXT에 있습니다.)
+  MUSIC: 음악
+  '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s에 %s이(가) 없습니다. RIPPOPS가 %s에서 Sony의 PS1 에뮬레이터를 찾았습니다: START를 누르면 %s을(를) 여기로 복사하고 게임을 시작합니다.'
+  ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
+  : 'RIPPS2에서 %s이(가) 보이지 않습니다(%s%s). POPSTARTER에는 POPS_IOX.PAK과 POPS.PAK, 또는 POPS_IOX.PAK과 POPS.ELF와 IOPRP252.IMG가 필요합니다: 여러분 콘솔의 Sony PS1 에뮬레이터입니다. RIPPS2가 찾지 않는 곳에서 찾을 수도 있습니다(게임이 시작된다면 찾은 것입니다). START로 실행하며, 이 드라이브는 다시 묻지 않습니다.'
 labels:
   IP_ADDRESS_TYPE_STATIC: 고정
   HINT_NEUTRINO_AUTO_ELF: 게임의 부트 ELF를 Neutrino에 넘겨 타이틀별 설정을 찾게 합니다. 기본으로 켜져 있으며, 직접 설정한 Boot ELF 옵션이 우선합니다.
@@ -1701,3 +1716,5 @@ labels:
   HINT_EXITPATH: '게임 내 메뉴의 EXIT가 가는 곳. BIBLE을 설정하고(상태 > 부트 로더 > 관리, 또는 PS2BBL의 BOOT LOCK) 비워 두는 것이 가장 좋습니다. 그러면 EXIT는 본체 자체의 부팅 경로로 리셋하고 PS2BBL이 전원을 켤 때처럼 RIPPS2를 시작합니다. 가장 안전한 복귀입니다. 브라우저: PS2 브라우저. 메모리 카드(mc0:/mc1:)나 FAT32 USB 드라이브(mass:/)의 ELF는 리셋 직후 불러오는데, 모든 게임이 본체를 그에 맞게 두지는 않습니다. 그때 MMCE에는 전혀 접근할 수 없습니다.'
   HINT_BDM_START: 'USB, iLink, MX4SIO, exFAT HDD. 자동은 부팅 때 시작합니다: 꽂아 둔 드라이브에 가장 빠르며, 그 게임이 처음부터 모든 게임에 있습니다. 수동은 페이지를 열 때 시작합니다.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino는 APA HDD의 VMC를 쓸 수 없습니다(exFAT, USB, MX4SIO는 가능): 이 게임은 그 슬롯의 실제 카드로 시작합니다.'
+  RIPPS2_FAST_BOOT: Fast Boot
+  HINT_RIPPS2_FAST_BOOT: '시작할 때 RIPPS2 자신의 드라이브만 읽습니다: RIPPS2.ELF 옆의 설정과 사운드(위치는 그곳의 RIPPS2.FB가 알려 줌), 그리고 모든 목록은 캐시에서. 다른 드라이브는 기다립니다: 페이지에서 SELECT를 누르면 그 드라이브가 시작되고 이미지를 불러옵니다(자동 새로 고침을 켜면 시작할 때 함께 시작). 켜면 사운드와, 공간이 있으면 음악을 RIPPS2 옆 AUDIO로 복사합니다.'

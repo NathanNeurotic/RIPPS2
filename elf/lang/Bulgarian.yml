@@ -198,12 +198,9 @@ strings:
   '%s could not be made. Is the drive write-protected?': '%s не можа да се създаде. Защитено ли е устройството срещу запис?'
   '%u.%u MB': '%u.%u MB'
   RIP: ИЗВЛИЧАНЕ
-  RIP TO OPL'S AUDIO: ИЗВЛИЧАНЕ В AUDIO НА OPL
   RIPPS2 cannot tell where its folder is, so there is nowhere to put the sounds.: RIPPS2 не знае къде е папката му, така че няма къде да сложи звуците.
   ? RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
   : RIPPS2 изсвирва музиката от менюто на тази конзола, атмосферната пиеса на браузъра ѝ (%d:%02d), по собствените ноти на BIOS и я записва като WAV с размер %s в %s; никоя карта с памет няма място за нея. Вече съществуващ там %s се заменя. Отнема минута-две.
-  ? RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
-  : RIPPS2 изсвирва музиката от менюто на тази конзола, атмосферната пиеса на браузъра ѝ (%d:%02d), по собствените ноти на BIOS и я записва като WAV с размер %s; никоя карта с памет няма място за нея. Потвърждаване я записва в %s, до RIPPS2. START я записва в %s, ресурсите на OPL на това устройство. Вече съществуващ там %s се заменя. Отнема минута-две.
   ? 'RIPPS2 reads the sounds from this console''s own BIOS and writes them to %s as its sounds: cursor, confirm, cancel, pages, category, messages, disc, error, save, drives and random, and the boot and game launch music, played from the BIOS''s own notes. Files of those names already there are replaced.'
   : 'RIPPS2 чете звуците от собствения BIOS на тази конзола и ги записва в %s като свои звуци: курсор, потвърждаване, отказ, страници, категория, съобщения, диск, грешка, запис, устройства и случаен, плюс музиката при стартиране и при пускане на игра, изсвирена по собствените ноти на BIOS. Файловете с тези имена, които вече са там, се заменят.'
   Reading this console's menu music: Четене на музиката от менюто на тази конзола
@@ -248,34 +245,20 @@ strings:
   : '- %s (%s) първо се премества изцяло в папка с резервно копие.
 
     '
-  ? '- RIPPS2 is copied to %s.
-
-    '
-  : '- RIPPS2 се копира в %s.
-
-    '
-  A COPY ON MEMORY CARD %d: КОПИЕ НА КАРТА С ПАМЕТ %d
-  A COPY ON MX4SIO: КОПИЕ НА MX4SIO
-  A COPY ON THE USB DRIVE: КОПИЕ НА USB ФЛАШКАТА
-  BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE не можа да копира RIPPS2 в %s. Проверете мястото и дали не е защитено срещу запис. Нищо друго не е променено.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE не можа да копира RIPPS2 в дяла %s на HDD. Проверете свободното място. Нищо друго не е променено.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE не можа да запази копие на програмата за зареждане на HDD, затова спря преди да я промени. RIPPS2 е копиран на HDD; нищо друго не е променено.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE не можа да запише конфигурацията си (%s). Програмата за зареждане не е променена.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE не можа да запише програмата за зареждане на HDD (стъпка %d). %s
-  ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
-  : 'BIBLE е инсталиран на карта с памет %d (mc%d:/%s/%s) и BOOT LOCK е включен: при включване конзолата веднага стартира RIPPS2 от %s.'
   ? 'BIBLE is installed on the internal HDD and BOOT LOCK is on: at power on the console starts RIPPS2 from %s%s%s%s, at once. Config: %s.%s%s'
   : 'BIBLE е инсталиран на вътрешния HDD и BOOT LOCK е включен: при включване конзолата веднага стартира RIPPS2 от %s%s%s%s. Конфигурация: %s.%s%s'
   ? BIBLE is on memory card %d, but its config (%s) could not be written, so it starts the browser. Free some space and run MANAGE again to finish.
   : BIBLE е на карта с памет %d, но конфигурацията му (%s) не можа да се запише, затова стартира браузъра. Освободете малко място и пуснете УПРАВЛЕНИЕ отново, за да довършите.
   BIBLE ran out of memory before it started. Nothing was changed.: BIBLE остана без памет, преди да започне. Нищо не е променено.
   BIBLE ran out of memory. Nothing on the memory card was changed.: BIBLE остана без памет. Нищо на картата с памет не е променено.
-  'BIBLE: binding PS2BBL to the memory card': 'BIBLE: свързване на PS2BBL с картата с памет'
   'BIBLE: copying RIPPS2 to %s (%d%%)': 'BIBLE: копиране на RIPPS2 в %s (%d%%)'
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: запазване на програмата за зареждане на HDD'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: връщане на програмата за зареждане на HDD'
-  'BIBLE: restarting the I/O processor with the security module': 'BIBLE: рестартиране на I/O процесора с модула за сигурност'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: записване на PS2BBL в зоната за зареждане на HDD'
   BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK не можа да запише PS2BBL конфигурацията. Проверете дали картата с памет или устройството не са защитени срещу запис и опитайте отново.
   BOOT LOCK found no PS2BBL config to change.: BOOT LOCK не намери PS2BBL конфигурация за промяна.
@@ -283,7 +266,6 @@ strings:
   ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
   : BOOT LOCK е включен. Сега PS2BBL стартира RIPPS2 при включване (%s). Задръжте клавиш за бърз достъп на PS2BBL, докато конзолата стартира, за да стигнете до нещо друго.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK работи чрез PS2BBL (PlayStation 2 Basic BootLoader), а такъв няма на никоя карта с памет тук.
-  INSTALL BIBLE: ИНСТАЛИРАНЕ НА BIBLE
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -307,14 +289,7 @@ strings:
 
     Нужна е конзола, която зарежда от своя HDD (дебела PS2 с мрежовия адаптер). Оставете я включена, докато не пише готово.'
   INTERNAL HDD  (its boot area): ВЪТРЕШЕН HDD  (зоната му за зареждане)
-  MEMORY CARD %d  (%s): КАРТА С ПАМЕТ %d  (%s)
-  Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Карта с памет %d има %d KB свободни, а BIBLE се нуждае от %d KB там. Освободете малко място и опитайте отново.
-  Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Карта с памет %d има %d KB свободни, а копието на RIPPS2 се нуждае от %d KB. Освободете малко място или изберете друго място.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Карта с памет %d стартира %s при включване, а BOOT LOCK работи само чрез PS2BBL.
-  ? PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO). BOOT LOADER > MANAGE can copy RIPPS2 to a memory card or a USB drive for it.
-  : PS2BBL 1.2.0 не може да стартира RIPPS2 оттам, където е сега (достига карти с памет, USB флашки и MX4SIO). ЗАРЕЖДАЩ МОДУЛ > УПРАВЛЕНИЕ може да копира RIPPS2 за него на карта с памет или USB флашка.
-  ? PS2BBL starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 could not read itself to copy there. Start RIPPS2 from one of those, then try again.
-  : PS2BBL стартира програми от карта с памет, USB флашка или MX4SIO, а RIPPS2 не можа да прочете сам себе си, за да се копира там. Стартирайте RIPPS2 от някое от тях и опитайте отново.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -342,9 +317,7 @@ strings:
   There is no kept boot program on this HDD. Nothing was changed.: На този HDD няма запазена програма за зареждане. Нищо не е променено.
   ? This HDD has no __sysconf partition, so BIBLE's config has to go on a memory card (PS2BBL reads a card's first), and there is none in either slot. Insert one, then try again.
   : Този HDD няма дял __sysconf, затова конфигурацията на BIBLE трябва да е на карта с памет (PS2BBL чете първо тази от картата), а в нито един слот няма карта. Поставете една и опитайте отново.
-  WHERE IT IS NOW (%.40s): ТАМ, КЪДЕТО Е СЕГА (%.40s)
   a boot loader RIPPS2 does not know: зареждащ модул, който RIPPS2 не познава
-  memory card %d: карта с памет %d
   no boot loader: няма зареждащ модул
   no memory card: няма карта с памет
   the HDD: HDD
@@ -855,11 +828,7 @@ strings:
   TRAY OPEN: ТАВАТА Е ОТВОРЕНА
   TREFOIL KNOT: ТРИЛИСТЕН ВЪЗЕЛ
   ' and ': ' и '
-  ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  : '%s липсват в %s%s. RIPPOPS намери POPS.ELF и POPS_IOX.PAK, PS1 емулатора на Sony, на %s: START ги копира тук и стартира играта.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s не можа да се копира в %s%s. Пълно ли е устройството или защитено срещу запис?'
-  ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  : '%s липсва в %s%s. RIPPOPS намери POPS.ELF и POPS_IOX.PAK, PS1 емулатора на Sony, на %s: START ги копира тук и стартира играта.'
   COPY AND START: КОПИРАНЕ И СТАРТИРАНЕ
   Copying %s: Копиране на %s
   LAUNCH ANYWAY: СТАРТИРАНЕ ВСЕ ПАК
@@ -909,12 +878,8 @@ strings:
   THE RED SCREEN MUSIC (DISC WARNING): МУЗИКАТА ОТ ЧЕРВЕНИЯ ЕКРАН (ПРЕДУПРЕЖДЕНИЕ ЗА ДИСК)
   'Ripping this console''s red screen music: %d%%': 'Извличане на музиката от червения екран на тази конзола: %d%%'
   The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: Музиката от червения екран (%s) е в %s като %s. Аудио настройки > Музика я показва като Red Screen.
-  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
-  : RIPPS2 изсвирва музиката от червения екран на тази конзола, атмосферната пиеса на предупреждението за диск (%d:%02d), по собствените ноти на BIOS и я записва като WAV с размер %s; никоя карта с памет няма място за нея. Потвърждаване я записва в %s, до RIPPS2. START я записва в %s, ресурсите на OPL на това устройство. Вече съществуващ там %s се заменя. Отнема минута-две.
   ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
   : RIPPS2 изсвирва музиката от червения екран на тази конзола, атмосферната пиеса на предупреждението за диск (%d:%02d), по собствените ноти на BIOS и я записва като WAV с размер %s в %s; никоя карта с памет няма място за нея. Вече съществуващ там %s се заменя. Отнема минута-две.
-  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
-  : RIPPS2 изсвирва музиката от менюто на тази конзола (%d:%02d) и музиката от червения ѝ екран (%d:%02d) по собствените ноти на BIOS и ги записва като два WAV файла, общо %s; никоя карта с памет няма място за тях. Потвърждаване ги записва в %s, до RIPPS2. START ги записва в %s, ресурсите на OPL на това устройство. Вече съществуващи там файлове с тези имена се заменят. Всеки отнема минута-две.
   ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
   : RIPPS2 изсвирва музиката от менюто на тази конзола (%d:%02d) и музиката от червения ѝ екран (%d:%02d) по собствените ноти на BIOS и ги записва като два WAV файла, общо %s, в %s; никоя карта с памет няма място за тях. Вече съществуващи там файлове с тези имена се заменят. Всеки отнема минута-две.
   Across the Top: Отгоре
@@ -1120,40 +1085,8 @@ strings:
   ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
   : Звуците заемат %d KB, а тази карта с памет има %d KB свободни. START ги записва вместо това в %sAUDIO/ на устройството и RIPPS2 ги пуска оттам.
   There was not enough memory to make the sounds. Nothing was written.: Нямаше достатъчно памет за създаване на звуците. Нищо не е записано.
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-  
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
-  
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 се свързва с тази карта от конзолата и се записва като %s/%s.
-  
-    - Конфигурацията му, mc%d:/PS2BBL/CONFIG.INI, стартира RIPPS2 от %s без чакане (0 ms, което PS2BBL Extended не позволява), BOOT LOCK е включен.
-  
-    За целта I/O процесорът се рестартира; музиката и устройствата се връщат след това. Оставете картата вътре и конзолата включена, докато не пише готово.'
-  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
-  : BIBLE не можа да се запише на карта с памет %d, затова картата е върната в предишното ѝ състояние. Проверете свободното място и опитайте отново. (DIAG.TXT до RIPPS2 съдържа отговора на картата.)
   ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
   : BIBLE не можа да премести %s настрана, за да го запази, затова спря там. Нищо на картата не е променено. (DIAG.TXT до RIPPS2 съдържа отговора на картата.)
-  ? 'MEMORY CARD 0: %s
-  
-    MEMORY CARD 1: %s
-  
-    %s
-  
-    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'КАРТА С ПАМЕТ 0: %s
-  
-    КАРТА С ПАМЕТ 1: %s
-  
-    %s
-  
-    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 от El Isra, настроен от RIPPS2: старт за 0 ms при включване (PS2BBL Extended не позволява 0), първо RIPPS2, а бутон, задържан при включване, все така води до браузъра (ТРИЪГЪЛНИК), до диск (START) и до това, което беше там преди (КРЪГ). Да се инсталира или поправи ли на карта с памет или на вътрешния HDD?'
-  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
-  
-    '
-  : 'RIPPS2 BIBLE: BBL 1.20 НА КАРТА С ПАМЕТ %d
-  
-    '
   ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
   : 'Файлове в паметта се отваря сега, на MEDIA, с диска в клипборда (ИЗВЛЕЧЕНО). Отидете до устройството и папката, където трябва да отиде (всяко устройство: USB, HDD, MEDIA на SD2PSX), натиснете ТРИЪГЪЛНИК за ДЕЙСТВИЯ и изберете ПОСТАВЯНЕ. RIPDISC пита още веднъж и чете диска с лазера на вашия PS2, като го записва там.'
   RENAME THE GAME: ПРЕИМЕНУВАНЕ НА ИГРАТА
@@ -1200,8 +1133,6 @@ strings:
   This drive's game list, for a quick boot: Списъкът с игри на това устройство, за бързо стартиране
   Virtual memory cards for games: Виртуални карти с памет за игри
   What RIPPS2's last launch did: Какво направи последното стартиране на RIPPS2
-  Circle from the top   Cross close: 'Кръг: от началото   Кръстче: затваряне'
-  Cross from the top   Circle close: 'Кръстче: от началото   Кръг: затваряне'
   ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
   : Тази песен не можа да се пусне. RIPPS2 пуска 16-битови PCM .wav файлове (каквито ги извличат RIPDISC и BIOS музика), Ogg Vorbis .ogg файлове и MP3.
   'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'САМО ЗА ЧЕТЕНЕ: КАРТАТА ЗА СТАРТИРАНЕ НА SD2PSX СЕ ИЗПОЛЗВА'
@@ -1241,8 +1172,92 @@ strings:
   what boot reads first: какво чете първо стартирането
   ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
   : Този Neutrino е по-стар от 1.3, който не може да стартира игри от APA HDD. Насочете Стартиране на игри > Neutrino към Neutrino 1.3 или по-нов или изчистете пътя, за да се ползва този, който носи RIPPS2.
-  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
-  : RIPPS2 не вижда %s в %s%s. POPSTARTER се нуждае от POPS.ELF и POPS_IOX.PAK, PS1 емулатора от вашата собствена конзола; той може да ги намери там, където RIPPS2 не търси (ако игрите ви стартират, намира ги). START стартира и за това устройство повече няма да се пита.
+  ', the sounds': ', звуците'
+  ? 'Fast Boot is on. RIPPS2 boots from its own drive (%s): the settings%s and every list from its cache. The other drives start when you press SELECT on their page, or launch one of their games.'
+  : 'Fast Boot е включен. RIPPS2 стартира от собственото си устройство (%s): настройките%s и всеки списък от неговия кеш. Другите устройства се стартират, когато натиснеш SELECT на тяхната страница или пуснеш някоя от игрите им.'
+  Fast Boot is on. The sounds take %d KB and the memory card RIPPS2 runs from has %d KB free, so they stay in %s.: Fast Boot е включен. Звуците заемат %d KB, а картата памет, от която работи RIPPS2, има %d KB свободни, затова остават в %s.
+  ' (%d KB free)': ' (%d KB свободни)'
+  ' (%u MB free)': ' (%u MB свободни)'
+  'BESIDE RIPPS2: %sAUDIO%s, read first at boot': 'ДО RIPPS2: %sAUDIO%s, чете се първо при стартиране'
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 where it is (%s) with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on. RIPPS2 itself is not copied.
+  
+    The I/O processor restarts for this and every drive read stops until it is done; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- Конзолата свързва PS2BBL 1.2.0 с тази карта и го записва като %s/%s.
+  
+    - Неговата конфигурация, mc%d:/PS2BBL/CONFIG.INI, стартира RIPPS2 там, където е (%s), без чакане (0 ms, което PS2BBL Extended не позволява), BOOT LOCK включен. Самият RIPPS2 не се копира.
+  
+    Входно-изходният процесор се рестартира за това и всяко четене от устройства спира до края; музиката и устройствата се връщат след това. Остави картата вътре и конзолата включена, докато не каже, че е готово.'
+  ? 'An SD2PSX or MMCE card may protect itself after a refused write: if the memory card or the MMCE drive is missing now, turn the console off and on.'
+  : 'Карта SD2PSX или MMCE може да се защити след отказан запис: ако сега липсва картата памет или устройството MMCE, изключи и включи конзолата.'
+  BOOT LOCK ON: BOOT LOCK ВКЛЮЧЕН
+  'Done: the memory card in slot %d starts what it started before BBL 1.20. BBL 1.20 is kept in mc%d:/%s.': 'Готово: картата памет в слот %d стартира това, което стартираше преди BBL 1.20. BBL 1.20 се пази в mc%d:/%s.'
+  ? 'For a standard 8 MB PS2 memory card (a MagicGate card, or an SD2PSX or MMCE BOOT card): the one in slot %d. At power on PS2BBL reads slot 2''s config before slot 1''s.
+  
+    '
+  : 'За обикновена PS2 карта памет от 8 MB (карта MagicGate или BOOT карта на SD2PSX или MMCE): тази в слот %d. При включване PS2BBL чете конфигурацията на слот 2 преди тази на слот 1.
+  
+    '
+  MEMORY CARD IN SLOT %d  (%s): КАРТА ПАМЕТ В СЛОТ %d  (%s)
+  ? PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD.
+  : PS2BBL 1.2.0 не може да стартира RIPPS2 оттам, където е сега (стига до карти памет, USB устройства и MX4SIO), а RIPPS2 не се копира сам. Сложи RIPPS2.ELF на карта памет или USB устройство и го стартирай оттам, или използвай PS2BBL Extended, който чете MMCE и твърдия диск.
+  RESTORE SLOT %d'S OLD BOOT LOADER: ВЪРНИ СТАРИЯ ЗАРЕЖДАЩ МОДУЛ В СЛОТ %d
+  ? 'RIPPS2: BBL 1.20 is set up on the memory card in slot %d (mc%d:/%s/%s), BOOT LOCK on: at power on it starts RIPPS2 from %s, at once.'
+  : 'RIPPS2: BBL 1.20 е настроен на картата памет в слот %d (mc%d:/%s/%s), BOOT LOCK включен: при включване веднага стартира RIPPS2 от %s.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    '
+  : 'RIPPS2: настройване на BBL 1.20
+  
+    '
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read (it reads memory cards, USB and MX4SIO), and RIPPS2 does not copy itself. The PS2BBL Extended config on this card (%s) reads it: START turns BOOT LOCK on, so it starts RIPPS2 from %s at power on. Nothing else on the card changes.'
+  : 'RIPPS2: настройване на BBL 1.20
+  
+    RIPPS2 работи от %s, което PS2BBL 1.2.0 не може да чете (чете карти памет, USB и MX4SIO), а RIPPS2 не се копира сам. Конфигурацията на PS2BBL Extended на тази карта (%s) го чете: START включва BOOT LOCK, за да стартира RIPPS2 от %s при включване. Нищо друго на картата не се променя.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read: it starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 does not copy itself. Put RIPPS2.ELF on one of those (a memory card''s APPS folder, or a USB drive), start it from there, then set up BIBLE again.'
+  : 'RIPPS2: настройване на BBL 1.20
+  
+    RIPPS2 работи от %s, което PS2BBL 1.2.0 не може да чете: той стартира програми от карта памет, USB устройство или MX4SIO, а RIPPS2 не се копира сам. Сложи RIPPS2.ELF на едно от тях (папката APPS на карта памет или USB устройство), стартирай го оттам и после настрой отново BIBLE.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    The memory card in slot %d: BBL 1.20 (mc%d:/%s) moves aside, and what it replaced (mc%d:/%s) goes back in its place. Nothing is deleted. The PS2BBL config stays as it is (BOOT LOCK can turn the lock off).'
+  : 'RIPPS2: настройване на BBL 1.20
+  
+    Картата памет в слот %d: BBL 1.20 (mc%d:/%s) се премества настрана, а това, което замени (mc%d:/%s), се връща на мястото си. Нищо не се изтрива. Конфигурацията на PS2BBL остава както е (BOOT LOCK може да изключи заключването).'
+  'RIPPS2: Setting up BBL 1.20 (binding PS2BBL to the memory card)': 'RIPPS2: настройване на BBL 1.20 (свързване на PS2BBL с картата памет)'
+  'RIPPS2: Setting up BBL 1.20 (putting back what was there)': 'RIPPS2: настройване на BBL 1.20 (връщане на предишното)'
+  'RIPPS2: Setting up BBL 1.20 (restarting the I/O processor)': 'RIPPS2: настройване на BBL 1.20 (рестартиране на входно-изходния процесор)'
+  'RIPPS2: Setting up BBL 1.20 (writing it to the memory card)': 'RIPPS2: настройване на BBL 1.20 (запис на картата памет)'
+  SET UP BBL 1.20: НАСТРОЙ BBL 1.20
+  ? 'SLOT 1: %s
+  
+    SLOT 2: %s
+  
+    %s
+  
+    RIPPS2: Setting up BBL 1.20. PS2BBL 1.2.0 by El Isra, set up by RIPPS2 on a standard 8 MB PS2 memory card or the internal HDD: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first from where it is (it is never copied), and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Set it up, repair it or restore what it replaced?'
+  : 'СЛОТ 1: %s
+  
+    СЛОТ 2: %s
+  
+    %s
+  
+    RIPPS2: настройване на BBL 1.20. PS2BBL 1.2.0 от El Isra, настроен от RIPPS2 на обикновена PS2 карта памет от 8 MB или на вътрешния твърд диск: старт за 0 ms при включване (PS2BBL Extended не позволява 0), първо RIPPS2 оттам, където е (никога не се копира), а бутон, задържан при включване, все така води до браузъра (TRIANGLE), до диск (START) и до предишното (CIRCLE). Да се настрои, поправи или да се върне това, което замени?'
+  The memory card in slot %d has %d KB free, and BBL 1.20 needs %d KB there. Free some space, then try again.: Картата памет в слот %d има %d KB свободни, а BBL 1.20 се нуждае от %d KB на нея. Освободи малко място и опитай отново.
+  ? The memory card in slot %d refused PS2BBL, so RIPPS2 put the card back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : Картата памет в слот %d отказа PS2BBL, затова RIPPS2 остави картата както беше. Провери свободното ѝ място и опитай отново. (DIAG.TXT до RIPPS2 съдържа отговора на картата.)
+  ? The memory card in slot %d would not move BBL 1.20 aside, so nothing was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : Картата памет в слот %d не премести BBL 1.20 настрана, затова нищо не се промени. (DIAG.TXT до RIPPS2 съдържа отговора на картата.)
+  The memory card in slot %d would not take %s back, so BBL 1.20 stayed. (DIAG.TXT beside RIPPS2 has what the card said.): Картата памет в слот %d не прие обратно %s, затова BBL 1.20 остана. (DIAG.TXT до RIPPS2 съдържа отговора на картата.)
+  MUSIC: МУЗИКА
+  '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': 'В %s%s няма %s. RIPPOPS намери PS1 емулатора на Sony на %s: START копира %s тук и стартира играта.'
+  ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
+  : 'RIPPS2 не вижда %s в %s%s. POPSTARTER има нужда от POPS_IOX.PAK с POPS.PAK или с POPS.ELF и IOPRP252.IMG: PS1 емулатора на Sony от собствената ти конзола. Може да ги намери там, където RIPPS2 не търси (ако игрите ти тръгват, намира ги). START стартира и за това устройство повече не се пита.'
 labels:
   BDMMODE: Режим на стартиране на BDM
   GAME_ID: ID на играта
@@ -1706,3 +1721,5 @@ labels:
   HINT_EXITPATH: 'Накъде води EXIT в Менюто в играта. Най-добре оставете празно, с настроен BIBLE (СЪСТОЯНИЕ > Зареждащ модул > Управление, или BOOT LOCK на вашия PS2BBL): тогава EXIT рестартира конзолата по собствения ѝ път за стартиране и PS2BBL стартира RIPPS2 като при включване, най-сигурният път обратно. Браузър: браузърът на PS2. ELF на карта с памет (mc0:/mc1:) или FAT32 USB устройство (mass:/) се зарежда веднага след рестарта, за което не всяка игра оставя конзолата готова; тогава MMCE изобщо не е достъпен.'
   HINT_BDM_START: 'USB, iLink, MX4SIO и exFAT HDD. Автоматично ги стартира при стартиране: най-бързо за включените устройства, с игрите им във Всички игри от самото начало. Ръчно ги стартира, когато отворите страницата им.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino не може да ползва VMC на APA HDD (exFAT, USB и MX4SIO могат): тази игра стартира с истинската карта в този слот.'
+  RIPPS2_FAST_BOOT: Fast Boot
+  HINT_RIPPS2_FAST_BOOT: 'Стартирането чете само устройството на RIPPS2: настройките и звуците до RIPPS2.ELF (RIPPS2.FB там казва къде) и всеки списък от неговия кеш. Другите устройства чакат: SELECT на страница стартира устройствата ѝ и зарежда техните изображения (с автоматично опресняване те стартират при старт). Включването копира звуците ти, а ако има място и музиката, в AUDIO до RIPPS2.'

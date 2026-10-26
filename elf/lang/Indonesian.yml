@@ -198,12 +198,9 @@ strings:
   '%s could not be made. Is the drive write-protected?': '%s tidak bisa dibuat. Apakah drive dilindungi dari penulisan?'
   '%u.%u MB': '%u.%u MB'
   RIP: RIP
-  RIP TO OPL'S AUDIO: RIP KE AUDIO MILIK OPL
   RIPPS2 cannot tell where its folder is, so there is nowhere to put the sounds.: RIPPS2 tidak tahu di mana foldernya, jadi tidak ada tempat untuk menaruh suara.
   ? RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
   : RIPPS2 memainkan musik menu konsol ini, lagu suasana peramban (%d:%02d), dari not milik BIOS sendiri dan menulisnya sebagai WAV berukuran %s ke %s; tidak ada kartu memori yang muat. %s yang sudah ada di sana akan diganti. Butuh satu atau dua menit.
-  ? RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
-  : RIPPS2 memainkan musik menu konsol ini, lagu suasana peramban (%d:%02d), dari not milik BIOS sendiri dan menulisnya sebagai WAV berukuran %s; tidak ada kartu memori yang muat. Terima menulisnya ke %s, di samping RIPPS2. START menulisnya ke %s, sumber daya OPL di drive itu. %s yang sudah ada di sana akan diganti. Butuh satu atau dua menit.
   ? 'RIPPS2 reads the sounds from this console''s own BIOS and writes them to %s as its sounds: cursor, confirm, cancel, pages, category, messages, disc, error, save, drives and random, and the boot and game launch music, played from the BIOS''s own notes. Files of those names already there are replaced.'
   : 'RIPPS2 membaca suara dari BIOS milik konsol ini dan menulisnya ke %s sebagai suaranya: kursor, terima, batal, halaman, kategori, pesan, disk, galat, simpan, drive, dan acak, serta musik boot dan peluncuran game, dimainkan dari not milik BIOS sendiri. File bernama sama yang sudah ada di sana akan diganti.'
   Reading this console's menu music: Membaca musik menu konsol ini
@@ -248,34 +245,20 @@ strings:
   : '- %s (%s) dipindahkan utuh ke folder cadangan lebih dulu.
 
     '
-  ? '- RIPPS2 is copied to %s.
-
-    '
-  : '- RIPPS2 disalin ke %s.
-
-    '
-  A COPY ON MEMORY CARD %d: SALINAN DI KARTU MEMORI %d
-  A COPY ON MX4SIO: SALINAN DI MX4SIO
-  A COPY ON THE USB DRIVE: SALINAN DI FLASHDISK USB
-  BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE tidak bisa menyalin RIPPS2 ke %s. Periksa ruangnya dan pastikan tidak dilindungi dari penulisan. Tidak ada hal lain yang diubah.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE tidak bisa menyalin RIPPS2 ke partisi %s di HDD. Periksa ruang kosongnya. Tidak ada hal lain yang diubah.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE tidak bisa menyimpan salinan program boot HDD, jadi berhenti sebelum mengubahnya. RIPPS2 sudah disalin ke HDD; tidak ada hal lain yang diubah.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE tidak bisa menulis konfigurasinya (%s). Program boot tidak diubah.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE tidak bisa menulis program boot HDD (langkah %d). %s
-  ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
-  : 'BIBLE terinstal di kartu memori %d (mc%d:/%s/%s) dan BOOT LOCK menyala: saat menyala, konsol langsung menjalankan RIPPS2 dari %s.'
   ? 'BIBLE is installed on the internal HDD and BOOT LOCK is on: at power on the console starts RIPPS2 from %s%s%s%s, at once. Config: %s.%s%s'
   : 'BIBLE terinstal di HDD internal dan BOOT LOCK menyala: saat menyala, konsol langsung menjalankan RIPPS2 dari %s%s%s%s. Konfigurasi: %s.%s%s'
   ? BIBLE is on memory card %d, but its config (%s) could not be written, so it starts the browser. Free some space and run MANAGE again to finish.
   : BIBLE ada di kartu memori %d, tetapi konfigurasinya (%s) tidak bisa ditulis, jadi ia menjalankan peramban. Kosongkan sedikit ruang dan jalankan KELOLA lagi untuk menyelesaikannya.
   BIBLE ran out of memory before it started. Nothing was changed.: Memori BIBLE habis sebelum mulai. Tidak ada yang diubah.
   BIBLE ran out of memory. Nothing on the memory card was changed.: Memori BIBLE habis. Tidak ada yang diubah di kartu memori.
-  'BIBLE: binding PS2BBL to the memory card': 'BIBLE: mengikat PS2BBL ke kartu memori'
   'BIBLE: copying RIPPS2 to %s (%d%%)': 'BIBLE: menyalin RIPPS2 ke %s (%d%%)'
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: menyimpan program boot HDD'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: mengembalikan program boot HDD'
-  'BIBLE: restarting the I/O processor with the security module': 'BIBLE: memulai ulang prosesor I/O dengan modul keamanan'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: menulis PS2BBL ke area boot HDD'
   BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK tidak bisa menulis konfigurasi PS2BBL. Pastikan kartu memori atau drive tidak dilindungi dari penulisan, lalu coba lagi.
   BOOT LOCK found no PS2BBL config to change.: BOOT LOCK tidak menemukan konfigurasi PS2BBL untuk diubah.
@@ -283,7 +266,6 @@ strings:
   ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
   : BOOT LOCK menyala. PS2BBL sekarang menjalankan RIPPS2 saat menyala (%s). Tahan tombol pintas PS2BBL saat konsol mulai untuk menuju hal lain.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK bekerja melalui PS2BBL (PlayStation 2 Basic BootLoader), dan tidak ada PS2BBL di kartu memori mana pun di sini.
-  INSTALL BIBLE: INSTAL BIBLE
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -307,14 +289,7 @@ strings:
 
     Ini butuh konsol yang boot dari HDD-nya (PS2 tebal dengan adaptor jaringan). Biarkan menyala sampai muncul tulisan selesai.'
   INTERNAL HDD  (its boot area): HDD INTERNAL  (area boot-nya)
-  MEMORY CARD %d  (%s): KARTU MEMORI %d  (%s)
-  Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: Kartu memori %d punya %d KB kosong, dan BIBLE butuh %d KB di sana. Kosongkan sedikit ruang, lalu coba lagi.
-  Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: Kartu memori %d punya %d KB kosong, dan salinan RIPPS2 butuh %d KB. Kosongkan sedikit ruang atau pilih tempat lain.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Kartu memori %d menjalankan %s saat menyala, dan BOOT LOCK hanya bekerja melalui PS2BBL.
-  ? PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO). BOOT LOADER > MANAGE can copy RIPPS2 to a memory card or a USB drive for it.
-  : PS2BBL 1.2.0 tidak bisa menjalankan RIPPS2 dari tempatnya sekarang (ia menjangkau kartu memori, flashdisk USB, dan MX4SIO). BOOT LOADER > KELOLA bisa menyalin RIPPS2 untuknya ke kartu memori atau flashdisk USB.
-  ? PS2BBL starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 could not read itself to copy there. Start RIPPS2 from one of those, then try again.
-  : PS2BBL menjalankan program dari kartu memori, flashdisk USB, atau MX4SIO, dan RIPPS2 tidak bisa membaca dirinya sendiri untuk disalin ke sana. Jalankan RIPPS2 dari salah satunya, lalu coba lagi.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -342,9 +317,7 @@ strings:
   There is no kept boot program on this HDD. Nothing was changed.: Tidak ada program boot yang disimpan di HDD ini. Tidak ada yang diubah.
   ? This HDD has no __sysconf partition, so BIBLE's config has to go on a memory card (PS2BBL reads a card's first), and there is none in either slot. Insert one, then try again.
   : HDD ini tidak punya partisi __sysconf, jadi konfigurasi BIBLE harus ada di kartu memori (PS2BBL membaca milik kartu lebih dulu), dan tidak ada kartu di kedua slot. Pasang satu, lalu coba lagi.
-  WHERE IT IS NOW (%.40s): LETAKNYA SEKARANG (%.40s)
   a boot loader RIPPS2 does not know: boot loader yang tidak dikenal RIPPS2
-  memory card %d: kartu memori %d
   no boot loader: tidak ada boot loader
   no memory card: tidak ada kartu memori
   the HDD: HDD
@@ -855,11 +828,7 @@ strings:
   TRAY OPEN: BAKI TERBUKA
   TREFOIL KNOT: SIMPUL TREFOIL
   ' and ': ' dan '
-  ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  : '%s tidak ada di %s%s. RIPPOPS menemukan POPS.ELF dan POPS_IOX.PAK, emulator PS1 milik Sony, di %s: START menyalinnya ke sini dan menjalankan game.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s tidak bisa disalin ke %s%s. Apakah drive penuh atau dilindungi dari penulisan?'
-  ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  : '%s tidak ada di %s%s. RIPPOPS menemukan POPS.ELF dan POPS_IOX.PAK, emulator PS1 milik Sony, di %s: START menyalinnya ke sini dan menjalankan game.'
   COPY AND START: SALIN DAN JALANKAN
   Copying %s: Menyalin %s
   LAUNCH ANYWAY: TETAP JALANKAN
@@ -909,12 +878,8 @@ strings:
   THE RED SCREEN MUSIC (DISC WARNING): MUSIK LAYAR MERAH (PERINGATAN DISK)
   'Ripping this console''s red screen music: %d%%': 'Me-rip musik layar merah konsol ini: %d%%'
   The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: Musik layar merah (%s) ada di %s sebagai %s. Pengaturan Audio > Musik mencantumkannya sebagai Red Screen.
-  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
-  : RIPPS2 memainkan musik layar merah konsol ini, lagu suasana peringatan disk (%d:%02d), dari not milik BIOS sendiri dan menulisnya sebagai WAV berukuran %s; tidak ada kartu memori yang muat. Terima menulisnya ke %s, di samping RIPPS2. START menulisnya ke %s, sumber daya OPL di drive itu. %s yang sudah ada di sana akan diganti. Butuh satu atau dua menit.
   ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
   : RIPPS2 memainkan musik layar merah konsol ini, lagu suasana peringatan disk (%d:%02d), dari not milik BIOS sendiri dan menulisnya sebagai WAV berukuran %s ke %s; tidak ada kartu memori yang muat. %s yang sudah ada di sana akan diganti. Butuh satu atau dua menit.
-  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
-  : RIPPS2 memainkan musik menu konsol ini (%d:%02d) dan musik layar merahnya (%d:%02d) dari not milik BIOS sendiri dan menulisnya sebagai dua WAV, total %s; tidak ada kartu memori yang muat. Terima menulisnya ke %s, di samping RIPPS2. START menulisnya ke %s, sumber daya OPL di drive itu. Berkas dengan nama itu yang sudah ada di sana akan diganti. Masing-masing butuh satu atau dua menit.
   ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
   : RIPPS2 memainkan musik menu konsol ini (%d:%02d) dan musik layar merahnya (%d:%02d) dari not milik BIOS sendiri dan menulisnya sebagai dua WAV, total %s, ke %s; tidak ada kartu memori yang muat. Berkas dengan nama itu yang sudah ada di sana akan diganti. Masing-masing butuh satu atau dua menit.
   Across the Top: Di Atas
@@ -1119,40 +1084,8 @@ strings:
   ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
   : Suara butuh %d KB dan kartu memori ini punya %d KB kosong. START menulisnya ke %sAUDIO/ di drive sebagai gantinya, dan RIPPS2 memutarnya dari sana.
   There was not enough memory to make the sounds. Nothing was written.: Memori tidak cukup untuk membuat suara. Tidak ada yang ditulis.
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-  
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
-  
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 diikat ke kartu ini oleh konsol dan ditulis sebagai %s/%s.
-  
-    - Konfigurasinya, mc%d:/PS2BBL/CONFIG.INI, menjalankan RIPPS2 dari %s tanpa menunggu (0 ms, yang tidak diizinkan PS2BBL Extended), BOOT LOCK menyala.
-  
-    Prosesor I/O dimulai ulang untuk ini; musik dan drive kembali setelahnya. Biarkan kartu terpasang dan konsol menyala sampai muncul tulisan selesai.'
-  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
-  : BIBLE tidak bisa ditulis ke kartu memori %d, jadi kartu dikembalikan seperti semula. Periksa ruang kosongnya, lalu coba lagi. (DIAG.TXT di samping RIPPS2 berisi jawaban kartu.)
   ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
   : BIBLE tidak bisa memindahkan %s untuk menyimpannya, jadi berhenti di situ. Tidak ada yang diubah di kartu. (DIAG.TXT di samping RIPPS2 berisi jawaban kartu.)
-  ? 'MEMORY CARD 0: %s
-  
-    MEMORY CARD 1: %s
-  
-    %s
-  
-    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'KARTU MEMORI 0: %s
-  
-    KARTU MEMORI 1: %s
-  
-    %s
-  
-    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 oleh El Isra yang diatur RIPPS2: mulai dalam 0 ms saat menyala (PS2BBL Extended tidak mengizinkan 0), RIPPS2 dulu, dan tombol yang ditahan saat menyala tetap menuju peramban (SEGITIGA), disk (START), dan isi sebelumnya (LINGKARAN). Instal atau perbaiki di kartu memori atau HDD internal?'
-  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
-  
-    '
-  : 'RIPPS2 BIBLE: BBL 1.20 DI KARTU MEMORI %d
-  
-    '
   ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
   : 'File Memori terbuka sekarang, di MEDIA, dengan disk di papan klipnya (DI-RIP). Buka drive dan folder tujuannya (drive apa saja: USB, HDD, MEDIA milik SD2PSX), tekan SEGITIGA untuk TINDAKAN, lalu pilih TEMPEL. RIPDISC lalu bertanya sekali lagi dan membaca disk dengan laser PS2-mu, lalu menulisnya di sana.'
   RENAME THE GAME: GANTI NAMA GAME
@@ -1199,8 +1132,6 @@ strings:
   This drive's game list, for a quick boot: Daftar game drive ini, untuk boot cepat
   Virtual memory cards for games: Kartu memori virtual untuk game
   What RIPPS2's last launch did: Apa yang dilakukan peluncuran terakhir RIPPS2
-  Circle from the top   Cross close: 'Lingkaran: dari awal   Silang: tutup'
-  Cross from the top   Circle close: 'Silang: dari awal   Lingkaran: tutup'
   ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
   : Trek ini tidak bisa diputar. RIPPS2 memutar file .wav PCM 16-bit (seperti hasil rip RIPDISC dan Musik BIOS), file Ogg Vorbis .ogg, dan MP3.
   'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'HANYA BACA: KARTU BOOT SD2PSX SEDANG DIPAKAI'
@@ -1240,8 +1171,92 @@ strings:
   what boot reads first: yang dibaca boot lebih dulu
   ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
   : Neutrino ini lebih lama dari 1.3, yang tidak bisa memulai game dari HDD APA. Arahkan Peluncuran game > Neutrino ke Neutrino 1.3 atau lebih baru, atau kosongkan jalurnya untuk memakai bawaan RIPPS2.
-  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
-  : RIPPS2 tidak melihat %s di %s%s. POPSTARTER butuh POPS.ELF dan POPS_IOX.PAK, emulator PS1 dari konsolmu sendiri; ia mungkin menemukannya di tempat yang tidak dilihat RIPPS2 (jika game-mu berjalan, ia menemukannya). START meluncurkan, dan drive ini tidak ditanyakan lagi.
+  ', the sounds': ', suara'
+  ? 'Fast Boot is on. RIPPS2 boots from its own drive (%s): the settings%s and every list from its cache. The other drives start when you press SELECT on their page, or launch one of their games.'
+  : 'Fast Boot aktif. RIPPS2 berjalan dari drive-nya sendiri (%s): pengaturan%s dan setiap daftar dari cache-nya. Drive lain dimulai saat kamu menekan SELECT di halamannya atau menjalankan salah satu gimnya.'
+  Fast Boot is on. The sounds take %d KB and the memory card RIPPS2 runs from has %d KB free, so they stay in %s.: Fast Boot aktif. Suara memakan %d KB dan kartu memori tempat RIPPS2 berjalan punya %d KB kosong, jadi suara tetap di %s.
+  ' (%d KB free)': ' (%d KB kosong)'
+  ' (%u MB free)': ' (%u MB kosong)'
+  'BESIDE RIPPS2: %sAUDIO%s, read first at boot': 'DI SAMPING RIPPS2: %sAUDIO%s, dibaca pertama saat mulai'
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 where it is (%s) with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on. RIPPS2 itself is not copied.
+  
+    The I/O processor restarts for this and every drive read stops until it is done; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- PS2BBL 1.2.0 diikat ke kartu ini oleh konsol dan ditulis sebagai %s/%s.
+  
+    - Konfigurasinya, mc%d:/PS2BBL/CONFIG.INI, menjalankan RIPPS2 di tempatnya (%s) tanpa menunggu (0 ms, yang tidak diizinkan PS2BBL Extended), BOOT LOCK aktif. RIPPS2 sendiri tidak disalin.
+  
+    Prosesor I/O dimulai ulang untuk ini dan setiap pembacaan drive berhenti sampai selesai; musik dan drive kembali setelahnya. Biarkan kartu terpasang dan konsol menyala sampai ia bilang selesai.'
+  ? 'An SD2PSX or MMCE card may protect itself after a refused write: if the memory card or the MMCE drive is missing now, turn the console off and on.'
+  : 'Kartu SD2PSX atau MMCE bisa melindungi dirinya setelah penulisan ditolak: jika kartu memori atau drive MMCE sekarang hilang, matikan lalu nyalakan konsol.'
+  BOOT LOCK ON: BOOT LOCK AKTIF
+  'Done: the memory card in slot %d starts what it started before BBL 1.20. BBL 1.20 is kept in mc%d:/%s.': 'Selesai: kartu memori di slot %d menjalankan apa yang dijalankannya sebelum BBL 1.20. BBL 1.20 disimpan di mc%d:/%s.'
+  ? 'For a standard 8 MB PS2 memory card (a MagicGate card, or an SD2PSX or MMCE BOOT card): the one in slot %d. At power on PS2BBL reads slot 2''s config before slot 1''s.
+  
+    '
+  : 'Untuk kartu memori PS2 standar 8 MB (kartu MagicGate, atau kartu BOOT SD2PSX atau MMCE): yang di slot %d. Saat dinyalakan, PS2BBL membaca konfigurasi slot 2 sebelum slot 1.
+  
+    '
+  MEMORY CARD IN SLOT %d  (%s): KARTU MEMORI DI SLOT %d  (%s)
+  ? PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD.
+  : PS2BBL 1.2.0 tidak bisa menjalankan RIPPS2 dari tempatnya sekarang (ia menjangkau kartu memori, drive USB, dan MX4SIO), dan RIPPS2 tidak menyalin dirinya sendiri. Taruh RIPPS2.ELF di kartu memori atau drive USB lalu jalankan dari sana, atau gunakan PS2BBL Extended, yang membaca MMCE dan hard disk.
+  RESTORE SLOT %d'S OLD BOOT LOADER: PULIHKAN BOOT LOADER LAMA DI SLOT %d
+  ? 'RIPPS2: BBL 1.20 is set up on the memory card in slot %d (mc%d:/%s/%s), BOOT LOCK on: at power on it starts RIPPS2 from %s, at once.'
+  : 'RIPPS2: BBL 1.20 terpasang di kartu memori slot %d (mc%d:/%s/%s), BOOT LOCK aktif: saat dinyalakan ia langsung menjalankan RIPPS2 dari %s.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    '
+  : 'RIPPS2: memasang BBL 1.20
+  
+    '
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read (it reads memory cards, USB and MX4SIO), and RIPPS2 does not copy itself. The PS2BBL Extended config on this card (%s) reads it: START turns BOOT LOCK on, so it starts RIPPS2 from %s at power on. Nothing else on the card changes.'
+  : 'RIPPS2: memasang BBL 1.20
+  
+    RIPPS2 berjalan dari %s, yang tidak bisa dibaca PS2BBL 1.2.0 (ia membaca kartu memori, USB, dan MX4SIO), dan RIPPS2 tidak menyalin dirinya sendiri. Konfigurasi PS2BBL Extended di kartu ini (%s) bisa membacanya: START menyalakan BOOT LOCK, sehingga ia menjalankan RIPPS2 dari %s saat dinyalakan. Tidak ada hal lain di kartu yang berubah.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read: it starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 does not copy itself. Put RIPPS2.ELF on one of those (a memory card''s APPS folder, or a USB drive), start it from there, then set up BIBLE again.'
+  : 'RIPPS2: memasang BBL 1.20
+  
+    RIPPS2 berjalan dari %s, yang tidak bisa dibaca PS2BBL 1.2.0: ia menjalankan program dari kartu memori, drive USB, atau MX4SIO, dan RIPPS2 tidak menyalin dirinya sendiri. Taruh RIPPS2.ELF di salah satunya (folder APPS di kartu memori, atau drive USB), jalankan dari sana, lalu pasang BIBLE lagi.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    The memory card in slot %d: BBL 1.20 (mc%d:/%s) moves aside, and what it replaced (mc%d:/%s) goes back in its place. Nothing is deleted. The PS2BBL config stays as it is (BOOT LOCK can turn the lock off).'
+  : 'RIPPS2: memasang BBL 1.20
+  
+    Kartu memori di slot %d: BBL 1.20 (mc%d:/%s) dipindah ke samping, dan yang digantikannya (mc%d:/%s) kembali ke tempatnya. Tidak ada yang dihapus. Konfigurasi PS2BBL tetap seperti adanya (BOOT LOCK bisa mematikan kuncinya).'
+  'RIPPS2: Setting up BBL 1.20 (binding PS2BBL to the memory card)': 'RIPPS2: memasang BBL 1.20 (mengikat PS2BBL ke kartu memori)'
+  'RIPPS2: Setting up BBL 1.20 (putting back what was there)': 'RIPPS2: memasang BBL 1.20 (mengembalikan yang sebelumnya)'
+  'RIPPS2: Setting up BBL 1.20 (restarting the I/O processor)': 'RIPPS2: memasang BBL 1.20 (memulai ulang prosesor I/O)'
+  'RIPPS2: Setting up BBL 1.20 (writing it to the memory card)': 'RIPPS2: memasang BBL 1.20 (menulisnya ke kartu memori)'
+  SET UP BBL 1.20: PASANG BBL 1.20
+  ? 'SLOT 1: %s
+  
+    SLOT 2: %s
+  
+    %s
+  
+    RIPPS2: Setting up BBL 1.20. PS2BBL 1.2.0 by El Isra, set up by RIPPS2 on a standard 8 MB PS2 memory card or the internal HDD: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first from where it is (it is never copied), and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Set it up, repair it or restore what it replaced?'
+  : 'SLOT 1: %s
+  
+    SLOT 2: %s
+  
+    %s
+  
+    RIPPS2: memasang BBL 1.20. PS2BBL 1.2.0 karya El Isra, dipasang oleh RIPPS2 di kartu memori PS2 standar 8 MB atau hard disk internal: mulai dalam 0 ms saat dinyalakan (PS2BBL Extended tidak mengizinkan 0), RIPPS2 lebih dulu dari tempatnya (tidak pernah disalin), dan tombol yang ditahan saat dinyalakan tetap membawa ke browser (TRIANGLE), ke disk (START), dan ke yang sebelumnya (CIRCLE). Pasang, perbaiki, atau pulihkan yang digantikannya?'
+  The memory card in slot %d has %d KB free, and BBL 1.20 needs %d KB there. Free some space, then try again.: Kartu memori di slot %d punya %d KB kosong, dan BBL 1.20 butuh %d KB di sana. Kosongkan sedikit ruang, lalu coba lagi.
+  ? The memory card in slot %d refused PS2BBL, so RIPPS2 put the card back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : Kartu memori di slot %d menolak PS2BBL, jadi RIPPS2 membiarkan kartu seperti semula. Periksa ruang kosongnya, lalu coba lagi. (DIAG.TXT di samping RIPPS2 berisi jawaban kartu.)
+  ? The memory card in slot %d would not move BBL 1.20 aside, so nothing was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : Kartu memori di slot %d tidak mau memindahkan BBL 1.20, jadi tidak ada yang berubah. (DIAG.TXT di samping RIPPS2 berisi jawaban kartu.)
+  The memory card in slot %d would not take %s back, so BBL 1.20 stayed. (DIAG.TXT beside RIPPS2 has what the card said.): Kartu memori di slot %d tidak mau menerima kembali %s, jadi BBL 1.20 tetap ada. (DIAG.TXT di samping RIPPS2 berisi jawaban kartu.)
+  MUSIC: MUSIK
+  '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s tidak punya %s. RIPPOPS menemukan emulator PS1 Sony di %s: START menyalin %s ke sini dan menjalankan gimnya.'
+  ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
+  : 'RIPPS2 tidak melihat %s di %s%s. POPSTARTER butuh POPS_IOX.PAK dengan POPS.PAK, atau dengan POPS.ELF dan IOPRP252.IMG: emulator PS1 Sony, dari konsolmu sendiri. Ia mungkin menemukannya di tempat yang tidak dicari RIPPS2 (jika gimmu berjalan, ia menemukannya). START menjalankan, dan drive ini tidak ditanyakan lagi.'
 labels:
   BDM_GAMES: Game BDM
   HDD_GAMES: Game HDD
@@ -1725,3 +1740,5 @@ labels:
   HINT_EXITPATH: 'Ke mana EXIT di Menu Dalam Game pergi. Sebaiknya dikosongkan, dengan BIBLE terpasang (STATUS > Boot Loader > Kelola, atau BOOT LOCK di PS2BBL-mu): EXIT lalu me-reset konsol lewat jalur boot-nya sendiri dan PS2BBL memulai RIPPS2 seperti saat menyala, jalan pulang paling aman. Peramban: peramban PS2. ELF di kartu memori (mc0:/mc1:) atau drive USB FAT32 (mass:/) dimuat tepat setelah reset, yang tidak semua game siapkan; MMCE sama sekali tidak bisa dijangkau saat itu.'
   HINT_BDM_START: 'USB, iLink, MX4SIO, dan HDD exFAT. Otomatis memulainya saat boot: tercepat untuk drive yang tertancap, game-nya ada di Semua Game sejak awal. Manual memulainya saat kamu membuka halamannya.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino tidak bisa memakai VMC di HDD APA (exFAT, USB, dan MX4SIO bisa): game ini dimulai dengan kartu asli di slot itu.'
+  RIPPS2_FAST_BOOT: Fast Boot
+  HINT_RIPPS2_FAST_BOOT: 'Saat mulai, hanya drive RIPPS2 yang dibaca: pengaturan dan suara di samping RIPPS2.ELF (RIPPS2.FB di sana menunjukkan letaknya) dan setiap daftar dari cache-nya. Drive lain menunggu: SELECT di sebuah halaman memulai drive-nya dan memuat gambarnya (dengan penyegaran otomatis, drive dimulai saat mulai). Menyalakannya menyalin suaramu, dan musik jika ada ruang, ke AUDIO di samping RIPPS2.'

@@ -1,0 +1,40 @@
+{
+ "s": {
+  "0": ", ljuden",
+  "1": "Fast Boot är på. RIPPS2 startar från sin egen enhet (%s): inställningarna%s och varje lista från sin cache. De andra enheterna startar när du trycker SELECT på deras sida eller startar ett av deras spel.",
+  "2": "Fast Boot är på. Ljuden tar %d KB och minneskortet som RIPPS2 körs från har %d KB ledigt, så de stannar i %s.",
+  "3": " (%d KB ledigt)",
+  "4": " (%u MB ledigt)",
+  "5": "BREDVID RIPPS2: %sAUDIO%s, läses först vid start",
+  "6": "- PS2BBL 1.2.0 binds till det här kortet av konsolen och skrivs som %s/%s.\n- Dess konfiguration, mc%d:/PS2BBL/CONFIG.INI, startar RIPPS2 där det ligger (%s) utan väntan (0 ms, vilket PS2BBL Extended inte tillåter), BOOT LOCK på. RIPPS2 själv kopieras inte.\nI/O-processorn startar om för detta och all läsning från enheter stoppar tills det är klart; musik och enheter kommer tillbaka efteråt. Låt kortet sitta i och konsolen vara på tills det säger klart.",
+  "7": "Ett SD2PSX- eller MMCE-kort kan skydda sig efter en nekad skrivning: saknas minneskortet eller MMCE-enheten nu, stäng av och slå på konsolen.",
+  "8": "BOOT LOCK PÅ",
+  "9": "Klart: minneskortet i plats %d startar det som det startade före BBL 1.20. BBL 1.20 sparas i mc%d:/%s.",
+  "10": "För ett vanligt PS2-minneskort på 8 MB (ett MagicGate-kort, eller ett SD2PSX- eller MMCE-BOOT-kort): det i plats %d. Vid start läser PS2BBL konfigurationen i plats 2 före den i plats 1.\n",
+  "11": "MINNESKORT I PLATS %d  (%s)",
+  "12": "PS2BBL 1.2.0 kan inte starta RIPPS2 där det ligger nu (det når minneskort, USB-enheter och MX4SIO), och RIPPS2 kopierar inte sig själv. Lägg RIPPS2.ELF på ett minneskort eller en USB-enhet och starta det därifrån, eller använd PS2BBL Extended, som läser MMCE och hårddisken.",
+  "13": "ÅTERSTÄLL DEN GAMLA STARTLADDAREN I PLATS %d",
+  "14": "RIPPS2: BBL 1.20 är installerat på minneskortet i plats %d (mc%d:/%s/%s), BOOT LOCK på: vid start startar det RIPPS2 från %s, direkt.",
+  "15": "RIPPS2: installerar BBL 1.20\n",
+  "16": "RIPPS2: installerar BBL 1.20\nRIPPS2 körs från %s, som PS2BBL 1.2.0 inte kan läsa (det läser minneskort, USB och MX4SIO), och RIPPS2 kopierar inte sig själv. PS2BBL Extended-konfigurationen på det här kortet (%s) läser det: START slår på BOOT LOCK, så att den startar RIPPS2 från %s vid start. Inget annat på kortet ändras.",
+  "17": "RIPPS2: installerar BBL 1.20\nRIPPS2 körs från %s, som PS2BBL 1.2.0 inte kan läsa: det startar program från ett minneskort, en USB-enhet eller MX4SIO, och RIPPS2 kopierar inte sig själv. Lägg RIPPS2.ELF på en av dem (ett minneskorts APPS-mapp eller en USB-enhet), starta det därifrån och installera sedan BIBLE igen.",
+  "18": "RIPPS2: installerar BBL 1.20\nMinneskortet i plats %d: BBL 1.20 (mc%d:/%s) flyttas undan, och det som det ersatte (mc%d:/%s) kommer tillbaka på sin plats. Inget raderas. PS2BBL-konfigurationen förblir som den är (BOOT LOCK kan slå av låset).",
+  "19": "RIPPS2: installerar BBL 1.20 (binder PS2BBL till minneskortet)",
+  "20": "RIPPS2: installerar BBL 1.20 (lägger tillbaka det som fanns)",
+  "21": "RIPPS2: installerar BBL 1.20 (I/O-processorn startar om)",
+  "22": "RIPPS2: installerar BBL 1.20 (skriver det till minneskortet)",
+  "23": "INSTALLERA BBL 1.20",
+  "24": "PLATS 1: %s\nPLATS 2: %s\n%s\nRIPPS2: installerar BBL 1.20. PS2BBL 1.2.0 av El Isra, installerat av RIPPS2 på ett vanligt PS2-minneskort på 8 MB eller den interna hårddisken: en start på 0 ms vid påslag (PS2BBL Extended tillåter inte 0), RIPPS2 först där det ligger (det kopieras aldrig), och en knapp som hålls vid påslag når fortfarande webbläsaren (TRIANGLE), en skiva (START) och det som fanns före (CIRCLE). Installera, reparera eller återställa det som det ersatte?",
+  "25": "Minneskortet i plats %d har %d KB ledigt, och BBL 1.20 behöver %d KB där. Frigör lite utrymme och försök igen.",
+  "26": "Minneskortet i plats %d nekade PS2BBL, så RIPPS2 lämnade kortet som det var. Kontrollera dess lediga utrymme och försök igen. (DIAG.TXT bredvid RIPPS2 har det som kortet svarade.)",
+  "27": "Minneskortet i plats %d ville inte flytta undan BBL 1.20, så inget ändrades. (DIAG.TXT bredvid RIPPS2 har det som kortet svarade.)",
+  "28": "Minneskortet i plats %d ville inte ta tillbaka %s, så BBL 1.20 blev kvar. (DIAG.TXT bredvid RIPPS2 har det som kortet svarade.)",
+  "29": "MUSIK",
+  "30": "%s%s har ingen %s. RIPPOPS hittade Sonys PS1-emulator på %s: START kopierar %s hit och startar spelet.",
+  "31": "RIPPS2 ser inte %s i %s%s. POPSTARTER behöver POPS_IOX.PAK med POPS.PAK, eller med POPS.ELF och IOPRP252.IMG: Sonys PS1-emulator, från din egen konsol. Den kan hitta dem där RIPPS2 inte letar (om dina spel startar gör den det). START startar, och den här enheten frågas inte om igen."
+ },
+ "l": {
+  "RIPPS2_FAST_BOOT": "Fast Boot",
+  "HINT_RIPPS2_FAST_BOOT": "Starten läser bara RIPPS2:s egen enhet: inställningarna och ljuden bredvid RIPPS2.ELF (RIPPS2.FB där säger var) och varje lista från sin cache. De andra enheterna väntar: SELECT på en sida startar dess enheter och hämtar deras bilder (med automatisk uppdatering startar de vid start). Att slå på det kopierar dina ljud, och musiken om det finns plats, till AUDIO bredvid RIPPS2."
+ }
+}

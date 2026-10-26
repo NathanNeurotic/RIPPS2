@@ -198,12 +198,9 @@ strings:
   '%s could not be made. Is the drive write-protected?': '%s n''a pas pu être créé. Le périphérique est-il protégé en écriture ?'
   '%u.%u MB': '%u.%u Mo'
   RIP: EXTRAIRE
-  RIP TO OPL'S AUDIO: EXTRAIRE VERS L'AUDIO D'OPL
   RIPPS2 cannot tell where its folder is, so there is nowhere to put the sounds.: RIPPS2 ne sait pas où se trouve son dossier, il n'y a donc nulle part où mettre les sons.
   ? RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
   : RIPPS2 joue la musique du menu de cette console, la pièce d'ambiance de son navigateur (%d:%02d), à partir des notes du BIOS lui-même, et l'écrit en WAV de %s dans %s ; aucune carte mémoire n'a la place. Un %s déjà présent est remplacé. Cela prend une minute ou deux.
-  ? RIPPS2 plays this console's menu music, its browser's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
-  : RIPPS2 joue la musique du menu de cette console, la pièce d'ambiance de son navigateur (%d:%02d), à partir des notes du BIOS lui-même, et l'écrit en WAV de %s ; aucune carte mémoire n'a la place. Valider l'écrit dans %s, à côté de RIPPS2. START l'écrit dans %s, les ressources d'OPL sur ce périphérique. Un %s déjà présent est remplacé. Cela prend une minute ou deux.
   ? 'RIPPS2 reads the sounds from this console''s own BIOS and writes them to %s as its sounds: cursor, confirm, cancel, pages, category, messages, disc, error, save, drives and random, and the boot and game launch music, played from the BIOS''s own notes. Files of those names already there are replaced.'
   : 'RIPPS2 lit les sons du BIOS de cette console et les écrit dans %s comme ses propres sons : curseur, validation, annulation, pages, catégorie, messages, disque, erreur, sauvegarde, périphériques et aléatoire, ainsi que les musiques de démarrage et de lancement de jeu, jouées à partir des notes du BIOS lui-même. Les fichiers de ces noms déjà présents sont remplacés.'
   Reading this console's menu music: Lecture de la musique du menu de cette console
@@ -248,34 +245,20 @@ strings:
   : '- %s (%s) est d''abord déplacé en entier dans un dossier de sauvegarde.
 
     '
-  ? '- RIPPS2 is copied to %s.
-
-    '
-  : '- RIPPS2 est copié dans %s.
-
-    '
-  A COPY ON MEMORY CARD %d: UNE COPIE SUR LA CARTE MÉMOIRE %d
-  A COPY ON MX4SIO: UNE COPIE SUR MX4SIO
-  A COPY ON THE USB DRIVE: UNE COPIE SUR LA CLÉ USB
-  BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.: BIBLE n'a pas pu copier RIPPS2 dans %s. Vérifiez l'espace libre et l'absence de protection en écriture. Rien d'autre n'a été modifié.
   BIBLE could not copy RIPPS2 to the HDD's %s partition. Check its free space. Nothing else was changed.: BIBLE n'a pas pu copier RIPPS2 dans la partition %s du disque dur. Vérifiez son espace libre. Rien d'autre n'a été modifié.
   ? BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   : BIBLE n'a pas pu garder une copie du programme de démarrage du disque dur, il s'est donc arrêté avant de le modifier. RIPPS2 a été copié sur le disque dur ; rien d'autre n'a été modifié.
   BIBLE could not write its config (%s). The boot program was not changed.: BIBLE n'a pas pu écrire sa configuration (%s). Le programme de démarrage n'a pas été modifié.
   BIBLE could not write the HDD's boot program (step %d). %s: BIBLE n'a pas pu écrire le programme de démarrage du disque dur (étape %d). %s
-  ? 'BIBLE is installed on memory card %d (mc%d:/%s/%s) and BOOT LOCK is on: at power on the console starts RIPPS2 from %s, at once.'
-  : 'BIBLE est installé sur la carte mémoire %d (mc%d:/%s/%s) et BOOT LOCK est activé : à l''allumage, la console lance RIPPS2 depuis %s, immédiatement.'
   ? 'BIBLE is installed on the internal HDD and BOOT LOCK is on: at power on the console starts RIPPS2 from %s%s%s%s, at once. Config: %s.%s%s'
   : 'BIBLE est installé sur le disque dur interne et BOOT LOCK est activé : à l''allumage, la console lance RIPPS2 depuis %s%s%s%s, immédiatement. Configuration : %s.%s%s'
   ? BIBLE is on memory card %d, but its config (%s) could not be written, so it starts the browser. Free some space and run MANAGE again to finish.
   : BIBLE est sur la carte mémoire %d, mais sa configuration (%s) n'a pas pu être écrite, il lance donc le navigateur. Libérez de l'espace et relancez GÉRER pour terminer.
   BIBLE ran out of memory before it started. Nothing was changed.: BIBLE a manqué de mémoire avant de commencer. Rien n'a été modifié.
   BIBLE ran out of memory. Nothing on the memory card was changed.: BIBLE a manqué de mémoire. Rien n'a été modifié sur la carte mémoire.
-  'BIBLE: binding PS2BBL to the memory card': 'BIBLE : liaison de PS2BBL à la carte mémoire'
   'BIBLE: copying RIPPS2 to %s (%d%%)': 'BIBLE : copie de RIPPS2 dans %s (%d%%)'
   'BIBLE: keeping the HDD''s boot program': 'BIBLE : sauvegarde du programme de démarrage du disque dur'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE : remise en place du programme de démarrage du disque dur'
-  'BIBLE: restarting the I/O processor with the security module': 'BIBLE : redémarrage du processeur d''E/S avec le module de sécurité'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE : écriture de PS2BBL dans la zone de démarrage du disque dur'
   BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK n'a pas pu écrire la configuration PS2BBL. Vérifiez que la carte mémoire ou le périphérique n'est pas protégé en écriture, puis réessayez.
   BOOT LOCK found no PS2BBL config to change.: BOOT LOCK n'a trouvé aucune configuration PS2BBL à modifier.
@@ -283,7 +266,6 @@ strings:
   ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
   : BOOT LOCK est activé. PS2BBL lance maintenant RIPPS2 à l'allumage (%s). Maintenez un raccourci PS2BBL pendant le démarrage de la console pour accéder à autre chose.%s
   BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK passe par PS2BBL (PlayStation 2 Basic BootLoader), et il n'y en a aucun sur une carte mémoire ici.
-  INSTALL BIBLE: INSTALLER BIBLE
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -307,14 +289,7 @@ strings:
 
     Cela demande une console qui démarre depuis son disque dur (une PS2 fat avec l''adaptateur réseau). Laissez-la allumée jusqu''à la fin.'
   INTERNAL HDD  (its boot area): DISQUE DUR INTERNE  (sa zone de démarrage)
-  MEMORY CARD %d  (%s): CARTE MÉMOIRE %d  (%s)
-  Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.: La carte mémoire %d a %d Ko libres, et BIBLE y a besoin de %d Ko. Libérez de l'espace, puis réessayez.
-  Memory card %d has %d KB free, and the copy of RIPPS2 needs %d KB. Free some space or choose another place.: La carte mémoire %d a %d Ko libres, et la copie de RIPPS2 a besoin de %d Ko. Libérez de l'espace ou choisissez un autre emplacement.
   Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: La carte mémoire %d lance %s à l'allumage, et BOOT LOCK ne fonctionne qu'avec PS2BBL.
-  ? PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO). BOOT LOADER > MANAGE can copy RIPPS2 to a memory card or a USB drive for it.
-  : PS2BBL 1.2.0 ne peut pas lancer RIPPS2 depuis son emplacement actuel (il atteint les cartes mémoire, les clés USB et MX4SIO). CHARGEUR DE DÉMARRAGE > GÉRER peut copier RIPPS2 sur une carte mémoire ou une clé USB pour lui.
-  ? PS2BBL starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 could not read itself to copy there. Start RIPPS2 from one of those, then try again.
-  : PS2BBL lance des programmes depuis une carte mémoire, une clé USB ou MX4SIO, et RIPPS2 n'a pas pu se lire lui-même pour s'y copier. Lancez RIPPS2 depuis l'un d'eux, puis réessayez.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -342,9 +317,7 @@ strings:
   There is no kept boot program on this HDD. Nothing was changed.: Il n'y a aucun programme de démarrage conservé sur ce disque dur. Rien n'a été modifié.
   ? This HDD has no __sysconf partition, so BIBLE's config has to go on a memory card (PS2BBL reads a card's first), and there is none in either slot. Insert one, then try again.
   : Ce disque dur n'a pas de partition __sysconf, la configuration de BIBLE doit donc aller sur une carte mémoire (PS2BBL lit d'abord celle d'une carte), et il n'y en a dans aucun emplacement. Insérez-en une, puis réessayez.
-  WHERE IT IS NOW (%.40s): LÀ OÙ IL EST (%.40s)
   a boot loader RIPPS2 does not know: un chargeur de démarrage que RIPPS2 ne connaît pas
-  memory card %d: la carte mémoire %d
   no boot loader: aucun chargeur de démarrage
   no memory card: aucune carte mémoire
   the HDD: le disque dur
@@ -855,11 +828,7 @@ strings:
   TRAY OPEN: PLATEAU OUVERT
   TREFOIL KNOT: NŒUD DE TRÈFLE
   ' and ': ' et '
-  ? '%s are missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  : '%s sont absents de %s%s. RIPPOPS a trouvé POPS.ELF et POPS_IOX.PAK, l''émulateur PS1 de Sony, sur %s : START les copie ici et lance le jeu.'
   '%s could not be copied to %s%s. Is the drive full or write-protected?': '%s n''a pas pu être copié dans %s%s. Le périphérique est-il plein ou protégé en écriture ?'
-  ? '%s is missing from %s%s. RIPPOPS found POPS.ELF and POPS_IOX.PAK, Sony''s PS1 emulator, on %s: START copies them here and starts the game.'
-  : '%s est absent de %s%s. RIPPOPS a trouvé POPS.ELF et POPS_IOX.PAK, l''émulateur PS1 de Sony, sur %s : START les copie ici et lance le jeu.'
   COPY AND START: COPIER ET LANCER
   Copying %s: Copie de %s
   LAUNCH ANYWAY: LANCER QUAND MÊME
@@ -909,12 +878,8 @@ strings:
   THE RED SCREEN MUSIC (DISC WARNING): LA MUSIQUE DE L'ÉCRAN ROUGE (AVERTISSEMENT DISQUE)
   'Ripping this console''s red screen music: %d%%': 'Extraction de la musique de l''écran rouge de cette console : %d%%'
   The red screen music (%s) is in %s as %s. Audio settings > Music lists it as Red Screen.: La musique de l'écran rouge (%s) est dans %s sous le nom %s. Paramètres audio > Musique la liste comme Red Screen.
-  ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s; no memory card has room for it. Accept writes it to %s, beside RIPPS2. START writes it to %s, OPL's resources on that drive. A %s already there is replaced. It takes a minute or two.
-  : RIPPS2 joue la musique de l'écran rouge de cette console, la pièce d'ambiance de l'avertissement disque (%d:%02d), à partir des notes du BIOS lui-même, et l'écrit en WAV de %s ; aucune carte mémoire n'a la place. Valider l'écrit dans %s, à côté de RIPPS2. START l'écrit dans %s, les ressources d'OPL sur ce périphérique. Un %s déjà présent est remplacé. Cela prend une minute ou deux.
   ? RIPPS2 plays this console's red screen music, the disc warning's ambient piece (%d:%02d), from the BIOS's own notes and writes it as a WAV of %s to %s; no memory card has room for it. A %s already there is replaced. It takes a minute or two.
   : RIPPS2 joue la musique de l'écran rouge de cette console, la pièce d'ambiance de l'avertissement disque (%d:%02d), à partir des notes du BIOS lui-même, et l'écrit en WAV de %s dans %s ; aucune carte mémoire n'a la place. Un %s déjà présent est remplacé. Cela prend une minute ou deux.
-  ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all; no memory card has room for them. Accept writes them to %s, beside RIPPS2. START writes them to %s, OPL's resources on that drive. Files of those names already there are replaced. Each takes a minute or two.
-  : RIPPS2 joue la musique du menu de cette console (%d:%02d) et celle de son écran rouge (%d:%02d) à partir des notes du BIOS lui-même, et les écrit en deux WAV, %s en tout ; aucune carte mémoire n'a la place. Valider les écrit dans %s, à côté de RIPPS2. START les écrit dans %s, les ressources d'OPL sur ce périphérique. Les fichiers de ces noms déjà présents sont remplacés. Chacun prend une minute ou deux.
   ? RIPPS2 plays this console's menu music (%d:%02d) and its red screen music (%d:%02d) from the BIOS's own notes and writes them as two WAVs, %s in all, to %s; no memory card has room for them. Files of those names already there are replaced. Each takes a minute or two.
   : RIPPS2 joue la musique du menu de cette console (%d:%02d) et celle de son écran rouge (%d:%02d) à partir des notes du BIOS lui-même, et les écrit en deux WAV, %s en tout, dans %s ; aucune carte mémoire n'a la place. Les fichiers de ces noms déjà présents sont remplacés. Chacun prend une minute ou deux.
   Across the Top: En haut
@@ -1119,40 +1084,8 @@ strings:
   ? The sounds take %d KB and this memory card has %d KB free. START writes them to %sAUDIO/ on the drive instead, and RIPPS2 plays them from there.
   : Les sons occupent %d Ko et cette carte mémoire a %d Ko libres. START les écrit plutôt dans %sAUDIO/ sur le périphérique, et RIPPS2 les joue depuis là.
   There was not enough memory to make the sounds. Nothing was written.: Il n'y avait pas assez de mémoire pour créer les sons. Rien n'a été écrit.
-  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
-  
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
-  
-    The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
-  : '- PS2BBL 1.2.0 est lié à cette carte par la console et écrit sous %s/%s.
-  
-    - Sa configuration, mc%d:/PS2BBL/CONFIG.INI, lance RIPPS2 depuis %s sans attente (0 ms, ce que PS2BBL Extended ne permet pas), BOOT LOCK activé.
-  
-    Le processeur d''E/S redémarre pour cela ; la musique et les périphériques reviennent ensuite. Laissez la carte en place et la console allumée jusqu''à la fin.'
-  ? BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
-  : BIBLE n'a pas pu être écrit sur la carte mémoire %d, la carte a donc été remise comme avant. Vérifiez son espace libre, puis réessayez. (DIAG.TXT, à côté de RIPPS2, contient ce que la carte a répondu.)
   ? BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
   : BIBLE n'a pas pu mettre %s de côté pour le conserver, il s'est donc arrêté là. Rien n'a été modifié sur la carte. (DIAG.TXT, à côté de RIPPS2, contient ce que la carte a répondu.)
-  ? 'MEMORY CARD 0: %s
-  
-    MEMORY CARD 1: %s
-  
-    %s
-  
-    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
-  : 'CARTE MÉMOIRE 0 : %s
-  
-    CARTE MÉMOIRE 1 : %s
-  
-    %s
-  
-    RIPPS2 BIBLE : BBL 1.20, PS2BBL 1.2.0 par El Isra réglé par RIPPS2 : un démarrage en 0 ms à l''allumage (PS2BBL Extended ne permet pas 0), RIPPS2 d''abord, et un bouton maintenu à l''allumage donne toujours accès au navigateur (TRIANGLE), à un disque (START) et à ce qui s''y trouvait avant (ROND). L''installer ou le réparer sur une carte mémoire ou le disque dur interne ?'
-  ? 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
-  
-    '
-  : 'RIPPS2 BIBLE : BBL 1.20 SUR LA CARTE MÉMOIRE %d
-  
-    '
   ? 'Memory Files opens now, on MEDIA, with the disc on its clipboard (RIPPED). Go to the drive and folder it should be in (any drive: USB, the HDD, the SD2PSX''s MEDIA), press TRIANGLE for ACTIONS and choose PASTE. RIPDISC then asks once more and reads the disc with your PS2''s laser, writing it there.'
   : 'Fichiers mémoire s''ouvre maintenant, sur MEDIA, avec le disque dans son presse-papiers (EXTRAIT). Allez au périphérique et au dossier où il doit aller (n''importe lequel : USB, le disque dur, le MEDIA du SD2PSX), appuyez sur TRIANGLE pour ACTIONS et choisissez COLLER. RIPDISC demande alors une dernière fois et lit le disque avec le laser de votre PS2 pour l''écrire là.'
   RENAME THE GAME: RENOMMER LE JEU
@@ -1199,8 +1132,6 @@ strings:
   This drive's game list, for a quick boot: La liste des jeux de ce périphérique, pour un démarrage rapide
   Virtual memory cards for games: Cartes mémoire virtuelles pour les jeux
   What RIPPS2's last launch did: Ce qu'a fait le dernier lancement de RIPPS2
-  Circle from the top   Cross close: 'Rond : depuis le début   Croix : fermer'
-  Cross from the top   Circle close: 'Croix : depuis le début   Rond : fermer'
   ? This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them), Ogg Vorbis .ogg files and MP3s.
   : Cette piste n'a pas pu être lue. RIPPS2 lit les fichiers .wav PCM 16 bits (comme RIPDISC et Musique du BIOS les extraient), les fichiers Ogg Vorbis .ogg et les MP3.
   'READ ONLY: THE SD2PSX''S BOOT CARD IS IN USE': 'LECTURE SEULE : LA CARTE DE DÉMARRAGE DU SD2PSX EST UTILISÉE'
@@ -1240,8 +1171,92 @@ strings:
   what boot reads first: ce que le démarrage lit d'abord
   ? This Neutrino is older than 1.3, which cannot start games from the APA HDD. Point Game Launching > Neutrino at Neutrino 1.3 or newer, or clear the path to use the one RIPPS2 carries.
   : Ce Neutrino est antérieur à 1.3, qui ne peut pas lancer de jeux depuis le disque dur APA. Pointez Lancement des jeux > Neutrino vers Neutrino 1.3 ou plus récent, ou videz le chemin pour utiliser celui qu'embarque RIPPS2.
-  ? RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS.ELF and POPS_IOX.PAK, the PS1 emulator from your own console; it may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.
-  : RIPPS2 ne voit pas %s dans %s%s. POPSTARTER a besoin de POPS.ELF et POPS_IOX.PAK, l'émulateur PS1 de votre propre console ; il peut les trouver là où RIPPS2 ne cherche pas (si vos jeux démarrent, c'est le cas). START lance, et ce périphérique ne sera plus redemandé.
+  ', the sounds': ', les sons'
+  ? 'Fast Boot is on. RIPPS2 boots from its own drive (%s): the settings%s and every list from its cache. The other drives start when you press SELECT on their page, or launch one of their games.'
+  : 'Fast Boot est activé. RIPPS2 démarre depuis son propre lecteur (%s) : la configuration%s et chaque liste depuis son cache. Les autres lecteurs démarrent quand tu appuies sur SELECT sur leur page ou que tu lances un de leurs jeux.'
+  Fast Boot is on. The sounds take %d KB and the memory card RIPPS2 runs from has %d KB free, so they stay in %s.: Fast Boot est activé. Les sons prennent %d Ko et la carte mémoire d'où RIPPS2 tourne a %d Ko libres, ils restent donc dans %s.
+  ' (%d KB free)': ' (%d Ko libres)'
+  ' (%u MB free)': ' (%u Mo libres)'
+  'BESIDE RIPPS2: %sAUDIO%s, read first at boot': 'À CÔTÉ DE RIPPS2 : %sAUDIO%s, lu en premier au démarrage'
+  ? '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
+  
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 where it is (%s) with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on. RIPPS2 itself is not copied.
+  
+    The I/O processor restarts for this and every drive read stops until it is done; music and drives come back after. Keep the card in and the console on until it says done.'
+  : '- PS2BBL 1.2.0 est lié à cette carte par la console et écrit sous %s/%s.
+  
+    - Sa configuration, mc%d:/PS2BBL/CONFIG.INI, démarre RIPPS2 là où il est (%s) sans attente (0 ms, ce que PS2BBL Extended ne permet pas), BOOT LOCK activé. RIPPS2 lui-même n''est pas copié.
+  
+    Le processeur d''E/S redémarre pour cela et toute lecture de lecteur s''arrête jusqu''à la fin ; la musique et les lecteurs reviennent après. Laisse la carte en place et la console allumée jusqu''à ce qu''il annonce la fin.'
+  ? 'An SD2PSX or MMCE card may protect itself after a refused write: if the memory card or the MMCE drive is missing now, turn the console off and on.'
+  : 'Une carte SD2PSX ou MMCE peut se protéger après une écriture refusée : si la carte mémoire ou le lecteur MMCE manque maintenant, éteins puis rallume la console.'
+  BOOT LOCK ON: BOOT LOCK ACTIVÉ
+  'Done: the memory card in slot %d starts what it started before BBL 1.20. BBL 1.20 is kept in mc%d:/%s.': 'Terminé : la carte mémoire du port %d démarre ce qu''elle démarrait avant BBL 1.20. BBL 1.20 est conservé dans mc%d:/%s.'
+  ? 'For a standard 8 MB PS2 memory card (a MagicGate card, or an SD2PSX or MMCE BOOT card): the one in slot %d. At power on PS2BBL reads slot 2''s config before slot 1''s.
+  
+    '
+  : 'Pour une carte mémoire PS2 standard de 8 Mo (une carte MagicGate, ou une carte BOOT SD2PSX ou MMCE) : celle du port %d. À l''allumage, PS2BBL lit la configuration du port 2 avant celle du port 1.
+  
+    '
+  MEMORY CARD IN SLOT %d  (%s): CARTE MÉMOIRE DU PORT %d  (%s)
+  ? PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD.
+  : PS2BBL 1.2.0 ne peut pas démarrer RIPPS2 depuis son emplacement actuel (il atteint les cartes mémoire, les lecteurs USB et MX4SIO), et RIPPS2 ne se copie pas lui-même. Mets RIPPS2.ELF sur une carte mémoire ou un lecteur USB et démarre-le de là, ou utilise PS2BBL Extended, qui lit MMCE et le disque dur.
+  RESTORE SLOT %d'S OLD BOOT LOADER: RESTAURER L'ANCIEN CHARGEUR DU PORT %d
+  ? 'RIPPS2: BBL 1.20 is set up on the memory card in slot %d (mc%d:/%s/%s), BOOT LOCK on: at power on it starts RIPPS2 from %s, at once.'
+  : 'RIPPS2 : BBL 1.20 est installé sur la carte mémoire du port %d (mc%d:/%s/%s), BOOT LOCK activé : à l''allumage il démarre aussitôt RIPPS2 depuis %s.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    '
+  : 'RIPPS2 : installation de BBL 1.20
+  
+    '
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read (it reads memory cards, USB and MX4SIO), and RIPPS2 does not copy itself. The PS2BBL Extended config on this card (%s) reads it: START turns BOOT LOCK on, so it starts RIPPS2 from %s at power on. Nothing else on the card changes.'
+  : 'RIPPS2 : installation de BBL 1.20
+  
+    RIPPS2 tourne depuis %s, que PS2BBL 1.2.0 ne sait pas lire (il lit les cartes mémoire, l''USB et MX4SIO), et RIPPS2 ne se copie pas lui-même. La configuration PS2BBL Extended de cette carte (%s) le lit : START active BOOT LOCK, pour qu''elle démarre RIPPS2 depuis %s à l''allumage. Rien d''autre ne change sur la carte.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    RIPPS2 runs from %s, which PS2BBL 1.2.0 cannot read: it starts programs from a memory card, a USB drive or MX4SIO, and RIPPS2 does not copy itself. Put RIPPS2.ELF on one of those (a memory card''s APPS folder, or a USB drive), start it from there, then set up BIBLE again.'
+  : 'RIPPS2 : installation de BBL 1.20
+  
+    RIPPS2 tourne depuis %s, que PS2BBL 1.2.0 ne sait pas lire : il démarre les programmes depuis une carte mémoire, un lecteur USB ou MX4SIO, et RIPPS2 ne se copie pas lui-même. Mets RIPPS2.ELF sur l''un d''eux (le dossier APPS d''une carte mémoire ou un lecteur USB), démarre-le de là, puis installe BIBLE à nouveau.'
+  ? 'RIPPS2: Setting up BBL 1.20
+  
+    The memory card in slot %d: BBL 1.20 (mc%d:/%s) moves aside, and what it replaced (mc%d:/%s) goes back in its place. Nothing is deleted. The PS2BBL config stays as it is (BOOT LOCK can turn the lock off).'
+  : 'RIPPS2 : installation de BBL 1.20
+  
+    La carte mémoire du port %d : BBL 1.20 (mc%d:/%s) est mis de côté, et ce qu''il avait remplacé (mc%d:/%s) reprend sa place. Rien n''est supprimé. La configuration PS2BBL reste telle quelle (BOOT LOCK peut désactiver le verrou).'
+  'RIPPS2: Setting up BBL 1.20 (binding PS2BBL to the memory card)': 'RIPPS2 : installation de BBL 1.20 (liaison de PS2BBL à la carte mémoire)'
+  'RIPPS2: Setting up BBL 1.20 (putting back what was there)': 'RIPPS2 : installation de BBL 1.20 (remise en place de l''ancien)'
+  'RIPPS2: Setting up BBL 1.20 (restarting the I/O processor)': 'RIPPS2 : installation de BBL 1.20 (redémarrage du processeur d''E/S)'
+  'RIPPS2: Setting up BBL 1.20 (writing it to the memory card)': 'RIPPS2 : installation de BBL 1.20 (écriture sur la carte mémoire)'
+  SET UP BBL 1.20: INSTALLER BBL 1.20
+  ? 'SLOT 1: %s
+  
+    SLOT 2: %s
+  
+    %s
+  
+    RIPPS2: Setting up BBL 1.20. PS2BBL 1.2.0 by El Isra, set up by RIPPS2 on a standard 8 MB PS2 memory card or the internal HDD: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first from where it is (it is never copied), and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Set it up, repair it or restore what it replaced?'
+  : 'PORT 1 : %s
+  
+    PORT 2 : %s
+  
+    %s
+  
+    RIPPS2 : installation de BBL 1.20. PS2BBL 1.2.0 d''El Isra, installé par RIPPS2 sur une carte mémoire PS2 standard de 8 Mo ou le disque dur interne : un démarrage à 0 ms à l''allumage (PS2BBL Extended n''autorise pas 0), RIPPS2 d''abord depuis son emplacement (il n''est jamais copié), et un bouton maintenu à l''allumage mène toujours au navigateur (TRIANGLE), à un disque (START) et à ce qu''il y avait avant (CIRCLE). L''installer, le réparer ou restaurer ce qu''il a remplacé ?'
+  The memory card in slot %d has %d KB free, and BBL 1.20 needs %d KB there. Free some space, then try again.: La carte mémoire du port %d a %d Ko libres et BBL 1.20 y a besoin de %d Ko. Libère de la place puis réessaie.
+  ? The memory card in slot %d refused PS2BBL, so RIPPS2 put the card back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : La carte mémoire du port %d a refusé PS2BBL, RIPPS2 a donc remis la carte comme elle était. Vérifie sa place libre puis réessaie. (DIAG.TXT à côté de RIPPS2 contient ce que la carte a répondu.)
+  ? The memory card in slot %d would not move BBL 1.20 aside, so nothing was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
+  : La carte mémoire du port %d n'a pas voulu mettre BBL 1.20 de côté, rien n'a donc changé. (DIAG.TXT à côté de RIPPS2 contient ce que la carte a répondu.)
+  The memory card in slot %d would not take %s back, so BBL 1.20 stayed. (DIAG.TXT beside RIPPS2 has what the card said.): La carte mémoire du port %d n'a pas voulu reprendre %s, BBL 1.20 est donc resté. (DIAG.TXT à côté de RIPPS2 contient ce que la carte a répondu.)
+  MUSIC: MUSIQUE
+  '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s n''a pas de %s. RIPPOPS a trouvé l''émulateur PS1 de Sony sur %s : START copie %s ici et lance le jeu.'
+  ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
+  : 'RIPPS2 ne voit pas %s dans %s%s. POPSTARTER a besoin de POPS_IOX.PAK avec POPS.PAK, ou avec POPS.ELF et IOPRP252.IMG : l''émulateur PS1 de Sony, de ta propre console. Il peut les trouver là où RIPPS2 ne regarde pas (si tes jeux démarrent, c''est le cas). START lance, et ce lecteur n''est plus redemandé.'
 labels:
   HINT_NEUTRINO_AUTO_ELF: Transmet l'ELF de démarrage du jeu à Neutrino pour chercher sa configuration par titre. Activé par défaut ; une option Boot ELF réglée à la main a la priorité.
   HINT_POPSTARTER_PATH: Emplacement de POPSTARTER.ELF. Laissé vide, RIPPS2 en renseigne un qu'il trouve sur un périphérique ; écrivez par-dessus pour en utiliser un autre, comme usb:/POPS/POPSTARTER.ELF
@@ -1699,3 +1714,5 @@ labels:
   HINT_EXITPATH: 'Où va EXIT dans le Menu en jeu. Mieux vaut le laisser vide, avec BIBLE installé (ÉTAT > Chargeur de démarrage > Gérer, ou BOOT LOCK sur votre PS2BBL) : EXIT réinitialise alors la console par son propre chemin de démarrage et PS2BBL lance RIPPS2 comme à l''allumage, le retour le plus sûr. Navigateur : le navigateur PS2. Un ELF sur une carte mémoire (mc0:/mc1:) ou une clé USB FAT32 (mass:/) se charge juste après la réinitialisation, ce pour quoi tous les jeux ne laissent pas la console prête ; MMCE n''est alors pas joignable du tout.'
   HINT_BDM_START: 'USB, iLink, MX4SIO et le disque dur exFAT. Automatique les démarre au lancement : le plus rapide pour les périphériques branchés, leurs jeux dans Tous les jeux dès le début. Manuel les démarre quand vous ouvrez leur page.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino ne peut pas utiliser de VMC sur le disque dur APA (exFAT, USB et MX4SIO le peuvent) : ce jeu démarre avec la vraie carte dans ce port.'
+  RIPPS2_FAST_BOOT: Fast Boot
+  HINT_RIPPS2_FAST_BOOT: 'Le démarrage ne lit que le lecteur de RIPPS2 : la configuration et les sons à côté de RIPPS2.ELF (RIPPS2.FB y indique où) et chaque liste depuis son cache. Les autres lecteurs attendent : SELECT sur une page démarre ses lecteurs et charge leurs images (avec l''actualisation automatique, ils démarrent au démarrage). L''activer copie tes sons, et la musique s''il y a la place, dans AUDIO à côté de RIPPS2.'
