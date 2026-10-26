@@ -110,7 +110,8 @@ for typed, mode in (('usb0', 'USB'), ('mx4sio0', 'MX4SIO'), ('ilink0', 'ILINK'))
     if '!strcmp(path, "%s:/RIPPS2"))\n        return RIPPS2_HOME_%s;' % (typed, mode) not in ui:
         fail.append('ripps2ui.c: %s:/RIPPS2 reads as its choice' % typed)
 need(opl, (('static int prepareMmceSettingsPath(const char *path)', 'an MMCE settings home'),
-           ('mmceLoadModules();\n    for (tries = 0; tries < 10; tries++)', "its driver loaded at boot, with an MMCE boot's wait"),
+           # build 115: the root as mmceman opens it (mmce0:/), and up to 8 s while the card says it is busy
+           ('mmceLoadModules();\n    for (tries = 0; tries < 40; tries++)', "its driver loaded at boot, with an MMCE boot's wait"),
            ('if (!strncmp(path, "mmce", 4))\n        return prepareMmceSettingsPath(path);', 'used for an mmce path')), 'opl.c')
 
 # ---- the info page: a game reached with the d-pad gets its size
