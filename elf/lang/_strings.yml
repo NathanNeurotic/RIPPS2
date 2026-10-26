@@ -264,6 +264,9 @@ strings:
 - en: Boot
   in:
   - gui.c
+- en: Classic (Split)
+  in:
+  - gui.c
 - en: Controllers
   in:
   - gui.c
@@ -343,9 +346,6 @@ strings:
 - en: On RiptOPL %s
   in:
   - gui.c
-- en: One Piece
-  in:
-  - gui.c
 - en: PS Emulation
   in:
   - gui.c
@@ -381,9 +381,6 @@ strings:
 - en: Spin
   in:
   - gui.c
-- en: Split
-  in:
-  - gui.c
 - en: Strong
   in:
   - gui.c
@@ -396,6 +393,9 @@ strings:
   - menusys.c
   - ripps2hints.c
 - en: Weak
+  in:
+  - gui.c
+- en: XL (One Piece)
   in:
   - gui.c
 - en: 'Yes'
@@ -1049,7 +1049,7 @@ strings:
   - ripps2boot.c
 - en: '- PS2BBL 1.2.0 is bound to this card by the console and written as %s/%s.
 
-    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s, BOOT LOCK on.
+    - Its config, mc%d:/PS2BBL/CONFIG.INI, starts RIPPS2 from %s with no wait (0 ms, which PS2BBL Extended does not allow), BOOT LOCK on.
 
     The I/O processor restarts for this; music and drives come back after. Keep the card in and the console on until it says done.'
   in:
@@ -1068,7 +1068,7 @@ strings:
 - en: A COPY ON THE USB DRIVE
   in:
   - ripps2boot.c
-- en: BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again.
+- en: BIBLE could not be written to memory card %d, so the card was put back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
   in:
   - ripps2boot.c
 - en: BIBLE could not copy RIPPS2 to %s. Check the space and that it is not write protected. Nothing else was changed.
@@ -1080,7 +1080,7 @@ strings:
 - en: BIBLE could not keep a copy of the HDD's boot program, so it stopped before changing it. RIPPS2 was copied to the HDD; nothing else was changed.
   in:
   - ripps2boot.c
-- en: BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed.
+- en: BIBLE could not move %s aside to keep it, so it stopped there. Nothing on the card was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
   in:
   - ripps2boot.c
 - en: BIBLE could not write its config (%s). The boot program was not changed.
@@ -1140,11 +1140,6 @@ strings:
 - en: INSTALL BIBLE
   in:
   - ripps2boot.c
-- en: 'INSTALL BIBLE ON MEMORY CARD %d
-
-    '
-  in:
-  - ripps2boot.c
 - en: 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -1170,7 +1165,7 @@ strings:
 
     %s
 
-    BIBLE is PS2BBL 1.2.0 by El Isra, set up by RIPPS2: no wait at power on, RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
+    RIPPS2 BIBLE: BBL 1.20, PS2BBL 1.2.0 by El Isra set up by RIPPS2: a 0 ms start at power on (PS2BBL Extended does not allow 0), RIPPS2 first, and a button held at power on still reaches the browser (TRIANGLE), a disc (START) and what was there before (CIRCLE). Install or repair it on a memory card or the internal HDD?'
   in:
   - ripps2boot.c
 - en: Memory card %d has %d KB free, and BIBLE needs %d KB there. Free some space, then try again.
@@ -1197,6 +1192,11 @@ strings:
   in:
   - ripps2boot.c
 - en: RESTORE THE HDD'S OLD BOOT PROGRAM
+  in:
+  - ripps2boot.c
+- en: 'RIPPS2 BIBLE: BBL 1.20 ON MEMORY CARD %d
+
+    '
   in:
   - ripps2boot.c
 - en: RIPPS2 cannot tell this console's region from its ROM, so it does not know which system-update folder it reads. BIBLE was not installed.
@@ -1736,6 +1736,9 @@ strings:
   in:
   - ripps2edit.c
 - en: RELEASE
+  in:
+  - ripps2edit.c
+- en: RENAME THE GAME
   in:
   - ripps2edit.c
 - en: SAVE AND CLOSE
@@ -2769,7 +2772,13 @@ strings:
 - en: '%s   %d TRIANGLES   %d %s%s'
   in:
   - ripps2media.c
+- en: Circle from the top   Cross close
+  in:
+  - ripps2media.c
 - en: Circle play again   Cross close
+  in:
+  - ripps2media.c
+- en: Cross from the top   Circle close
   in:
   - ripps2media.c
 - en: Cross play again   Circle close
@@ -2833,6 +2842,9 @@ strings:
   in:
   - ripps2media.c
 - en: This sound could not be played. RIPPS2 plays .adp sounds with their APCM header, up to 1 MB, as BIOS Sounds > Rip and RIPPS2 Audio Studio make them.
+  in:
+  - ripps2media.c
+- en: This track could not be played. RIPPS2 plays 16-bit PCM .wav files (as RIPDISC and BIOS Music rip them) and Ogg Vorbis .ogg files.
   in:
   - ripps2media.c
 - en: This video could not be opened.
@@ -3154,6 +3166,9 @@ strings:
   in:
   - ripps2side.c
   - ripps2ui.c
+- en: '%d music tracks'
+  in:
+  - ripps2status.c
 - en: '%d sounds from %sAUDIO%s'
   in:
   - ripps2status.c
@@ -3170,6 +3185,9 @@ strings:
   in:
   - ripps2status.c
 - en: ', some files could not be used'
+  in:
+  - ripps2status.c
+- en: 1 music track
   in:
   - ripps2status.c
 - en: A PS2BBL with RIPPS2's lock is on this console.
@@ -3266,6 +3284,9 @@ strings:
   in:
   - ripps2status.c
 - en: NEUTRINO SETTINGS
+  in:
+  - ripps2status.c
+- en: 'No music yet: Audio settings > BIOS Music rips this console''s menu music.'
   in:
   - ripps2status.c
 - en: 'None yet: RIPPS2 has no sounds of its own. Rip this console''s, or make them in RIPPS2 Audio Studio.'

@@ -138,6 +138,61 @@ MMCE beta 2 is on the SD as PS2BBL's R1).
 Site (pushed 10/26): the shelf's ten hats, each a Color Theme wave on the towers; portrait phones get the letterboxed
 player (letterbox.js).
 
+### Round 3c: the user's hardware notes of 10/26 (round 3b ELF on the SD2PSX)
+Working on hardware: games from MMCE storage (OPL core); Neutrino installed by RIPPS2 and booting Burnout 3 from MMCE
+(no in-game menu: Neutrino has none, like Ember; it showed an MMCE message too small to read); Ember Digimon World over
+MMCE; POPSTARTER from the app list and from Memory Files' ELF; the USB VMC prompt (FAT32) and IGR back; BGM on boot;
+the Color Sweep through boot.
+
+Crashes and data first:
+1. CRASH: held SELECT, the theme panel never reaches the screen and the console hangs: a race with the cache
+   setting dropping the list (instead of the lazy refresh) while the panel comes up.
+2. "Could not write settings to mmce0:/RIPPS2 (error 19)".
+3. Manual sources (MMCE, HDD): All Games shows no HDD art until HDD is started by hand; then the list loaded,
+   vanished, loaded again; the art came but not the CFG metadata (the HDD page has it). Auto boots faster but the
+   list still refreshes instead of trusting the cache.
+4. The MMCE controller bug (pad input lost while MMCE loads): research a wait or fix; a note in the MMCE menu and an
+   experimental fix on by default there. Game Sources / STATUS / Cache: say Auto on the drives that are connected
+   is fastest.
+5. POPSTARTER: a VCD's launch says POPS files are missing (STATUS's search says so too) though it launches fine.
+Sound:
+6. Menu and red screen music: not playing after the rip until toggled off and on (quick fix); STATUS says 14 sounds
+   after ripping two; a reboot still had neither. The BGM is set per theme: the ripped BGM goes to every built-in
+   theme at once (Menu the default when both are ripped).
+7. The BGM plays on every screen but the CD player, the media player and the audio pickers' previews; it is unloaded
+   there and brought back (not just silenced).
+8. Media: the ripped music CD and BGM .wav in MEDIA (HDD) do not play; WAV playback in the media player. Rips may go to
+   the MMCE's MEDIA too. (Answer: which other video and audio formats are possible.)
+9. Ripping: a modal that explains Memory Files opens with the rip to paste where it goes (Triangle for actions,
+   Paste, then RIPDISC confirms and writes with the laser): O OK alone, a message not a choice. Other messages that are
+   only information get the same single button.
+Sidebar and navigation:
+10. Sidebar styles renamed Classic (Split) and XL (One Piece); on Adapt the one piece showed the split bar on the
+    list and info pages and none in the morph between them: transition frames for either style, the icons staying put;
+    Adapt keys the sidebar drawn throughout.
+11. Info pages with the sidebar: Left reaches the icons; Up / Down move in the list; Right no longer cycles games
+    (Left / Right are the sidebar's, as on the list); Circle backs out to the list.
+12. RIPFLOW: Left is the covers' (the sidebar ignores it); a sidebar on by the theme's default hides itself; on by the
+    user's choice it is their flow.
+13. Memory Files: Left / Right the sidebar, L1 / R1 the formations only.
+14. Vertical moves along the sidebar: from STORAGE up to LAUNCH DISC, from Storage's last source to MEMORY FILES.
+    Circle with the sidebar hidden pulls it out to the icons, lit, not the drawer.
+15. Layout: Category Order before Hints and Glyphs Fade; its tooltip says it swaps the icons too.
+16. Hints: Cross RUN left of the source name, Circle SOURCE right of it (OSDSYS style); keys so RIPFLOW has it and a
+    theme can space its hints like the OSDSYS (Adapt shows how).
+17. Adapt: the text beside a glyph (font6) in RIPPS2 Sleek Case, as its hints.
+18. Tilt (right stick) not working, even with Auto sources.
+From the round before (10/26 morning):
+19. The SD2PSX "getting this game's memory card ready" screen: wrapped and padded like the message boxes (every
+    guiRenderTextScreen).
+20. IGR back to RIPPS2 from the in-game menu is less safe than the BIBLE / PS2 browser boot path: the IGR Path tooltip
+    and the README say leave it off and set up BIBLE; the issue gets a three-step answer.
+21. BIBLE's PS2BBL 1.2.0 install message titled "RIPPS2 BIBLE: BBL 1.20", naming its 0 ms start (which PS2BBL Extended
+    does not allow); the install failed over an existing PS2BBL Extended install on the boot card.
+22. Game settings: Set Metadata merged into the Change Name row, reading "Set Metadata (Rename)", spacing as is.
+23. POPSTARTER's own in-game menu (a lite RIPPS2-themed one): POPSTARTER is closed, so only its own IGR is possible;
+    noted, not planned.
+
 ### Round 4: release
 - Translations: build 115's 58 strings and its new labels in the 32 languages.
 - Lab rounds in PCSX2: navigation and sidebar, Recent Games, the list pulse, STATUS LOADING, the BIOS Sounds room check,
