@@ -193,7 +193,7 @@ index 0000000..d32a97c
 +        print(" - " + f)
 +    sys.exit(1)
 diff --git a/.github/scripts/test_bdm_scan_retry.py b/.github/scripts/test_bdm_scan_retry.py
-index ec32183..ebd7b53 100644
+index ec32183..f8c976f 100644
 --- a/.github/scripts/test_bdm_scan_retry.py
 +++ b/.github/scripts/test_bdm_scan_retry.py
 @@ -97,6 +97,7 @@ typedef struct { unsigned char tried, shown; unsigned int sum; } sb_snap_t;
@@ -204,6 +204,14 @@ index ec32183..ebd7b53 100644
  static void sbSetPadBreath(int on) { (void)on; }
  
  typedef struct
+@@ -166,6 +167,7 @@ static int lngAddLanguages(const char *p, const char *s, int m) { (void)p; (void
+ static void bdmBuildPs1Prefix(char *t, int n, int slot) { snprintf(t, n, "mass%d:/", slot); }
+ static int ps1Scans, ps1Result, ps1Incomplete;
+ static int ps1GameListNeedsRetry(void) { return ps1Incomplete; }
++static int mixWantsPs1(void) { return 0; } /* build 115: All Games' PS1 rows (off here: the page's own view decides) */
+ static int ps1FillGameList(const char *p, base_game_info_t **g) { (void)p; (void)g; ps1Scans++; return ps1Result; }
+ static int cueFillGameList(const char *p, base_game_info_t **g) { (void)p; (void)g; return 0; }
+ static const char *folderGetSub(int mode) { (void)mode; return browseSub; }
 diff --git a/.github/scripts/test_neutrino_argv_budget.py b/.github/scripts/test_neutrino_argv_budget.py
 index b610b5c..dafb5a2 100644
 --- a/.github/scripts/test_neutrino_argv_budget.py
@@ -643,7 +651,7 @@ index e75f52a..6e6a64d 100644
  #define FAV_MAGIC             0x4641464F // 'OFAV' (little-endian on the EE)
  #define FAV_VERSION           3          // v3 widens v2's isVcd byte to a KIND (see FAV_KIND_*)
 diff --git a/include/gui.h b/include/gui.h
-index 421bd63..d2fb43e 100644
+index 421bd63..4696282 100644
 --- a/include/gui.h
 +++ b/include/gui.h
 @@ -130,6 +130,7 @@ void guiCycleTheme(void); // build 79: the next theme (SELECT held 4.2 s)
@@ -654,7 +662,15 @@ index 421bd63..d2fb43e 100644
  int guiPickTheme(void);   // build 114: the theme list (SELECT held 4.2 s, Hold SELECT: List); 0: the one in use, refresh
  void guiMsgBoxStartOption(const char *label); // RIPPS2: the next guiMsgBox offers START (returns 2)
  void guiMsgBoxBackLabel(const char *label);   // build 114: the next guiMsgBox's Back hint reads this ("Back (keeps both)")
-@@ -177,6 +178,8 @@ int guiDrawBGSettings(void);
+@@ -143,6 +144,7 @@ int guiConfirmKey(void);
+ int guiCancelKey(void);
+ int guiConfirmIcon(void);
+ int guiCancelIcon(void);
++int guiIconTextWidth(int iconId, int textId, int font); // build 115: a hint's width, glyph and label
+ 
+ void guiUpdateScrollSpeed(void);
+ void guiUpdateScreenScale(void);
+@@ -177,6 +179,8 @@ int guiDrawBGSettings(void);
  int guiDeviceTypeToIoMode(int deviceType);
  int guiIoModeToDeviceType(int ioMode);
  void guiShowNeutrinoDefaults(void);
@@ -971,7 +987,7 @@ index be2df16..cf46c88 100644
  #ifdef RETROACHIEVEMENTS
      // RA mark over a tracked game's cover (theme override "ra_mark"). Appended last:
 diff --git a/include/themes.h b/include/themes.h
-index e300e61..63d50d9 100644
+index e300e61..b490c70 100644
 --- a/include/themes.h
 +++ b/include/themes.h
 @@ -100,6 +100,7 @@ typedef struct
@@ -982,7 +998,7 @@ index e300e61..63d50d9 100644
  
  // Forward declaration: an element carries a back-pointer to the family it was parsed into (see
  // theme_element_t::family), and theme_elems_t itself is defined below, after the element.
-@@ -280,6 +281,12 @@ typedef struct theme
+@@ -280,6 +281,13 @@ typedef struct theme
      int sbBar;                          // sidebar_bar: 2 always (default), 1 on the pages without one of the theme's, 0 never
      unsigned char sbColor[3], sbAccent[3]; // sidebar_color, sidebar_accent_color
      int sbTint, sbAccentTint;           // sidebar_tint, sidebar_accent_tint (0..128)
@@ -990,12 +1006,13 @@ index e300e61..63d50d9 100644
 +    int sbLeftList;                     // build 115: sidebar_left=list: Left / Right and L1 / R1 stay the list's (RIPFLOW's covers)
 +    int sbAutoHide;                     // build 115: sidebar_hide=1: the sidebar slides away until Circle calls it
 +    int hintsFade;                      // build 115: hints_fade (1, the default): a hint glyph that changes fades in
++    int hintsFlank, hintsFlankGap;      // build 115: hints_flank=1: RUN and SOURCE either side of the source name; the gap
 +    int badgeSet;                       // build 115: badge_set=ripps2 (1): RIPPS2's built-in badges, none of its own
 +    int loadingMark;                    // build 115: loading_mark: 0 the LoadingIcon element's place, 1 center, 2 corner
      // RIPPS2 build 92: the Grid's coverless cases and the name under it (<grid>_coverless, <grid>_title...)
      int gridCoverless;                  // 1: a case with no art shows the game's serial in the pixel font
      int gridTitle, gridTitleY, gridTitleFont; // the chosen game's name under the grid, its line and its face
-@@ -299,6 +306,8 @@ typedef struct theme
+@@ -299,6 +307,8 @@ typedef struct theme
      GSTEXTURE textures[TEXTURES_COUNT];
      int fonts[THM_MAX_FONTS]; //!< Storage of font handles for removal once not needed
      int diaFont, diaTipFont;  // RIPPS2 build 96: the settings pages' faces, the same on every theme
@@ -1004,7 +1021,7 @@ index e300e61..63d50d9 100644
  } theme_t;
  
  extern theme_t *gTheme;
-@@ -314,6 +323,9 @@ extern theme_t *gTheme;
+@@ -314,6 +324,9 @@ extern theme_t *gTheme;
  #define RIPPS2_MENU_FONT RIPPS2_DIA_FONT
  // RIPPS2: Sleek Bold with a true lowercase (builtin:ripps2sleekcase, theme font15), for typed text
  #define RIPPS2_CASE_FONT (gTheme->fonts[15])
@@ -1166,10 +1183,10 @@ index aef6bd1..4d591ec 100644
  - label: HINT_RIPPS2_THEME_COLOR
    string: "The Color Theme's own color. Pick Custom as the Color Theme to choose it yourself, as the text colors are chosen."
 diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
-index 0c9f01e..bb39f7c 100644
+index 0c9f01e..db1700e 100644
 --- a/misc/theme_coverflow.cfg
 +++ b/misc/theme_coverflow.cfg
-@@ -4,6 +4,10 @@
+@@ -4,6 +4,12 @@
  # tooltips and hints (font15, RIPPS2 Sleek Case from build 102) keep their lowercase. Same slots as the RIPPS2 theme.
  # RIPPS2 build 81: RIPFLOW puts Memory Files first on the category bar unless the user has picked an order
  category_order=memory_files_first
@@ -1177,6 +1194,8 @@ index 0c9f01e..bb39f7c 100644
 +# sidebar stays out of sight until Circle brings it out
 +sidebar_left=list
 +sidebar_hide=1
++# build 115: OSDSYS-style hints, RUN left of the source name and SOURCE right of it
++hints_flank=1
  # RIPPS2 build 91: as a game launches its disc pops in and spins up (Flow and Grid > Launch Disc can change it)
  launch_disc=spin
  default_font=builtin:ripflow
@@ -1442,14 +1461,15 @@ index 51dd1df..6aa8d21 100644
  {
      int i;
 diff --git a/src/bdmsupport.c b/src/bdmsupport.c
-index 7894802..5340e06 100644
+index 7894802..f3fa2e6 100644
 --- a/src/bdmsupport.c
 +++ b/src/bdmsupport.c
-@@ -1,3 +1,4 @@
-+#include "include/mixsupport.h" // build 115: mixWantsPs1
+@@ -1,4 +1,5 @@
  #include "include/opl.h"
++#include "include/mixsupport.h" // build 115: mixWantsPs1
  #ifdef RETROACHIEVEMENTS
  #include "include/achievements.h"
+ #endif
 @@ -903,6 +904,37 @@ static void bdmDiagFlushPendingIopState(item_list_t *itemList)
  }
  #endif
@@ -1901,14 +1921,15 @@ index 6379d40..c4fe9a9 100644
      {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_TRANSITION}}},
      {UI_SPACER},
 diff --git a/src/ethsupport.c b/src/ethsupport.c
-index 642b1ff..f4a4b50 100644
+index 642b1ff..5357527 100644
 --- a/src/ethsupport.c
 +++ b/src/ethsupport.c
-@@ -1,3 +1,4 @@
-+#include "include/mixsupport.h" // build 115: mixWantsPs1
+@@ -1,4 +1,5 @@
  #include "include/opl.h"
++#include "include/mixsupport.h" // build 115: mixWantsPs1
  #ifdef RETROACHIEVEMENTS
  #include "include/achievements.h"
+ #endif
 @@ -454,6 +455,8 @@ static int ethNeedsUpdate(item_list_t *itemList)
      if (gPCShareName[0] && (libListViewActive(itemList) == LIB_VIEW_PS1))
          return 0;
@@ -2011,7 +2032,7 @@ index 7a1b2b6..d71c0fc 100644
      // Settings rows (builtin:ripflowbold, 700) and a theme's own pick of weight (builtin:roboto, font<N>_weight)
      if (strcmp(path, "builtin:ripflow") == 0 || strcmp(path, "builtin:ripflowbold") == 0 || strcmp(path, "builtin:roboto") == 0) {
 diff --git a/src/gui.c b/src/gui.c
-index fef5147..5c541bd 100644
+index fef5147..faffff4 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -443,10 +443,10 @@ static void guiRenderNotifications(char *string, int y)
@@ -2110,10 +2131,8 @@ index fef5147..5c541bd 100644
 +    if (changed)
 +        guiSettingsSavePending = 1; // saved with the rest when Settings closes (from STATUS: when STATUS closes)
 +    return changed;
- }
- 
--// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's);
--// a change fills Starred Games again so it shows at once, and is saved when Settings closes
++}
++
 +int guiShowCacheSettings(void)
 +{
 +    int changed;
@@ -2121,8 +2140,10 @@ index fef5147..5c541bd 100644
 +    changed = guiShowCacheConfig();
 +    cacheFromStatus = 0;
 +    return changed;
-+}
-+
+ }
+ 
+-// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's);
+-// a change fills Starred Games again so it shows at once, and is saved when Settings closes
 +// RIPPS2 build 113: Show Recents, now a Game Sources row beside the Starred Games ones (it was Colors and More's).
 +// Build 115: Recent Games, its own page (0 hides it, else how many, up to 99); the change shows when Game Sources
 +// applies (initAllSupport starts or hides the page) and is saved when Settings closes
@@ -2281,7 +2302,22 @@ index fef5147..5c541bd 100644
  {
      GSTEXTURE *iconTex = thmGetTexture(iconId);
      font = guiHintFont(font);
-@@ -5557,6 +5635,12 @@ static void guiShow()
+@@ -5213,6 +5291,14 @@ int guiDrawIconAndTextA(int iconId, int textId, int font, int x, int y, u64 colo
+     return x;
+ }
+ 
++// build 115: how wide guiDrawIconAndTextNoFade draws a hint (its glyph, the gap, its label), to stand one against a name
++int guiIconTextWidth(int iconId, int textId, int font)
++{
++    GSTEXTURE *iconTex = thmGetTexture(iconId);
++    int w = iconTex != NULL && iconTex->Height > 0 ? rmWideScale((iconTex->Width * 20) / iconTex->Height) + 2 : 0;
++    return w + rmUnScaleX(fntCalcDimensions(guiHintFont(font), _l(textId)));
++}
++
+ static int guiDrawIconAndLiteralText(int iconId, const char *text, int font, int x, int y, u64 color)
+ {
+     GSTEXTURE *iconTex = thmGetTexture(iconId);
+@@ -5557,6 +5643,12 @@ static void guiShow()
                  menuRenderBackdrop();
              else
                  ripps2DrawPanelMorph(ax, ay, aw, ah, bx, by, bw, bh, (t - MORPH_CONCEAL_S) / MORPH_MOVE_S);
@@ -2294,7 +2330,7 @@ index fef5147..5c541bd 100644
          } else {
              if (!transArrived) {
                  transArrived = 1;
-@@ -5572,9 +5656,11 @@ static void guiShow()
+@@ -5572,9 +5664,11 @@ static void guiShow()
                  screenHandlerTarget = NULL;
              }
          }
@@ -2307,7 +2343,7 @@ index fef5147..5c541bd 100644
  }
  
  // build 114: the page as it stands (the theme list fades in over it, whatever the theme)
-@@ -5747,7 +5833,7 @@ void guiUpdateScreenScale(void)
+@@ -5747,7 +5841,7 @@ void guiUpdateScreenScale(void)
  static int guiWrapText(const char *text, int innerW, char *out, int outSize)
  {
      int wlen = 0, lineW = 0, lines = 1;
@@ -2316,7 +2352,7 @@ index fef5147..5c541bd 100644
      const char *p = text;
  
      if (out == NULL || outSize <= 0)
-@@ -5774,7 +5860,7 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
+@@ -5774,7 +5868,7 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
          while (*p && *p != ' ' && *p != '\n' && k < (int)sizeof(word) - 1)
              word[k++] = *p++;
          word[k] = '\0';
@@ -2325,7 +2361,7 @@ index fef5147..5c541bd 100644
  
          if (lineW > 0 && (lineW + spaceW + wordW) > innerW) { // does not fit -> break the line
              if (wlen < outSize - 1)
-@@ -5794,6 +5880,27 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
+@@ -5794,6 +5888,27 @@ static int guiWrapText(const char *text, int innerW, char *out, int outSize)
      return lines;
  }
  
@@ -2353,7 +2389,7 @@ index fef5147..5c541bd 100644
  // RIPPS2: the next message box's sound (an error, a save), once; then the plain message sound again
  static int msgBoxSound = SFX_MESSAGE;
  
-@@ -5835,6 +5942,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5835,6 +5950,10 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
      const char *backLabel = msgBoxBackLabel;   // build 114
      msgBoxStartLabel = NULL;
      msgBoxBackLabel = NULL;
@@ -2364,7 +2400,7 @@ index fef5147..5c541bd 100644
      // Wrapped once up front, not per frame: the result depends only on `text` and the screen width.
      char wrapped[1024]; // RIPPS2: 512 cut the longer screens (BIBLE's) short
  
-@@ -5880,23 +5991,7 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
+@@ -5880,23 +5999,7 @@ int guiMsgBox(const char *text, int addAccept, struct UIItem *ui)
          // Render the wrapped lines ONE AT A TIME: ALIGN_CENTER centres on the measured width of the
          // WHOLE string, so handing it a multi-line buffer would centre it as a single long run and
          // leave every line off-centre. Block is vertically centred on the old single-line position.
@@ -2389,7 +2425,7 @@ index fef5147..5c541bd 100644
          // RIPPS2: the hints sit where every other screen's do, right-aligned on the same footer line,
          // so BACK lines up with the settings pages' (was fixed at x 500, short of their right edge)
          {
-@@ -5996,7 +6091,7 @@ int guiPromptRebootIop(void)
+@@ -5996,7 +6099,7 @@ int guiPromptRebootIop(void)
  
          guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
  
@@ -2398,7 +2434,7 @@ index fef5147..5c541bd 100644
  
          guiDrawIconAndLiteralText(guiConfirmIcon(), _t("Yes"), RIPPS2_UI_FONT, 70, 417, gTheme->textColor);
          guiDrawIconAndLiteralText(TRIANGLE_ICON, _l(_STR_CANCEL), RIPPS2_UI_FONT, 285, 417, gTheme->textColor);
-@@ -6181,7 +6276,12 @@ void guiRenderTextScreen(const char *message)
+@@ -6181,7 +6284,12 @@ void guiRenderTextScreen(const char *message)
      // background); the video-mode, remove-settings and cheat-selection screens went opaque too.
      guiDrawStatusBackdrop(); // RIPPS2: was opaque black
  
@@ -2412,7 +2448,7 @@ index fef5147..5c541bd 100644
  
      guiDrawOverlays();
  
-@@ -6362,7 +6462,7 @@ void guiWarning(const char *text, int count)
+@@ -6362,7 +6470,7 @@ void guiWarning(const char *text, int count)
      // fixed number of frames, so it gets an opaque backdrop rather than a ~75% wash.
      guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
  
@@ -2421,7 +2457,7 @@ index fef5147..5c541bd 100644
  
      guiEndFrame();
  
-@@ -6424,7 +6524,7 @@ int guiConfirmVideoMode(void)
+@@ -6424,7 +6532,7 @@ int guiConfirmVideoMode(void)
          // steps and the keep landed while it still looked 4/5 full (zackcage6, 09-26).
          guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
  
@@ -2430,7 +2466,7 @@ index fef5147..5c541bd 100644
          // How long until the automatic revert (zackcage6's idea). Hidden during a hold. A hold does NOT
          // pause the deadline -- it only defers the revert check so a started hold can finish; let go
          // early after the deadline and the next pass reverts. Whole seconds rounded up, so it reads
-@@ -6433,7 +6533,7 @@ int guiConfirmVideoMode(void)
+@@ -6433,7 +6541,7 @@ int guiConfirmVideoMode(void)
              int leftMs = OPL_VMODE_CHANGE_CONFIRMATION_TIMEOUT_MS - (int)((clock() - timeStart) / (CLOCKS_PER_SEC / 1000));
              char countdown[64];
              snprintf(countdown, sizeof(countdown), _l(_STR_CFM_VMODE_REVERT_IN), leftMs > 0 ? (leftMs + 999) / 1000 : 1);
@@ -2439,7 +2475,7 @@ index fef5147..5c541bd 100644
          }
          guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _STR_BACK, RIPPS2_UI_FONT, 500, 417, gTheme->textColor);
          guiDrawIconAndText(gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, _STR_CFM_VMODE_HOLD_KEEP, RIPPS2_UI_FONT, 70, 417, gTheme->textColor);
-@@ -6484,7 +6584,7 @@ int guiGameShowRemoveSettings(config_set_t *configSet, config_set_t *configGame)
+@@ -6484,7 +6592,7 @@ int guiGameShowRemoveSettings(config_set_t *configSet, config_set_t *configGame)
          // Opaque for the same reason as guiConfirmVideoMode: the backdrop is just guiShow().
          guiDrawStatusBackdrop(); // RIPPS2: was black with two white rules
  
@@ -2489,15 +2525,16 @@ index a7ff5de..9e3b714 100644
      // Neutrino-only row greyed even under a Neutrino global default (guiGameSetCoreAwareState reads
      // this). SMB likewise: ethsupport has no Neutrino launch leg, the effective core is always <OPL>.
 diff --git a/src/hddsupport.c b/src/hddsupport.c
-index c825958..28ebcd5 100644
+index c825958..286f288 100644
 --- a/src/hddsupport.c
 +++ b/src/hddsupport.c
-@@ -1,4 +1,5 @@
+@@ -1,5 +1,6 @@
  #include "sys/fcntl.h"
-+#include "include/mixsupport.h" // build 115: mixWantsPs1
  #include "include/opl.h"
++#include "include/mixsupport.h" // build 115: mixWantsPs1
  #ifdef RETROACHIEVEMENTS
  #include "include/achievements.h"
+ #endif
 @@ -1652,7 +1653,7 @@ static int hddUpdateGameList(item_list_t *itemList)
      if (!hddSupportModulesLoaded)
          LOG("HDDSUPPORT UpdateGameList: PFS support incomplete; attempting read-only APA enumeration anyway\n");
@@ -2823,7 +2860,7 @@ index 1f08c7e..0233e82 100644
  
      for (it = appMenu; it; it = it->next, cp++) {
 diff --git a/src/mixsupport.c b/src/mixsupport.c
-index 3eb2114..af3d01c 100644
+index 3eb2114..3c43ff2 100644
 --- a/src/mixsupport.c
 +++ b/src/mixsupport.c
 @@ -28,6 +28,11 @@
@@ -2838,7 +2875,16 @@ index 3eb2114..af3d01c 100644
  */
  
  #include <stdio.h>
-@@ -78,10 +83,15 @@ typedef struct
+@@ -50,6 +55,8 @@
+ #include "include/bdmsupport.h"
+ #include "include/favsupport.h"
+ #include "include/mixsupport.h"
++#include "include/texcache.h" // build 115: a first answer looks again
++#include "include/metadb.h" // build 115: a first answer looks again
+ 
+ #include <kernel.h>
+ #include <fcntl.h>
+@@ -78,10 +85,15 @@ typedef struct
      int family;         // build 114: MIX_FAM_*, the kind of source (a waiting row has no owner yet)
  } mix_rec_t;
  
@@ -2858,7 +2904,7 @@ index 3eb2114..af3d01c 100644
  static int mixSema = -1;
  
  static void mixLock(void)
-@@ -379,15 +389,15 @@ static void mixFreeRecords(mix_rec_t *arr, int count)
+@@ -379,15 +391,15 @@ static void mixFreeRecords(mix_rec_t *arr, int count)
      free(arr);
  }
  
@@ -2879,7 +2925,7 @@ index 3eb2114..af3d01c 100644
      mixUnlock();
      mixFreeRecords(arr, count);
  }
-@@ -491,6 +501,16 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
+@@ -491,6 +503,16 @@ static void mixCollect(mix_build_t *b, int mode, int rank)
      }
  }
  
@@ -2896,7 +2942,7 @@ index 3eb2114..af3d01c 100644
  // By name (ignoring case), PS2 before PS1 for the same name, then source order
  static int mixCompare(const void *a, const void *b)
  {
-@@ -505,7 +525,7 @@ static int mixCompare(const void *a, const void *b)
+@@ -505,7 +527,7 @@ static int mixCompare(const void *a, const void *b)
  
  // ---- item_list_t callbacks ----
  
@@ -2905,7 +2951,7 @@ index 3eb2114..af3d01c 100644
  static int mixGetIconId(item_list_t *itemList) { return BDM_ICON; }
  
  static void mixInit(item_list_t *itemList)
-@@ -516,9 +536,10 @@ static void mixInit(item_list_t *itemList)
+@@ -516,9 +538,10 @@ static void mixInit(item_list_t *itemList)
  static int mixNeedsUpdate(item_list_t *itemList)
  {
      // the L3 dirty flag is consumed first and always, so a forced rebuild clears it too (as favNeedsUpdate)
@@ -2919,7 +2965,7 @@ index 3eb2114..af3d01c 100644
          return 1;
      }
      // build 114: polled only while saved games wait (updateDelay): a started source silent past MIX_WAIT_S drops them
-@@ -530,12 +551,16 @@ static int mixNeedsUpdate(item_list_t *itemList)
+@@ -530,12 +553,16 @@ static int mixNeedsUpdate(item_list_t *itemList)
  
  // One pass: gather every source, sort, drop the second copy of a title, keep the rows the current
  // view shows (ALL, PS1 or PS2). updateMenuFromGameList appends the submenu from the count returned.
@@ -2938,7 +2984,7 @@ index 3eb2114..af3d01c 100644
      for (i = 0; i < MIX_SOURCE_COUNT; i++)
          mixCollect(&b, mixSourceModes[i], i);
      // build 114: the saved games of every source still to answer (rank 100 and up, so a live row of the same title wins)
-@@ -550,7 +575,7 @@ static int mixUpdateItemList(item_list_t *itemList)
+@@ -550,7 +577,7 @@ static int mixUpdateItemList(item_list_t *itemList)
          mixFamWaiting[m->family] = 1;
          waiting++;
      }
@@ -2947,7 +2993,7 @@ index 3eb2114..af3d01c 100644
      if (b.count == 0) {
          free(b.arr);
          return 0;
-@@ -568,8 +593,11 @@ static int mixUpdateItemList(item_list_t *itemList)
+@@ -568,8 +595,11 @@ static int mixUpdateItemList(item_list_t *itemList)
          b.arr[kept++] = *r;
      }
      // build 114: kept as the master list (every kind, whatever the view), once no started source is still to answer
@@ -2960,7 +3006,7 @@ index 3eb2114..af3d01c 100644
      // the rows the view shows (ALL, PS1 or PS2)
      for (i = 0; i < kept; i++) {
          mix_rec_t *r = &b.arr[i];
-@@ -580,31 +608,63 @@ static int mixUpdateItemList(item_list_t *itemList)
+@@ -580,31 +610,63 @@ static int mixUpdateItemList(item_list_t *itemList)
          }
          b.arr[shown++] = *r;
      }
@@ -3034,7 +3080,7 @@ index 3eb2114..af3d01c 100644
  // record, the info page hang testers hit on All Games as the disc and cover came in.
  typedef struct
  {
-@@ -613,15 +673,15 @@ typedef struct
+@@ -613,15 +675,15 @@ typedef struct
      char text[256];
  } mix_row_t;
  
@@ -3056,7 +3102,7 @@ index 3eb2114..af3d01c 100644
          ok = 1;
      }
      mixUnlock();
-@@ -656,34 +716,37 @@ static int mixOwnerId(mix_row_t *r)
+@@ -656,34 +718,37 @@ static int mixOwnerId(mix_row_t *r)
  
  static int mixGetRowView(item_list_t *itemList, int id)
  {
@@ -3101,7 +3147,7 @@ index 3eb2114..af3d01c 100644
          return NULL;
      item_list_t *o = &r.view;
      // A PS1 row's config is keyed by its name under the source's prefix, as on a device page and as
-@@ -711,7 +774,7 @@ static config_set_t *mixGetConfig(item_list_t *itemList, int id)
+@@ -711,7 +776,7 @@ static config_set_t *mixGetConfig(item_list_t *itemList, int id)
  static void mixLaunchItem(item_list_t *itemList, int id, config_set_t *configSet)
  {
      mix_row_t r;
@@ -3110,7 +3156,7 @@ index 3eb2114..af3d01c 100644
          return;
      item_list_t *o = &r.view;
      if (mixKindIsPs1(r.kind)) { // PS1 titles launch by name, through the row's own core
-@@ -738,22 +801,23 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
+@@ -738,22 +803,23 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
      item_list_t asks[MIX_SOURCE_COUNT + 1];
      int askPs1[MIX_SOURCE_COUNT + 1];
      int n = 0, i, k;
@@ -3140,7 +3186,7 @@ index 3eb2114..af3d01c 100644
              continue;
          asks[n] = *o;
          askPs1[n++] = ps1;
-@@ -762,8 +826,8 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
+@@ -762,8 +828,8 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
      }
      int matched = n;
      if (!isRelative) { // theme images: any source may serve them
@@ -3151,7 +3197,7 @@ index 3eb2114..af3d01c 100644
              if (o == NULL || o->itemGetImage == NULL)
                  continue;
              for (k = 0; k < n && asks[k].mode != o->mode; k++)
-@@ -786,25 +850,26 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
+@@ -786,25 +852,26 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
      return -1;
  }
  
@@ -3187,7 +3233,7 @@ index 3eb2114..af3d01c 100644
      }
      mixUnlock();
      return mode;
-@@ -819,12 +884,12 @@ static void mixCleanUp(item_list_t *itemList, int exception)
+@@ -819,12 +886,12 @@ static void mixCleanUp(item_list_t *itemList, int exception)
  
  static void mixShutdown(item_list_t *itemList)
  {
@@ -3203,7 +3249,7 @@ index 3eb2114..af3d01c 100644
      if (mod == NULL || mod->menuItem.current == NULL)
          return -1;
      return mod->menuItem.current->item.id;
-@@ -833,41 +898,43 @@ static int mixSelectedId(void)
+@@ -833,41 +900,43 @@ static int mixSelectedId(void)
  unsigned char mixGetFlags(item_list_t *itemList)
  {
      mix_row_t r;
@@ -3257,7 +3303,19 @@ index 3eb2114..af3d01c 100644
      mixUnlock();
      return kind;
  }
-@@ -881,11 +948,12 @@ void mixSourceAnswered(int mode)
+@@ -876,16 +945,24 @@ int mixGetItemKind(int id)
+ void mixSourceAnswered(int mode)
+ {
+     int fam = mixModeFamily(mode);
++    // build 115 (the user, 10/26: with HDD on Manual, All Games showed its rows' art once it was started but never their
++    // CFG details): a source's first answer is a drive that was not there before, the same as a drive plugged in, so
++    // what was asked of it while it was away (its metadata database, missing covers) is asked again
++    if (fam >= 0 && !mixAnswered[fam]) {
++        metaDbInvalidate();
++        cacheInvalidateFailMemo();
++    }
+     if (fam >= 0)
+         mixAnswered[fam] = 1;
      mixRequestUpdate();
  }
  
@@ -3272,7 +3330,7 @@ index 3eb2114..af3d01c 100644
      mixUnlock();
      return waiting;
  }
-@@ -895,12 +963,17 @@ int mixMasterGames(void)
+@@ -895,12 +972,17 @@ int mixMasterGames(void)
      return mixMasterSaved > 0 ? mixMasterSaved : 0;
  }
  
@@ -3293,7 +3351,7 @@ index 3eb2114..af3d01c 100644
      mixUnlock();
      return found;
  }
-@@ -911,21 +984,24 @@ static int mixLiveHas(const char *text, int kind)
+@@ -911,21 +993,24 @@ static int mixLiveHas(const char *text, int kind)
  int mixWaitForRow(struct menu_item *menu)
  {
      char name[256], startup[64], line[300];
@@ -3324,7 +3382,7 @@ index 3eb2114..af3d01c 100644
      mixUnlock();
      if (fam < 0 || fam >= MIX_FAM_COUNT)
          fam = MIX_FAM_BDM;
-@@ -935,12 +1011,12 @@ int mixWaitForRow(struct menu_item *menu)
+@@ -935,12 +1020,12 @@ int mixWaitForRow(struct menu_item *menu)
      readPads();
      while (1) {
          guiExecDeferredOps(); // the rebuilt list reaches the menu
@@ -3339,7 +3397,7 @@ index 3eb2114..af3d01c 100644
              snprintf(line, sizeof(line), _t("%s is not on %s any more, so it has left All Games."), name, _t(mixFamName[fam]));
              guiMsgBoxSound(SFX_ERROR);
              guiMsgBox(line, 0, NULL);
-@@ -976,19 +1052,25 @@ int mixWaitForRow(struct menu_item *menu)
+@@ -976,19 +1061,25 @@ int mixWaitForRow(struct menu_item *menu)
  
  void mixRequestUpdate(void)
  {
@@ -3371,7 +3429,7 @@ index 3eb2114..af3d01c 100644
  }
  
  // Two modes are one source for a favourite when equal or both BDM (a stick can change slots)
-@@ -1001,20 +1083,27 @@ static int mixModesMatch(int a, int b)
+@@ -1001,20 +1092,27 @@ static int mixModesMatch(int a, int b)
  
  void mixMarkStar(int mode, int id, int kind, const char *text)
  {
@@ -3387,14 +3445,14 @@ index 3eb2114..af3d01c 100644
 -    for (cur = mod->subMenu; cur != NULL; cur = cur->next) {
 -        int r = cur->item.id;
 -        if (!mixValidIndex(r) || mixArray[r].kind != kind || strcmp(mixArray[r].text, text) != 0)
+-            continue;
+-        // a PS1 favourite is its name; a PS2 one is that row on that source
+-        if (!mixKindIsPs1(kind) && !(mixModesMatch(mixArray[r].mode, mode) && mixArray[r].id == id))
 +    for (l = 0; l < 2; l++) {
 +        opl_io_module_t *mod = oplGetModule(lists[l]);
 +        mix_set_t *set = MIX_SET(lists[l]);
 +        if (mod == NULL)
              continue;
--        // a PS1 favourite is its name; a PS2 one is that row on that source
--        if (!mixKindIsPs1(kind) && !(mixModesMatch(mixArray[r].mode, mode) && mixArray[r].id == id))
--            continue;
 -        cur->item.favourited = 1;
 +        for (cur = mod->subMenu; cur != NULL; cur = cur->next) {
 +            int r = cur->item.id;
@@ -3408,7 +3466,7 @@ index 3eb2114..af3d01c 100644
      }
      mixUnlock();
  }
-@@ -1026,8 +1115,22 @@ item_list_t *mixGetObject(int initOnly)
+@@ -1026,8 +1124,22 @@ item_list_t *mixGetObject(int initOnly)
      return &mixItemList;
  }
  
@@ -3432,14 +3490,15 @@ index 3eb2114..af3d01c 100644
 +    &mixGetConfig, &mixGetImage, &mixCleanUp, &mixShutdown, &mixCheckVMC, &mixGetIconId,
 +    NULL, ITEM_VIEW_NATIVE, NULL, NULL, &mixGetRowView, NULL};
 diff --git a/src/mmcesupport.c b/src/mmcesupport.c
-index ba683b0..98c19b7 100644
+index ba683b0..7110e04 100644
 --- a/src/mmcesupport.c
 +++ b/src/mmcesupport.c
-@@ -1,3 +1,4 @@
-+#include "include/mixsupport.h" // build 115: mixWantsPs1
+@@ -1,4 +1,5 @@
  #include "include/opl.h"
++#include "include/mixsupport.h" // build 115: mixWantsPs1
  #ifdef RETROACHIEVEMENTS
  #include "include/achievements.h"
+ #endif
 @@ -20,6 +21,8 @@
  #include "include/extern_irx.h"
  #include "include/cheatman.h"
@@ -7252,7 +7311,7 @@ index 2da860e..403aa1e 100644
      return (result >= 0) ? 0 : result;
  }
 diff --git a/src/themes.c b/src/themes.c
-index fa854fb..9592bf4 100644
+index fa854fb..8e0cbf7 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -15,6 +15,7 @@
@@ -7384,7 +7443,29 @@ index fa854fb..9592bf4 100644
                  if (texture && texture->Mem)
                      rmDrawPixmap(texture, elem->posX, elem->posY, elem->aligned, elem->width, elem->height, elem->scaled, gDefaultCol, 0);
  
-@@ -4158,7 +4222,8 @@ static void drawBDMIndex(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4114,6 +4178,21 @@ static void drawMenuText(struct menu_list *menu, struct submenu_list *item, conf
+         ripps2SourceToast(text);
+         return;
+     }
++    // build 115: hints_flank=1 (OSDSYS style): the confirm button's RUN left of the name, the cancel button's SOURCE right
++    // of it when there is another source to step to, in the D-pad glyphs' place (the hint row leaves the two out)
++    if (gTheme->hintsFlank && elem->aligned && !ripps2SidebarOn()) {
++        if (srcA <= 0.0f)
++            return;
++        int confirm = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, half = rmUnScaleX(fntCalcDimensions(elem->font, text)) / 2;
++        u64 c = (elem->color & ~(0xFFULL << 24)) | ((u64)(int)(((elem->color >> 24) & 0xFF) * srcA) << 24);
++        u64 ic = GS_SETREG_RGBA(0x80, 0x80, 0x80, (int)(0x80 * srcA));
++        guiDrawIconAndTextNoFade(confirm, _STR_RUN, elem->font, elem->posX - half - gTheme->hintsFlankGap - guiIconTextWidth(confirm, _STR_RUN, elem->font),
++                                 elem->posY - 10, c, ic);
++        if (findMenuNext(menu) != 0 || findMenuPrev(menu) != 0)
++            guiDrawIconAndTextNoFade(guiCancelIcon(), _STR_RIPPS2_SOURCE, elem->font, elem->posX + half + gTheme->hintsFlankGap, elem->posY - 10, c, ic);
++        fntRenderString(elem->font, elem->posX, elem->posY, elem->aligned, 0, 0, text, c);
++        return;
++    }
+     int shownAlpha = (int)(glyphAlpha * ripps2GlyphsAlpha(RIPPS2_GLYPH_DRIVES) * srcA);
+     u64 glyphCol = GS_SETREG_RGBA(0x80, 0x80, 0x80, shownAlpha);
+ 
+@@ -4158,7 +4237,8 @@ static void drawBDMIndex(struct menu_list *menu, struct submenu_list *item, conf
          rmDrawPixmap(indexTex, elem->posX, elem->posY, elem->aligned, elem->width, elem->height, elem->scaled, gDefaultCol, 0);
  }
  
@@ -7394,7 +7475,7 @@ index fa854fb..9592bf4 100644
  
  // RIPPS2 build 106: which of a list's per-kind row icons a row takes: 0 a PS2 game, 1 a PS1 one, 2 an app
  static int thmRowKind(item_list_t *list, submenu_list_t *row)
-@@ -4582,6 +4647,11 @@ static int hintEntryWidth(menu_hint_item_t *h, int labels, int font)
+@@ -4582,6 +4662,11 @@ static int hintEntryWidth(menu_hint_item_t *h, int labels, int font)
  static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y, u64 col, u64 iconCol)
  {
      GSTEXTURE *badge = hintBadge(labels);
@@ -7406,7 +7487,7 @@ index fa854fb..9592bf4 100644
      if (badge != NULL) {
          int w = hintEntryWidth(h, labels, font);
          float half = badge->Width / 2.0f;
-@@ -4591,7 +4661,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
+@@ -4591,7 +4676,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
          if (mid > 0)
              rmDrawPixmapPart(badge, x + cap, by, ALIGN_NONE, mid, HINT_BADGE_H, SCALING_NONE, iconCol, half - 0.5f, 0, half + 0.5f, badge->Height);
          rmDrawPixmapPart(badge, x + cap + (mid > 0 ? mid : 0), by, ALIGN_NONE, capW, HINT_BADGE_H, SCALING_RATIO, iconCol, half, 0, badge->Width, badge->Height);
@@ -7415,7 +7496,7 @@ index fa854fb..9592bf4 100644
          return x + w;
      }
      if (hintGlyphOnly(h, labels)) {
-@@ -4600,7 +4670,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
+@@ -4600,7 +4685,7 @@ static int drawHintEntry(menu_hint_item_t *h, int labels, int font, int x, int y
          rmDrawPixmap(t, x, y + 10, ALIGN_VCENTER, w, 20, SCALING_RATIO, iconCol, 0);
          return x + rmWideScale(w) + 2;
      }
@@ -7424,7 +7505,27 @@ index fa854fb..9592bf4 100644
  }
  
  static void drawHintText(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
-@@ -4655,6 +4725,13 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4633,6 +4718,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+         showSource = 0;
+     } else if (ripps2SidebarOn())
+         showSource = 0; // the cancel button opens the sidebar's drawer instead
++    int flank = !sidebar && gTheme->hintsFlank && !ripps2SidebarOn() && ripps2SourceNameMode() != RIPPS2_SRC_POP; // build 115
++    if (flank)
++        showSource = 0; // beside the source name instead
+     if (hint && showSource) {
+         menu_hint_item_t *last = hint;
+         while (last->next != NULL)
+@@ -4645,7 +4733,8 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+         menu_hint_item_t *row[16], *h;
+         int n = 0, i, j, labels = ripps2HintLabels();
+         for (h = hint; h != NULL && n < 16; h = h->next)
+-            if (sidebar || ripps2HintShown(ripps2HintToken(h->text_id, h->icon_id)))
++            if (sidebar || (ripps2HintShown(ripps2HintToken(h->text_id, h->icon_id)) &&
++                            !(flank && ripps2HintToken(h->text_id, h->icon_id) == RIPPS2_HINT_RUN)))
+                 row[n++] = h;
+         for (i = sidebar ? n : 1; i < n; i++) {
+             menu_hint_item_t *k = row[i];
+@@ -4655,6 +4744,13 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
              row[j] = k;
          }
          u64 col = hintFade(elem->color, hintA), iconCol = hintFade(gDefaultCol, hintA);
@@ -7438,7 +7539,7 @@ index fa854fb..9592bf4 100644
  
          if (ripps2HintColumn()) {
              // one hint a line from the element's x/y down; a column that would run off the bottom (the
-@@ -4665,7 +4742,7 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4665,7 +4761,7 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
              if (y < 0)
                  y = 0;
              for (i = 0; i < n; i++)
@@ -7447,7 +7548,7 @@ index fa854fb..9592bf4 100644
          } else {
              // RIPPS2: fit the row between the screen margins. A full row (Menu, Run, Info, Options,
              // Refresh, Favorite, PS1) is wider than a gap of elem->width allows, so the gap tightens
-@@ -4695,7 +4772,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4695,7 +4791,9 @@ static void drawHintText(struct menu_list *menu, struct submenu_list *item, conf
                  x = 4;
  
              for (i = 0; i < n; i++)
@@ -7458,7 +7559,7 @@ index fa854fb..9592bf4 100644
          }
          if (showSource) {
              menu_hint_item_t *h2 = menu->item->hints;
-@@ -6003,6 +6082,36 @@ static void thmLoadFonts(config_set_t *themeConfig, const char *themePath, theme
+@@ -6003,6 +6101,36 @@ static void thmLoadFonts(config_set_t *themeConfig, const char *themePath, theme
      }
      theme->diaFont = diaFont != FNT_ERROR ? diaFont : theme->fonts[4];
      theme->diaTipFont = thmDiaTipFont != FNT_ERROR ? thmDiaTipFont : theme->fonts[15];
@@ -7495,7 +7596,7 @@ index fa854fb..9592bf4 100644
  }
  
  /* RIPPS2 build 102 (user: "ripflow status page font and ripps2 about pages font slots on all themes"). About and
-@@ -6040,12 +6149,14 @@ int gRipps2TextWeight = 0;
+@@ -6040,12 +6168,14 @@ int gRipps2TextWeight = 0;
  void ripps2ApplyTextWeight(void)
  {
      int i;
@@ -7512,7 +7613,7 @@ index fa854fb..9592bf4 100644
  }
  
  void thmPageFontsEnd(void)
-@@ -6455,7 +6566,7 @@ static int thmLoad(const char *themePath)
+@@ -6455,7 +6585,7 @@ static int thmLoad(const char *themePath)
      newT->paletteDef = newT->catBarDef = newT->hintsDef = newT->glyphsDef = newT->srcNameDef = newT->catSwapDef = -1;
      {
          static const char *const showNames[] = {"shown", "fade", "hidden"};
@@ -7521,7 +7622,7 @@ index fa854fb..9592bf4 100644
          const char *v = NULL;
          int i;
          if (configGetStr(themeConfig, "color_theme", &v) && v != NULL)
-@@ -6470,9 +6581,12 @@ static int thmLoad(const char *themePath)
+@@ -6470,9 +6600,18 @@ static int thmLoad(const char *themePath)
              if (configGetStr(themeConfig, "source_name", &v) && v != NULL && !strcasecmp(v, showNames[i]))
                  newT->srcNameDef = i;
          }
@@ -7532,10 +7633,16 @@ index fa854fb..9592bf4 100644
 +        newT->hintsFade = 1; // build 115: hints_fade=1 (the default): a hint glyph that changes fades in; 0: it just appears
 +        if (configGetInt(themeConfig, "hints_fade", &intValue))
 +            newT->hintsFade = intValue != 0;
++        // build 115 (the user, 10/26: "X run on the left of the source name and O source on the right, OSDSYS style"):
++        // hints_flank=1, the room between name and hint hints_flank_gap (18)
++        newT->hintsFlank = configGetInt(themeConfig, "hints_flank", &intValue) && intValue == 1;
++        newT->hintsFlankGap = 18;
++        if (configGetInt(themeConfig, "hints_flank_gap", &intValue) && intValue >= 0 && intValue <= 200)
++            newT->hintsFlankGap = intValue;
          if (configGetStr(themeConfig, "category_order", &v) && v != NULL) // launch_disc_first | memory_files_first
              newT->catSwapDef = !strcasecmp(v, "memory_files_first") ? 1 : !strcasecmp(v, "launch_disc_first") ? 0 : -1;
      }
-@@ -6522,27 +6636,29 @@ static int thmLoad(const char *themePath)
+@@ -6522,27 +6661,29 @@ static int thmLoad(const char *themePath)
          newT->catX = newT->catY = newT->catSpacing = newT->catTransitionDef = -1;
          if (configGetStr(themeConfig, "category_font", &v) && v != NULL)
              newT->catFontTheme = !strcasecmp(v, "theme");
@@ -7577,7 +7684,7 @@ index fa854fb..9592bf4 100644
          // build 113: the sidebar's bar, by default Adapt's (its main2 at x 0, 26 wide, #01040F at 88, and main3's
          // #28C5F9 accent at 22 beside it); a theme that draws its own bar on Storage says sidebar_bar=pages
          newT->sbX = 0;
-@@ -6561,6 +6677,14 @@ static int thmLoad(const char *themePath)
+@@ -6561,6 +6702,14 @@ static int thmLoad(const char *themePath)
              newT->sbDrawer = intValue;
          if (configGetStr(themeConfig, "sidebar_bar", &v) && v != NULL)
              newT->sbBar = !strcasecmp(v, "never") ? 0 : !strcasecmp(v, "pages") ? 1 : 2;
@@ -7593,14 +7700,15 @@ index fa854fb..9592bf4 100644
          configGetColor(themeConfig, "sidebar_accent_color", newT->sbAccent);
          if (configGetInt(themeConfig, "sidebar_tint", &intValue) && intValue >= 0 && intValue <= 128)
 diff --git a/src/udpfssupport.c b/src/udpfssupport.c
-index 2145824..74e302d 100644
+index 2145824..7ed5496 100644
 --- a/src/udpfssupport.c
 +++ b/src/udpfssupport.c
-@@ -1,3 +1,4 @@
-+#include "include/mixsupport.h" // build 115: mixWantsPs1
+@@ -1,4 +1,5 @@
  #include "include/opl.h"
++#include "include/mixsupport.h" // build 115: mixWantsPs1
  #include "include/saveicon.h"
  #include "include/lang.h"
+ #include "include/gui.h"
 @@ -599,7 +600,7 @@ static int udpfsUpdateGameList(item_list_t *itemList)
      if (answeredBefore)
          udpfsDiscoverLanguages();
