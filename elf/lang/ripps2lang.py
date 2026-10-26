@@ -390,6 +390,11 @@ def other_script(lang, text):
     return span is not None and any(span[0] <= ord(c) <= span[1] for c in text)
 
 
+# build 115: Open PS2 Loader labels whose English RIPPS2 rewrote. Upstream's lines translate the old text ("Turn on/off
+# Block Device Manager."), so RIPPS2's own (the labels: in elf/lang) win for these; upstream's only fills a gap
+REWORDED = {'HINT_EXITPATH', 'HINT_BDM_START'}
+
+
 def build_language(tree, lang, base, english_template, report):
     """(the .lng text, every character it uses) for one language."""
     opl = opl_translations(os.path.join(tree, 'lng_src', lang + '.yml'))
@@ -424,7 +429,10 @@ def build_language(tree, lang, base, english_template, report):
 
     for d in base['gui_strings']:  # Open PS2 Loader's labels, by their English here; RIPPS2's labels: only the gaps
         label, en = d['label'], d['string']
-        tr = opl.get(label) or label_fill.get(label) or via_opl.get(label) or via_fill.get(label)
+        if label in REWORDED:
+            tr = label_fill.get(label) or via_fill.get(label) or opl.get(label) or via_opl.get(label)
+        else:
+            tr = opl.get(label) or label_fill.get(label) or via_opl.get(label) or via_fill.get(label)
         add(en, tr, label, False)
     known = set(english_template)
     n_mine = 0

@@ -345,3 +345,7 @@ Left: Trust Cache row + its strings on the Cache page (config key ripps2_trust_c
 path, PC Card CF fold, Recent Games source 1-99, tooltip slide, BIOS sounds space check, STATUS<->Cache link and the
 STATUS loading section, translations for new _t strings, lab rounds, release v1.1.5-beta, the Short, Discord post,
 the 1.1.5 ELF into the SD's boot cards (BootCard-1/2/4/6/8). SD card hash result: scratchpad isohash-card.tsv.
+
+## Handoff (10/26, end of session)
+The next session starts from `build-115-handoff.md`: where things stand, the user's last requests, the steps to the
+release in order, and the translation kit in `tools/lang115/`.
