@@ -1001,7 +1001,7 @@ strings:
 - en: WHICH MUSIC?
   in:
   - ripps2biossnd.c
-- en: ' (The PS2BBL configs found were set: %s.)'
+- en: ' (The configs found were set: %s.)'
   in:
   - ripps2boot.c
 - en: ' (hold CIRCLE at power on to start it)'
@@ -1025,6 +1025,9 @@ strings:
 - en: ' RIPPS2 can install BIBLE, PS2BBL 1.2.0 set up to start RIPPS2, on a memory card; what starts from it now is kept in a backup folder. Install BIBLE?'
   in:
   - ripps2boot.c
+- en: ' Save its settings once with its own configurator, then turn BOOT LOCK on again.'
+  in:
+  - ripps2boot.c
 - en: ' The HDD''s old boot program is kept (MANAGE > RESTORE).'
   in:
   - ripps2boot.c
@@ -1038,6 +1041,9 @@ strings:
   in:
   - ripps2boot.c
 - en: ' Your own PS2BBL config was kept, BOOT LOCK set in it.'
+  in:
+  - ripps2boot.c
+- en: '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
   in:
   - ripps2boot.c
 - en: '(Removed a SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it.)
@@ -1111,19 +1117,22 @@ strings:
 - en: BOOT LOCK ON
   in:
   - ripps2boot.c
-- en: BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.
+- en: BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
   in:
   - ripps2boot.c
-- en: BOOT LOCK found no PS2BBL config to change.
+- en: BOOT LOCK found no boot loader config to change.
   in:
   - ripps2boot.c
-- en: BOOT LOCK is off. PS2BBL starts what it started before (%s).
+- en: BOOT LOCK is off. Your boot loader starts what it started before (%s).
   in:
   - ripps2boot.c
-- en: BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
+- en: BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
   in:
   - ripps2boot.c
-- en: BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.
+- en: 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  in:
+  - ripps2boot.c
+- en: BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.
   in:
   - ripps2boot.c
 - en: 'Done: the memory card in slot %d starts what it started before BBL 1.20. BBL 1.20 is kept in mc%d:/%s.'
@@ -1151,9 +1160,6 @@ strings:
   in:
   - ripps2boot.c
 - en: MEMORY CARD IN SLOT %d  (%s)
-  in:
-  - ripps2boot.c
-- en: Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.
   in:
   - ripps2boot.c
 - en: PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD.
@@ -1251,6 +1257,12 @@ strings:
   in:
   - ripps2boot.c
 - en: The memory card in slot %d refused PS2BBL, so RIPPS2 put the card back as it was. Check its free space, then try again. (DIAG.TXT beside RIPPS2 has what the card said.)
+  in:
+  - ripps2boot.c
+- en: The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).
+  in:
+  - ripps2boot.c
+- en: 'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.'
   in:
   - ripps2boot.c
 - en: The memory card in slot %d would not move BBL 1.20 aside, so nothing was changed. (DIAG.TXT beside RIPPS2 has what the card said.)
@@ -3221,13 +3233,16 @@ strings:
 - en: 1 music track
   in:
   - ripps2status.c
-- en: A PS2BBL with RIPPS2's lock is on this console.
+- en: A boot loader with RIPPS2's lock is on this console.
   in:
   - ripps2status.c
 - en: 'A game''s EXIT: %s'
   in:
   - ripps2status.c
 - en: 'A game''s EXIT: the browser'
+  in:
+  - ripps2status.c
+- en: 'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)'
   in:
   - ripps2status.c
 - en: AUDIO folder

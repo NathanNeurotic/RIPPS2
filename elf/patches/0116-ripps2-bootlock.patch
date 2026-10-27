@@ -1,0 +1,657 @@
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 990b3bf..344a594 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -36,8 +36,8 @@ void ripps2WriteReadme(const char *base, int media);          // base's AUDIO/RE
+ void ripps2PillarMusic(int on); // ripps2bg.c: the towers settle and light up to what is playing
+ 
+ // ---- BOOT LOCK (ripps2boot.c): PS2BBL starts RIPPS2 at power on ----
+-int ripps2BootLockState(void);              // 1 when a PS2BBL config on the console has RIPPS2's lock in it
+-void ripps2BootLockApply(int on);           // writes it into (or out of) every PS2BBL config found; says how it went
++int ripps2BootLockState(void);              // 1 when the config of the loader the console starts has RIPPS2's lock in it
++void ripps2BootLockApply(int on);           // writes it into (or out of) every PS2BBL, FMCB and OSDMenu config found; says how it went
+ int ripps2BootLockIgrPath(char *out, int size); // RIPPS2's path in the IGR Path's own form; 0 when the IGR cannot reach it
+ void ripps2ExitPathCheck(void);                  // build 115: is a memory-card IGR Path there (the boot card in)
+ const char *ripps2ExitPath(char *buf, int size); // build 115: where EXIT goes: the IGR Path, else RIPPS2, else Browser
+@@ -152,6 +152,7 @@ int ripps2HddSpace(u32 *totalS, u32 *freeS); // ripps2hdd.c: the APA drive's sec
+ // ---- build 113: the category sidebar (ripps2side.c) ----
+ extern int gRipps2FastCache; // build 113: Game Sources > Cache > Fast Cache, each source's saved list (1, the default)
+ extern int gRipps2FastBoot;  // build 115: Game Sources > Cache > Fast Boot (opl.c: RIPPS2.FB beside the ELF)
++extern int gRipps2BootLocked; // build 116: BOOT LOCK is on in the loader that starts at power on (ripps2boot.c: EXIT goes through it)
+ void ripps2FastBootApply(void); // build 115 (gui.c): Fast Boot just turned on: the drives and the sounds set for it
+ extern int gRipps2TrustCache; // build 115: Game Sources > Cache > Trust Cache, a cached list stands until SELECT (1)
+ extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar, 3 Menu (build 115)
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index dbcef50..cd6ccc5 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -305,7 +305,7 @@ gui_strings:
+ - label: BDM_PREFIX
+   string: BDM Prefix Path
+ - label: HINT_EXITPATH
+-  string: "Where EXIT in the In-Game Menu goes. Best left empty, with BIBLE set up (STATUS > Boot Loader > Manage, or BOOT LOCK on your PS2BBL): EXIT then resets the console through its own boot path and PS2BBL starts RIPPS2 as it does at power on, the safest way back. Browser: the PS2 browser. An ELF on a memory card (mc0:/mc1:) or a FAT32 USB drive (mass:/) loads straight after the reset, which not every game leaves the console ready for; MMCE can't be reached then at all."
++  string: "Where EXIT in the In-Game Menu goes. Best left empty with BOOT LOCK on (PS2BBL, FMCB or OSDMenu, or BIBLE set up): EXIT then goes through the browser, which starts your boot loader and RIPPS2 as at power on, the safest way back. Empty without the lock: RIPPS2's own ELF on a memory card or a FAT32 USB drive, loaded straight after the reset, which not every game leaves the console ready for. Browser: the PS2 browser. An ELF on MMCE can't be reached then at all."
+ - label: HINT_SPINDOWN
+   string: Value in minute(s), 0 to disable spin down.
+ - label: HDD_SPINDOWN
+@@ -1412,7 +1412,7 @@ gui_strings:
+ - label: RIPPS2_BOOT_LOCK
+   string: Boot Lock
+ - label: HINT_RIPPS2_BOOT_LOCK
+-  string: "Starts RIPPS2 at power on through PS2BBL. Off puts back what PS2BBL started before. No PS2BBL yet? Boot Loader installs BIBLE."
++  string: "Starts RIPPS2 at power on through your boot loader: PS2BBL and FMCB start it at once, OSDMenu puts it first in its menu, and a game's EXIT goes back the same way. Off puts back what was there before. None yet? Boot Loader installs BIBLE."
+ - label: HINT_COLORS_TEXT
+   string: "The color of the game list's text. Themes set their own; this changes it for the built-in themes."
+ - label: HINT_COLORS_SELECTED
+diff --git a/src/gui.c b/src/gui.c
+index 18d433e..fd1a50b 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -598,8 +598,6 @@ void guiShowRANotices(void)
+ }
+ #endif
+ 
+-static void guiBootLockAutofill(struct UIItem *ui);
+-
+ static int guiUpdater(int modified)
+ {
+     int showAutoStartLast;
+@@ -608,7 +606,6 @@ static int guiUpdater(int modified)
+         diaGetInt(diaConfig, CFG_LASTPLAYED, &showAutoStartLast);
+         diaSetVisible(diaConfig, CFG_LBL_AUTOSTARTLAST, showAutoStartLast);
+         diaSetVisible(diaConfig, CFG_AUTOSTARTLAST, showAutoStartLast);
+-        guiBootLockAutofill(diaConfig); // RIPPS2
+         ripps2SettingsHomeShow(diaConfig); // RIPPS2 build 109
+     }
+     return 0;
+@@ -680,32 +677,21 @@ void guiExitPathEnd(void)
+     ripps2ExitPathCheck(); // build 115
+ }
+ 
+-// RIPPS2: BOOT LOCK (ripps2boot.c). Turning it on fills an empty IGR Path with RIPPS2's own path; a
+-// path typed in is left alone (clear it and turn the lock on again to have RIPPS2's filled in).
+-static int bootLockWas = 0, bootLockShown = 0;
++// RIPPS2: BOOT LOCK (ripps2boot.c), written to the loader's config when the page closes. Build 116: it no longer fills
++// the IGR Path with RIPPS2's own ELF; with the lock on, an empty IGR Path sends a game's EXIT through the boot
++// loader (ripps2ExitPath), and turning it on clears an IGR Path that is RIPPS2's own (blSetLocked).
++static int bootLockWas = 0;
+ 
+ static void guiBootLockBegin(struct UIItem *ui)
+ {
+-    bootLockWas = bootLockShown = ripps2BootLockState();
++    bootLockWas = ripps2BootLockState();
+     diaSetInt(ui, CFG_RIPPS2_BOOTLOCK, bootLockWas);
+ }
+ 
+-static void guiBootLockAutofill(struct UIItem *ui)
+-{
+-    int lock = 0;
+-    diaGetInt(ui, CFG_RIPPS2_BOOTLOCK, &lock);
+-    if (lock && !bootLockShown && exitPathEdit[0] == '\0' && ripps2BootLockIgrPath(exitPathEdit, sizeof(exitPathEdit)))
+-        diaSetString(ui, CFG_EXITTO, exitPathEdit);
+-    bootLockShown = lock;
+-}
+-
+ static void guiBootLockEnd(struct UIItem *ui)
+ {
+     int lock = 0;
+     diaGetInt(ui, CFG_RIPPS2_BOOTLOCK, &lock);
+-    // build 113: IGR Path is on the In-Game Menu page now, so the lock fills the setting itself (an empty one only)
+-    if (lock && !bootLockWas && gExitPath[0] == '\0')
+-        ripps2BootLockIgrPath(gExitPath, sizeof(gExitPath));
+     if (lock != bootLockWas)
+         ripps2BootLockApply(lock);
+ }
+@@ -3851,7 +3837,6 @@ static int guiSettingsGeneralUpdater(int modified)
+         diaGetInt(guiSettingsActiveDialog, CFG_LASTPLAYED, &showAutoStartLast);
+         diaSetVisible(guiSettingsActiveDialog, CFG_LBL_AUTOSTARTLAST, showAutoStartLast);
+         diaSetVisible(guiSettingsActiveDialog, CFG_AUTOSTARTLAST, showAutoStartLast);
+-        guiBootLockAutofill(guiSettingsActiveDialog);
+         ripps2SettingsHomeShow(guiSettingsActiveDialog); // RIPPS2 build 109
+     }
+     return 0;
+diff --git a/src/opl.c b/src/opl.c
+index e7cef7d..985e253 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -3717,6 +3717,7 @@ static int ripps2CardSettingsHome(char *out, int size, int haveSettings)
+   while Fast Boot is on; removed when it is turned off.
+ */
+ int gRipps2FastBoot = 0;
++int gRipps2BootLocked = 0; // build 116 (ripps2boot.c)
+ 
+ static int fastBootPath(char *out, int size)
+ {
+@@ -3979,6 +3980,7 @@ static void _loadConfig()
+                 gHDDGameListCache = 1; // build 110: on by default (checked in the background now); once for older configs
+             configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath)); // build 115: checked with the boot card in
+             ripps2ExitPathCheck();
++            configGetInt(configOPL, "ripps2_bootlock", &gRipps2BootLocked); // build 116: EXIT through the boot loader
+             configGetStrCopy(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
+             configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
+             configGetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, &gAutoRefresh);
+@@ -4689,6 +4691,7 @@ static void _saveConfig()
+         configSetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, gHDDGameListCache);
+         configSetInt(configOPL, "ripps2_hddcache_v", 110); // build 110: the one-time switch to on has run
+         configSetStr(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath);
++        configSetInt(configOPL, "ripps2_bootlock", gRipps2BootLocked); // build 116
+         configSetStr(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath);
+         configSetInt(configOPL, CONFIG_OPL_AUTO_SORT, gAutosort);
+         configSetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, gAutoRefresh);
+@@ -6180,6 +6183,7 @@ static void miniInit(int mode)
+             configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
+             configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath)); // build 115: checked with the boot card in
+             ripps2ExitPathCheck();
++            configGetInt(configOPL, "ripps2_bootlock", &gRipps2BootLocked); // build 116: EXIT through the boot loader
+             configGetInt(configOPL, CONFIG_OPL_HDD_SPINDOWN, &gHDDSpindown);
+ #ifdef RETROACHIEVEMENTS
+             configGetInt(configOPL, CONFIG_OPL_RA_TELEMETRY, &gRATelemetry);
+diff --git a/src/ripps2boot.c b/src/ripps2boot.c
+index 70ef86d..694a7d0 100644
+--- a/src/ripps2boot.c
++++ b/src/ripps2boot.c
+@@ -11,6 +11,13 @@
+          place of stay in the file, commented out with a #RIPPS2# prefix under a marker line.
+     off  the marker and RIPPS2's lines go, and the #RIPPS2# lines come back exactly as they were.
+ 
++  Build 116: and through the other loaders a card can start, in their own files. FMCB (Free McBoot
++  1.8 and 1.9) gets LK_Auto_E1 the same way, in SYS-CONF/FREEMCB.CNF (FMCB_CFG.CNF for 1.8): issue #3's
++  console started FMCB, and the lock offered only BIBLE. OSDMenu has no automatic entry, so RIPPS2
++  becomes the first item of its menu (OSDMenu lists its items in the file's order and finds an item's
++  paths by its number; a number no line uses is taken). Each loader gets RIPPS2's path in a form it
++  reads: FMCB mc?: and mass: only, OSDMenu every drive PS2BBL Extended reads.
++
+   A hotkey held at power on still reaches every other PS2BBL entry, so the lock shuts nothing out.
+   The first time a config is changed, its original is kept beside it as <name>.RIPPS2-BACKUP.
+ 
+@@ -107,6 +114,14 @@ static const char *blConfigs[] = {
+     "mass0:/PS2BBL/CONFIG.INI",
+     "mmce0:/PS2BBL/CONFIG.INI",
+     "mmce1:/PS2BBL/CONFIG.INI",
++    // build 116: FMCB 1.9's (on a card, or a USB drive's), FMCB 1.8's, and OSDMenu's
++    "mc0:/SYS-CONF/FREEMCB.CNF",
++    "mc1:/SYS-CONF/FREEMCB.CNF",
++    "mass0:/FREEMCB.CNF",
++    "mc0:/SYS-CONF/FMCB_CFG.CNF",
++    "mc1:/SYS-CONF/FMCB_CFG.CNF",
++    "mc0:/SYS-CONF/OSDMENU.CNF",
++    "mc1:/SYS-CONF/OSDMENU.CNF",
+     NULL};
+ 
+ // The console's system-update folders (A USA and Asia, E Europe, I Japan, C China)
+@@ -117,6 +132,16 @@ static const char *blSysFolders[] = {"BAEXEC-SYSTEM", "BEEXEC-SYSTEM", "BIEXEC-S
+ enum { BL_NONE = 0, BL_PS2BBL, BL_FMCB, BL_OSDMENU, BL_OTHER };
+ static const char *const blKindName[] = {N_("no boot loader"), "PS2BBL", "FMCB (Free McBoot)", "OSDMenu", N_("a boot loader RIPPS2 does not know")};
+ 
++// build 116: whose config a path in blConfigs is
++static int blDialect(const char *path)
++{
++    if (strstr(path, "FREEMCB.CNF") != NULL || strstr(path, "FMCB_CFG.CNF") != NULL)
++        return BL_FMCB;
++    if (strstr(path, "OSDMENU.CNF") != NULL)
++        return BL_OSDMENU;
++    return BL_PS2BBL;
++}
++
+ typedef struct
+ {
+     int present;     // a formatted PS2 memory card is in the slot
+@@ -341,6 +366,11 @@ static void blScanCard(int port)
+             c->kind = BL_FMCB;
+             return;
+         }
++        snprintf(path, sizeof(path), "mc%d:/SYS-CONF/FMCB_CFG.CNF", port); // build 116: FMCB 1.8's
++        if (blFileExists(path)) {
++            c->kind = BL_FMCB;
++            return;
++        }
+         snprintf(path, sizeof(path), "mc%d:/PS2BBL/CONFIG.INI", port);
+         if (blFileExists(path)) {
+             c->kind = BL_PS2BBL;
+@@ -392,9 +422,10 @@ static int blCleanStrays(void)
+     return removed;
+ }
+ 
+-// ---- a PS2BBL config, edited ----
++// ---- a boot loader's config, edited ----
+ 
+-// The whole file, or -1. Only a file with PS2BBL launch keys in it counts as a PS2BBL config.
++// The whole file, or -1. Only a file with launch keys in it counts as a PS2BBL or FMCB config; OSDMenu's
++// is one by its name (build 116: it may have no items yet).
+ static int blRead(const char *path)
+ {
+     int fd = open(path, O_RDONLY), n;
+@@ -407,7 +438,7 @@ static int blRead(const char *path)
+     blText[n] = '\0';
+     if (!strncmp(blText, BL_STRAY, strlen(BL_STRAY)))
+         return -1; // build 68's file for a loader that is not PS2BBL: not a config
+-    return strstr(blText, "LK_") != NULL ? n : -1;
++    return (strstr(blText, "LK_") != NULL || blDialect(path) == BL_OSDMENU) ? n : -1;
+ }
+ 
+ static int blWrite(const char *path, const char *text, int len)
+@@ -435,9 +466,40 @@ static void blKey(const char *line, int len, char *key, int size)
+     key[n] = '\0';
+ }
+ 
+-static int blTaken(const char *key)
++// The lines the lock takes the place of: PS2BBL's automatic entry, FMCB's (LK_Auto_E1); none in OSDMenu's,
++// where RIPPS2 is an item added (build 116)
++static int blTaken(int dialect, const char *key)
++{
++    if (dialect == BL_OSDMENU)
++        return 0;
++    return !strcasecmp(key, "LK_AUTO_E1") || (dialect == BL_PS2BBL && (!strcmp(key, "ARG_AUTO_E1") || !strcmp(key, "NAME_AUTO")));
++}
++
++// What the lock writes under its marker: PS2BBL's NAME_AUTO and LK_AUTO_E1, FMCB's LK_Auto_E1, OSDMenu's
++// item (name_ and path1_OSDSYS_ITEM_<n>)
++static int blOurs(const char *key)
++{
++    return !strcasecmp(key, "NAME_AUTO") || !strcasecmp(key, "LK_AUTO_E1") || !strncmp(key, "name_OSDSYS_ITEM_", 17) ||
++           !strncmp(key, "path1_OSDSYS_ITEM_", 18);
++}
++
++// build 116: the lowest OSDMenu item number no line uses (OSDMenu finds an item's paths by its number)
++static int blOsdFreeItem(const char *text)
+ {
+-    return !strcmp(key, "LK_AUTO_E1") || !strcmp(key, "ARG_AUTO_E1") || !strcmp(key, "NAME_AUTO");
++    unsigned char used[256];
++    const char *p = text;
++    int n;
++
++    memset(used, 0, sizeof(used));
++    while ((p = strstr(p, "_OSDSYS_ITEM_")) != NULL) {
++        p += 13;
++        n = atoi(p);
++        if (n > 0 && n < (int)sizeof(used))
++            used[n] = 1;
++    }
++    for (n = 1; n < (int)sizeof(used) - 1 && used[n]; n++)
++        ;
++    return n;
+ }
+ 
+ // Builds the file without the lock (as it was before it) into blOut; its length
+@@ -451,8 +513,8 @@ static int blUnlocked(const char *text)
+         char key[32];
+         blKey(p, len, key, sizeof(key));
+         if (!strncmp(p, BL_MARKER, strlen(BL_MARKER)))
+-            skip = 2; // the marker and RIPPS2's NAME_AUTO and LK_AUTO_E1 after it
+-        else if (skip > 0 && (!strcmp(key, "NAME_AUTO") || !strcmp(key, "LK_AUTO_E1")))
++            skip = 2; // the marker and RIPPS2's lines after it (blOurs)
++        else if (skip > 0 && blOurs(key))
+             skip--;
+         else {
+             skip = 0;
+@@ -469,28 +531,44 @@ static int blUnlocked(const char *text)
+     return o;
+ }
+ 
+-// Builds the locked file from an unlocked one into blOut; its length
+-static int blLocked(const char *text, const char *ripps2)
++// Builds the locked file from an unlocked one into blOut, in the dialect's own keys; its length
++static int blLocked(const char *text, const char *ripps2, int dialect)
+ {
+     const char *p = text, *eol = strstr(text, "\r\n") ? "\r\n" : "\n";
+-    int o = 0, placed = 0;
+-    char ours[320];
+-    int oursLen = snprintf(ours, sizeof(ours), "%s: RIPPS2 starts first. Turn BOOT LOCK off in RIPPS2 to bring back the lines marked #RIPPS2#.%s"
++    int o = 0, placed = 0, item;
++    char ours[400];
++    int oursLen;
++
++    if (dialect == BL_OSDMENU) { // RIPPS2 as the menu's first item
++        item = blOsdFreeItem(text);
++        oursLen = snprintf(ours, sizeof(ours), "%s: RIPPS2 is first in this menu. Turn BOOT LOCK off in RIPPS2 to take it out.%s"
++                                               "name_OSDSYS_ITEM_%d = RIPPS2%spath1_OSDSYS_ITEM_%d = %s%s",
++                           BL_MARKER, eol, item, eol, item, ripps2, eol);
++    } else if (dialect == BL_FMCB)
++        oursLen = snprintf(ours, sizeof(ours), "%s: RIPPS2 starts first. Turn BOOT LOCK off in RIPPS2 to bring back the lines marked #RIPPS2#.%s"
++                                               "LK_Auto_E1 = %s%s",
++                           BL_MARKER, eol, ripps2, eol);
++    else
++        oursLen = snprintf(ours, sizeof(ours), "%s: RIPPS2 starts first. Turn BOOT LOCK off in RIPPS2 to bring back the lines marked #RIPPS2#.%s"
+                                                "NAME_AUTO = RIPPS2%sLK_AUTO_E1 = %s%s",
+                            BL_MARKER, eol, eol, ripps2, eol);
++    if (oursLen >= (int)sizeof(ours))
++        return -1;
+     while (*p) {
+         const char *e = strchr(p, '\n');
+         int len = e ? (int)(e - p) + 1 : (int)strlen(p);
++        int take;
+         char key[32];
+         blKey(p, len, key, sizeof(key));
+-        if (blTaken(key)) {
+-            if (!placed) { // RIPPS2's lines go where the automatic entry was
+-                memcpy(blOut + o, ours, oursLen);
+-                o += oursLen;
+-                placed = 1;
+-            }
+-            o += sprintf(blOut + o, "%s", BL_KEPT);
++        take = blTaken(dialect, key);
++        if (!placed && (take || (dialect == BL_OSDMENU && strstr(key, "_OSDSYS_ITEM_") != NULL))) {
++            // RIPPS2's lines go where the automatic entry was, or above OSDMenu's first item
++            memcpy(blOut + o, ours, oursLen);
++            o += oursLen;
++            placed = 1;
+         }
++        if (take)
++            o += sprintf(blOut + o, "%s", BL_KEPT);
+         if (o + len >= (int)sizeof(blOut) - (int)sizeof(ours))
+             return -1;
+         memcpy(blOut + o, p, len);
+@@ -550,6 +628,23 @@ static int blRipps2Path(int extended, char *out, int size)
+     return blPathFor(extended, boot, ripps2GetBootBdmType(), out, size);
+ }
+ 
++static const char *blChosenPath = NULL;
++
++// build 116: RIPPS2's path as one config writes it (path, its text in blText); 0 when that loader cannot reach it.
++// OSDMenu reads every drive PS2BBL Extended does; FMCB starts programs from memory cards and USB drives only.
++static int blPathIn(int dialect, const char *path, char *out, int size)
++{
++    if (dialect == BL_PS2BBL) {
++        int extended = blIsExtended(path, blText);
++        if (blChosenPath != NULL && (!extended || !strncmp(blChosenPath, "mc?:", 4))) // a memory card path reads the same in both
++            return snprintf(out, size, "%s", blChosenPath) < size;
++        return blRipps2Path(extended, out, size);
++    }
++    if (!blRipps2Path(dialect == BL_OSDMENU, out, size))
++        return 0;
++    return dialect == BL_OSDMENU || !strncmp(out, "mc?:", 4) || !strncmp(out, "mass:", 5);
++}
++
+ int ripps2BootLockIgrPath(char *out, int size)
+ {
+     char boot[256];
+@@ -567,7 +662,9 @@ int ripps2BootLockIgrPath(char *out, int size)
+ 
+ // RIPPS2 build 115: where the in-game menu's EXIT goes. An empty IGR Path (the default) is back to this RIPPS2, where it
+ // was started, when the IGR can reach that (a memory card or USB; ripps2BootLockIgrPath), else the PS2 browser as
+-// before; "Browser" typed in is the browser. A memory-card path that names no file is passed over for RIPPS2's own:
++// before; "Browser" typed in is the browser. Build 116: with BOOT LOCK on (gRipps2BootLocked), an empty one is the
++// browser, which starts the boot loader and so RIPPS2 as at power on: a straight load of RIPPS2's ELF after a game
++// is one not every game leaves the console ready for (issue #3: a black screen). A memory-card path that names no file is passed over for RIPPS2's own:
+ // the user's console kept exit_path=mc1:/APPS/RIPPS2.elf from an older set-up, an EXIT that went nowhere, while RIPPS2
+ // itself was at mc0:/RIPPS2/RIPPS2.ELF (10/25). That is checked while the boot card is in (after the settings load,
+ // and when the IGR Path is set), never at a launch: an SD2PSX may have switched to the game's own card by then.
+@@ -587,49 +684,69 @@ const char *ripps2ExitPath(char *buf, int size)
+         return "Browser";
+     if (gExitPath[0] != '\0' && !exitStale)
+         return gExitPath;
+-    if (ripps2BootLockIgrPath(buf, size))
++    if (!gRipps2BootLocked && ripps2BootLockIgrPath(buf, size))
+         return buf;
+     return "Browser";
+ }
+ 
+-// 1 when the lock is in a PS2BBL config AND what the console starts at power on is PS2BBL (or no card
+-// says otherwise: PS2BBL may start from the HDD). A lock in the config of a card FMCB starts past is
+-// no lock at all, so it shows off, and turning it on says why and offers BIBLE.
++// build 116: the lock's state kept in the settings (ripps2_bootlock), for EXIT (ripps2ExitPath). Locking clears an IGR
++// Path that is RIPPS2's own ELF, the one build 115's lock filled in: with the loader there, EXIT goes back through it.
++// A path typed in for anything else stays.
++static void blSetLocked(int locked)
++{
++    char own[256];
++    int save = locked != gRipps2BootLocked;
++
++    gRipps2BootLocked = locked;
++    if (locked && gExitPath[0] && ripps2BootLockIgrPath(own, sizeof(own)) && !strcasecmp(gExitPath, own)) {
++        LOG("RIPPS2: BOOT LOCK on, the IGR Path %s cleared: EXIT goes through the boot loader\n", gExitPath);
++        gExitPath[0] = '\0';
++        ripps2ExitPathCheck();
++        save = 1;
++    }
++    if (save)
++        ripps2SaveSettingsInBackground();
++}
++
++// 1 when the lock is in a config of the loader the console starts at power on (or, when no card's loader
++// starts, in any config: PS2BBL may start from the HDD). A lock in the config of a card another loader
++// starts past is no lock at all, so it shows off, and turning it on says why. Build 116: PS2BBL, FMCB or
++// OSDMenu; the answer is kept for EXIT (blSetLocked).
+ int ripps2BootLockState(void)
+ {
+-    int i, boot = blScan();
+-    if (boot >= 0 && blCards[boot].kind != BL_PS2BBL)
+-        return 0;
+-    for (i = 0; blConfigs[i] != NULL; i++)
+-        if (blRead(blConfigs[i]) >= 0 && strstr(blText, BL_MARKER) != NULL)
+-            return 1;
+-    return 0;
++    int i, boot = blScan(), kind = boot >= 0 ? blCards[boot].kind : BL_NONE, locked = 0;
++    if (kind != BL_OTHER)
++        for (i = 0; blConfigs[i] != NULL && !locked; i++)
++            locked = (boot < 0 || blDialect(blConfigs[i]) == kind) && blRead(blConfigs[i]) >= 0 && strstr(blText, BL_MARKER) != NULL;
++    blSetLocked(locked);
++    return locked;
+ }
+ 
+ // The path BIBLE's install chose for RIPPS2 (PS2BBL 1.2.0's form), which every config then takes:
+-// PS2BBL reads a drive's config and slot 2's before slot 1's, so all of them must say the same
+-static const char *blChosenPath = NULL;
++// PS2BBL reads a drive's config and slot 2's before slot 1's, so all of them must say the same (blChosenPath, above)
++
++// build 116: a bit (1 << BL_*) per loader whose config the last blApplyAll changed, could not write, could not reach RIPPS2 in
++static int blKindsChanged, blKindsFailed, blKindsUnreachable;
+ 
+-// The lock in (or out of) every PS2BBL config there is. Counts what changed, what could not be
+-// written, and the configs that cannot reach RIPPS2 where it is; where lists the ones changed.
+-static void blApplyAll(int on, int *changed, int *failed, int *unreachable, char *where, int whereSize)
++// The lock in (or out of) every config there is (only: one loader's alone, BIBLE's PS2BBL; 0 every one). Counts
++// what changed, what could not be written, and the configs that cannot reach RIPPS2 where it is; where lists
++// the ones changed.
++static void blApplyAll(int on, int only, int *changed, int *failed, int *unreachable, char *where, int whereSize)
+ {
+     char ripps2[256], backup[128];
+-    int i, len;
++    int i, len, dialect;
+ 
+     *changed = *failed = *unreachable = 0;
++    blKindsChanged = blKindsFailed = blKindsUnreachable = 0;
+     where[0] = '\0';
+     for (i = 0; blConfigs[i] != NULL; i++) {
+-        if (blRead(blConfigs[i]) < 0)
++        dialect = blDialect(blConfigs[i]);
++        if ((only && dialect != only) || blRead(blConfigs[i]) < 0)
++            continue;
++        if (on && !blPathIn(dialect, blConfigs[i], ripps2, sizeof(ripps2))) {
++            (*unreachable)++;
++            blKindsUnreachable |= 1 << dialect;
+             continue;
+-        if (on) {
+-            int extended = blIsExtended(blConfigs[i], blText);
+-            if (blChosenPath != NULL && (!extended || !strncmp(blChosenPath, "mc?:", 4))) // a memory card path reads the same in both
+-                snprintf(ripps2, sizeof(ripps2), "%s", blChosenPath);
+-            else if (!blRipps2Path(extended, ripps2, sizeof(ripps2))) {
+-                (*unreachable)++;
+-                continue;
+-            }
+         }
+         snprintf(backup, sizeof(backup), "%s.RIPPS2-BACKUP", blConfigs[i]);
+         if (!blFileExists(backup) && strstr(blText, BL_MARKER) == NULL) // the config as it was before RIPPS2 ever touched it
+@@ -637,13 +754,15 @@ static void blApplyAll(int on, int *changed, int *failed, int *unreachable, char
+         len = blUnlocked(blText);
+         if (on) {
+             memcpy(blText, blOut, len + 1);
+-            len = blLocked(blText, ripps2);
++            len = blLocked(blText, ripps2, dialect);
+         }
+         if (len < 0 || blWrite(blConfigs[i], blOut, len) != 0) {
+             (*failed)++;
++            blKindsFailed |= 1 << dialect;
+             continue;
+         }
+         (*changed)++;
++        blKindsChanged |= 1 << dialect;
+         if ((int)(strlen(where) + strlen(blConfigs[i]) + 3) < whereSize)
+             snprintf(where + strlen(where), whereSize - strlen(where), "%s%s", where[0] ? ", " : "", blConfigs[i]);
+     }
+@@ -655,22 +774,39 @@ static void blRestoreCard(int port);                   // build 115
+ 
+ void ripps2BootLockApply(int on)
+ {
+-    char msg[700], where[200];
+-    int changed, failed, unreachable, boot, removed;
++    char msg[700], where[200], from[256];
++    int changed, failed, unreachable, boot, removed, kind, bit, n;
+ 
+     boot = blScan();
+     removed = blCleanStrays();
+-    blApplyAll(on, &changed, &failed, &unreachable, where, sizeof(where));
+-
+-    if (on && ((boot >= 0 && blCards[boot].kind != BL_PS2BBL) || (boot < 0 && !changed))) {
+-        // What starts at power on is not PS2BBL, or there is no PS2BBL at all: a config cannot do it
+-        int n;
+-        if (boot >= 0) {
+-            n = snprintf(msg, sizeof(msg), _t("Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL."), boot, _t(blKindName[blCards[boot].kind]));
+-        } else
+-            n = snprintf(msg, sizeof(msg), _t("BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here."));
++    blApplyAll(on, 0, &changed, &failed, &unreachable, where, sizeof(where));
++    // build 116: the loader the console starts at power on decides; with no card's loader starting (PS2BBL from the HDD,
++    // say), any config set counts
++    kind = boot >= 0 ? blCards[boot].kind : BL_PS2BBL;
++    bit = 1 << kind;
++
++    if (!on) {
++        blSetLocked(0);
++        if (changed)
++            snprintf(msg, sizeof(msg), _t("BOOT LOCK is off. Your boot loader starts what it started before (%s)."), where);
++        else if (failed)
++            snprintf(msg, sizeof(msg), _t("BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again."));
++        else
++            snprintf(msg, sizeof(msg), _t("BOOT LOCK found no boot loader config to change."));
++        guiMsgBoxSound(changed ? SFX_SAVE : SFX_ERROR);
++        guiMsgBox(msg, 0, NULL);
++        return;
++    }
++
++    if ((boot >= 0 && kind == BL_OTHER) || (boot < 0 && !changed)) {
++        // What starts at power on is a loader RIPPS2 cannot set, or there is none at all: a config cannot do it
++        blSetLocked(0);
++        if (boot >= 0)
++            n = snprintf(msg, sizeof(msg), _t("The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu."), boot + 1, _t(blKindName[kind]));
++        else
++            n = snprintf(msg, sizeof(msg), _t("BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here."));
+         if (changed && n < (int)sizeof(msg))
+-            n += snprintf(msg + n, sizeof(msg) - n, _t(" (The PS2BBL configs found were set: %s.)"), where);
++            n += snprintf(msg + n, sizeof(msg) - n, _t(" (The configs found were set: %s.)"), where);
+         if (n < (int)sizeof(msg))
+             snprintf(msg + n, sizeof(msg) - n, _t(" RIPPS2 can install BIBLE, PS2BBL 1.2.0 set up to start RIPPS2, on a memory card; what starts from it now is kept in a backup folder. Install BIBLE?"));
+         guiMsgBoxSound(SFX_MESSAGE);
+@@ -679,18 +815,30 @@ void ripps2BootLockApply(int on)
+         return;
+     }
+ 
+-    if (!changed && !failed && !unreachable)
+-        snprintf(msg, sizeof(msg), _t("BOOT LOCK found no PS2BBL config to change."));
+-    else if (unreachable && !changed && !failed)
+-        snprintf(msg, sizeof(msg), _t("PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD."));
+-    else if (failed && !changed)
+-        snprintf(msg, sizeof(msg), _t("BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again."));
+-    else if (on)
+-        snprintf(msg, sizeof(msg), _t("BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s"), where,
+-                 removed ? _t(" A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.") : "");
+-    else
+-        snprintf(msg, sizeof(msg), _t("BOOT LOCK is off. PS2BBL starts what it started before (%s)."), where);
+-    guiMsgBoxSound(changed ? SFX_SAVE : SFX_ERROR);
++    blSetLocked(changed && (boot < 0 || (blKindsChanged & bit)));
++    if (boot < 0 || (blKindsChanged & bit)) {
++        if (kind == BL_OSDMENU) // no automatic entry: RIPPS2 first in its menu
++            snprintf(msg, sizeof(msg), _t("BOOT LOCK put RIPPS2 first in OSDMenu's menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game's EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader)."), where);
++        else
++            snprintf(msg, sizeof(msg), _t("BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s"),
++                     _t(blKindName[kind]), where, removed ? _t(" A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.") : "");
++    } else if (blKindsUnreachable & bit) {
++        if (kind == BL_PS2BBL)
++            snprintf(msg, sizeof(msg), _t("PS2BBL 1.2.0 cannot start RIPPS2 from where it is now (it reaches memory cards, USB drives and MX4SIO), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there, or use PS2BBL Extended, which reads MMCE and the HDD."));
++        else {
++            if (!ripps2GetBootPath(from, sizeof(from)))
++                snprintf(from, sizeof(from), "?");
++            snprintf(msg, sizeof(msg), _t("%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there."), _t(blKindName[kind]), from);
++        }
++    } else if (blKindsFailed & bit)
++        snprintf(msg, sizeof(msg), _t("BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again."));
++    else {
++        n = snprintf(msg, sizeof(msg), _t("The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s)."), boot + 1, _t(blKindName[kind]),
++                     kind == BL_FMCB ? "SYS-CONF/FREEMCB.CNF" : kind == BL_OSDMENU ? "SYS-CONF/OSDMENU.CNF" : "PS2BBL/CONFIG.INI");
++        if (kind != BL_PS2BBL && n < (int)sizeof(msg))
++            snprintf(msg + n, sizeof(msg) - n, _t(" Save its settings once with its own configurator, then turn BOOT LOCK on again."));
++    }
++    guiMsgBoxSound(boot < 0 || (blKindsChanged & bit) ? SFX_SAVE : SFX_ERROR);
+     guiMsgBox(msg, 0, NULL);
+ }
+ 
+@@ -1063,8 +1211,9 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+         char where[200];
+         int changed, failed, unreachable;
+         blChosenPath = w->path;
+-        blApplyAll(1, &changed, &failed, &unreachable, where, sizeof(where));
++        blApplyAll(1, BL_PS2BBL, &changed, &failed, &unreachable, where, sizeof(where));
+         blChosenPath = NULL;
++        blSetLocked(1); // build 116: EXIT goes back through BIBLE
+     }
+ 
+     guiMsgBoxSound(SFX_SAVE);
+@@ -1386,9 +1535,11 @@ static void blHddInstall(void)
+         char where[200];
+         int changed, failed, unreachable;
+         blChosenPath = first;
+-        blApplyAll(1, &changed, &failed, &unreachable, where, sizeof(where));
++        blApplyAll(1, BL_PS2BBL, &changed, &failed, &unreachable, where, sizeof(where));
+         blChosenPath = NULL;
+     }
++    if (bootOn)
++        blSetLocked(1); // build 116: EXIT goes back through BIBLE
+     guiMsgBoxSound(bootOn ? SFX_SAVE : SFX_ERROR);
+     ok = snprintf(msg, sizeof(msg), _t("BIBLE is installed on the internal HDD and BOOT LOCK is on: at power on the console starts RIPPS2 from %s%s%s%s, at once. Config: %s.%s%s"),
+                   first, second[0] ? _t(" (then ") : "", second, second[0] ? ")" : "", conf,
+@@ -1533,7 +1684,7 @@ static void blInstall(void)
+         char ext[256];
+         int i2;
+         for (i2 = 0; blConfigs[i2] != NULL; i2++)
+-            if (blRead(blConfigs[i2]) >= 0 && blIsExtended(blConfigs[i2], blText))
++            if (blDialect(blConfigs[i2]) == BL_PS2BBL && blRead(blConfigs[i2]) >= 0 && blIsExtended(blConfigs[i2], blText))
+                 break;
+         if (blConfigs[i2] != NULL && blRipps2Path(1, ext, sizeof(ext))) {
+             snprintf(msg, sizeof(msg),
+@@ -1649,6 +1800,7 @@ static void blRestoreCard(int port)
+         guiMsgBox(msg, 0, NULL);
+         return;
+     }
++    ripps2BootLockState(); // build 116: EXIT follows what starts now
+     guiMsgBoxSound(SFX_SAVE);
+     snprintf(msg, sizeof(msg), _t("Done: the memory card in slot %d starts what it started before BBL 1.20. BBL 1.20 is kept in mc%d:/%s."), port + 1, port, aside);
+     guiMsgBox(msg, 0, NULL);
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index 15a5a8d..f3fa45e 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -272,12 +272,14 @@ static void stScan(void)
+             r->ok = games > 0;
+         }
+         exitTo = ripps2ExitPath(exitBuf, sizeof(exitBuf));
+-        if (!strcmp(exitTo, "Browser"))
++        if (!strcmp(exitTo, "Browser") && gRipps2BootLocked && strcmp(gExitPath, "Browser"))
++            snprintf(line, sizeof(line), _t("A game's EXIT: the browser, then your boot loader (BOOT LOCK)")); // build 116
++        else if (!strcmp(exitTo, "Browser"))
+             snprintf(line, sizeof(line), _t("A game's EXIT: the browser"));
+         else
+             snprintf(line, sizeof(line), _t("A game's EXIT: %s"), exitTo);
+         r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
+-        r->ok = strcmp(exitTo, "Browser") != 0;
++        r->ok = strcmp(exitTo, "Browser") != 0 || gRipps2BootLocked;
+     }
+     stAdd(ROW_ACTION, ACT_CACHE, _t("CACHE SETTINGS"), stFromCache ? _t("back to Cache") : _t("Fast Cache, Trust Cache"))->hint =
+         _t("Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press "
+@@ -328,7 +330,7 @@ static void stScan(void)
+     {
+         int locked = ripps2BootLockState();
+         st_row_t *r = stAdd(ROW_STATUS, ACT_NONE,
+-                            locked ? _t("A PS2BBL with RIPPS2's lock is on this console.") : _t("What each card starts; install or repair BIBLE."), NULL);
++                            locked ? _t("A boot loader with RIPPS2's lock is on this console.") : _t("What each card starts; install or repair BIBLE."), NULL);
+         r->ok = locked;
+     }
+     stAdd(ROW_ACTION, ACT_BIBLE_MANAGE, _t("MANAGE"), _t("boot loader, card by card"))->hint =
