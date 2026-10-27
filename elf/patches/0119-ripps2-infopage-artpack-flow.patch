@@ -96,7 +96,7 @@ index e2ef210..a6878d2 100644
              int cat = gRipps2Category, src = menuSourceCurrent();
              ripps2SidebarInput();
 diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
-index ca492e0..fcb3018 100644
+index ca492e0..05a862f 100644
 --- a/src/ripps2artpack.c
 +++ b/src/ripps2artpack.c
 @@ -51,6 +51,7 @@
@@ -188,30 +188,31 @@ index ca492e0..fcb3018 100644
      }
      closedir(d);
      return err == 0;
-@@ -505,14 +537,77 @@ static int apMeasure(int s)
+@@ -505,14 +537,78 @@ static int apMeasure(int s)
      return (int)((unsigned long long)bytes * 1000 / 1024 / (ms > 0 ? ms : 1));
  }
  
 -// ---------------------------------------------------------------- the build
-+// build 119: how fast a drive takes one long file (KB a second): RIPDISC's figures for the kinds of storage
++// build 119: how fast a drive takes one long file (KB a second), as COMPRESS TO ZSO counts it (zpSpeed): the lab's first
++// pack (254 MB on the internal HDD) took 13 s where RIPDISC's figures (a disc read in them) said 2 min
 +static int apWriteKbs(const char *root)
 +{
 +    if (!strncmp(root, "mmce", 4))
-+        return 400;
++        return 1024;
 +    if (!strncmp(root, "pfs", 3))
-+        return 2400;
++        return 9 * 1024;
 +    if (!strncmp(root, "mass", 4) && root[4] >= '0' && root[4] <= '7')
 +        switch (bdmSlotDeviceType(root[4] - '0')) {
 +            case BDM_TYPE_ATA:
-+                return 2400;
++                return 9 * 1024;
 +            case BDM_TYPE_ILINK:
-+                return 1400;
++                return 2560;
 +            case BDM_TYPE_SDC:
-+                return 600;
++                return 1434;
 +            default:
 +                break;
 +        }
-+    return 800; // USB 1.1
++    return 820; // USB 1.1
 +}
  
 -static int apStopAsked(void)
@@ -270,7 +271,7 @@ index ca492e0..fcb3018 100644
  static int apWriteZeros(FILE *out, unsigned int n)
  {
      static const unsigned char zero[512];
-@@ -525,19 +620,54 @@ static int apWriteZeros(FILE *out, unsigned int n)
+@@ -525,19 +621,54 @@ static int apWriteZeros(FILE *out, unsigned int n)
      return 1;
  }
  
@@ -328,7 +329,7 @@ index ca492e0..fcb3018 100644
      char *list = NULL;
      void *buf;
  
-@@ -553,6 +683,7 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
+@@ -553,6 +684,7 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
      if ((out = fopen(pack, "wb")) == NULL)
          goto done;
      setvbuf(out, NULL, _IOFBF, 256 * 1024); // whole 256 KB writes (exFAT slipped odd-placed ones, RIPSHOT build 114)
@@ -336,7 +337,7 @@ index ca492e0..fcb3018 100644
  
      // the picked drive's own pictures first: a name on two drives goes in from the one the pack is on
      for (pass = 0; pass < 2 && !stopped; pass++)
-@@ -562,17 +693,11 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
+@@ -562,17 +694,11 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
              unsigned int h = apHash(apFiles[i].name);
              for (k = 0; k < n && (written[k] != h || strcasecmp(apFiles[writtenFrom[k]].name, apFiles[i].name)); k++)
                  ;
@@ -358,7 +359,7 @@ index ca492e0..fcb3018 100644
              }
              snprintf(path, sizeof(path), "%s/%s", apSrc[apFiles[i].src].dir, apFiles[i].name);
              buf = NULL;
-@@ -593,6 +718,7 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
+@@ -593,6 +719,7 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
              }
              if (buf == NULL) { // unreadable or too big: it stays out, and its game is asked of its folder
                  apKeyOut(apFiles[i].name);
@@ -366,7 +367,7 @@ index ca492e0..fcb3018 100644
                  total--;
                  continue;
              }
-@@ -610,9 +736,11 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
+@@ -610,9 +737,11 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
              writtenFrom[n] = i;
              written[n++] = h;
              pos += 512 + size + k;
@@ -378,7 +379,7 @@ index ca492e0..fcb3018 100644
  
      // the games it was built for: on a drive whose folder was listed whole, every picture of theirs in
      k = snprintf(list, AP_MAX_KEYS * AP_KEY / 2 + 64, "%s\r\n", AP_HEAD);
-@@ -677,13 +805,13 @@ static int apSpeedCmp(const void *a, const void *b)
+@@ -677,13 +806,13 @@ static int apSpeedCmp(const void *a, const void *b)
  
  int ripps2ArtPackDialog(void)
  {
@@ -395,7 +396,7 @@ index ca492e0..fcb3018 100644
      apFiles = malloc(AP_MAX_FILES * sizeof(ap_file_t));
      apKeys = malloc(AP_MAX_KEYS * sizeof(ap_key_t));
      apFileCount = 0;
-@@ -693,21 +821,35 @@ int ripps2ArtPackDialog(void)
+@@ -693,21 +822,35 @@ int ripps2ArtPackDialog(void)
          return 0;
      }
      apCollect();
@@ -436,7 +437,7 @@ index ca492e0..fcb3018 100644
          list[i] = items[i];
      }
      if (removable) {
-@@ -718,7 +860,12 @@ int ripps2ArtPackDialog(void)
+@@ -718,7 +861,12 @@ int ripps2ArtPackDialog(void)
      result = 0;
      if (n == 0 && !removable) {
          guiMsgBoxSound(SFX_ERROR);
@@ -450,7 +451,7 @@ index ca492e0..fcb3018 100644
          goto out;
      }
      if ((pick = ripps2PickList(list, n + removable)) < 0)
-@@ -755,9 +902,19 @@ int ripps2ArtPackDialog(void)
+@@ -755,9 +903,19 @@ int ripps2ArtPackDialog(void)
      snprintf(pack, sizeof(pack), "%sART/art.tar", apSrc[target].root);
      for (i = 0, folders = 0; i < apSrcCount; i++)
          folders += apSrc[i].files > 0;
@@ -471,7 +472,7 @@ index ca492e0..fcb3018 100644
      if (!guiMsgBox(msg, 1, NULL))
          goto out;
  
-@@ -782,7 +939,8 @@ int ripps2ArtPackDialog(void)
+@@ -782,7 +940,8 @@ int ripps2ArtPackDialog(void)
          tarInvalidate(TAR_KIND_ART);
          artIndexInvalidate();
          cacheInvalidateFailMemo();
