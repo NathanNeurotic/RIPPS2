@@ -1,5 +1,57 @@
 # RIPPS2 changelog
 
+## Build 117 (beta, v1.1.7-beta), changes since build 115
+
+Builds 116 and 117 together: BOOT LOCK through the boot loader the console really starts (issue #3), drive pages that
+show their games on Manual and launch from them, the sidebar's keys alike on every theme, RIPFLOW's case tilt, the
+music and the menu sounds made safe on an SD2PSX, and RIPSHOT on MMCE.
+
+### BOOT LOCK
+- **FMCB and OSDMenu, not only PS2BBL.** BOOT LOCK finds the boot loader on your memory cards and writes its own
+  config: FMCB's `LK_Auto_E1` (SYS-CONF/FREEMCB.CNF, FMCB_CFG.CNF for FMCB 1.8), PS2BBL's `LK_AUTO_E1`, and for
+  OSDMenu, RIPPS2 as the first item of its menu (OSDMenu starts nothing by itself). Turning the lock off puts back
+  what the loader started before, line for line.
+- **A game's EXIT goes through your boot loader.** With the lock on and the IGR Path empty, EXIT goes to the browser,
+  which starts the loader, which starts RIPPS2 (a straight load of RIPPS2's ELF after a game was a black screen). The
+  lock no longer fills the IGR Path with RIPPS2's own ELF, and clears one it set before.
+- **Messages that say what happened:** which configs were set, a loader with no config to change, a card that is
+  write protected, a loader BOOT LOCK cannot set, and RIPPS2 sitting where the loader cannot start it.
+
+### Drives on Manual
+- **A drive's page shows its games before it starts.** BDM Games, HDD Games, MMCE Games and the others on Manual show
+  that drive's part of All Games' master list (with Fast Boot, from the first frame). SELECT, refresh, or Auto brings
+  the art and the drive's own list.
+- **A game starts from a waiting drive.** Pressing X on a game whose drive is on Manual starts that drive, waits for
+  it to list the game and launches it ("the HDD is not connected" and the endless wait are gone). The HDD is given
+  three seconds to answer before it counts as missing.
+
+### The sidebar, on every theme
+- **One set of keys.** With the categories as the sidebar (Layout > Category Layout > Sidebar), every theme works the
+  same, themes made for OPL included: Circle opens the sidebar on every page, and Left does on a list; Right never
+  steps a source. L1 / R1 are the theme's own again: a list turns whole pages the way OPL does (unless Page Buttons
+  gives the pages to L2 / R2), RIPFLOW walks its covers.
+- **RIPFLOW and RIPGRID** walk their covers on Left / Right and go round their ends (the last cover after the first);
+  Left never opens the sidebar there: Circle does.
+- **RIPFLOW's case tilt.** Up / Down, or the left stick, tip the centre case back and forth instead of changing the
+  source. The sources are in the sidebar's drawer. Theme key: `flowtilt=1` (RIPPS2-themes edition 117).
+- **Launch Disc** leaves L1 / R1 alone; **Memory Files** steps its orb formations with them.
+- **The RIPDISC and theme boxes** start flush with the sidebar's bar, and **the sidebar is drawn over everything** on
+  the page. Built-in sidebars as before: Adapt's XL bar, RIPFLOW's hidden one.
+
+### Music and sounds
+- **Music that keeps playing on an SD2PSX.** A failed file lookup anywhere on the card (a missing cover, a settings
+  probe) broke the reads of every other open file, and the `.wav` and `.mp3` music read through a bare file stopped
+  after a message box or a few menu changes. They now read through the same source as the Ogg music, which caches
+  and opens the track again when the card loses it, round the loop included.
+- **Menu sounds load whole.** A short read is read again and the sound's length checked, so a sound is never played
+  half loaded (the sounds that "bugged out and played strangely").
+- **BIOS Music rip** writes with the background I/O held, so the rip and the music never race for the card.
+
+### RIPSHOT
+- **RIPSHOT on MMCE.** A game started from an SD2PSX or another MMCE device gets its roll on the SD
+  (MEDIA/RIPSHOT/<ID>.ROLL) like a USB drive's, so in-game screenshots work there instead of "not for this game".
+  Games on the APA HDD still say so: the HDD's roll needs a partition of its own, which comes in a later build.
+
 ## Build 115 (beta, v1.1.5-beta), changes since build 114
 
 The first real-hardware rounds on an SD2PSX (LinkRetro's SD2PSXTD on sd2psXtd 1.4.0), the testers' reports since
