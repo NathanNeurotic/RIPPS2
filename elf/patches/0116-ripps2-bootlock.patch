@@ -147,7 +147,7 @@ index e7cef7d..985e253 100644
  #ifdef RETROACHIEVEMENTS
              configGetInt(configOPL, CONFIG_OPL_RA_TELEMETRY, &gRATelemetry);
 diff --git a/src/ripps2boot.c b/src/ripps2boot.c
-index 70ef86d..694a7d0 100644
+index 70ef86d..3a96090 100644
 --- a/src/ripps2boot.c
 +++ b/src/ripps2boot.c
 @@ -11,6 +11,13 @@
@@ -595,6 +595,15 @@ index 70ef86d..694a7d0 100644
      }
  
      guiMsgBoxSound(SFX_SAVE);
+@@ -1359,7 +1508,7 @@ static void blHddInstall(void)
+     } else
+         len = blBibleConfig(second, "");
+     if (len >= 0)
+-        len = blLocked(blText, first);
++        len = blLocked(blText, first, BL_PS2BBL); // build 116: the HDD build of PS2BBL reads a PS2BBL config
+     if (len < 0 || blWrite(conf, blOut, len) != 0) {
+         blHddClose();
+         ioBlockOps(0);
 @@ -1386,9 +1535,11 @@ static void blHddInstall(void)
          char where[200];
          int changed, failed, unreachable;
