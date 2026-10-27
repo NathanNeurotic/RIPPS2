@@ -7,11 +7,11 @@
 [I]RIP PS2, the ELF killer. ELF-sufficient, never ELF-destructive.[/I]
 
 [URL='https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2.elf'][B]Download the latest RIPPS2.elf[/B][/URL]  |  [URL='https://github.com/akilluminati47/RIPPS2/releases/latest']What's new[/URL]  |  [URL='https://github.com/akilluminati47/RIPPS2-themes/releases/latest/download/RIPPS2-themes.zip']Theme pack[/URL]  |  [URL='https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip']Languages[/URL]  |  [URL='https://github.com/akilluminati47/RIPPS2']GitHub[/URL]  |  [URL='https://akilluminati47.github.io/RIPPS2/']Website[/URL]
-[SIZE=2]Current release: v1.1.4 beta (build 114)  |  [URL='https://github.com/akilluminati47/RIPPS2/blob/main/CHANGELOG.md']Changelog[/URL]  |  [URL='https://github.com/akilluminati47/RIPPS2/releases']All releases[/URL][/SIZE][/CENTER]
+[SIZE=2]Current release: v1.1.5 beta (build 115)  |  [URL='https://github.com/akilluminati47/RIPPS2/blob/main/CHANGELOG.md']Changelog[/URL]  |  [URL='https://github.com/akilluminati47/RIPPS2/releases']All releases[/URL][/SIZE][/CENTER]
 
 Hey everyone. RIPPS2 is in beta, and the download link above always gets the newest build.
 
-[SIZE=3]RIPPS2 is a PS2 front end in a single .elf (2.7 MB): a teardown and rebuild of [URL='https://github.com/NathanNeurotic/Open-PS2-Loader']RiptOPL[/URL], the Open PS2 Loader fork, with rickgaiser's [URL='https://github.com/rickgaiser/neutrino']Neutrino[/URL] inside as its second game core, and its own look, launchers, file browser and save tools. Glass towers stand behind your games and orbits behind your files, all drawn live by the PS2. The video is v1.1.4 running in PCSX2; the opening's menu music is a PS2's own, ripped from its BIOS by RIPPS2 itself.[/SIZE]
+[SIZE=3]RIPPS2 is a PS2 front end in a single .elf (2,694 KB): a teardown and rebuild of [URL='https://github.com/NathanNeurotic/Open-PS2-Loader']RiptOPL[/URL], the Open PS2 Loader fork, with rickgaiser's [URL='https://github.com/rickgaiser/neutrino']Neutrino[/URL] inside as its second game core, and its own look, launchers, file browser and save tools. Glass towers stand behind your games and orbits behind your files, all drawn live by the PS2. The video is v1.1.4 running in PCSX2; the opening's menu music is a PS2's own, ripped from its BIOS by RIPPS2 itself.[/SIZE]
 
 [SIZE=5][B]Launch Disc[/B][/SIZE]
 [LIST]
@@ -22,6 +22,7 @@ Hey everyone. RIPPS2 is in beta, and the download link above always gets the new
 
 [SIZE=5][B]Storage[/B][/SIZE]
 [LIST]
+[*][LEFT][B]Fast Boot[/B] (Settings > Game Sources > Cache): RIPPS2 boots from its own drive alone, every list from its cache, and the other drives start when you need them.[/LEFT]
 [*][LEFT]Every game on every drive in one list, [B]All Games[/B], whole from the first frame, before the drives even answer; or drive by drive: USB, the internal HDD (exFAT or APA, shown once), iLink, MX4SIO, MMCE and the network.[/LEFT]
 [*][LEFT]Art and an info page with the game's badges, five-star rating, genre, developer, release and size; the screenshots crossfade, and the right stick tips the page like a case in your hand.[/LEFT]
 [*][LEFT]Per game: [B]Hide Game[/B] (back any time from Game Sources > Hidden Games), [B]Delete[/B] completely (the image, its settings, art and cheats; its saves only if you say so; on APA the partition table is checked first), and [B]Compress to ZSO[/B] (experimental: every piece checked before the ISO goes, and Back keeps both; an MMCE card needs [URL='https://sd2psxtd.github.io/download']sd2psXtd[/URL] 1.4.0 or newer), plus the loader core, cheats, VMCs, GSM, controller macros and achievements.[/LEFT]
@@ -34,6 +35,7 @@ Hey everyone. RIPPS2 is in beta, and the download link above always gets the new
 [LIST]
 [*][LEFT]A full file manager: copy, cut, paste and delete across memory cards, USB, HDD and MMCE, with a clean replace (it asks first, then erases, copies and checks the new file).[/LEFT]
 [*][LEFT]SEARCH FILES: type part of a name and every drive is searched; a result opens in its own folder.[/LEFT]
+[*][LEFT][B]A CD player for your own tracks[/B]: mark .wav, .ogg or .mp3 files and open them together, and they play as one disc over the towers.[/LEFT]
 [*][LEFT]OPL's VMC card images open like folders; PSU export and import; a text editor; pictures; XviD and DivX AVI video full screen; ISO, ZSO and PS1 VCD games start right from the browser.[/LEFT]
 [*][LEFT]3D save icons, textured, lit and animated, and RIP 3D ICON writes any icon out as OBJ, MTL and PNG for a PC.[/LEFT]
 [*][LEFT]Square on a memory card opens MCKILLA, the card manager: back a card up to a VMC, write saves back, erase, format.[/LEFT]
@@ -50,16 +52,16 @@ Hey everyone. RIPPS2 is in beta, and the download link above always gets the new
 [SIZE=5][B]On board, and found[/B][/SIZE]
 [LIST]
 [*][LEFT]Neutrino 1.8.0 rides inside the .elf. Your own POPSTARTER, the POPS files, Ember and its BIOS are searched for on your drives and remembered (Settings > Game Sources > Cache > Look now). STATUS on the START menu opens on your drives, their format and free space, then the launchers it found.[/LEFT]
-[*][LEFT]BIBLE: PS2BBL 1.2.0 set up for RIPPS2 on a memory card or the internal HDD, so the console boots straight into it.[/LEFT]
+[*][LEFT]BIBLE: PS2BBL 1.2.0 set up for RIPPS2 on an 8 MB memory card or the internal HDD, so the console boots straight into it, from where RIPPS2 already is (it never copies itself). On an SD2PSX it sets BOOT LOCK in the card's own PS2BBL Extended.[/LEFT]
 [*][LEFT]SpiritofRA: RetroAchievements through the xeRAbora client on your PC, with badges and YOUR ACCOUNT.[/LEFT]
 [*][LEFT]Settings in RIPPS2's own memory card save (mc0:/RIPPS2, with its own icon), apart from any other OPL, or on any drive you pick (Settings > General > Save Settings To). Every settings page fits one screen.[/LEFT]
-[*][LEFT]33 languages, Arabic and Persian right to left: copy [URL='https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip']RIPPS2-languages.zip[/URL]'s LNG folder to your drive and pick one in Settings > Interface > Language.[/LEFT]
+[*][LEFT]33 languages, Arabic and Persian right to left: every release carries [URL='https://github.com/akilluminati47/RIPPS2/releases/latest/download/RIPPS2-languages.zip']RIPPS2-languages.zip[/URL], kept up to date with each build. Copy its LNG folder to your drive and pick one in Settings > Interface > Language.[/LEFT]
 [/LIST]
 
 [SIZE=5][B]Sound from your own console[/B][/SIZE]
 [LIST]
 [*][LEFT]No one's sounds ship with RIPPS2. Audio Settings > BIOS Sounds rips your PS2's own browser sounds from its BIOS (under 1 MB), and BIOS Music renders its menu music (the clock's piece, 5:04, or the red screen's, or both) as a WAV, telling you the size first and letting you pick the folder.[/LEFT]
-[*][LEFT]Any WAV or Ogg in your AUDIO folder plays as music, on every theme.[/LEFT]
+[*][LEFT]Any WAV, Ogg or MP3 in your AUDIO folder plays as music, on every theme, and you choose where a rip goes (beside RIPPS2 is read first at boot).[/LEFT]
 [*][LEFT]On a PC, [URL='https://github.com/akilluminati47/RIPPS2/tree/main/tools/audio-studio']RIPPS2 Audio Studio[/URL] turns any sound or song into what RIPPS2 plays.[/LEFT]
 [/LIST]
 
