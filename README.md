@@ -158,7 +158,7 @@ Add `?t=12` to skip the pillars intro, or `?f=3#memory-files` to open a specific
 
 ## Credits
 
-RIPPS2 is designed and directed by akilluminati47 and built with Claude (Anthropic). Testers: ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60, lukeatmynose, ahavasi, and everyone testing on Discord. Issues on GitHub: DarkNerdShawny (an issue is the best way to get RIPPS2 updated: be like DarkNerdShawny and [open one](https://github.com/akilluminati47/RIPPS2/issues)). Special thanks to all the YouTube love as well: glad to help however you reach me.
+RIPPS2 is designed and directed by akilluminati47 and built with Claude (Anthropic). Testers: ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60, lukeatmynose, ahavasi, and everyone testing on Discord. Issues on GitHub: DarkNerdShawny and everyone who opens one (an issue is the best way to get RIPPS2 updated: be like them and [open one](https://github.com/akilluminati47/RIPPS2/issues)). Special thanks to all the YouTube love as well: glad to help however you reach me.
 
 - [RiptOPL](https://github.com/NathanNeurotic/Open-PS2-Loader) by NathanNeurotic and the [Open PS2 Loader](https://github.com/ps2homebrew/Open-PS2-Loader) team (AFL-3.0), which RIPPS2 is built on. Their full credits are on RIPPS2's About page.
 - [Neutrino](https://github.com/rickgaiser/neutrino) by [rickgaiser](https://github.com/rickgaiser) (AFL-3.0), the small, fast and modular device emulator that is RIPPS2's second game core: RIPPS2.elf carries its newest build (v1.8.0-61-g7be8de2, 31 August 2026) unmodified and installs it where you pick, and your own Neutrino of any version comes first ([`elf/neutrino`](elf/neutrino/README.md)). Choose it as the Default Loader Core in Settings > Game Launching.
