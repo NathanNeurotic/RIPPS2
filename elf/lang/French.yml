@@ -1265,6 +1265,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'La carte mémoire du port %d lance %s à l''allumage, que BOOT LOCK ne peut pas régler : il passe par PS2BBL, FMCB et OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Un chargeur de démarrage avec le verrou de RIPPS2 est sur cette console.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT d''un jeu : le navigateur, puis votre chargeur de démarrage (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d images de %d dossiers ART vont dans un seul fichier, %s. Les dossiers ART restent tels quels : le pack est une copie. Tu peux copier art.tar dans le dossier ART d''un autre périphérique avec Memory Files, mais le construire sur le périphérique où tu navigues est le plus rapide, c''est pourquoi le périphérique le plus rapide est proposé en premier. Le construire maintenant ?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar : %d images ici, lit %d Ko/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar : %d images ici, lit %d Ko/s, le plus rapide'
+  'In use: %s, %d pictures, %d MB': 'Utilisé : %s, %d images, %d Mo'
+  Looking at the ART folders on the started drives: Lecture des dossiers ART des périphériques démarrés
+  'Measuring how fast each drive reads its art: %s': 'Mesure de la vitesse à laquelle chaque périphérique lit ses images : %s'
+  'None: each picture is read from its own ART folder.': 'Aucun : chaque image est lue dans son propre dossier ART.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Les images vont dans %s : %d sur %d images, %d Mo. Appuie sur le bouton retour pour arrêter.'
+  REMOVE the pack in %s (the ART folders stay as they are): SUPPRIMER le pack de %s (les dossiers ART restent tels quels)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Supprimer le pack ART de %s ? Les dossiers ART restent tels quels.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Arrêté. Le pack inachevé a été supprimé, et les images viennent des dossiers ART comme avant.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Le pack ART n''a pas pu être écrit dans %s (y a-t-il de la place sur ce périphérique ?). Rien d''autre n''a changé : les images viennent des dossiers ART comme avant.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Le pack ART de %s est supprimé. Les images viennent de nouveau des dossiers ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Le pack ART est construit : %d images, %d Mo, dans %s (%d s). Les images viennent de lui désormais, et les %d jeux pour lesquels il a été construit ne voient plus jamais leur dossier ART interrogé image par image. Les images que RIPPS2 télécharge ou capture s''affichent tout de suite ; celles que tu copies depuis un PC s''affichent quand tu reconstruis le pack.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Aucun dossier ART avec des images sur les périphériques démarrés. Démarre les périphériques où sont tes images (SELECT sur leur page), puis reviens.
 labels:
   HINT_NEUTRINO_AUTO_ELF: Transmet l'ELF de démarrage du jeu à Neutrino pour chercher sa configuration par titre. Activé par défaut ; une option Boot ELF réglée à la main a la priorité.
   HINT_POPSTARTER_PATH: Emplacement de POPSTARTER.ELF. Laissé vide, RIPPS2 en renseigne un qu'il trouve sur un périphérique ; écrivez par-dessus pour en utiliser un autre, comme usb:/POPS/POPSTARTER.ELF
@@ -1724,3 +1743,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino ne peut pas utiliser de VMC sur le disque dur APA (exFAT, USB et MX4SIO le peuvent) : ce jeu démarre avec la vraie carte dans ce port.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Le démarrage ne lit que le lecteur de RIPPS2 : la configuration et les sons à côté de RIPPS2.ELF (RIPPS2.FB y indique où) et chaque liste depuis son cache. Les autres lecteurs attendent : SELECT sur une page démarre ses lecteurs et charge leurs images (avec l''actualisation automatique, ils démarrent au démarrage). L''activer copie tes sons, et la musique s''il y a la place, dans AUDIO à côté de RIPPS2.'
+  RIPPS2_ART_PACK: Pack ART
+  RIPPS2_ART_PACK_BUILD: Construire ou supprimer
+  HINT_RIPPS2_ART_PACK: Met le dossier ART de chaque périphérique démarré dans un seul art.tar sur le périphérique choisi (le plus rapide est proposé en premier). Les jaquettes viennent alors d'un seul fichier avec un seul index, jamais d'une recherche par jeu, et les menus comme la musique restent fluides. Les dossiers ART restent tels quels.

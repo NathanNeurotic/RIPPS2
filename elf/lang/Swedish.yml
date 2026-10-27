@@ -1265,6 +1265,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Minneskortet i plats %d startar %s vid påslag, som BOOT LOCK inte kan ställa in: den fungerar via PS2BBL, FMCB och OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: En startladdare med RIPPS2:s lås finns på den här konsolen.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'Ett spels EXIT: webbläsaren, sedan din startladdare (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d bilder från %d ART-mappar hamnar i en enda fil, %s. ART-mapparna förblir som de är: paketet är en kopia. Du kan kopiera art.tar till en annan enhets ART-mapp med Memory Files, men att bygga det på enheten du bläddrar från går snabbast, därför står den snabbaste enheten först. Bygga nu?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d bilder där, läser %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d bilder där, läser %d KB/s, den snabbaste'
+  'In use: %s, %d pictures, %d MB': 'Används: %s, %d bilder, %d MB'
+  Looking at the ART folders on the started drives: Tittar på ART-mapparna på de startade enheterna
+  'Measuring how fast each drive reads its art: %s': 'Mäter hur snabbt varje enhet läser sina bilder: %s'
+  'None: each picture is read from its own ART folder.': 'Inget: varje bild läses från sin egen ART-mapp.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Packar bilderna i %s: %d av %d bilder, %d MB. Tryck på bakåtknappen för att stoppa.'
+  REMOVE the pack in %s (the ART folders stay as they are): TA BORT paketet i %s (ART-mapparna förblir som de är)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Ta bort ART-paketet i %s? ART-mapparna förblir som de är.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Stoppat. Det ofärdiga paketet togs bort, och bilderna läses från ART-mapparna som förut.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'ART-paketet kunde inte skrivas till %s (finns det plats på den enheten?). Inget annat ändrades: bilderna läses från ART-mapparna som förut.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: ART-paketet i %s är borttaget. Bilderna läses från ART-mapparna igen.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'ART-paketet är byggt: %d bilder, %d MB, i %s (%d s). Bilderna läses från det från och med nu, och de %d spel det byggdes för får aldrig sin ART-mapp tillfrågad en bild i taget. Bilder som RIPPS2 hämtar eller tar syns direkt; bilder du kopierar in från en dator syns när du bygger paketet igen.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Det finns ingen ART-mapp med bilder på de startade enheterna. Starta enheterna där dina bilder finns (SELECT på deras sida) och kom sedan tillbaka.
 labels:
   OK: OK
   BDMMODE: Startläge för BDM
@@ -1746,3 +1765,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino kan inte använda en VMC på APA-HDD:n (exFAT, USB och MX4SIO kan): det här spelet startar med det riktiga kortet i den platsen.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Starten läser bara RIPPS2:s egen enhet: inställningarna och ljuden bredvid RIPPS2.ELF (RIPPS2.FB där säger var) och varje lista från sin cache. De andra enheterna väntar: SELECT på en sida startar dess enheter och hämtar deras bilder (med automatisk uppdatering startar de vid start). Att slå på det kopierar dina ljud, och musiken om det finns plats, till AUDIO bredvid RIPPS2.'
+  RIPPS2_ART_PACK: ART-paket
+  RIPPS2_ART_PACK_BUILD: Bygg eller ta bort
+  HINT_RIPPS2_ART_PACK: Packar ART-mappen på varje startad enhet i en enda art.tar på enheten du väljer (den snabbaste erbjuds först). Omslagen läses då från en fil med ett index, aldrig med en sökning per spel, så menyerna och musiken förblir mjuka. ART-mapparna förblir som de är.

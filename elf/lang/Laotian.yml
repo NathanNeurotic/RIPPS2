@@ -1266,6 +1266,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'ເມມໂມຣີກາດໃນຊ່ອງ %d ເລີ່ມ %s ຕອນເປີດເຄື່ອງ, ເຊິ່ງ BOOT LOCK ຕັ້ງບໍ່ໄດ້: ມັນເຮັດວຽກ ຜ່ານ PS2BBL, FMCB ແລະ OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: ເຄື່ອງນີ້ ມີໂຕໂຫຼດບູດ ພ້ອມການລັອກຂອງ RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT ຂອງເກມ: ໂຕທ່ອງ, ແລ້ວໂຕໂຫຼດບູດຂອງທ່ານ (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : 'ຮູບ %d ຮູບ ຈາກໂຟນເດີ ART %d ໂຟນເດີ ຈະເຂົ້າໄປໃນໄຟລ໌ດຽວ, %s. ໂຟນເດີ ART ຄົງຢູ່ຄືເກົ່າ: ແພັກເປັນສຳເນົາ. ທ່ານສາມາດສຳເນົາ art.tar ໄປໃສ່ໂຟນເດີ ART ຂອງໄດຣຟ໌ອື່ນດ້ວຍ Memory Files, ແຕ່ການສ້າງມັນໃນໄດຣຟ໌ທີ່ທ່ານເປີດເບິ່ງແມ່ນໄວທີ່ສຸດ, ສະນັ້ນໄດຣຟ໌ທີ່ໄວທີ່ສຸດຈຶ່ງຢູ່ກ່ອນ. ສ້າງດຽວນີ້ບໍ?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: ມີຮູບ %d ຮູບ, ອ່ານ %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: ມີຮູບ %d ຮູບ, ອ່ານ %d KB/s, ໄວທີ່ສຸດ'
+  'In use: %s, %d pictures, %d MB': 'ກຳລັງໃຊ້: %s, ຮູບ %d ຮູບ, %d MB'
+  Looking at the ART folders on the started drives: ກຳລັງເບິ່ງໂຟນເດີ ART ໃນໄດຣຟ໌ທີ່ເລີ່ມແລ້ວ
+  'Measuring how fast each drive reads its art: %s': 'ກຳລັງວັດແທກວ່າແຕ່ລະໄດຣຟ໌ອ່ານຮູບຂອງມັນໄວປານໃດ: %s'
+  'None: each picture is read from its own ART folder.': 'ບໍ່ມີ: ແຕ່ລະຮູບຖືກອ່ານຈາກໂຟນເດີ ART ຂອງມັນເອງ.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'ກຳລັງລວມຮູບເຂົ້າໃນ %s: %d ຈາກ %d ຮູບ, %d MB. ກົດປຸ່ມກັບຄືນເພື່ອຢຸດ.'
+  REMOVE the pack in %s (the ART folders stay as they are): ລຶບແພັກໃນ %s (ໂຟນເດີ ART ຄົງຢູ່ຄືເກົ່າ)
+  Remove the ART Pack in %s? The ART folders stay as they are.: ລຶບແພັກ ART ໃນ %s ບໍ? ໂຟນເດີ ART ຄົງຢູ່ຄືເກົ່າ.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: ຢຸດແລ້ວ. ແພັກທີ່ຍັງບໍ່ສຳເລັດຖືກລຶບແລ້ວ, ແລະຮູບຖືກໂຫຼດຈາກໂຟນເດີ ART ຄືເກົ່າ.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'ບໍ່ສາມາດຂຽນແພັກ ART ລົງ %s ໄດ້ (ໄດຣຟ໌ນັ້ນມີບ່ອນຫວ່າງບໍ?). ບໍ່ມີຫຍັງອື່ນປ່ຽນ: ຮູບຖືກໂຫຼດຈາກໂຟນເດີ ART ຄືເກົ່າ.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: ແພັກ ART ໃນ %s ຖືກລຶບແລ້ວ. ຮູບຖືກໂຫຼດຈາກໂຟນເດີ ART ອີກຄັ້ງ.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'ແພັກ ART ສ້າງແລ້ວ: ຮູບ %d ຮູບ, %d MB, ໃນ %s (%d ວິນາທີ). ຕໍ່ຈາກນີ້ຮູບຖືກໂຫຼດຈາກມັນ, ແລະເກມ %d ເກມທີ່ມັນຖືກສ້າງໃຫ້ ຈະບໍ່ຖືກຖາມໂຟນເດີ ART ຂອງມັນເທື່ອລະຮູບອີກເລີຍ. ຮູບທີ່ RIPPS2 ດຶງມາ ຫຼື ຖ່າຍ ຈະສະແດງທັນທີ; ຮູບທີ່ທ່ານສຳເນົາມາຈາກຄອມພິວເຕີ ຈະສະແດງເມື່ອທ່ານສ້າງແພັກໃໝ່.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : ບໍ່ມີໂຟນເດີ ART ທີ່ມີຮູບໃນໄດຣຟ໌ທີ່ເລີ່ມແລ້ວ. ເລີ່ມໄດຣຟ໌ທີ່ມີຮູບຂອງທ່ານກ່ອນ (SELECT ໃນໜ້າຂອງມັນ), ແລ້ວກັບມາ.
 labels:
   SETTINGS_SAVED: ບັນທຶກການຕັ້ງຄ່າ ໄວ້ໃນ %s ແລ້ວ
   REMOVE_ALL_SETTINGS: ລົບການຕັ້ງຄ່າ
@@ -1809,3 +1828,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino ໃຊ້ VMC ໃນ HDD APA ບໍ່ໄດ້ (exFAT, USB ແລະ MX4SIO ໄດ້): ເກມນີ້ເລີ່ມດ້ວຍກາດແທ້ໃນຊ່ອງນັ້ນ.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'ຕອນເລີ່ມ ຈະອ່ານສະເພາະໄດຣຟ໌ຂອງ RIPPS2: ການຕັ້ງຄ່າ ແລະ ສຽງຂ້າງ RIPPS2.ELF (RIPPS2.FB ຢູ່ນັ້ນບອກບ່ອນ) ແລະ ທຸກລາຍການຈາກແຄຊຂອງມັນ. ໄດຣຟ໌ອື່ນລໍຖ້າ: SELECT ໃນໜ້າໃດໜຶ່ງເລີ່ມໄດຣຟ໌ຂອງໜ້ານັ້ນ ແລະ ໂຫຼດຮູບຂອງມັນ (ເມື່ອເປີດການໂຫຼດຄືນອັດຕະໂນມັດ ພວກມັນເລີ່ມຕອນເລີ່ມ). ການເປີດຈະສຳເນົາສຽງຂອງທ່ານ, ແລະ ດົນຕີຖ້າມີບ່ອນ, ໄປໄວ້ໃນ AUDIO ຂ້າງ RIPPS2.'
+  RIPPS2_ART_PACK: ແພັກ ART
+  RIPPS2_ART_PACK_BUILD: ສ້າງ ຫຼື ລຶບ
+  HINT_RIPPS2_ART_PACK: ລວມໂຟນເດີ ART ຂອງທຸກໄດຣຟ໌ທີ່ເລີ່ມແລ້ວ ເຂົ້າເປັນ art.tar ດຽວໃນໄດຣຟ໌ທີ່ທ່ານເລືອກ (ໄດຣຟ໌ທີ່ໄວທີ່ສຸດຖືກສະເໜີກ່ອນ). ໜ້າປົກຈະຖືກໂຫຼດຈາກໄຟລ໌ດຽວດ້ວຍດັດຊະນີດຽວ, ບໍ່ເຄີຍຊອກຫາເທື່ອລະເກມ, ສະນັ້ນເມນູ ແລະ ເພງຈຶ່ງລື່ນໄຫຼ. ໂຟນເດີ ART ຄົງຢູ່ຄືເກົ່າ.

@@ -1265,6 +1265,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'La tarjeta de memoria de la ranura %d inicia %s al encender, que BOOT LOCK no puede ajustar: funciona a través de PS2BBL, FMCB y OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: En esta consola hay un cargador de arranque con el bloqueo de RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT de un juego: el navegador, luego tu cargador de arranque (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d imágenes de %d carpetas ART van a un solo archivo, %s. Las carpetas ART quedan como están: el paquete es una copia. Puedes copiar art.tar a la carpeta ART de otra unidad con Memory Files, pero crearlo en la unidad desde la que navegas es lo más rápido, por eso la unidad más rápida aparece primero. ¿Crearlo ahora?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d imágenes allí, lee %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d imágenes allí, lee %d KB/s, la más rápida'
+  'In use: %s, %d pictures, %d MB': 'En uso: %s, %d imágenes, %d MB'
+  Looking at the ART folders on the started drives: Revisando las carpetas ART de las unidades iniciadas
+  'Measuring how fast each drive reads its art: %s': 'Midiendo qué tan rápido lee cada unidad sus imágenes: %s'
+  'None: each picture is read from its own ART folder.': 'Ninguno: cada imagen se lee de su propia carpeta ART.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Empaquetando las imágenes en %s: %d de %d imágenes, %d MB. Pulsa el botón de volver para detener.'
+  REMOVE the pack in %s (the ART folders stay as they are): QUITAR el paquete de %s (las carpetas ART quedan como están)
+  Remove the ART Pack in %s? The ART folders stay as they are.: ¿Quitar el paquete ART de %s? Las carpetas ART quedan como están.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Detenido. Se quitó el paquete sin terminar, y las imágenes se cargan de las carpetas ART como antes.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'No se pudo escribir el paquete ART en %s (¿hay espacio en esa unidad?). Nada más cambió: las imágenes se cargan de las carpetas ART como antes.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Se quitó el paquete ART de %s. Las imágenes vuelven a cargarse de las carpetas ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'El paquete ART está listo: %d imágenes, %d MB, en %s (%d s). Las imágenes se cargan de él a partir de ahora, y a los %d juegos para los que se creó nunca se les pregunta a su carpeta ART imagen por imagen. Las imágenes que RIPPS2 descarga o captura aparecen al momento; las que copias desde un PC aparecen cuando vuelves a crear el paquete.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : No hay ninguna carpeta ART con imágenes en las unidades iniciadas. Inicia las unidades donde están tus imágenes (SELECT en su página) y luego vuelve.
 labels:
   HINT_NEUTRINO_AUTO_ELF: Pasa el ELF de arranque del juego a Neutrino para buscar su configuración por título. Activado por defecto; una opción Boot ELF puesta a mano tiene prioridad.
   HINT_POPSTARTER_PATH: Dónde está POPSTARTER.ELF. Si lo dejas vacío, RIPPS2 pone uno que encuentre en una unidad; escribe encima para usar otro, como usb:/POPS/POPSTARTER.ELF
@@ -1724,3 +1743,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino no puede usar una VMC en el disco duro APA (exFAT, USB y MX4SIO sí): este juego se inicia con la tarjeta real en esa ranura.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'El arranque solo lee la unidad de RIPPS2: la configuración y los sonidos junto a RIPPS2.ELF (RIPPS2.FB allí dice dónde) y cada lista desde su caché. Las demás unidades esperan: SELECT en una página inicia sus unidades y trae sus imágenes (con la actualización automática se inician al arrancar). Activarlo copia tus sonidos, y la música si hay espacio, a AUDIO junto a RIPPS2.'
+  RIPPS2_ART_PACK: Paquete ART
+  RIPPS2_ART_PACK_BUILD: Crear o quitar
+  HINT_RIPPS2_ART_PACK: Junta la carpeta ART de cada unidad iniciada en un solo art.tar en la unidad que elijas (la más rápida se ofrece primero). Las carátulas se cargan entonces de un archivo con un índice, nunca con una búsqueda por juego, y los menús y la música van fluidos. Las carpetas ART quedan como están.

@@ -1,5 +1,27 @@
 # RIPPS2 changelog
 
+## Build 118 (beta, v1.1.8-beta when released), changes since build 117
+
+The user's notes of 10/27: the boot sound with the first frame, and covers from one file.
+
+- **The boot sound with the towers' first frame.** It was the first sound of the whole set, which the I/O worker reached
+  only after every drive's start and list, so it came in with the list. Now it is the I/O worker's first job at boot,
+  queued as soon as the settings are read (with Fast Boot the AUDIO folder is known then; else the one beside RIPPS2, or
+  the disk theme's own sound), and it is ready when the towers start. The rest of the sounds load after it without
+  starting audio over underneath it.
+- **ART Pack** (Settings > Game Sources > Cache). Packs the ART folder of every started drive into one `art.tar` in the
+  ART folder of the drive you pick. Each drive is measured as it reads a few of its own pictures and the fastest is
+  listed first. The pictures go in as they are (a plain tar a PC opens), the ART folders are left alone, and the same
+  button removes it.
+- **Covers read through the pack's index.** Turning the pack on uses RiptOPL's art.tar engine with its index written by
+  the build (no first-boot scan), looked up in sorted order, with the pack's drive tried first. The pack lists the games
+  it was built for: a picture of one of them that the pack does not hold is not looked for in the ART folder at all (no
+  listing, no failed open on an SD2PSX). Pictures in the pack can be PNG or JPG, under RIPPS2's names or OPL Manager's
+  (`_BG_00`, `_SCR_00`, `_SCR_01`). Art RIPPS2 fetches or develops later is noted beside the pack (`art_new.txt`) and its
+  game asks its folder again; PS1 games, whose art goes by other keys, always do.
+- **AUDIO and MEDIA's README.txt** say where each belongs: AUDIO beside RIPPS2.ELF (read first at boot, the boot sound
+  with Fast Boot), MEDIA on your biggest drive (nothing in it is read at boot). AUDIO's lists .mp3 too.
+
 ## Build 117 (beta, v1.1.7-beta), changes since build 115
 
 Builds 116 and 117 together: BOOT LOCK through the boot loader the console really starts (issue #3), drive pages that

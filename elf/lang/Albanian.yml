@@ -1265,6 +1265,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Karta e memories në folenë %d nis %s në ndezje, të cilin BOOT LOCK nuk mund ta vendosë: punon përmes PS2BBL, FMCB dhe OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Në këtë konsolë ka një ngarkues nisjeje me kyçin e RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT-i i një loje: shfletuesi, pastaj ngarkuesi yt i nisjes (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d figura nga %d dosje ART shkojnë në një skedar të vetëm, %s. Dosjet ART mbeten siç janë: paketa është një kopje. Mund ta kopjosh art.tar në dosjen ART të një disku tjetër me Memory Files, por më e shpejta është ta ndërtosh në diskun nga i cili shfleton, prandaj disku më i shpejtë del i pari. Ta ndërtoj tani?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d figura atje, lexon %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d figura atje, lexon %d KB/s, më i shpejti'
+  'In use: %s, %d pictures, %d MB': 'Në përdorim: %s, %d figura, %d MB'
+  Looking at the ART folders on the started drives: Po shikohen dosjet ART në disqet e nisura
+  'Measuring how fast each drive reads its art: %s': 'Po matet sa shpejt lexon çdo disk figurat e veta: %s'
+  'None: each picture is read from its own ART folder.': 'Asnjë: çdo figurë lexohet nga dosja e vet ART.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Po paketohen figurat në %s: %d nga %d figura, %d MB. Shtyp butonin e kthimit për ta ndalur.'
+  REMOVE the pack in %s (the ART folders stay as they are): HIQ paketën në %s (dosjet ART mbeten siç janë)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Të hiqet paketa ART në %s? Dosjet ART mbeten siç janë.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: U ndal. Paketa e papërfunduar u hoq dhe figurat ngarkohen nga dosjet ART si më parë.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Paketa ART nuk mund të shkruhej në %s (a ka vend në atë disk?). Asgjë tjetër nuk ndryshoi: figurat ngarkohen nga dosjet ART si më parë.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Paketa ART në %s u hoq. Figurat ngarkohen sërish nga dosjet ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Paketa ART është gati: %d figura, %d MB, në %s (%d s). Tani e tutje figurat ngarkohen prej saj, dhe për %d lojërat për të cilat u ndërtua, dosja e tyre ART nuk pyetet më kurrë figurë pas figure. Figurat që RIPPS2 shkarkon ose kap shfaqen menjëherë; ato që kopjon nga një PC shfaqen kur e ndërton paketën sërish.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Nuk ka asnjë dosje ART me figura në disqet e nisura. Nis disqet ku janë figurat e tua (SELECT në faqen e tyre), pastaj kthehu.
 labels:
   OK: OK
   EXITTO: Shtegu IGR
@@ -1750,3 +1769,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino nuk mund të përdorë VMC në HDD-në APA (exFAT, USB dhe MX4SIO mundin): kjo lojë niset me kartën e vërtetë në atë fole.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Nisja lexon vetëm diskun e RIPPS2: cilësimet dhe tingujt pranë RIPPS2.ELF (RIPPS2.FB atje thotë ku) dhe çdo listë nga cache e saj. Disqet e tjerë presin: SELECT në një faqe nis disqet e saj dhe sjell imazhet e tyre (me rifreskimin automatik nisin në nisje). Ndezja kopjon tingujt e tu, dhe muzikën nëse ka vend, në AUDIO pranë RIPPS2.'
+  RIPPS2_ART_PACK: Paketa ART
+  RIPPS2_ART_PACK_BUILD: Ndërto ose hiq
+  HINT_RIPPS2_ART_PACK: Paketon dosjen ART të çdo disku të nisur në një art.tar të vetëm në diskun që zgjedh (më i shpejti ofrohet i pari). Kopertinat ngarkohen pastaj nga një skedar me një indeks, kurrë me një kërkim për çdo lojë, kështu që menytë dhe muzika mbeten të rrjedhshme. Dosjet ART mbeten siç janë.

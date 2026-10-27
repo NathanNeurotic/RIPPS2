@@ -1266,6 +1266,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Memorijska kartica u utoru %d pri uključivanju pokreće %s, koji BOOT LOCK ne može postaviti: radi preko PS2BBL-a, FMCB-a i OSDMenu-a.'
   A boot loader with RIPPS2's lock is on this console.: Na ovoj konzoli je učitavač s RIPPS2 zaključavanjem.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT iz igre: preglednik, zatim tvoj učitavač (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d slika iz %d mapa ART ide u jednu datoteku, %s. Mape ART ostaju kakve jesu: paket je kopija. art.tar možeš kopirati u mapu ART drugog pogona pomoću Memory Files, ali najbrže je izraditi ga na pogonu s kojeg pregledavaš, zato je najbrži pogon prvi. Izraditi sada?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d slika tamo, čita %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d slika tamo, čita %d KB/s, najbrži'
+  'In use: %s, %d pictures, %d MB': 'U upotrebi: %s, %d slika, %d MB'
+  Looking at the ART folders on the started drives: Pregled mapa ART na pokrenutim pogonima
+  'Measuring how fast each drive reads its art: %s': 'Mjerenje koliko brzo svaki pogon čita svoje slike: %s'
+  'None: each picture is read from its own ART folder.': 'Nijedan: svaka se slika čita iz vlastite mape ART.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Pakiranje slika u %s: %d od %d slika, %d MB. Pritisni tipku za natrag za zaustavljanje.'
+  REMOVE the pack in %s (the ART folders stay as they are): UKLONI paket u %s (mape ART ostaju kakve jesu)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Ukloniti paket ART u %s? Mape ART ostaju kakve jesu.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Zaustavljeno. Nedovršeni paket je uklonjen, a slike se učitavaju iz mapa ART kao prije.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Paket ART nije se mogao zapisati u %s (ima li mjesta na tom pogonu?). Ništa se drugo nije promijenilo: slike se učitavaju iz mapa ART kao prije.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Paket ART u %s je uklonjen. Slike se opet učitavaju iz mapa ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Paket ART je izrađen: %d slika, %d MB, u %s (%d s). Slike se od sada učitavaju iz njega, a za %d igara za koje je izrađen njihova se mapa ART više nikad ne pita sliku po sliku. Slike koje RIPPS2 preuzme ili snimi odmah se vide; slike koje kopiraš s računala vide se kad ponovno izradiš paket.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Na pokrenutim pogonima nema mape ART sa slikama. Pokreni pogone na kojima su tvoje slike (SELECT na njihovoj stranici), pa se vrati.
 labels:
   NETCONFIG: Mrežne postavke
   BDMMODE: Način pokretanja BDM-a
@@ -1749,3 +1768,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino ne može koristiti VMC na APA HDD-u (exFAT, USB i MX4SIO mogu): ova se igra pokreće sa stvarnom karticom u tom utoru.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Pokretanje čita samo pogon RIPPS2: postavke i zvukove uz RIPPS2.ELF (RIPPS2.FB ondje kaže gdje) i svaki popis iz njegove predmemorije. Ostali pogoni čekaju: SELECT na stranici pokreće njezine pogone i donosi njihove slike (s automatskim osvježavanjem pokreću se pri pokretanju). Uključivanje kopira tvoje zvukove, a glazbu ako ima mjesta, u AUDIO uz RIPPS2.'
+  RIPPS2_ART_PACK: Paket ART
+  RIPPS2_ART_PACK_BUILD: Izradi ili ukloni
+  HINT_RIPPS2_ART_PACK: Pakira mapu ART svakog pokrenutog pogona u jedan art.tar na pogonu koji odabereš (najbrži se nudi prvi). Omoti se tada učitavaju iz jedne datoteke s jednim indeksom, nikad pretragom za svaku igru, pa izbornici i glazba ostaju glatki. Mape ART ostaju kakve jesu.

@@ -52,7 +52,9 @@ if 'tn->noise' in rip or 'RBS_NOISE_BASE' in rip or 'noise_voice' in studio or "
 # Sound: the beep after the save modals. audsrv_adpcm_init turns every voice up to full, so every voice goes silent
 # right after it, and only a sounding voice is turned up again
 snd = rd('src/sound.c')
-if snd.count('audsrv_adpcm_init();\n    voicesReset();\n    voicesSilence();') != 3 or 'if (!voiceMuted[v] && voiceBusy(v))' not in snd or \
+# (build 118: sfxInit's is inside "if (!keepBoot)", one level in: the boot sound read first is not started over under)
+if len(__import__('re').findall(r'audsrv_adpcm_init\(\);\n\s+voicesReset\(\);\n\s+voicesSilence\(\);', snd)) != 3 or \
+        'if (!voiceMuted[v] && voiceBusy(v))' not in snd or \
         'if (voiceBusy(SFX_BOOT_VOICE))' not in snd:
     fail.append('after every audsrv init each voice must go silent, and audioSetVolume turn up only a sounding voice')
 

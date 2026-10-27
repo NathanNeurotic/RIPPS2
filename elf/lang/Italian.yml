@@ -1265,6 +1265,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'La memory card nello slot %d avvia %s all''accensione, che BOOT LOCK non può impostare: funziona tramite PS2BBL, FMCB e OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Su questa console c'è un loader di avvio con il blocco di RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT di un gioco: il browser, poi il tuo loader di avvio (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d immagini da %d cartelle ART vanno in un solo file, %s. Le cartelle ART restano come sono: il pacchetto è una copia. Puoi copiare art.tar nella cartella ART di un''altra unità con Memory Files, ma crearlo sull''unità da cui navighi è la cosa più rapida, per questo l''unità più veloce è in cima. Crearlo adesso?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d immagini lì, legge %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d immagini lì, legge %d KB/s, la più veloce'
+  'In use: %s, %d pictures, %d MB': 'In uso: %s, %d immagini, %d MB'
+  Looking at the ART folders on the started drives: Controllo delle cartelle ART sulle unità avviate
+  'Measuring how fast each drive reads its art: %s': 'Misura di quanto velocemente ogni unità legge le sue immagini: %s'
+  'None: each picture is read from its own ART folder.': 'Nessuno: ogni immagine viene letta dalla sua cartella ART.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Le immagini vanno in %s: %d di %d immagini, %d MB. Premi il tasto indietro per fermare.'
+  REMOVE the pack in %s (the ART folders stay as they are): RIMUOVI il pacchetto in %s (le cartelle ART restano come sono)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Rimuovere il pacchetto ART in %s? Le cartelle ART restano come sono.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Fermato. Il pacchetto incompleto è stato rimosso, e le immagini arrivano dalle cartelle ART come prima.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Non è stato possibile scrivere il pacchetto ART in %s (c''è spazio su quell''unità?). Nient''altro è cambiato: le immagini arrivano dalle cartelle ART come prima.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Il pacchetto ART in %s è stato rimosso. Le immagini arrivano di nuovo dalle cartelle ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Il pacchetto ART è pronto: %d immagini, %d MB, in %s (%d s). Da ora le immagini arrivano da lì, e per i %d giochi per cui è stato creato la loro cartella ART non viene mai più interrogata immagine per immagine. Le immagini che RIPPS2 scarica o cattura compaiono subito; quelle che copi da un PC compaiono quando ricrei il pacchetto.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Sulle unità avviate non c'è una cartella ART con immagini. Avvia le unità dove sono le tue immagini (SELECT sulla loro pagina), poi torna qui.
 labels:
   'ON': Attivo
   'OFF': Disattivo
@@ -1729,3 +1748,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino non può usare una VMC sull''hard disk APA (exFAT, USB e MX4SIO sì): questo gioco parte con la memory card vera in quello slot.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'L''avvio legge solo l''unità di RIPPS2: le impostazioni e i suoni accanto a RIPPS2.ELF (RIPPS2.FB lì dice dove) e ogni elenco dalla sua cache. Le altre unità aspettano: SELECT su una pagina avvia le sue unità e carica le loro immagini (con l''aggiornamento automatico partono all''avvio). Attivarlo copia i tuoi suoni, e la musica se c''è spazio, in AUDIO accanto a RIPPS2.'
+  RIPPS2_ART_PACK: Pacchetto ART
+  RIPPS2_ART_PACK_BUILD: Crea o rimuovi
+  HINT_RIPPS2_ART_PACK: Mette la cartella ART di ogni unità avviata in un solo art.tar sull'unità che scegli (la più veloce è proposta per prima). Le copertine arrivano poi da un file con un indice, mai con una ricerca per gioco, così i menu e la musica restano fluidi. Le cartelle ART restano come sono.

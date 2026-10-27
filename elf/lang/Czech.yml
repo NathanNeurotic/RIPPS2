@@ -1266,6 +1266,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Paměťová karta ve slotu %d při zapnutí spouští %s, který BOOT LOCK nastavit neumí: funguje přes PS2BBL, FMCB a OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Na této konzoli je zavaděč se zámkem RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT ze hry: prohlížeč, pak váš zavaděč (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d obrázků z %d složek ART půjde do jednoho souboru, %s. Složky ART zůstanou, jak jsou: balíček je kopie. art.tar můžeš zkopírovat do složky ART jiného disku pomocí Memory Files, ale nejrychlejší je postavit ho na disku, ze kterého procházíš, proto je nejrychlejší disk první. Postavit teď?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d obrázků tam, čte %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d obrázků tam, čte %d KB/s, nejrychlejší'
+  'In use: %s, %d pictures, %d MB': 'Používá se: %s, %d obrázků, %d MB'
+  Looking at the ART folders on the started drives: Prohlížení složek ART na spuštěných discích
+  'Measuring how fast each drive reads its art: %s': 'Měření, jak rychle každý disk čte své obrázky: %s'
+  'None: each picture is read from its own ART folder.': 'Žádný: každý obrázek se čte z vlastní složky ART.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Balení obrázků do %s: %d z %d obrázků, %d MB. Zastavíš tlačítkem zpět.'
+  REMOVE the pack in %s (the ART folders stay as they are): ODSTRANIT balíček v %s (složky ART zůstanou, jak jsou)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Odstranit balíček ART v %s? Složky ART zůstanou, jak jsou.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Zastaveno. Nedokončený balíček byl odstraněn a obrázky se načítají ze složek ART jako dřív.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Balíček ART se nepodařilo zapsat do %s (je na tom disku místo?). Nic jiného se nezměnilo: obrázky se načítají ze složek ART jako dřív.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Balíček ART v %s je odstraněn. Obrázky se opět načítají ze složek ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Balíček ART je hotový: %d obrázků, %d MB, v %s (%d s). Od teď se obrázky načítají z něj a u %d her, pro které byl postaven, se už jejich složky ART nikdy neptá obrázek po obrázku. Obrázky, které RIPPS2 stáhne nebo vyfotí, se ukážou hned; obrázky zkopírované z PC se ukážou, až balíček postavíš znovu.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Na spuštěných discích není žádná složka ART s obrázky. Spusť disky, na kterých máš obrázky (SELECT na jejich stránce), a pak se vrať.
 labels:
   HINT_NEUTRINO_AUTO_ELF: Předá zaváděcí ELF hry Neutrinu, aby vyhledalo nastavení pro daný titul. Ve výchozím stavu zapnuto; ručně nastavená volba Boot ELF má přednost.
   HINT_POPSTARTER_PATH: Kde je POPSTARTER.ELF. Když zůstane prázdné, RIPPS2 doplní ten, který najde na disku; přepište, chcete-li jiný, např. usb:/POPS/POPSTARTER.ELF
@@ -1725,3 +1744,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino nemůže použít VMC na APA HDD (exFAT, USB a MX4SIO ano): tato hra se spustí se skutečnou kartou v tom slotu.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Start čte jen jednotku RIPPS2: nastavení a zvuky vedle RIPPS2.ELF (RIPPS2.FB tam říká kde) a každý seznam z jeho mezipaměti. Ostatní jednotky čekají: SELECT na stránce spustí její jednotky a načte jejich obrázky (s automatickým obnovením se spustí při startu). Zapnutí zkopíruje tvé zvuky, a když je místo i hudbu, do AUDIO vedle RIPPS2.'
+  RIPPS2_ART_PACK: Balíček ART
+  RIPPS2_ART_PACK_BUILD: Postavit nebo odstranit
+  HINT_RIPPS2_ART_PACK: Zabalí složku ART každého spuštěného disku do jednoho art.tar na disku, který vybereš (nejrychlejší je nabídnut první). Obaly se pak načítají z jednoho souboru s jedním indexem, nikdy s hledáním pro každou hru, takže menu i hudba běží plynule. Složky ART zůstanou, jak jsou.

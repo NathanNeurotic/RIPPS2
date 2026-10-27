@@ -1265,6 +1265,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Kartu memori di slot %d menjalankan %s saat menyala, yang tidak bisa diatur BOOT LOCK: ia bekerja lewat PS2BBL, FMCB, dan OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Ada boot loader dengan kunci RIPPS2 di konsol ini.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT dari game: peramban, lalu boot loader-mu (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d gambar dari %d folder ART masuk ke satu berkas, %s. Folder ART tetap seperti adanya: paket ini salinan. Kamu bisa menyalin art.tar ke folder ART drive lain dengan Memory Files, tetapi membuatnya di drive tempat kamu menjelajah adalah yang tercepat, karena itu drive tercepat ada di atas. Buat sekarang?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d gambar di sana, membaca %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d gambar di sana, membaca %d KB/s, yang tercepat'
+  'In use: %s, %d pictures, %d MB': 'Dipakai: %s, %d gambar, %d MB'
+  Looking at the ART folders on the started drives: Melihat folder ART di drive yang sudah dimulai
+  'Measuring how fast each drive reads its art: %s': 'Mengukur seberapa cepat tiap drive membaca gambarnya: %s'
+  'None: each picture is read from its own ART folder.': 'Tidak ada: tiap gambar dibaca dari folder ART-nya sendiri.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Mengemas gambar ke %s: %d dari %d gambar, %d MB. Tekan tombol kembali untuk berhenti.'
+  REMOVE the pack in %s (the ART folders stay as they are): HAPUS paket di %s (folder ART tetap seperti adanya)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Hapus paket ART di %s? Folder ART tetap seperti adanya.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Dihentikan. Paket yang belum selesai sudah dihapus, dan gambar dimuat dari folder ART seperti sebelumnya.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Paket ART tidak bisa ditulis ke %s (apakah ada ruang di drive itu?). Tidak ada yang lain berubah: gambar dimuat dari folder ART seperti sebelumnya.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Paket ART di %s sudah dihapus. Gambar dimuat lagi dari folder ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Paket ART sudah jadi: %d gambar, %d MB, di %s (%d dtk). Mulai sekarang gambar dimuat darinya, dan %d game yang menjadi sasarannya tidak pernah lagi ditanyakan ke folder ART-nya gambar demi gambar. Gambar yang diunduh atau diambil RIPPS2 langsung tampil; gambar yang kamu salin dari PC tampil setelah kamu membuat paket lagi.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Tidak ada folder ART berisi gambar di drive yang sudah dimulai. Mulai drive tempat gambarmu berada (SELECT di halamannya), lalu kembali.
 labels:
   BDM_GAMES: Game BDM
   HDD_GAMES: Game HDD
@@ -1750,3 +1769,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino tidak bisa memakai VMC di HDD APA (exFAT, USB, dan MX4SIO bisa): game ini dimulai dengan kartu asli di slot itu.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Saat mulai, hanya drive RIPPS2 yang dibaca: pengaturan dan suara di samping RIPPS2.ELF (RIPPS2.FB di sana menunjukkan letaknya) dan setiap daftar dari cache-nya. Drive lain menunggu: SELECT di sebuah halaman memulai drive-nya dan memuat gambarnya (dengan penyegaran otomatis, drive dimulai saat mulai). Menyalakannya menyalin suaramu, dan musik jika ada ruang, ke AUDIO di samping RIPPS2.'
+  RIPPS2_ART_PACK: Paket ART
+  RIPPS2_ART_PACK_BUILD: Buat atau hapus
+  HINT_RIPPS2_ART_PACK: Mengemas folder ART setiap drive yang dimulai ke satu art.tar di drive yang kamu pilih (yang tercepat ditawarkan lebih dulu). Sampul lalu dimuat dari satu berkas dengan satu indeks, tidak pernah dengan pencarian per game, sehingga menu dan musik tetap lancar. Folder ART tetap seperti adanya.

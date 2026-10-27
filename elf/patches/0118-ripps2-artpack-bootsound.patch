@@ -1,0 +1,1659 @@
+diff --git a/Makefile b/Makefile
+index f100a32..e19ed26 100644
+--- a/Makefile
++++ b/Makefile
+@@ -138,7 +138,7 @@ ifneq ($(GIT_TAG),latest)
+ endif
+ endif
+ 
+-FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2side.o ripps2seance.o ripps2games.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2cd.o ripps2disc.o ripps2shot.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
++FRONTEND_OBJS = ripps2.o ripps2ui.o ripps2side.o ripps2seance.o ripps2games.o ripps2boot.o ripps2ra.o ripps2status.o ripps2ember.o ripps2art.o ripps2artpack.o ripps2cd.o ripps2disc.o ripps2shot.o ripps2sfxpack.o ripps2bg.o ripps2files.o ripps2edit.o ripps2hdd.o ripps2card.o ripps2biossnd.o ripps2hints.o ripps2media.o ripps2iconrip.o rahunt.o ripps2kbd.o ripps2saves.o ripps2about.o ripps2tr.o pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o elfldr_noreset.o elfldr.o lang.o lang_internal.o config.o hdd.o dialogs.o favsupport.o mixsupport.o metadb.o \
+ 		dia.o ioman.o texcache.o themes.o supportbase.o bdmsupport.o netsupport.o ethsupport.o httpcatalog.o httpsupport.o udpfssupport.o hddsupport.o zso.o lz4.o launchdiag.o \
+ 		appsupport.o mmcesupport.o artindex.o vcdsupport.o cuesupport.o libview.o retrogem.o folderbrowse.o gui.o guigame.o vmcrebuild.o vmc_groups.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o cheatconfig.o sound.o ps2cnf.o tar.o saveicon.o cfgtitle.o
+ 
+diff --git a/include/dialogs.h b/include/dialogs.h
+index a76e1a0..1ceb9dc 100644
+--- a/include/dialogs.h
++++ b/include/dialogs.h
+@@ -401,6 +401,8 @@ enum UI_ITEMS {
+     UICFG_RIPPS2_HINTFADE,    // build 115: Layout > Hints and Glyphs Fade
+     UICFG_RIPPS2_BADGE_SET,   // build 115: Hints and Glyphs > Badge Set
+     UICFG_RIPPS2_MMCE_PADFIRST, // build 115: MMCE > Pad First (experimental)
++    RIPPS2_ARTPACK_BUTTON,      // build 118: Cache > ART Pack (ripps2artpack.c)
++    RIPPS2_ARTPACK_ROW,         // and the line saying which pack is in use
+ 
+ #ifdef PADEMU
+     PADEMU_GLOBAL_BUTTON,
+diff --git a/include/ripps2artpack.h b/include/ripps2artpack.h
+new file mode 100644
+index 0000000..c707dc0
+--- /dev/null
++++ b/include/ripps2artpack.h
+@@ -0,0 +1,25 @@
++#ifndef __RIPPS2_ARTPACK_H
++#define __RIPPS2_ARTPACK_H
++
++// RIPPS2 build 118: the ART Pack (Settings > Game Sources > Cache > ART Pack), ripps2artpack.c
++
++extern char gRipps2ArtPack[160]; // the pack in use: "mmce0:/ART/art.tar" ("" none), saved as ripps2_artpack
++extern int gRipps2ArtPackCount;  // its pictures (ripps2_artpack_n), for the Cache page
++extern int gRipps2ArtPackKb;     // and their size in KB (ripps2_artpack_kb)
++
++// the settings just read: the pack's drive is swept first (tar.c)
++void ripps2ArtPackApplySettings(void);
++// the Cache page's line about the pack (in the chosen language)
++void ripps2ArtPackDescribe(char *out, int size);
++// Cache > ART Pack: build the pack on a drive the user picks (the fastest first), or remove it. 1 when the settings changed
++int ripps2ArtPackDialog(void);
++// The art worker, a picture not in the archive held: 1 when that archive is the ART Pack RIPPS2 built and it was built for
++// this game (and no art was written for it since), so the picture is not there and the ART folder need not be asked
++int ripps2ArtPackAnswers(const char *key);
++// RIPPS2 wrote a picture into an ART folder (a fetched cover, a developed RIPSHOT): the pack does not hold it, so that
++// game's art is looked for in its folder again, this session and the next (art_new.txt beside the pack)
++void ripps2ArtPackNoteNew(const char *path);
++// "SLUS_210.50_COV.png" (or a path ending in it) -> "SLUS_210.50": the game a picture belongs to; 0 when not art
++int ripps2ArtKeyOf(const char *name, char *key, int size);
++
++#endif
+diff --git a/include/sound.h b/include/sound.h
+index 096acf8..ace6751 100644
+--- a/include/sound.h
++++ b/include/sound.h
+@@ -70,6 +70,7 @@ int bgmPlayFile(const char *path); // build 115: the media player's .wav / .ogg,
+ void bgmPlayFileStop(void);        // build 115: and the menu music again
+ unsigned int bgmPlayedMs(void);    // build 115: how far into it
+ void sfxBootStart(void);        // RIPPS2: the main thread, as the towers rise: audio up, the boot sound playing
++void sfxBootEarlyQueue(int themeID); // build 118: with the settings read, the boot sound is the IO worker's first job
+ void sfxBootSoundsLoaded(void); // RIPPS2: the IO worker, every sound loaded: the music may start
+ void bgmBootTick(void);         // RIPPS2: every GUI frame: starts the music once the sounds are in, then fades it in
+ int bgmHudReserve(void);            // RIPPS2 build 71 (perf HUD): decoded chunks waiting, -1 with no music
+diff --git a/include/tar.h b/include/tar.h
+index 912786d..ed37d48 100644
+--- a/include/tar.h
++++ b/include/tar.h
+@@ -85,4 +85,9 @@ void tarInvalidate(TarKind kind);
+ 
+ const char *tarGetDevicePrefix(TarKind kind);
+ 
++// RIPPS2 build 118: the ART Pack (ripps2artpack.c)
++void tarSetPreferredRoot(TarKind kind, const char *mountRoot);  // swept first ("mmce0:/")
++int tarLoadedPath(TarKind kind, char *out, int outSize);         // the archive whose index is held
++TarEntryBase *tarFindLoaded(TarKind kind, const char *name);     // in the held index only, by name
++
+ #endif
+diff --git a/include/textures.h b/include/textures.h
+index cf46c88..cec4ac5 100644
+--- a/include/textures.h
++++ b/include/textures.h
+@@ -172,6 +172,7 @@ enum INTERNAL_TEXTURE {
+ int texLookupInternalTexId(const char *name);
+ int texLoadInternal(GSTEXTURE *texture, int texId);
+ int texLoadFromMemory(GSTEXTURE *texture, const void *buf, u32 size);
++int texLoadArtFromMemory(GSTEXTURE *texture, const void *buf, u32 size, int background); // build 118: PNG or JPG
+ int texDiscoverLoad(GSTEXTURE *texture, const char *path, int texId);
+ void texSetProbe(char *out, int size); // RIPPS2 build 73: report the path texDiscoverLoad would try (cover art download)
+ 
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index cd6ccc5..99d66fa 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -2234,3 +2234,9 @@ gui_strings:
+   string: Fast Boot
+ - label: HINT_RIPPS2_FAST_BOOT
+   string: "Boot reads RIPPS2's own drive only: the settings and the sounds beside RIPPS2.ELF (RIPPS2.FB there says where) and every list from its cache. The other drives wait: SELECT on a page starts its drives and brings their art (with Automatic Refresh on they start at boot). Turning it on copies your sounds, and the music when there is room, into AUDIO beside RIPPS2."
++- label: RIPPS2_ART_PACK
++  string: ART Pack
++- label: RIPPS2_ART_PACK_BUILD
++  string: Build or Remove
++- label: HINT_RIPPS2_ART_PACK
++  string: "Packs the ART folder of every started drive into one art.tar on the drive you pick (the fastest is offered first). Covers then load from one file with one index, never a lookup per game, so the menus and the music stay smooth. The ART folders stay as they are."
+diff --git a/src/dialogs.c b/src/dialogs.c
+index 6fa4b89..e117f5c 100644
+--- a/src/dialogs.c
++++ b/src/dialogs.c
+@@ -2118,6 +2118,15 @@ struct UIItem diaCacheConfig[] = {
+     {UI_BOOL, UICFG_AUTOREFRESH, 1, 1, _STR_HINT_AUTOREFRESH, 0, 0, {.intvalue = {0, 0}}},
+     {UI_BREAK},
+ 
++    // build 118: the ART Pack (ripps2artpack.c), every started drive's art in one art.tar on the drive picked, and the line
++    // saying which is in use (gui.c fills it in)
++    {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_ART_PACK}}},
++    {UI_SPACER},
++    {UI_BUTTON, RIPPS2_ARTPACK_BUTTON, 1, 1, _STR_HINT_RIPPS2_ART_PACK, 0, 0, {.label = {NULL, _STR_RIPPS2_ART_PACK_BUILD}}},
++    {UI_BREAK},
++    {UI_LABEL, RIPPS2_ARTPACK_ROW, 1, 1, -1, 0, 0, {.label = {"", -1}}},
++    {UI_BREAK},
++
+     // build 115: STATUS's LOADING section, where boot reads the settings and the lists (from STATUS: back to it)
+     {UI_LABEL, 0, 1, 1, -1, -40, 0, {.label = {NULL, _STR_RIPPS2_STATUS}}},
+     {UI_SPACER},
+diff --git a/src/gui.c b/src/gui.c
+index 05133b6..3514a62 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -54,6 +54,7 @@
+ #include "include/texcache.h"
+ #include "include/appsupport.h" // appGetObject() -- push a live Art Delay change onto the APPS list
+ #include "include/tar.h"        // tarInvalidate -- re-arm the .tar probe when the toggle flips
++#include "include/ripps2artpack.h" // build 118: Cache > ART Pack
+ #include "include/ripps2tr.h" // RIPPS2 build 104: _t
+ 
+ #include <limits.h>
+@@ -968,6 +969,8 @@ static int guiShowCacheConfig(void)
+     diaSetInt(diaCacheConfig, CFG_RIPPS2_FASTBOOT, gRipps2FastBoot);     // build 115
+     diaSetInt(diaCacheConfig, CFG_HDDGAMELISTCACHE, gHDDGameListCache);
+     diaSetInt(diaCacheConfig, UICFG_AUTOREFRESH, gAutoRefresh);
++    static char artPackRow[200]; // build 118: the ART Pack in use (the page keeps the pointer)
++    int artPack = 0;
+     for (;;) {
+         for (i = 0; i < SEANCE_COUNT; i++) {
+             char where[160];
+@@ -976,7 +979,14 @@ static int guiShowCacheConfig(void)
+                      state > 0 ? where : state == 0 ? _t("not found on the started drives") : _t("not looked for yet"));
+             diaSetLabel(diaCacheConfig, RIPPS2_SEANCE_ROW0 + i, seanceRows[i]);
+         }
++        ripps2ArtPackDescribe(artPackRow, sizeof(artPackRow));
++        diaSetLabel(diaCacheConfig, RIPPS2_ARTPACK_ROW, artPackRow);
+         result = diaExecuteDialog(diaCacheConfig, -1, 1, NULL);
++        if (result == RIPPS2_ARTPACK_BUTTON) { // build 118: build the pack (or remove it), then the page again
++            guiCacheConfigRead();
++            artPack |= ripps2ArtPackDialog();
++            continue;
++        }
+         if (result == RIPPS2_STATUS_BUTTON) { // build 115: STATUS shows the rows as they are now
+             guiCacheConfigRead();
+             if (cacheFromStatus) {
+@@ -1001,7 +1011,7 @@ static int guiShowCacheConfig(void)
+     if (gRipps2FastBoot && !fastBoot)
+         ripps2FastBootApply(); // build 115: the drives and the sounds set for it (the gate comes with the save)
+     changed = gRipps2FastCache != fast || gRipps2TrustCache != trust || gHDDGameListCache != list || gAutoRefresh != refresh ||
+-              gRipps2FastBoot != fastBoot;
++              gRipps2FastBoot != fastBoot || artPack;
+     if (changed)
+         guiSettingsSavePending = 1; // saved with the rest when Settings closes (from STATUS: when STATUS closes)
+     return changed;
+diff --git a/src/opl.c b/src/opl.c
+index e2f8f07..79ada93 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -46,6 +46,7 @@
+ #include "include/folderbrowse.h" // folderDepth -- favourites suppression inside subfolders
+ #include "include/mmcesupport.h"  // mmceLoadModules() -- MMCE boot branch of resolveBootDirToMass
+ #include "include/tar.h"          // tarInvalidate -- re-arm the .tar probe on a settings apply
++#include "include/ripps2artpack.h" // RIPPS2 build 118: the ART Pack's setting
+ #include "include/vcdsupport.h"
+ #include "include/cuesupport.h" // cueIsCueEntry -- a PS1 row names its own core   // VCD display naming + POPSTARTER launch helpers
+ #include "include/libview.h"    // libViewActive / libListViewActive -- which list this page shows
+@@ -4220,6 +4221,12 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_ENABLE_BGART, &gEnableBGArt);
+             configGetInt(configOPL, CONFIG_OPL_ENABLE_SAVE_ICONS, &gEnableSaveIcons);
+             configGetInt(configOPL, CONFIG_OPL_ENABLE_ART_TAR, &gEnableArtTar);
++            // RIPPS2 build 118: the ART Pack (Cache > ART Pack): its drive is swept first
++            if (configGetStr(configOPL, "ripps2_artpack", &temp))
++                snprintf(gRipps2ArtPack, sizeof(gRipps2ArtPack), "%s", temp);
++            configGetInt(configOPL, "ripps2_artpack_n", &gRipps2ArtPackCount);
++            configGetInt(configOPL, "ripps2_artpack_kb", &gRipps2ArtPackKb);
++            ripps2ArtPackApplySettings();
+             configGetInt(configOPL, CONFIG_OPL_ART_DELAY, &gArtDelay);
+             // Keep the stored domain identical to the Artwork page's enum {0,2,5,8} (item 45), so a
+             // hand-edited or legacy value cannot render as a delay the UI is unable to express.
+@@ -4475,6 +4482,10 @@ static void _loadConfig()
+                         (gNetworkProtocol == NET_PROTO_UDPFS || gNetworkProtocol == NET_PROTO_UDPFSBD ||
+                          gNetworkProtocol == NET_PROTO_UDPBD));
+ 
++    // RIPPS2 build 118: the boot sound is read before applyConfig queues the drives' starts and lists, so it is in for the
++    // towers' first frame (with Fast Boot the AUDIO folder is known already; else the one beside RIPPS2)
++    if (gBootInProgress)
++        sfxBootEarlyQueue(themeID);
+     applyConfig(themeID, langID, 0);
+ 
+     lscret = result;
+@@ -4849,6 +4860,9 @@ static void _saveConfig()
+         configSetInt(configOPL, CONFIG_OPL_ENABLE_BGART, gEnableBGArt);
+         configSetInt(configOPL, CONFIG_OPL_ENABLE_SAVE_ICONS, gEnableSaveIcons);
+         configSetInt(configOPL, CONFIG_OPL_ENABLE_ART_TAR, gEnableArtTar);
++        configSetStr(configOPL, "ripps2_artpack", gRipps2ArtPack); // build 118
++        configSetInt(configOPL, "ripps2_artpack_n", gRipps2ArtPackCount);
++        configSetInt(configOPL, "ripps2_artpack_kb", gRipps2ArtPackKb);
+         configSetInt(configOPL, CONFIG_OPL_ART_DELAY, gArtDelay);
+         configSetInt(configOPL, CONFIG_OPL_FOLDER_NAV, gEnableFolderNav);
+         configSetColor(configOPL, CONFIG_OPL_PLAS_BLEND_COLOR, gDefaultPlasBlendColor);
+diff --git a/src/ripps2art.c b/src/ripps2art.c
+index 110ea59..e81cf41 100644
+--- a/src/ripps2art.c
++++ b/src/ripps2art.c
+@@ -63,6 +63,7 @@
+ #include "include/ripps2art_ta.h"
+ #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
+ #include "include/ripps2tr.h" // build 104: _t, RIPPS2's words in the chosen language
++#include "include/ripps2artpack.h" // build 118: a fetched cover is new to the ART Pack
+ 
+ #define ART_HOST      "raw.githubusercontent.com"
+ #define ART_URI       "/xlenore/ps2-covers/main/covers/default/%s.jpg"
+@@ -717,6 +718,8 @@ static int artSave(const art_target_t *t, const unsigned char *buf, int len)
+     if (w != len)
+         remove(file);
+     ioWriteEnd();
++    if (w == len)
++        ripps2ArtPackNoteNew(file); // build 118: the ART Pack does not hold it: the game's folder is asked again
+     return w == len;
+ }
+ 
+diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
+new file mode 100644
+index 0000000..541b9b3
+--- /dev/null
++++ b/src/ripps2artpack.c
+@@ -0,0 +1,815 @@
++/*
++  ripps2artpack.c the ART Pack (build 118): every started drive's art in one art.tar
++
++  Copyright 2026, RIPPS2 contributors
++  Licenced under Academic Free License version 3.0
++  Review OpenUsbLd README & LICENSE files for further details.
++
++  The user, 10/27: "add a feature in the cache for .tar compression ART migrate ... compress it to the intended drive
++  (fastest detected shown as default choice like my mmce) make the .tar file read intelligent with the cache features so
++  the PS2 won't call for each games art individually".
++
++  Settings > Game Sources > Cache > ART Pack packs the ART folder of every started drive into one plain tar, art.tar in the
++  ART folder of the drive the user picks. Each drive is measured as it reads a few of its own pictures and the drives are
++  listed fastest first, so X takes the fastest. The pictures go in as they are, under their own names (PNG and JPG are
++  compressed already: the tar bundles them), so a PC opens the pack as any tar. The ART folders are never touched.
++
++  Reading it is RiptOPL's art.tar engine (tar.c, texcache.c) with its toggle on (Artwork > .tar art): one index for the
++  whole pack, written here with the pack (art_cache.bin, so the first boot does not read two thousand headers), looked up
++  in sorted order, the pack's drive swept first. And one thing more: the pack holds RIPPS2ART.LST, the games it was built
++  for. A picture of one of those the pack does not hold is not in the ART folders either, so the art worker neither lists
++  nor opens the folder for it (ripps2ArtPackAnswers): no lookup per game, and no failed open (which on an SD2PSX cost the
++  music its file). Art RIPPS2 writes afterwards (a fetched cover, a developed RIPSHOT) is noted beside the pack
++  (art_new.txt) and its game looked for in its folder again; art copied in on a PC shows after the next build.
++*/
++
++#include <stdio.h>
++#include <string.h>
++#include <strings.h>
++#include <stdlib.h>
++#include <ctype.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <dirent.h>
++#include <time.h>
++#include <sys/stat.h>
++#include <kernel.h>
++
++#include "include/opl.h"
++#include "include/gui.h"
++#include "include/pad.h"
++#include "include/sound.h"
++#include "include/ioman.h"
++#include "include/iosupport.h"
++#include "include/libview.h"
++#include "include/textures.h"
++#include "include/texcache.h"
++#include "include/artindex.h"
++#include "include/tar.h"
++#include "include/ripps2.h"
++#include "include/ripps2diag.h"
++#include "include/ripps2artpack.h"
++#include "include/ripps2tr.h" // _t, RIPPS2's words in the chosen language
++
++char gRipps2ArtPack[160];
++int gRipps2ArtPackCount = 0;
++int gRipps2ArtPackKb = 0;
++
++#define AP_SOURCES   12
++#define AP_KEY       48
++#define AP_NAME      48   // TarEntryArt's filename: 47 characters and the NUL
++#define AP_MAX_FILES 6144
++#define AP_MAX_KEYS  4096
++#define AP_NEW_MAX   512
++#define AP_LIST      "RIPPS2ART.LST" // the pack's own member: the games it was built for, a key a line
++#define AP_NEW       "art_new.txt"   // beside the pack: the games RIPPS2 wrote art for since
++#define AP_HEAD      "RIPPS2 ART PACK 1"
++#define AP_MEASURE_FILES 6
++#define AP_MEASURE_BYTES (384 * 1024)
++
++// ---------------------------------------------------------------- names and keys
++
++// FNV-1a over the name in capitals: FAT and exFAT keep a name's case but ignore it
++static unsigned int apHash(const char *s)
++{
++    unsigned int h = 2166136261u;
++    for (; *s; s++)
++        h = (h ^ (unsigned char)toupper((unsigned char)*s)) * 16777619u;
++    return h;
++}
++
++static int apIsPicture(const char *name)
++{
++    const char *dot = strrchr(name, '.');
++    return dot != NULL && dot != name && (!strcasecmp(dot, ".png") || !strcasecmp(dot, ".jpg") || !strcasecmp(dot, ".jpeg"));
++}
++
++// a piece of a game's art, as the themes ask for it: COV COV2 ICO LAB LGO BG SCR SCR<n>
++static int apIsKind(const char *k)
++{
++    static const char *const kinds[] = {"COV", "COV2", "ICO", "LAB", "LGO", "BG", "SCR"};
++    unsigned int i;
++    for (i = 0; i < sizeof(kinds) / sizeof(kinds[0]); i++)
++        if (!strcasecmp(k, kinds[i]))
++            return 1;
++    if (strncasecmp(k, "SCR", 3) || !k[3])
++        return 0;
++    for (k += 3; *k; k++)
++        if (!isdigit((unsigned char)*k))
++            return 0;
++    return 1;
++}
++
++int ripps2ArtKeyOf(const char *name, char *key, int size)
++{
++    const char *base = strrchr(name, '/'), *dot, *u, *u2;
++    char stem[128];
++    int n;
++
++    base = base != NULL ? base + 1 : name;
++    dot = strrchr(base, '.');
++    n = dot != NULL ? (int)(dot - base) : (int)strlen(base);
++    if (n <= 0 || n >= (int)sizeof(stem))
++        return 0;
++    memcpy(stem, base, n);
++    stem[n] = '\0';
++    if ((u = strrchr(stem, '_')) == NULL || u == stem)
++        return 0;
++    if (isdigit((unsigned char)u[1]) && isdigit((unsigned char)u[2]) && u[3] == '\0') {
++        // OPL Manager's two-part kinds: _BG_00 to _BG_06, _SCR_00 and _SCR_01
++        for (u2 = u - 1; u2 > stem && *u2 != '_'; u2--)
++            ;
++        if (u2 <= stem || (strncasecmp(u2 + 1, "BG_", 3) && strncasecmp(u2 + 1, "SCR_", 4)))
++            return 0;
++        n = (int)(u2 - stem);
++    } else if (apIsKind(u + 1))
++        n = (int)(u - stem);
++    else
++        return 0;
++    if (n <= 0 || n >= size)
++        return 0;
++    memcpy(key, stem, n);
++    key[n] = '\0';
++    return 1;
++}
++
++// two paths to the same file, whether or not a '/' follows the device's ':' ("pfs0:ART/art.tar", "pfs0:/ART/art.tar")
++static int apSamePath(const char *a, const char *b)
++{
++    const char *ca = strchr(a, ':'), *cb = strchr(b, ':');
++    if (ca == NULL || cb == NULL || ca - a != cb - b || strncasecmp(a, b, ca - a))
++        return 0;
++    ca += ca[1] == '/' ? 2 : 1;
++    cb += cb[1] == '/' ? 2 : 1;
++    return !strcasecmp(ca, cb);
++}
++
++// the folder the pack is in ("mmce0:/ART/"), for art_cache.bin and art_new.txt
++static void apPackDir(const char *pack, char *out, int size)
++{
++    const char *slash = strrchr(pack, '/');
++    snprintf(out, size, "%.*s", slash != NULL ? (int)(slash - pack + 1) : 0, pack);
++}
++
++// ---------------------------------------------------------------- what the pack knows (the art worker)
++
++static unsigned int *apCovered;  // the keys' hashes, sorted
++static int apCoveredCount;
++static char apCoveredFor[160];   // the pack they were read from
++static volatile unsigned int apGen = 1, apCoveredGen = 0; // a build or a removal starts over
++static unsigned int apNew[AP_NEW_MAX];
++static volatile int apNewCount;
++
++static int apHashCmp(const void *a, const void *b)
++{
++    unsigned int x = *(const unsigned int *)a, y = *(const unsigned int *)b;
++    return x < y ? -1 : (x > y ? 1 : 0);
++}
++
++static int apNewHas(unsigned int h)
++{
++    int i, n = apNewCount;
++    for (i = 0; i < n; i++)
++        if (apNew[i] == h)
++            return 1;
++    return 0;
++}
++
++static void apNewAdd(unsigned int h)
++{
++    if (!apNewHas(h) && apNewCount < AP_NEW_MAX) {
++        apNew[apNewCount] = h;
++        apNewCount++; // after the hash is in: a reader on another thread never sees an empty slot counted
++    }
++}
++
++// one line of text: its key's hash into apNew (art_new.txt) or into the list (RIPPS2ART.LST)
++static void apReadKeys(char *text, int len, int intoNew, unsigned int *list, int *count, int max)
++{
++    char *line = text, *end = text + len, *nl;
++    while (line < end) {
++        for (nl = line; nl < end && *nl != '\n' && *nl != '\r'; nl++)
++            ;
++        *nl = '\0';
++        if (*line && strcmp(line, AP_HEAD)) {
++            if (intoNew)
++                apNewAdd(apHash(line));
++            else if (*count < max)
++                list[(*count)++] = apHash(line);
++        }
++        line = nl + 1;
++    }
++}
++
++// the art worker: the games the pack held now was built for, and the games RIPPS2 wrote art for since
++static void apLoad(const char *held)
++{
++    char dir[160], path[200];
++    TarEntryBase *e;
++    char *text;
++    int fd, n;
++
++    free(apCovered);
++    apCovered = NULL;
++    apCoveredCount = 0;
++    snprintf(apCoveredFor, sizeof(apCoveredFor), "%s", held);
++    apCoveredGen = apGen;
++    if ((e = tarFindLoaded(TAR_KIND_ART, AP_LIST)) == NULL || e->rawSize == 0 || e->rawSize > AP_MAX_KEYS * AP_KEY ||
++        (text = malloc(e->rawSize + 1)) == NULL)
++        return; // a pack made elsewhere: it answers for what it holds only
++    if (tarRead(TAR_KIND_ART, e, text, e->rawSize) == e->rawSize && !strncmp(text, AP_HEAD, strlen(AP_HEAD)) &&
++        (apCovered = malloc(AP_MAX_KEYS * sizeof(unsigned int))) != NULL) {
++        apReadKeys(text, e->rawSize, 0, apCovered, &apCoveredCount, AP_MAX_KEYS);
++        qsort(apCovered, apCoveredCount, sizeof(unsigned int), apHashCmp);
++    }
++    free(text);
++    // art_new.txt: written empty with the pack, so this open finds it (no failed open on the card)
++    apPackDir(held, dir, sizeof(dir));
++    snprintf(path, sizeof(path), "%s%s", dir, AP_NEW);
++    if ((fd = open(path, O_RDONLY)) >= 0) {
++        n = lseek(fd, 0, SEEK_END);
++        lseek(fd, 0, SEEK_SET);
++        if (n > 0 && n < 64 * 1024 && (text = malloc(n + 1)) != NULL) {
++            if (read(fd, text, n) == n)
++                apReadKeys(text, n, 1, NULL, NULL, 0);
++            free(text);
++        }
++        close(fd);
++    }
++    LOG("ART PACK: %s knows %d games, %d with art written since\n", held, apCoveredCount, apNewCount);
++}
++
++int ripps2ArtPackAnswers(const char *key)
++{
++    char held[200];
++    unsigned int h;
++
++    if (!gEnableArtTar || !gRipps2ArtPack[0] || key == NULL || !key[0])
++        return 0;
++    if (!tarLoadedPath(TAR_KIND_ART, held, sizeof(held)) || !apSamePath(held, gRipps2ArtPack))
++        return 0; // another archive (a pack someone else made, the HDD's own): it answers only for what it holds
++    if (apCoveredGen != apGen || strcmp(apCoveredFor, held))
++        apLoad(held);
++    if (apCovered == NULL || apCoveredCount == 0)
++        return 0;
++    h = apHash(key);
++    if (bsearch(&h, apCovered, apCoveredCount, sizeof(unsigned int), apHashCmp) == NULL)
++        return 0; // a game added since the pack was built: its folder is asked, as before
++    return !apNewHas(h);
++}
++
++void ripps2ArtPackNoteNew(const char *path)
++{
++    char key[AP_KEY], dir[160], file[200], line[AP_KEY + 4];
++    int fd, n;
++    unsigned int h;
++
++    if (!gRipps2ArtPack[0] || path == NULL || !ripps2ArtKeyOf(path, key, sizeof(key)))
++        return;
++    h = apHash(key);
++    if (apNewHas(h))
++        return;
++    apNewAdd(h);
++    apPackDir(gRipps2ArtPack, dir, sizeof(dir));
++    snprintf(file, sizeof(file), "%s%s", dir, AP_NEW);
++    n = snprintf(line, sizeof(line), "%s\r\n", key);
++    if (!ioWriteBegin())
++        return;
++    if ((fd = open(file, O_WRONLY | O_CREAT, 0666)) >= 0) {
++        lseek(fd, 0, SEEK_END);
++        write(fd, line, n);
++        close(fd);
++    }
++    ioWriteEnd();
++}
++
++void ripps2ArtPackApplySettings(void)
++{
++    char root[24];
++    const char *colon = strchr(gRipps2ArtPack, ':');
++
++    root[0] = '\0';
++    if (colon != NULL && colon - gRipps2ArtPack < (int)sizeof(root) - 2)
++        snprintf(root, sizeof(root), "%.*s/", (int)(colon - gRipps2ArtPack + 1), gRipps2ArtPack);
++    tarSetPreferredRoot(TAR_KIND_ART, root);
++    apGen++;
++}
++
++void ripps2ArtPackDescribe(char *out, int size)
++{
++    if (gRipps2ArtPack[0])
++        snprintf(out, size, _t("In use: %s, %d pictures, %d MB"), gRipps2ArtPack, gRipps2ArtPackCount, (gRipps2ArtPackKb + 1023) / 1024);
++    else
++        snprintf(out, size, "%s", _t("None: each picture is read from its own ART folder."));
++}
++
++// ---------------------------------------------------------------- the tar (a plain ustar a PC opens)
++
++// a member's 512-byte header: name, size, a fixed mode and owner, the time, the checksum
++static void apHeader(unsigned char h[512], const char *name, unsigned int size, unsigned int mtime)
++{
++    unsigned int sum = 0;
++    int i;
++
++    memset(h, 0, 512);
++    snprintf((char *)h, 100, "%s", name);
++    memcpy(h + 100, "0000644", 8);
++    memcpy(h + 108, "0000000", 8);
++    memcpy(h + 116, "0000000", 8);
++    snprintf((char *)h + 124, 12, "%011o", size);
++    snprintf((char *)h + 136, 12, "%011o", mtime);
++    memset(h + 148, ' ', 8);
++    h[156] = '0';
++    memcpy(h + 257, "ustar", 6);
++    memcpy(h + 263, "00", 2);
++    for (i = 0; i < 512; i++)
++        sum += h[i];
++    snprintf((char *)h + 148, 8, "%06o", sum);
++    h[155] = ' ';
++}
++
++// ---------------------------------------------------------------- the drives and their pictures
++
++typedef struct
++{
++    char root[24]; // "mmce0:/"
++    char dir[40];  // "mmce0:/ART"
++    int target;    // a drive the sweep looks on (tar.c gDevices), with its ART folder at its root
++    int listed;    // its listing finished
++    int files, kbps;
++} ap_source_t;
++
++typedef struct
++{
++    char name[AP_NAME];
++    unsigned char src;
++} ap_file_t;
++
++typedef struct
++{
++    char key[AP_KEY];
++    unsigned char src, out; // the drive whose list has it; out: one of its pictures could not go in
++} ap_key_t;
++
++static ap_source_t apSrc[AP_SOURCES];
++static int apSrcCount;
++static ap_file_t *apFiles;
++static int apFileCount;
++static ap_key_t *apKeys;
++static int apKeyCount;
++
++static int apKeyCmp(const void *a, const void *b)
++{
++    return strcasecmp(((const ap_key_t *)a)->key, ((const ap_key_t *)b)->key);
++}
++
++// a picture that could not go in: its game is not one the pack answers for
++static void apKeyOut(const char *name)
++{
++    char key[AP_KEY];
++    ap_key_t probe, *k;
++    if (!ripps2ArtKeyOf(name, key, sizeof(key)))
++        return;
++    snprintf(probe.key, sizeof(probe.key), "%s", key);
++    if ((k = bsearch(&probe, apKeys, apKeyCount, sizeof(ap_key_t), apKeyCmp)) != NULL)
++        k->out = 1;
++}
++
++// the drive root of a source's ART folder from the path it would read a cover at ("mass0:ART/SLUS_210.50_COV")
++static int apSourceOf(const char *probe)
++{
++    static const char *const targets[] = {"mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/", "mass7:/",
++                                          "mmce0:/", "mmce1:/", "pfs0:/", NULL};
++    const char *colon = strchr(probe, ':'), *slash = strrchr(probe, '/'), *at;
++    char root[24], dir[40];
++    int i, atRoot;
++
++    if (colon == NULL || slash == NULL || strchr(probe, '\\') != NULL || !strncmp(probe, "smb", 3) || colon - probe > 8)
++        return -1; // the network keeps its own art
++    at = colon[1] == '/' ? colon + 2 : colon + 1;
++    if (slash - at < 3 || strncasecmp(slash - 3, "ART", 3) || (slash - 3 > at && slash[-4] != '/'))
++        return -1; // not an ART folder
++    atRoot = slash - 3 == at;
++    snprintf(root, sizeof(root), "%.*s/", (int)(colon - probe + 1), probe);
++    snprintf(dir, sizeof(dir), "%s%.*s", root, (int)(slash - at), at);
++    for (i = 0; i < apSrcCount; i++)
++        if (!strcasecmp(apSrc[i].dir, dir))
++            return i;
++    if (apSrcCount >= AP_SOURCES)
++        return -1;
++    memset(&apSrc[apSrcCount], 0, sizeof(ap_source_t));
++    snprintf(apSrc[apSrcCount].root, sizeof(apSrc[0].root), "%s", root);
++    snprintf(apSrc[apSrcCount].dir, sizeof(apSrc[0].dir), "%s", dir);
++    for (i = 0; targets[i] != NULL && atRoot; i++)
++        if (!strcasecmp(targets[i], root))
++            apSrc[apSrcCount].target = 1;
++    return apSrcCount++;
++}
++
++// every started list's ART folder and its games' keys (no device asked: texSetProbe, as the cover download does)
++static void apCollect(void)
++{
++    GSTEXTURE probeTex;
++    char probe[256];
++    int mode, id, count, s;
++
++    apSrcCount = apKeyCount = 0;
++    for (mode = 0; mode < MODE_COUNT; mode++) {
++        if (mode == APP_MODE || mode == FAV_MODE || MODE_IS_MIX(mode))
++            continue; // apps keep their own names; Favorites and All Games repeat other lists
++        opl_io_module_t *mod = oplGetModule(mode);
++        item_list_t *list = mod != NULL ? mod->support : NULL;
++        if (list == NULL || !list->enabled || list->itemGetCount == NULL || list->itemGetStartup == NULL || list->itemGetImage == NULL)
++            continue;
++        count = list->itemGetCount(list);
++        for (id = 0, s = -2; id < count; id++) {
++            char *startup = list->itemGetStartup(list, id);
++            if (startup == NULL || !startup[0])
++                continue;
++            if (s == -2) { // the list's ART folder, from its first game
++                probe[0] = '\0';
++                memset(&probeTex, 0, sizeof(probeTex));
++                texSetProbe(probe, sizeof(probe));
++                list->itemGetImage(list, "ART", 1, startup, "COV", &probeTex, GS_PSM_CT24);
++                texSetProbe(NULL, 0);
++                s = probe[0] ? apSourceOf(probe) : -1;
++                if (s < 0)
++                    break;
++            }
++            // a PS1 game's art goes by other keys as well (textures.c texArtAliases): its folder keeps answering for it
++            if (libListRowView(list, id) == LIB_VIEW_PS1 || strlen(startup) >= AP_KEY || apKeyCount >= AP_MAX_KEYS)
++                continue;
++            snprintf(apKeys[apKeyCount].key, AP_KEY, "%s", startup);
++            apKeys[apKeyCount].src = (unsigned char)s;
++            apKeys[apKeyCount].out = 0;
++            apKeyCount++;
++        }
++    }
++}
++
++// a source's pictures into apFiles (a name too long for the index stays out, and its game with it); 1 when the listing
++// finished
++static int apList(int s)
++{
++    struct dirent *e;
++    DIR *d = opendir(apSrc[s].dir);
++    int err;
++
++    if (d == NULL)
++        return 0;
++    for (;;) {
++        errno = 0;
++        if ((e = readdir(d)) == NULL) {
++            err = errno;
++            break;
++        }
++        if (e->d_name[0] == '.' || !apIsPicture(e->d_name))
++            continue;
++        if (strlen(e->d_name) >= AP_NAME || apFileCount >= AP_MAX_FILES) {
++            apKeyOut(e->d_name);
++            continue;
++        }
++        snprintf(apFiles[apFileCount].name, AP_NAME, "%s", e->d_name);
++        apFiles[apFileCount].src = (unsigned char)s;
++        apFileCount++;
++        apSrc[s].files++;
++    }
++    closedir(d);
++    return err == 0;
++}
++
++// how fast a drive reads its own art: its first pictures, whole (KB a second; 0 when it has none)
++static int apMeasure(int s)
++{
++    static unsigned char buf[64 * 1024];
++    char path[128];
++    int i, fd, r, files = 0;
++    unsigned int bytes = 0;
++    clock_t start = clock(), ms;
++
++    for (i = 0; i < apFileCount && files < AP_MEASURE_FILES && bytes < AP_MEASURE_BYTES; i++) {
++        if (apFiles[i].src != s)
++            continue;
++        snprintf(path, sizeof(path), "%s/%s", apSrc[s].dir, apFiles[i].name);
++        if ((fd = open(path, O_RDONLY)) < 0)
++            continue;
++        while (bytes < AP_MEASURE_BYTES && (r = read(fd, buf, sizeof(buf))) > 0)
++            bytes += r;
++        close(fd);
++        files++;
++    }
++    ms = (clock() - start) * 1000 / CLOCKS_PER_SEC;
++    if (bytes == 0)
++        return 0;
++    return (int)((unsigned long long)bytes * 1000 / 1024 / (ms > 0 ? ms : 1));
++}
++
++// ---------------------------------------------------------------- the build
++
++static int apStopAsked(void)
++{
++    readPads();
++    return getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE);
++}
++
++static int apWriteZeros(FILE *out, unsigned int n)
++{
++    static const unsigned char zero[512];
++    while (n > 0) {
++        unsigned int k = n < sizeof(zero) ? n : sizeof(zero);
++        if (fwrite(zero, 1, k, out) != k)
++            return 0;
++        n -= k;
++    }
++    return 1;
++}
++
++// 1 built, 0 stopped, -1 not written. *pictures, *kb what went in
++static int apBuild(int target, const char *pack, int *pictures, int *kb, int *games)
++{
++    char path[200], dir[160], msg[300];
++    unsigned char head[512];
++    unsigned int *written = NULL, mtime = (unsigned int)time(NULL);
++    int *writtenFrom = NULL; // which of apFiles each went in from: a hash match is checked by name
++    TarEntryArt *index = NULL;
++    TarCacheHeader ch;
++    unsigned long long pos = 0;
++    FILE *out = NULL;
++    clock_t shown = 0;
++    int pass, i, k, fd, size, n = 0, ok = 0, stopped = 0, total = apFileCount;
++    char *list = NULL;
++    void *buf;
++
++    apPackDir(pack, dir, sizeof(dir));
++    *pictures = *kb = *games = 0;
++    if ((written = malloc((apFileCount + 1) * sizeof(unsigned int))) == NULL ||
++        (writtenFrom = malloc((apFileCount + 1) * sizeof(int))) == NULL ||
++        (index = calloc(apFileCount + 1, sizeof(TarEntryArt))) == NULL || (list = malloc(AP_MAX_KEYS * AP_KEY / 2 + 64)) == NULL)
++        goto done;
++    snprintf(path, sizeof(path), "%sart_cache.bin", dir); // the old index goes first: it could never match this pack
++    remove(path);
++    remove(pack);
++    if ((out = fopen(pack, "wb")) == NULL)
++        goto done;
++    setvbuf(out, NULL, _IOFBF, 256 * 1024); // whole 256 KB writes (exFAT slipped odd-placed ones, RIPSHOT build 114)
++
++    // the picked drive's own pictures first: a name on two drives goes in from the one the pack is on
++    for (pass = 0; pass < 2 && !stopped; pass++)
++        for (i = 0; i < apFileCount && !stopped; i++) {
++            if ((apFiles[i].src == target) != (pass == 0))
++                continue;
++            unsigned int h = apHash(apFiles[i].name);
++            for (k = 0; k < n && (written[k] != h || strcasecmp(apFiles[writtenFrom[k]].name, apFiles[i].name)); k++)
++                ;
++            if (k < n) {
++                total--;
++                continue; // that name is in already
++            }
++            if (clock() - shown > CLOCKS_PER_SEC / 4) {
++                snprintf(msg, sizeof(msg), _t("Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop."), pack,
++                         n, total, (int)(pos >> 20));
++                guiRenderTextScreen(msg);
++                shown = clock();
++                if (apStopAsked())
++                    stopped = 1;
++            }
++            snprintf(path, sizeof(path), "%s/%s", apSrc[apFiles[i].src].dir, apFiles[i].name);
++            buf = NULL;
++            size = -1;
++            if ((fd = open(path, O_RDONLY)) >= 0) {
++                size = lseek(fd, 0, SEEK_END);
++                lseek(fd, 0, SEEK_SET);
++                if (size > 0 && size <= MAX_FILE_SIZE && (buf = malloc(size)) != NULL) {
++                    int got = 0, r;
++                    while (got < size && (r = read(fd, (char *)buf + got, size - got)) > 0)
++                        got += r;
++                    if (got != size) {
++                        free(buf);
++                        buf = NULL;
++                    }
++                }
++                close(fd);
++            }
++            if (buf == NULL) { // unreadable or too big: it stays out, and its game is asked of its folder
++                apKeyOut(apFiles[i].name);
++                total--;
++                continue;
++            }
++            apHeader(head, apFiles[i].name, size, mtime);
++            k = (512 - size % 512) % 512;
++            if (fwrite(head, 1, 512, out) != 512 || fwrite(buf, 1, size, out) != (size_t)size || !apWriteZeros(out, k)) {
++                free(buf);
++                goto done;
++            }
++            free(buf);
++            index[n].base.offset = pos + 512;
++            index[n].base.rawSize = size;
++            index[n].base.paddedSize = size + k;
++            snprintf(index[n].filename, sizeof(index[n].filename), "%s", apFiles[i].name);
++            writtenFrom[n] = i;
++            written[n++] = h;
++            pos += 512 + size + k;
++        }
++    if (stopped)
++        goto done;
++
++    // the games it was built for: on a drive whose folder was listed whole, every picture of theirs in
++    k = snprintf(list, AP_MAX_KEYS * AP_KEY / 2 + 64, "%s\r\n", AP_HEAD);
++    for (i = 0; i < apKeyCount; i++)
++        if (!apKeys[i].out && apSrc[apKeys[i].src].listed && (i == 0 || strcasecmp(apKeys[i].key, apKeys[i - 1].key)) &&
++            k + (int)strlen(apKeys[i].key) + 3 < AP_MAX_KEYS * AP_KEY / 2 + 64) {
++            k += snprintf(list + k, AP_MAX_KEYS * AP_KEY / 2 + 64 - k, "%s\r\n", apKeys[i].key);
++            (*games)++;
++        }
++    apHeader(head, AP_LIST, k, mtime);
++    i = (512 - k % 512) % 512;
++    if (fwrite(head, 1, 512, out) != 512 || fwrite(list, 1, k, out) != (size_t)k || !apWriteZeros(out, i) || !apWriteZeros(out, 1024))
++        goto done;
++    index[n].base.offset = pos + 512;
++    index[n].base.rawSize = k;
++    index[n].base.paddedSize = k + i;
++    snprintf(index[n].filename, sizeof(index[n].filename), "%s", AP_LIST);
++    pos += 512 + k + i + 1024;
++    if (ferror(out) || fclose(out) != 0) {
++        out = NULL;
++        goto done;
++    }
++    out = NULL;
++
++    // its index, as tar.c would write it after reading every header (art_cache.bin, checked against the pack's size)
++    memset(&ch, 0, sizeof(ch));
++    memcpy(ch.magic, ARC_MAGIC, 4);
++    ch.version = ARC_VERSION;
++    ch.tarSize = pos;
++    ch.entryCount = n + 1;
++    snprintf(path, sizeof(path), "%sart_cache.bin", dir);
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0) {
++        if (write(fd, &ch, sizeof(ch)) != (int)sizeof(ch) || write(fd, index, (n + 1) * sizeof(TarEntryArt)) != (int)((n + 1) * sizeof(TarEntryArt))) {
++            close(fd);
++            remove(path); // tar.c reads the headers itself, once
++        } else
++            close(fd);
++    }
++    snprintf(path, sizeof(path), "%s%s", dir, AP_NEW); // empty: nothing written since
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) >= 0)
++        close(fd);
++    *pictures = n;
++    *kb = (int)(pos >> 10);
++    ok = 1;
++
++done:
++    if (out != NULL)
++        fclose(out);
++    if (!ok)
++        remove(pack); // never a pack half written
++    free(written);
++    free(writtenFrom);
++    free(index);
++    free(list);
++    return ok ? 1 : (stopped ? 0 : -1);
++}
++
++static int apSpeedCmp(const void *a, const void *b)
++{
++    return apSrc[*(const int *)b].kbps - apSrc[*(const int *)a].kbps;
++}
++
++int ripps2ArtPackDialog(void)
++{
++    char items[AP_SOURCES + 1][160], msg[700], pack[160];
++    const char *list[AP_SOURCES + 1];
++    int order[AP_SOURCES], n = 0, i, pick, target, pictures, kb, games, folders, result, removable = gRipps2ArtPack[0] != '\0';
++    int wasTar = gEnableArtTar; // Artwork > .tar art as it was: put back when a build does not finish
++    clock_t start;
++
++    guiRenderTextScreen(_t("Looking at the ART folders on the started drives"));
++    apFiles = malloc(AP_MAX_FILES * sizeof(ap_file_t));
++    apKeys = malloc(AP_MAX_KEYS * sizeof(ap_key_t));
++    apFileCount = 0;
++    if (apFiles == NULL || apKeys == NULL) {
++        free(apFiles);
++        free(apKeys);
++        return 0;
++    }
++    apCollect();
++    qsort(apKeys, apKeyCount, sizeof(ap_key_t), apKeyCmp);
++    for (i = 0; i < apSrcCount; i++)
++        apSrc[i].listed = apList(i);
++    for (i = 0; i < apSrcCount; i++)
++        if (apSrc[i].target && apSrc[i].files > 0) {
++            snprintf(msg, sizeof(msg), _t("Measuring how fast each drive reads its art: %s"), apSrc[i].root);
++            guiRenderTextScreen(msg);
++            apSrc[i].kbps = apMeasure(i);
++            order[n++] = i;
++        }
++    qsort(order, n, sizeof(int), apSpeedCmp);
++    for (i = 0; i < n; i++) {
++        snprintf(items[i], sizeof(items[i]),
++                 i == 0 ? _t("%sART/art.tar: %d pictures there, reads %d KB/s, the fastest") : _t("%sART/art.tar: %d pictures there, reads %d KB/s"),
++                 apSrc[order[i]].root, apSrc[order[i]].files, apSrc[order[i]].kbps);
++        list[i] = items[i];
++    }
++    if (removable) {
++        snprintf(items[n], sizeof(items[n]), _t("REMOVE the pack in %s (the ART folders stay as they are)"), gRipps2ArtPack);
++        list[n] = items[n];
++    }
++
++    result = 0;
++    if (n == 0 && !removable) {
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(_t("There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back."), 0, NULL);
++        goto out;
++    }
++    if ((pick = ripps2PickList(list, n + removable)) < 0)
++        goto out;
++
++    if (pick == n) { // remove the pack: RIPPS2's own three files, never the ART folders
++        snprintf(msg, sizeof(msg), _t("Remove the ART Pack in %s? The ART folders stay as they are."), gRipps2ArtPack);
++        if (!guiMsgBox(msg, 1, NULL))
++            goto out;
++        apPackDir(gRipps2ArtPack, pack, sizeof(pack));
++        gEnableArtTar = 0;
++        tarInvalidate(TAR_KIND_ART);
++        if (ioWriteBegin()) {
++            remove(gRipps2ArtPack);
++            snprintf(msg, sizeof(msg), "%sart_cache.bin", pack);
++            remove(msg);
++            snprintf(msg, sizeof(msg), "%s%s", pack, AP_NEW);
++            remove(msg);
++            ioWriteEnd();
++        }
++        snprintf(msg, sizeof(msg), _t("The ART Pack in %s is removed. Art loads from the ART folders again."), gRipps2ArtPack);
++        gRipps2ArtPack[0] = '\0';
++        gRipps2ArtPackCount = gRipps2ArtPackKb = 0;
++        ripps2ArtPackApplySettings();
++        artIndexInvalidate();
++        cacheInvalidateFailMemo();
++        guiMsgBoxSound(SFX_SAVE);
++        guiMsgBox(msg, 0, NULL);
++        result = 1;
++        goto out;
++    }
++
++    target = order[pick];
++    snprintf(pack, sizeof(pack), "%sART/art.tar", apSrc[target].root);
++    for (i = 0, folders = 0; i < apSrcCount; i++)
++        folders += apSrc[i].files > 0;
++    snprintf(msg, sizeof(msg),
++             _t("%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive's ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?"),
++             apFileCount, folders, pack);
++    if (!guiMsgBox(msg, 1, NULL))
++        goto out;
++
++    // nothing reads a pack while it is written: the toggle off (the art worker asks it per picture), the IO worker held
++    gEnableArtTar = 0;
++    tarInvalidate(TAR_KIND_ART);
++    ioBlockOps(1);
++    start = clock();
++    if (!ioWriteBegin()) // never once a launch has begun
++        i = -1;
++    else {
++        i = apBuild(target, pack, &pictures, &kb, &games);
++        ioWriteEnd();
++    }
++    ioBlockOps(0);
++    if (i > 0) {
++        snprintf(gRipps2ArtPack, sizeof(gRipps2ArtPack), "%s", pack);
++        gRipps2ArtPackCount = pictures;
++        gRipps2ArtPackKb = kb;
++        gEnableArtTar = 1;
++        ripps2ArtPackApplySettings();
++        tarInvalidate(TAR_KIND_ART);
++        artIndexInvalidate();
++        cacheInvalidateFailMemo();
++        ripps2Diag("art pack: %d pictures, %d KB, %d games in %s, %d s", pictures, kb, games, pack, (int)((clock() - start) / CLOCKS_PER_SEC));
++        snprintf(msg, sizeof(msg),
++                 _t("The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again."),
++                 pictures, (kb + 1023) / 1024, pack, (int)((clock() - start) / CLOCKS_PER_SEC), games);
++        guiMsgBoxSound(SFX_SAVE);
++        result = 1;
++    } else {
++        // the pack in use before (if any) was the one just replaced: art loads from the folders until the next build
++        if (gRipps2ArtPack[0] && apSamePath(gRipps2ArtPack, pack)) {
++            gRipps2ArtPack[0] = '\0';
++            gRipps2ArtPackCount = gRipps2ArtPackKb = 0;
++            result = 1;
++        }
++        gEnableArtTar = wasTar;
++        ripps2ArtPackApplySettings();
++        tarInvalidate(TAR_KIND_ART);
++        if (i == 0)
++            snprintf(msg, sizeof(msg), "%s", _t("Stopped. The unfinished pack was removed, and art loads from the ART folders as before."));
++        else
++            snprintf(msg, sizeof(msg), _t("The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before."), pack);
++        guiMsgBoxSound(SFX_ERROR);
++    }
++    guiMsgBox(msg, 0, NULL);
++
++out:
++    free(apFiles);
++    free(apKeys);
++    apFiles = NULL;
++    apKeys = NULL;
++    return result;
++}
+diff --git a/src/ripps2disc.c b/src/ripps2disc.c
+index 84d7833..b1f68c6 100644
+--- a/src/ripps2disc.c
++++ b/src/ripps2disc.c
+@@ -1567,6 +1567,14 @@ static const char rdReadmeAudio[] =
+     "RIPPS2 plays the sounds and the music in this folder. It ships none of its own:\r\n"
+     "without this folder it is silent. STATUS > SOUNDS says what it found here.\r\n"
+     "\r\n"
++    "Where to keep it\r\n"
++    "  Beside RIPPS2.ELF, on the drive RIPPS2 starts from: the boot reads it first.\r\n"
++    "  With Fast Boot on (Settings > Game Sources > Cache) the boot sound is read\r\n"
++    "  with the settings and plays as the towers' first frame appears, before the\r\n"
++    "  drives and the lists are up. Keep only what the menus play here: the sounds\r\n"
++    "  and your music. Big things (ripped CDs, DVD videos, screenshots) go in MEDIA,\r\n"
++    "  which can be on any drive.\r\n"
++    "\r\n"
+     "Sound effects: .adp files named for their events\r\n"
+     "  boot, cancel, confirm, cursor, message, transition, bd_connect, bd_disconnect,\r\n"
+     "  page_in, page_out, error, save, launch, disc, random\r\n"
+@@ -1574,7 +1582,7 @@ static const char rdReadmeAudio[] =
+     "  here from its BIOS, with the boot and game launch music played from the BIOS's\r\n"
+     "  own notes.\r\n"
+     "\r\n"
+-    "Music: any .ogg (Ogg Vorbis, no tags) or .wav (16-bit) file\r\n"
++    "Music: any .ogg (Ogg Vorbis, no tags), .wav (16-bit) or .mp3 file\r\n"
+     "  Settings > Audio Settings > Music lists every one. A name like\r\n"
+     "  \"bgm_01 Title.ogg\" sets its place in the list and its title, but any other name\r\n"
+     "  is listed as it is: a CD track copied here from MEDIA (or with the CD player's\r\n"
+@@ -1594,6 +1602,13 @@ static const char rdReadmeMedia[] =
+     "RIPDISC puts the CDs and DVD videos you rip here, apart from the sounds and\r\n"
+     "music in AUDIO.\r\n"
+     "\r\n"
++    "Where to keep it\r\n"
++    "  On your biggest drive. MEDIA holds the large things (ripped CDs and DVD\r\n"
++    "  videos, full-size shots, videos) and nothing in it is read at boot, so how\r\n"
++    "  fast its drive reads matters little. The sounds and music the menus play\r\n"
++    "  belong in AUDIO beside RIPPS2.ELF, which the boot reads first (with Fast\r\n"
++    "  Boot on, the boot sound plays with the first frame).\r\n"
++    "\r\n"
+     "Ripping a disc\r\n"
+     "  1. Put the disc in the drive and open LAUNCH DISC.\r\n"
+     "  2. After a few seconds the RIPDISC panel shows. Hold SELECT until its ring fills.\r\n"
+diff --git a/src/ripps2shot.c b/src/ripps2shot.c
+index 5a477df..3b819f6 100644
+--- a/src/ripps2shot.c
++++ b/src/ripps2shot.c
+@@ -19,6 +19,7 @@
+ #include <stdlib.h>
+ #include <tamtypes.h>
+ #include "include/ripps2shot.h"
++#include "include/ripps2artpack.h" // build 118: a developed ART shot is new to the ART Pack
+ #include "ripshot_roll.h"
+ 
+ int gRipps2Ripshot = 1;
+@@ -598,6 +599,8 @@ static int rsPng(const char *path, const u8 *idx, int w, int h, int twice, const
+         return 0;
+     ok = rsPngNow(path, idx, w, h, twice, pal, n);
+     ioWriteEnd();
++    if (ok)
++        ripps2ArtPackNoteNew(path); // build 118: an ART shot (MEDIA's are no art: no key) is new to the ART Pack
+     return ok;
+ }
+ 
+diff --git a/src/sound.c b/src/sound.c
+index e9194cc..55047fc 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -496,6 +496,72 @@ static void sfxBootPlay(void)
+     }
+ }
+ 
++/* RIPPS2 build 118 (the user, 10/27: with Fast Boot the boot sound should already be playing as the towers' first frame
++   appears, not come in with the list). The boot sound was the first sound of the whole set's load (deferredAudioInit),
++   which the IO worker reaches only after every drive's start and list. Now it is the IO worker's first job at boot,
++   queued with the settings read (sfxBootEarlyQueue, before applyConfig starts the drives): one file from where the sounds
++   load (the AUDIO folder Fast Boot names, else the one beside RIPPS2) or the disk theme's own. Audio comes up on the main
++   thread meanwhile (sfxBootStart); whichever of the two ends last sends it to the SPU, so it is ready for the first frame.
++   The set's load later keeps it (sfxInit) rather than starting audsrv over under it. Still on the IO worker only. */
++#define SFX_EARLY_NONE  0
++#define SFX_EARLY_READ  1 // in RAM, audio not up yet
++#define SFX_EARLY_READY 2 // in the SPU: sfxInit(1) keeps it
++static volatile int sfxBootEarly = SFX_EARLY_NONE;
++static volatile int sfxAudioUp = 0;
++static char sfxBootThemePath[256]; // the disk theme's sound folder ("" for none)
++
++static void sfxBootEarlyUpload(void)
++{
++    if (sfxLoad(&sfx_files[SFX_BOOT], &sfx[SFX_BOOT]) != 0) {
++        sfxBootEarly = SFX_EARLY_NONE;
++        return;
++    }
++    sfxReady[SFX_BOOT] = 1;
++    sfxBootEarly = SFX_EARLY_READY;
++    if (gEnableSFX && gEnableBootSND)
++        sfxBootPending = 1; // sfxBootPlay, from the towers' first frame
++    ripps2Diag("boot: the boot sound is ready before the drives start");
++}
++
++static void sfxBootEarlyWork(void)
++{
++    char base[256], path[300];
++    int up, ret = -ENOENT;
++
++    if (sfxBootThemePath[0]) {
++        snprintf(path, sizeof(path), "%s/%s", sfxBootThemePath, sfx_files[SFX_BOOT].name);
++        ret = sfxRead(path, &sfx_files[SFX_BOOT]);
++    }
++    if (ret != 0 && ripps2AudioBase(base, sizeof(base) - 8, 0) && audioBaseFound) {
++        snprintf(path, sizeof(path), "%sAUDIO/%s", base, sfx_files[SFX_BOOT].name);
++        ret = sfxRead(path, &sfx_files[SFX_BOOT]);
++    }
++    if (ret != 0)
++        return; // no boot sound where the set loads from: the set's load looks again, as before
++    DIntr();
++    up = sfxAudioUp;
++    if (!up)
++        sfxBootEarly = SFX_EARLY_READ; // sfxBootStart sends it on
++    EIntr();
++    if (up)
++        sfxBootEarlyUpload();
++}
++
++void sfxBootEarlyQueue(int themeID)
++{
++    static int queued = 0;
++    char *thmPath;
++
++    if (queued || !gEnableSFX || !gEnableBootSND)
++        return;
++    queued = 1;
++    sfxBootThemePath[0] = '\0';
++    thmPath = thmGetFilePath(themeID);
++    if (thmPath != NULL)
++        snprintf(sfxBootThemePath, sizeof(sfxBootThemePath), "%ssound", thmPath);
++    ioPutRequest(IO_CUSTOM_SIMPLEACTION, &sfxBootEarlyWork);
++}
++
+ // Returns the number of sounds loaded, < 0 if audio is not up. The IO worker only (sfxReload queues it)
+ // RIPPS2 build 111 (user: "simplify the audio approach for 0 bugs on real hardware"): what a load would read, as one
+ // number: the theme's sound folder and the AUDIO folder, and each event's file in them (its size and date). The
+@@ -590,22 +656,32 @@ int sfxInit(int bootSnd)
+         return sfxLoadedCount;
+     }
+ 
++    // build 118: at boot the boot sound may be in the SPU already, and playing (sfxBootEarlyWork): the rest load after it,
++    // with no audsrv_adpcm_init under it (sfxBootStart did that before it went in)
++    int keepBoot = bootSnd && sfxBootEarly == SFX_EARLY_READY && sfxReady[SFX_BOOT];
+     sfxLoading = 1;     // build 101: the GUI touches no voice until the set is in
+     clock_t loadStart = clock(); // build 115: how long the GUI's sounds were held, in DIAG.TXT
+-    sfxForgetPresses(); // build 101: no memory of a voice from before the load survives it
+-    voicesSilence();    // build 101: a tail still ringing is quiet before init turns every voice up
+-    audsrv_adpcm_init();
+-    voicesReset();
+-    voicesSilence(); // build 100: init turned every voice up
++    if (!keepBoot) {
++        sfxForgetPresses(); // build 101: no memory of a voice from before the load survives it
++        voicesSilence();    // build 101: a tail still ringing is quiet before init turns every voice up
++        audsrv_adpcm_init();
++        voicesReset();
++        voicesSilence(); // build 100: init turned every voice up
++    }
++    sfxBootEarly = SFX_EARLY_NONE; // a later load (a theme, a rip) starts audsrv over as always
++    int bootMs = sfx_files[SFX_BOOT].duration_ms;
+     sfxInitDefaults();
++    if (keepBoot)
++        sfx_files[SFX_BOOT].duration_ms = bootMs; // sfxBootPlay times the boot sound (and the music after it) by it
+     audioSetVolume();
+ 
+-    loaded = 0;
++    loaded = keepBoot ? 1 : 0;
+     memset(sfxReady, 0, sizeof(sfxReady));
++    sfxReady[SFX_BOOT] = keepBoot;
+     memset(sfxSkipped, 0, sizeof(sfxSkipped));
+     unsigned char fromTheme[SFX_COUNT];
+     memset(fromTheme, 0, sizeof(fromTheme));
+-    for (i = bootSnd ? 0 : 1; i < SFX_COUNT; i++) {
++    for (i = (bootSnd && !keepBoot) ? 0 : 1; i < SFX_COUNT; i++) {
+         full_path[0] = '\0';
+         if (themeSfx) {
+             snprintf(full_path, sizeof(full_path), "%s/%s", sound_path, sfx_files[i].name);
+@@ -1066,6 +1142,15 @@ void sfxBootStart(void)
+     voicesSilence(); // build 100: init turned every voice up
+     sfxSetGen = (unsigned int)-1; // build 111: the set is gone, the next sfxInit loads it
+     audioSetVolume();
++    { // build 118: the boot sound the IO worker read first goes to the SPU now, unless it is still being read
++        int have;
++        DIntr();
++        have = sfxBootEarly == SFX_EARLY_READ;
++        sfxAudioUp = 1;
++        EIntr();
++        if (have)
++            sfxBootEarlyUpload();
++    }
+ }
+ 
+ // Build 74: RIPPS2 started where it has no AUDIO folder (a memory card, through BIBLE) finds the one on
+diff --git a/src/tar.c b/src/tar.c
+index e9c78d6..63931e2 100644
+--- a/src/tar.c
++++ b/src/tar.c
+@@ -66,6 +66,11 @@ static const TarDevice *s_dev[TAR_KIND_MAX] = {NULL, NULL, NULL};
+ static int s_inactive[TAR_KIND_MAX] = {0, 0, 0};
+ static char s_exactPath[TAR_KIND_MAX][256] = {{0}, {0}, {0}};
+ static int s_isExact[TAR_KIND_MAX] = {0, 0, 0};
++// RIPPS2 build 118: the drive the user's ART Pack is on is swept first (tarSetPreferredRoot), and the index is looked up
++// through a copy of its order sorted by name (tarSortIndex), not entry by entry: a pack of two thousand pictures answers
++// each cover with a dozen compares
++static char s_prefRoot[TAR_KIND_MAX][16] = {{0}, {0}, {0}};
++static u32 *s_sorted[TAR_KIND_MAX] = {NULL, NULL, NULL};
+ 
+ static const unsigned char s_zeroBlock[TAR_BLOCK_SIZE] __attribute__((aligned(64))) = {0};
+ 
+@@ -86,8 +91,47 @@ static int isZeroBlock(const unsigned char header[TAR_BLOCK_SIZE])
+     return memcmp(header, s_zeroBlock, TAR_BLOCK_SIZE) == 0;
+ }
+ 
++// an entry's name after any folder in it
++static const char *tarEntryBaseName(TarKind kind, u32 i)
++{
++    const char *fname = (const char *)s_index[kind] + gTarInfo[kind].entrySize * i + sizeof(TarEntryBase);
++    const char *slash = strrchr(fname, '/');
++    return slash ? slash + 1 : fname;
++}
++
++static int tarSortCmp(TarKind kind, u32 a, u32 b)
++{
++    int c = strcasecmp(tarEntryBaseName(kind, a), tarEntryBaseName(kind, b));
++    return c != 0 ? c : (a < b ? -1 : (a > b ? 1 : 0)); // the same name twice: the earlier member first, as the scan found it
++}
++
++// build 118: the entries' order by name, once per index (a shell sort: no state outside this call, so the CHT index can
++// be sorted on another thread at the same time). No memory: the lookups scan as they always did
++static void tarSortIndex(TarKind kind)
++{
++    u32 n = s_count[kind], gap, i, j, v;
++    u32 *order;
++
++    free(s_sorted[kind]);
++    s_sorted[kind] = NULL;
++    if (n < 2 || (order = (u32 *)malloc(n * sizeof(u32))) == NULL)
++        return;
++    for (i = 0; i < n; i++)
++        order[i] = i;
++    for (gap = n / 2; gap > 0; gap = gap == 2 ? 1 : gap * 5 / 11)
++        for (i = gap; i < n; i++) {
++            v = order[i];
++            for (j = i; j >= gap && tarSortCmp(kind, order[j - gap], v) > 0; j -= gap)
++                order[j] = order[j - gap];
++            order[j] = v;
++        }
++    s_sorted[kind] = order;
++}
++
+ static void tarCloseInternal(TarKind kind)
+ {
++    free(s_sorted[kind]);
++    s_sorted[kind] = NULL;
+     if (s_index[kind]) {
+         free(s_index[kind]);
+         s_index[kind] = NULL;
+@@ -246,8 +290,10 @@ static int tarParseFile(TarKind kind, const char *path)
+     char fullCachePath[256];
+     snprintf(fullCachePath, sizeof(fullCachePath), "%s%s", dirPath, gTarInfo[kind].cacheName);
+ 
+-    if (tarReadCache(fullCachePath, path, kind) == 0)
++    if (tarReadCache(fullCachePath, path, kind) == 0) {
++        tarSortIndex(kind); // build 118
+         return 0;
++    }
+ 
+     int fd = open(path, O_RDONLY);
+     if (fd < 0)
+@@ -257,6 +303,8 @@ static int tarParseFile(TarKind kind, const char *path)
+     s_index[kind] = NULL;
+     s_count[kind] = 0;
+     s_cap[kind] = 0;
++    free(s_sorted[kind]); // build 118: the order of the index just let go
++    s_sorted[kind] = NULL;
+ 
+     u32 entrySize = gTarInfo[kind].entrySize;
+     if (entrySize <= sizeof(TarEntryBase) + 1)
+@@ -373,6 +421,7 @@ static int tarParseFile(TarKind kind, const char *path)
+ 
+     close(fd);
+     tarWriteCache(fullCachePath, path, kind);
++    tarSortIndex(kind); // build 118
+     return 0;
+ 
+ fail:
+@@ -381,6 +430,8 @@ fail:
+     s_index[kind] = NULL;
+     s_count[kind] = 0;
+     s_cap[kind] = 0;
++    free(s_sorted[kind]); // build 118
++    s_sorted[kind] = NULL;
+     return -1;
+ }
+ 
+@@ -439,10 +490,16 @@ int tarLoadFromAnyDevice(TarKind kind)
+         tarCloseInternal(kind);
+     }
+ 
+-    int found = 0;
++    int found = 0, pref = -1, n;
+ 
+-    for (int i = 0; gDevices[i].prefix; i++) {
+-        const TarDevice *dev = &gDevices[i];
++    // build 118: the user's ART Pack first (Cache > ART Pack), then every device in order (skipping it)
++    for (n = 0; gDevices[n].prefix; n++)
++        if (s_prefRoot[kind][0] && !strcmp(gDevices[n].mountRoot, s_prefRoot[kind]))
++            pref = n;
++    for (int k = pref >= 0 ? -1 : 0; k < n; k++) {
++        if (k >= 0 && k == pref)
++            continue;
++        const TarDevice *dev = &gDevices[k < 0 ? pref : k];
+ 
+         char tarPath[256];
+         if (buildTarPath(dev, kind, tarPath, sizeof(tarPath)) < 0)
+@@ -519,6 +576,26 @@ TarEntryBase *tarFind(TarKind kind, const char *filename)
+     return NULL;
+ }
+ 
++// build 118: the first member (in archive order) whose name after any folder starts with prefix, through the sorted
++// order: every name with the prefix sits together there (callers without a sorted order scan, as before)
++static TarEntryBase *tarFindPrefixSorted(TarKind kind, const char *prefix)
++{
++    u32 *order = s_sorted[kind], lo = 0, hi = s_count[kind], best = (u32)-1;
++    size_t prefixLen = strlen(prefix);
++
++    while (lo < hi) { // the first name not below the prefix
++        u32 mid = lo + (hi - lo) / 2;
++        if (strncasecmp(tarEntryBaseName(kind, order[mid]), prefix, prefixLen) < 0)
++            lo = mid + 1;
++        else
++            hi = mid;
++    }
++    for (; lo < s_count[kind] && !strncasecmp(tarEntryBaseName(kind, order[lo]), prefix, prefixLen); lo++)
++        if (order[lo] < best)
++            best = order[lo];
++    return best == (u32)-1 ? NULL : (TarEntryBase *)((char *)s_index[kind] + gTarInfo[kind].entrySize * best);
++}
++
+ TarEntryBase *tarFindPrefix(TarKind kind, const char *prefix)
+ {
+     if (s_isExact[kind])
+@@ -531,6 +608,9 @@ TarEntryBase *tarFindPrefix(TarKind kind, const char *prefix)
+         if (tarLoadFromAnyDevice(kind) < 0)
+             return NULL;
+ 
++    if (s_sorted[kind] != NULL)
++        return tarFindPrefixSorted(kind, prefix);
++
+     size_t prefixLen = strlen(prefix);
+     u32 entrySize = gTarInfo[kind].entrySize;
+     char *base = (char *)s_index[kind];
+@@ -577,6 +657,8 @@ TarEntryBase *tarFindPrefixExact(TarKind kind, const char *prefix)
+ {
+     if (!s_isExact[kind] || !s_index[kind] || s_count[kind] == 0)
+         return NULL;
++    if (s_sorted[kind] != NULL)
++        return tarFindPrefixSorted(kind, prefix); // build 118
+     size_t prefixLen = strlen(prefix);
+     u32 entrySize = gTarInfo[kind].entrySize;
+     char *base = (char *)s_index[kind];
+@@ -674,3 +756,33 @@ const char *tarGetDevicePrefix(TarKind kind)
+ {
+     return s_dev[kind] ? s_dev[kind]->prefix : NULL;
+ }
++
++// build 118: the sweep tries this device first ("mmce0:/", as gDevices names it; NULL or "" for none). Takes effect at the
++// next sweep (tarInvalidate)
++void tarSetPreferredRoot(TarKind kind, const char *mountRoot)
++{
++    snprintf(s_prefRoot[kind], sizeof(s_prefRoot[kind]), "%s", mountRoot != NULL ? mountRoot : "");
++}
++
++// build 118: the archive the index in memory came from, 1 with its path; 0 when none is held
++int tarLoadedPath(TarKind kind, char *out, int outSize)
++{
++    if (s_index[kind] == NULL || s_count[kind] == 0)
++        return 0;
++    if (s_isExact[kind])
++        return s_exactPath[kind][0] != '\0' && snprintf(out, outSize, "%s", s_exactPath[kind]) < outSize;
++    return buildTarPath(s_dev[kind], kind, out, outSize) == 0;
++}
++
++// build 118: a member of the archive held now, by its name after any folder; never loads or sweeps
++TarEntryBase *tarFindLoaded(TarKind kind, const char *name)
++{
++    u32 entrySize = gTarInfo[kind].entrySize;
++
++    if (s_index[kind] == NULL)
++        return NULL;
++    for (u32 i = 0; i < s_count[kind]; i++)
++        if (strcasecmp(tarEntryBaseName(kind, i), name) == 0)
++            return (TarEntryBase *)((char *)s_index[kind] + entrySize * i);
++    return NULL;
++}
+diff --git a/src/texcache.c b/src/texcache.c
+index 272c5c8..aeb299b 100644
+--- a/src/texcache.c
++++ b/src/texcache.c
+@@ -14,6 +14,7 @@
+ #include "include/favsupport.h" // favGetArtMode -- so are FAV rows
+ #include "include/mixsupport.h" // RIPPS2: and All Games rows
+ #include "include/hddsupport.h" // hddGetArtArchivePath -- exact HDD tar home
++#include "include/ripps2artpack.h" // RIPPS2 build 118: ripps2ArtPackAnswers, the ART Pack's word on a missing picture
+ #include <kernel.h>
+ #include <delaythread.h> // DelayThread -- must be included explicitly, it is not pulled in by kernel.h
+ 
+@@ -133,79 +134,82 @@ static void cacheWakeArtWorker(void);
+ //       non-fatal (tarParseFile ignores the result) and happens only when the archive changes, but it
+ //       is the thing to instrument first if a .tar-enabled build ever feels worse than a plain one.
+ //   DEFAULT PATH: gEnableArtTar ships 0, so none of the above is reachable unless the user opts in.
+-static int artTarLoadImageExact(const char *value, const char *suffix, const char *exactPath, GSTEXTURE *texture)
++// RIPPS2 build 118: "not in the archive's index" apart from every other failure, so an ART Pack RIPPS2 built (which knows
++// every game it was built for) can answer that the picture is not there (ripps2ArtPackAnswers) instead of the folder
++#define ART_TAR_MISS -1000
++
++// build 118: the archive's member for a game's piece of art: its own name, then the name OPL Manager gives the same piece
++// (_BG_00, _SCR_00, _SCR_01 where RIPPS2's themes ask for _BG, _SCR, _SCR2, and the other way), as the folder's lookup
++// tries them (textures.c texArtAliases)
++static TarEntryBase *artTarFindPiece(const char *value, const char *suffix, int exact)
+ {
++    static const char *const swap[][2] = {{"BG", "BG_00"}, {"SCR", "SCR_00"}, {"SCR2", "SCR_01"}};
+     char prefix[64];
+-    TarEntryBase *entry = NULL;
+-    void *buffer;
+-    int result;
++    TarEntryBase *entry;
++    int i, k;
+ 
+     if (snprintf(prefix, sizeof(prefix), "%s_%s.", value, suffix) >= (int)sizeof(prefix))
+-        return -1;
+-
+-    if (tarLoadFile(TAR_KIND_ART, exactPath) < 0)
+-        return -1;
+-
+-    entry = tarFindPrefixExact(TAR_KIND_ART, prefix);
++        return NULL;
++    entry = exact ? tarFindPrefixExact(TAR_KIND_ART, prefix) : tarFindPrefix(TAR_KIND_ART, prefix);
++    for (i = 0; entry == NULL && i < (int)(sizeof(swap) / sizeof(swap[0])); i++)
++        for (k = 0; k < 2 && entry == NULL; k++)
++            if (!strcmp(suffix, swap[i][k]) && snprintf(prefix, sizeof(prefix), "%s_%s.", value, swap[i][!k]) < (int)sizeof(prefix))
++                entry = exact ? tarFindPrefixExact(TAR_KIND_ART, prefix) : tarFindPrefix(TAR_KIND_ART, prefix);
++    return entry;
++}
+ 
+-    if (entry == NULL) {
+-        LOG("ART TAR: '%s_%s' not in the archive index\n", value, suffix);
+-        return -1;
+-    }
++// the member read whole and decoded: a PNG, or a JPG (build 118: RIPPS2 packs both; RiptOPL read PNG only)
++static int artTarDecode(TarEntryBase *entry, const char *value, const char *suffix, GSTEXTURE *texture)
++{
++    void *buffer;
++    int result;
+ 
+     buffer = malloc(entry->rawSize);
+     if (buffer == NULL) {
+-        LOG("ART TAR: out of memory for '%s' (%u bytes)\n", prefix, entry->rawSize);
++        LOG("ART TAR: out of memory for '%s_%s' (%u bytes)\n", value, suffix, entry->rawSize);
+         return -1;
+     }
+ 
+     if (tarRead(TAR_KIND_ART, entry, buffer, entry->rawSize) != entry->rawSize) {
+-        LOG("ART TAR: short read for '%s' (%u bytes expected)\n", prefix, entry->rawSize);
++        LOG("ART TAR: short read for '%s_%s' (%u bytes expected)\n", value, suffix, entry->rawSize);
+         free(buffer);
+-        return -1;
++        return ERR_FILE_IO; // there, but the device stopped short: asked again later
+     }
+ 
+-    result = texLoadFromMemory(texture, buffer, entry->rawSize);
++    result = texLoadArtFromMemory(texture, buffer, entry->rawSize, !strncmp(suffix, "BG", 2));
+     if (result < 0)
+-        LOG("ART TAR: '%s' found (%u bytes) but PNG decode failed (%d)\n", prefix, entry->rawSize, result);
++        LOG("ART TAR: '%s_%s' found (%u bytes) but could not be decoded (%d)\n", value, suffix, entry->rawSize, result);
+     free(buffer);
+     return result;
+ }
+ 
+-static int artTarLoadImage(const char *value, const char *suffix, GSTEXTURE *texture)
++static int artTarLoadImageExact(const char *value, const char *suffix, const char *exactPath, GSTEXTURE *texture)
+ {
+-    char prefix[64];
+-    TarEntryBase *entry = NULL;
+-    void *buffer;
+-    int result;
++    TarEntryBase *entry;
+ 
+-    if (snprintf(prefix, sizeof(prefix), "%s_%s.", value, suffix) >= (int)sizeof(prefix))
++    if (tarLoadFile(TAR_KIND_ART, exactPath) < 0)
+         return -1;
+ 
+-    entry = tarFindPrefix(TAR_KIND_ART, prefix);
++    entry = artTarFindPiece(value, suffix, 1);
+ 
+     if (entry == NULL) {
+         LOG("ART TAR: '%s_%s' not in the archive index\n", value, suffix);
+-        return -1;
++        return ART_TAR_MISS;
+     }
+ 
+-    buffer = malloc(entry->rawSize);
+-    if (buffer == NULL) {
+-        LOG("ART TAR: out of memory for '%s' (%u bytes)\n", prefix, entry->rawSize);
+-        return -1;
+-    }
++    return artTarDecode(entry, value, suffix, texture);
++}
+ 
+-    if (tarRead(TAR_KIND_ART, entry, buffer, entry->rawSize) != entry->rawSize) {
+-        LOG("ART TAR: short read for '%s' (%u bytes expected)\n", prefix, entry->rawSize);
+-        free(buffer);
+-        return -1;
++static int artTarLoadImage(const char *value, const char *suffix, GSTEXTURE *texture)
++{
++    TarEntryBase *entry = artTarFindPiece(value, suffix, 0);
++
++    if (entry == NULL) {
++        LOG("ART TAR: '%s_%s' not in the archive index\n", value, suffix);
++        return ART_TAR_MISS; // (no archive at all is a miss too: ripps2ArtPackAnswers asks which archive is held)
+     }
+ 
+-    result = texLoadFromMemory(texture, buffer, entry->rawSize);
+-    if (result < 0)
+-        LOG("ART TAR: '%s' found (%u bytes) but PNG decode failed (%d)\n", prefix, entry->rawSize, result);
+-    free(buffer);
+-    return result;
++    return artTarDecode(entry, value, suffix, texture);
+ }
+ 
+ 
+@@ -934,6 +938,7 @@ static void cacheLoadImage(load_image_request_t *req)
+     // The archive decision was made on the GUI thread at enqueue (cacheResolveArtArchive). Nothing
+     // here may re-derive it: every input to that answer is support-private state a list rebuild
+     // rewrites underneath this thread.
++    int packAnswered = 0; // RIPPS2 build 118
+     if (gEnableArtTar) {
+         if (req->artArchive < 0)
+             result = -1; // source has a home we cannot reach -- never fall back to another device's archive
+@@ -941,10 +946,16 @@ static void cacheLoadImage(load_image_request_t *req)
+             result = artTarLoadImageExact(req->value, req->cache->suffix, req->artArchivePath, &staged);
+         else
+             result = artTarLoadImage(req->value, req->cache->suffix, &staged);
++        // build 118: an ART Pack RIPPS2 built holds every picture the ART folders had for the games it was built for: one it
++        // does not hold is not there, so the folder is not listed or opened for it (no art RIPPS2 wrote since, no PS1 game)
++        if (result == ART_TAR_MISS && ripps2ArtPackAnswers(req->value)) {
++            result = ERR_BAD_FILE;
++            packAnswered = 1;
++        }
+     }
+ 
+     // Fall through to the per-file lookup whenever the archive is off, absent, or lacks this key.
+-    if (result < 0)
++    if (result < 0 && !packAnswered)
+         result = handler->itemGetImage(handler, req->cache->prefix, req->cache->isPrefixRelative, req->value, req->cache->suffix, &staged, GS_PSM_CT24);
+ 
+     texSetLoadAbortFlag(NULL);
+diff --git a/src/textures.c b/src/textures.c
+index 403aa1e..91b7135 100644
+--- a/src/textures.c
++++ b/src/textures.c
+@@ -1133,6 +1133,32 @@ int texLoadFromMemory(GSTEXTURE *texture, const void *buf, u32 size)
+     return texLoadAll(texture, NULL, -1, buf, size);
+ }
+ 
++// RIPPS2 build 118: a picture of a game's art already in memory (out of an ART Pack), whatever it holds, as texLoadArt
++// does for a file: a PNG through the loader above, anything it refuses (a JPG, 16 bits a channel, too big) through the
++// decoder that reads both and shrinks it (a background to a full screen, the rest to 512 on a side). 0, or ERR_BAD_FILE
++int texLoadArtFromMemory(GSTEXTURE *texture, const void *buf, u32 size, int background)
++{
++    unsigned char *rgba;
++    int w, h, ow, oh;
++
++    if (texLoadAll(texture, NULL, -1, buf, size) >= 0)
++        return 0;
++    if (texLoadAbortRequested())
++        return ERR_LOAD_ABORTED;
++    if (!ripps2DecodePicture((const unsigned char *)buf, (int)size, background ? 720 : 512, 512, &rgba, &w, &h, &ow, &oh, NULL))
++        return ERR_BAD_FILE;
++    texPrepare(texture);
++    texture->Width = w;
++    texture->Height = h;
++    texture->PSM = GS_PSM_CT32;
++    texture->Mem = (u32 *)rgba;
++    if (texSizeValidate(w, h, GS_PSM_CT32) < 0) {
++        texFree(texture);
++        return ERR_BAD_FILE;
++    }
++    return 0;
++}
++
+ // RIPPS2 build 73: texSetProbe(buf, size) makes texDiscoverLoad on the CALLING thread report the path
+ // it would try (without its extension) into buf and load nothing: the cover art download asks every
+ // source where its covers live. Other threads (the art worker) load as usual meanwhile.

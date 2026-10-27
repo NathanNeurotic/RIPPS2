@@ -1265,6 +1265,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Memorykortet i plads %d starter %s ved opstart, som BOOT LOCK ikke kan indstille: den virker gennem PS2BBL, FMCB og OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: En opstartsindlæser med RIPPS2's lås er på denne konsol.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'Et spils EXIT: browseren, derefter din opstartsindlæser (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d billeder fra %d ART-mapper kommer i én fil, %s. ART-mapperne forbliver, som de er: pakken er en kopi. Du kan kopiere art.tar til et andet drevs ART-mappe med Memory Files, men det går hurtigst at bygge den på det drev, du browser fra, derfor står det hurtigste drev først. Byg den nu?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d billeder der, læser %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d billeder der, læser %d KB/s, det hurtigste'
+  'In use: %s, %d pictures, %d MB': 'I brug: %s, %d billeder, %d MB'
+  Looking at the ART folders on the started drives: Kigger på ART-mapperne på de startede drev
+  'Measuring how fast each drive reads its art: %s': 'Måler hvor hurtigt hvert drev læser sine billeder: %s'
+  'None: each picture is read from its own ART folder.': 'Ingen: hvert billede læses fra sin egen ART-mappe.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Pakker billederne i %s: %d af %d billeder, %d MB. Tryk på tilbage-knappen for at stoppe.'
+  REMOVE the pack in %s (the ART folders stay as they are): FJERN pakken i %s (ART-mapperne forbliver, som de er)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Fjern ART-pakken i %s? ART-mapperne forbliver, som de er.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Stoppet. Den ufærdige pakke blev fjernet, og billederne læses fra ART-mapperne som før.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'ART-pakken kunne ikke skrives til %s (er der plads på det drev?). Intet andet ændrede sig: billederne læses fra ART-mapperne som før.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: ART-pakken i %s er fjernet. Billederne læses fra ART-mapperne igen.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'ART-pakken er bygget: %d billeder, %d MB, i %s (%d s). Billederne læses fra den fra nu af, og de %d spil, den blev bygget til, får aldrig deres ART-mappe spurgt ét billede ad gangen. Billeder, som RIPPS2 henter eller tager, vises med det samme; billeder, du kopierer ind fra en pc, vises, når du bygger pakken igen.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Der er ingen ART-mappe med billeder på de startede drev. Start de drev, dine billeder ligger på (SELECT på deres side), og kom så tilbage.
 labels:
   OK: OK
   MEDIUM: Mellem
@@ -1741,3 +1760,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino kan ikke bruge en VMC på APA-HDD''en (exFAT, USB og MX4SIO kan): dette spil starter med det rigtige kort i den plads.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Starten læser kun RIPPS2''s eget drev: indstillingerne og lydene ved siden af RIPPS2.ELF (RIPPS2.FB der siger hvor) og hver liste fra sin cache. De andre drev venter: SELECT på en side starter dens drev og henter deres billeder (med automatisk opdatering starter de ved start). At slå det til kopierer dine lyde, og musikken hvis der er plads, til AUDIO ved siden af RIPPS2.'
+  RIPPS2_ART_PACK: ART-pakke
+  RIPPS2_ART_PACK_BUILD: Byg eller fjern
+  HINT_RIPPS2_ART_PACK: Pakker ART-mappen på hvert startet drev i én art.tar på det drev, du vælger (det hurtigste tilbydes først). Coverne læses så fra én fil med ét indeks, aldrig med et opslag pr. spil, så menuerne og musikken forbliver glatte. ART-mapperne forbliver, som de er.

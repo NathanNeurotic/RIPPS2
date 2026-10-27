@@ -1266,6 +1266,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 插槽 %d 的記憶卡開機時啟動 %s，BOOT LOCK 無法設定它：BOOT LOCK 透過 PS2BBL、FMCB 和 OSDMenu 運作。
   A boot loader with RIPPS2's lock is on this console.: 這台主機上有帶 RIPPS2 鎖定的開機程式。
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 遊戲的 EXIT：瀏覽器，然後是你的開機程式（BOOT LOCK）
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d 張圖片（來自 %d 個 ART 資料夾）將放進一個檔案 %s。ART 資料夾保持原樣：包只是副本。你可以用 Memory Files 把 art.tar 複製到其他磁碟的 ART 資料夾，但在你平常瀏覽的磁碟上建立最快，所以最快的磁碟排在最前面。現在建立嗎？'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar：%d 張圖片，讀取 %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar：%d 張圖片，讀取 %d KB/s，最快'
+  'In use: %s, %d pictures, %d MB': 使用中：%s，%d 張圖片，%d MB
+  Looking at the ART folders on the started drives: 正在查看已啟動磁碟上的 ART 資料夾
+  'Measuring how fast each drive reads its art: %s': 正在測量每個磁碟讀取圖片的速度：%s
+  'None: each picture is read from its own ART folder.': 無：每張圖片都從它自己的 ART 資料夾讀取。
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 正在把圖片打包到 %s：%d / %d 張，%d MB。按返回鍵停止。
+  REMOVE the pack in %s (the ART folders stay as they are): 刪除 %s 中的包（ART 資料夾保持原樣）
+  Remove the ART Pack in %s? The ART folders stay as they are.: 要刪除 %s 中的 ART 包嗎？ART 資料夾保持原樣。
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: 已停止。未完成的包已刪除，圖片照舊從 ART 資料夾讀取。
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 無法把 ART 包寫入 %s（該磁碟還有空間嗎？）。其他沒有任何改變：圖片照舊從 ART 資料夾讀取。
+  The ART Pack in %s is removed. Art loads from the ART folders again.: '%s 中的 ART 包已刪除。圖片重新從 ART 資料夾讀取。'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : ART 包已建立：%d 張圖片，%d MB，位於 %s（%d 秒）。今後圖片從包中讀取，它所對應的 %d 款遊戲再也不會逐張查詢各自的 ART 資料夾。RIPPS2 下載或拍下的圖片會立即顯示；從電腦複製進去的圖片在重新建立包之後顯示。
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : 已啟動的磁碟上沒有含圖片的 ART 資料夾。請先啟動存放圖片的磁碟（在其頁面按 SELECT），然後再回來。
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色
@@ -1736,3 +1755,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: Neutrino 無法使用 APA 硬碟上的 VMC（exFAT、USB 與 MX4SIO 可以）：這個遊戲將使用該插槽中的真實記憶卡啟動。
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 啟動時只讀取 RIPPS2 自己的磁碟：RIPPS2.ELF 旁邊的設定和音效 (位置由那裡的 RIPPS2.FB 說明)，以及每個清單的快取。其他磁碟會等待：在頁面上按 SELECT 會啟動其磁碟並載入圖片 (開啟自動重新整理時它們在啟動時就會啟動)。開啟後會把你的音效，以及空間足夠時的音樂，複製到 RIPPS2 旁邊的 AUDIO。
+  RIPPS2_ART_PACK: ART 包
+  RIPPS2_ART_PACK_BUILD: 建立或刪除
+  HINT_RIPPS2_ART_PACK: 把每個已啟動磁碟的 ART 資料夾打包成你所選磁碟上的一個 art.tar（最快的磁碟優先推薦）。封面隨後從一個檔案憑一個索引讀取，不再逐個遊戲查找，選單和音樂都保持流暢。ART 資料夾保持原樣。

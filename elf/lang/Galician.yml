@@ -1265,6 +1265,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'A tarxeta de memoria da rañura %d inicia %s ao acender, que BOOT LOCK non pode axustar: funciona a través de PS2BBL, FMCB e OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Nesta consola hai un cargador de arranque co bloqueo de RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT dun xogo: o navegador, despois o teu cargador de arranque (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d imaxes de %d cartafoles ART van a un só ficheiro, %s. Os cartafoles ART quedan como están: o paquete é unha copia. Podes copiar art.tar ao cartafol ART doutra unidade con Memory Files, pero crealo na unidade desde a que navegas é o máis rápido, por iso a unidade máis rápida aparece primeiro. Crealo agora?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d imaxes alí, le %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d imaxes alí, le %d KB/s, a máis rápida'
+  'In use: %s, %d pictures, %d MB': 'En uso: %s, %d imaxes, %d MB'
+  Looking at the ART folders on the started drives: Revisando os cartafoles ART das unidades iniciadas
+  'Measuring how fast each drive reads its art: %s': 'Medindo a que velocidade le cada unidade as súas imaxes: %s'
+  'None: each picture is read from its own ART folder.': 'Ningún: cada imaxe lese do seu propio cartafol ART.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Empaquetando as imaxes en %s: %d de %d imaxes, %d MB. Preme o botón de volver para deter.'
+  REMOVE the pack in %s (the ART folders stay as they are): QUITAR o paquete de %s (os cartafoles ART quedan como están)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Quitar o paquete ART de %s? Os cartafoles ART quedan como están.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Detido. Quitouse o paquete sen rematar, e as imaxes cárganse dos cartafoles ART coma antes.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Non se puido escribir o paquete ART en %s (hai espazo nesa unidade?). Nada máis cambiou: as imaxes cárganse dos cartafoles ART coma antes.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Quitouse o paquete ART de %s. As imaxes volven cargarse dos cartafoles ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'O paquete ART está listo: %d imaxes, %d MB, en %s (%d s). As imaxes cárganse del a partir de agora, e aos %d xogos para os que se creou nunca máis se lles pregunta ao seu cartafol ART imaxe por imaxe. As imaxes que RIPPS2 descarga ou captura aparecen ao momento; as que copias desde un PC aparecen cando volves crear o paquete.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Non hai ningún cartafol ART con imaxes nas unidades iniciadas. Inicia as unidades onde están as túas imaxes (SELECT na súa páxina) e despois volve.
 labels:
   HINT_OSD_SETTINGS_LNG: Forzar unha configuración de idioma personalizada
   OSD_SETTINGS_TVASPECT: Tamaño da pantalla
@@ -1970,3 +1989,6 @@ labels:
   HINT_BDM_START: 'USB, iLink, MX4SIO e o disco duro exFAT. Automático iníciaos no arranque: o máis rápido para as unidades que teña conectadas, cos seus xogos en Todos os xogos desde o comezo. Manual iníciaos ao abrir a súa páxina.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'O arranque só le a unidade de RIPPS2: a configuración e os sons xunto a RIPPS2.ELF (RIPPS2.FB alí di onde) e cada lista desde a súa caché. As outras unidades agardan: SELECT nunha páxina inicia as súas unidades e trae as imaxes (coa actualización automática inícianse ao arrancar). Activalo copia os teus sons, e a música se hai espazo, a AUDIO xunto a RIPPS2.'
+  RIPPS2_ART_PACK: Paquete ART
+  RIPPS2_ART_PACK_BUILD: Crear ou quitar
+  HINT_RIPPS2_ART_PACK: Xunta o cartafol ART de cada unidade iniciada nun só art.tar na unidade que escollas (a máis rápida ofrécese primeiro). As portadas cárganse entón dun ficheiro cun índice, nunca cunha procura por xogo, e os menús e a música van fluídos. Os cartafoles ART quedan como están.

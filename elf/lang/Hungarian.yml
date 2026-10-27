@@ -1266,6 +1266,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'A(z) %d. foglalat memóriakártyája bekapcsoláskor ezt indítja: %s, amit a BOOT LOCK nem tud beállítani: a PS2BBL-en, az FMCB-n és az OSDMenun keresztül működik.'
   A boot loader with RIPPS2's lock is on this console.: Ezen a konzolon egy rendszerbetöltő van a RIPPS2 zárával.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'Egy játék EXIT-je: a böngésző, aztán a rendszerbetöltőd (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d kép %d ART mappából egyetlen fájlba kerül: %s. Az ART mappák maradnak, ahogy vannak: a csomag másolat. Az art.tar-t a Memory Files-szal átmásolhatod egy másik meghajtó ART mappájába, de az a leggyorsabb, ha azon a meghajtón építed meg, amelyről böngészel, ezért a leggyorsabb meghajtó áll elöl. Megépíted most?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: ott %d kép, %d KB/s olvasás'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: ott %d kép, %d KB/s olvasás, a leggyorsabb'
+  'In use: %s, %d pictures, %d MB': 'Használatban: %s, %d kép, %d MB'
+  Looking at the ART folders on the started drives: Az elindított meghajtók ART mappáinak átnézése
+  'Measuring how fast each drive reads its art: %s': 'Annak mérése, milyen gyorsan olvassa egy meghajtó a képeit: %s'
+  'None: each picture is read from its own ART folder.': 'Nincs: minden kép a saját ART mappájából jön.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'A képek csomagolása ide: %s: %d / %d kép, %d MB. A vissza gombbal leállítható.'
+  REMOVE the pack in %s (the ART folders stay as they are): 'A csomag TÖRLÉSE innen: %s (az ART mappák maradnak, ahogy vannak)'
+  Remove the ART Pack in %s? The ART folders stay as they are.: 'Törlöd az ART csomagot innen: %s? Az ART mappák maradnak, ahogy vannak.'
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Leállítva. A félkész csomag törölve, és a képek az ART mappákból jönnek, mint eddig.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Az ART csomagot nem sikerült ide írni: %s (van hely azon a meghajtón?). Semmi más nem változott: a képek az ART mappákból jönnek, mint eddig.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: 'Az ART csomag törölve innen: %s. A képek ismét az ART mappákból jönnek.'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Az ART csomag elkészült: %d kép, %d MB, itt: %s (%d s). Mostantól a képek belőle jönnek, és annak a %d játéknak, amelyhez készült, az ART mappáját soha többé nem kérdezi képenként. A RIPPS2 által letöltött vagy készített képek azonnal megjelennek; a PC-ről bemásolt képek akkor jelennek meg, ha újra megépíted a csomagot.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Az elindított meghajtókon nincs képeket tartalmazó ART mappa. Indítsd el azokat a meghajtókat, amelyeken a képeid vannak (SELECT az oldalukon), aztán gyere vissza.
 labels:
   OK: OK
   BACKSPACE: Visszatörlés
@@ -1738,3 +1757,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'A Neutrino nem tud VMC-t használni az APA HDD-n (az exFAT, az USB és az MX4SIO igen): ez a játék a valódi kártyával indul abban a foglalatban.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Az indulás csak a RIPPS2 saját meghajtóját olvassa: a beállításokat és a hangokat a RIPPS2.ELF mellett (az ott lévő RIPPS2.FB mondja meg, hol) és minden listát a gyorsítótárából. A többi meghajtó vár: egy oldalon a SELECT elindítja a meghajtóit és betölti a képeiket (automatikus frissítéssel induláskor indulnak). A bekapcsolás a hangjaidat, és ha van hely, a zenét is az AUDIO mappába másolja a RIPPS2 mellé.'
+  RIPPS2_ART_PACK: ART csomag
+  RIPPS2_ART_PACK_BUILD: Építés vagy törlés
+  HINT_RIPPS2_ART_PACK: Minden elindított meghajtó ART mappáját egyetlen art.tar fájlba csomagolja a választott meghajtón (a leggyorsabbat kínálja elsőként). A borítók ezután egy fájlból, egy indexszel jönnek, soha nem játékonkénti kereséssel, így a menük és a zene zökkenőmentesek maradnak. Az ART mappák maradnak, ahogy vannak.

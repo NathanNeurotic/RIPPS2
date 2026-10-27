@@ -1266,6 +1266,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 插槽 %d 的记忆卡开机时启动 %s，BOOT LOCK 无法设置它：BOOT LOCK 通过 PS2BBL、FMCB 和 OSDMenu 工作。
   A boot loader with RIPPS2's lock is on this console.: 这台主机上有带 RIPPS2 锁定的引导程序。
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 游戏的 EXIT：浏览器，然后是你的引导程序（BOOT LOCK）
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d 张图片（来自 %d 个 ART 文件夹）将放进一个文件 %s。ART 文件夹保持原样：包只是副本。你可以用 Memory Files 把 art.tar 复制到其他驱动器的 ART 文件夹，但在你平时浏览的驱动器上生成最快，所以最快的驱动器排在最前。现在生成吗？'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar：%d 张图片，读取 %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar：%d 张图片，读取 %d KB/s，最快'
+  'In use: %s, %d pictures, %d MB': 使用中：%s，%d 张图片，%d MB
+  Looking at the ART folders on the started drives: 正在查看已启动驱动器上的 ART 文件夹
+  'Measuring how fast each drive reads its art: %s': 正在测量每个驱动器读取图片的速度：%s
+  'None: each picture is read from its own ART folder.': 无：每张图片都从它自己的 ART 文件夹读取。
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 正在把图片打包到 %s：%d / %d 张，%d MB。按返回键停止。
+  REMOVE the pack in %s (the ART folders stay as they are): 删除 %s 中的包（ART 文件夹保持原样）
+  Remove the ART Pack in %s? The ART folders stay as they are.: 删除 %s 中的 ART 包吗？ART 文件夹保持原样。
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: 已停止。未完成的包已删除，图片照旧从 ART 文件夹读取。
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 无法把 ART 包写入 %s（该驱动器还有空间吗？）。其他没有任何变化：图片照旧从 ART 文件夹读取。
+  The ART Pack in %s is removed. Art loads from the ART folders again.: '%s 中的 ART 包已删除。图片重新从 ART 文件夹读取。'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : ART 包已生成：%d 张图片，%d MB，位于 %s（%d 秒）。今后图片从包中读取，它所针对的 %d 款游戏再也不会逐张查询各自的 ART 文件夹。RIPPS2 下载或拍下的图片会立即显示；从电脑复制进去的图片在重新生成包后显示。
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : 已启动的驱动器上没有含图片的 ART 文件夹。请先启动存放图片的驱动器（在其页面按 SELECT），然后再回来。
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
@@ -1727,3 +1746,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: Neutrino 无法使用 APA 硬盘上的 VMC（exFAT、USB 和 MX4SIO 可以）：这个游戏将使用该插槽中的真实记忆卡启动。
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 启动时只读取 RIPPS2 自己的驱动器：RIPPS2.ELF 旁边的设置和音效 (位置由那里的 RIPPS2.FB 说明)，以及每个列表的缓存。其他驱动器会等待：在页面上按 SELECT 会启动其驱动器并载入图片 (开启自动刷新时它们在启动时就会启动)。开启后会把你的音效，以及空间足够时的音乐，复制到 RIPPS2 旁边的 AUDIO。
+  RIPPS2_ART_PACK: ART 包
+  RIPPS2_ART_PACK_BUILD: 生成或删除
+  HINT_RIPPS2_ART_PACK: 把每个已启动驱动器的 ART 文件夹打包成你所选驱动器上的一个 art.tar（最快的驱动器优先推荐）。封面随后从一个文件凭一个索引读取，不再逐个游戏查找，菜单和音乐都保持流畅。ART 文件夹保持原样。

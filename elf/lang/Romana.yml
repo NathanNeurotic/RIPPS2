@@ -1264,6 +1264,25 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Cardul de memorie din slotul %d pornește %s la pornire, pe care BOOT LOCK nu îl poate seta: funcționează prin PS2BBL, FMCB și OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Pe această consolă este un încărcător de pornire cu blocarea RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT-ul unui joc: browserul, apoi încărcătorul tău de pornire (BOOT LOCK)'
+  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d imagini din %d foldere ART intră într-un singur fișier, %s. Folderele ART rămân cum sunt: pachetul este o copie. Poți copia art.tar în folderul ART al altei unități cu Memory Files, dar cel mai rapid este să-l construiești pe unitatea de pe care navighezi, de aceea unitatea cea mai rapidă apare prima. Îl construiești acum?'
+  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d imagini acolo, citește %d KB/s'
+  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d imagini acolo, citește %d KB/s, cea mai rapidă'
+  'In use: %s, %d pictures, %d MB': 'În uz: %s, %d imagini, %d MB'
+  Looking at the ART folders on the started drives: Se cercetează folderele ART de pe unitățile pornite
+  'Measuring how fast each drive reads its art: %s': 'Se măsoară cât de repede își citește fiecare unitate imaginile: %s'
+  'None: each picture is read from its own ART folder.': 'Niciunul: fiecare imagine se citește din propriul folder ART.'
+  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Se împachetează imaginile în %s: %d din %d imagini, %d MB. Apasă butonul înapoi ca să oprești.'
+  REMOVE the pack in %s (the ART folders stay as they are): ȘTERGE pachetul din %s (folderele ART rămân cum sunt)
+  Remove the ART Pack in %s? The ART folders stay as they are.: Ștergi pachetul ART din %s? Folderele ART rămân cum sunt.
+  Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Oprit. Pachetul neterminat a fost șters, iar imaginile se încarcă din folderele ART ca înainte.
+  ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
+  : 'Pachetul ART nu a putut fi scris în %s (este loc pe acea unitate?). Nimic altceva nu s-a schimbat: imaginile se încarcă din folderele ART ca înainte.'
+  The ART Pack in %s is removed. Art loads from the ART folders again.: Pachetul ART din %s a fost șters. Imaginile se încarcă din nou din folderele ART.
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Pachetul ART este gata: %d imagini, %d MB, în %s (%d s). De acum imaginile se încarcă din el, iar pentru cele %d jocuri pentru care a fost construit folderul ART nu mai este întrebat niciodată imagine cu imagine. Imaginile pe care RIPPS2 le descarcă sau le captează apar imediat; cele copiate de pe un PC apar după ce construiești pachetul din nou.'
+  ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  : Nu există niciun folder ART cu imagini pe unitățile pornite. Pornește unitățile pe care sunt imaginile tale (SELECT pe pagina lor), apoi revino.
 labels:
   SETTINGS_SAVED: Setări salvate în %s
   REMOVE_ALL_SETTINGS: Elimină setările
@@ -1783,3 +1802,6 @@ labels:
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino nu poate folosi un VMC pe HDD-ul APA (exFAT, USB și MX4SIO pot): acest joc pornește cu cardul real în acel slot.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Pornirea citește doar unitatea RIPPS2: setările și sunetele de lângă RIPPS2.ELF (RIPPS2.FB de acolo spune unde) și fiecare listă din cache-ul ei. Celelalte unități așteaptă: SELECT pe o pagină pornește unitățile ei și aduce imaginile lor (cu reîmprospătarea automată pornesc la pornire). Activarea copiază sunetele tale, și muzica dacă e loc, în AUDIO lângă RIPPS2.'
+  RIPPS2_ART_PACK: Pachet ART
+  RIPPS2_ART_PACK_BUILD: Construiește sau șterge
+  HINT_RIPPS2_ART_PACK: Pune folderul ART al fiecărei unități pornite într-un singur art.tar pe unitatea pe care o alegi (cea mai rapidă este oferită prima). Copertele se încarcă apoi dintr-un fișier cu un index, niciodată cu o căutare pentru fiecare joc, așa că meniurile și muzica rămân fluide. Folderele ART rămân cum sunt.
