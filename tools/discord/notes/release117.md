@@ -39,6 +39,6 @@ Builds 116 and 117 come together: BOOT LOCK through the boot loader your console
 - Games from an SD2PSX or another MMCE device keep their roll on the SD (MEDIA/RIPSHOT), so the in-game screenshot works there instead of "not for this game". Games on the APA HDD still say that: its roll needs a partition of its own, coming in a later build.
 
 ### Thanks
-Thanks to ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60 and lukeatmynose for the reports that got us here, and to DarkNerdShawny for issue #3. Special thanks to all the YouTube love as well: glad to help however you reach me.
+Thanks to ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60 and lukeatmynose for the reports that got us here, and to DarkNerdShawny for opening issues on GitHub (three so far; this build's FreeMcBoot fix came from one). An issue is the best way to get RIPPS2 updated: be like DarkNerdShawny and [open one](https://github.com/akilluminati47/RIPPS2/issues). Special thanks to all the YouTube love as well: glad to help however you reach me.
 
 The full list is in the [changelog](https://github.com/akilluminati47/RIPPS2/blob/main/CHANGELOG.md).

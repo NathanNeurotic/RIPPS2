@@ -19,7 +19,7 @@ RIPPS2 is a PS2 front end in a single `.elf`: a teardown and rebuild of [RiptOPL
 - **STORAGE** is your game library: every drive in one list, with art, an info page whose art crossfades with the screenshots, per-game settings, and R3 to star a game into Starred Games (the star sits at the start of the row; Settings > Game Sources > Starred Games Star moves or hides it). Every drive's games show at once from its last list, then the drive is read again (MMCE from build 109, every source from build 110).
 - **MEMORY FILES** is a built-in file browser: copy, move and delete across memory cards, USB and HDD; open OPL's VMC card images like folders; export and import PSU saves; edit text files; open pictures and play AVI video full screen; Start opens its settings, where **SEARCH FILES** finds any file or folder by name on every started drive and opens the tree where it is. Square on a memory card opens the **CARD MANAGER**: back a card up to a VMC, write a VMC's saves back, erase the game saves, format.
 
-It is **beta** from build 100: a hundred builds of alpha, tested on consoles and in PCSX2 by ripto, nuno6573, zackcage6, eliminator1403, FifthFox and Mr.sus.60, and in the beta by lukeatmynose too, with special thanks to all the YouTube love as well. Keep your usual loader close by, and tell us what breaks: feedback is what makes RIPPS2.
+It is **beta** from build 100: a hundred builds of alpha, tested on consoles and in PCSX2 by ripto, nuno6573, zackcage6, eliminator1403, FifthFox and Mr.sus.60, and in the beta by lukeatmynose too, with special thanks to all the YouTube love as well. Keep your usual loader close by, and tell us what breaks: feedback is what makes RIPPS2. **The best way to get RIPPS2 updated is [an issue on GitHub](https://github.com/akilluminati47/RIPPS2/issues)**: DarkNerdShawny has opened three, and v1.1.7's FreeMcBoot fix came from one. Be like DarkNerdShawny.
 
 ## Highlights
 
@@ -152,7 +152,7 @@ Add `?t=12` to skip the pillars intro, or `?f=3#memory-files` to open a specific
 
 ## Credits
 
-RIPPS2 is designed and directed by akilluminati47 and built with Claude (Anthropic). Testers: ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60, lukeatmynose. Special thanks to all the YouTube love as well: glad to help however you reach me.
+RIPPS2 is designed and directed by akilluminati47 and built with Claude (Anthropic). Testers: ripto, nuno6573, zackcage6, eliminator1403, FifthFox, Mr.sus.60, lukeatmynose. Issues on GitHub: DarkNerdShawny (an issue is the best way to get RIPPS2 updated: be like DarkNerdShawny and [open one](https://github.com/akilluminati47/RIPPS2/issues)). Special thanks to all the YouTube love as well: glad to help however you reach me.
 
 - [RiptOPL](https://github.com/NathanNeurotic/Open-PS2-Loader) by NathanNeurotic and the [Open PS2 Loader](https://github.com/ps2homebrew/Open-PS2-Loader) team (AFL-3.0), which RIPPS2 is built on. Their full credits are on RIPPS2's About page.
 - [Neutrino](https://github.com/rickgaiser/neutrino) by [rickgaiser](https://github.com/rickgaiser) (AFL-3.0), the small, fast and modular device emulator that is RIPPS2's second game core: RIPPS2.elf carries its newest build (v1.8.0-61-g7be8de2, 31 August 2026) unmodified and installs it where you pick, and your own Neutrino of any version comes first ([`elf/neutrino`](elf/neutrino/README.md)). Choose it as the Default Loader Core in Settings > Game Launching.
