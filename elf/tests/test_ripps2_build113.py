@@ -147,7 +147,7 @@ need(opl, (('configSetInt(configOPL, "ripps2_fastcache", gRipps2FastCache);', 'F
 disc = rd('src/ripps2disc.c')
 need(disc, (('#define RD_NOTCHES 12', 'the hold fills notches'),
             ('float fill = p * RD_NOTCHES - i; // 1: lit, 0..1: filling, below 0: still to come', 'the one filling fades in'),
-            ('hx = 320 - (RD_RING_W + 6 + ripps2HintWidth(hold)) / 2;', 'the ring has its own room in the hint'),
+            ('hx = x + w / 2 - (RD_RING_W + 6 + ripps2HintWidth(hold)) / 2;', 'the ring has its own room in the hint (build 117: in the box flush with the bar)'),
             ('ripps2HintText(hx + RD_RING_W + 6, y + 90, hold, rdAlpha(RD_SOFT, ia));', 'HOLD starts after the ring (build 114: on the launch guard frame)')), 'ripps2disc.c')
 if 'rmDrawLine(cx + (int)(r * cosf(a0))' in disc:
     fail.append('ripps2disc.c: the old 1 px ring is still drawn')

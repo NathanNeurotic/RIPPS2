@@ -18,7 +18,8 @@ if '#define FLIP_HOLD_S 0.42f' not in thm:
 if 'gridBacks[GRID_BACK_SLOTS]' not in thm or 'for (i = 0; i < 2; i++)\n        if (gridBacks' in thm:
     fail.append('the back covers need a place for every flipping element (GRID_BACK_SLOTS)')
 cf = thm[thm.index('static void drawCoverFlow('):thm.index('// Grid (RIPPS2 build 78)')]
-if 'gridFlipUpdate(' not in cf or ('ripps2TiltBeginTurn(posX, posY, 0,' not in cf and 'ripps2TiltBeginTurn(posX, posY, cfTilt ? elem->tiltScale : 0,' not in cf) or 'texture = cfBack;' not in cf:
+if 'gridFlipUpdate(' not in cf or ('ripps2TiltBeginTurn(posX, posY, 0,' not in cf and 'ripps2TiltBeginTurn(posX, posY, cfTilt ? elem->tiltScale : 0,' not in cf and
+                                   'ripps2TiltBeginFlow(posX, posY, cfTilt && elem->tilt ? elem->tiltScale : 0,' not in cf) or 'texture = cfBack;' not in cf:  # build 117: flowtilt
     fail.append("RIPFLOW's centre cover must turn over to its back cover")
 init = thm[thm.index('static void initCoverflow('):]
 init = init[:init.index('\n}\n')]

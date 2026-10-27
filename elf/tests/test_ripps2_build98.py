@@ -98,7 +98,8 @@ int main(void)
 # --- music with a top-bit Ogg serial: the reader clears it and corrects each page's CRC (run on the host)
 if 'src->fixSerial = 1;' not in snd or 'return bgmFixedRead(src, (unsigned char *)ptr, size * nmemb) / size;' not in snd:
     fail.append('a top-bit serial must be spotted at the open and fixed as it is read')
-if re.search(r'^[^#\n]*bgmOpenTrace', snd[snd.index('static size_t bgmSourceRead('):snd.index('static ov_callbacks bgmSourceCallbacks')], re.M) and \
+SRC_READ = 'static size_t bgmSourceRead(void *ptr, size_t size, size_t nmemb, void *datasource)\n{'  # build 117: the definition, not its prototype
+if re.search(r'^[^#\n]*bgmOpenTrace', snd[snd.index(SRC_READ):snd.index('static ov_callbacks bgmSourceCallbacks')], re.M) and \
         not re.search(r'#ifdef __DEBUG\n +if \(bgmOpenTrace\)', snd.replace('\r\n', '\n')):  # build 99: one level in
     fail.append('the open trace must stay behind __DEBUG (a host test compiles the reader)')
 
@@ -133,7 +134,7 @@ def ogg_stream(serial, pages=40, seed=7):
 
 
 if cc:
-    src = snd[snd.index('#define OGG_HDR_MAX'):snd.index('static size_t bgmSourceRead(')]
+    src = snd[snd.index('#define OGG_HDR_MAX'):snd.index(SRC_READ)]
     src = src.replace('static int bgmSourceReopen(bgm_source_t *src);', '')
     neg, pos = ogg_stream(0x9234ABCD), ogg_stream(0x1234ABCD)
     prog = r'''#include <stdio.h>
@@ -193,7 +194,7 @@ if 'static int menuGridPage(int dir)' not in menu or 'if (menuGridPage(1))' not 
     fail.append('L2 / R2 on the Grid must turn a whole page of covers')
 # --- RIPFLOW tilts its centre cover; its info screenshots tip as one sheet
 cf = rd('misc/theme_coverflow.cfg').replace('\r\n', '\n')
-if 'int cfTilt = elem->tilt' not in th or cf.count('\ttype=Coverflow\n\ttilt=1\n') < 1 or cf.count('\ttilt_x=320\n\ttilt_y=330\n') != 2:
+if ('int cfTilt = elem->tilt' not in th and 'int cfTilt = (elem->tilt || gTheme->flowTilt)' not in th) or cf.count('\ttype=Coverflow\n\ttilt=1\n') < 1 or cf.count('\ttilt_x=320\n\ttilt_y=330\n') != 2:
     fail.append('RIPFLOW: the centre cover tips with the stick, the two screenshots on one pivot')
 # --- vignette levels, background blur, the widescreen grid
 if 'fade *= gRipps2Vignette >= 2 ? 1.0f : gRipps2Vignette == 1 ? 0.5f : 0.0f;' not in th or 'w + 2, h + 2' not in th:
