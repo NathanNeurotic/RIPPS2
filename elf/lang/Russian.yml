@@ -1266,13 +1266,9 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Карта памяти в слоте %d при включении запускает %s, который BOOT LOCK настроить не может: он работает через PS2BBL, FMCB и OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: На этой консоли есть загрузчик с блокировкой RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT из игры: браузер, затем ваш загрузчик (BOOT LOCK)'
-  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: там %d изображений, чтение %d КБ/с'
-  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: там %d изображений, чтение %d КБ/с, самый быстрый'
   'In use: %s, %d pictures, %d MB': 'Используется: %s, %d изображений, %d МБ'
-  Looking at the ART folders on the started drives: Просмотр папок ART на запущенных накопителях
   'Measuring how fast each drive reads its art: %s': 'Замер скорости, с которой каждый накопитель читает свои изображения: %s'
   'None: each picture is read from its own ART folder.': 'Нет: каждое изображение читается из своей папки ART.'
-  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Упаковка изображений в %s: %d из %d изображений, %d МБ. Нажми кнопку «назад», чтобы остановить.'
   REMOVE the pack in %s (the ART folders stay as they are): УДАЛИТЬ пакет в %s (папки ART останутся как есть)
   Remove the ART Pack in %s? The ART folders stay as they are.: Удалить пакет ART в %s? Папки ART останутся как есть.
   Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Остановлено. Незаконченный пакет удалён, а изображения загружаются из папок ART, как раньше.
@@ -1285,6 +1281,21 @@ strings:
   : '%d изображений из %d папок ART попадут в один файл, %s. Папки ART останутся как есть: пакет является копией. Ты можешь скопировать art.tar в папку ART другого накопителя через Memory Files, но быстрее всего собрать его на том накопителе, с которого ты просматриваешь игры, поэтому самый быстрый накопитель стоит первым. Собрать сейчас?'
   ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
   : 'Пакет ART собран: %d изображений, %d МБ, в %s (%d с). Теперь изображения загружаются из него, и для %d игр, для которых он собран, их папка ART больше никогда не опрашивается по одному изображению. Изображения, которые RIPPS2 загружает или снимает, появляются сразу; скопированные с ПК появятся, когда ты снова соберёшь пакет.'
+  '%s free': свободно %s
+  '%sART/art.tar: reads %s/s, %s': '%sART/art.tar: чтение %s/с, %s'
+  '%sART/art.tar: reads %s/s, the fastest, %s': '%sART/art.tar: чтение %s/с, самый быстрый, %s'
+  ART PACK: ПАКЕТ ART
+  About %d min: Около %d мин
+  'Looking at the ART folders: %d pictures, %s': 'Просмотр папок ART: изображений %d, %s'
+  ? 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
+  : 'Ни на одном запущенном накопителе нет места для пакета ART: нужно около %s. Освободи место на накопителе, с которого просматриваешь игры, и попробуй снова.'
+  PACKING THE ART: УПАКОВКА ИЗОБРАЖЕНИЙ
+  PICTURE %d OF %d: ИЗОБРАЖЕНИЕ %d ИЗ %d
+  'Pictures: %d (%s). ART folders: %d.': 'Изображений: %d (%s). Папок ART: %d.'
+  Stop? The unfinished pack is removed; the ART folders stay as they are.: Остановить? Незаконченный пакет удаляется; папки ART останутся как есть.
+  'The ART folders stay as they are: the pack is a copy.': 'Папки ART останутся как есть: пакет является копией.'
+  Under a minute: Меньше минуты
+  free space unknown: свободное место неизвестно
 labels:
   DS34BT_MODE: DualShock3/4 по Bluetooth
   HINT_NEUTRINO_AUTO_ELF: Передаёт загрузочный ELF игры в Neutrino, чтобы найти настройки для этой игры. Включено по умолчанию; заданный вручную параметр Boot ELF важнее.

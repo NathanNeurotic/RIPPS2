@@ -1266,13 +1266,9 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 슬롯 %d의 메모리 카드는 전원을 켤 때 %s을(를) 시작하는데, BOOT LOCK은 이를 설정할 수 없습니다. BOOT LOCK은 PS2BBL, FMCB, OSDMenu를 통해 작동합니다.
   A boot loader with RIPPS2's lock is on this console.: 이 본체에는 RIPPS2 잠금이 있는 부트 로더가 있습니다.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': '게임의 EXIT: 브라우저, 그다음 부트 로더 (BOOT LOCK)'
-  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: 이미지 %d개, 읽기 %d KB/s'
-  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: 이미지 %d개, 읽기 %d KB/s, 가장 빠름'
   'In use: %s, %d pictures, %d MB': '사용 중: %s, 이미지 %d개, %d MB'
-  Looking at the ART folders on the started drives: 시작된 드라이브의 ART 폴더를 살펴보는 중
   'Measuring how fast each drive reads its art: %s': '각 드라이브가 이미지를 읽는 속도를 재는 중: %s'
   'None: each picture is read from its own ART folder.': '없음: 각 이미지는 자기 ART 폴더에서 읽습니다.'
-  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': '이미지를 %s에 모으는 중: %d / %d개, %d MB. 뒤로 버튼을 누르면 멈춥니다.'
   REMOVE the pack in %s (the ART folders stay as they are): '%s의 팩 삭제 (ART 폴더는 그대로 남습니다)'
   Remove the ART Pack in %s? The ART folders stay as they are.: '%s의 ART 팩을 삭제할까요? ART 폴더는 그대로 남습니다.'
   Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: 멈췄습니다. 만들다 만 팩은 삭제되었고, 이미지는 전처럼 ART 폴더에서 읽습니다.
@@ -1285,6 +1281,21 @@ strings:
   : '이미지 %d개(ART 폴더 %d개에서)가 하나의 파일 %s에 들어갑니다. ART 폴더는 그대로 남습니다: 팩은 사본입니다. Memory Files로 art.tar를 다른 드라이브의 ART 폴더에 복사할 수도 있지만, 평소 탐색하는 드라이브에서 만드는 것이 가장 빠르므로 가장 빠른 드라이브가 맨 위에 있습니다. 지금 만들까요?'
   ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
   : 'ART 팩이 완성되었습니다: 이미지 %d개, %d MB, %s (%d초). 이제부터 이미지는 팩에서 읽으며, 팩이 만들어진 대상인 게임 %d개는 ART 폴더에 이미지를 하나씩 묻지 않습니다. RIPPS2가 받아 오거나 찍은 이미지는 바로 나타나고, PC에서 복사해 넣은 이미지는 팩을 다시 만들면 나타납니다.'
+  '%s free': '%s 여유'
+  '%sART/art.tar: reads %s/s, %s': '%sART/art.tar: 읽기 %s/s, %s'
+  '%sART/art.tar: reads %s/s, the fastest, %s': '%sART/art.tar: 읽기 %s/s, 가장 빠름, %s'
+  ART PACK: ART 팩
+  About %d min: 약 %d분
+  'Looking at the ART folders: %d pictures, %s': 'ART 폴더를 살펴보는 중: 이미지 %d개, %s'
+  ? 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
+  : '시작된 드라이브에 ART 팩을 둘 공간이 없습니다: 약 %s이(가) 필요합니다. 평소 탐색하는 드라이브의 공간을 비운 뒤 다시 시도하세요.'
+  PACKING THE ART: 이미지를 모으는 중
+  PICTURE %d OF %d: 이미지 %d / %d
+  'Pictures: %d (%s). ART folders: %d.': '이미지: %d개 (%s). ART 폴더: %d개.'
+  Stop? The unfinished pack is removed; the ART folders stay as they are.: 멈출까요? 만들다 만 팩은 삭제되고, ART 폴더는 그대로 남습니다.
+  'The ART folders stay as they are: the pack is a copy.': 'ART 폴더는 그대로 남습니다: 팩은 사본입니다.'
+  Under a minute: 1분 이내
+  free space unknown: 여유 공간 알 수 없음
 labels:
   IP_ADDRESS_TYPE_STATIC: 고정
   HINT_NEUTRINO_AUTO_ELF: 게임의 부트 ELF를 Neutrino에 넘겨 타이틀별 설정을 찾게 합니다. 기본으로 켜져 있으며, 직접 설정한 Boot ELF 옵션이 우선합니다.

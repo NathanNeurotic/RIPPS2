@@ -1265,13 +1265,9 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'La tarjeta de memoria de la ranura %d inicia %s al encender, que BOOT LOCK no puede ajustar: funciona a través de PS2BBL, FMCB y OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: En esta consola hay un cargador de arranque con el bloqueo de RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT de un juego: el navegador, luego tu cargador de arranque (BOOT LOCK)'
-  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d imágenes allí, lee %d KB/s'
-  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d imágenes allí, lee %d KB/s, la más rápida'
   'In use: %s, %d pictures, %d MB': 'En uso: %s, %d imágenes, %d MB'
-  Looking at the ART folders on the started drives: Revisando las carpetas ART de las unidades iniciadas
   'Measuring how fast each drive reads its art: %s': 'Midiendo qué tan rápido lee cada unidad sus imágenes: %s'
   'None: each picture is read from its own ART folder.': 'Ninguno: cada imagen se lee de su propia carpeta ART.'
-  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Empaquetando las imágenes en %s: %d de %d imágenes, %d MB. Pulsa el botón de volver para detener.'
   REMOVE the pack in %s (the ART folders stay as they are): QUITAR el paquete de %s (las carpetas ART quedan como están)
   Remove the ART Pack in %s? The ART folders stay as they are.: ¿Quitar el paquete ART de %s? Las carpetas ART quedan como están.
   Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Detenido. Se quitó el paquete sin terminar, y las imágenes se cargan de las carpetas ART como antes.
@@ -1284,6 +1280,21 @@ strings:
   : '%d imágenes de %d carpetas ART van a un solo archivo, %s. Las carpetas ART quedan como están: el paquete es una copia. Puedes copiar art.tar a la carpeta ART de otra unidad con Memory Files, pero crearlo en la unidad desde la que navegas es lo más rápido, por eso la unidad más rápida aparece primero. ¿Crearlo ahora?'
   ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
   : 'El paquete ART está listo: %d imágenes, %d MB, en %s (%d s). Las imágenes se cargan de él a partir de ahora, y a los %d juegos para los que se creó nunca se les pregunta a su carpeta ART imagen por imagen. Las imágenes que RIPPS2 descarga o captura aparecen al momento; las que copias desde un PC aparecen cuando vuelves a crear el paquete.'
+  '%s free': '%s libres'
+  '%sART/art.tar: reads %s/s, %s': '%sART/art.tar: lee %s/s, %s'
+  '%sART/art.tar: reads %s/s, the fastest, %s': '%sART/art.tar: lee %s/s, la más rápida, %s'
+  ART PACK: PAQUETE ART
+  About %d min: Unos %d min
+  'Looking at the ART folders: %d pictures, %s': 'Revisando las carpetas ART: %d imágenes, %s'
+  ? 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
+  : 'Ninguna unidad iniciada tiene espacio para el paquete ART: necesita unos %s. Libera espacio en la unidad desde la que navegas y vuelve a intentarlo.'
+  PACKING THE ART: EMPAQUETANDO LAS IMÁGENES
+  PICTURE %d OF %d: IMAGEN %d DE %d
+  'Pictures: %d (%s). ART folders: %d.': 'Imágenes: %d (%s). Carpetas ART: %d.'
+  Stop? The unfinished pack is removed; the ART folders stay as they are.: ¿Detener? Se quita el paquete sin terminar; las carpetas ART quedan como están.
+  'The ART folders stay as they are: the pack is a copy.': 'Las carpetas ART quedan como están: el paquete es una copia.'
+  Under a minute: Menos de un minuto
+  free space unknown: espacio libre desconocido
 labels:
   HINT_NEUTRINO_AUTO_ELF: Pasa el ELF de arranque del juego a Neutrino para buscar su configuración por título. Activado por defecto; una opción Boot ELF puesta a mano tiene prioridad.
   HINT_POPSTARTER_PATH: Dónde está POPSTARTER.ELF. Si lo dejas vacío, RIPPS2 pone uno que encuentre en una unidad; escribe encima para usar otro, como usb:/POPS/POPSTARTER.ELF

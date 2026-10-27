@@ -1266,13 +1266,9 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Paměťová karta ve slotu %d při zapnutí spouští %s, který BOOT LOCK nastavit neumí: funguje přes PS2BBL, FMCB a OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Na této konzoli je zavaděč se zámkem RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT ze hry: prohlížeč, pak váš zavaděč (BOOT LOCK)'
-  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d obrázků tam, čte %d KB/s'
-  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d obrázků tam, čte %d KB/s, nejrychlejší'
   'In use: %s, %d pictures, %d MB': 'Používá se: %s, %d obrázků, %d MB'
-  Looking at the ART folders on the started drives: Prohlížení složek ART na spuštěných discích
   'Measuring how fast each drive reads its art: %s': 'Měření, jak rychle každý disk čte své obrázky: %s'
   'None: each picture is read from its own ART folder.': 'Žádný: každý obrázek se čte z vlastní složky ART.'
-  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 'Balení obrázků do %s: %d z %d obrázků, %d MB. Zastavíš tlačítkem zpět.'
   REMOVE the pack in %s (the ART folders stay as they are): ODSTRANIT balíček v %s (složky ART zůstanou, jak jsou)
   Remove the ART Pack in %s? The ART folders stay as they are.: Odstranit balíček ART v %s? Složky ART zůstanou, jak jsou.
   Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: Zastaveno. Nedokončený balíček byl odstraněn a obrázky se načítají ze složek ART jako dřív.
@@ -1285,6 +1281,21 @@ strings:
   : '%d obrázků z %d složek ART půjde do jednoho souboru, %s. Složky ART zůstanou, jak jsou: balíček je kopie. art.tar můžeš zkopírovat do složky ART jiného disku pomocí Memory Files, ale nejrychlejší je postavit ho na disku, ze kterého procházíš, proto je nejrychlejší disk první. Postavit teď?'
   ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
   : 'Balíček ART je hotový: %d obrázků, %d MB, v %s (%d s). Od teď se obrázky načítají z něj a u %d her, pro které byl postaven, se už jejich složky ART nikdy neptá obrázek po obrázku. Obrázky, které RIPPS2 stáhne nebo vyfotí, se ukážou hned; obrázky zkopírované z PC se ukážou, až balíček postavíš znovu.'
+  '%s free': '%s volno'
+  '%sART/art.tar: reads %s/s, %s': '%sART/art.tar: čte %s/s, %s'
+  '%sART/art.tar: reads %s/s, the fastest, %s': '%sART/art.tar: čte %s/s, nejrychlejší, %s'
+  ART PACK: BALÍČEK ART
+  About %d min: Asi %d min
+  'Looking at the ART folders: %d pictures, %s': 'Prohlížení složek ART: %d obrázků, %s'
+  ? 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
+  : 'Žádný spuštěný disk nemá místo na balíček ART: potřebuje asi %s. Uvolni místo na disku, ze kterého procházíš, a zkus to znovu.'
+  PACKING THE ART: BALENÍ OBRÁZKŮ
+  PICTURE %d OF %d: OBRÁZEK %d Z %d
+  'Pictures: %d (%s). ART folders: %d.': 'Obrázky: %d (%s). Složky ART: %d.'
+  Stop? The unfinished pack is removed; the ART folders stay as they are.: Zastavit? Nedokončený balíček se odstraní; složky ART zůstanou, jak jsou.
+  'The ART folders stay as they are: the pack is a copy.': 'Složky ART zůstanou, jak jsou: balíček je kopie.'
+  Under a minute: Méně než minuta
+  free space unknown: volné místo neznámé
 labels:
   HINT_NEUTRINO_AUTO_ELF: Předá zaváděcí ELF hry Neutrinu, aby vyhledalo nastavení pro daný titul. Ve výchozím stavu zapnuto; ručně nastavená volba Boot ELF má přednost.
   HINT_POPSTARTER_PATH: Kde je POPSTARTER.ELF. Když zůstane prázdné, RIPPS2 doplní ten, který najde na disku; přepište, chcete-li jiný, např. usb:/POPS/POPSTARTER.ELF

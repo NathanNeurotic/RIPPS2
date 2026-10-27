@@ -1,0 +1,549 @@
+diff --git a/include/menusys.h b/include/menusys.h
+index f0dbae8..8dc3f6f 100644
+--- a/include/menusys.h
++++ b/include/menusys.h
+@@ -151,6 +151,7 @@ void menuRequestInfoSize(void);
+ void menuRenderMain();
+ void menuRenderMenu();
+ void menuRenderInfo();
++int menuInfoSidebar(void); // build 119: the sidebar on the info page (the theme's info_sidebar)
+ void menuRenderBackdrop(void); // RIPPS2 build 70: the list's backdrop alone (RIPFLOW's list <-> info switch)
+ void menuRenderGameMenu();
+ void menuRenderAppMenu();
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 2a89b58..c9c9e50 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -180,6 +180,9 @@ void ripps2SizeText(long long bytes, char *out, int size);
+ int ripps2StageFor(unsigned int clusterBytes, int floor); // a write stage of whole clusters, at least floor
+ // build 114: the RIPPS2 progress bar (ripps2games.c) for a long job with nothing else on screen, and a file copied with it
+ void ripps2DrawProgress(const char *head, const char *name, long long done, long long total, const char *left, int cancel);
++// build 119: the long-job panel (what, sizes, how long; SELECT held to go on: 1, back: 0) and the sizes as RIPPS2 writes them
++int ripps2AskHold(const char *head, const char *name, const char *info, const char *when, const char *note);
++void ripps2SizeText(long long bytes, char *out, int size);
+ int ripps2CopyFile(const char *src, const char *dst, const char *name) __attribute__((weak));
+ void ripps2DiscWatch(void);         // every frame: the drive read after boot and after the tray closes
+ int ripps2DiscQuiet(void);
+diff --git a/include/themes.h b/include/themes.h
+index d9808c1..2019a90 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -285,6 +285,7 @@ typedef struct theme
+     int sbLeftList;                     // build 115: sidebar_left=list: Left / Right and L1 / R1 stay the list's (RIPFLOW's covers)
+     int sbAutoHide;                     // build 115: sidebar_hide=1: the sidebar slides away until Circle calls it
+     int flowTilt;                       // build 117: flowtilt=1: RIPFLOW's Up / Down (left stick) tip the centre case
++    int infoSidebar;                    // build 119: info_sidebar=1: the info page leaves the sidebar its room (Adapt, RIPGRID)
+     int hintsFade;                      // build 115: hints_fade (1, the default): a hint glyph that changes fades in
+     int hintsFlank, hintsFlankGap;      // build 115: hints_flank=1: RUN and SOURCE either side of the source name; the gap
+     int badgeSet;                       // build 115: badge_set=ripps2 (1): RIPPS2's built-in badges, none of its own
+diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
+index 3f257e4..7a97648 100644
+--- a/misc/theme_ripgrid.cfg
++++ b/misc/theme_ripgrid.cfg
+@@ -4,6 +4,8 @@
+ launch_disc=pop
+ # RIPPS2 build 96: L2 / R2 turn the grid's pages (Controller Settings > Page Buttons can change it)
+ page_buttons=l2r2
++# build 119: the info page's glass starts at 45, room for the sidebar (Layout > Category Layout > Sidebar): it stays there
++info_sidebar=1
+ # build 102: the Standard glyph set (L3 and R3 included); Controller Settings > Hints and Glyphs can change it
+ glyph_set=standard
+ # RIPPS2 build 100 (hotfix): the info page's stars and badges at the default theme's sizes (111 x 14, 51 x 26),
+diff --git a/src/gui.c b/src/gui.c
+index 3514a62..9feb00b 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -5761,7 +5761,8 @@ static void guiShow()
+                 ripps2DrawPanelMorph(ax, ay, aw, ah, bx, by, bw, bh, (t - MORPH_CONCEAL_S) / MORPH_MOVE_S);
+             // build 115 (the user, 10/26: the sidebar went missing between the list and the info page): it stays where it
+             // is through the morph, its icons in place
+-            if (ripps2SidebarOn() && !ripps2Legacy() &&
++            // (build 119: only when the info page keeps it as well, menuInfoSidebar; else it goes with the list page)
++            if (menuInfoSidebar() &&
+                 (screenHandler == &screenHandlers[GUI_SCREEN_MAIN] || screenHandler == &screenHandlers[GUI_SCREEN_INFO]) &&
+                 (screenHandlerTarget == &screenHandlers[GUI_SCREEN_MAIN] || screenHandlerTarget == &screenHandlers[GUI_SCREEN_INFO]))
+                 ripps2SidebarRender();
+diff --git a/src/menusys.c b/src/menusys.c
+index e2ef210..a6878d2 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -2756,16 +2756,25 @@ void menuRenderInfo(void)
+         gTheme->itemsList = thmResolveItemsList(&gTheme->infoElems, gTheme->gamesItemsList, selected_item->item->icon_id);
+     }
+     // RIPPS2: no category bar here -- the info page gives the whole screen to the game's art panel. Build 115: the sidebar
+-    // stays, where the list page has it (Left reaches it here too)
+-    if (ripps2SidebarOn() && !ripps2Legacy())
++    // stays, where the list page has it (Left reaches it here too); build 119: only on a theme whose info page leaves it
++    // the room (info_sidebar: Adapt, RIPGRID)
++    if (menuInfoSidebar())
+         ripps2SidebarRender();
+ }
+ 
++// build 119 (the user, 10/27): the sidebar on the info page only where the theme's info page leaves it room (info_sidebar).
++// Elsewhere (RIPPS2's own info page, the themes made for OPL) the page is the game's alone: Left / Right step the games and
++// Circle goes back to the list, where the sidebar is
++int menuInfoSidebar(void)
++{
++    return ripps2SidebarOn() && !ripps2Legacy() && gTheme != NULL && gTheme->infoSidebar;
++}
++
+ void menuHandleInputInfo()
+ {
+     // build 115 (the user, 10/26): with the sidebar, the info page is the list's: Left goes to the sidebar's icons, Right
+     // steps no game, Up / Down still do, and a category picked in the sidebar takes the page back to its list
+-    if (ripps2SidebarOn() && !ripps2Legacy()) {
++    if (menuInfoSidebar()) {
+         if (ripps2SidebarFocused()) {
+             int cat = gRipps2Category, src = menuSourceCurrent();
+             ripps2SidebarInput();
+diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
+index ca492e0..fcb3018 100644
+--- a/src/ripps2artpack.c
++++ b/src/ripps2artpack.c
+@@ -51,6 +51,7 @@
+ #include "include/ripps2diag.h"
+ #include "include/ripps2artpack.h"
+ #include "include/ripps2tr.h" // _t, RIPPS2's words in the chosen language
++#include "include/bdmsupport.h" // build 119: bdmSlotDeviceType, how fast a drive writes
+ 
+ char gRipps2ArtPack[160];
+ int gRipps2ArtPackCount = 0;
+@@ -338,12 +339,16 @@ typedef struct
+     int target;    // a drive the sweep looks on (tar.c gDevices), with its ART folder at its root
+     int listed;    // its listing finished
+     int files, kbps;
++    long long bytes;        // build 119: its pictures' sizes together
++    long long freeBytes;    // where the pack could go: its room (-1 when the drive cannot say)
++    int fits;               // build 119: the pack fits there (or the drive cannot say), on a file system that takes it
+ } ap_source_t;
+ 
+ typedef struct
+ {
+     char name[AP_NAME];
+     unsigned char src;
++    unsigned int size; // build 119: read as it is listed, for the sizes, the room and the bar
+ } ap_file_t;
+ 
+ typedef struct
+@@ -358,6 +363,8 @@ static ap_file_t *apFiles;
+ static int apFileCount;
+ static ap_key_t *apKeys;
+ static int apKeyCount;
++static long long apTotal;  // build 119: the pictures that go in (each name once) and their bytes
++static int apTotalFiles;
+ 
+ static int apKeyCmp(const void *a, const void *b)
+ {
+@@ -448,11 +455,31 @@ static void apCollect(void)
+     }
+ }
+ 
+-// a source's pictures into apFiles (a name too long for the index stays out, and its game with it); 1 when the listing
+-// finished
++// build 119: the screen while the folders are looked at, with what has been found (a few times a second)
++static void apShowFound(int force)
++{
++    static clock_t shown = 0;
++    char msg[160], size[24];
++    long long bytes = 0;
++    int i;
++
++    if (!force && clock() - shown < CLOCKS_PER_SEC / 4)
++        return;
++    shown = clock();
++    for (i = 0; i < apSrcCount; i++)
++        bytes += apSrc[i].bytes;
++    ripps2SizeText(bytes, size, sizeof(size));
++    snprintf(msg, sizeof(msg), _t("Looking at the ART folders: %d pictures, %s"), apFileCount, size);
++    guiRenderTextScreen(msg);
++}
++
++// a source's pictures into apFiles with their sizes (a name too long for the index stays out, and its game with it); 1
++// when the listing finished
+ static int apList(int s)
+ {
+     struct dirent *e;
++    struct stat st;
++    char path[128];
+     DIR *d = opendir(apSrc[s].dir);
+     int err;
+ 
+@@ -466,14 +493,19 @@ static int apList(int s)
+         }
+         if (e->d_name[0] == '.' || !apIsPicture(e->d_name))
+             continue;
+-        if (strlen(e->d_name) >= AP_NAME || apFileCount >= AP_MAX_FILES) {
++        snprintf(path, sizeof(path), "%s/%s", apSrc[s].dir, e->d_name);
++        if (strlen(e->d_name) >= AP_NAME || apFileCount >= AP_MAX_FILES || stat(path, &st) != 0 || st.st_size <= 0 ||
++            st.st_size > MAX_FILE_SIZE) {
+             apKeyOut(e->d_name);
+             continue;
+         }
+         snprintf(apFiles[apFileCount].name, AP_NAME, "%s", e->d_name);
+         apFiles[apFileCount].src = (unsigned char)s;
++        apFiles[apFileCount].size = (unsigned int)st.st_size;
+         apFileCount++;
+         apSrc[s].files++;
++        apSrc[s].bytes += st.st_size;
++        apShowFound(0);
+     }
+     closedir(d);
+     return err == 0;
+@@ -505,14 +537,77 @@ static int apMeasure(int s)
+     return (int)((unsigned long long)bytes * 1000 / 1024 / (ms > 0 ? ms : 1));
+ }
+ 
+-// ---------------------------------------------------------------- the build
++// build 119: how fast a drive takes one long file (KB a second): RIPDISC's figures for the kinds of storage
++static int apWriteKbs(const char *root)
++{
++    if (!strncmp(root, "mmce", 4))
++        return 400;
++    if (!strncmp(root, "pfs", 3))
++        return 2400;
++    if (!strncmp(root, "mass", 4) && root[4] >= '0' && root[4] <= '7')
++        switch (bdmSlotDeviceType(root[4] - '0')) {
++            case BDM_TYPE_ATA:
++                return 2400;
++            case BDM_TYPE_ILINK:
++                return 1400;
++            case BDM_TYPE_SDC:
++                return 600;
++            default:
++                break;
++        }
++    return 800; // USB 1.1
++}
+ 
+-static int apStopAsked(void)
++// build 119: the pictures that go in (each name once, as the build takes them) and their bytes; then for each drive the
++// pack could go on, its room and whether the pack fits there (a FAT drive keeps no file of 4 GB or more)
++static void apSizeUp(void)
+ {
+-    readPads();
+-    return getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE);
++    unsigned int *seen = malloc((apFileCount + 1) * sizeof(unsigned int));
++    long long need;
++    ripps2_vol_t vol;
++    int i, k, n = 0;
++
++    apTotal = 0;
++    apTotalFiles = 0;
++    for (i = 0; i < apFileCount; i++) {
++        unsigned int h = apHash(apFiles[i].name);
++        for (k = 0; seen != NULL && k < n && seen[k] != h; k++)
++            ;
++        if (seen != NULL && k < n)
++            continue;
++        if (seen != NULL)
++            seen[n++] = h;
++        apTotal += apFiles[i].size;
++        apTotalFiles++;
++    }
++    free(seen);
++    // a header a picture, the list of games, the end, and a little over for the index beside it
++    need = apTotal + (long long)(apTotalFiles + 1) * 1024 + (long long)AP_MAX_KEYS * AP_KEY / 2 + 1024 * 1024;
++    for (i = 0; i < apSrcCount; i++) {
++        apSrc[i].freeBytes = -1;
++        apSrc[i].fits = apSrc[i].target;
++        if (!apSrc[i].target || !ripps2VolInfo(apSrc[i].root, &vol) || vol.freeKb == 0)
++            continue; // MMCE, the APA HDD: they cannot say, and a full one stops the build cleanly
++        apSrc[i].freeBytes = (long long)vol.freeKb * 1024;
++        if (apSrc[i].freeBytes < need || (vol.fsType != RIPPS2_FS_EXFAT && need > 0xFFFFFFFFLL))
++            apSrc[i].fits = 0;
++    }
+ }
+ 
++// build 119: about how long the build takes on that drive, in seconds: each drive reads its own pictures at what it was
++// measured at, the pack is written at what its drive takes
++static int apSeconds(int target)
++{
++    double s = 0.0;
++    int i;
++    for (i = 0; i < apSrcCount; i++)
++        if (apSrc[i].bytes > 0)
++            s += (double)apSrc[i].bytes / 1024.0 / (apSrc[i].kbps > 0 ? apSrc[i].kbps : 400);
++    return (int)(s + (double)apTotal / 1024.0 / apWriteKbs(apSrc[target].root) + 0.5);
++}
++
++// ---------------------------------------------------------------- the build
++
+ static int apWriteZeros(FILE *out, unsigned int n)
+ {
+     static const unsigned char zero[512];
+@@ -525,19 +620,54 @@ static int apWriteZeros(FILE *out, unsigned int n)
+     return 1;
+ }
+ 
++// build 119: the RIPPS2 progress bar (as COPYING and COMPRESSING draw it): how much of how much, which picture, how long
++// is left once that can be told; the back key asks to stop (1 = stop)
++static int apProgress(const char *pack, long long done, int n, int total, clock_t began, int force)
++{
++    static clock_t shown = 0;
++    char left[96], when[48];
++    double secs = (double)(clock() - began) / CLOCKS_PER_SEC;
++    float p = apTotal > 0 ? (float)((double)done / (double)apTotal) : 0.0f;
++
++    readPads();
++    if (getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
++        guiMsgBoxSound(SFX_ERROR);
++        if (guiMsgBox(_t("Stop? The unfinished pack is removed; the ART folders stay as they are."), 1, NULL))
++            return 1;
++        force = 1;
++    }
++    if (!force && clock() - shown < CLOCKS_PER_SEC / 5)
++        return 0;
++    shown = clock();
++    when[0] = '\0';
++    if (secs > 5.0 && p > 0.02f) {
++        int mins = (int)((secs / p - secs) / 60.0 + 0.5);
++        if (mins < 1)
++            snprintf(when, sizeof(when), "%s", _t("LESS THAN A MINUTE LEFT"));
++        else
++            snprintf(when, sizeof(when), _t("ABOUT %d MIN"), mins);
++    }
++    snprintf(left, sizeof(left), _t("PICTURE %d OF %d"), n, total);
++    if (when[0])
++        snprintf(left + strlen(left), sizeof(left) - strlen(left), "   %s", when);
++    ripps2DrawProgress(_t("PACKING THE ART"), pack, done, apTotal, left, 1);
++    return 0;
++}
++
+ // 1 built, 0 stopped, -1 not written. *pictures, *kb what went in
+ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *games)
+ {
+-    char path[200], dir[160], msg[300];
++    char path[200], dir[160];
+     unsigned char head[512];
+     unsigned int *written = NULL, mtime = (unsigned int)time(NULL);
+     int *writtenFrom = NULL; // which of apFiles each went in from: a hash match is checked by name
+     TarEntryArt *index = NULL;
+     TarCacheHeader ch;
+     unsigned long long pos = 0;
++    long long done = 0;
+     FILE *out = NULL;
+-    clock_t shown = 0;
+-    int pass, i, k, fd, size, n = 0, ok = 0, stopped = 0, total = apFileCount;
++    clock_t began = clock();
++    int pass, i, k, fd, size, n = 0, ok = 0, stopped = 0, total = apTotalFiles;
+     char *list = NULL;
+     void *buf;
+ 
+@@ -553,6 +683,7 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
+     if ((out = fopen(pack, "wb")) == NULL)
+         goto done;
+     setvbuf(out, NULL, _IOFBF, 256 * 1024); // whole 256 KB writes (exFAT slipped odd-placed ones, RIPSHOT build 114)
++    apProgress(pack, 0, 0, total, began, 1);
+ 
+     // the picked drive's own pictures first: a name on two drives goes in from the one the pack is on
+     for (pass = 0; pass < 2 && !stopped; pass++)
+@@ -562,17 +693,11 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
+             unsigned int h = apHash(apFiles[i].name);
+             for (k = 0; k < n && (written[k] != h || strcasecmp(apFiles[writtenFrom[k]].name, apFiles[i].name)); k++)
+                 ;
+-            if (k < n) {
+-                total--;
++            if (k < n)
+                 continue; // that name is in already
+-            }
+-            if (clock() - shown > CLOCKS_PER_SEC / 4) {
+-                snprintf(msg, sizeof(msg), _t("Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop."), pack,
+-                         n, total, (int)(pos >> 20));
+-                guiRenderTextScreen(msg);
+-                shown = clock();
+-                if (apStopAsked())
+-                    stopped = 1;
++            if (apProgress(pack, done, n + 1, total, began, 0)) {
++                stopped = 1;
++                break;
+             }
+             snprintf(path, sizeof(path), "%s/%s", apSrc[apFiles[i].src].dir, apFiles[i].name);
+             buf = NULL;
+@@ -593,6 +718,7 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
+             }
+             if (buf == NULL) { // unreadable or too big: it stays out, and its game is asked of its folder
+                 apKeyOut(apFiles[i].name);
++                done += apFiles[i].size;
+                 total--;
+                 continue;
+             }
+@@ -610,9 +736,11 @@ static int apBuild(int target, const char *pack, int *pictures, int *kb, int *ga
+             writtenFrom[n] = i;
+             written[n++] = h;
+             pos += 512 + size + k;
++            done += apFiles[i].size;
+         }
+     if (stopped)
+         goto done;
++    apProgress(pack, apTotal, n, total, began, 1);
+ 
+     // the games it was built for: on a drive whose folder was listed whole, every picture of theirs in
+     k = snprintf(list, AP_MAX_KEYS * AP_KEY / 2 + 64, "%s\r\n", AP_HEAD);
+@@ -677,13 +805,13 @@ static int apSpeedCmp(const void *a, const void *b)
+ 
+ int ripps2ArtPackDialog(void)
+ {
+-    char items[AP_SOURCES + 1][160], msg[700], pack[160];
++    char items[AP_SOURCES + 1][200], msg[700], pack[160], rate[24], room[48], size[24], info[120], when[48];
+     const char *list[AP_SOURCES + 1];
+-    int order[AP_SOURCES], n = 0, i, pick, target, pictures, kb, games, folders, result, removable = gRipps2ArtPack[0] != '\0';
++    int order[AP_SOURCES], n = 0, i, pick, target, pictures, kb, games, folders, result, secs, roomless = 0;
++    int removable = gRipps2ArtPack[0] != '\0';
+     int wasTar = gEnableArtTar; // Artwork > .tar art as it was: put back when a build does not finish
+     clock_t start;
+ 
+-    guiRenderTextScreen(_t("Looking at the ART folders on the started drives"));
+     apFiles = malloc(AP_MAX_FILES * sizeof(ap_file_t));
+     apKeys = malloc(AP_MAX_KEYS * sizeof(ap_key_t));
+     apFileCount = 0;
+@@ -693,21 +821,35 @@ int ripps2ArtPackDialog(void)
+         return 0;
+     }
+     apCollect();
++    apShowFound(1);
+     qsort(apKeys, apKeyCount, sizeof(ap_key_t), apKeyCmp);
+     for (i = 0; i < apSrcCount; i++)
+         apSrc[i].listed = apList(i);
+     for (i = 0; i < apSrcCount; i++)
+-        if (apSrc[i].target && apSrc[i].files > 0) {
++        if (apSrc[i].files > 0) {
+             snprintf(msg, sizeof(msg), _t("Measuring how fast each drive reads its art: %s"), apSrc[i].root);
+             guiRenderTextScreen(msg);
+             apSrc[i].kbps = apMeasure(i);
+-            order[n++] = i;
++        }
++    apSizeUp();
++    for (i = 0; i < apSrcCount; i++)
++        if (apSrc[i].target && apSrc[i].files > 0) {
++            if (apSrc[i].fits)
++                order[n++] = i;
++            else
++                roomless++;
+         }
+     qsort(order, n, sizeof(int), apSpeedCmp);
++    // the drives the pack fits on, fastest first: how fast each reads, and its room (MMCE and the APA HDD cannot say)
+     for (i = 0; i < n; i++) {
+-        snprintf(items[i], sizeof(items[i]),
+-                 i == 0 ? _t("%sART/art.tar: %d pictures there, reads %d KB/s, the fastest") : _t("%sART/art.tar: %d pictures there, reads %d KB/s"),
+-                 apSrc[order[i]].root, apSrc[order[i]].files, apSrc[order[i]].kbps);
++        ripps2SizeText((long long)apSrc[order[i]].kbps * 1024, rate, sizeof(rate));
++        if (apSrc[order[i]].freeBytes >= 0) {
++            ripps2SizeText(apSrc[order[i]].freeBytes, size, sizeof(size));
++            snprintf(room, sizeof(room), _t("%s free"), size);
++        } else
++            snprintf(room, sizeof(room), "%s", _t("free space unknown"));
++        snprintf(items[i], sizeof(items[i]), i == 0 ? _t("%sART/art.tar: reads %s/s, the fastest, %s") : _t("%sART/art.tar: reads %s/s, %s"),
++                 apSrc[order[i]].root, rate, room);
+         list[i] = items[i];
+     }
+     if (removable) {
+@@ -718,7 +860,12 @@ int ripps2ArtPackDialog(void)
+     result = 0;
+     if (n == 0 && !removable) {
+         guiMsgBoxSound(SFX_ERROR);
+-        guiMsgBox(_t("There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back."), 0, NULL);
++        if (roomless > 0) { // only allowed where it fits
++            ripps2SizeText(apTotal + 1024 * 1024, size, sizeof(size));
++            snprintf(msg, sizeof(msg), _t("No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again."), size);
++            guiMsgBox(msg, 0, NULL);
++        } else
++            guiMsgBox(_t("There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back."), 0, NULL);
+         goto out;
+     }
+     if ((pick = ripps2PickList(list, n + removable)) < 0)
+@@ -755,9 +902,19 @@ int ripps2ArtPackDialog(void)
+     snprintf(pack, sizeof(pack), "%sART/art.tar", apSrc[target].root);
+     for (i = 0, folders = 0; i < apSrcCount; i++)
+         folders += apSrc[i].files > 0;
++    // the panel every long job has (COMPRESS TO ZSO's): what goes where, how big, how long; SELECT held to go on
++    ripps2SizeText(apTotal, size, sizeof(size));
++    snprintf(info, sizeof(info), _t("Pictures: %d (%s). ART folders: %d."), apTotalFiles, size, folders);
++    secs = apSeconds(target);
++    if (secs < 60)
++        snprintf(when, sizeof(when), "%s", _t("Under a minute"));
++    else
++        snprintf(when, sizeof(when), _t("About %d min"), (secs + 30) / 60);
++    if (!ripps2AskHold(_t("ART PACK"), pack, info, when, _t("The ART folders stay as they are: the pack is a copy.")))
++        goto out;
+     snprintf(msg, sizeof(msg),
+              _t("Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive's ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?"),
+-             apFileCount, folders, pack);
++             apTotalFiles, folders, pack);
+     if (!guiMsgBox(msg, 1, NULL))
+         goto out;
+ 
+@@ -782,7 +939,8 @@ int ripps2ArtPackDialog(void)
+         tarInvalidate(TAR_KIND_ART);
+         artIndexInvalidate();
+         cacheInvalidateFailMemo();
+-        ripps2Diag("art pack: %d pictures, %d KB, %d games in %s, %d s", pictures, kb, games, pack, (int)((clock() - start) / CLOCKS_PER_SEC));
++        ripps2Diag("art pack: %d pictures, %d KB, %d games in %s, %d s (said %d s)", pictures, kb, games, pack,
++                   (int)((clock() - start) / CLOCKS_PER_SEC), secs);
+         snprintf(msg, sizeof(msg),
+                  _t("The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again."),
+                  pictures, (kb + 1023) / 1024, pack, (int)((clock() - start) / CLOCKS_PER_SEC), games);
+diff --git a/src/ripps2games.c b/src/ripps2games.c
+index 386b7d3..c8e1d7b 100644
+--- a/src/ripps2games.c
++++ b/src/ripps2games.c
+@@ -464,6 +464,12 @@ static void lrSize(long long bytes, char *out, int size)
+         snprintf(out, size, "%d KB", (int)((bytes + 1023) / 1024));
+ }
+ 
++// build 119: the same, for the ART Pack's sizes
++void ripps2SizeText(long long bytes, char *out, int size)
++{
++    lrSize(bytes, out, size);
++}
++
+ // A game's extras in its drive's folders: CFG, art, cheats, then its VMCs and full-size shots (kept unless asked).
+ // shared: another copy of the game on this drive keeps the CFG, art and cheats.
+ static void lrPlanExtras(item_list_t *view, int id, const char *prefix, char sep, const char *startup, const char *name, int shared)
+@@ -1402,8 +1408,9 @@ static void zpPage(void)
+     ripps2RenderCategoryBar();
+ }
+ 
+-// the panel: what it will do, SELECT held to go on (1), Circle to back out (0)
+-static int zpAsk(const char *head, const char *name, const char *info, const char *when)
++// the panel: what it will do, SELECT held to go on (1), Circle to back out (0). Build 119: any long job's (the ART Pack's),
++// note a line under the rest (or NULL)
++int ripps2AskHold(const char *head, const char *name, const char *info, const char *when, const char *note)
+ {
+     double t0 = ripps2Seconds(), heldSince = 0.0, now;
+     int backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
+@@ -1445,12 +1452,18 @@ static int zpAsk(const char *head, const char *name, const char *info, const cha
+         ripps2HintText(hx + 44, y + 90, hold, lgAlpha(LG_SOFT, ia));
+         fntRenderStringFit(gTheme->fonts[5], 320, y + 120, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
+         fntRenderStringFit(gTheme->fonts[5], 320, y + 140, ALIGN_CENTER, w - 40, when, lgAlpha(LG_SOFT, ia), 1);
+-        fntRenderStringFit(gTheme->fonts[5], 320, y + 160, ALIGN_CENTER, w - 40, _t("Experimental: OPL core only (not Neutrino)"), lgAlpha(LG_SOFT, ia / 2), 1);
++        if (note != NULL && note[0])
++            fntRenderStringFit(gTheme->fonts[5], 320, y + 160, ALIGN_CENTER, w - 40, note, lgAlpha(LG_SOFT, ia / 2), 1);
+         ripps2HintOneA(backIcon, _t("BACK"), y + 184, ia);
+         rmEndFrame();
+     }
+ }
+ 
++static int zpAsk(const char *head, const char *name, const char *info, const char *when)
++{
++    return ripps2AskHold(head, name, info, when, _t("Experimental: OPL core only (not Neutrino)"));
++}
++
+ // build 114: the RIPPS2 progress bar, for any long job that has nothing else on screen: the page under a glass panel on
+ // the notch panels' frame (580 wide at y 134), what is happening, the name, the bar, how much, how long is left when
+ // known, and CANCEL when the job can stop
+diff --git a/src/themes.c b/src/themes.c
+index 98773e6..996ef4a 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -6713,6 +6713,11 @@ static int thmLoad(const char *themePath)
+         // build 117 (the user, 10/27): flowtilt=1, a coverflow theme's Up / Down (and the left stick) tip the centre case
+         // instead of changing the source, the sidebar on (its drawer has the sources)
+         newT->flowTilt = configGetInt(themeConfig, "flowtilt", &intValue) && intValue == 1;
++        // build 119 (the user, 10/27: the sidebar drawn over RIPPS2's info page): info_sidebar=1, the info page leaves room
++        // for the sidebar (Adapt's, RIPGRID's), so it stays there and Left reaches it; 0, the page has the whole screen, as
++        // most themes made for OPL do: no sidebar there, Left / Right step the games, Circle goes back to the list, where
++        // the sidebar is. A theme that puts its categories in the sidebar itself (category_layout=sidebar) leaves the room
++        newT->infoSidebar = configGetInt(themeConfig, "info_sidebar", &intValue) ? intValue == 1 : newT->catSidebar;
+         configGetColor(themeConfig, "sidebar_color", newT->sbColor);
+         configGetColor(themeConfig, "sidebar_accent_color", newT->sbAccent);
+         if (configGetInt(themeConfig, "sidebar_tint", &intValue) && intValue >= 0 && intValue <= 128)

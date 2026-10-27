@@ -1266,13 +1266,9 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': スロット %d のメモリーカードは電源投入時に %s を起動しますが、BOOT LOCK はこれを設定できません。BOOT LOCK は PS2BBL、FMCB、OSDMenu を通じて動作します。
   A boot loader with RIPPS2's lock is on this console.: この本体には RIPPS2 のロック付きのブートローダーがあります。
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': ゲームの EXIT：ブラウザー、次にブートローダー（BOOT LOCK）
-  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar：画像 %d 枚、読み込み %d KB/s'
-  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar：画像 %d 枚、読み込み %d KB/s、最速'
   'In use: %s, %d pictures, %d MB': 使用中：%s、画像 %d 枚、%d MB
-  Looking at the ART folders on the started drives: 起動したドライブの ART フォルダーを確認しています
   'Measuring how fast each drive reads its art: %s': 各ドライブが画像を読む速さを測っています：%s
   'None: each picture is read from its own ART folder.': なし：画像はそれぞれの ART フォルダーから読み込みます。
-  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 画像を %s にまとめています：%d / %d 枚、%d MB。戻るボタンで中止します。
   REMOVE the pack in %s (the ART folders stay as they are): '%s のパックを削除（ART フォルダーはそのまま残ります）'
   Remove the ART Pack in %s? The ART folders stay as they are.: '%s の ART パックを削除しますか？ART フォルダーはそのまま残ります。'
   Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: 中止しました。作りかけのパックは削除され、画像はこれまでどおり ART フォルダーから読み込みます。
@@ -1285,6 +1281,21 @@ strings:
   : '%d 枚の画像（%d 個の ART フォルダーから）を 1 つのファイル %s にまとめます。ART フォルダーはそのまま残ります：パックはコピーです。art.tar は Memory Files で別のドライブの ART フォルダーにコピーできますが、ふだん閲覧するドライブで作るのがいちばん速いので、最速のドライブを先頭に出しています。今すぐ作りますか？'
   ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
   : ART パックができました：画像 %d 枚、%d MB、%s（%d 秒）。これからは画像をパックから読み込み、作成の対象になった %d 本のゲームは ART フォルダーに 1 枚ずつ問い合わせることがなくなります。RIPPS2 が取得・撮影した画像はすぐに表示されます。PC からコピーした画像は、パックを作り直すと表示されます。
+  '%s free': 空き %s
+  '%sART/art.tar: reads %s/s, %s': '%sART/art.tar：読み込み %s/s、%s'
+  '%sART/art.tar: reads %s/s, the fastest, %s': '%sART/art.tar：読み込み %s/s、最速、%s'
+  ART PACK: ART パック
+  About %d min: 約 %d 分
+  'Looking at the ART folders: %d pictures, %s': ART フォルダーを確認しています：画像 %d 枚、%s
+  ? 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
+  : 起動したドライブに ART パックを置く空きがありません：約 %s 必要です。ふだん閲覧するドライブの空きを増やしてから、もう一度どうぞ。
+  PACKING THE ART: 画像をまとめています
+  PICTURE %d OF %d: 画像 %d / %d
+  'Pictures: %d (%s). ART folders: %d.': 画像：%d 枚（%s）。ART フォルダー：%d 個。
+  Stop? The unfinished pack is removed; the ART folders stay as they are.: 中止しますか？作りかけのパックは削除され、ART フォルダーはそのまま残ります。
+  'The ART folders stay as they are: the pack is a copy.': ART フォルダーはそのまま残ります：パックはコピーです。
+  Under a minute: 1 分以内
+  free space unknown: 空き容量は不明
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。

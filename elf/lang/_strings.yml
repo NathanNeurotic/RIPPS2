@@ -890,25 +890,53 @@ strings:
 - en: The server sent a chunked answer.
   in:
   - ripps2art.c
-- en: '%sART/art.tar: %d pictures there, reads %d KB/s'
+- en: '%s free'
   in:
   - ripps2artpack.c
-- en: '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest'
+- en: '%sART/art.tar: reads %s/s, %s'
+  in:
+  - ripps2artpack.c
+- en: '%sART/art.tar: reads %s/s, the fastest, %s'
+  in:
+  - ripps2artpack.c
+- en: ABOUT %d MIN
+  in:
+  - ripps2artpack.c
+  - ripps2disc.c
+  - ripps2games.c
+- en: ART PACK
+  in:
+  - ripps2artpack.c
+- en: About %d min
   in:
   - ripps2artpack.c
 - en: 'In use: %s, %d pictures, %d MB'
   in:
   - ripps2artpack.c
-- en: Looking at the ART folders on the started drives
+- en: LESS THAN A MINUTE LEFT
+  in:
+  - ripps2artpack.c
+  - ripps2disc.c
+  - ripps2games.c
+- en: 'Looking at the ART folders: %d pictures, %s'
   in:
   - ripps2artpack.c
 - en: 'Measuring how fast each drive reads its art: %s'
   in:
   - ripps2artpack.c
+- en: 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
+  in:
+  - ripps2artpack.c
 - en: 'None: each picture is read from its own ART folder.'
   in:
   - ripps2artpack.c
-- en: 'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.'
+- en: PACKING THE ART
+  in:
+  - ripps2artpack.c
+- en: PICTURE %d OF %d
+  in:
+  - ripps2artpack.c
+- en: 'Pictures: %d (%s). ART folders: %d.'
   in:
   - ripps2artpack.c
 - en: 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
@@ -918,6 +946,9 @@ strings:
   in:
   - ripps2artpack.c
 - en: Remove the ART Pack in %s? The ART folders stay as they are.
+  in:
+  - ripps2artpack.c
+- en: Stop? The unfinished pack is removed; the ART folders stay as they are.
   in:
   - ripps2artpack.c
 - en: Stopped. The unfinished pack was removed, and art loads from the ART folders as before.
@@ -932,7 +963,16 @@ strings:
 - en: 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
   in:
   - ripps2artpack.c
+- en: 'The ART folders stay as they are: the pack is a copy.'
+  in:
+  - ripps2artpack.c
 - en: There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  in:
+  - ripps2artpack.c
+- en: Under a minute
+  in:
+  - ripps2artpack.c
+- en: free space unknown
   in:
   - ripps2artpack.c
 - en: ' (%d KB free)'
@@ -1646,10 +1686,6 @@ strings:
 - en: ABOUT %d H %02d MIN LEFT
   in:
   - ripps2disc.c
-- en: ABOUT %d MIN
-  in:
-  - ripps2disc.c
-  - ripps2games.c
 - en: ABOUT %d MIN LEFT
   in:
   - ripps2disc.c
@@ -1682,10 +1718,6 @@ strings:
   - ripps2disc.c
   - ripps2files.c
 - en: HOLD
-  in:
-  - ripps2disc.c
-  - ripps2games.c
-- en: LESS THAN A MINUTE LEFT
   in:
   - ripps2disc.c
   - ripps2games.c

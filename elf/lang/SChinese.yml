@@ -1266,13 +1266,9 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 插槽 %d 的记忆卡开机时启动 %s，BOOT LOCK 无法设置它：BOOT LOCK 通过 PS2BBL、FMCB 和 OSDMenu 工作。
   A boot loader with RIPPS2's lock is on this console.: 这台主机上有带 RIPPS2 锁定的引导程序。
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 游戏的 EXIT：浏览器，然后是你的引导程序（BOOT LOCK）
-  '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar：%d 张图片，读取 %d KB/s'
-  '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar：%d 张图片，读取 %d KB/s，最快'
   'In use: %s, %d pictures, %d MB': 使用中：%s，%d 张图片，%d MB
-  Looking at the ART folders on the started drives: 正在查看已启动驱动器上的 ART 文件夹
   'Measuring how fast each drive reads its art: %s': 正在测量每个驱动器读取图片的速度：%s
   'None: each picture is read from its own ART folder.': 无：每张图片都从它自己的 ART 文件夹读取。
-  'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.': 正在把图片打包到 %s：%d / %d 张，%d MB。按返回键停止。
   REMOVE the pack in %s (the ART folders stay as they are): 删除 %s 中的包（ART 文件夹保持原样）
   Remove the ART Pack in %s? The ART folders stay as they are.: 删除 %s 中的 ART 包吗？ART 文件夹保持原样。
   Stopped. The unfinished pack was removed, and art loads from the ART folders as before.: 已停止。未完成的包已删除，图片照旧从 ART 文件夹读取。
@@ -1285,6 +1281,21 @@ strings:
   : '%d 张图片（来自 %d 个 ART 文件夹）将放进一个文件 %s。ART 文件夹保持原样：包只是副本。你可以用 Memory Files 把 art.tar 复制到其他驱动器的 ART 文件夹，但在你平时浏览的驱动器上生成最快，所以最快的驱动器排在最前。现在生成吗？'
   ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
   : ART 包已生成：%d 张图片，%d MB，位于 %s（%d 秒）。今后图片从包中读取，它所针对的 %d 款游戏再也不会逐张查询各自的 ART 文件夹。RIPPS2 下载或拍下的图片会立即显示；从电脑复制进去的图片在重新生成包后显示。
+  '%s free': 剩余 %s
+  '%sART/art.tar: reads %s/s, %s': '%sART/art.tar：读取 %s/s，%s'
+  '%sART/art.tar: reads %s/s, the fastest, %s': '%sART/art.tar：读取 %s/s，最快，%s'
+  ART PACK: ART 包
+  About %d min: 约 %d 分钟
+  'Looking at the ART folders: %d pictures, %s': 正在查看 ART 文件夹：%d 张图片，%s
+  ? 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
+  : 已启动的驱动器都没有空间放 ART 包：约需 %s。请在你平时浏览的驱动器上腾出空间，然后再试。
+  PACKING THE ART: 正在打包图片
+  PICTURE %d OF %d: 图片 %d / %d
+  'Pictures: %d (%s). ART folders: %d.': 图片：%d 张（%s）。ART 文件夹：%d 个。
+  Stop? The unfinished pack is removed; the ART folders stay as they are.: 要停止吗？未完成的包会被删除；ART 文件夹保持原样。
+  'The ART folders stay as they are: the pack is a copy.': ART 文件夹保持原样：包只是副本。
+  Under a minute: 不到一分钟
+  free space unknown: 剩余空间未知
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
