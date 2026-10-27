@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'ເມມໂມຣີກາດໃນຊ່ອງ %d ເລີ່ມ %s ຕອນເປີດເຄື່ອງ, ເຊິ່ງ BOOT LOCK ຕັ້ງບໍ່ໄດ້: ມັນເຮັດວຽກ ຜ່ານ PS2BBL, FMCB ແລະ OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: ເຄື່ອງນີ້ ມີໂຕໂຫຼດບູດ ພ້ອມການລັອກຂອງ RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT ຂອງເກມ: ໂຕທ່ອງ, ແລ້ວໂຕໂຫຼດບູດຂອງທ່ານ (BOOT LOCK)'
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : 'ຮູບ %d ຮູບ ຈາກໂຟນເດີ ART %d ໂຟນເດີ ຈະເຂົ້າໄປໃນໄຟລ໌ດຽວ, %s. ໂຟນເດີ ART ຄົງຢູ່ຄືເກົ່າ: ແພັກເປັນສຳເນົາ. ທ່ານສາມາດສຳເນົາ art.tar ໄປໃສ່ໂຟນເດີ ART ຂອງໄດຣຟ໌ອື່ນດ້ວຍ Memory Files, ແຕ່ການສ້າງມັນໃນໄດຣຟ໌ທີ່ທ່ານເປີດເບິ່ງແມ່ນໄວທີ່ສຸດ, ສະນັ້ນໄດຣຟ໌ທີ່ໄວທີ່ສຸດຈຶ່ງຢູ່ກ່ອນ. ສ້າງດຽວນີ້ບໍ?'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: ມີຮູບ %d ຮູບ, ອ່ານ %d KB/s'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: ມີຮູບ %d ຮູບ, ອ່ານ %d KB/s, ໄວທີ່ສຸດ'
   'In use: %s, %d pictures, %d MB': 'ກຳລັງໃຊ້: %s, ຮູບ %d ຮູບ, %d MB'
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 'ບໍ່ສາມາດຂຽນແພັກ ART ລົງ %s ໄດ້ (ໄດຣຟ໌ນັ້ນມີບ່ອນຫວ່າງບໍ?). ບໍ່ມີຫຍັງອື່ນປ່ຽນ: ຮູບຖືກໂຫຼດຈາກໂຟນເດີ ART ຄືເກົ່າ.'
   The ART Pack in %s is removed. Art loads from the ART folders again.: ແພັກ ART ໃນ %s ຖືກລຶບແລ້ວ. ຮູບຖືກໂຫຼດຈາກໂຟນເດີ ART ອີກຄັ້ງ.
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : 'ແພັກ ART ສ້າງແລ້ວ: ຮູບ %d ຮູບ, %d MB, ໃນ %s (%d ວິນາທີ). ຕໍ່ຈາກນີ້ຮູບຖືກໂຫຼດຈາກມັນ, ແລະເກມ %d ເກມທີ່ມັນຖືກສ້າງໃຫ້ ຈະບໍ່ຖືກຖາມໂຟນເດີ ART ຂອງມັນເທື່ອລະຮູບອີກເລີຍ. ຮູບທີ່ RIPPS2 ດຶງມາ ຫຼື ຖ່າຍ ຈະສະແດງທັນທີ; ຮູບທີ່ທ່ານສຳເນົາມາຈາກຄອມພິວເຕີ ຈະສະແດງເມື່ອທ່ານສ້າງແພັກໃໝ່.'
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : ບໍ່ມີໂຟນເດີ ART ທີ່ມີຮູບໃນໄດຣຟ໌ທີ່ເລີ່ມແລ້ວ. ເລີ່ມໄດຣຟ໌ທີ່ມີຮູບຂອງທ່ານກ່ອນ (SELECT ໃນໜ້າຂອງມັນ), ແລ້ວກັບມາ.
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : 'ຮູບ %d ຮູບ ຈາກໂຟນເດີ ART %d ໂຟນເດີ ຈະເຂົ້າໄປໃນໄຟລ໌ດຽວ, %s. ໂຟນເດີ ART ຄົງຢູ່ຄືເກົ່າ: ແພັກເປັນສຳເນົາ. ທ່ານສາມາດສຳເນົາ art.tar ໄປໃສ່ໂຟນເດີ ART ຂອງໄດຣຟ໌ອື່ນດ້ວຍ Memory Files, ແຕ່ການສ້າງມັນໃນໄດຣຟ໌ທີ່ທ່ານເປີດເບິ່ງແມ່ນໄວທີ່ສຸດ, ສະນັ້ນໄດຣຟ໌ທີ່ໄວທີ່ສຸດຈຶ່ງຢູ່ກ່ອນ. ສ້າງດຽວນີ້ບໍ?'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'ແພັກ ART ສ້າງແລ້ວ: ຮູບ %d ຮູບ, %d MB, ໃນ %s (%d ວິນາທີ). ຕໍ່ຈາກນີ້ຮູບຖືກໂຫຼດຈາກມັນ, ແລະເກມ %d ເກມທີ່ມັນຖືກສ້າງໃຫ້ ຈະບໍ່ຖືກຖາມໂຟນເດີ ART ຂອງມັນເທື່ອລະຮູບອີກເລີຍ. ຮູບທີ່ RIPPS2 ດຶງມາ ຫຼື ຖ່າຍ ຈະສະແດງທັນທີ; ຮູບທີ່ທ່ານສຳເນົາມາຈາກຄອມພິວເຕີ ຈະສະແດງເມື່ອທ່ານສ້າງແພັກໃໝ່.'
 labels:
   SETTINGS_SAVED: ບັນທຶກການຕັ້ງຄ່າ ໄວ້ໃນ %s ແລ້ວ
   REMOVE_ALL_SETTINGS: ລົບການຕັ້ງຄ່າ

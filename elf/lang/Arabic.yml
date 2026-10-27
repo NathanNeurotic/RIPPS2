@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'بطاقة الذاكرة في المنفذ %d تشغّل %s عند التشغيل، ولا يستطيع BOOT LOCK ضبطه: يعمل عبر PS2BBL وFMCB وOSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: يوجد على هذا الجهاز محمّل إقلاع مع قفل RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT للعبة: المتصفح، ثم محمّل الإقلاع لديك (BOOT LOCK)'
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : '%d صورة من %d مجلد ART تدخل في ملف واحد، %s. تبقى مجلدات ART كما هي: الحزمة نسخة. يمكنك نسخ art.tar إلى مجلد ART في محرك آخر بواسطة Memory Files، لكن بناءها على المحرك الذي تتصفح منه هو الأسرع، لذلك يأتي أسرع محرك أولًا. هل تبنيها الآن؟'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d صورة هناك، يقرأ %d KB/s'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d صورة هناك، يقرأ %d KB/s، الأسرع'
   'In use: %s, %d pictures, %d MB': 'قيد الاستخدام: %s، %d صورة، %d MB'
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 'تعذّرت كتابة حزمة ART في %s (هل توجد مساحة على ذلك المحرك؟). لم يتغير شيء آخر: تُحمَّل الصور من مجلدات ART كما كانت.'
   The ART Pack in %s is removed. Art loads from the ART folders again.: أُزيلت حزمة ART في %s. تُحمَّل الصور من مجلدات ART من جديد.
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : 'حزمة ART جاهزة: %d صورة، %d MB، في %s (%d ث). من الآن تُحمَّل الصور منها، والألعاب الـ %d التي بُنيت لها لن يُسأل مجلد ART الخاص بها صورةً صورةً أبدًا. الصور التي يجلبها RIPPS2 أو يلتقطها تظهر فورًا؛ والتي تنسخها من حاسوب تظهر بعد أن تبني الحزمة من جديد.'
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : لا يوجد مجلد ART فيه صور على المحركات التي بدأت. ابدأ المحركات التي عليها صورك (SELECT في صفحتها)، ثم عُد.
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d صورة من %d مجلد ART تدخل في ملف واحد، %s. تبقى مجلدات ART كما هي: الحزمة نسخة. يمكنك نسخ art.tar إلى مجلد ART في محرك آخر بواسطة Memory Files، لكن بناءها على المحرك الذي تتصفح منه هو الأسرع، لذلك يأتي أسرع محرك أولًا. هل تبنيها الآن؟'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'حزمة ART جاهزة: %d صورة، %d MB، في %s (%d ث). من الآن تُحمَّل الصور منها، والألعاب الـ %d التي بُنيت لها لن يُسأل مجلد ART الخاص بها صورةً صورةً أبدًا. الصور التي يجلبها RIPPS2 أو يلتقطها تظهر فورًا؛ والتي تنسخها من حاسوب تظهر بعد أن تبني الحزمة من جديد.'
 labels:
   SETTINGS_SAVED: حُفظت الإعدادات في %s
   CONFIRMATION_EXIT: الخروج إلى المتصفح؟

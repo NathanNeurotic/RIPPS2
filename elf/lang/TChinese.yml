@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 插槽 %d 的記憶卡開機時啟動 %s，BOOT LOCK 無法設定它：BOOT LOCK 透過 PS2BBL、FMCB 和 OSDMenu 運作。
   A boot loader with RIPPS2's lock is on this console.: 這台主機上有帶 RIPPS2 鎖定的開機程式。
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 遊戲的 EXIT：瀏覽器，然後是你的開機程式（BOOT LOCK）
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : '%d 張圖片（來自 %d 個 ART 資料夾）將放進一個檔案 %s。ART 資料夾保持原樣：包只是副本。你可以用 Memory Files 把 art.tar 複製到其他磁碟的 ART 資料夾，但在你平常瀏覽的磁碟上建立最快，所以最快的磁碟排在最前面。現在建立嗎？'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar：%d 張圖片，讀取 %d KB/s'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar：%d 張圖片，讀取 %d KB/s，最快'
   'In use: %s, %d pictures, %d MB': 使用中：%s，%d 張圖片，%d MB
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 無法把 ART 包寫入 %s（該磁碟還有空間嗎？）。其他沒有任何改變：圖片照舊從 ART 資料夾讀取。
   The ART Pack in %s is removed. Art loads from the ART folders again.: '%s 中的 ART 包已刪除。圖片重新從 ART 資料夾讀取。'
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : ART 包已建立：%d 張圖片，%d MB，位於 %s（%d 秒）。今後圖片從包中讀取，它所對應的 %d 款遊戲再也不會逐張查詢各自的 ART 資料夾。RIPPS2 下載或拍下的圖片會立即顯示；從電腦複製進去的圖片在重新建立包之後顯示。
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : 已啟動的磁碟上沒有含圖片的 ART 資料夾。請先啟動存放圖片的磁碟（在其頁面按 SELECT），然後再回來。
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d 張圖片（來自 %d 個 ART 資料夾）將放進一個檔案 %s。ART 資料夾保持原樣：包只是副本。你可以用 Memory Files 把 art.tar 複製到其他磁碟的 ART 資料夾，但在你平常瀏覽的磁碟上建立最快，所以最快的磁碟排在最前面。現在建立嗎？'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : ART 包已建立：%d 張圖片，%d MB，位於 %s（%d 秒）。今後圖片從包中讀取，它所對應的 %d 款遊戲再也不會逐張查詢各自的 ART 資料夾。RIPPS2 下載或拍下的圖片會立即顯示；從電腦複製進去的圖片在重新建立包之後顯示。
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色

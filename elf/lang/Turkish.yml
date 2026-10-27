@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': '%d. yuvadaki hafıza kartı açılışta şunu başlatıyor: %s; BOOT LOCK bunu ayarlayamaz: PS2BBL, FMCB ve OSDMenu üzerinden çalışır.'
   A boot loader with RIPPS2's lock is on this console.: Bu konsolda RIPPS2'nin kilidini taşıyan bir önyükleyici var.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'Bir oyunun EXIT''i: tarayıcı, sonra önyükleyiciniz (BOOT LOCK)'
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : '%d resim, %d ART klasöründen tek bir dosyaya gidiyor: %s. ART klasörleri olduğu gibi kalır: paket bir kopyadır. art.tar dosyasını Memory Files ile başka bir sürücünün ART klasörüne kopyalayabilirsin, ama en hızlısı onu göz attığın sürücüde oluşturmaktır, bu yüzden en hızlı sürücü en üstte. Şimdi oluşturulsun mu?'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: orada %d resim, %d KB/s okur'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: orada %d resim, %d KB/s okur, en hızlısı'
   'In use: %s, %d pictures, %d MB': 'Kullanımda: %s, %d resim, %d MB'
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 'ART paketi %s konumuna yazılamadı (o sürücüde yer var mı?). Başka hiçbir şey değişmedi: resimler önceki gibi ART klasörlerinden yükleniyor.'
   The ART Pack in %s is removed. Art loads from the ART folders again.: '%s içindeki ART paketi kaldırıldı. Resimler yeniden ART klasörlerinden yükleniyor.'
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : 'ART paketi hazır: %d resim, %d MB, %s içinde (%d sn). Resimler artık ondan yükleniyor ve oluşturulduğu %d oyunun ART klasörüne bir daha asla resim resim sorulmuyor. RIPPS2''nin indirdiği ya da çektiği resimler hemen görünür; PC''den kopyaladıkların paketi yeniden oluşturduğunda görünür.'
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : Başlatılan sürücülerde resim içeren bir ART klasörü yok. Resimlerinin bulunduğu sürücüleri başlat (sayfalarında SELECT), sonra geri gel.
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d resim, %d ART klasöründen tek bir dosyaya gidiyor: %s. ART klasörleri olduğu gibi kalır: paket bir kopyadır. art.tar dosyasını Memory Files ile başka bir sürücünün ART klasörüne kopyalayabilirsin, ama en hızlısı onu göz attığın sürücüde oluşturmaktır, bu yüzden en hızlı sürücü en üstte. Şimdi oluşturulsun mu?'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'ART paketi hazır: %d resim, %d MB, %s içinde (%d sn). Resimler artık ondan yükleniyor ve oluşturulduğu %d oyunun ART klasörüne bir daha asla resim resim sorulmuyor. RIPPS2''nin indirdiği ya da çektiği resimler hemen görünür; PC''den kopyaladıkların paketi yeniden oluşturduğunda görünür.'
 labels:
   ETH_100MFDX: 100Mbit Tam çift yönlü
   ETH_100MHDX: 100Mbit Yarı çift yönlü

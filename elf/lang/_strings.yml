@@ -890,9 +890,6 @@ strings:
 - en: The server sent a chunked answer.
   in:
   - ripps2art.c
-- en: '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  in:
-  - ripps2artpack.c
 - en: '%sART/art.tar: %d pictures there, reads %d KB/s'
   in:
   - ripps2artpack.c
@@ -914,6 +911,9 @@ strings:
 - en: 'Packing the art into %s: %d of %d pictures, %d MB. Press the back button to stop.'
   in:
   - ripps2artpack.c
+- en: 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  in:
+  - ripps2artpack.c
 - en: REMOVE the pack in %s (the ART folders stay as they are)
   in:
   - ripps2artpack.c
@@ -929,7 +929,7 @@ strings:
 - en: The ART Pack in %s is removed. Art loads from the ART folders again.
   in:
   - ripps2artpack.c
-- en: 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+- en: 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
   in:
   - ripps2artpack.c
 - en: There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.

@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Картата памет в слот %d стартира %s при включване, който BOOT LOCK не може да настрои: работи чрез PS2BBL, FMCB и OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: На тази конзола има зареждащ модул с ключалката на RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT от игра: браузърът, после вашият зареждащ модул (BOOT LOCK)'
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : '%d изображения от %d папки ART отиват в един файл, %s. Папките ART остават каквито са: пакетът е копие. Можеш да копираш art.tar в папката ART на друго устройство с Memory Files, но най-бързо е да го изградиш на устройството, от което разглеждаш, затова най-бързото устройство е първо. Да се изгради ли сега?'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d изображения там, чете %d KB/s'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d изображения там, чете %d KB/s, най-бързото'
   'In use: %s, %d pictures, %d MB': 'В употреба: %s, %d изображения, %d MB'
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 'Пакетът ART не можа да се запише в %s (има ли място на това устройство?). Нищо друго не се промени: изображенията се зареждат от папките ART както преди.'
   The ART Pack in %s is removed. Art loads from the ART folders again.: Пакетът ART в %s е премахнат. Изображенията отново се зареждат от папките ART.
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : 'Пакетът ART е готов: %d изображения, %d MB, в %s (%d s). Отсега изображенията се зареждат от него, а за %d игри, за които е изграден, папката им ART никога повече не се пита изображение по изображение. Изображенията, които RIPPS2 изтегля или заснема, се показват веднага; копираните от компютър се показват, когато изградиш пакета отново.'
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : На стартираните устройства няма папка ART с изображения. Стартирай устройствата, на които са изображенията ти (SELECT на страницата им), и се върни.
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d изображения от %d папки ART отиват в един файл, %s. Папките ART остават каквито са: пакетът е копие. Можеш да копираш art.tar в папката ART на друго устройство с Memory Files, но най-бързо е да го изградиш на устройството, от което разглеждаш, затова най-бързото устройство е първо. Да се изгради ли сега?'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Пакетът ART е готов: %d изображения, %d MB, в %s (%d s). Отсега изображенията се зареждат от него, а за %d игри, за които е изграден, папката им ART никога повече не се пита изображение по изображение. Изображенията, които RIPPS2 изтегля или заснема, се показват веднага; копираните от компютър се показват, когато изградиш пакета отново.'
 labels:
   BDMMODE: Режим на стартиране на BDM
   GAME_ID: ID на играта

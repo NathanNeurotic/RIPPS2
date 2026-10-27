@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Paměťová karta ve slotu %d při zapnutí spouští %s, který BOOT LOCK nastavit neumí: funguje přes PS2BBL, FMCB a OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Na této konzoli je zavaděč se zámkem RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT ze hry: prohlížeč, pak váš zavaděč (BOOT LOCK)'
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : '%d obrázků z %d složek ART půjde do jednoho souboru, %s. Složky ART zůstanou, jak jsou: balíček je kopie. art.tar můžeš zkopírovat do složky ART jiného disku pomocí Memory Files, ale nejrychlejší je postavit ho na disku, ze kterého procházíš, proto je nejrychlejší disk první. Postavit teď?'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d obrázků tam, čte %d KB/s'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d obrázků tam, čte %d KB/s, nejrychlejší'
   'In use: %s, %d pictures, %d MB': 'Používá se: %s, %d obrázků, %d MB'
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 'Balíček ART se nepodařilo zapsat do %s (je na tom disku místo?). Nic jiného se nezměnilo: obrázky se načítají ze složek ART jako dřív.'
   The ART Pack in %s is removed. Art loads from the ART folders again.: Balíček ART v %s je odstraněn. Obrázky se opět načítají ze složek ART.
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : 'Balíček ART je hotový: %d obrázků, %d MB, v %s (%d s). Od teď se obrázky načítají z něj a u %d her, pro které byl postaven, se už jejich složky ART nikdy neptá obrázek po obrázku. Obrázky, které RIPPS2 stáhne nebo vyfotí, se ukážou hned; obrázky zkopírované z PC se ukážou, až balíček postavíš znovu.'
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : Na spuštěných discích není žádná složka ART s obrázky. Spusť disky, na kterých máš obrázky (SELECT na jejich stránce), a pak se vrať.
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d obrázků z %d složek ART půjde do jednoho souboru, %s. Složky ART zůstanou, jak jsou: balíček je kopie. art.tar můžeš zkopírovat do složky ART jiného disku pomocí Memory Files, ale nejrychlejší je postavit ho na disku, ze kterého procházíš, proto je nejrychlejší disk první. Postavit teď?'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Balíček ART je hotový: %d obrázků, %d MB, v %s (%d s). Od teď se obrázky načítají z něj a u %d her, pro které byl postaven, se už jejich složky ART nikdy neptá obrázek po obrázku. Obrázky, které RIPPS2 stáhne nebo vyfotí, se ukážou hned; obrázky zkopírované z PC se ukážou, až balíček postavíš znovu.'
 labels:
   HINT_NEUTRINO_AUTO_ELF: Předá zaváděcí ELF hry Neutrinu, aby vyhledalo nastavení pro daný titul. Ve výchozím stavu zapnuto; ručně nastavená volba Boot ELF má přednost.
   HINT_POPSTARTER_PATH: Kde je POPSTARTER.ELF. Když zůstane prázdné, RIPPS2 doplní ten, který najde na disku; přepište, chcete-li jiný, např. usb:/POPS/POPSTARTER.ELF

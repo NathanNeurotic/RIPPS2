@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Η κάρτα μνήμης στην υποδοχή %d ξεκινά στο άναμμα το %s, που το BOOT LOCK δεν μπορεί να ρυθμίσει: λειτουργεί μέσω PS2BBL, FMCB και OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: Σε αυτή την κονσόλα υπάρχει φορτωτής εκκίνησης με το κλείδωμα του RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT παιχνιδιού: ο περιηγητής, μετά ο φορτωτής εκκίνησής σας (BOOT LOCK)'
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : '%d εικόνες από %d φακέλους ART μπαίνουν σε ένα αρχείο, %s. Οι φάκελοι ART μένουν όπως είναι: το πακέτο είναι αντίγραφο. Μπορείς να αντιγράψεις το art.tar στον φάκελο ART άλλης μονάδας με το Memory Files, αλλά το πιο γρήγορο είναι να το φτιάξεις στη μονάδα από την οποία περιηγείσαι, γι'' αυτό η πιο γρήγορη μονάδα είναι πρώτη. Να φτιαχτεί τώρα;'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: %d εικόνες εκεί, διαβάζει %d KB/s'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: %d εικόνες εκεί, διαβάζει %d KB/s, η πιο γρήγορη'
   'In use: %s, %d pictures, %d MB': 'Σε χρήση: %s, %d εικόνες, %d MB'
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 'Το πακέτο ART δεν μπόρεσε να γραφτεί στο %s (υπάρχει χώρος σε αυτή τη μονάδα;). Τίποτε άλλο δεν άλλαξε: οι εικόνες φορτώνονται από τους φακέλους ART όπως πριν.'
   The ART Pack in %s is removed. Art loads from the ART folders again.: Το πακέτο ART στο %s αφαιρέθηκε. Οι εικόνες φορτώνονται ξανά από τους φακέλους ART.
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : 'Το πακέτο ART είναι έτοιμο: %d εικόνες, %d MB, στο %s (%d s). Από τώρα οι εικόνες φορτώνονται από αυτό, και για τα %d παιχνίδια για τα οποία φτιάχτηκε ο φάκελος ART τους δεν ερωτάται ποτέ ξανά εικόνα προς εικόνα. Οι εικόνες που κατεβάζει ή τραβά το RIPPS2 εμφανίζονται αμέσως· όσες αντιγράφεις από υπολογιστή εμφανίζονται όταν ξαναφτιάξεις το πακέτο.'
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : Δεν υπάρχει φάκελος ART με εικόνες στις μονάδες που ξεκίνησαν. Ξεκίνα τις μονάδες όπου είναι οι εικόνες σου (SELECT στη σελίδα τους) και μετά γύρισε εδώ.
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d εικόνες από %d φακέλους ART μπαίνουν σε ένα αρχείο, %s. Οι φάκελοι ART μένουν όπως είναι: το πακέτο είναι αντίγραφο. Μπορείς να αντιγράψεις το art.tar στον φάκελο ART άλλης μονάδας με το Memory Files, αλλά το πιο γρήγορο είναι να το φτιάξεις στη μονάδα από την οποία περιηγείσαι, γι'' αυτό η πιο γρήγορη μονάδα είναι πρώτη. Να φτιαχτεί τώρα;'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Το πακέτο ART είναι έτοιμο: %d εικόνες, %d MB, στο %s (%d s). Από τώρα οι εικόνες φορτώνονται από αυτό, και για τα %d παιχνίδια για τα οποία φτιάχτηκε ο φάκελος ART τους δεν ερωτάται ποτέ ξανά εικόνα προς εικόνα. Οι εικόνες που κατεβάζει ή τραβά το RIPPS2 εμφανίζονται αμέσως· όσες αντιγράφεις από υπολογιστή εμφανίζονται όταν ξαναφτιάξεις το πακέτο.'
 labels:
   OK: OK
   WIDE_SCREEN: Ευρεία οθόνη

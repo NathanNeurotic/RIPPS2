@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Карта памяти в слоте %d при включении запускает %s, который BOOT LOCK настроить не может: он работает через PS2BBL, FMCB и OSDMenu.'
   A boot loader with RIPPS2's lock is on this console.: На этой консоли есть загрузчик с блокировкой RIPPS2.
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT из игры: браузер, затем ваш загрузчик (BOOT LOCK)'
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : '%d изображений из %d папок ART попадут в один файл, %s. Папки ART останутся как есть: пакет является копией. Ты можешь скопировать art.tar в папку ART другого накопителя через Memory Files, но быстрее всего собрать его на том накопителе, с которого ты просматриваешь игры, поэтому самый быстрый накопитель стоит первым. Собрать сейчас?'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar: там %d изображений, чтение %d КБ/с'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar: там %d изображений, чтение %d КБ/с, самый быстрый'
   'In use: %s, %d pictures, %d MB': 'Используется: %s, %d изображений, %d МБ'
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 'Не удалось записать пакет ART в %s (есть ли место на этом накопителе?). Больше ничего не изменилось: изображения загружаются из папок ART, как раньше.'
   The ART Pack in %s is removed. Art loads from the ART folders again.: Пакет ART в %s удалён. Изображения снова загружаются из папок ART.
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : 'Пакет ART собран: %d изображений, %d МБ, в %s (%d с). Теперь изображения загружаются из него, и для %d игр, для которых он собран, их папка ART больше никогда не опрашивается по одному изображению. Изображения, которые RIPPS2 загружает или снимает, появляются сразу; скопированные с ПК появятся, когда ты снова соберёшь пакет.'
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : На запущенных накопителях нет папки ART с изображениями. Запусти накопители, на которых лежат твои изображения (SELECT на их странице), и вернись.
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d изображений из %d папок ART попадут в один файл, %s. Папки ART останутся как есть: пакет является копией. Ты можешь скопировать art.tar в папку ART другого накопителя через Memory Files, но быстрее всего собрать его на том накопителе, с которого ты просматриваешь игры, поэтому самый быстрый накопитель стоит первым. Собрать сейчас?'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : 'Пакет ART собран: %d изображений, %d МБ, в %s (%d с). Теперь изображения загружаются из него, и для %d игр, для которых он собран, их папка ART больше никогда не опрашивается по одному изображению. Изображения, которые RIPPS2 загружает или снимает, появляются сразу; скопированные с ПК появятся, когда ты снова соберёшь пакет.'
 labels:
   DS34BT_MODE: DualShock3/4 по Bluetooth
   HINT_NEUTRINO_AUTO_ELF: Передаёт загрузочный ELF игры в Neutrino, чтобы найти настройки для этой игры. Включено по умолчанию; заданный вручную параметр Boot ELF важнее.

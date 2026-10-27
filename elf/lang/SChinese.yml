@@ -1266,8 +1266,6 @@ strings:
   'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 插槽 %d 的记忆卡开机时启动 %s，BOOT LOCK 无法设置它：BOOT LOCK 通过 PS2BBL、FMCB 和 OSDMenu 工作。
   A boot loader with RIPPS2's lock is on this console.: 这台主机上有带 RIPPS2 锁定的引导程序。
   'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 游戏的 EXIT：浏览器，然后是你的引导程序（BOOT LOCK）
-  ? '%d pictures from %d ART folders go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
-  : '%d 张图片（来自 %d 个 ART 文件夹）将放进一个文件 %s。ART 文件夹保持原样：包只是副本。你可以用 Memory Files 把 art.tar 复制到其他驱动器的 ART 文件夹，但在你平时浏览的驱动器上生成最快，所以最快的驱动器排在最前。现在生成吗？'
   '%sART/art.tar: %d pictures there, reads %d KB/s': '%sART/art.tar：%d 张图片，读取 %d KB/s'
   '%sART/art.tar: %d pictures there, reads %d KB/s, the fastest': '%sART/art.tar：%d 张图片，读取 %d KB/s，最快'
   'In use: %s, %d pictures, %d MB': 使用中：%s，%d 张图片，%d MB
@@ -1281,10 +1279,12 @@ strings:
   ? 'The ART Pack could not be written to %s (is there room on that drive?). Nothing else changed: art loads from the ART folders as before.'
   : 无法把 ART 包写入 %s（该驱动器还有空间吗？）。其他没有任何变化：图片照旧从 ART 文件夹读取。
   The ART Pack in %s is removed. Art loads from the ART folders again.: '%s 中的 ART 包已删除。图片重新从 ART 文件夹读取。'
-  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the %d games it was built for never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
-  : ART 包已生成：%d 张图片，%d MB，位于 %s（%d 秒）。今后图片从包中读取，它所针对的 %d 款游戏再也不会逐张查询各自的 ART 文件夹。RIPPS2 下载或拍下的图片会立即显示；从电脑复制进去的图片在重新生成包后显示。
   ? There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
   : 已启动的驱动器上没有含图片的 ART 文件夹。请先启动存放图片的驱动器（在其页面按 SELECT），然后再回来。
+  ? 'Pictures: %d. ART folders: %d. They go into one file, %s. The ART folders stay as they are: the pack is a copy. You can copy art.tar into another drive''s ART folder with Memory Files, but building it on the drive you browse from is quickest, so the fastest drive comes first. Build it now?'
+  : '%d 张图片（来自 %d 个 ART 文件夹）将放进一个文件 %s。ART 文件夹保持原样：包只是副本。你可以用 Memory Files 把 art.tar 复制到其他驱动器的 ART 文件夹，但在你平时浏览的驱动器上生成最快，所以最快的驱动器排在最前。现在生成吗？'
+  ? 'The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again.'
+  : ART 包已生成：%d 张图片，%d MB，位于 %s（%d 秒）。今后图片从包中读取，它所针对的 %d 款游戏再也不会逐张查询各自的 ART 文件夹。RIPPS2 下载或拍下的图片会立即显示；从电脑复制进去的图片在重新生成包后显示。
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
