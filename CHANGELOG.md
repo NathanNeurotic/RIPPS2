@@ -4,10 +4,11 @@
 
 The user's notes of 10/27 on v1.1.8.
 
-- **The sidebar stays on the list.** With the categories as the sidebar it was drawn over the info page too, over the
-  game on RIPPS2's own info page and on the themes made for OPL. The info page is the game's now on every theme: Square
-  goes in, Circle comes back to the list and its sidebar, and Left / Right step the games. A theme that wants the
-  sidebar on its info page says `info_sidebar=1` (none of the built-in ones does).
+- **The sidebar out of sight on the info page.** With the categories as the sidebar it was drawn over the info page,
+  over the game on RIPPS2's own info page and on the themes made for OPL. Now, on every theme, the info page is the
+  game's: the sidebar stays out of sight until Left brings it out, Circle or Right put it away and the page stays, Up /
+  Down step the games, and Circle with the sidebar away goes back to the list. A theme that wants it drawn there all the
+  time says `info_sidebar=1` (none of the built-in ones does).
 - **The ART Pack's flow as the other long jobs have it.** Each picture is sized as the ART folders are looked at (the
   count and the size shown as it goes), the drives are offered fastest first with their free space, and only where the
   pack fits (a FAT drive under 4 GB; MMCE and the APA HDD cannot say, and a full one stops cleanly). The panel every long

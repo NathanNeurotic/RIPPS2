@@ -1,12 +1,13 @@
 diff --git a/include/menusys.h b/include/menusys.h
-index f0dbae8..8dc3f6f 100644
+index f0dbae8..4af1c08 100644
 --- a/include/menusys.h
 +++ b/include/menusys.h
-@@ -151,6 +151,7 @@ void menuRequestInfoSize(void);
+@@ -151,6 +151,8 @@ void menuRequestInfoSize(void);
  void menuRenderMain();
  void menuRenderMenu();
  void menuRenderInfo();
-+int menuInfoSidebar(void); // build 119: the sidebar on the info page (the theme's info_sidebar)
++int menuInfoSidebar(void);      // build 119: the sidebar drawn on the info page all the time (the theme's info_sidebar=1)
++int menuInfoSidebarReach(void); // build 119: Left brings it out there (every theme with the sidebar on)
  void menuRenderBackdrop(void); // RIPPS2 build 70: the list's backdrop alone (RIPFLOW's list <-> info switch)
  void menuRenderGameMenu();
  void menuRenderAppMenu();
@@ -50,34 +51,42 @@ index 3514a62..9feb00b 100644
                  (screenHandlerTarget == &screenHandlers[GUI_SCREEN_MAIN] || screenHandlerTarget == &screenHandlers[GUI_SCREEN_INFO]))
                  ripps2SidebarRender();
 diff --git a/src/menusys.c b/src/menusys.c
-index e2ef210..8d76dda 100644
+index e2ef210..c5c6f6b 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
-@@ -2756,16 +2756,24 @@ void menuRenderInfo(void)
+@@ -2756,16 +2756,31 @@ void menuRenderInfo(void)
          gTheme->itemsList = thmResolveItemsList(&gTheme->infoElems, gTheme->gamesItemsList, selected_item->item->icon_id);
      }
      // RIPPS2: no category bar here -- the info page gives the whole screen to the game's art panel. Build 115: the sidebar
 -    // stays, where the list page has it (Left reaches it here too)
 -    if (ripps2SidebarOn() && !ripps2Legacy())
-+    // stayed, where the list page has it (Left reached it here too); build 119: the info page is the game's (Square in,
-+    // Circle back), the sidebar only on a theme that asks for it (info_sidebar=1)
-+    if (menuInfoSidebar())
++    // stayed, where the list page has it; build 119: out of sight until Left brings it out (or always, info_sidebar=1)
++    if (menuInfoSidebar() || (menuInfoSidebarReach() && ripps2SidebarFocused()))
          ripps2SidebarRender();
  }
  
-+// build 119 (the user, 10/27): the info page is the game's alone on every theme (Square goes in, Circle back to the list,
-+// where the sidebar is): Left / Right step the games. A theme that wants the sidebar there too says info_sidebar=1
++// build 119 (the user, 10/27): the info page is the game's, on every theme, the ones made for OPL included: the sidebar is
++// out of sight there (a theme that wants it drawn says info_sidebar=1), Left brings it out, Circle or Right put it away and
++// the page stays, Up / Down step the games, and Circle with the sidebar away goes back to the list
 +int menuInfoSidebar(void)
 +{
-+    return ripps2SidebarOn() && !ripps2Legacy() && gTheme != NULL && gTheme->infoSidebar;
++    return menuInfoSidebarReach() && gTheme != NULL && gTheme->infoSidebar;
++}
++
++// the sidebar can be brought out on the info page (it is on, on a theme that is not a legacy one)
++int menuInfoSidebarReach(void)
++{
++    return ripps2SidebarOn() && !ripps2Legacy();
 +}
 +
  void menuHandleInputInfo()
  {
      // build 115 (the user, 10/26): with the sidebar, the info page is the list's: Left goes to the sidebar's icons, Right
-     // steps no game, Up / Down still do, and a category picked in the sidebar takes the page back to its list
+-    // steps no game, Up / Down still do, and a category picked in the sidebar takes the page back to its list
 -    if (ripps2SidebarOn() && !ripps2Legacy()) {
-+    if (menuInfoSidebar()) {
++    // steps no game, Up / Down still do, and a category picked in the sidebar takes the page back to its list. Build 119:
++    // on every theme, the sidebar out of sight until Left (its own Circle and Right put it away, the page staying)
++    if (menuInfoSidebarReach()) {
          if (ripps2SidebarFocused()) {
              int cat = gRipps2Category, src = menuSourceCurrent();
              ripps2SidebarInput();

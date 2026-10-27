@@ -1,5 +1,5 @@
-"""Build 119 (the user, 10/27): the sidebar off the info page on every theme (Square goes in, Circle back to the list and
-its sidebar; info_sidebar=1 for a theme that wants it there); the ART Pack's flow as the other long jobs have it: the
+"""Build 119 (the user, 10/27): the sidebar out of sight on the info page of every theme, Left bringing it out, Circle or
+Right putting it away with the page staying, Up / Down stepping the games (info_sidebar=1 keeps it drawn); the ART Pack's flow as the other long jobs have it: the
 sizes, the time it should take, RIPPS2's numbered progress bar, and only the drives it fits on; those panels in RIPPS2's
 Roboto on every theme.
 
@@ -33,13 +33,14 @@ for cfg in ('misc/theme_ripgrid.cfg', 'misc/theme_coverflow.cfg', 'misc/conf_the
     if 'info_sidebar=1' in rd(cfg):
         fail.append('%s: no built-in theme keeps the sidebar on its info page' % cfg)
 menu = rd('src/menusys.c')
-need(menu, (('return ripps2SidebarOn() && !ripps2Legacy() && gTheme != NULL && gTheme->infoSidebar;', 'the rule'),), 'menusys.c')
+need(menu, (('return menuInfoSidebarReach() && gTheme != NULL && gTheme->infoSidebar;', 'drawn all the time only with info_sidebar=1'),
+            ('return ripps2SidebarOn() && !ripps2Legacy();', 'brought out on every theme with the sidebar on')), 'menusys.c')
 info = body(menu, 'void menuRenderInfo(void)')
-if 'if (menuInfoSidebar())\n        ripps2SidebarRender();' not in info:
-    fail.append('menuRenderInfo: the sidebar drawn only where the info page has room')
+if 'if (menuInfoSidebar() || (menuInfoSidebarReach() && ripps2SidebarFocused()))\n        ripps2SidebarRender();' not in info:
+    fail.append('menuRenderInfo: the sidebar out of sight on the info page until it is brought out')
 inp = body(menu, 'void menuHandleInputInfo()')
-if not inp.lstrip('void menuHandleInputInfo()\n{').count('if (menuInfoSidebar()) {'):
-    fail.append('menuHandleInputInfo: Left opens the sidebar only where it is drawn (else Left / Right step the games)')
+if 'if (menuInfoSidebarReach()) {' not in inp or 'ripps2SidebarOpen(0);' not in inp or 'ripps2SidebarInput();' not in inp:
+    fail.append('menuHandleInputInfo: Left brings it out, its own Circle and Right put it away (the page stays)')
 if 'if (menuInfoSidebar() &&' not in rd('src/gui.c'):
     fail.append('gui.c: the sidebar stays through the page morph only when the info page keeps it')
 
