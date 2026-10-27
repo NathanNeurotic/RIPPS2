@@ -73,6 +73,30 @@ need(th, (('newT->flowTilt = configGetInt(themeConfig, "flowtilt", &intValue) &&
 if 'flowtilt=1' not in rd('misc/theme_coverflow.cfg'):
     fail.append('theme_coverflow.cfg: RIPFLOW has flowtilt=1')
 
+# ---- RIPSHOT on MMCE: the roll on the SD, handed over by the card's descriptor
+cfg = rd('modules/iopcore/common/cdvd_config.h')
+mmce_struct = cfg[cfg.index('struct cdvdman_settings_mmce'):]
+mmce_struct = mmce_struct[:mmce_struct.index('} __attribute__((packed));')]
+if 'int roll_fd1;' not in mmce_struct:
+    fail.append('cdvd_config.h: the MMCE settings carry the roll\'s card descriptor (plus 1)')
+dev = rd('modules/iopcore/cdvdman/device-mmce.c')
+roll_io = body(dev, 'int DeviceRollIo(int write, u32 offset, void *buf, u32 size)')
+if 'mmce_write_offset(fd, offset, size' not in roll_io or 'mmce_read_offset(fd, offset, size' not in roll_io:
+    fail.append('device-mmce.c: the roll is read and written by offset, as the VMCs are')
+if 'return cdvdman_settings.roll_fd1 > 0 ? RS_ROLL_BYTES : 0;' not in dev:
+    fail.append('device-mmce.c: the roll\'s size once one was handed over')
+shot = rd('src/ripps2shot.c')
+prep = body(shot, 'void ripps2ShotPrepareMmce(')
+need(prep, (('fileXioIoctl2(rsMmceFd, 0x80, NULL, 0, NULL, 0)', "the card's own descriptor"),
+            ('settings->roll_fd1 = cardFd + 1;', 'handed over'),
+            ('rsLaunch.state = RIPSHOT_READY;', 'ready for the menu')), 'ripps2ShotPrepareMmce')
+if '!strncmp(mode, "MMCE", 4)' not in body(shot, 'void ripps2ShotFillConfig('):
+    fail.append('ripps2ShotFillConfig: an MMCE launch gets its roll\'s state')
+if 'if (!haveBlank && strncmp(root, "mmce", 4))' not in body(shot, 'static void rsJob(void)'):
+    fail.append('rsJob: no blank roll written over the bus the pads share')
+if 'ripps2ShotPrepareMmce(settings, mmcePrefix, game->startup, game->name);' not in rd('src/mmcesupport.c'):
+    fail.append('mmcesupport.c: the launch prepares the roll')
+
 # ---- the launch wait asks its drive
 mix = rd('src/mixsupport.c')
 wait = body(mix, 'int mixWaitForRow(struct menu_item *menu)')
