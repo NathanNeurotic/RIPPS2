@@ -140,7 +140,7 @@ index fd1a50b..05133b6 100644
  }
  
 diff --git a/src/menusys.c b/src/menusys.c
-index 87c8748..fe47683 100644
+index 87c8748..e2ef210 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
 @@ -2578,10 +2578,11 @@ static void menuShoulderKeys(int viewPending)
@@ -207,9 +207,10 @@ index 87c8748..fe47683 100644
 -        if (!side || grid) // build 115: RIPFLOW's held Left in sidebar mode does not walk the covers back
 -            menuNavigateLeft(); // RIPPS2 build 69: Left/Right switch drives, like the orb formations (FifthFox)
 -    } else if (side && !cf && !grid && getKey(KEY_RIGHT)) {
+-        // build 115: a list in sidebar mode: Right steps no source
 +        menuNavigateLeft(); // RIPPS2 build 69: Left/Right switch drives, like the orb formations (FifthFox)
-+    } else if (sb && !cf && !grid && getKey(KEY_RIGHT)) {
-         // build 115: a list in sidebar mode: Right steps no source
++    } else if (side && getKey(KEY_RIGHT)) {
++        // build 115: a list in sidebar mode: Right steps no source (build 117: sidebar_left=list keeps both the list's)
      } else if ((cf || grid) ? getKey(KEY_RIGHT) : getKeyOn(KEY_RIGHT)) {
          menuNavigateRight();
      } else if (flowSide && (getKey(KEY_UP) || getKey(KEY_DOWN))) {
