@@ -422,7 +422,7 @@ index b5e1891..9317880 100644
  
  int ripps2ThemePanel(const char **names, int cur)
 diff --git a/src/sound.c b/src/sound.c
-index adc44a8..59a1625 100644
+index adc44a8..e9194cc 100644
 --- a/src/sound.c
 +++ b/src/sound.c
 @@ -311,8 +311,18 @@ static int sfxRead(const char *full_path, struct sfxEffect *sfx)
@@ -451,14 +451,14 @@ index adc44a8..59a1625 100644
  static int pcmEnded = 0; // the once-played .wav or .mp3 reached its end (not a read error)
  
 -static FILE *wavFile = NULL;
-+// build 117: read through the music's own source (bgmSourceOpen, below): RAM pieces, a descriptor the SD2PSX lost reopened
-+struct bgm_source;
-+static struct bgm_source *bgmSourceOpen(const char *path);
-+static size_t bgmSourceRead(void *ptr, size_t size, size_t nmemb, void *datasource);
-+static int bgmSourceSeek(void *datasource, ogg_int64_t offset, int whence);
-+static long bgmSourceTell(void *datasource);
-+static int bgmSourceClose(void *datasource);
-+static struct bgm_source *wavSrc = NULL;
++// build 117: read through the music's own source (audSrc*, defined after it, below): RAM pieces, a descriptor the SD2PSX
++// lost reopened and the read resumed
++static void *audSrcOpen(const char *path);
++static size_t audSrcRead(void *src, void *buf, size_t n);
++static int audSrcSeek(void *src, long offset, int whence);
++static long audSrcTell(void *src);
++static void audSrcClose(void *src);
++static void *wavSrc = NULL;
  static long wavData = 0, wavSize = 0, wavPos = 0;
  static int wavSrcRate = 48000, wavSrcCh = 2;
  // the file read in blocks, not a frame at a time. Build 115 (the user, 10/26: a CD track in the MMCE's AUDIO stuttered as music
@@ -467,7 +467,7 @@ index adc44a8..59a1625 100644
                  return 0;
              }
 -            if (fseek(wavFile, wavData, SEEK_SET) != 0)
-+            if (bgmSourceSeek(wavSrc, wavData, SEEK_SET) != 0)
++            if (audSrcSeek(wavSrc, wavData, SEEK_SET) != 0)
                  return 0;
              wavPos = 0;
          }
@@ -476,7 +476,7 @@ index adc44a8..59a1625 100644
              want = (int)(wavSize - wavPos);
          want -= want % frame;
 -        n = (int)fread(wavIn, 1, want, wavFile);
-+        n = (int)bgmSourceRead(wavIn, 1, want, wavSrc); // build 117: a lost descriptor is reopened and the read resumed
++        n = (int)audSrcRead(wavSrc, wavIn, want); // build 117: a lost descriptor is reopened and the read resumed
          n -= n % frame;
          if (n <= 0)
              return 0;
@@ -488,7 +488,7 @@ index adc44a8..59a1625 100644
 -        fclose(wavFile);
 -    wavFile = NULL;
 +    if (wavSrc != NULL)
-+        bgmSourceClose(wavSrc);
++        audSrcClose(wavSrc);
 +    wavSrc = NULL;
  }
  
@@ -498,17 +498,17 @@ index adc44a8..59a1625 100644
  
      wavClose();
 -    if ((wavFile = fopen(path, "rb")) == NULL)
-+    if ((wavSrc = bgmSourceOpen(path)) == NULL)
++    if ((wavSrc = audSrcOpen(path)) == NULL)
          return 0;
 -    if (fread(h, 1, 12, wavFile) != 12 || memcmp(h, "RIFF", 4) || memcmp(h + 8, "WAVE", 4))
-+    if (bgmSourceRead(h, 1, 12, wavSrc) != 12 || memcmp(h, "RIFF", 4) || memcmp(h + 8, "WAVE", 4))
++    if (audSrcRead(wavSrc, h, 12) != 12 || memcmp(h, "RIFF", 4) || memcmp(h + 8, "WAVE", 4))
          goto bad;
 -    while (fread(ck, 1, 8, wavFile) == 8) {
-+    while (bgmSourceRead(ck, 1, 8, wavSrc) == 8) {
++    while (audSrcRead(wavSrc, ck, 8) == 8) {
          long len = ck[4] | (ck[5] << 8) | (ck[6] << 16) | ((long)ck[7] << 24);
          if (!memcmp(ck, "fmt ", 4) && len >= 16) {
 -            if (fread(fmt, 1, 16, wavFile) != 16)
-+            if (bgmSourceRead(fmt, 1, 16, wavSrc) != 16)
++            if (audSrcRead(wavSrc, fmt, 16) != 16)
                  goto bad;
              int tag = fmt[0] | (fmt[1] << 8), bits = fmt[14] | (fmt[15] << 8);
              bgmPcmChannels = fmt[2] | (fmt[3] << 8);
@@ -517,11 +517,11 @@ index adc44a8..59a1625 100644
                  goto bad;
              haveFmt = 1;
 -            if (len > 16 && fseek(wavFile, len - 16 + (len & 1), SEEK_CUR) != 0)
-+            if (len > 16 && bgmSourceSeek(wavSrc, len - 16 + (len & 1), SEEK_CUR) != 0)
++            if (len > 16 && audSrcSeek(wavSrc, len - 16 + (len & 1), SEEK_CUR) != 0)
                  goto bad;
          } else if (!memcmp(ck, "data", 4) && haveFmt) {
 -            wavData = ftell(wavFile);
-+            wavData = bgmSourceTell(wavSrc);
++            wavData = audSrcTell(wavSrc);
              wavSize = len;
              wavPos = 0;
              wavSrcRate = bgmPcmRate; // build 111: what the file holds; audsrv is given 48 kHz stereo
@@ -530,7 +530,7 @@ index adc44a8..59a1625 100644
              bgmPcmRead = wavRead;
              return 1;
 -        } else if (fseek(wavFile, len + (len & 1), SEEK_CUR) != 0)
-+        } else if (bgmSourceSeek(wavSrc, len + (len & 1), SEEK_CUR) != 0)
++        } else if (audSrcSeek(wavSrc, len + (len & 1), SEEK_CUR) != 0)
              goto bad;
      }
  bad:
@@ -539,7 +539,7 @@ index adc44a8..59a1625 100644
  
  #define MP3_IN_SIZE 16384 // the file read ahead: several frames at any bitrate
 -static FILE *mp3File = NULL;
-+static struct bgm_source *mp3Src = NULL; // build 117: the music's own source, as the .wav
++static void *mp3Src = NULL; // build 117: the music's own source, as the .wav
  static mp3dec_t *mp3Dec = NULL;
  static unsigned char *mp3In = NULL;
  static short *mp3Pcm = NULL; // one frame's samples, as minimp3 gives them
@@ -548,7 +548,7 @@ index adc44a8..59a1625 100644
      if (mp3Eof || mp3InLen >= MP3_IN_SIZE)
          return;
 -    n = (int)fread(mp3In + mp3InLen, 1, MP3_IN_SIZE - mp3InLen, mp3File);
-+    n = (int)bgmSourceRead(mp3In + mp3InLen, 1, MP3_IN_SIZE - mp3InLen, mp3Src);
++    n = (int)audSrcRead(mp3Src, mp3In + mp3InLen, MP3_IN_SIZE - mp3InLen);
      if (n <= 0)
          mp3Eof = 1;
      else
@@ -557,7 +557,7 @@ index adc44a8..59a1625 100644
                  return 0;
              }
 -            if (rounds++ > 0 || fseek(mp3File, mp3Start, SEEK_SET) != 0)
-+            if (rounds++ > 0 || bgmSourceSeek(mp3Src, mp3Start, SEEK_SET) != 0)
++            if (rounds++ > 0 || audSrcSeek(mp3Src, mp3Start, SEEK_SET) != 0)
                  return 0;
              mp3InLen = mp3InPos = 0;
              mp3Eof = 0;
@@ -569,7 +569,7 @@ index adc44a8..59a1625 100644
 -        fclose(mp3File);
 -    mp3File = NULL;
 +    if (mp3Src != NULL)
-+        bgmSourceClose(mp3Src);
++        audSrcClose(mp3Src);
 +    mp3Src = NULL;
      free(mp3Dec);
      free(mp3In);
@@ -579,7 +579,7 @@ index adc44a8..59a1625 100644
  
      mp3Close();
 -    if ((mp3File = fopen(path, "rb")) == NULL)
-+    if ((mp3Src = bgmSourceOpen(path)) == NULL)
++    if ((mp3Src = audSrcOpen(path)) == NULL)
          return 0;
      mp3Dec = malloc(sizeof(mp3dec_t));
      mp3In = malloc(MP3_IN_SIZE);
@@ -588,30 +588,21 @@ index adc44a8..59a1625 100644
          goto bad;
      mp3Start = 0;
 -    if (fread(h, 1, 10, mp3File) == 10 && !memcmp(h, "ID3", 3)) // a syncsafe size, plus a footer when its flag says so
-+    if (bgmSourceRead(h, 1, 10, mp3Src) == 10 && !memcmp(h, "ID3", 3)) // a syncsafe size, plus a footer when its flag says so
++    if (audSrcRead(mp3Src, h, 10) == 10 && !memcmp(h, "ID3", 3)) // a syncsafe size, plus a footer when its flag says so
          mp3Start = 10 + (((long)(h[6] & 0x7f) << 21) | ((long)(h[7] & 0x7f) << 14) | ((h[8] & 0x7f) << 7) | (h[9] & 0x7f)) +
                     ((h[5] & 0x10) ? 10 : 0);
 -    if (fseek(mp3File, mp3Start, SEEK_SET) != 0)
-+    if (bgmSourceSeek(mp3Src, mp3Start, SEEK_SET) != 0)
++    if (audSrcSeek(mp3Src, mp3Start, SEEK_SET) != 0)
          goto bad;
      mp3dec_init(mp3Dec);
      mp3InLen = mp3InPos = mp3Eof = 0;
-@@ -1996,7 +2013,7 @@ static void bgmIoThread(void *arg)
- #define BGM_REOPEN_TRIES    4
- #define BGM_REOPEN_RETRY_US (20 * 1000)
- 
--typedef struct
-+typedef struct bgm_source
- {
-     FILE *f;
-     long pos;  // where the decoder believes it is
-@@ -2270,6 +2287,32 @@ static int bgmSourceClose(void *datasource)
+@@ -2270,6 +2287,52 @@ static int bgmSourceClose(void *datasource)
      return ret;
  }
  
 +// build 117: a file the engine reads itself (.wav, .mp3) through the same source as the Ogg music: from RAM in big pieces,
 +// a descriptor the SD2PSX lost reopened and the read resumed where it was (bgmCacheRead). NULL when it will not open
-+static bgm_source_t *bgmSourceOpen(const char *path)
++static void *audSrcOpen(const char *path)
 +{
 +    bgm_source_t *src;
 +    FILE *f = fopen(path, "rb");
@@ -633,6 +624,26 @@ index adc44a8..59a1625 100644
 +        return NULL;
 +    }
 +    return src;
++}
++
++static size_t audSrcRead(void *src, void *buf, size_t n)
++{
++    return bgmSourceRead(buf, 1, n, src);
++}
++
++static int audSrcSeek(void *src, long offset, int whence)
++{
++    return bgmSourceSeek(src, offset, whence);
++}
++
++static long audSrcTell(void *src)
++{
++    return bgmSourceTell(src);
++}
++
++static void audSrcClose(void *src)
++{
++    bgmSourceClose(src);
 +}
 +
  static ov_callbacks bgmSourceCallbacks = {

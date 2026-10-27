@@ -33,7 +33,7 @@ for name in ('static int wavOpen(const char *path)', 'static int mp3Open(const c
     b = body(snd, name)
     if 'fopen(' in b or 'fread(' in b or 'fseek(' in b:
         fail.append('sound.c %s: reads through the music\'s source (bgmSource*), not a bare FILE*' % name.split('(')[0])
-need(snd, (('static bgm_source_t *bgmSourceOpen(const char *path)', 'a source for a file the engine reads itself'),
+need(snd, (('static void *audSrcOpen(const char *path)', 'a source for a file the engine reads itself'),
            ('for (int tries = 0; ret != size && tries < 3; tries++) {', 'a sound read short is read again'),
            ('sfxHeaderMs((const unsigned char *)buffer, size) != ms', 'and checked whole')), 'sound.c')
 rip = body(rd('src/ripps2biossnd.c'), 'void ripps2RipBiosMusicDialog(void)')
