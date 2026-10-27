@@ -1,5 +1,43 @@
+diff --git a/include/menusys.h b/include/menusys.h
+index 92c8d66..f0dbae8 100644
+--- a/include/menusys.h
++++ b/include/menusys.h
+@@ -167,6 +167,7 @@ void menuHandleInputAppMenu();
+ // Sets the selected item if it is found in the menu list
+ void menuSetSelectedItem(menu_item_t *item);
+ int menuCurrentMode(void); // RIPPS2 build 96: the IO mode of the page shown, -1 when none
++void *menuCurrentUserdata(void); // build 116: the list the page shown reads its rows from (its item_list_t), NULL when none
+ 
+ /** Serialize menu_item_t::hints against the renderer.
+  *
+diff --git a/include/mixsupport.h b/include/mixsupport.h
+index df8cd54..35a4a80 100644
+--- a/include/mixsupport.h
++++ b/include/mixsupport.h
+@@ -16,7 +16,7 @@ int mixWantsPs1(void);
+ // RIPPS2 build 114: the master list (allgames.bin). A source's list came (its saved games are replaced from now on);
+ // a row from the saved list whose source has not answered; Cross on one (start, wait, then the usual launch); how
+ // many games the kept list holds
+-void mixSourceAnswered(int mode);
++void mixSourceAnswered(int mode, int count); // build 116: count, the games it listed (an empty pass is no answer)
+ int mixIsWaiting(int list, int id); // build 115: list = MIX_MODE or RECENT_MODE, as below
+ struct menu_item;
+ int mixWaitForRow(struct menu_item *menu);
+@@ -24,6 +24,12 @@ int mixMasterGames(void);
+ void mixMasterWhere(char *out, int size); // build 115: where allgames.bin is (STATUS > LOADING)
+ int ripps2ModeStartMode(int mode); // opl.c: a page's start mode (START_MODE_*)
+ 
++// build 116: a drive page whose drive waits on Manual shows its saved games through a list of All Games' kind (MIX_MODE);
++// NULL when it has none. mixPageMode: the drive page of such a list, else -1. mixPageForget: its rows freed (submenu gone)
++item_list_t *mixPageObject(int mode);
++int mixPageMode(const item_list_t *itemList);
++void mixPageForget(item_list_t *itemList);
++
+ // The source of one All Games row: its device mode, the id in that device's PS2 or PS1 list (found
+ // again by name if the device has rescanned since), and its FAV_KIND_*. -1 when id is invalid.
+ int mixGetItemSourceMode(int list, int id);
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 990b3bf..344a594 100644
+index 990b3bf..2d670aa 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -36,8 +36,8 @@ void ripps2WriteReadme(const char *base, int media);          // base's AUDIO/RE
@@ -21,6 +59,14 @@ index 990b3bf..344a594 100644
  void ripps2FastBootApply(void); // build 115 (gui.c): Fast Boot just turned on: the drives and the sounds set for it
  extern int gRipps2TrustCache; // build 115: Game Sources > Cache > Trust Cache, a cached list stands until SELECT (1)
  extern int gRipps2CatLayout; // Colors and More > Category Layout: 0 Theme, 1 Across the Top, 2 Sidebar, 3 Menu (build 115)
+@@ -235,6 +236,7 @@ void ripps2FilesEnter(void); // from the Memory Files page: open it where it was
+ void ripps2RenderFiles(void);
+ void ripps2HandleInputFiles(void);
+ void ripps2StartSources(void); // opl.c: start every game source that waits for a start
++void ripps2StartSourceMode(int mode); // build 116: start one page's source (BDM: every slot) when it waits for a start
+ 
+ // USB keyboard (ripps2kbd.c): one key at a time, 0 when none
+ enum { RIPPS2_KEY_ENTER = 0x100, RIPPS2_KEY_ESC, RIPPS2_KEY_BACKSPACE, RIPPS2_KEY_DELETE, RIPPS2_KEY_LEFT, RIPPS2_KEY_RIGHT,
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
 index dbcef50..cd6ccc5 100644
 --- a/lng_tmpl/_base.yml
@@ -110,11 +156,643 @@ index 18d433e..fd1a50b 100644
          ripps2SettingsHomeShow(guiSettingsActiveDialog); // RIPPS2 build 109
      }
      return 0;
+diff --git a/src/hddsupport.c b/src/hddsupport.c
+index 139603a..773acc1 100644
+--- a/src/hddsupport.c
++++ b/src/hddsupport.c
+@@ -1030,6 +1030,12 @@ static int hddLoadCoreSupportModules(void)
+     // Check if the drive contains MBR/GPT partition data before we load the APA/PFS modules. If the drive is not
+     // APA then loading the APA irx modules can corrupt the drive as it will try to write APA partition data.
+     nonSony = hddDetectNonSonyFileSystem();
++    // build 116: a drive woken for a launch (Fast Boot leaves the HDD on Manual) may not answer its first read: that read alone
++    // said "Hard drive not detected" until the drive was started again (the user, 10/27). Asked again for up to 3 s
++    for (int tries = 0; nonSony == HDD_PROBE_READ_FAILED && tries < 6; tries++) {
++        DelayThread(500 * 1000);
++        nonSony = hddDetectNonSonyFileSystem();
++    }
+     if (nonSony != 0) {
+         // Drive is MBR/GPT style, or unknown, bail out or risk corrupting the drive.
+         LOG("HDDSUPPORT LoadSupportModules bailing out early (%d)...\n", nonSony);
+diff --git a/src/menusys.c b/src/menusys.c
+index ef81f62..87c8748 100644
+--- a/src/menusys.c
++++ b/src/menusys.c
+@@ -1754,10 +1754,22 @@ static void menuPrevPage()
+ }
+ 
+ // RIPPS2 build 96: the IO mode of the page the menu is on (Default Menu > Last Used), -1 when it is not a game page
++// build 116: a drive page showing its saved games reads them from a list of All Games' kind; the page is still its drive's
++static int menuListMode(const item_list_t *list)
++{
++    int page = list != NULL ? mixPageMode(list) : -1;
++    return page >= 0 ? page : list != NULL ? list->mode : -1;
++}
++
+ int menuCurrentMode(void)
+ {
+     item_list_t *support = (selected_item != NULL && selected_item->item != NULL) ? (item_list_t *)selected_item->item->userdata : NULL;
+-    return support != NULL ? support->mode : -1;
++    return menuListMode(support);
++}
++
++void *menuCurrentUserdata(void)
++{
++    return (selected_item != NULL && selected_item->item != NULL) ? selected_item->item->userdata : NULL;
+ }
+ 
+ void menuSetSelectedItem(menu_item_t *item)
+@@ -2345,7 +2357,7 @@ int menuSourceMode(int i)
+         return BDM_MODE;
+     menu_list_t *m = menuSourceAt(i);
+     item_list_t *list = m != NULL ? m->item->userdata : NULL;
+-    return list != NULL ? list->mode : -1;
++    return menuListMode(list);
+ }
+ 
+ int menuSourceCurrent(void)
+diff --git a/src/mixsupport.c b/src/mixsupport.c
+index 2c0d92a..e6c8fc3 100644
+--- a/src/mixsupport.c
++++ b/src/mixsupport.c
+@@ -33,6 +33,12 @@
+   first, as many as Game Sources > Recent Games keeps (1 to 99). Its rows are All Games' rows, waiting ones included, so
+   a recent game whose source is on Manual starts that source when it is picked, as on All Games. Each list keeps its own
+   rows (mix_set_t); both are guarded by mixSema.
++
++  RIPPS2 build 116 (the user, 10/27: "encourage manual so it overrides the start drives with the list"): a drive page whose
++  drive waits on Manual shows that drive's games from the master list, a list of its own built the same way (mixPageObject:
++  All Games' callbacks, its rows only that drive's). Its mode is MIX_MODE, so to the menu it is All Games: Cross on a row
++  starts the drive and launches the game, SELECT starts the drive for its art. Once the drive lists, the page takes the
++  drive's own list (opl.c, updateMenuFromGameList). A list named by MIX_MODE is the one on screen (mixSetOf).
+ */
+ 
+ #include <stdio.h>
+@@ -92,9 +98,36 @@ typedef struct
+     int count;
+     int forceUpdate; // the first deferred pass builds the list
+ } mix_set_t;
+-static mix_set_t mixSets[2] = {{NULL, 0, 1}, {NULL, 0, 1}}; // All Games, Recent Games
+-#define MIX_SET(mode) (&mixSets[(mode) == RECENT_MODE])
+-static item_list_t mixItemList, recentItemList;
++#define MIX_PAGES 6 // build 116: the drive pages that show their saved games before their drive starts
++static mix_set_t mixSets[2 + MIX_PAGES] = {{NULL, 0, 1}, {NULL, 0, 1}, {NULL, 0, 1}, {NULL, 0, 1},
++                                           {NULL, 0, 1}, {NULL, 0, 1}, {NULL, 0, 1}, {NULL, 0, 1}}; // All Games, Recent Games, the pages'
++static item_list_t mixItemList, recentItemList, mixPageList[MIX_PAGES];
++static const int mixPageModes[MIX_PAGES] = {HDD_MODE, BDM_MODE, MMCE_MODE, ETH_MODE, UDPFS_MODE, HTTP_MODE};
++
++static int mixPageIndex(const item_list_t *l)
++{
++    return (l >= &mixPageList[0] && l < &mixPageList[MIX_PAGES]) ? (int)(l - mixPageList) : -1;
++}
++
++// build 116: which rows a list is: All Games', Recent Games' or a drive page's
++static mix_set_t *mixSetFor(const item_list_t *l)
++{
++    int k = mixPageIndex(l);
++    if (k >= 0)
++        return &mixSets[2 + k];
++    return &mixSets[l == &recentItemList];
++}
++
++// A list named by its mode, as the menu names it: Recent Games, or All Games. A drive page showing its saved games is
++// All Games' kind to the menu, so MIX_MODE is that page's rows while it is the one on screen
++static mix_set_t *mixSetOf(int list)
++{
++    item_list_t *shown = (item_list_t *)menuCurrentUserdata();
++    if (list == MIX_MODE && mixPageIndex(shown) >= 0)
++        return mixSetFor(shown);
++    return &mixSets[list == RECENT_MODE];
++}
++#define MIX_SET(mode) mixSetOf(mode)
+ static int mixSema = -1;
+ 
+ static void mixLock(void)
+@@ -528,8 +561,27 @@ static int mixCompare(const void *a, const void *b)
+ 
+ // ---- item_list_t callbacks ----
+ 
+-static int mixGetTextId(item_list_t *itemList) { return itemList->mode == RECENT_MODE ? _STR_RIPPS2_RECENT_GAMES : _STR_RIPPS2_ALL_GAMES; }
+-static int mixGetIconId(item_list_t *itemList) { return BDM_ICON; }
++// build 116: a drive page's list keeps that page's name and icon
++static item_list_t *mixPageSource(const item_list_t *itemList)
++{
++    int k = mixPageIndex(itemList);
++    opl_io_module_t *mod = k >= 0 ? oplGetModule(mixPageModes[k]) : NULL;
++    return mod != NULL ? mod->support : NULL;
++}
++
++static int mixGetTextId(item_list_t *itemList)
++{
++    item_list_t *src = mixPageSource(itemList);
++    if (src != NULL)
++        return src->itemTextId(src);
++    return itemList->mode == RECENT_MODE ? _STR_RIPPS2_RECENT_GAMES : _STR_RIPPS2_ALL_GAMES;
++}
++
++static int mixGetIconId(item_list_t *itemList)
++{
++    item_list_t *src = mixPageSource(itemList);
++    return src != NULL ? src->itemIconId(src) : BDM_ICON;
++}
+ 
+ static void mixInit(item_list_t *itemList)
+ {
+@@ -539,7 +591,7 @@ static void mixInit(item_list_t *itemList)
+ static int mixNeedsUpdate(item_list_t *itemList)
+ {
+     // the L3 dirty flag is consumed first and always, so a forced rebuild clears it too (as favNeedsUpdate)
+-    mix_set_t *set = MIX_SET(itemList->mode);
++    mix_set_t *set = mixSetFor(itemList);
+     int viewToggled = libViewConsumeDirty(itemList->mode), fam;
+     if (set->forceUpdate) {
+         set->forceUpdate = 0;
+@@ -561,22 +613,27 @@ static int mixKeepRecents(mix_rec_t *arr, int kept);
+ static int mixBuildRows(item_list_t *itemList, mix_rec_t **out, int save)
+ {
+     mix_build_t b = {NULL, 0, 0};
+-    int recent = itemList->mode == RECENT_MODE;
++    int recent = itemList->mode == RECENT_MODE, page = mixPageIndex(itemList), pageMode = page >= 0 ? mixPageModes[page] : -1;
+     int i, kept = 0, shown = 0, waiting = 0, settling = 0, view = recent ? LIB_VIEW_ALL : libViewActive(MIX_MODE);
+ 
+     *out = NULL;
+     for (i = 0; i < MIX_SOURCE_COUNT; i++)
+-        mixCollect(&b, mixSourceModes[i], i);
++        if (page < 0 || mixFamilyMode(mixModeFamily(mixSourceModes[i])) == pageMode || mixSourceModes[i] == pageMode) // build 116
++            mixCollect(&b, mixSourceModes[i], i);
+     // build 114: the saved games of every source still to answer (rank 100 and up, so a live row of the same title wins)
+     if (!mixMasterLoaded)
+         mixMasterLoad();
+-    memset(mixFamWaiting, 0, sizeof(mixFamWaiting));
++    if (page < 0)
++        memset(mixFamWaiting, 0, sizeof(mixFamWaiting));
+     for (i = 0; gRipps2FastCache && i < mixMasterCount; i++) {
+         mix_master_t *m = &mixMaster[i];
+         if (mixAnswered[m->family] || mixFamilyGone(m->family, &settling))
+             continue;
++        if (page >= 0 && mixFamilyMode(m->family) != pageMode) // build 116: a drive page shows its own drive's
++            continue;
+         mixAppend(&b, NULL, -1, -1, m->kind, 100 + m->family, m->text, m->startup, m->family);
+-        mixFamWaiting[m->family] = 1;
++        if (page < 0)
++            mixFamWaiting[m->family] = 1;
+         waiting++;
+     }
+     itemList->updateDelay = waiting ? MENU_UPD_DELAY_GENREFRESH : MENU_UPD_DELAY_NOUPDATE;
+@@ -597,7 +654,7 @@ static int mixBuildRows(item_list_t *itemList, mix_rec_t **out, int save)
+         b.arr[kept++] = *r;
+     }
+     // build 114: kept as the master list (every kind, whatever the view), once no started source is still to answer
+-    if (save && !settling && !recent)
++    if (save && !settling && !recent && page < 0)
+         mixMasterSave(b.arr, kept);
+     // build 115: Recent Games keeps the recent ones, in the order they were played
+     if (recent)
+@@ -619,7 +676,7 @@ static int mixBuildRows(item_list_t *itemList, mix_rec_t **out, int save)
+ 
+ static int mixUpdateItemList(item_list_t *itemList)
+ {
+-    mix_set_t *set = MIX_SET(itemList->mode);
++    mix_set_t *set = mixSetFor(itemList);
+     mix_rec_t *arr;
+     int shown;
+ 
+@@ -640,7 +697,7 @@ static int mixUpdateItemList(item_list_t *itemList)
+ // seen at boot. The text a row shows stays the one the page holds (the submenu points at it); 1 when it was quiet
+ static int mixQuietUpdate(item_list_t *itemList)
+ {
+-    mix_set_t *set = MIX_SET(itemList->mode);
++    mix_set_t *set = mixSetFor(itemList);
+     mix_rec_t *arr;
+     int shown = mixBuildRows(itemList, &arr, 0), i, same;
+ 
+@@ -694,7 +751,7 @@ static int mixKeepRecents(mix_rec_t *arr, int kept)
+     return shown;
+ }
+ 
+-static int mixGetItemCount(item_list_t *itemList) { return MIX_SET(itemList->mode)->count; }
++static int mixGetItemCount(item_list_t *itemList) { return mixSetFor(itemList)->count; }
+ 
+ static int mixValidIndex(const mix_set_t *set, int id) { return set->arr != NULL && id >= 0 && id < set->count; }
+ 
+@@ -762,7 +819,7 @@ static int mixOwnerId(mix_row_t *r)
+ 
+ static int mixGetRowView(item_list_t *itemList, int id)
+ {
+-    mix_set_t *set = MIX_SET(itemList->mode);
++    mix_set_t *set = mixSetFor(itemList);
+     int kind = -1;
+     mixLock();
+     if (mixValidIndex(set, id))
+@@ -773,26 +830,26 @@ static int mixGetRowView(item_list_t *itemList, int id)
+ 
+ static char *mixGetItemName(item_list_t *itemList, int id)
+ {
+-    mix_set_t *set = MIX_SET(itemList->mode);
++    mix_set_t *set = mixSetFor(itemList);
+     return mixValidIndex(set, id) ? set->arr[id].text : "";
+ }
+ 
+ static int mixGetItemNameLength(item_list_t *itemList, int id)
+ {
+-    mix_set_t *set = MIX_SET(itemList->mode);
++    mix_set_t *set = mixSetFor(itemList);
+     return mixValidIndex(set, id) ? (int)strlen(set->arr[id].text) + 1 : 0;
+ }
+ 
+ static char *mixGetItemStartup(item_list_t *itemList, int id)
+ {
+-    mix_set_t *set = MIX_SET(itemList->mode);
++    mix_set_t *set = mixSetFor(itemList);
+     return mixValidIndex(set, id) ? set->arr[id].startup : "";
+ }
+ 
+ static config_set_t *mixGetConfig(item_list_t *itemList, int id)
+ {
+     mix_row_t r;
+-    if (!mixRow(MIX_SET(itemList->mode), id, &r))
++    if (!mixRow(mixSetFor(itemList), id, &r))
+         return NULL;
+     item_list_t *o = &r.view;
+     // A PS1 row's config is keyed by its name under the source's prefix, as on a device page and as
+@@ -820,7 +877,7 @@ static config_set_t *mixGetConfig(item_list_t *itemList, int id)
+ static void mixLaunchItem(item_list_t *itemList, int id, config_set_t *configSet)
+ {
+     mix_row_t r;
+-    if (!mixRow(MIX_SET(itemList->mode), id, &r))
++    if (!mixRow(mixSetFor(itemList), id, &r))
+         return;
+     item_list_t *o = &r.view;
+     if (mixKindIsPs1(r.kind)) { // PS1 titles launch by name, through the row's own core
+@@ -847,7 +904,7 @@ static int mixGetImage(item_list_t *itemList, char *folder, int isRelative, char
+     item_list_t asks[MIX_SOURCE_COUNT + 1];
+     int askPs1[MIX_SOURCE_COUNT + 1];
+     int n = 0, i, k;
+-    mix_set_t *set = MIX_SET(itemList->mode);
++    mix_set_t *set = mixSetFor(itemList);
+ 
+     if (value == NULL)
+         return -1;
+@@ -930,13 +987,18 @@ static void mixCleanUp(item_list_t *itemList, int exception)
+ 
+ static void mixShutdown(item_list_t *itemList)
+ {
+-    mixFreeArray(MIX_SET(itemList->mode));
++    mixFreeArray(mixSetFor(itemList));
+ }
+ 
+-static int mixSelectedId(int list)
++static int mixSelectedId(item_list_t *itemList)
+ {
+-    opl_io_module_t *mod = oplGetModule(list);
+-    if (mod == NULL || mod->menuItem.current == NULL)
++    opl_io_module_t *mod;
++    int k = mixPageIndex(itemList);
++    if (k >= 0) // build 116: a drive page's rows are on that page
++        mod = oplGetModule(mixPageModes[k]);
++    else
++        mod = oplGetModule(itemList->mode);
++    if (mod == NULL || mod->menuItem.current == NULL || mod->menuItem.userdata != itemList)
+         return -1;
+     return mod->menuItem.current->item.id;
+ }
+@@ -944,13 +1006,13 @@ static int mixSelectedId(int list)
+ unsigned char mixGetFlags(item_list_t *itemList)
+ {
+     mix_row_t r;
+-    return mixRow(MIX_SET(itemList->mode), mixSelectedId(itemList->mode), &r) ? r.view.flags : 0;
++    return mixRow(mixSetFor(itemList), mixSelectedId(itemList), &r) ? r.view.flags : 0;
+ }
+ 
+ static int mixCheckVMC(item_list_t *itemList, char *name, int createSize)
+ {
+     mix_row_t r;
+-    if (!mixRow(MIX_SET(itemList->mode), mixSelectedId(itemList->mode), &r) || r.view.itemCheckVMC == NULL)
++    if (!mixRow(mixSetFor(itemList), mixSelectedId(itemList), &r) || r.view.itemCheckVMC == NULL)
+         return -1;
+     return r.view.itemCheckVMC(&r.view, name, createSize);
+ }
+@@ -986,9 +1048,12 @@ int mixGetItemKind(int list, int id)
+ }
+ 
+ // build 114: a source's list came (opl.c, after its rebuild): its saved games are replaced by it from now on
+-void mixSourceAnswered(int mode)
++void mixSourceAnswered(int mode, int count)
+ {
+-    int fam = mixModeFamily(mode);
++    int fam = count > 0 ? mixModeFamily(mode) : -1, k;
++    // build 116: an empty pass is no answer. A drive started for a launch lists nothing until it has mounted, and that
++    // first pass made its saved games leave at once: Cross on an exFAT HDD game said it "has left All Games" a second
++    // later (the lab, 10/27). Its saved games now stay until it lists them, or MIX_WAIT_S passes (mixFamilyGone)
+     // build 115 (the user, 10/26: with HDD on Manual, All Games showed its rows' art once it was started but never their
+     // CFG details): a source's first answer is a drive that was not there before, the same as a drive plugged in, so
+     // what was asked of it while it was away (its metadata database, missing covers) is asked again
+@@ -998,6 +1063,9 @@ void mixSourceAnswered(int mode)
+     }
+     if (fam >= 0)
+         mixAnswered[fam] = 1;
++    for (k = 0; k < MIX_PAGES; k++) // build 116: a drive page showing saved games: its rows take their live source, quietly
++        if (mixPageList[k].itemInit != NULL && mixSets[2 + k].arr != NULL)
++            mixQuietUpdate(&mixPageList[k]);
+     // build 115: nothing on screen changes: no rebuild (All Games, and Recent Games when it is on)
+     item_list_t *all = mixGetObject(1), *rec = recentGetObject(1);
+     if (all != NULL && mixQuietUpdate(all) && (rec == NULL || mixQuietUpdate(rec))) {
+@@ -1007,6 +1075,37 @@ void mixSourceAnswered(int mode)
+     mixRequestUpdate();
+ }
+ 
++// build 116: the list a drive page shows while its drive waits on Manual: the games the master list keeps of that drive,
++// with All Games' callbacks (NULL for a page that has none, or with Fast Cache off)
++item_list_t *mixPageObject(int mode)
++{
++    int k;
++    for (k = 0; k < MIX_PAGES && mixPageModes[k] != mode; k++)
++        ;
++    if (k == MIX_PAGES || !gRipps2FastCache)
++        return NULL;
++    if (mixPageList[k].itemInit == NULL) {
++        mixPageList[k] = mixItemList;
++        mixPageList[k].mode = MIX_MODE;
++        mixPageList[k].enabled = 1;
++        mixPageList[k].owner = NULL;
++    }
++    return &mixPageList[k];
++}
++
++int mixPageMode(const item_list_t *itemList)
++{
++    int k = mixPageIndex(itemList);
++    return k >= 0 ? mixPageModes[k] : -1;
++}
++
++// Its rows freed, once the page's submenu (which points at their names) is gone
++void mixPageForget(item_list_t *itemList)
++{
++    if (mixPageIndex(itemList) >= 0)
++        mixFreeArray(mixSetFor(itemList));
++}
++
+ int mixIsWaiting(int list, int id)
+ {
+     mix_set_t *set = MIX_SET(list);
+@@ -1043,14 +1142,15 @@ static int mixLiveHas(const mix_set_t *set, const char *text, int kind)
+ int mixWaitForRow(struct menu_item *menu)
+ {
+     char name[256], startup[64], line[300];
+-    int kind, fam, id, list, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
++    int kind, fam, id, backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
+     double since;
+     mix_set_t *set;
++    item_list_t *rows;
+ 
+-    if (menu == NULL || menu->current == NULL)
++    if (menu == NULL || menu->current == NULL || menu->userdata == NULL)
+         return 0;
+-    list = menu->userdata != NULL ? ((item_list_t *)menu->userdata)->mode : MIX_MODE; // build 115: All Games or Recent Games
+-    set = MIX_SET(list);
++    rows = (item_list_t *)menu->userdata; // build 115: All Games or Recent Games; build 116: or a drive page's saved games
++    set = mixSetFor(rows);
+     id = menu->current->item.id;
+     mixLock();
+     if (!mixValidIndex(set, id) || set->arr[id].owner != NULL) {
+@@ -1065,17 +1165,26 @@ int mixWaitForRow(struct menu_item *menu)
+     if (fam < 0 || fam >= MIX_FAM_COUNT)
+         fam = MIX_FAM_BDM;
+ 
+-    ripps2StartSources(); // a source on Manual starts as All Games' own Start starts it
++    // build 116 (the user, 10/27: a Manual HDD game would not launch from All Games, "hdd not connected"): only the game's own
++    // drive starts. Build 115 started every source on Manual at once, the network's among them, whose start can hold the
++    // IO worker past this wait while the drive the game is on waited behind it
++    ripps2StartSourceMode(mixFamilyMode(fam));
+     since = ripps2Seconds();
+     readPads();
+     while (1) {
+         guiExecDeferredOps(); // the rebuilt list reaches the menu
+-        if (menu->current != NULL && !mixIsWaiting(list, menu->current->item.id) && mixLiveHas(set, name, kind)) {
++        if (menu->userdata != rows) { // build 116: the drive page took its drive's own list: the cursor follows the startup
++            item_list_t *own = (item_list_t *)menu->userdata;
++            const char *now = (menu->current != NULL && own != NULL && own->itemGetStartup != NULL) ? own->itemGetStartup(own, menu->current->item.id) : NULL;
++            if (now != NULL && !strcmp(now, startup))
++                return 1;
++        } else if (menu->current != NULL && mixValidIndex(set, menu->current->item.id) && set->arr[menu->current->item.id].owner != NULL &&
++                   mixLiveHas(set, name, kind)) {
+             const char *now = menu->current->item.text;
+             if (now != NULL && !strcmp(now, name))
+                 return 1;
+         }
+-        if (mixAnswered[fam] && !mixLiveHas(set, name, kind)) {
++        if (menu->userdata == rows && mixAnswered[fam] && !mixLiveHas(set, name, kind)) {
+             snprintf(line, sizeof(line), _t("%s is not on %s any more, so it has left All Games."), name, _t(mixFamName[fam]));
+             guiMsgBoxSound(SFX_ERROR);
+             guiMsgBox(line, 0, NULL);
+@@ -1142,7 +1251,7 @@ static int mixModesMatch(int a, int b)
+ 
+ void mixMarkStar(int mode, int id, int kind, const char *text)
+ {
+-    static const int lists[2] = {MIX_MODE, RECENT_MODE}; // build 115: Recent Games' rows show the star too
++    static const int lists[2] = {MIX_MODE, RECENT_MODE}; // build 115: Recent Games' rows show the star too (build 116: All Games' own)
+     submenu_list_t *cur;
+     int l;
+ 
+@@ -1151,7 +1260,7 @@ void mixMarkStar(int mode, int id, int kind, const char *text)
+     mixLock();
+     for (l = 0; l < 2; l++) {
+         opl_io_module_t *mod = oplGetModule(lists[l]);
+-        mix_set_t *set = MIX_SET(lists[l]);
++        mix_set_t *set = &mixSets[l];
+         if (mod == NULL)
+             continue;
+         for (cur = mod->subMenu; cur != NULL; cur = cur->next) {
 diff --git a/src/opl.c b/src/opl.c
-index e7cef7d..985e253 100644
+index e7cef7d..df1f893 100644
 --- a/src/opl.c
 +++ b/src/opl.c
-@@ -3717,6 +3717,7 @@ static int ripps2CardSettingsHome(char *out, int size, int haveSettings)
+@@ -354,7 +354,7 @@ void moduleUpdateMenuInternal(opl_io_module_t *mod, int themeChanged, int langCh
+     menuRemoveHints(&mod->menuItem);
+ 
+     menuAddHint(&mod->menuItem, _STR_MENU, START_ICON);
+-    if (!mod->support->enabled)
++    if (!mod->support->enabled && mod->menuItem.userdata == mod->support) // build 116: a page showing saved games runs them
+         menuAddHint(&mod->menuItem, _STR_START_DEVICE, gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON);
+     else {
+         menuAddHint(&mod->menuItem, _STR_RUN, gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON);
+@@ -439,6 +439,25 @@ void ripps2StartSources(void)
+     }
+ }
+ 
++// build 116: start one page's source when it waits for a start (BDM's start covers every slot): the drive a game from All
++// Games or a drive page's saved games is on, and nothing else
++void ripps2StartSourceMode(int mode)
++{
++    int i, first = mode, last = mode;
++    if (mode >= BDM_MODE && mode <= BDM_MODE_LAST) {
++        first = BDM_MODE;
++        last = BDM_MODE_LAST;
++    }
++    if (mode < 0 || mode >= MODE_COUNT)
++        return;
++    for (i = first; i <= last; i++) {
++        item_list_t *source = list_support[i].support;
++        if (source == NULL || source->enabled || modeStartMode(i) == START_MODE_DISABLED)
++            continue;
++        itemInitSupport(source);
++    }
++}
++
+ static void itemPushRecent(struct menu_item *curMenu, item_list_t *support); // RIPPS2 build 71
+ 
+ static void itemExecSelect(struct menu_item *curMenu)
+@@ -472,6 +491,9 @@ static void itemExecSelect(struct menu_item *curMenu)
+                 // for its list (the cursor follows the game onto its real row), then launch as usual
+                 if (MODE_IS_MIX(support->mode) && mixIsWaiting(support->mode, curMenu->current->item.id) && !mixWaitForRow(curMenu))
+                     return;
++                support = curMenu->userdata; // build 116: a drive page that showed saved games may have its drive's own list now
++                if (support == NULL || curMenu->current == NULL)
++                    return;
+                 config_set_t *configSet = menuLoadConfig();
+                 if (configSet == NULL)
+                     return;
+@@ -563,6 +585,17 @@ static void itemExecSelect(struct menu_item *curMenu)
+ static void itemExecRefresh(struct menu_item *curMenu)
+ {
+     item_list_t *support = curMenu->userdata;
++    int pageMode = support != NULL ? mixPageMode(support) : -1;
++
++    // build 116: a drive page showing its saved games: SELECT starts its drive, whose list (and art) then takes the page
++    if (pageMode >= 0) {
++        if (list_support[pageMode].support != NULL && list_support[pageMode].support->enabled)
++            ioPutRequestUnlessWaiting(IO_MENU_UPDATE_DEFFERED, &list_support[pageMode].support->mode);
++        else
++            ripps2StartSourceMode(pageMode);
++        sfxPlay(SFX_CONFIRM);
++        return;
++    }
+ 
+     // RIPPS2 build 115 (the user, 10/26 evening: Fast Boot's "refresh starts a page's drive(s) to load art"): SELECT on a
+     // page whose drive waits on Manual starts it, as Cross on its Start does
+@@ -629,7 +662,7 @@ static void itemExecRefresh(struct menu_item *curMenu)
+ static void itemExecToggleView(struct menu_item *curMenu)
+ {
+     item_list_t *support = curMenu->userdata;
+-    if (!support || !libViewRingUsable(support->mode) || libViewPending(support->mode))
++    if (!support || !libViewRingUsable(support->mode) || libViewPending(support->mode) || mixPageMode(support) >= 0) // build 116
+         return;
+ 
+     // Queue before changing any view state. The IO worker is deliberately lower priority than this
+@@ -1148,6 +1181,8 @@ int oplIsBootInProgress(void)
+     return gBootInProgress;
+ }
+ 
++static void pageCacheAll(void); // build 116: below, beside menuDeferredUpdate
++
+ static void initAllSupport(int force_reinit)
+ {
+     // Keep support probing in its established order. GUI page order is handled independently by
+@@ -1183,6 +1218,7 @@ static void initAllSupport(int force_reinit)
+     LOG("BOOT scan: MMCE initSupport done\n");
+     initSupport(mixGetObject(0), MIX_MODE, force_reinit); // RIPPS2: All Games, after every source
+     initSupport(recentGetObject(0), RECENT_MODE, force_reinit); // build 115: Recent Games, beside it
++    ioPutRequest(IO_CUSTOM_SIMPLEACTION, &pageCacheAll); // build 116: pages on Manual show their saved games
+ 
+     // Arm the MMCE GameID transport at boot and on every settings apply -- instead
+     // of deferring it to itemLaunchMMCE.
+@@ -1495,20 +1531,33 @@ config_set_t *oplGetLegacyAppsInfo(char *name)
+ static void updateMenuFromGameList(opl_io_module_t *mdl)
+ {
+     int viewTransition;
++    item_list_t *shown = mdl->menuItem.userdata != NULL ? (item_list_t *)mdl->menuItem.userdata : mdl->support;
++
++    // build 116: a page showing its saved games keeps them until its drive is started
++    if (shown != mdl->support && !mdl->support->enabled)
++        return;
+ 
+     guiExecDeferredOps();
+ 
+     // Remember where the cursor was, so a rebuild does not dump the user back at the top of
+     // the list (#589). Keyed on the game's startup id, not its row index: a rescan is exactly
+-    // the thing that renumbers rows. Folder rows have no startup and are skipped.
++    // the thing that renumbers rows. Folder rows have no startup and are skipped. (Build 116: read from the rows on
++    // screen, the drive's saved games when the page showed them)
+     char keepStartup[128] = {0};
+     if (mdl->menuItem.current != NULL && !mdl->menuItem.current->item.isFolder) {
+-        const char *s = mdl->support->itemGetStartup(mdl->support, mdl->menuItem.current->item.id);
++        const char *s = shown->itemGetStartup(shown, mdl->menuItem.current->item.id);
+         if (s != NULL)
+             snprintf(keepStartup, sizeof(keepStartup), "%s", s);
+     }
+ 
+     clearMenuGameList(mdl);
++    if (shown != mdl->support) { // build 116: the drive lists: its own list from now on
++        guiLock();
++        mdl->menuItem.userdata = mdl->support;
++        guiUnlock();
++        mixPageForget(shown);
++        moduleUpdateMenuInternal(mdl, 0, 0);
++    }
+     ripps2ShroudReload(mdl->support->mode); // RIPPS2 build 114: the drive's hidden list, read with its games
+     // An L3 transition is staged while the old submenu is still live. Commit only after that submenu
+     // is gone, then every array read below and every newly queued row belongs to the same new view.
+@@ -1660,6 +1709,51 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+     }
+ }
+ 
++// build 116 (the user, 10/27: "encourage manual so it overrides the start drives with the list"): a page whose drive waits
++// on Manual shows the games the master list keeps of that drive (mixPageObject), rows of All Games' kind: Cross starts the
++// drive and launches the game, SELECT starts the drive for its art, and the drive's own list takes the page once it lists
++// (updateMenuFromGameList). IO worker, like a list rebuild
++static void pageCacheBuild(opl_io_module_t *mdl)
++{
++    item_list_t *cache;
++    struct gui_update_t *gup;
++    int count, i;
++
++    if (mdl->support == NULL || mdl->support->enabled || modeStartMode(mdl->support->mode) != START_MODE_MANUAL ||
++        (cache = mixPageObject(mdl->support->mode)) == NULL)
++        return;
++    clearMenuGameList(mdl); // the submenu points at the rows' names: it goes before they do
++    count = cache->itemUpdate(cache);
++    guiLock();
++    mdl->menuItem.userdata = count > 0 ? cache : mdl->support;
++    guiUnlock();
++    for (i = 0; i < count; i++) {
++        if ((gup = guiOpCreate(GUI_OP_APPEND_MENU)) == NULL)
++            continue;
++        gup->menu.menu = &mdl->menuItem;
++        gup->menu.subMenu = &mdl->subMenu;
++        gup->submenu.icon_id = -1;
++        gup->submenu.id = i;
++        gup->submenu.text = cache->itemGetName(cache, i);
++        gup->submenu.text_id = -1;
++        gup->submenu.selected = 0;
++        gup->submenu.autoStart = 0;
++        gup->submenu.isFolder = 0;
++        guiDeferUpdate(gup);
++    }
++    if (count <= 0)
++        mixPageForget(cache);
++    moduleUpdateMenuInternal(mdl, 0, 0); // Run on a page of saved games, Start on an empty one
++}
++
++static void pageCacheAll(void)
++{
++    static const int modes[] = {HDD_MODE, BDM_MODE, MMCE_MODE, ETH_MODE, UDPFS_MODE, HTTP_MODE};
++    int i;
++    for (i = 0; i < (int)(sizeof(modes) / sizeof(modes[0])); i++)
++        pageCacheBuild(&list_support[modes[i]]);
++}
++
+ void menuDeferredUpdate(void *data)
+ {
+     short int *mode = data;
+@@ -1719,7 +1813,7 @@ void menuDeferredUpdate(void *data)
+         // RIPPS2: a game source changed, or filled a list it never scanned: All Games rebuilds after it (build 114: and its
+         // saved games give way to its list)
+         if (mod->support->mode != APP_MODE && mod->support->mode != FAV_MODE && !MODE_IS_MIX(mod->support->mode))
+-            mixSourceAnswered(mod->support->mode);
++            mixSourceAnswered(mod->support->mode, mod->support->itemGetCount != NULL ? mod->support->itemGetCount(mod->support) : 1);
+     } else if (libViewPending(mod->support->mode)) {
+         // A device can reject a scan before it consumes the view-dirty flag (for example, MMCE with
+         // no card inserted). Still retire the old rows and commit the retained destination so input
+@@ -3717,6 +3811,7 @@ static int ripps2CardSettingsHome(char *out, int size, int haveSettings)
    while Fast Boot is on; removed when it is turned off.
  */
  int gRipps2FastBoot = 0;
@@ -122,7 +800,7 @@ index e7cef7d..985e253 100644
  
  static int fastBootPath(char *out, int size)
  {
-@@ -3979,6 +3980,7 @@ static void _loadConfig()
+@@ -3979,6 +4074,7 @@ static void _loadConfig()
                  gHDDGameListCache = 1; // build 110: on by default (checked in the background now); once for older configs
              configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath)); // build 115: checked with the boot card in
              ripps2ExitPathCheck();
@@ -130,7 +808,7 @@ index e7cef7d..985e253 100644
              configGetStrCopy(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath, sizeof(gCustomSettingsPath));
              configGetInt(configOPL, CONFIG_OPL_AUTO_SORT, &gAutosort);
              configGetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, &gAutoRefresh);
-@@ -4689,6 +4691,7 @@ static void _saveConfig()
+@@ -4689,6 +4785,7 @@ static void _saveConfig()
          configSetInt(configOPL, CONFIG_OPL_HDD_GAME_LIST_CACHE, gHDDGameListCache);
          configSetInt(configOPL, "ripps2_hddcache_v", 110); // build 110: the one-time switch to on has run
          configSetStr(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath);
@@ -138,7 +816,7 @@ index e7cef7d..985e253 100644
          configSetStr(configOPL, CONFIG_OPL_CUSTOM_SETTINGS_PATH, gCustomSettingsPath);
          configSetInt(configOPL, CONFIG_OPL_AUTO_SORT, gAutosort);
          configSetInt(configOPL, CONFIG_OPL_AUTO_REFRESH, gAutoRefresh);
-@@ -6180,6 +6183,7 @@ static void miniInit(int mode)
+@@ -6180,6 +6277,7 @@ static void miniInit(int mode)
              configGetInt(configOPL, CONFIG_OPL_PS2LOGO, &gPS2Logo);
              configGetStrCopy(configOPL, CONFIG_OPL_EXIT_PATH, gExitPath, sizeof(gExitPath)); // build 115: checked with the boot card in
              ripps2ExitPathCheck();

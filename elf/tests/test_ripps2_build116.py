@@ -61,6 +61,23 @@ base = rd('lng_tmpl/_base.yml')
 need(base, (('Best left empty with BOOT LOCK on (PS2BBL, FMCB or OSDMenu', 'the IGR Path hint says what an empty one does now'),
             ('PS2BBL and FMCB start it at once, OSDMenu puts it first in its menu', "BOOT LOCK's hint names the loaders")), '_base.yml')
 
+# ---- Manual pages show their saved games; a launch starts only the game's drive; an empty pass is no answer
+mix = rd('src/mixsupport.c')
+need(mix, (('item_list_t *mixPageObject(int mode)', 'a drive page on Manual has a list of its saved games'),
+           ('if (page >= 0 && mixFamilyMode(m->family) != pageMode)', "a drive page's list holds only its own drive's games"),
+           ('if (save && !settling && !recent && page < 0)', 'only All Games writes the master list'),
+           ('int fam = count > 0 ? mixModeFamily(mode) : -1, k;', 'an empty pass is no answer'),
+           ('ripps2StartSourceMode(mixFamilyMode(fam));', "Cross on a waiting row starts only the game's drive")), 'mixsupport.c')
+wait = body(mix, 'int mixWaitForRow(struct menu_item *menu)')
+if 'ripps2StartSources();' in wait:
+    fail.append('mixWaitForRow: every source started for one game (build 115)')
+need(opl, (('static void pageCacheBuild(opl_io_module_t *mdl)', 'a Manual page builds its saved games'),
+           ('ioPutRequest(IO_CUSTOM_SIMPLEACTION, &pageCacheAll);', 'at boot and on every Game Sources change'),
+           ('if (shown != mdl->support && !mdl->support->enabled)\n        return;', 'the saved games stay until the drive is started'),
+           ('support = curMenu->userdata; // build 116', 'a launch reads the page again after the wait')), 'opl.c')
+need(rd('src/hddsupport.c'), (('nonSony == HDD_PROBE_READ_FAILED && tries < 6', 'a cold HDD is asked again before "not detected"'),), 'hddsupport.c')
+need(rd('src/menusys.c'), (('return menuListMode(support);', 'a page of saved games is still its drive to the sidebar and Last Device'),), 'menusys.c')
+
 # ---- compiled: lock, then unlock, in each loader's own config
 cc = shutil.which('gcc') or shutil.which('cc')
 if cc is None:
