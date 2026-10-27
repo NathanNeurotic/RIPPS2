@@ -4,17 +4,19 @@
 
 The user's notes of 10/27 on v1.1.8.
 
-- **The sidebar off the info page where it has no room.** With the categories as the sidebar, RIPPS2's own info page and
-  the themes made for OPL use the whole screen for the game, and the sidebar was drawn over it. Now the info page keeps
-  the sidebar only on a theme that leaves it room there (Adapt, RIPGRID); elsewhere it is the game's alone: Left / Right
-  step the games and Circle goes back to the list, where the sidebar is. Theme key `info_sidebar` (1 keeps it; by
-  default on when the theme puts its categories in the sidebar itself).
+- **The sidebar stays on the list.** With the categories as the sidebar it was drawn over the info page too, over the
+  game on RIPPS2's own info page and on the themes made for OPL. The info page is the game's now on every theme: Square
+  goes in, Circle comes back to the list and its sidebar, and Left / Right step the games. A theme that wants the
+  sidebar on its info page says `info_sidebar=1` (none of the built-in ones does).
 - **The ART Pack's flow as the other long jobs have it.** Each picture is sized as the ART folders are looked at (the
   count and the size shown as it goes), the drives are offered fastest first with their free space, and only where the
   pack fits (a FAT drive under 4 GB; MMCE and the APA HDD cannot say, and a full one stops cleanly). The panel every long
   job has (COMPRESS TO ZSO's) shows the pictures, their size, the ART folders and about how long it will take, SELECT
   held to go on. The build draws RIPPS2's progress bar: how much of how much, the percentage, which picture of how many
   and the time left; the back key asks before it stops.
+- **Roboto on the long jobs' panel and bar.** The panel (SELECT held) and the progress bar of the ART Pack, COMPRESS TO
+  ZSO and COPYING were drawn in the theme's display face (Adapt's Planet N); they use RIPPS2's Roboto now, as its
+  messages do, on every theme.
 
 ## Build 118 (beta, v1.1.8-beta), changes since build 117
 

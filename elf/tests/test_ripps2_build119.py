@@ -1,6 +1,7 @@
-"""Build 119 (the user, 10/27): the sidebar off the info page of a theme whose info page has no room for it (RIPPS2's own,
-the themes made for OPL), kept where it has (Adapt, RIPGRID: info_sidebar); the ART Pack's flow as the other long jobs
-have it: the sizes, the time it should take, RIPPS2's numbered progress bar, and only the drives it fits on.
+"""Build 119 (the user, 10/27): the sidebar off the info page on every theme (Square goes in, Circle back to the list and
+its sidebar; info_sidebar=1 for a theme that wants it there); the ART Pack's flow as the other long jobs have it: the
+sizes, the time it should take, RIPPS2's numbered progress bar, and only the drives it fits on; those panels in RIPPS2's
+Roboto on every theme.
 
 Static checks on the patched tree."""
 import os
@@ -26,10 +27,11 @@ def body(text, head):
 
 # ---- the info page
 th = rd('src/themes.c')
-need(th, (('newT->infoSidebar = configGetInt(themeConfig, "info_sidebar", &intValue) ? intValue == 1 : newT->catSidebar;',
-           'info_sidebar, by default where the theme puts its categories in the sidebar itself (Adapt)'),), 'themes.c')
-if 'info_sidebar=1' not in rd('misc/theme_ripgrid.cfg'):
-    fail.append('theme_ripgrid.cfg: RIPGRID keeps the sidebar on its info page')
+need(th, (('newT->infoSidebar = configGetInt(themeConfig, "info_sidebar", &intValue) && intValue == 1;',
+           'info_sidebar, off unless a theme asks for it'),), 'themes.c')
+for cfg in ('misc/theme_ripgrid.cfg', 'misc/theme_coverflow.cfg', 'misc/conf_theme_OPL.cfg'):
+    if 'info_sidebar=1' in rd(cfg):
+        fail.append('%s: no built-in theme keeps the sidebar on its info page' % cfg)
 menu = rd('src/menusys.c')
 need(menu, (('return ripps2SidebarOn() && !ripps2Legacy() && gTheme != NULL && gTheme->infoSidebar;', 'the rule'),), 'menusys.c')
 info = body(menu, 'void menuRenderInfo(void)')
@@ -54,6 +56,9 @@ need(ap, (('apSrc[s].bytes += st.st_size;', 'each picture sized as it is listed'
           ('snprintf(left, sizeof(left), "PICTURE %d OF %d", n, total);', 'which picture of how many'),
           ('"Stop? The unfinished pack is removed; the ART folders stay as they are."', 'the back key asks before it stops')), 'ripps2artpack.c')
 gm = rd('src/ripps2games.c')
+ask, bar = body(gm, 'int ripps2AskHold('), body(gm, 'void ripps2DrawProgress(')
+if 'gTheme->fonts[' in ask or 'gTheme->fonts[' in bar:
+    fail.append("ripps2games.c: the long jobs' panel and bar in RIPPS2's Roboto, not the theme's display face")
 need(gm, (('int ripps2AskHold(const char *head, const char *name, const char *info, const char *when, const char *note)', 'the panel shared'),
           ('return ripps2AskHold(head, name, info, when, "Experimental: OPL core only (not Neutrino)");', 'ZSO keeps its note'),
           ('void ripps2SizeText(long long bytes, char *out, int size)', 'the sizes shared')), 'ripps2games.c')

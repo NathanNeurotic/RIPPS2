@@ -24,30 +24,17 @@ index 2a89b58..b495bcb 100644
  void ripps2DiscWatch(void);         // every frame: the drive read after boot and after the tray closes
  int ripps2DiscQuiet(void);
 diff --git a/include/themes.h b/include/themes.h
-index d9808c1..2019a90 100644
+index d9808c1..c0c1b8a 100644
 --- a/include/themes.h
 +++ b/include/themes.h
 @@ -285,6 +285,7 @@ typedef struct theme
      int sbLeftList;                     // build 115: sidebar_left=list: Left / Right and L1 / R1 stay the list's (RIPFLOW's covers)
      int sbAutoHide;                     // build 115: sidebar_hide=1: the sidebar slides away until Circle calls it
      int flowTilt;                       // build 117: flowtilt=1: RIPFLOW's Up / Down (left stick) tip the centre case
-+    int infoSidebar;                    // build 119: info_sidebar=1: the info page leaves the sidebar its room (Adapt, RIPGRID)
++    int infoSidebar;                    // build 119: info_sidebar=1: the sidebar stays on the info page (none built in does)
      int hintsFade;                      // build 115: hints_fade (1, the default): a hint glyph that changes fades in
      int hintsFlank, hintsFlankGap;      // build 115: hints_flank=1: RUN and SOURCE either side of the source name; the gap
      int badgeSet;                       // build 115: badge_set=ripps2 (1): RIPPS2's built-in badges, none of its own
-diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
-index 3f257e4..7a97648 100644
---- a/misc/theme_ripgrid.cfg
-+++ b/misc/theme_ripgrid.cfg
-@@ -4,6 +4,8 @@
- launch_disc=pop
- # RIPPS2 build 96: L2 / R2 turn the grid's pages (Controller Settings > Page Buttons can change it)
- page_buttons=l2r2
-+# build 119: the info page's glass starts at 45, room for the sidebar (Layout > Category Layout > Sidebar): it stays there
-+info_sidebar=1
- # build 102: the Standard glyph set (L3 and R3 included); Controller Settings > Hints and Glyphs can change it
- glyph_set=standard
- # RIPPS2 build 100 (hotfix): the info page's stars and badges at the default theme's sizes (111 x 14, 51 x 26),
 diff --git a/src/gui.c b/src/gui.c
 index 3514a62..9feb00b 100644
 --- a/src/gui.c
@@ -63,24 +50,23 @@ index 3514a62..9feb00b 100644
                  (screenHandlerTarget == &screenHandlers[GUI_SCREEN_MAIN] || screenHandlerTarget == &screenHandlers[GUI_SCREEN_INFO]))
                  ripps2SidebarRender();
 diff --git a/src/menusys.c b/src/menusys.c
-index e2ef210..a6878d2 100644
+index e2ef210..8d76dda 100644
 --- a/src/menusys.c
 +++ b/src/menusys.c
-@@ -2756,16 +2756,25 @@ void menuRenderInfo(void)
+@@ -2756,16 +2756,24 @@ void menuRenderInfo(void)
          gTheme->itemsList = thmResolveItemsList(&gTheme->infoElems, gTheme->gamesItemsList, selected_item->item->icon_id);
      }
      // RIPPS2: no category bar here -- the info page gives the whole screen to the game's art panel. Build 115: the sidebar
 -    // stays, where the list page has it (Left reaches it here too)
 -    if (ripps2SidebarOn() && !ripps2Legacy())
-+    // stays, where the list page has it (Left reaches it here too); build 119: only on a theme whose info page leaves it
-+    // the room (info_sidebar: Adapt, RIPGRID)
++    // stayed, where the list page has it (Left reached it here too); build 119: the info page is the game's (Square in,
++    // Circle back), the sidebar only on a theme that asks for it (info_sidebar=1)
 +    if (menuInfoSidebar())
          ripps2SidebarRender();
  }
  
-+// build 119 (the user, 10/27): the sidebar on the info page only where the theme's info page leaves it room (info_sidebar).
-+// Elsewhere (RIPPS2's own info page, the themes made for OPL) the page is the game's alone: Left / Right step the games and
-+// Circle goes back to the list, where the sidebar is
++// build 119 (the user, 10/27): the info page is the game's alone on every theme (Square goes in, Circle back to the list,
++// where the sidebar is): Left / Right step the games. A theme that wants the sidebar there too says info_sidebar=1
 +int menuInfoSidebar(void)
 +{
 +    return ripps2SidebarOn() && !ripps2Legacy() && gTheme != NULL && gTheme->infoSidebar;
@@ -483,7 +469,7 @@ index ca492e0..05a862f 100644
                   _t("The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again."),
                   pictures, (kb + 1023) / 1024, pack, (int)((clock() - start) / CLOCKS_PER_SEC), games);
 diff --git a/src/ripps2games.c b/src/ripps2games.c
-index 386b7d3..c842aa5 100644
+index 386b7d3..7324c7c 100644
 --- a/src/ripps2games.c
 +++ b/src/ripps2games.c
 @@ -1402,8 +1402,9 @@ static void zpPage(void)
@@ -498,13 +484,29 @@ index 386b7d3..c842aa5 100644
  {
      double t0 = ripps2Seconds(), heldSince = 0.0, now;
      int backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
-@@ -1445,12 +1446,18 @@ static int zpAsk(const char *head, const char *name, const char *info, const cha
+@@ -1435,22 +1436,30 @@ static int zpAsk(const char *head, const char *name, const char *info, const cha
+         rmStartFrame();
+         zpPage();
+         ripps2DrawHintBoxA(x, y, w, h, a);
+-        fntRenderString(gTheme->fonts[4], 320, y + 26, ALIGN_CENTER, 0, 0, head, lgAlpha(LG_LIT, ia));
+-        fntRenderStringFit(gTheme->fonts[5], 320, y + 54, ALIGN_CENTER, w - 40, name, lgAlpha(LG_SOFT, ia), 1);
++        // build 119 (the user, 10/27: the theme's display face, Adapt's Planet N, "too distracting" on the messages): RIPPS2's
++        // own Roboto here on every theme, the notifications' bold for the head and the messages' face for the rest
++        fntRenderString(RIPPS2_NOTE_FONT, 320, y + 26, ALIGN_CENTER, 0, 0, head, lgAlpha(LG_LIT, ia));
++        fntRenderStringFit(RIPPS2_MSG_FONT, 320, y + 54, ALIGN_CENTER, w - 40, name, lgAlpha(LG_SOFT, ia), 1);
+         // the wheel where RIPDISC's and the guard's are: SELECT at its centre, HOLD after it
+         hx = 320 - (38 + 6 + ripps2HintWidth(hold)) / 2;
+         ripps2NotchRing(hx + 19, y + 90, p, ia);
+         if (sel != NULL)
+             rmDrawPixmap(sel, hx + 9, y + 80, ALIGN_NONE, 20, 20, SCALING_RATIO, lgAlpha(LG_LIT, ia), 0);
          ripps2HintText(hx + 44, y + 90, hold, lgAlpha(LG_SOFT, ia));
-         fntRenderStringFit(gTheme->fonts[5], 320, y + 120, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
-         fntRenderStringFit(gTheme->fonts[5], 320, y + 140, ALIGN_CENTER, w - 40, when, lgAlpha(LG_SOFT, ia), 1);
+-        fntRenderStringFit(gTheme->fonts[5], 320, y + 120, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
+-        fntRenderStringFit(gTheme->fonts[5], 320, y + 140, ALIGN_CENTER, w - 40, when, lgAlpha(LG_SOFT, ia), 1);
 -        fntRenderStringFit(gTheme->fonts[5], 320, y + 160, ALIGN_CENTER, w - 40, _t("Experimental: OPL core only (not Neutrino)"), lgAlpha(LG_SOFT, ia / 2), 1);
++        fntRenderStringFit(RIPPS2_MSG_FONT, 320, y + 120, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
++        fntRenderStringFit(RIPPS2_MSG_FONT, 320, y + 140, ALIGN_CENTER, w - 40, when, lgAlpha(LG_SOFT, ia), 1);
 +        if (note != NULL && note[0])
-+            fntRenderStringFit(gTheme->fonts[5], 320, y + 160, ALIGN_CENTER, w - 40, note, lgAlpha(LG_SOFT, ia / 2), 1);
++            fntRenderStringFit(RIPPS2_MSG_FONT, 320, y + 160, ALIGN_CENTER, w - 40, note, lgAlpha(LG_SOFT, ia / 2), 1);
          ripps2HintOneA(backIcon, _t("BACK"), y + 184, ia);
          rmEndFrame();
      }
@@ -518,19 +520,38 @@ index 386b7d3..c842aa5 100644
  // build 114: the RIPPS2 progress bar, for any long job that has nothing else on screen: the page under a glass panel on
  // the notch panels' frame (580 wide at y 134), what is happening, the name, the bar, how much, how long is left when
  // known, and CANCEL when the job can stop
+@@ -1467,13 +1476,14 @@ void ripps2DrawProgress(const char *head, const char *name, long long done, long
+     rmStartFrame();
+     zpPage();
+     ripps2DrawPanelGlass(30, 134, 580, 170, 0);
+-    fntRenderString(gTheme->fonts[5], 320, 162, ALIGN_CENTER, 0, 0, head, LG_SOFT);
+-    fntRenderStringFit(gTheme->fonts[4], 320, 190, ALIGN_CENTER, 520, name, LG_LIT, 1);
++    // build 119: RIPPS2's Roboto on every theme (the panel above's faces)
++    fntRenderString(RIPPS2_NOTE_FONT, 320, 162, ALIGN_CENTER, 0, 0, head, LG_SOFT);
++    fntRenderStringFit(RIPPS2_MSG_FONT, 320, 190, ALIGN_CENTER, 520, name, LG_LIT, 1);
+     rmDrawRect(150, 216, 340, 6, GS_SETREG_RGBA(0x03, 0x08, 0x22, 0x80));
+     rmDrawRect(150, 216, (int)(340 * p), 6, GS_SETREG_RGBA(0x4A, 0x8C, 0xF0, 0x80));
+-    fntRenderString(gTheme->fonts[5], 320, 246, ALIGN_CENTER, 0, 0, line, LG_SOFT);
++    fntRenderString(RIPPS2_MSG_FONT, 320, 246, ALIGN_CENTER, 0, 0, line, LG_SOFT);
+     if (left != NULL && left[0])
+-        fntRenderString(gTheme->fonts[5], 320, 270, ALIGN_CENTER, 0, 0, left, lgAlpha(LG_SOFT, 0x50));
++        fntRenderString(RIPPS2_MSG_FONT, 320, 270, ALIGN_CENTER, 0, 0, left, lgAlpha(LG_SOFT, 0x50));
+     if (cancel)
+         ripps2HintOneA(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _t("CANCEL"), 448, 0x80);
+     rmEndFrame();
 diff --git a/src/themes.c b/src/themes.c
-index 98773e6..996ef4a 100644
+index 98773e6..74ca961 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -6713,6 +6713,11 @@ static int thmLoad(const char *themePath)
          // build 117 (the user, 10/27): flowtilt=1, a coverflow theme's Up / Down (and the left stick) tip the centre case
          // instead of changing the source, the sidebar on (its drawer has the sources)
          newT->flowTilt = configGetInt(themeConfig, "flowtilt", &intValue) && intValue == 1;
-+        // build 119 (the user, 10/27: the sidebar drawn over RIPPS2's info page): info_sidebar=1, the info page leaves room
-+        // for the sidebar (Adapt's, RIPGRID's), so it stays there and Left reaches it; 0, the page has the whole screen, as
-+        // most themes made for OPL do: no sidebar there, Left / Right step the games, Circle goes back to the list, where
-+        // the sidebar is. A theme that puts its categories in the sidebar itself (category_layout=sidebar) leaves the room
-+        newT->infoSidebar = configGetInt(themeConfig, "info_sidebar", &intValue) ? intValue == 1 : newT->catSidebar;
++        // build 119 (the user, 10/27: the sidebar drawn over RIPPS2's info page, then: "this should be default info page
++        // behavior on the sidebar it hides on info pages since o circle is back"): the info page is the game's, Square goes
++        // in and Circle back, so the sidebar stays on the list. info_sidebar=1 keeps it there for a theme that wants it
++        // (Left reaches it); none of the built-in themes does
++        newT->infoSidebar = configGetInt(themeConfig, "info_sidebar", &intValue) && intValue == 1;
          configGetColor(themeConfig, "sidebar_color", newT->sbColor);
          configGetColor(themeConfig, "sidebar_accent_color", newT->sbAccent);
          if (configGetInt(themeConfig, "sidebar_tint", &intValue) && intValue >= 0 && intValue <= 128)
