@@ -147,7 +147,7 @@ index e7cef7d..985e253 100644
  #ifdef RETROACHIEVEMENTS
              configGetInt(configOPL, CONFIG_OPL_RA_TELEMETRY, &gRATelemetry);
 diff --git a/src/ripps2boot.c b/src/ripps2boot.c
-index 70ef86d..3a96090 100644
+index 70ef86d..3ea609d 100644
 --- a/src/ripps2boot.c
 +++ b/src/ripps2boot.c
 @@ -11,6 +11,13 @@
@@ -376,7 +376,23 @@ index 70ef86d..3a96090 100644
  // the user's console kept exit_path=mc1:/APPS/RIPPS2.elf from an older set-up, an EXIT that went nowhere, while RIPPS2
  // itself was at mc0:/RIPPS2/RIPPS2.ELF (10/25). That is checked while the boot card is in (after the settings load,
  // and when the IGR Path is set), never at a launch: an SD2PSX may have switched to the game's own card by then.
-@@ -587,49 +684,69 @@ const char *ripps2ExitPath(char *buf, int size)
+@@ -575,10 +672,12 @@ static int exitStale = 0;
+ 
+ void ripps2ExitPathCheck(void)
+ {
+-    struct stat st;
+-    exitStale = (!strncmp(gExitPath, "mc0:", 4) || !strncmp(gExitPath, "mc1:", 4)) && stat(gExitPath, &st) != 0;
++    // build 116: opened, not stat()ed: stat() on a memory card says yes for a path that is not there (blFileExists), so
++    // build 115 never caught the stale path it was written for (lab, 10/27: STATUS showed EXIT: mc1:/APPS/RIPPS2.elf
++    // with a blank card in slot 2)
++    exitStale = (!strncmp(gExitPath, "mc0:", 4) || !strncmp(gExitPath, "mc1:", 4)) && !blFileExists(gExitPath);
+     if (exitStale)
+-        LOG("RIPPS2: the IGR Path %s is not there; EXIT goes back to RIPPS2 instead\n", gExitPath);
++        LOG("RIPPS2: the IGR Path %s is not there; EXIT goes back to RIPPS2 (through the boot loader when locked) instead\n", gExitPath);
+ }
+ 
+ const char *ripps2ExitPath(char *buf, int size)
+@@ -587,49 +686,69 @@ const char *ripps2ExitPath(char *buf, int size)
          return "Browser";
      if (gExitPath[0] != '\0' && !exitStale)
          return gExitPath;
@@ -472,7 +488,7 @@ index 70ef86d..3a96090 100644
          }
          snprintf(backup, sizeof(backup), "%s.RIPPS2-BACKUP", blConfigs[i]);
          if (!blFileExists(backup) && strstr(blText, BL_MARKER) == NULL) // the config as it was before RIPPS2 ever touched it
-@@ -637,13 +754,15 @@ static void blApplyAll(int on, int *changed, int *failed, int *unreachable, char
+@@ -637,13 +756,15 @@ static void blApplyAll(int on, int *changed, int *failed, int *unreachable, char
          len = blUnlocked(blText);
          if (on) {
              memcpy(blText, blOut, len + 1);
@@ -489,7 +505,7 @@ index 70ef86d..3a96090 100644
          if ((int)(strlen(where) + strlen(blConfigs[i]) + 3) < whereSize)
              snprintf(where + strlen(where), whereSize - strlen(where), "%s%s", where[0] ? ", " : "", blConfigs[i]);
      }
-@@ -655,22 +774,39 @@ static void blRestoreCard(int port);                   // build 115
+@@ -655,22 +776,39 @@ static void blRestoreCard(int port);                   // build 115
  
  void ripps2BootLockApply(int on)
  {
@@ -541,7 +557,7 @@ index 70ef86d..3a96090 100644
          if (n < (int)sizeof(msg))
              snprintf(msg + n, sizeof(msg) - n, _t(" RIPPS2 can install BIBLE, PS2BBL 1.2.0 set up to start RIPPS2, on a memory card; what starts from it now is kept in a backup folder. Install BIBLE?"));
          guiMsgBoxSound(SFX_MESSAGE);
-@@ -679,18 +815,30 @@ void ripps2BootLockApply(int on)
+@@ -679,18 +817,30 @@ void ripps2BootLockApply(int on)
          return;
      }
  
@@ -584,7 +600,7 @@ index 70ef86d..3a96090 100644
      guiMsgBox(msg, 0, NULL);
  }
  
-@@ -1063,8 +1211,9 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
+@@ -1063,8 +1213,9 @@ static void blInstallOn(int port, const blWhere_t *w, const char *alt)
          char where[200];
          int changed, failed, unreachable;
          blChosenPath = w->path;
@@ -595,7 +611,7 @@ index 70ef86d..3a96090 100644
      }
  
      guiMsgBoxSound(SFX_SAVE);
-@@ -1359,7 +1508,7 @@ static void blHddInstall(void)
+@@ -1359,7 +1510,7 @@ static void blHddInstall(void)
      } else
          len = blBibleConfig(second, "");
      if (len >= 0)
@@ -604,7 +620,7 @@ index 70ef86d..3a96090 100644
      if (len < 0 || blWrite(conf, blOut, len) != 0) {
          blHddClose();
          ioBlockOps(0);
-@@ -1386,9 +1535,11 @@ static void blHddInstall(void)
+@@ -1386,9 +1537,11 @@ static void blHddInstall(void)
          char where[200];
          int changed, failed, unreachable;
          blChosenPath = first;
@@ -617,7 +633,7 @@ index 70ef86d..3a96090 100644
      guiMsgBoxSound(bootOn ? SFX_SAVE : SFX_ERROR);
      ok = snprintf(msg, sizeof(msg), _t("BIBLE is installed on the internal HDD and BOOT LOCK is on: at power on the console starts RIPPS2 from %s%s%s%s, at once. Config: %s.%s%s"),
                    first, second[0] ? _t(" (then ") : "", second, second[0] ? ")" : "", conf,
-@@ -1533,7 +1684,7 @@ static void blInstall(void)
+@@ -1533,7 +1686,7 @@ static void blInstall(void)
          char ext[256];
          int i2;
          for (i2 = 0; blConfigs[i2] != NULL; i2++)
@@ -626,7 +642,7 @@ index 70ef86d..3a96090 100644
                  break;
          if (blConfigs[i2] != NULL && blRipps2Path(1, ext, sizeof(ext))) {
              snprintf(msg, sizeof(msg),
-@@ -1649,6 +1800,7 @@ static void blRestoreCard(int port)
+@@ -1649,6 +1802,7 @@ static void blRestoreCard(int port)
          guiMsgBox(msg, 0, NULL);
          return;
      }

@@ -39,6 +39,9 @@ need(boot, (('"mc0:/SYS-CONF/FREEMCB.CNF",', "FMCB 1.9's config is one BOOT LOCK
             ('if (!gRipps2BootLocked && ripps2BootLockIgrPath(buf, size))', 'with the lock on, an empty IGR Path is the browser, then the loader'),
             ('blDialect(blConfigs[i2]) == BL_PS2BBL && blRead(blConfigs[i2]) >= 0 && blIsExtended(', "BIBLE's MMCE offer reads PS2BBL Extended's config, not OSDMenu's")),
      'ripps2boot.c')
+check = body(boot, 'void ripps2ExitPathCheck(void)')
+if 'stat(gExitPath' in check or '!blFileExists(gExitPath)' not in check:
+    fail.append('ripps2ExitPathCheck: a memory card IGR Path is opened to be sure (stat() on mc says yes for a missing file)')
 path_in = body(boot, 'static int blPathIn(')
 if 'return dialect == BL_OSDMENU || !strncmp(out, "mc?:", 4) || !strncmp(out, "mass:", 5);' not in path_in:
     fail.append('blPathIn: FMCB is given memory card and USB paths only')
