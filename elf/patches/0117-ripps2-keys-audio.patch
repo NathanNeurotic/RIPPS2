@@ -160,7 +160,7 @@ index 87c8748..fe47683 100644
          if (gSelectButton == KEY_CROSS)
              guiSwitchScreen(GUI_SCREEN_MAIN);
 diff --git a/src/mixsupport.c b/src/mixsupport.c
-index e6c8fc3..f2ab304 100644
+index e6c8fc3..02cef2c 100644
 --- a/src/mixsupport.c
 +++ b/src/mixsupport.c
 @@ -1139,6 +1139,22 @@ static int mixLiveHas(const mix_set_t *set, const char *text, int kind)
@@ -186,7 +186,7 @@ index e6c8fc3..f2ab304 100644
  int mixWaitForRow(struct menu_item *menu)
  {
      char name[256], startup[64], line[300];
-@@ -1171,7 +1187,14 @@ int mixWaitForRow(struct menu_item *menu)
+@@ -1171,13 +1187,25 @@ int mixWaitForRow(struct menu_item *menu)
      ripps2StartSourceMode(mixFamilyMode(fam));
      since = ripps2Seconds();
      readPads();
@@ -199,8 +199,55 @@ index e6c8fc3..f2ab304 100644
 +            mixPokeFamily(fam);
 +        }
          guiExecDeferredOps(); // the rebuilt list reaches the menu
-         if (menu->userdata != rows) { // build 116: the drive page took its drive's own list: the cursor follows the startup
+-        if (menu->userdata != rows) { // build 116: the drive page took its drive's own list: the cursor follows the startup
++        if (menu->userdata != rows) { // build 116: the drive page took its drive's own list: the game is found there by its startup
              item_list_t *own = (item_list_t *)menu->userdata;
+-            const char *now = (menu->current != NULL && own != NULL && own->itemGetStartup != NULL) ? own->itemGetStartup(own, menu->current->item.id) : NULL;
+-            if (now != NULL && !strcmp(now, startup))
+-                return 1;
++            struct submenu_list *p;
++            for (p = menu->submenu; own != NULL && own->itemGetStartup != NULL && p != NULL; p = p->next) {
++                const char *st = p->item.isFolder ? NULL : own->itemGetStartup(own, p->item.id);
++                if (st != NULL && !strcmp(st, startup)) {
++                    menu->current = p; // build 117: the cursor is put on it (it went where the drive's list put it)
++                    return 1;
++                }
++            }
+         } else if (menu->current != NULL && mixValidIndex(set, menu->current->item.id) && set->arr[menu->current->item.id].owner != NULL &&
+                    mixLiveHas(set, name, kind)) {
+             const char *now = menu->current->item.text;
+diff --git a/src/opl.c b/src/opl.c
+index df1f893..e2f8f07 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -1533,9 +1533,15 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+     int viewTransition;
+     item_list_t *shown = mdl->menuItem.userdata != NULL ? (item_list_t *)mdl->menuItem.userdata : mdl->support;
+ 
+-    // build 116: a page showing its saved games keeps them until its drive is started
+-    if (shown != mdl->support && !mdl->support->enabled)
+-        return;
++    // build 116: a page showing its saved games keeps them until its drive is started. Build 117: and until it lists games:
++    // the first pass of a drive started for a launch comes before it has mounted, and took the page to an empty list
++    int preCount = -1;
++    if (shown != mdl->support) {
++        if (!mdl->support->enabled)
++            return;
++        if ((preCount = mdl->support->itemUpdate(mdl->support)) <= 0)
++            return;
++    }
+ 
+     guiExecDeferredOps();
+ 
+@@ -1587,7 +1593,7 @@ static void updateMenuFromGameList(opl_io_module_t *mdl)
+ 
+     // read the new game list
+     struct gui_update_t *gup = NULL;
+-    int count = mdl->support->itemUpdate(mdl->support);
++    int count = preCount >= 0 ? preCount : mdl->support->itemUpdate(mdl->support); // build 117: read above for a page of saved games
+ 
+ #ifdef RETROACHIEVEMENTS
+     // RA badges: recompute on every list rebuild. This runs on the I/O thread (itemUpdate
 diff --git a/src/pad.c b/src/pad.c
 index 9d03205..fd9b648 100644
 --- a/src/pad.c

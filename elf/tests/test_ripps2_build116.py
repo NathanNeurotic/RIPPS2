@@ -73,7 +73,7 @@ if 'ripps2StartSources();' in wait:
     fail.append('mixWaitForRow: every source started for one game (build 115)')
 need(opl, (('static void pageCacheBuild(opl_io_module_t *mdl)', 'a Manual page builds its saved games'),
            ('ioPutRequest(IO_CUSTOM_SIMPLEACTION, &pageCacheAll);', 'at boot and on every Game Sources change'),
-           ('if (shown != mdl->support && !mdl->support->enabled)\n        return;', 'the saved games stay until the drive is started'),
+           ('if ((preCount = mdl->support->itemUpdate(mdl->support)) <= 0)\n            return;', 'the saved games stay until the drive is started and lists games (build 117)'),
            ('support = curMenu->userdata; // build 116', 'a launch reads the page again after the wait')), 'opl.c')
 need(rd('src/hddsupport.c'), (('nonSony == HDD_PROBE_READ_FAILED && tries < 6', 'a cold HDD is asked again before "not detected"'),), 'hddsupport.c')
 need(rd('src/menusys.c'), (('return menuListMode(support);', 'a page of saved games is still its drive to the sidebar and Last Device'),), 'menusys.c')
