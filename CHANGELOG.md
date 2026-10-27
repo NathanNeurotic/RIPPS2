@@ -1,6 +1,6 @@
 # RIPPS2 changelog
 
-## Build 118 (beta, v1.1.8-beta when released), changes since build 117
+## Build 118 (beta, v1.1.8-beta), changes since build 117
 
 The user's notes of 10/27: the boot sound with the first frame, and covers from one file.
 
