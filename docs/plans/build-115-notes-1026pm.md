@@ -59,4 +59,11 @@ decisions made for them. This page is the list, what was decided, and where each
 
 ## Progress
 
-(filled in as the work lands)
+All fifteen landed in patch 0115 (pushed 80e8ac2 to 3ae5b11; release build CI 40419595767, RIPPS2.elf 2,758,148 bytes,
+2,694 KB). Lab (PCSX2, t115r5, t115r6, t115rel): the PS1 game menu and its Set Metadata editor with RENAME THE GAME; the
+PS2 menu clear of the title and "Set Metadata (Rename)" on an All Games row; MP3s opened alone and three marked ones
+playing track after track (the stack fix from the session before is in); the Cache page's Fast Boot and its message; the
+BIOS Music rip's place picker and the rip itself. Found and fixed on the way: every drive's module latch survived an IOP
+reset (the user's "drives gone after BIBLE"); an ended track's stream was never freed (the next would not start); Game
+Sources wrote its old start modes back over Fast Boot's; "1 TRACKS". Not testable in PCSX2: the BIBLE bind and MMCE.
+The Short: media/b115/ripps2-v115-short.mp4 (kit: ripps2-v108-reel/short115.py), music from the build 55 reel.

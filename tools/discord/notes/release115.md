@@ -2,7 +2,7 @@
 
 ## Rip it: RIPPS2 v1.1.5 beta (build 115)
 
-**[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/download/v1.1.5-beta/RIPPS2.elf)** (one file, @SIZE@) and put it in place of your old one. Your settings stay where they were. **[RIPPS2-languages.zip](https://github.com/akilluminati47/RIPPS2/releases/download/v1.1.5-beta/RIPPS2-languages.zip)** puts RIPPS2 in your language: every release carries the language pack, kept up to date with each build. The **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** is edition 115: Adapt and Adapt Rx are each a config and one picture now (a theme of two files), so update it with this build.
+**[Download RIPPS2.elf](https://github.com/akilluminati47/RIPPS2/releases/download/v1.1.5-beta/RIPPS2.elf)** (one file, 2,694 KB) and put it in place of your old one. Your settings stay where they were. **[RIPPS2-languages.zip](https://github.com/akilluminati47/RIPPS2/releases/download/v1.1.5-beta/RIPPS2-languages.zip)** puts RIPPS2 in your language: every release carries the language pack, kept up to date with each build. The **[theme pack](https://github.com/akilluminati47/RIPPS2-themes/releases/latest)** is edition 115: Adapt and Adapt Rx are each a config and one picture now (a theme of two files), so update it with this build.
 
 **[Watch the v1.1.5 Short](https://akilluminati47.github.io/RIPPS2/media/b115/ripps2-v115-short.mp4)** (on GitHub, no YouTube needed).
 
