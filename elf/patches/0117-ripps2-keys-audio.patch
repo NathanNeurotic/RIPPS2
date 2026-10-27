@@ -26,6 +26,28 @@ index 2d670aa..2a89b58 100644
  int ripps2StickSide(void);                                          // build 82: the right stick held left / right: -1, 0, 1
  
  // ---- Storage art panel glass (theme element Ripps2PanelGlass) ----
+diff --git a/include/ripps2shot.h b/include/ripps2shot.h
+index a443a0a..7269490 100644
+--- a/include/ripps2shot.h
++++ b/include/ripps2shot.h
+@@ -21,6 +21,7 @@ void ripps2ShotShrink(const unsigned short *src, int w, int h, int field, unsign
+ 
+ #ifndef RIPPS2_SHOT_HOST_TEST
+ struct cdvdman_settings_bdm;
++struct cdvdman_settings_mmce;
+ struct EECoreConfig_t;
+ 
+ // BDM launch (bdmsupport.c), after the ISO's fragments: find the game's roll on its drive (or rename the blank, or
+@@ -28,6 +29,9 @@ struct EECoreConfig_t;
+ // prefix the game library folder (ART is under it).
+ void ripps2ShotPrepareBdm(struct cdvdman_settings_bdm *settings, unsigned char *fragCount, const char *root,
+                           const char *prefix, const char *id, const char *title);
++// build 117: the MMCE launch (mmcesupport.c), after the ISO's descriptor: the game's roll on the SD (made here when the
++// card has none), left open and handed over by the card's descriptor (roll_fd1). root and prefix "mmce0:/" or "mmce1:/"
++void ripps2ShotPrepareMmce(struct cdvdman_settings_mmce *settings, const char *root, const char *id, const char *title);
+ // sysLaunchLoaderElf: the state and the names into ee_core's config. Consumes what the prepare left.
+ void ripps2ShotFillConfig(struct EECoreConfig_t *config, const char *mode);
+ 
 diff --git a/include/themes.h b/include/themes.h
 index b490c70..d9808c1 100644
 --- a/include/themes.h
@@ -51,6 +73,57 @@ index db1700e..b90b720 100644
  # build 115: OSDSYS-style hints, RUN left of the source name and SOURCE right of it
  hints_flank=1
  # RIPPS2 build 91: as a game launches its disc pops in and spins up (Flow and Grid > Launch Disc can change it)
+diff --git a/modules/iopcore/cdvdman/device-mmce.c b/modules/iopcore/cdvdman/device-mmce.c
+index 65d85fe..f982ae7 100644
+--- a/modules/iopcore/cdvdman/device-mmce.c
++++ b/modules/iopcore/cdvdman/device-mmce.c
+@@ -6,6 +6,7 @@
+ #include "device.h"
+ #include "ioplib_util.h"
+ #include "mmcedrv_config.h"
++#include "ripshot_roll.h" // RIPPS2 build 117: RS_ROLL_BYTES
+ 
+ extern struct cdvdman_settings_mmce cdvdman_settings;
+ 
+@@ -210,17 +211,20 @@ int mmce_write_offset(int fd, unsigned int offset, unsigned int size, const unsi
+     return ret;
+ }
+ 
+-// RIPPS2 build 108: RIPSHOT's roll is not on this device yet (BDM first, ripshot.md step 2)
++// RIPPS2 build 117: RIPSHOT's roll, a file on the SD the launch opened and handed over by the card's own descriptor
++// (roll_fd1, plus 1), read and written by offset as the VMCs are (under mmce_io_sema, as every call here)
+ u32 DeviceRollBytes(void)
+ {
+-    return 0;
++    return cdvdman_settings.roll_fd1 > 0 ? RS_ROLL_BYTES : 0;
+ }
+ 
+ int DeviceRollIo(int write, u32 offset, void *buf, u32 size)
+ {
+-    (void)write;
+-    (void)offset;
+-    (void)buf;
+-    (void)size;
++    int fd = cdvdman_settings.roll_fd1 - 1;
++
++    if (fd < 0 || offset + size > RS_ROLL_BYTES)
++        return -1;
++    if (write ? mmce_write_offset(fd, offset, size, (const unsigned char *)buf) : mmce_read_offset(fd, offset, size, (unsigned char *)buf))
++        return (int)size;
+     return -1;
+ }
+diff --git a/modules/iopcore/common/cdvd_config.h b/modules/iopcore/common/cdvd_config.h
+index 128d1a8..152f6c4 100644
+--- a/modules/iopcore/common/cdvd_config.h
++++ b/modules/iopcore/common/cdvd_config.h
+@@ -129,6 +129,7 @@ struct cdvdman_settings_mmce
+     //vmc_id is in mcemu struct
+     int ack_wait_cycles;
+     int use_alarms;
++    int roll_fd1; // RIPPS2 build 117: RIPSHOT's roll, the card's own descriptor plus 1 (0: no roll)
+ } __attribute__((packed));
+ 
+ #define CDVDMAN_SETTINGS_DEFAULT_COMMON                                \
 diff --git a/src/gui.c b/src/gui.c
 index fd1a50b..05133b6 100644
 --- a/src/gui.c
@@ -216,6 +289,26 @@ index e6c8fc3..02cef2c 100644
          } else if (menu->current != NULL && mixValidIndex(set, menu->current->item.id) && set->arr[menu->current->item.id].owner != NULL &&
                     mixLiveHas(set, name, kind)) {
              const char *now = menu->current->item.text;
+diff --git a/src/mmcesupport.c b/src/mmcesupport.c
+index 8c26291..622fd7e 100644
+--- a/src/mmcesupport.c
++++ b/src/mmcesupport.c
+@@ -34,6 +34,7 @@
+ #include <delaythread.h> // DelayThread() -- real-sleep gap in the MMCE card-switch wait
+ #include "include/pad.h"     // RIPPS2 build 115: START skips the wait for the game's card
+ #include "include/ripps2diag.h" // RIPPS2 build 115: the hardware log
++#include "include/ripps2shot.h" // RIPPS2 build 117: RIPSHOT's roll on the SD
+ #include <time.h>        // RIPPS2 build 115: clock, for the card's busy check
+ #include <unistd.h>
+ #include <fcntl.h>
+@@ -1555,6 +1556,7 @@ void mmceLaunchGame(item_list_t *itemList, int id, config_set_t *configSet)
+     // TEMP: The fd given by sd2psx is not the same one we see here on the EE
+     // and ps2sdk_get_iop_fd does not seem to return the right value either
+     settings->iso_fd = fileXioIoctl2(iso_file, 0x80, NULL, 0, NULL, 0);
++    ripps2ShotPrepareMmce(settings, mmcePrefix, game->startup, game->name); // build 117: RIPSHOT's roll on the SD
+ 
+     LOG("name: %s\n", game->name);
+     LOG("start: %s\n", game->startup);
 diff --git a/src/opl.c b/src/opl.c
 index df1f893..e2f8f07 100644
 --- a/src/opl.c
@@ -328,6 +421,166 @@ index 0789fdd..84d7833 100644
      float p = rdHolding ? (float)(now - rdHoldSince) / RD_HOLD_S : 0.0f;
      rdRing(hx + RD_RING_W / 2, y + 90, p > 1.0f ? 1.0f : p, ia);
      GSTEXTURE *sel = thmGetTexture(SELECT_ICON);
+diff --git a/src/ripps2shot.c b/src/ripps2shot.c
+index e4c5242..5a477df 100644
+--- a/src/ripps2shot.c
++++ b/src/ripps2shot.c
+@@ -494,6 +494,78 @@ void ripps2ShotPrepareBdm(struct cdvdman_settings_bdm *settings, unsigned char *
+     LOG("RIPSHOT roll %s: %d fragments, kept 0x%02x, next SCR%d / SHOT %02d\n", path, n, kept, rsLaunch.scr, rsLaunch.shot);
+ }
+ 
++// build 117: RIPSHOT on MMCE. The roll is opened here and stays open into the game: CDVDMAN reads and writes it by the
++// descriptor the card gave it (fileXioIoctl2 0x80, as the ISO's and the VMCs'). A launch that came back closes the last one
++static int rsMmceFd = -1;
++
++void ripps2ShotPrepareMmce(struct cdvdman_settings_mmce *settings, const char *root, const char *id, const char *title)
++{
++    char dir[160], path[192], blank[192];
++    rs_slot_hdr_t hdr[RS_SLOTS];
++    int fd, kept, art, media, cardFd;
++
++    if (rsMmceFd >= 0) {
++        fileXioClose(rsMmceFd);
++        rsMmceFd = -1;
++    }
++    settings->roll_fd1 = 0;
++    memset(&rsLaunch, 0, sizeof(rsLaunch));
++    rsLaunch.armed = 1;
++    rsLaunch.state = RIPSHOT_OFF;
++    if (!gRipps2IgrMenu || !gRipps2Ripshot)
++        return;
++    rsLaunch.state = RIPSHOT_NOT_HERE;
++    snprintf(rsLaunch.drive, sizeof(rsLaunch.drive), "MMCE");
++    ripps2ShotFolder(title, id, rsLaunch.title, sizeof(rsLaunch.title));
++
++    snprintf(dir, sizeof(dir), "%sMEDIA/RIPSHOT", root);
++    snprintf(path, sizeof(path), "%s/%s.ROLL", dir, id);
++    if (!rsExists(path)) {
++        snprintf(blank, sizeof(blank), "%s/BLANK.ROLL", dir);
++        rsLaunch.state = RIPSHOT_DRIVE_FULL;
++        if (rsCountRolls(dir) >= RS_ROLLS_MAX)
++            return;
++        if (!(rsExists(blank) && rename(blank, path) == 0) && !rsMake(root, path))
++            return; // no blank and no room for a roll
++        if ((fd = open(path, O_RDWR)) < 0)
++            return;
++        rsStamp(fd, id, title);
++        close(fd);
++    }
++    if ((fd = open(path, O_RDONLY)) < 0)
++        return;
++    if (lseek(fd, 0, SEEK_END) < RS_ROLL_BYTES) { // cut short (or an older layout): a roll of today's size, when nothing is kept
++        rsSlots(fd, hdr);
++        close(fd);
++        ripps2ShotCount(hdr, &kept, &art, &media);
++        rsLaunch.state = RIPSHOT_DRIVE_FULL;
++        if (kept || remove(path) != 0 || !rsMake(root, path))
++            return;
++        if ((fd = open(path, O_RDWR)) < 0)
++            return;
++        rsStamp(fd, id, title);
++        lseek(fd, 0, SEEK_SET);
++    }
++    rsSlots(fd, hdr);
++    close(fd);
++    ripps2ShotCount(hdr, &kept, &art, &media);
++
++    rsLaunch.state = RIPSHOT_NOT_HERE;
++    if ((rsMmceFd = fileXioOpen(path, 0x3, 0666)) < 0) // read and write, as the VMCs are opened
++        return;
++    if ((cardFd = fileXioIoctl2(rsMmceFd, 0x80, NULL, 0, NULL, 0)) < 0) {
++        fileXioClose(rsMmceFd);
++        rsMmceFd = -1;
++        return;
++    }
++    settings->roll_fd1 = cardFd + 1;
++    rsLaunch.kept = kept;
++    rsLaunch.scr = rsFirstScr(root, id) + art;
++    rsLaunch.shot = rsFirstShot(root, rsLaunch.title) + media;
++    rsLaunch.state = RIPSHOT_READY;
++    LOG("RIPSHOT roll %s: card descriptor %d, kept 0x%02x, next SCR%d / SHOT %02d\n", path, cardFd, kept, rsLaunch.scr, rsLaunch.shot);
++}
++
+ void ripps2ShotFillConfig(struct EECoreConfig_t *config, const char *mode)
+ {
+     config->Ripshot = (config->IgrMenu && gRipps2Ripshot) ? RIPSHOT_NOT_HERE : RIPSHOT_OFF; // IgrMenu: set just before
+@@ -503,7 +575,7 @@ void ripps2ShotFillConfig(struct EECoreConfig_t *config, const char *mode)
+     config->RipshotFreeMB = -1; // BDM's file systems do not say; the APA HDD will
+     config->RipshotDrive[0] = '\0';
+     config->RipshotTitle[0] = '\0';
+-    if (mode != NULL && !strncmp(mode, "BDM_", 4) && rsLaunch.armed && config->Ripshot != RIPSHOT_OFF) {
++    if (mode != NULL && (!strncmp(mode, "BDM_", 4) || !strncmp(mode, "MMCE", 4)) && rsLaunch.armed && config->Ripshot != RIPSHOT_OFF) {
+         config->Ripshot = rsLaunch.state;
+         config->RipshotKept = rsLaunch.kept;
+         config->RipshotScrNext = rsLaunch.scr;
+@@ -728,7 +800,7 @@ static void rsRootOf(const char *path, char *root, int size, char *prefix, int p
+     if (c != NULL && c[1] == '/')
+         n++;
+     snprintf(root, size, "%.*s", n, path);
+-    if (gBDMPrefix[0] != '\0')
++    if (gBDMPrefix[0] != '\0' && !strncmp(path, "mass", 4)) // build 117: an MMCE card's ART is at its root
+         snprintf(prefix, psize, "%s%s/", root, gBDMPrefix);
+     else
+         snprintf(prefix, psize, "%s", root);
+@@ -754,18 +826,18 @@ static struct
+ } rsWork[RS_WORK_MAX];
+ static int rsWorkCount, rsWorkAt, rsWorkSaved, rsWorkFailed, rsWaiting, rsToldWaiting;
+ static volatile int rsBusy;
+-static int rsJobSlot;
++static char rsJobRoot[48]; // build 117: "massN:/" or the MMCE card's prefix
+ 
+ static void rsJob(void)
+ {
+-    char dir[64], path[160], blank[160], root[16];
++    char dir[96], path[160], blank[160], root[48];
+     rs_slot_hdr_t hdr[RS_SLOTS];
+     DIR *d;
+     struct dirent *e;
+     int haveBlank, kept, i;
+ 
+-    snprintf(root, sizeof(root), "mass%d:/", rsJobSlot);
+-    snprintf(dir, sizeof(dir), "mass%d:/MEDIA/RIPSHOT/", rsJobSlot);
++    snprintf(root, sizeof(root), "%s", rsJobRoot);
++    snprintf(dir, sizeof(dir), "%sMEDIA/RIPSHOT/", rsJobRoot);
+     snprintf(blank, sizeof(blank), "%sBLANK.ROLL", dir);
+     haveBlank = rsExists(blank);
+     if ((d = opendir(dir)) != NULL) {
+@@ -793,7 +865,7 @@ static void rsJob(void)
+         closedir(d);
+         ripps2WriteReadme(root, 1); // a drive RIPSHOT already uses gets MEDIA's README with RIPSHOT in it (build 108)
+     }
+-    if (!haveBlank) {
++    if (!haveBlank && strncmp(root, "mmce", 4)) { // build 117: never a blank roll written over the bus the pads share
+         if (rsMake(root, blank))
+             LOG("RIPSHOT made %s\n", blank);
+     }
+@@ -868,12 +940,25 @@ void ripps2ShotTick(void)
+         if (t == -2 || t == BDM_TYPE_UDPBD)
+             continue; // nothing mounted there now, or a network block device (Neutrino's only)
+         done |= 1 << i;
+-        rsJobSlot = i;
++        snprintf(rsJobRoot, sizeof(rsJobRoot), "mass%d:/", i);
+         rsBusy = 1;
+         if (ioPutRequest(IO_CUSTOM_SIMPLEACTION, &rsJob) != IO_OK)
+             rsBusy = 0;
+         return;
+     }
++    { // build 117: the MMCE card's rolls, once it lists (its prefix is the card's root)
++        opl_io_module_t *mod = oplGetModule(MMCE_MODE);
++        const char *prefix = (mod != NULL && mod->support != NULL && mod->support->enabled && mod->support->itemGetPrefix != NULL) ?
++                                 mod->support->itemGetPrefix(mod->support) : NULL;
++        if (!(done & (1 << 8)) && prefix != NULL && !strncmp(prefix, "mmce", 4) && strlen(prefix) < sizeof(rsJobRoot)) {
++            done |= 1 << 8;
++            snprintf(rsJobRoot, sizeof(rsJobRoot), "%s", prefix); // "mmceN:/", where the launch keeps its rolls
++            rsBusy = 1;
++            if (ioPutRequest(IO_CUSTOM_SIMPLEACTION, &rsJob) != IO_OK)
++                rsBusy = 0;
++            return;
++        }
++    }
+     if (!rsToldWaiting && rsWaiting > 0 && gRipps2RipshotDevelop != 1) { // Manual: say so once, after every drive
+         char msg[64];
+         rsToldWaiting = 1;
 diff --git a/src/ripps2side.c b/src/ripps2side.c
 index 8b1e237..13a2e08 100644
 --- a/src/ripps2side.c
