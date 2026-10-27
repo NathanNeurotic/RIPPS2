@@ -126,7 +126,6 @@ strings:
   Planet N Compact by Iconian Fonts: Iconian Fonts 的 Planet N Compact
   QUALITY ASSURANCE: 品質保證
   'RIGHT STICK OR UP / DOWN: SCROLL': 右搖桿或上 / 下：捲動
-  RIPFLOW's type: RIPFLOW 的字型
   RIPPOPS copies your own POPS files over from another drive: RIPPOPS 會從另一個磁碟機複製你自己的 POPS 檔案
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek 與 Sleek Bold，為 RIPPS2 繪製
   RetroAchievements on the console by hacan359 (yoba): hacan359（yoba）的主機端 RetroAchievements
@@ -1130,7 +1129,6 @@ strings:
   '%d music tracks': '%d 首音樂'
   1 music track: 1 首音樂
   'A game''s EXIT: %s': 遊戲的 EXIT：%s
-  'A game''s EXIT: the browser': 遊戲的 EXIT：瀏覽器
   'All Games: %d games kept in %s, listed at boot before any drive answers': 全部遊戲：%d 個遊戲保存在 %s，開機時在任何磁碟機回應前就列出
   'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 全部遊戲：尚無主清單；遊戲列出後會寫入 %s（Fast Cache 開啟）
   CACHE SETTINGS: 快取設定
@@ -1296,6 +1294,13 @@ strings:
   'The ART folders stay as they are: the pack is a copy.': ART 資料夾保持原樣：包只是副本。
   Under a minute: 不到一分鐘
   free space unknown: 剩餘空間未知
+  'A game''s EXIT: the browser, or your boot loader when one is installed': 遊戲的 EXIT：瀏覽器，或已安裝的開機載入程式
+  Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0): Ogg Vorbis：Xiph.Org（BSD），minimp3：lieff（CC0）
+  RIPFLOW's type, and every message and notification: RIPFLOW 的字體，以及每則訊息與通知
+  'Thanks to everyone testing on Discord and opening issues on GitHub:': 感謝所有在 Discord 測試、在 GitHub 提出 issue 的朋友：
+  'The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself': IGR Path %s 不會使用：遊戲結束後只能載入記憶卡或 USB 上的檔案，且絕不會是 RIPPS2 本身
+  an issue is the best way to get RIPPS2 updated.: 提出 issue 是讓 RIPPS2 更新的最好方式。
+  your Ogg and MP3 music, as RIPPS2 plays it: 你的 Ogg 與 MP3 音樂，依 RIPPS2 的方式播放
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色
@@ -1761,7 +1766,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 變化的按鍵提示或圖示會像封面一樣在變化時淡入；不變的保持原樣，在每個頁面和訊息中都是如此。關閉：直接出現。主題：由主題決定（除非寫有 hints_fade=0，否則開啟）。
   RIPPS2_SIDEBAR_STYLE: 側邊欄樣式
   HINT_RIPPS2_SIDEBAR_STYLE: 經典（分體）：圖示在側邊欄的深色條中，旁邊是彩色條帶。XL（一體）：一條更寬的條，圖示在中間。主題：由主題決定。
-  HINT_EXITPATH: 遊戲內選單中 EXIT 去哪裡。最好在 BOOT LOCK 開啟時留空（PS2BBL、FMCB 或 OSDMenu，或已設定好 BIBLE）：EXIT 會經過瀏覽器，瀏覽器像開機時一樣啟動你的開機程式和 RIPPS2，這是最安全的返回方式。未鎖定時留空：記憶卡或 FAT32 USB 磁碟機上 RIPPS2 自己的 ELF 會在重設後立即載入，但並非每個遊戲都會讓主機為此做好準備。Browser：PS2 瀏覽器。那時完全無法存取 MMCE 上的 ELF。
+  HINT_EXITPATH: 遊戲內選單中 EXIT 的去向。最好留空：EXIT 會進入瀏覽器，若已安裝開機載入程式（FreeMcBoot、PS2BBL、OSDMenu 或 BIBLE）則由它啟動，開啟 BOOT LOCK 時會像開機一樣回到 RIPPS2；沒有載入程式時則是 PS2 瀏覽器。在此輸入的 ELF 只有在重設後能被載入（位於記憶卡或 FAT32 USB 磁碟）且不是 RIPPS2 本身時才會使用；其他情況都進入瀏覽器。
   HINT_BDM_START: USB、iLink、MX4SIO 與 exFAT 硬碟。自動在開機時啟動它們：對已插入的磁碟機最快，其遊戲從一開始就在全部遊戲中。手動在你開啟其頁面時啟動。
   NEUTRINO_VMC_HDD_UNSUPPORTED: Neutrino 無法使用 APA 硬碟上的 VMC（exFAT、USB 與 MX4SIO 可以）：這個遊戲將使用該插槽中的真實記憶卡啟動。
   RIPPS2_FAST_BOOT: Fast Boot

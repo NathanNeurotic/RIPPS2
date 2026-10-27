@@ -126,7 +126,6 @@ strings:
   Planet N Compact by Iconian Fonts: Planet N Compact от Iconian Fonts
   QUALITY ASSURANCE: ОСИГУРЯВАНЕ НА КАЧЕСТВОТО
   'RIGHT STICK OR UP / DOWN: SCROLL': 'ДЕСЕН ЛОСТ ИЛИ НАГОРЕ / НАДОЛУ: ПРЕВЪРТАНЕ'
-  RIPFLOW's type: Шрифтът на RIPFLOW
   RIPPOPS copies your own POPS files over from another drive: RIPPOPS копира вашите собствени POPS файлове от друго устройство
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek и Sleek Bold, нарисувани за RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements на конзолата от hacan359 (yoba)
@@ -1130,7 +1129,6 @@ strings:
   '%d music tracks': 'Музикални песни: %d'
   1 music track: 1 музикална песен
   'A game''s EXIT: %s': 'EXIT на игра: %s'
-  'A game''s EXIT: the browser': 'EXIT на игра: браузърът'
   'All Games: %d games kept in %s, listed at boot before any drive answers': 'Всички игри: %d игри, пазени в %s, показани при стартиране преди да отговори което и да е устройство'
   'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Всички игри: още няма основен списък; %s се записва, щом игрите се покажат (Fast Cache включен)'
   CACHE SETTINGS: НАСТРОЙКИ НА КЕША
@@ -1296,6 +1294,13 @@ strings:
   'The ART folders stay as they are: the pack is a copy.': 'Папките ART остават каквито са: пакетът е копие.'
   Under a minute: Под минута
   free space unknown: свободното място е неизвестно
+  'A game''s EXIT: the browser, or your boot loader when one is installed': 'EXIT от игра: браузърът или твоят зареждач, когато има инсталиран'
+  Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0): Ogg Vorbis от Xiph.Org (BSD), minimp3 от lieff (CC0)
+  RIPFLOW's type, and every message and notification: шрифтът на RIPFLOW и на всяко съобщение и известие
+  'Thanks to everyone testing on Discord and opening issues on GitHub:': 'Благодарим на всички, които тестват в Discord и отварят issues в GitHub:'
+  'The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself': 'IGR Path %s не се използва: след игра може да се зареди само файл от карта с памет или USB, и никога самият RIPPS2'
+  an issue is the best way to get RIPPS2 updated.: issue е най-добрият начин RIPPS2 да се обнови.
+  your Ogg and MP3 music, as RIPPS2 plays it: твоята Ogg и MP3 музика, както я пуска RIPPS2
 labels:
   BDMMODE: Режим на стартиране на BDM
   GAME_ID: ID на играта
@@ -1756,7 +1761,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'Подсказка за бутон или символ, който се промени, се появява плавно, като обложките, в момента на промяната; онези, които остават, не се пипат, на всяка страница и съобщение. Изключено: просто се появяват. Тема: решава темата (включено, освен ако не казва hints_fade=0).'
   RIPPS2_SIDEBAR_STYLE: Стил на страничната лента
   HINT_RIPPS2_SIDEBAR_STYLE: 'Класически (разделен): иконите в тъмната ивица на страничната лента с цветната линия до нея. XL (от едно парче): една по-широка ивица с иконите в средата. Тема: решава темата.'
-  HINT_EXITPATH: 'Накъде води EXIT в Менюто в играта. Най-добре оставете празно с включен BOOT LOCK (PS2BBL, FMCB или OSDMenu, или настроен BIBLE): тогава EXIT минава през браузъра, който стартира вашия зареждащ модул и RIPPS2 като при включване, най-сигурният път обратно. Празно без ключалката: собственият ELF на RIPPS2 на карта с памет или FAT32 USB устройство, зареден веднага след рестарта, за който не всяка игра оставя конзолата готова. Browser: браузърът на PS2. ELF на MMCE тогава изобщо не е достъпен.'
+  HINT_EXITPATH: 'Къде води EXIT в менюто в игра. Най-добре празно: EXIT води към браузъра, който стартира твоя зареждач (FreeMcBoot, PS2BBL, OSDMenu или BIBLE), когато има инсталиран, и отново RIPPS2 с включен BOOT LOCK, както при включване; без такъв, браузъра на PS2. ELF, въведен тук, се използва само когато нулирането може да го зареди (от карта с памет или FAT32 USB устройство) и не е самият RIPPS2; всичко друго води към браузъра.'
   HINT_BDM_START: 'USB, iLink, MX4SIO и exFAT HDD. Автоматично ги стартира при стартиране: най-бързо за включените устройства, с игрите им във Всички игри от самото начало. Ръчно ги стартира, когато отворите страницата им.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino не може да ползва VMC на APA HDD (exFAT, USB и MX4SIO могат): тази игра стартира с истинската карта в този слот.'
   RIPPS2_FAST_BOOT: Fast Boot

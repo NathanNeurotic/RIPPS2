@@ -126,7 +126,6 @@ strings:
   Planet N Compact by Iconian Fonts: Planet N Compact par Iconian Fonts
   QUALITY ASSURANCE: ASSURANCE QUALITÉ
   'RIGHT STICK OR UP / DOWN: SCROLL': 'STICK DROIT OU HAUT / BAS : DÉFILER'
-  RIPFLOW's type: la police de RIPFLOW
   RIPPOPS copies your own POPS files over from another drive: RIPPOPS copie vos propres fichiers POPS depuis un autre périphérique
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek et Sleek Bold, dessinées pour RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements sur la console par hacan359 (yoba)
@@ -1129,7 +1128,6 @@ strings:
   '%d music tracks': '%d pistes de musique'
   1 music track: 1 piste de musique
   'A game''s EXIT: %s': 'EXIT d''un jeu : %s'
-  'A game''s EXIT: the browser': 'EXIT d''un jeu : le navigateur'
   'All Games: %d games kept in %s, listed at boot before any drive answers': 'Tous les jeux : %d jeux gardés dans %s, listés au démarrage avant que tout périphérique réponde'
   'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Tous les jeux : pas encore de liste principale ; %s est écrit une fois les jeux listés (Fast Cache activé)'
   CACHE SETTINGS: RÉGLAGES DU CACHE
@@ -1295,6 +1293,13 @@ strings:
   'The ART folders stay as they are: the pack is a copy.': 'Les dossiers ART restent tels quels : le pack est une copie.'
   Under a minute: Moins d'une minute
   free space unknown: place libre inconnue
+  'A game''s EXIT: the browser, or your boot loader when one is installed': 'EXIT d''un jeu : le navigateur, ou ton chargeur de démarrage s''il y en a un d''installé'
+  Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0): Ogg Vorbis par Xiph.Org (BSD), minimp3 par lieff (CC0)
+  RIPFLOW's type, and every message and notification: la police de RIPFLOW, et de chaque message et notification
+  'Thanks to everyone testing on Discord and opening issues on GitHub:': 'Merci à tous ceux qui testent sur Discord et ouvrent des issues sur GitHub :'
+  'The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself': 'L''IGR Path %s n''est pas utilisé : après un jeu, seul un fichier sur carte mémoire ou USB peut se charger, et jamais RIPPS2 lui-même'
+  an issue is the best way to get RIPPS2 updated.: une issue est le meilleur moyen de faire évoluer RIPPS2.
+  your Ogg and MP3 music, as RIPPS2 plays it: ta musique Ogg et MP3, telle que RIPPS2 la joue
 labels:
   HINT_NEUTRINO_AUTO_ELF: Transmet l'ELF de démarrage du jeu à Neutrino pour chercher sa configuration par titre. Activé par défaut ; une option Boot ELF réglée à la main a la priorité.
   HINT_POPSTARTER_PATH: Emplacement de POPSTARTER.ELF. Laissé vide, RIPPS2 en renseigne un qu'il trouve sur un périphérique ; écrivez par-dessus pour en utiliser un autre, comme usb:/POPS/POPSTARTER.ELF
@@ -1749,7 +1754,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'Une aide de bouton ou un symbole qui change apparaît en fondu, comme les jaquettes, au moment où il change ; ceux qui restent ne bougent pas, sur chaque page et chaque message. Désactivé : ils apparaissent simplement. Thème : le thème décide (activé sauf s''il indique hints_fade=0).'
   RIPPS2_SIDEBAR_STYLE: Style de la barre latérale
   HINT_RIPPS2_SIDEBAR_STYLE: 'Classique (séparé) : les icônes dans la bande sombre de la barre latérale, avec la bande colorée à côté. XL (d''un seul tenant) : une seule bande plus large, les icônes en son milieu. Thème : le thème décide.'
-  HINT_EXITPATH: 'Où va EXIT dans le Menu en jeu. Mieux vaut le laisser vide avec BOOT LOCK activé (PS2BBL, FMCB ou OSDMenu, ou BIBLE installé) : EXIT passe alors par le navigateur, qui lance votre chargeur de démarrage et RIPPS2 comme à l''allumage, le retour le plus sûr. Vide sans le verrou : l''ELF de RIPPS2 lui-même sur une carte mémoire ou une clé USB FAT32, chargé juste après la réinitialisation, ce pour quoi tous les jeux ne laissent pas la console prête. Browser : le navigateur PS2. Un ELF sur MMCE n''est alors pas joignable du tout.'
+  HINT_EXITPATH: 'Où mène EXIT dans le menu en jeu. Mieux vaut le laisser vide : EXIT mène au navigateur, qui lance ton chargeur de démarrage (FreeMcBoot, PS2BBL, OSDMenu ou BIBLE) s''il y en a un d''installé, puis à nouveau RIPPS2 avec BOOT LOCK activé, comme à la mise sous tension ; sans chargeur, le navigateur de la PS2. Un ELF saisi ici n''est utilisé que si la réinitialisation peut le charger (sur une carte mémoire ou une clé USB en FAT32) et que ce n''est pas RIPPS2 lui-même ; tout le reste mène au navigateur.'
   HINT_BDM_START: 'USB, iLink, MX4SIO et le disque dur exFAT. Automatique les démarre au lancement : le plus rapide pour les périphériques branchés, leurs jeux dans Tous les jeux dès le début. Manuel les démarre quand vous ouvrez leur page.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino ne peut pas utiliser de VMC sur le disque dur APA (exFAT, USB et MX4SIO le peuvent) : ce jeu démarre avec la vraie carte dans ce port.'
   RIPPS2_FAST_BOOT: Fast Boot

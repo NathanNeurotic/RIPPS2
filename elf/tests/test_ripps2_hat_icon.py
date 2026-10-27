@@ -2,7 +2,11 @@
 folder: it must write ripps2.icn (the embedded misc/ripps2.icn, byte for byte) and an icon.sys made from OPL's
 template that is titled RIPPS2, names ripps2.icn three times (list, copy, delete) and carries the night-to-blood
 background; a second run keeps that icon.sys; an older RIPPS2 icon.sys (OPL's icon as bible.icn) is replaced and
-anyone else's is kept. HAT_ICON_OUT=<dir> leaves the files there (for a lab card)."""
+anyone else's is kept. HAT_ICON_OUT=<dir> leaves the files there (for a lab card).
+
+Build 119 (a tester's card showed corrupted data; a v1.60 browser in the lab did too): the hat is one shape, the title
+full-width Shift-JIS, and RIPPS2's own folder is made whole on every run: a missing ripps2.icn, an older one (the
+three-shape hat) and an icon.sys with the ASCII title are written again."""
 import os
 import shutil
 import struct
@@ -23,7 +27,7 @@ def func(src, head):
 
 gcc = shutil.which('gcc')
 if gcc:
-    code = '\n'.join(func(boot, h) for h in ('static void blIconSysNamed(', 'int ripps2CardFolderIcon('))
+    code = '\n'.join(func(boot, h) for h in ('static int blSjis(', 'static void blIconSysNamed(', 'int ripps2CardFolderIcon('))
     sysb = (root / 'misc/icon.sys').read_bytes()
     icn = (root / 'misc/ripps2.icn').read_bytes()
     harness = r'''
@@ -73,8 +77,11 @@ int main(int argc, char **argv) { return ripps2CardFolderIcon(argv[1]) ? 0 : 1; 
                 names = [s[o:o + 64].split(b'\0')[0] for o in (0x104, 0x144, 0x184)]
                 if names != [b'ripps2.icn'] * 3:
                     fail.append('icon.sys must name ripps2.icn for list, copy and delete: %r' % names)
-                if s[0xC0:0xC0 + 7] != b'RIPPS2\0' or struct.unpack_from('<H', s, 6)[0] != 6:
-                    fail.append('icon.sys must be titled RIPPS2 on one line: %r' % s[0xC0:0xC8])
+                title = '\uff32\uff29\uff30\uff30\uff33\uff12'.encode('shift_jis')  # build 119: RIPPS2, full width
+                if s[0xC0:0xC0 + len(title) + 1] != title + b'\0' or struct.unpack_from('<H', s, 6)[0] != len(title):
+                    fail.append('icon.sys must be titled RIPPS2 in Shift-JIS on one line: %r' % s[0xC0:0xD0])
+                if struct.unpack_from('<I', icn, 4)[0] != 1:
+                    fail.append('the hat must be one shape: a v1.60 browser calls more corrupted data')
                 bg = [struct.unpack_from('<4i', s, 0x10 + 16 * i) for i in range(4)]
                 if bg != [(18, 10, 34, 0), (18, 10, 34, 0), (110, 4, 16, 0), (110, 4, 16, 0)]:
                     fail.append('the background corners: %r' % bg)
@@ -85,6 +92,21 @@ int main(int argc, char **argv) { return ripps2CardFolderIcon(argv[1]) ? 0 : 1; 
                     os.makedirs(out, exist_ok=True)
                     shutil.copy(d / 'icon.sys', out)
                     shutil.copy(d / 'ripps2.icn', out)
+                # build 119: made whole again: the icon missing, an older icon, the ASCII title
+                (d / 'ripps2.icn').unlink()
+                subprocess.run([str(exe), str(d)])
+                if not (d / 'ripps2.icn').exists() or (d / 'ripps2.icn').read_bytes() != icn:
+                    fail.append('a missing ripps2.icn must be written again')
+                (d / 'ripps2.icn').write_bytes(b'\0' * 50598)
+                ascii_sys = bytearray(s)
+                ascii_sys[0xC0:0x104] = b'RIPPS2'.ljust(68, b'\0')
+                ascii_sys[6] = 6
+                (d / 'icon.sys').write_bytes(bytes(ascii_sys))
+                subprocess.run([str(exe), str(d)])
+                if (d / 'ripps2.icn').read_bytes() != icn:
+                    fail.append("an older ripps2.icn (the three-shape hat) must be replaced")
+                if (d / 'icon.sys').read_bytes() != s:
+                    fail.append("RIPPS2's icon.sys with the ASCII title must be written again")
                 # someone else's icon.sys stays; RIPPS2's older one (bible.icn) is replaced
                 other = bytearray(sysb)
                 other[0x104:0x144] = b'mine.icn'.ljust(64, b'\0')
@@ -102,4 +124,4 @@ int main(int argc, char **argv) { return ripps2CardFolderIcon(argv[1]) ? 0 : 1; 
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print("RIPPS2 card folder icon: the hat, titled RIPPS2, others' icons kept OK" + ('' if gcc else ' (no gcc: skipped)'))
+print("RIPPS2 card folder icon: the one-shape hat, titled RIPPS2 in Shift-JIS, made whole, others' icons kept OK" + ('' if gcc else ' (no gcc: skipped)'))

@@ -26,7 +26,8 @@ param(
   [string]$Iso = "",
   [switch]$Attach,
   [string]$Title = "",
-  [switch]$NoPanel
+  [switch]$NoPanel,
+  [switch]$Bios
 )
 
 $lab = "B:\Emulation\PlayStation\PCSX2\ripps2-lab"
@@ -288,9 +289,9 @@ if ($Attach) {
 } else {
   $fgBefore = [BG]::GetForegroundWindow()
   if (-not $env:PS2BG_NODESK) { if ([BG]::OpenDesk()) { "on the lab's own desktop ($([BG]::DeskName)): it cannot take the focus or show" } else { "could not make the lab desktop; running parked off screen" } }
-  $launchArgs = "-fastboot -elf `"$Elf`""
+  $launchArgs = $(if ($Bios) { "-bios" } else { "-fastboot -elf `"$Elf`"" }) # -Bios: the console's own menu (the browser), no ELF
   if ($Iso) { $launchArgs += " `"$Iso`"" }
-  if (-not $NoPanel) { [LabPanel]::Start($(if ($Title) { $Title } else { Split-Path -Leaf (Split-Path -Parent $Elf) }), $exe) }
+  if (-not $NoPanel) { [LabPanel]::Start($(if ($Title) { $Title } else { $(if ($Bios) { "BIOS" } else { Split-Path -Leaf (Split-Path -Parent $Elf) }) }), $exe) }
   $pid2 = [BG]::Launch($exe, $launchArgs, $lab)
   if ($pid2 -le 0) { "could not start PCSX2"; [LabPanel]::Finish(); return }
   "launched pid $pid2 (minimized, not activated)"

@@ -36,7 +36,7 @@ need(boot, (('"mc0:/SYS-CONF/FREEMCB.CNF",', "FMCB 1.9's config is one BOOT LOCK
             ('"LK_Auto_E1 = %s%s"', "FMCB's automatic entry in its own spelling"),
             ('"name_OSDSYS_ITEM_%d = RIPPS2%spath1_OSDSYS_ITEM_%d = %s%s"', "RIPPS2 as an OSDMenu item"),
             ('blApplyAll(1, BL_PS2BBL, &changed', "BIBLE's install sets PS2BBL configs only"),
-            ('if (!gRipps2BootLocked && ripps2BootLockIgrPath(buf, size))', 'with the lock on, an empty IGR Path is the browser, then the loader'),
+            ('&& exitLoadable() ? gExitPath : "Browser";', 'an empty IGR Path is the browser, then the loader (build 119: lock or not)'),
             ('blDialect(blConfigs[i2]) == BL_PS2BBL && blRead(blConfigs[i2]) >= 0 && blIsExtended(', "BIBLE's MMCE offer reads PS2BBL Extended's config, not OSDMenu's")),
      'ripps2boot.c')
 check = body(boot, 'void ripps2ExitPathCheck(void)')
@@ -58,7 +58,7 @@ opl = rd('src/opl.c')
 if opl.count('configGetInt(configOPL, "ripps2_bootlock", &gRipps2BootLocked);') != 2 or 'configSetInt(configOPL, "ripps2_bootlock", gRipps2BootLocked);' not in opl:
     fail.append('opl.c: ripps2_bootlock is read on both load paths (the menu and a launch from argv) and saved')
 base = rd('lng_tmpl/_base.yml')
-need(base, (('Best left empty with BOOT LOCK on (PS2BBL, FMCB or OSDMenu', 'the IGR Path hint says what an empty one does now'),
+need(base, (('Best left empty: EXIT goes to the browser, which starts your boot loader', 'the IGR Path hint says what an empty one does now (build 119)'),
             ('PS2BBL and FMCB start it at once, OSDMenu puts it first in its menu', "BOOT LOCK's hint names the loaders")), '_base.yml')
 
 # ---- Manual pages show their saved games; a launch starts only the game's drive; an empty pass is no answer

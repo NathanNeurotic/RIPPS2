@@ -126,7 +126,6 @@ strings:
   Planet N Compact by Iconian Fonts: Planet N Compact, autor Iconian Fonts
   QUALITY ASSURANCE: OSIGURANJE KVALITETA
   'RIGHT STICK OR UP / DOWN: SCROLL': 'DESNA PALICA ILI GORE / DOLE: POMERANJE'
-  RIPFLOW's type: Pismo RIPFLOW-a
   RIPPOPS copies your own POPS files over from another drive: RIPPOPS kopira vaše sopstvene POPS datoteke sa drugog uređaja
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek i Sleek Bold, nacrtani za RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements na konzoli, autor hacan359 (yoba)
@@ -1130,7 +1129,6 @@ strings:
   '%d music tracks': 'Muzičke numere: %d'
   1 music track: 1 muzička numera
   'A game''s EXIT: %s': 'EXIT igre: %s'
-  'A game''s EXIT: the browser': 'EXIT igre: pregledač'
   'All Games: %d games kept in %s, listed at boot before any drive answers': 'Sve igre: %d igara sačuvanih u %s, prikazanih pri pokretanju pre nego što bilo koji uređaj odgovori'
   'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'Sve igre: još nema glavnog spiska; %s se upisuje kada se igre prikažu (Fast Cache uključen)'
   CACHE SETTINGS: PODEŠAVANJA KEŠA
@@ -1296,6 +1294,13 @@ strings:
   'The ART folders stay as they are: the pack is a copy.': 'Fascikle ART ostaju kakve jesu: paket je kopija.'
   Under a minute: Manje od minuta
   free space unknown: slobodno mesto nepoznato
+  'A game''s EXIT: the browser, or your boot loader when one is installed': 'EXIT iz igre: pregledač ili tvoj boot loader kada je instaliran'
+  Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0): Ogg Vorbis od Xiph.Org (BSD), minimp3 od lieff (CC0)
+  RIPFLOW's type, and every message and notification: pismo RIPFLOW-a, i svake poruke i obaveštenja
+  'Thanks to everyone testing on Discord and opening issues on GitHub:': 'Hvala svima koji testiraju na Discordu i otvaraju issues na GitHubu:'
+  'The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself': 'IGR Path %s se ne koristi: posle igre može da se učita samo datoteka sa memorijske kartice ili USB-a, i nikad sam RIPPS2'
+  an issue is the best way to get RIPPS2 updated.: issue je najbolji način da se RIPPS2 ažurira.
+  your Ogg and MP3 music, as RIPPS2 plays it: tvoja Ogg i MP3 muzika, kako je RIPPS2 pušta
 labels:
   ERROR_SAVING_SETTINGS_TO: Podešavanja nisu mogla da se upišu u %s (greška %d)
   LAUNCH_PS2_DISC: Pokreni PS2 disk
@@ -1985,7 +1990,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'Savet za dugme ili znak koji se promeni postepeno se pojavi, kao omoti, u trenutku promene; oni koji ostaju se ne diraju, na svakoj stranici i poruci. Isklj.: jednostavno se pojave. Tema: odlučuje tema (uklj., osim ako kaže hints_fade=0).'
   RIPPS2_SIDEBAR_STYLE: Stil bočne trake
   HINT_RIPPS2_SIDEBAR_STYLE: 'Klasično (podeljeno): ikone u tamnoj traci bočne trake sa obojenom linijom pored. XL (iz jednog dela): jedna šira traka sa ikonama u sredini. Tema: odlučuje tema.'
-  HINT_EXITPATH: 'Kuda vodi EXIT u Meniju u igri. Najbolje ostaviti prazno sa uključenim BOOT LOCK (PS2BBL, FMCB ili OSDMenu, ili podešenim BIBLE): EXIT tada ide kroz pregledač, koji pokreće vaš učitavač i RIPPS2 kao pri uključivanju, najbezbedniji povratak. Prazno bez zaključavanja: sopstveni ELF RIPPS2 na memorijskoj kartici ili FAT32 USB uređaju, učitan odmah posle reseta, za šta ne ostavlja svaka igra konzolu spremnom. Browser: PS2 pregledač. ELF na MMCE-u tada uopšte nije dostupan.'
+  HINT_EXITPATH: 'Kuda vodi EXIT u meniju u igri. Najbolje prazno: EXIT vodi u pregledač, koji pokreće tvoj boot loader (FreeMcBoot, PS2BBL, OSDMenu ili BIBLE) kada je instaliran, i ponovo RIPPS2 sa uključenim BOOT LOCK, kao pri uključivanju; bez njega, PS2 pregledač. ELF upisan ovde koristi se samo kada ga reset može učitati (sa memorijske kartice ili FAT32 USB uređaja) i nije sam RIPPS2; sve ostalo vodi u pregledač.'
   HINT_BDM_START: 'USB, iLink, MX4SIO i exFAT HDD. Automatski ih pokreće pri pokretanju: najbrže za priključene uređaje, sa njihovim igrama u Svim igrama od početka. Ručno ih pokreće kada otvorite njihovu stranicu.'
   RIPPS2_FAST_BOOT: Fast Boot
   HINT_RIPPS2_FAST_BOOT: 'Pokretanje čita samo disk RIPPS2: podešavanja i zvuke pored RIPPS2.ELF (RIPPS2.FB tamo kaže gde) i svaku listu iz njenog keša. Ostali diskovi čekaju: SELECT na stranici pokreće njene diskove i donosi njihove slike (sa automatskim osvežavanjem pokreću se pri pokretanju). Uključivanje kopira tvoje zvuke, a muziku ako ima mesta, u AUDIO pored RIPPS2.'

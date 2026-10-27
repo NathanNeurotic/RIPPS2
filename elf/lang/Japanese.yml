@@ -126,7 +126,6 @@ strings:
   Planet N Compact by Iconian Fonts: Iconian Fonts による Planet N Compact
   QUALITY ASSURANCE: 品質保証
   'RIGHT STICK OR UP / DOWN: SCROLL': 右スティックまたは上 / 下：スクロール
-  RIPFLOW's type: RIPFLOW の書体
   RIPPOPS copies your own POPS files over from another drive: RIPPOPS は自分の POPS ファイルを別のドライブからコピーします
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek と Sleek Bold、RIPPS2 のために描いたもの
   RetroAchievements on the console by hacan359 (yoba): hacan359（yoba）による本体上の RetroAchievements
@@ -1130,7 +1129,6 @@ strings:
   '%d music tracks': 音楽トラック %d 曲
   1 music track: 音楽トラック 1 曲
   'A game''s EXIT: %s': ゲームの EXIT：%s
-  'A game''s EXIT: the browser': ゲームの EXIT：ブラウザー
   'All Games: %d games kept in %s, listed at boot before any drive answers': すべてのゲーム：%d 本を %s に保存、どのドライブより先に起動時に表示
   'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': すべてのゲーム：マスターリスト未作成。ゲームの一覧ができると %s を書き込みます（Fast Cache オン）
   CACHE SETTINGS: キャッシュ設定
@@ -1296,6 +1294,13 @@ strings:
   'The ART folders stay as they are: the pack is a copy.': ART フォルダーはそのまま残ります：パックはコピーです。
   Under a minute: 1 分以内
   free space unknown: 空き容量は不明
+  'A game''s EXIT: the browser, or your boot loader when one is installed': ゲームの EXIT：ブラウザー、またはインストール済みのブートローダー
+  Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0): Ogg Vorbis：Xiph.Org（BSD）、minimp3：lieff（CC0）
+  RIPFLOW's type, and every message and notification: RIPFLOW の書体、そしてすべてのメッセージと通知
+  'Thanks to everyone testing on Discord and opening issues on GitHub:': Discord でテストし、GitHub で issue を立ててくれる皆さんに感謝：
+  'The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself': IGR Path %s は使われません：ゲーム後に読み込めるのはメモリーカードか USB のファイルだけで、RIPPS2 自身は決して読み込みません
+  an issue is the best way to get RIPPS2 updated.: issue は RIPPS2 を良くするいちばんの近道です。
+  your Ogg and MP3 music, as RIPPS2 plays it: あなたの Ogg と MP3 の音楽を、RIPPS2 が再生するとおりに
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。
@@ -1751,7 +1756,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 変わったボタンのヒントやアイコンは、カバーと同じように変わった瞬間にフェードインします。変わらないものはそのままです（すべてのページとメッセージで）。オフ：そのまま表示。テーマ：テーマが決めます（hints_fade=0 がなければオン）。
   RIPPS2_SIDEBAR_STYLE: サイドバーのスタイル
   HINT_RIPPS2_SIDEBAR_STYLE: クラシック（分割）：サイドバーの暗い帯にアイコン、その横に色の帯。XL（一体型）：幅の広い 1 本の帯の中央にアイコン。テーマ：テーマが決めます。
-  HINT_EXITPATH: ゲーム内メニューの EXIT の行き先。BOOT LOCK をオンにして（PS2BBL、FMCB、OSDMenu、または BIBLE を設定済み）空のままにするのがおすすめです。EXIT はブラウザーを通り、ブラウザーが電源投入時と同じようにブートローダーと RIPPS2 を起動します。最も安全な戻り方です。ロックなしで空のとき：メモリーカードや FAT32 の USB ドライブにある RIPPS2 自身の ELF をリセット直後に読み込みますが、すべてのゲームが本体をその準備ができた状態にするとは限りません。Browser：PS2 のブラウザー。そのとき MMCE 上の ELF には一切アクセスできません。
+  HINT_EXITPATH: ゲーム内メニューの EXIT の行き先。空欄がおすすめ：EXIT はブラウザーへ進み、ブートローダー（FreeMcBoot、PS2BBL、OSDMenu、BIBLE）がインストール済みならそれが起動し、BOOT LOCK がオンなら電源投入時と同じく RIPPS2 に戻ります。なければ PS2 のブラウザーです。ここに入力した ELF は、リセット後に読み込める場所（メモリーカードか FAT32 の USB ドライブ）にあり、RIPPS2 自身でない場合にだけ使われます。それ以外はブラウザーへ進みます。
   HINT_BDM_START: USB、iLink、MX4SIO、exFAT の HDD。自動は起動時に開始します。つないでいるドライブには最速で、そのゲームは最初からすべてのゲームに並びます。手動はページを開いたときに開始します。
   NEUTRINO_VMC_HDD_UNSUPPORTED: Neutrino は APA の HDD 上の VMC を使えません（exFAT、USB、MX4SIO は使えます）。このゲームはそのスロットの本物のカードで起動します。
   RIPPS2_FAST_BOOT: Fast Boot

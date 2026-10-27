@@ -126,7 +126,6 @@ strings:
   Planet N Compact by Iconian Fonts: Iconian Fonts 的 Planet N Compact
   QUALITY ASSURANCE: 质量保证
   'RIGHT STICK OR UP / DOWN: SCROLL': 右摇杆或上 / 下：滚动
-  RIPFLOW's type: RIPFLOW 的字体
   RIPPOPS copies your own POPS files over from another drive: RIPPOPS 会从另一个驱动器复制你自己的 POPS 文件
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek 与 Sleek Bold，为 RIPPS2 绘制
   RetroAchievements on the console by hacan359 (yoba): hacan359（yoba）的主机端 RetroAchievements
@@ -1130,7 +1129,6 @@ strings:
   '%d music tracks': '%d 首音乐'
   1 music track: 1 首音乐
   'A game''s EXIT: %s': 游戏的 EXIT：%s
-  'A game''s EXIT: the browser': 游戏的 EXIT：浏览器
   'All Games: %d games kept in %s, listed at boot before any drive answers': 全部游戏：%d 个游戏保存在 %s，开机时在任何驱动器响应前就列出
   'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 全部游戏：尚无主列表；游戏列出后会写入 %s（Fast Cache 开启）
   CACHE SETTINGS: 缓存设置
@@ -1296,6 +1294,13 @@ strings:
   'The ART folders stay as they are: the pack is a copy.': ART 文件夹保持原样：包只是副本。
   Under a minute: 不到一分钟
   free space unknown: 剩余空间未知
+  'A game''s EXIT: the browser, or your boot loader when one is installed': 游戏的 EXIT：浏览器，或已安装的引导程序
+  Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0): Ogg Vorbis：Xiph.Org（BSD），minimp3：lieff（CC0）
+  RIPFLOW's type, and every message and notification: RIPFLOW 的字体，以及每条消息和通知
+  'Thanks to everyone testing on Discord and opening issues on GitHub:': 感谢所有在 Discord 测试、在 GitHub 提交 issue 的朋友：
+  'The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself': IGR Path %s 不会使用：游戏结束后只能加载记忆卡或 USB 上的文件，且绝不会是 RIPPS2 本身
+  an issue is the best way to get RIPPS2 updated.: 提交 issue 是让 RIPPS2 更新的最好方式。
+  your Ogg and MP3 music, as RIPPS2 plays it: 你的 Ogg 和 MP3 音乐，按 RIPPS2 的方式播放
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
@@ -1752,7 +1757,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 变化的按键提示或图标会像封面一样在变化时淡入；不变的保持原样，在每个页面和消息中都是如此。关闭：直接出现。主题：由主题决定（除非写有 hints_fade=0，否则开启）。
   RIPPS2_SIDEBAR_STYLE: 侧边栏样式
   HINT_RIPPS2_SIDEBAR_STYLE: 经典（分体）：图标在侧边栏的深色条中，旁边是彩色条带。XL（一体）：一条更宽的条，图标在中间。主题：由主题决定。
-  HINT_EXITPATH: 游戏内菜单中 EXIT 去哪里。最好在 BOOT LOCK 开启时留空（PS2BBL、FMCB 或 OSDMenu，或已设置好 BIBLE）：EXIT 会经过浏览器，浏览器像开机时一样启动你的引导程序和 RIPPS2，这是最安全的返回方式。未锁定时留空：记忆卡或 FAT32 USB 驱动器上 RIPPS2 自己的 ELF 会在重置后立即加载，但并非每个游戏都会让主机为此做好准备。Browser：PS2 浏览器。那时完全无法访问 MMCE 上的 ELF。
+  HINT_EXITPATH: 游戏内菜单中 EXIT 的去向。最好留空：EXIT 会进入浏览器，若已安装引导程序（FreeMcBoot、PS2BBL、OSDMenu 或 BIBLE）则由它启动，开启 BOOT LOCK 时会像开机一样回到 RIPPS2；没有引导程序时则是 PS2 浏览器。在此输入的 ELF 只有在重置后能被加载（位于记忆卡或 FAT32 USB 驱动器上）且不是 RIPPS2 本身时才会使用；其他情况都进入浏览器。
   HINT_BDM_START: USB、iLink、MX4SIO 和 exFAT 硬盘。自动在开机时启动它们：对已插入的驱动器最快，其游戏从一开始就在全部游戏中。手动在你打开其页面时启动。
   NEUTRINO_VMC_HDD_UNSUPPORTED: Neutrino 无法使用 APA 硬盘上的 VMC（exFAT、USB 和 MX4SIO 可以）：这个游戏将使用该插槽中的真实记忆卡启动。
   RIPPS2_FAST_BOOT: Fast Boot

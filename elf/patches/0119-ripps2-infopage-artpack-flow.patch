@@ -12,10 +12,20 @@ index f0dbae8..4af1c08 100644
  void menuRenderGameMenu();
  void menuRenderAppMenu();
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 2a89b58..b495bcb 100644
+index 2a89b58..c09b774 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
-@@ -180,6 +180,8 @@ void ripps2SizeText(long long bytes, char *out, int size);
+@@ -40,7 +40,8 @@ int ripps2BootLockState(void);              // 1 when the config of the loader t
+ void ripps2BootLockApply(int on);           // writes it into (or out of) every PS2BBL, FMCB and OSDMenu config found; says how it went
+ int ripps2BootLockIgrPath(char *out, int size); // RIPPS2's path in the IGR Path's own form; 0 when the IGR cannot reach it
+ void ripps2ExitPathCheck(void);                  // build 115: is a memory-card IGR Path there (the boot card in)
+-const char *ripps2ExitPath(char *buf, int size); // build 115: where EXIT goes: the IGR Path, else RIPPS2, else Browser
++const char *ripps2ExitPath(char *buf, int size); // where EXIT goes: the IGR Path when the reset can load it, else Browser (build 119)
++int ripps2ExitPathIgnored(void);                  // build 119: an IGR Path is set that EXIT passes over for the browser
+ void ripps2BibleManage(void);               // BOOT LOADER > MANAGE: what each card starts; BIBLE (PS2BBL 1.2.0) to install or repair
+ int ripps2RebootIopWith(const void *ioprp, int size); // opl.c: the IOP rebooted from an IOPRP image, the menu taken down and back
+ int ripps2GetBootPath(char *out, int size); // opl.c: the path RIPPS2 was started from; 0 when unknown
+@@ -180,6 +181,8 @@ void ripps2SizeText(long long bytes, char *out, int size);
  int ripps2StageFor(unsigned int clusterBytes, int floor); // a write stage of whole clusters, at least floor
  // build 114: the RIPPS2 progress bar (ripps2games.c) for a long job with nothing else on screen, and a file copied with it
  void ripps2DrawProgress(const char *head, const char *name, long long done, long long total, const char *left, int cancel);
@@ -36,6 +46,329 @@ index d9808c1..c0c1b8a 100644
      int hintsFade;                      // build 115: hints_fade (1, the default): a hint glyph that changes fades in
      int hintsFlank, hintsFlankGap;      // build 115: hints_flank=1: RUN and SOURCE either side of the source name; the gap
      int badgeSet;                       // build 115: badge_set=ripps2 (1): RIPPS2's built-in badges, none of its own
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index 99d66fa..e551ed2 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -305,7 +305,7 @@ gui_strings:
+ - label: BDM_PREFIX
+   string: BDM Prefix Path
+ - label: HINT_EXITPATH
+-  string: "Where EXIT in the In-Game Menu goes. Best left empty with BOOT LOCK on (PS2BBL, FMCB or OSDMenu, or BIBLE set up): EXIT then goes through the browser, which starts your boot loader and RIPPS2 as at power on, the safest way back. Empty without the lock: RIPPS2's own ELF on a memory card or a FAT32 USB drive, loaded straight after the reset, which not every game leaves the console ready for. Browser: the PS2 browser. An ELF on MMCE can't be reached then at all."
++  string: "Where EXIT in the In-Game Menu goes. Best left empty: EXIT goes to the browser, which starts your boot loader (FreeMcBoot, PS2BBL, OSDMenu or BIBLE) when one is installed, and RIPPS2 again with BOOT LOCK on, as at power on; with none, the PS2 browser. An ELF typed here is used only when the reset can load it (on a memory card or a FAT32 USB drive) and it is not RIPPS2 itself; anything else goes to the browser."
+ - label: HINT_SPINDOWN
+   string: Value in minute(s), 0 to disable spin down.
+ - label: HDD_SPINDOWN
+diff --git a/misc/ripps2.icn b/misc/ripps2.icn
+index f30b141cc317e7c0391fc95b1a813aa8d2a8aa44..4f59490c70e905eb2497b92a8b830c3b50cc6c01 100644
+GIT binary patch
+delta 8148
+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
+
+literal 50598
+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
+L?(vhFRQ&$~kl|c7
+
 diff --git a/src/gui.c b/src/gui.c
 index 3514a62..9feb00b 100644
 --- a/src/gui.c
@@ -90,6 +423,70 @@ index e2ef210..c5c6f6b 100644
          if (ripps2SidebarFocused()) {
              int cat = gRipps2Category, src = menuSourceCurrent();
              ripps2SidebarInput();
+diff --git a/src/opl.c b/src/opl.c
+index 79ada93..14a233a 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -3801,10 +3801,14 @@ static int ripps2CardSettingsHome(char *out, int size, int haveSettings)
+             if ((fd = open(path, O_RDONLY)) < 0)
+                 continue;
+             close(fd);
++            ripps2CardFolderIcon(out); // build 119: its hat made whole (a card from an older build heals at boot)
+             return 1;
+         }
+-        mkdir(out, 0777);
+-        return ripps2CardFolderIcon(out); // the folder is there with its hat: the settings may go in
++        int made = mkdir(out, 0777) == 0;
++        if (ripps2CardFolderIcon(out))
++            return 1; // the folder is there with its hat: the settings may go in
++        if (made)
++            rmdir(out); // build 119: no room for the hat: no folder the browser would call corrupted data
+     }
+     return 0;
+ }
+@@ -3903,6 +3907,8 @@ static void _loadConfig()
+         snprintf(prevHome, sizeof(prevHome), "%s", configGetHomePath());
+         configSetMove(fbHome);
+         fromCard = 1; // (read back from prevHome if it does not answer, as a card home is)
++        if (!strncmp(fbHome, "mc0:/RIPPS2", 11) || !strncmp(fbHome, "mc1:/RIPPS2", 11))
++            ripps2CardFolderIcon(fbHome); // build 119: its hat made whole, as the card home's is
+         if (fbAudio[0]) {
+             char probe[300];
+             DIR *d;
+diff --git a/src/ripps2about.c b/src/ripps2about.c
+index 7b953e4..72684be 100644
+--- a/src/ripps2about.c
++++ b/src/ripps2about.c
+@@ -64,8 +64,10 @@ static const ab_row_t abRows[] = {
+     {'H', N_("TESTERS")},
+     {'T', "ripto - nuno6573 - zackcage6"},
+     {'T', "eliminator1403 - FifthFox - Mr.sus.60"},
+-    {'T', "lukeatmynose"},
++    {'T', "lukeatmynose - ahavasi - DarkNerdShawny"},
+     {'S', N_("Feedback makes RIPPS2. Thank you.")},
++    {'S', N_("Thanks to everyone testing on Discord and opening issues on GitHub:")}, // build 119: every tester after
++    {'S', N_("an issue is the best way to get RIPPS2 updated.")},
+     {'S', N_("Special thanks to all the YouTube love as well:")},
+     {'S', N_("glad to help however you reach me.")},
+     {'G', NULL},
+@@ -109,6 +111,8 @@ static const ab_row_t abRows[] = {
+     {'S', N_("BIOS Sounds > Rip plays them as the SPU2 does; no BIOS ships")},
+     {'T', "RIPPS2 Audio Studio"},
+     {'S', N_("the same, and your music, on your PC: tools/audio-studio")},
++    {'T', N_("Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0)")}, // build 119: the music's decoders, uncredited before
++    {'S', N_("your Ogg and MP3 music, as RIPPS2 plays it")},
+     {'G', NULL},
+     {'H', N_("BOOT LOCK AND BIBLE")},
+     {'T', N_("PS2BBL by El Isra (israpps)")},
+@@ -143,7 +147,7 @@ static const ab_row_t abRows[] = {
+     {'T', N_("Planet N Compact by Iconian Fonts")},
+     {'T', N_("RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2")},
+     {'T', N_("Roboto Condensed by The Roboto Project Authors (SIL OFL 1.1)")},
+-    {'S', N_("RIPFLOW's type")},
++    {'S', N_("RIPFLOW's type, and every message and notification")}, // build 119: the messages' face too
+     {'S', N_("PS1 and PS2 marks drawn from public SVGs; trademarks of Sony")},
+     {'G', NULL},
+     {'G', NULL},
 diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
 index ca492e0..05a862f 100644
 --- a/src/ripps2artpack.c
@@ -477,8 +874,208 @@ index ca492e0..05a862f 100644
          snprintf(msg, sizeof(msg),
                   _t("The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again."),
                   pictures, (kb + 1023) / 1024, pack, (int)((clock() - start) / CLOCKS_PER_SEC), games);
+diff --git a/src/ripps2boot.c b/src/ripps2boot.c
+index 3ea609d..11cef7f 100644
+--- a/src/ripps2boot.c
++++ b/src/ripps2boot.c
+@@ -660,7 +660,7 @@ int ripps2BootLockIgrPath(char *out, int size)
+     return 0; // the IGR cannot reach MMCE or the HDD (see the IGR Path hint)
+ }
+ 
+-// RIPPS2 build 115: where the in-game menu's EXIT goes. An empty IGR Path (the default) is back to this RIPPS2, where it
++// RIPPS2 build 115: where the in-game menu's EXIT goes (build 119 below has the last word). An empty IGR Path (the default) was back to this RIPPS2, where it
+ // was started, when the IGR can reach that (a memory card or USB; ripps2BootLockIgrPath), else the PS2 browser as
+ // before; "Browser" typed in is the browser. Build 116: with BOOT LOCK on (gRipps2BootLocked), an empty one is the
+ // browser, which starts the boot loader and so RIPPS2 as at power on: a straight load of RIPPS2's ELF after a game
+@@ -677,18 +677,35 @@ void ripps2ExitPathCheck(void)
+     // with a blank card in slot 2)
+     exitStale = (!strncmp(gExitPath, "mc0:", 4) || !strncmp(gExitPath, "mc1:", 4)) && !blFileExists(gExitPath);
+     if (exitStale)
+-        LOG("RIPPS2: the IGR Path %s is not there; EXIT goes back to RIPPS2 (through the boot loader when locked) instead\n", gExitPath);
++        LOG("RIPPS2: the IGR Path %s is not there; EXIT goes to the browser instead\n", gExitPath);
++}
++
++// Build 119 (the user: "simplify this to it being blank smart as a fallback so nobody gets a black screen worst case it
++// boots osdsys browser but if they have fmcb or bbl they take the handshake"): EXIT is the browser unless the IGR Path
++// names an ELF the reset can load that is not RIPPS2 itself. The browser is the console's own boot: FreeMcBoot, PS2BBL,
++// OSDMenu or BIBLE when one is installed (and so RIPPS2 again with BOOT LOCK), the PS2 browser when none is. An empty
++// path no longer loads RIPPS2's ELF straight after the game (the black screen of issue #3, with or without the lock),
++// and a path the reset cannot reach (MMCE, the HDD, a share: only rom0's memory card modules and USB from SYS-CONF are
++// loaded then) or a card file that is not there goes to the browser too, not to a load that fails.
++static int exitLoadable(void)
++{
++    char own[256];
++    if (exitStale || (strncmp(gExitPath, "mc0:", 4) && strncmp(gExitPath, "mc1:", 4) && strncmp(gExitPath, "mass:", 5)))
++        return 0;
++    return !(ripps2BootLockIgrPath(own, sizeof(own)) && !strcasecmp(gExitPath, own));
+ }
+ 
+ const char *ripps2ExitPath(char *buf, int size)
+ {
+-    if (!strcmp(gExitPath, "Browser"))
+-        return "Browser";
+-    if (gExitPath[0] != '\0' && !exitStale)
+-        return gExitPath;
+-    if (!gRipps2BootLocked && ripps2BootLockIgrPath(buf, size))
+-        return buf;
+-    return "Browser";
++    (void)buf;
++    (void)size;
++    return gExitPath[0] != '\0' && strcmp(gExitPath, "Browser") && exitLoadable() ? gExitPath : "Browser";
++}
++
++// build 119: 1 when an IGR Path is set that EXIT passes over for the browser (STATUS says so)
++int ripps2ExitPathIgnored(void)
++{
++    return gExitPath[0] != '\0' && strcmp(gExitPath, "Browser") && !exitLoadable();
+ }
+ 
+ // build 116: the lock's state kept in the settings (ripps2_bootlock), for EXIT (ripps2ExitPath). Locking clears an IGR
+@@ -885,15 +902,43 @@ static void *blMakeIoprp(const char *name, const void *module, int moduleSize, i
+     return img;
+ }
+ 
++// build 119: a title in the full-width Shift-JIS an icon.sys holds. A v1.60 browser (SCPH-30004R) shows plain ASCII
++// there as nothing (lab, 10/27); letters, digits and the space map across, anything else stays as it is. The bytes
++// written, at most size
++static int blSjis(const char *s, unsigned char *out, int size)
++{
++    int o = 0;
++    for (; *s; s++) {
++        unsigned int c = (unsigned char)*s, w = 0;
++        if (c >= '0' && c <= '9')
++            w = 0x824F + c - '0';
++        else if (c >= 'A' && c <= 'Z')
++            w = 0x8260 + c - 'A';
++        else if (c >= 'a' && c <= 'z')
++            w = 0x8281 + c - 'a';
++        else if (c == ' ')
++            w = 0x8140;
++        if (o + (w ? 2 : 1) > size)
++            break;
++        if (w) {
++            out[o++] = w >> 8;
++            out[o++] = w & 0xFF;
++        } else
++            out[o++] = c;
++    }
++    return o;
++}
++
+ // icon.sys for a BIBLE folder: RIPPS2's own, titled (two lines: first, second) and naming one icon file
+ static void blIconSysNamed(unsigned char *sys, const char *first, const char *second, const char *icn)
+ {
+-    int l1 = strlen(first);
++    int l1;
+     memcpy(sys, icon_sys, size_icon_sys);
++    memset(sys + 0xC0, 0, 68);
++    l1 = blSjis(first, sys + 0xC0, 66);
++    blSjis(second, sys + 0xC0 + l1, 66 - l1); // 68 with room for the end
+     sys[6] = l1 & 0xFF; // the second line starts here
+     sys[7] = (l1 >> 8) & 0xFF;
+-    memset(sys + 0xC0, 0, 68);
+-    snprintf((char *)sys + 0xC0, 68, "%s%s", first, second);
+     memset(sys + 0x104, 0, 64 * 3);
+     strcpy((char *)sys + 0x104, icn);
+     strcpy((char *)sys + 0x144, icn);
+@@ -905,35 +950,32 @@ static void blIconSys(unsigned char *sys, const char *first, const char *second)
+     blIconSysNamed(sys, first, second, "bible.icn");
+ }
+ 
+-// build 98: RIPPS2's own folder on a memory card shows the dead elf's hat ringing its bell, titled RIPPS2, over
+-// a night-to-blood background (a folder with no icon.sys showed as corrupted data in the browser). An icon.sys
+-// already there is kept, unless it is RIPPS2's older one (OPL's icon, as bible.icn). 1 = it has its icon.
++// build 98: RIPPS2's own folder on a memory card shows the dead elf's hat, titled RIPPS2, over a night-to-blood
++// background (a folder with no icon.sys showed as corrupted data in the browser). Someone else's icon.sys is kept.
++// Build 119 (a tester's card showed corrupted data): RIPPS2's own is made whole again each time this runs, as it does
++// when the settings load from the card and when they are saved there: a ripps2.icn missing or not this build's (the
++// three-shape hat a v1.60 browser calls corrupted) is written again, removed first (a card file is not cut short by
++// a rewrite), and an icon.sys not byte for byte this one (the ASCII title, OPL's icon as bible.icn) too. A ripps2.icn
++// that does not fit is removed rather than left half written. 1 = it has its icon.
+ int ripps2CardFolderIcon(const char *dir)
+ {
+     static const unsigned char bg[4][3] = {{18, 10, 34}, {18, 10, 34}, {110, 4, 16}, {110, 4, 16}}; // top, then foot
+-    unsigned char sys[1024], old[0x144];
+-    char path[96];
+-    int fd, i, keep = 0;
++    unsigned char sys[1024], old[1024];
++    char base[80], path[96];
++    int fd, i, n = 0, size = -1;
+ 
+-    snprintf(path, sizeof(path), "%s/icon.sys", dir);
++    if (size_icon_sys > sizeof(sys))
++        return 0;
++    snprintf(base, sizeof(base), "%s", dir);
++    if ((i = strlen(base)) > 0 && base[i - 1] == '/') // mc0:/RIPPS2/ as Fast Boot names it
++        base[i - 1] = '\0';
++    snprintf(path, sizeof(path), "%s/icon.sys", base);
+     if ((fd = open(path, O_RDONLY)) >= 0) {
+-        keep = read(fd, old, sizeof(old)) == (int)sizeof(old) && strncmp((char *)old + 0x104, "bible.icn", 10) != 0;
++        n = read(fd, old, sizeof(old));
+         close(fd);
+-        if (keep && !strncmp((char *)old + 0x104, "ripps2.icn", 11)) {
+-            // build 100: the hat got lighter (90 KB to 50 KB, the save small): an older ripps2.icn is replaced
+-            snprintf(path, sizeof(path), "%s/ripps2.icn", dir);
+-            if ((fd = open(path, O_RDONLY)) >= 0) {
+-                int size = (int)lseek(fd, 0, SEEK_END);
+-                close(fd);
+-                if (size != (int)size_ripps2_icn)
+-                    blWrite(path, (const char *)ripps2_icn, size_ripps2_icn);
+-            }
+-        }
+-        if (keep)
+-            return 1;
++        if (n >= 0x144 && strncmp((char *)old + 0x104, "bible.icn", 10) && strncmp((char *)old + 0x104, "ripps2.icn", 11))
++            return 1; // someone else's
+     }
+-    if (size_icon_sys > sizeof(sys))
+-        return 0;
+     blIconSysNamed(sys, "RIPPS2", "", "ripps2.icn");
+     for (i = 0; i < 4; i++) { // four corners, each r, g, b, a as 32-bit numbers
+         memset(sys + 0x10 + 16 * i, 0, 16);
+@@ -941,10 +983,22 @@ int ripps2CardFolderIcon(const char *dir)
+         sys[0x14 + 16 * i] = bg[i][1];
+         sys[0x18 + 16 * i] = bg[i][2];
+     }
+-    snprintf(path, sizeof(path), "%s/ripps2.icn", dir); // the icon first: icon.sys names it
+-    if (blWrite(path, (const char *)ripps2_icn, size_ripps2_icn) != 0)
+-        return 0;
+-    snprintf(path, sizeof(path), "%s/icon.sys", dir);
++    snprintf(path, sizeof(path), "%s/ripps2.icn", base); // the icon first: icon.sys names it
++    if ((fd = open(path, O_RDONLY)) >= 0) {
++        size = (int)lseek(fd, 0, SEEK_END);
++        close(fd);
++    }
++    if (size != (int)size_ripps2_icn) {
++        if (size >= 0)
++            remove(path);
++        if (blWrite(path, (const char *)ripps2_icn, size_ripps2_icn) != 0) {
++            remove(path);
++            return 0;
++        }
++    }
++    if (n == (int)size_icon_sys && !memcmp(old, sys, size_icon_sys))
++        return 1;
++    snprintf(path, sizeof(path), "%s/icon.sys", base);
+     return blWrite(path, (const char *)sys, size_icon_sys) == 0;
+ }
+ 
+diff --git a/src/ripps2edit.c b/src/ripps2edit.c
+index b93a80e..442b5b2 100644
+--- a/src/ripps2edit.c
++++ b/src/ripps2edit.c
+@@ -114,7 +114,8 @@ static int edMenu(const char *const *items, int count)
+             int ry = y + 10 + i * 24;
+             if (i == sel)
+                 rmDrawRect(x + 4, ry, w - 8, 22, ED_PRIM(0x1E, 0x3C, 0x96, 0x60));
+-            fntRenderString(ED_FONT, x + 16, ry + 11, ALIGN_VCENTER, 0, 0, _t(items[i]), i == sel ? ED_LIT : ED_SOFT);
++            // build 119: kept inside the box (a long item ran past its edge): the chosen one scrolls, the rest end in ...
++            fntRenderStringFit(ED_FONT, x + 16, ry + 11, ALIGN_VCENTER, w - 32, _t(items[i]), i == sel ? ED_LIT : ED_SOFT, i == sel);
+         }
+         int okIcon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON, backIcon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
+         int hy = y + h - 14, hw = 24 + ripps2HintWidth(_t("CHOOSE")) + 18 + 24 + ripps2HintWidth(_t("BACK"));
 diff --git a/src/ripps2games.c b/src/ripps2games.c
-index 386b7d3..7324c7c 100644
+index 386b7d3..a3fd3b5 100644
 --- a/src/ripps2games.c
 +++ b/src/ripps2games.c
 @@ -1402,8 +1402,9 @@ static void zpPage(void)
@@ -501,7 +1098,7 @@ index 386b7d3..7324c7c 100644
 -        fntRenderStringFit(gTheme->fonts[5], 320, y + 54, ALIGN_CENTER, w - 40, name, lgAlpha(LG_SOFT, ia), 1);
 +        // build 119 (the user, 10/27: the theme's display face, Adapt's Planet N, "too distracting" on the messages): RIPPS2's
 +        // own Roboto here on every theme, the notifications' bold for the head and the messages' face for the rest
-+        fntRenderString(RIPPS2_NOTE_FONT, 320, y + 26, ALIGN_CENTER, 0, 0, head, lgAlpha(LG_LIT, ia));
++        fntRenderStringFit(RIPPS2_NOTE_FONT, 320, y + 26, ALIGN_CENTER, w - 40, head, lgAlpha(LG_LIT, ia), 1);
 +        fntRenderStringFit(RIPPS2_MSG_FONT, 320, y + 54, ALIGN_CENTER, w - 40, name, lgAlpha(LG_SOFT, ia), 1);
          // the wheel where RIPDISC's and the guard's are: SELECT at its centre, HOLD after it
          hx = 320 - (38 + 6 + ripps2HintWidth(hold)) / 2;
@@ -529,25 +1126,48 @@ index 386b7d3..7324c7c 100644
  // build 114: the RIPPS2 progress bar, for any long job that has nothing else on screen: the page under a glass panel on
  // the notch panels' frame (580 wide at y 134), what is happening, the name, the bar, how much, how long is left when
  // known, and CANCEL when the job can stop
-@@ -1467,13 +1476,14 @@ void ripps2DrawProgress(const char *head, const char *name, long long done, long
+@@ -1467,13 +1476,15 @@ void ripps2DrawProgress(const char *head, const char *name, long long done, long
      rmStartFrame();
      zpPage();
      ripps2DrawPanelGlass(30, 134, 580, 170, 0);
 -    fntRenderString(gTheme->fonts[5], 320, 162, ALIGN_CENTER, 0, 0, head, LG_SOFT);
 -    fntRenderStringFit(gTheme->fonts[4], 320, 190, ALIGN_CENTER, 520, name, LG_LIT, 1);
 +    // build 119: RIPPS2's Roboto on every theme (the panel above's faces)
-+    fntRenderString(RIPPS2_NOTE_FONT, 320, 162, ALIGN_CENTER, 0, 0, head, LG_SOFT);
++    // build 119: every line kept inside the panel (a translation can run longer than the English)
++    fntRenderStringFit(RIPPS2_NOTE_FONT, 320, 162, ALIGN_CENTER, 520, head, LG_SOFT, 1);
 +    fntRenderStringFit(RIPPS2_MSG_FONT, 320, 190, ALIGN_CENTER, 520, name, LG_LIT, 1);
      rmDrawRect(150, 216, 340, 6, GS_SETREG_RGBA(0x03, 0x08, 0x22, 0x80));
      rmDrawRect(150, 216, (int)(340 * p), 6, GS_SETREG_RGBA(0x4A, 0x8C, 0xF0, 0x80));
 -    fntRenderString(gTheme->fonts[5], 320, 246, ALIGN_CENTER, 0, 0, line, LG_SOFT);
-+    fntRenderString(RIPPS2_MSG_FONT, 320, 246, ALIGN_CENTER, 0, 0, line, LG_SOFT);
++    fntRenderStringFit(RIPPS2_MSG_FONT, 320, 246, ALIGN_CENTER, 520, line, LG_SOFT, 1);
      if (left != NULL && left[0])
 -        fntRenderString(gTheme->fonts[5], 320, 270, ALIGN_CENTER, 0, 0, left, lgAlpha(LG_SOFT, 0x50));
-+        fntRenderString(RIPPS2_MSG_FONT, 320, 270, ALIGN_CENTER, 0, 0, left, lgAlpha(LG_SOFT, 0x50));
++        fntRenderStringFit(RIPPS2_MSG_FONT, 320, 270, ALIGN_CENTER, 520, left, lgAlpha(LG_SOFT, 0x50), 1);
      if (cancel)
          ripps2HintOneA(gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON, _t("CANCEL"), 448, 0x80);
      rmEndFrame();
+diff --git a/src/ripps2status.c b/src/ripps2status.c
+index f3fa45e..c1ab19f 100644
+--- a/src/ripps2status.c
++++ b/src/ripps2status.c
+@@ -275,11 +275,16 @@ static void stScan(void)
+         if (!strcmp(exitTo, "Browser") && gRipps2BootLocked && strcmp(gExitPath, "Browser"))
+             snprintf(line, sizeof(line), _t("A game's EXIT: the browser, then your boot loader (BOOT LOCK)")); // build 116
+         else if (!strcmp(exitTo, "Browser"))
+-            snprintf(line, sizeof(line), _t("A game's EXIT: the browser"));
++            snprintf(line, sizeof(line), _t("A game's EXIT: the browser, or your boot loader when one is installed")); // build 119
+         else
+             snprintf(line, sizeof(line), _t("A game's EXIT: %s"), exitTo);
+         r = stAdd(ROW_STATUS, ACT_NONE, line, NULL);
+         r->ok = strcmp(exitTo, "Browser") != 0 || gRipps2BootLocked;
++        if (ripps2ExitPathIgnored()) { // build 119: a path the reset cannot load, or RIPPS2 itself, is passed over
++            snprintf(line, sizeof(line), _t("The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself"),
++                     gExitPath);
++            stAdd(ROW_STATUS, ACT_NONE, line, NULL)->ok = 0;
++        }
+     }
+     stAdd(ROW_ACTION, ACT_CACHE, _t("CACHE SETTINGS"), stFromCache ? _t("back to Cache") : _t("Fast Cache, Trust Cache"))->hint =
+         _t("Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press "
 diff --git a/src/themes.c b/src/themes.c
 index 98773e6..74ca961 100644
 --- a/src/themes.c

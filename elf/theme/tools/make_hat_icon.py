@@ -8,6 +8,12 @@ RLE-packed as the icons RiptOPL ships are (texture type 0x0E, alpha bit clear).
 Build 100 (user: RIPPS2's save small and neat): a lighter mesh (one icon in the browser is a few centimetres
 high) and grain that runs along the rows, so the RLE packs it: about half the size of build 98's 90 KB.
 
+Build 119 (a tester's report: the save showed as corrupted data): a v1.60 browser (SCPH-30004R, 2001) shows any icon
+with more than one shape as corrupted data, whatever its keys, while later browsers animate it. The lab showed the hat
+at rest alone, titled in Shift-JIS, on v1.60, so the icon is that one shape now (the browser still turns it); the
+three shapes are still modelled below. A console's frame is 16 bytes (shape, key count, two words) and key count
+minus one keys follow (mymcplus' ps2icon.py), not the 8 bytes saveicon.c and this file once wrote.
+
     python make_hat_icon.py OUT.icn [--png preview.png]
 
 The format (as saveicon.c reads it): a 20-byte header (0x00010000, shapes, texture type, 1.0, vertices), per
@@ -235,25 +241,16 @@ def rle(px):
 
 def build():
     verts = [v for t in tris for v in t]
-    shapes = 3
-    out = [struct.pack('<IIIfI', 0x00010000, shapes, 0x0E, 1.0, len(verts))]
+    out = [struct.pack('<IIIfI', 0x00010000, 1, 0x0E, 1.0, len(verts))]
     for shapes_pos, n, uv in verts:
-        for s in range(shapes):
-            x, y, z = to_icon(shapes_pos[s])
-            out.append(struct.pack('<hhhh', fx(x), fx(y), fx(z), 0x400))
+        x, y, z = to_icon(shapes_pos[0])  # build 119: the hat at rest only (see the top)
+        out.append(struct.pack('<hhhh', fx(x), fx(y), fx(z), 0x400))
         nx, ny, nz = n[0], -n[1], -n[2]
         out.append(struct.pack('<hhhh', fx(nx), fx(ny), fx(nz), 0x400))
         out.append(struct.pack('<hh', uv[0], uv[1]))
         out.append(bytes([0x7F, 0x7F, 0x7F, 0x80]))
-    times = [0, 6, 12, 18, 24, 30, 36, 42, 48, 90]
-    keys = [[1, 0, 1, 0, 1, 0.4, 1, 0.65, 1, 1],  # at rest
-            [0, 1, 0, 0, 0, 0.6, 0, 0, 0, 0],  # swung one way
-            [0, 0, 0, 1, 0, 0, 0, 0.35, 0, 0]]  # the other
-    out.append(struct.pack('<IIfII', 1, 90, 1.0, 0, shapes))
-    for s in range(shapes):
-        out.append(struct.pack('<II', s, len(times)))
-        for t, v in zip(times, keys[s]):
-            out.append(struct.pack('<ff', float(t), float(v)))
+    # one frame of one shape, byte for byte as OPL's list.icn has it (which a v1.60 browser shows)
+    out.append(struct.pack('<IIfII', 1, 1, 0.0, 0, 1) + struct.pack('<IIff', 0, 1, 0.0, 1.0))
     img = make_texture()
     px = [((int(r) >> 3) | ((int(g) >> 3) << 5) | ((int(b) >> 3) << 10)) for r, g, b in img.reshape(-1, 3)]
     packed = rle(px)
@@ -267,4 +264,4 @@ if __name__ == '__main__':
     if '--png' in sys.argv:
         from PIL import Image
         Image.fromarray(img).resize((512, 512), Image.NEAREST).save(sys.argv[sys.argv.index('--png') + 1])
-    print('%s: %d vertices (%d triangles), 3 shapes, %d bytes' % (sys.argv[1], nv, nv // 3, len(data)))
+    print('%s: %d vertices (%d triangles), 1 shape, %d bytes' % (sys.argv[1], nv, nv // 3, len(data)))

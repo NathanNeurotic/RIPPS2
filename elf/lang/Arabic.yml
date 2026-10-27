@@ -126,7 +126,6 @@ strings:
   Planet N Compact by Iconian Fonts: Planet N Compact من Iconian Fonts
   QUALITY ASSURANCE: ضمان الجودة
   'RIGHT STICK OR UP / DOWN: SCROLL': 'العصا اليمنى أو أعلى / أسفل: تمرير'
-  RIPFLOW's type: خط RIPFLOW
   RIPPOPS copies your own POPS files over from another drive: ينسخ RIPPOPS ملفات POPS الخاصة بك من محرك آخر
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek وSleek Bold، مرسومان لـ RIPPS2
   RetroAchievements on the console by hacan359 (yoba): RetroAchievements على الجهاز من hacan359 (yoba)
@@ -1130,7 +1129,6 @@ strings:
   '%d music tracks': 'مسارات الموسيقى: %d'
   1 music track: مسار موسيقى واحد
   'A game''s EXIT: %s': 'EXIT للعبة: %s'
-  'A game''s EXIT: the browser': 'EXIT للعبة: المتصفح'
   'All Games: %d games kept in %s, listed at boot before any drive answers': 'كل الألعاب: %d لعبة محفوظة في %s، تُعرض عند الإقلاع قبل أن يرد أي محرك'
   'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': 'كل الألعاب: لا قائمة رئيسية بعد؛ يُكتب %s بعد عرض الألعاب (Fast Cache مفعّل)'
   CACHE SETTINGS: إعدادات التخزين المؤقت
@@ -1296,6 +1294,13 @@ strings:
   'The ART folders stay as they are: the pack is a copy.': 'تبقى مجلدات ART كما هي: الحزمة نسخة.'
   Under a minute: أقل من دقيقة
   free space unknown: المساحة الفارغة غير معروفة
+  'A game''s EXIT: the browser, or your boot loader when one is installed': 'EXIT للعبة: المتصفح، أو محمّل الإقلاع لديك إن كان مثبتاً'
+  Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0): Ogg Vorbis من Xiph.Org (BSD)، وminimp3 من lieff (CC0)
+  RIPFLOW's type, and every message and notification: خط RIPFLOW، وكل رسالة وإشعار
+  'Thanks to everyone testing on Discord and opening issues on GitHub:': 'شكراً لكل من يختبر على Discord ويفتح مشكلات على GitHub:'
+  'The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself': 'لا يُستخدم IGR Path %s: بعد اللعبة لا يُحمَّل إلا ملف على بطاقة ذاكرة أو USB، ولا يُحمَّل RIPPS2 نفسه أبداً'
+  an issue is the best way to get RIPPS2 updated.: فتح مشكلة هو أفضل طريقة لتحديث RIPPS2.
+  your Ogg and MP3 music, as RIPPS2 plays it: موسيقاك بصيغتي Ogg وMP3، كما يشغّلها RIPPS2
 labels:
   SETTINGS_SAVED: حُفظت الإعدادات في %s
   CONFIRMATION_EXIT: الخروج إلى المتصفح؟
@@ -1809,7 +1814,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'تلميح الزر أو الرمز الذي يتغير يظهر تدريجياً، مثل الأغلفة، لحظة تغيّره؛ وما يبقى كما هو لا يُمس، في كل صفحة ورسالة. ايقاف: تظهر ببساطة. السمة: تقرر السمة (مفعّل ما لم تقل hints_fade=0).'
   RIPPS2_SIDEBAR_STYLE: نمط الشريط الجانبي
   HINT_RIPPS2_SIDEBAR_STYLE: 'كلاسيكي (مقسوم): الأيقونات في الشريط الداكن للشريط الجانبي مع الخط الملوّن بجانبه. XL (قطعة واحدة): شريط واحد أعرض، والأيقونات في وسطه. السمة: تقرر السمة.'
-  HINT_EXITPATH: 'إلى أين يذهب EXIT في قائمة داخل اللعبة. الأفضل تركه فارغاً مع تفعيل BOOT LOCK (PS2BBL أو FMCB أو OSDMenu، أو ضبط BIBLE): عندها يمر EXIT عبر المتصفح، الذي يشغّل محمّل الإقلاع لديك وRIPPS2 كما عند التشغيل، وهي أكثر طرق العودة أماناً. فارغاً دون القفل: ملف ELF لبرنامج RIPPS2 نفسه على بطاقة ذاكرة أو محرك USB بنظام FAT32، يُحمَّل مباشرة بعد إعادة الضبط، وليست كل لعبة تترك الجهاز جاهزاً لذلك. Browser: متصفح PS2. ولا يمكن الوصول إلى ملف ELF على MMCE حينها إطلاقاً.'
+  HINT_EXITPATH: 'إلى أين يذهب EXIT في قائمة داخل اللعبة. الأفضل تركه فارغاً: يذهب EXIT إلى المتصفح، الذي يشغّل محمّل الإقلاع لديك (FreeMcBoot أو PS2BBL أو OSDMenu أو BIBLE) إن كان مثبتاً، ثم RIPPS2 من جديد مع تشغيل BOOT LOCK، كما عند التشغيل؛ ومن دونه، متصفح PS2. لا يُستخدم ELF مكتوب هنا إلا إذا أمكن تحميله بعد إعادة الضبط (على بطاقة ذاكرة أو محرك USB بنظام FAT32) ولم يكن RIPPS2 نفسه؛ وأي شيء آخر يذهب إلى المتصفح.'
   HINT_BDM_START: 'USB وiLink وMX4SIO والقرص الصلب exFAT. تلقائي يشغّلها عند الإقلاع: الأسرع للمحركات الموصولة، وألعابها في كل الألعاب منذ البداية. يدوي يشغّلها عندما تفتح صفحتها.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'لا يستطيع Neutrino استخدام VMC على القرص الصلب APA (يستطيع ذلك exFAT وUSB وMX4SIO): تبدأ هذه اللعبة بالبطاقة الحقيقية في تلك الفتحة.'
   RIPPS2_FAST_BOOT: Fast Boot

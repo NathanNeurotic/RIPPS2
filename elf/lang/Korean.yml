@@ -126,7 +126,6 @@ strings:
   Planet N Compact by Iconian Fonts: Iconian Fonts의 Planet N Compact
   QUALITY ASSURANCE: 품질 보증
   'RIGHT STICK OR UP / DOWN: SCROLL': '오른쪽 스틱 또는 위 / 아래: 스크롤'
-  RIPFLOW's type: RIPFLOW의 글꼴
   RIPPOPS copies your own POPS files over from another drive: RIPPOPS는 다른 드라이브에서 내 POPS 파일을 복사해 옵니다
   RIPPS2 Sleek and Sleek Bold, drawn for RIPPS2: RIPPS2 Sleek와 Sleek Bold, RIPPS2를 위해 그림
   RetroAchievements on the console by hacan359 (yoba): hacan359(yoba)의 본체용 RetroAchievements
@@ -1130,7 +1129,6 @@ strings:
   '%d music tracks': 음악 트랙 %d개
   1 music track: 음악 트랙 1개
   'A game''s EXIT: %s': '게임의 EXIT: %s'
-  'A game''s EXIT: the browser': '게임의 EXIT: 브라우저'
   'All Games: %d games kept in %s, listed at boot before any drive answers': '모든 게임: %d개를 %s에 보관, 부팅 때 어느 드라이브보다 먼저 표시'
   'All Games: no master list yet; %s is written once the games are listed (Fast Cache on)': '모든 게임: 마스터 목록 없음; 게임 목록이 나오면 %s을(를) 씀 (Fast Cache 켜짐)'
   CACHE SETTINGS: 캐시 설정
@@ -1296,6 +1294,13 @@ strings:
   'The ART folders stay as they are: the pack is a copy.': 'ART 폴더는 그대로 남습니다: 팩은 사본입니다.'
   Under a minute: 1분 이내
   free space unknown: 여유 공간 알 수 없음
+  'A game''s EXIT: the browser, or your boot loader when one is installed': '게임의 EXIT: 브라우저, 또는 설치되어 있으면 부트 로더'
+  Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0): 'Ogg Vorbis: Xiph.Org (BSD), minimp3: lieff (CC0)'
+  RIPFLOW's type, and every message and notification: RIPFLOW의 서체, 그리고 모든 메시지와 알림
+  'Thanks to everyone testing on Discord and opening issues on GitHub:': 'Discord에서 테스트하고 GitHub에 이슈를 올려 주는 모두에게 감사합니다:'
+  'The IGR Path %s is not used: after a game only a memory card file or USB can load, and never RIPPS2 itself': 'IGR Path %s 은(는) 쓰이지 않습니다: 게임 후에는 메모리 카드나 USB의 파일만 불러올 수 있고, RIPPS2 자신은 절대 아닙니다'
+  an issue is the best way to get RIPPS2 updated.: 이슈가 RIPPS2를 업데이트하는 가장 좋은 방법입니다.
+  your Ogg and MP3 music, as RIPPS2 plays it: RIPPS2가 재생하는 그대로의 Ogg와 MP3 음악
 labels:
   IP_ADDRESS_TYPE_STATIC: 고정
   HINT_NEUTRINO_AUTO_ELF: 게임의 부트 ELF를 Neutrino에 넘겨 타이틀별 설정을 찾게 합니다. 기본으로 켜져 있으며, 직접 설정한 Boot ELF 옵션이 우선합니다.
@@ -1751,7 +1756,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: '바뀌는 버튼 힌트나 아이콘은 커버처럼 바뀌는 순간 페이드인합니다. 그대로인 것은 건드리지 않습니다(모든 페이지와 메시지에서). 끄기: 그냥 나타납니다. 테마: 테마가 정합니다(hints_fade=0이 없으면 켜짐).'
   RIPPS2_SIDEBAR_STYLE: 사이드바 스타일
   HINT_RIPPS2_SIDEBAR_STYLE: '클래식 (분리형): 사이드바의 어두운 띠에 아이콘, 옆에 색 띠. XL (일체형): 더 넓은 띠 하나, 가운데에 아이콘. 테마: 테마가 정합니다.'
-  HINT_EXITPATH: '게임 내 메뉴의 EXIT가 가는 곳. BOOT LOCK을 켜고(PS2BBL, FMCB 또는 OSDMenu, 또는 BIBLE 설정) 비워 두는 것이 가장 좋습니다. 그러면 EXIT는 브라우저를 거치고, 브라우저가 전원을 켤 때처럼 부트 로더와 RIPPS2를 시작합니다. 가장 안전한 복귀입니다. 잠금 없이 비우면: 메모리 카드나 FAT32 USB 드라이브에 있는 RIPPS2 자체 ELF를 리셋 직후 불러오는데, 모든 게임이 본체를 그에 맞게 두지는 않습니다. Browser: PS2 브라우저. 그때 MMCE의 ELF에는 전혀 접근할 수 없습니다.'
+  HINT_EXITPATH: '게임 내 메뉴의 EXIT가 가는 곳. 비워 두는 것이 가장 좋습니다: EXIT는 브라우저로 가며, 부트 로더(FreeMcBoot, PS2BBL, OSDMenu 또는 BIBLE)가 설치되어 있으면 그것이 시작되고, BOOT LOCK이 켜져 있으면 전원을 켤 때처럼 다시 RIPPS2로 돌아옵니다. 없으면 PS2 브라우저입니다. 여기에 입력한 ELF는 리셋 후 불러올 수 있고(메모리 카드나 FAT32 USB 드라이브) RIPPS2 자신이 아닐 때만 쓰입니다. 그 밖에는 브라우저로 갑니다.'
   HINT_BDM_START: 'USB, iLink, MX4SIO, exFAT HDD. 자동은 부팅 때 시작합니다: 꽂아 둔 드라이브에 가장 빠르며, 그 게임이 처음부터 모든 게임에 있습니다. 수동은 페이지를 열 때 시작합니다.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino는 APA HDD의 VMC를 쓸 수 없습니다(exFAT, USB, MX4SIO는 가능): 이 게임은 그 슬롯의 실제 카드로 시작합니다.'
   RIPPS2_FAST_BOOT: Fast Boot

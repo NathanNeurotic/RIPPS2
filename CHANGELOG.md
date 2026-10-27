@@ -18,6 +18,29 @@ The user's notes of 10/27 on v1.1.8.
 - **Roboto on the long jobs' panel and bar.** The panel (SELECT held) and the progress bar of the ART Pack, COMPRESS TO
   ZSO and COPYING were drawn in the theme's display face (Adapt's Planet N); they use RIPPS2's Roboto now, as its
   messages do, on every theme.
+- **RIPPS2's memory card save no longer shows as corrupted data.** A tester's console showed RIPPS2's save as corrupted
+  data. The lab found why on a v1.60 browser (SCPH-30004R, 2001): it calls any icon with more than one shape corrupted,
+  so the hat ringing its bell (three shapes) never showed there, while later browsers animated it. The hat is one shape
+  now (the browser still turns it), and the save's title is in the full-width Shift-JIS the browser reads (v1.60 showed
+  the plain text title as nothing). RIPPS2 puts the folder right whenever the settings load from the card or are saved
+  there: a missing or older `ripps2.icn` and an older `icon.sys` are written again (an icon file is removed first, so a
+  rewrite is never cut short), and on a card without room for the icon no bare RIPPS2 folder is left behind. BIBLE's
+  folders get Shift-JIS titles too. A folder inside the save (AUDIO, with Fast Boot) was checked: the browser shows the
+  save fine with it.
+- **EXIT never black.** The in-game menu's EXIT goes to the browser unless the IGR Path names an ELF the reset can load
+  that is not RIPPS2 itself. The browser is the console's own boot: FreeMcBoot, PS2BBL, OSDMenu or BIBLE when one is
+  installed (and RIPPS2 again with BOOT LOCK on), the PS2 browser when none is. An empty IGR Path no longer loads
+  RIPPS2's ELF straight after the game (the black screen of issue #3, which builds 116 and 117 fixed only with BOOT
+  LOCK on), and a path the reset cannot reach (MMCE, the HDD, a network share: only the memory cards and USB from
+  SYS-CONF are there after it), a memory card file that is not there, or RIPPS2's own ELF goes to the browser too.
+  STATUS says when an IGR Path is passed over, and the IGR Path hint says all this.
+- **No text past its box.** The chooser (the ART Pack's drives, BIBLE's cards, the editor's menus) ran a long item past
+  its edge; the items are kept inside now, the chosen one scrolling. The progress bar's lines and the long jobs' panel
+  head are fitted too, for the languages that run longer than English.
+- **The About page's testers.** ahavasi (Discord) and DarkNerdShawny (GitHub issues) join the testers, and a line thanks
+  everyone testing on Discord and opening issues on GitHub, so every tester after them is in it too. The music's
+  decoders (Ogg Vorbis by Xiph.Org, minimp3 by lieff) are credited, and Roboto is named as the messages' face as well
+  as RIPFLOW's. All in 33 languages.
 
 ## Build 118 (beta, v1.1.8-beta), changes since build 117
 

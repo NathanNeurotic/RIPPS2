@@ -64,7 +64,47 @@ need(gm, (('int ripps2AskHold(const char *head, const char *name, const char *in
           ('return ripps2AskHold(head, name, info, when, "Experimental: OPL core only (not Neutrino)");', 'ZSO keeps its note'),
           ('void ripps2SizeText(long long bytes, char *out, int size)', 'the sizes shared')), 'ripps2games.c')
 
+# ---- EXIT: the browser unless the reset can load the IGR Path, never RIPPS2 itself (no black screen)
+boot = rd('src/ripps2boot.c')
+loadable = body(boot, 'static int exitLoadable(void)')
+for s, why in (('strncmp(gExitPath, "mc0:", 4) && strncmp(gExitPath, "mc1:", 4) && strncmp(gExitPath, "mass:", 5)',
+                'only a memory card or USB path survives the reset'),
+               ('exitStale', 'a card file that is not there goes to the browser'),
+               ('!(ripps2BootLockIgrPath(own, sizeof(own)) && !strcasecmp(gExitPath, own))', 'and RIPPS2 itself never loads straight after a game')):
+    if s not in loadable:
+        fail.append('exitLoadable: ' + why)
+exitp = body(boot, 'const char *ripps2ExitPath(char *buf, int size)')
+if 'exitLoadable() ? gExitPath : "Browser"' not in exitp or 'ripps2BootLockIgrPath' in exitp:
+    fail.append('ripps2ExitPath: an empty IGR Path is the browser (the boot loader), not RIPPS2 loaded straight after the game')
+if 'ripps2ExitPathIgnored()' not in rd('src/ripps2status.c'):
+    fail.append('ripps2status.c: STATUS says when an IGR Path is passed over')
+
+# ---- the memory card icon (a v1.60 browser called the three-shape hat corrupted data)
+opl = rd('src/opl.c')
+home = body(opl, 'static int ripps2CardSettingsHome(')
+if 'ripps2CardFolderIcon(out); // build 119' not in home or 'rmdir(out);' not in home:
+    fail.append('ripps2CardSettingsHome: the hat made whole when the settings load from a card; no bare folder left when it does not fit')
+if 'ripps2CardFolderIcon(fbHome);' not in opl:
+    fail.append("opl.c: Fast Boot's card home gets its hat made whole too")
+if 'l1 = blSjis(first, sys + 0xC0, 66);' not in boot:
+    fail.append('blIconSysNamed: titles in Shift-JIS (a v1.60 browser shows ASCII as nothing)')
+
+# ---- no text past its box: the chooser's items, the progress bar's lines, the hold panel's head
+if 'fntRenderStringFit(ED_FONT, x + 16, ry + 11, ALIGN_VCENTER, w - 32, _t(items[i])' not in rd('src/ripps2edit.c'):
+    fail.append("ripps2edit.c: the chooser's items kept inside its box")
+if 'fntRenderString(' in bar:
+    fail.append('ripps2DrawProgress: every line fitted to the panel')
+if 'fntRenderStringFit(RIPPS2_NOTE_FONT, 320, y + 26, ALIGN_CENTER, w - 40, head' not in ask:
+    fail.append("ripps2AskHold: the head fitted to the panel too")
+
+# ---- the About page: every tester, a line for the ones to come, the music's decoders
+about = rd('src/ripps2about.c')
+need(about, (('"lukeatmynose - ahavasi - DarkNerdShawny"', 'the newest testers by name'),
+             ('"Thanks to everyone testing on Discord and opening issues on GitHub:"', 'and everyone after them'),
+             ('"Special thanks to all the YouTube love as well:"', 'the YouTube thanks kept'),
+             ('"Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0)"', 'the music decoders credited')), 'ripps2about.c')
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build119: the sidebar on the info page only where it has room; the ART Pack sized, timed, numbered and offered only where it fits OK')
+print('build119: the sidebar on the info page; the ART Pack sized, timed, numbered and offered where it fits; the card icon whole; EXIT never black; no text past its box; the testers OK')
