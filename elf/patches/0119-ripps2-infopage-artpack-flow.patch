@@ -11,16 +11,15 @@ index f0dbae8..8dc3f6f 100644
  void menuRenderGameMenu();
  void menuRenderAppMenu();
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 2a89b58..c9c9e50 100644
+index 2a89b58..b495bcb 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
-@@ -180,6 +180,9 @@ void ripps2SizeText(long long bytes, char *out, int size);
+@@ -180,6 +180,8 @@ void ripps2SizeText(long long bytes, char *out, int size);
  int ripps2StageFor(unsigned int clusterBytes, int floor); // a write stage of whole clusters, at least floor
  // build 114: the RIPPS2 progress bar (ripps2games.c) for a long job with nothing else on screen, and a file copied with it
  void ripps2DrawProgress(const char *head, const char *name, long long done, long long total, const char *left, int cancel);
-+// build 119: the long-job panel (what, sizes, how long; SELECT held to go on: 1, back: 0) and the sizes as RIPPS2 writes them
++// build 119: the long-job panel (what, sizes, how long; SELECT held to go on: 1, back: 0)
 +int ripps2AskHold(const char *head, const char *name, const char *info, const char *when, const char *note);
-+void ripps2SizeText(long long bytes, char *out, int size);
  int ripps2CopyFile(const char *src, const char *dst, const char *name) __attribute__((weak));
  void ripps2DiscWatch(void);         // every frame: the drive read after boot and after the tray closes
  int ripps2DiscQuiet(void);
@@ -483,23 +482,10 @@ index ca492e0..fcb3018 100644
                   _t("The ART Pack is built: %d pictures, %d MB, in %s (%d s). Art loads from it from now on, and the games it was built for (%d) never have their ART folder asked one picture at a time. Art RIPPS2 fetches or shoots shows at once; art you copy in on a PC shows after you build the pack again."),
                   pictures, (kb + 1023) / 1024, pack, (int)((clock() - start) / CLOCKS_PER_SEC), games);
 diff --git a/src/ripps2games.c b/src/ripps2games.c
-index 386b7d3..c8e1d7b 100644
+index 386b7d3..c842aa5 100644
 --- a/src/ripps2games.c
 +++ b/src/ripps2games.c
-@@ -464,6 +464,12 @@ static void lrSize(long long bytes, char *out, int size)
-         snprintf(out, size, "%d KB", (int)((bytes + 1023) / 1024));
- }
- 
-+// build 119: the same, for the ART Pack's sizes
-+void ripps2SizeText(long long bytes, char *out, int size)
-+{
-+    lrSize(bytes, out, size);
-+}
-+
- // A game's extras in its drive's folders: CFG, art, cheats, then its VMCs and full-size shots (kept unless asked).
- // shared: another copy of the game on this drive keeps the CFG, art and cheats.
- static void lrPlanExtras(item_list_t *view, int id, const char *prefix, char sep, const char *startup, const char *name, int shared)
-@@ -1402,8 +1408,9 @@ static void zpPage(void)
+@@ -1402,8 +1402,9 @@ static void zpPage(void)
      ripps2RenderCategoryBar();
  }
  
@@ -511,7 +497,7 @@ index 386b7d3..c8e1d7b 100644
  {
      double t0 = ripps2Seconds(), heldSince = 0.0, now;
      int backKey = gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE;
-@@ -1445,12 +1452,18 @@ static int zpAsk(const char *head, const char *name, const char *info, const cha
+@@ -1445,12 +1446,18 @@ static int zpAsk(const char *head, const char *name, const char *info, const cha
          ripps2HintText(hx + 44, y + 90, hold, lgAlpha(LG_SOFT, ia));
          fntRenderStringFit(gTheme->fonts[5], 320, y + 120, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
          fntRenderStringFit(gTheme->fonts[5], 320, y + 140, ALIGN_CENTER, w - 40, when, lgAlpha(LG_SOFT, ia), 1);
