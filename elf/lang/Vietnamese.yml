@@ -215,7 +215,6 @@ strings:
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Ngân hàng âm thanh của BIOS này không phải loại RIPPS2 biết. Không ghi gì cả.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
   : BIOS của máy này không có SNDIMAGE. Máy từ SCPH-30000 trở đi mới có; các đời đầu lưu âm thanh theo cách khác, RIPPS2 chưa đọc được.
-  ' (The PS2BBL configs found were set: %s.)': ' (Các cấu hình PS2BBL tìm thấy đã được đặt: %s.)'
   ' (hold CIRCLE at power on to start it)': ' (giữ TRÒN khi bật máy để chạy nó)'
   ' (then ': ' (sau đó '
   ' A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.': ' Đã xóa SYS-CONF/PS2BBL.INI mà bản dựng 68 ghi cho một trình nạp không bao giờ đọc nó.'
@@ -260,12 +259,6 @@ strings:
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: đang giữ lại chương trình khởi động của HDD'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: đang đặt lại chương trình khởi động của HDD'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: đang ghi PS2BBL vào vùng khởi động của HDD'
-  BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK không ghi được cấu hình PS2BBL. Hãy kiểm tra thẻ nhớ hoặc ổ không bị chống ghi, rồi thử lại.
-  BOOT LOCK found no PS2BBL config to change.: BOOT LOCK không tìm thấy cấu hình PS2BBL nào để thay đổi.
-  BOOT LOCK is off. PS2BBL starts what it started before (%s).: BOOT LOCK đang tắt. PS2BBL chạy thứ nó chạy trước đây (%s).
-  ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
-  : BOOT LOCK đang bật. Giờ PS2BBL chạy RIPPS2 khi bật máy (%s). Giữ phím tắt PS2BBL trong lúc máy khởi động để vào thứ khác.%s
-  BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK hoạt động qua PS2BBL (PlayStation 2 Basic BootLoader), và không thẻ nhớ nào ở đây có nó.
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -289,7 +282,6 @@ strings:
 
     Việc này cần một máy khởi động từ HDD (PS2 dày có bộ chuyển mạng). Giữ máy bật cho tới khi báo xong.'
   INTERNAL HDD  (its boot area): HDD TRONG  (vùng khởi động)
-  Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Thẻ nhớ %d chạy %s khi bật máy, và BOOT LOCK chỉ hoạt động qua PS2BBL.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -774,7 +766,6 @@ strings:
   '%s could not be written to %s. Check its free space and that it is not write protected.': Không ghi được %s vào %s. Hãy kiểm tra dung lượng trống và việc chống ghi.
   '%s is installed in %s.': '%s đã được cài vào %s.'
   ', some files could not be used': ', một số tệp không dùng được'
-  A PS2BBL with RIPPS2's lock is on this console.: Máy này có PS2BBL với khóa của RIPPS2.
   AUDIO folder: thư mục AUDIO
   DRIVES: Ổ
   MANAGE: QUẢN LÝ
@@ -1258,6 +1249,23 @@ strings:
   '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s không có %s. RIPPOPS đã tìm thấy trình giả lập PS1 của Sony trên %s: START sao chép %s vào đây và chạy trò chơi.'
   ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   : 'RIPPS2 không thấy %s trong %s%s. POPSTARTER cần POPS_IOX.PAK cùng POPS.PAK, hoặc cùng POPS.ELF và IOPRP252.IMG: trình giả lập PS1 của Sony, từ chính máy của bạn. Nó có thể tìm thấy chúng ở nơi RIPPS2 không tìm (nếu trò chơi của bạn chạy được, là nó tìm thấy). START khởi chạy, và ổ này sẽ không bị hỏi lại.'
+  ' (The configs found were set: %s.)': ' (Đã đặt các cấu hình tìm thấy: %s.)'
+  ' Save its settings once with its own configurator, then turn BOOT LOCK on again.': ' Hãy lưu cài đặt của nó một lần bằng trình cấu hình riêng của nó, rồi bật lại BOOT LOCK.'
+  ? '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
+  : '%s không thể chạy RIPPS2 từ chỗ nó đang ở (%s), và RIPPS2 không tự sao chép. Hãy đặt RIPPS2.ELF lên thẻ nhớ hoặc ổ USB rồi chạy từ đó.'
+  ? BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
+  : BOOT LOCK không ghi được cấu hình của trình khởi động. Hãy kiểm tra thẻ nhớ hoặc ổ không bị chống ghi, rồi thử lại.
+  BOOT LOCK found no boot loader config to change.: BOOT LOCK không tìm thấy cấu hình trình khởi động nào để thay đổi.
+  BOOT LOCK is off. Your boot loader starts what it started before (%s).: BOOT LOCK đang tắt. Trình khởi động của bạn chạy thứ nó đã chạy trước đây (%s).
+  ? BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
+  : BOOT LOCK đang bật. Giờ %s chạy RIPPS2 khi bật máy (%s), và khi Vá IGR để trống, EXIT của trò chơi quay về theo cùng đường đó. Giữ một trong các nút của nó trong lúc máy khởi động để vào thứ khác.%s
+  ? 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  : 'BOOT LOCK đã đặt RIPPS2 lên đầu menu của OSDMenu (%s). OSDMenu không tự chạy gì cả: hãy chọn RIPPS2 ở đó, và EXIT của trò chơi quay về menu ấy. Để máy chạy RIPPS2 ngay, BIBLE cài PS2BBL 1.2.0 lên thẻ nhớ (Trình khởi động).'
+  BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.: BOOT LOCK hoạt động qua một trình khởi động trên thẻ nhớ (PS2BBL, FMCB hoặc OSDMenu), và ở đây không có.
+  The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).: Thẻ nhớ ở khe %d chạy %s khi bật máy, và BOOT LOCK không tìm thấy cấu hình nào của nó để thay đổi (nó tìm %s).
+  'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Thẻ nhớ ở khe %d chạy %s khi bật máy, thứ mà BOOT LOCK không thể đặt: nó hoạt động qua PS2BBL, FMCB và OSDMenu.'
+  A boot loader with RIPPS2's lock is on this console.: Máy này có một trình khởi động mang khóa của RIPPS2.
+  'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT của trò chơi: trình duyệt, rồi trình khởi động của bạn (BOOT LOCK)'
 labels:
   NETCONFIG: Cài đặt mạng
   SETTINGS_SAVED: Đã lưu cài đặt vào %s
@@ -1419,7 +1427,7 @@ labels:
   RIPPS2_ALL_GAMES: Tất cả trò chơi
   RIPPS2_SET_METADATA: Đặt siêu dữ liệu
   RIPPS2_BOOT_LOCK: Boot Lock
-  HINT_RIPPS2_BOOT_LOCK: Chạy RIPPS2 khi bật máy qua PS2BBL. Tắt sẽ trả lại thứ PS2BBL chạy trước đây. Chưa có PS2BBL? Trình khởi động sẽ cài BIBLE.
+  HINT_RIPPS2_BOOT_LOCK: 'Chạy RIPPS2 khi bật máy qua trình khởi động của bạn: PS2BBL và FMCB chạy nó ngay, OSDMenu đặt nó lên đầu menu, và EXIT của trò chơi quay về theo cùng đường. Tắt sẽ trả lại thứ có trước đây. Chưa có? Trình khởi động sẽ cài BIBLE.'
   HINT_COLORS_TEXT: Màu chữ của danh sách trò chơi. Chủ đề tự đặt màu riêng; mục này đổi màu cho các chủ đề có sẵn.
   HINT_COLORS_SELECTED: Màu của trò chơi đang chọn và dòng đang chọn trên các trang cài đặt.
   HINT_COLORS_DIALOG: Màu của các trang cài đặt và hộp thông báo.
@@ -1762,7 +1770,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'Gợi ý nút hoặc biểu tượng nào thay đổi sẽ hiện dần, như bìa, ngay lúc thay đổi; những cái giữ nguyên thì để yên, trên mọi trang và thông báo. Tắt: chúng chỉ xuất hiện. Chủ đề: chủ đề quyết định (bật, trừ khi ghi hints_fade=0).'
   RIPPS2_SIDEBAR_STYLE: Kiểu thanh bên
   HINT_RIPPS2_SIDEBAR_STYLE: 'Cổ điển (tách): biểu tượng trong dải tối của thanh bên, kèm dải màu bên cạnh. XL (liền một khối): một dải rộng hơn, biểu tượng ở giữa. Chủ đề: chủ đề quyết định.'
-  HINT_EXITPATH: 'EXIT trong Menu trong trò chơi đi đâu. Tốt nhất để trống, với BIBLE đã thiết lập (TRẠNG THÁI > Trình khởi động > Quản lý, hoặc BOOT LOCK trên PS2BBL của bạn): khi đó EXIT đặt lại máy theo đường khởi động riêng của nó và PS2BBL chạy RIPPS2 như lúc bật máy, cách quay về an toàn nhất. Trình duyệt: trình duyệt PS2. Một ELF trên thẻ nhớ (mc0:/mc1:) hoặc ổ USB FAT32 (mass:/) được tải ngay sau khi đặt lại, việc mà không phải trò chơi nào cũng để máy sẵn sàng; lúc đó MMCE hoàn toàn không truy cập được.'
+  HINT_EXITPATH: 'EXIT trong Menu trong trò chơi đi đâu. Tốt nhất để trống khi BOOT LOCK bật (PS2BBL, FMCB hoặc OSDMenu, hoặc BIBLE đã thiết lập): khi đó EXIT đi qua trình duyệt, nơi chạy trình khởi động của bạn và RIPPS2 như lúc bật máy, cách quay về an toàn nhất. Để trống khi không khóa: ELF của chính RIPPS2 trên thẻ nhớ hoặc ổ USB FAT32, được tải ngay sau khi đặt lại, việc mà không phải trò chơi nào cũng để máy sẵn sàng. Browser: trình duyệt PS2. Một ELF trên MMCE lúc đó hoàn toàn không truy cập được.'
   HINT_BDM_START: 'USB, iLink, MX4SIO và HDD exFAT. Tự động khởi động chúng lúc bật máy: nhanh nhất cho các ổ đang cắm, trò chơi của chúng có trong Tất cả trò chơi ngay từ đầu. Thủ công khởi động chúng khi bạn mở trang của chúng.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino không dùng được VMC trên HDD APA (exFAT, USB và MX4SIO thì được): trò chơi này chạy với thẻ thật trong khe đó.'
   RIPPS2_FAST_BOOT: Fast Boot

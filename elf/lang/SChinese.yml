@@ -215,7 +215,6 @@ strings:
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: 这个 BIOS 的音色库不是 RIPPS2 认识的那个。未写入任何内容。
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
   : 这台主机的 BIOS 没有 SNDIMAGE。从 SCPH-30000 起的主机才有；最早的型号用另一种方式保存音效，RIPPS2 目前还读不了。
-  ' (The PS2BBL configs found were set: %s.)': ' （找到的 PS2BBL 配置已设置：%s。）'
   ' (hold CIRCLE at power on to start it)': ' （开机时按住圆圈键启动它）'
   ' (then ': ' （然后 '
   ' A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.': ' 已删除 build 68 为一个从不读取它的引导程序写入的 SYS-CONF/PS2BBL.INI。'
@@ -260,12 +259,6 @@ strings:
   'BIBLE: keeping the HDD''s boot program': BIBLE：正在保留硬盘的引导程序
   'BIBLE: putting the HDD''s boot program back': BIBLE：正在恢复硬盘的引导程序
   'BIBLE: writing PS2BBL to the HDD''s boot area': BIBLE：正在把 PS2BBL 写入硬盘引导区
-  BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK 无法写入 PS2BBL 配置。请检查记忆卡或驱动器没有写保护，然后重试。
-  BOOT LOCK found no PS2BBL config to change.: BOOT LOCK 没有找到可更改的 PS2BBL 配置。
-  BOOT LOCK is off. PS2BBL starts what it started before (%s).: BOOT LOCK 已关闭。PS2BBL 会启动它以前启动的内容（%s）。
-  ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
-  : BOOT LOCK 已开启。PS2BBL 现在开机时启动 RIPPS2（%s）。主机启动时按住 PS2BBL 的快捷键可以进入其他内容。%s
-  BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK 通过 PS2BBL（PlayStation 2 Basic BootLoader）工作，而这里的记忆卡上都没有它。
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -289,7 +282,6 @@ strings:
 
     这需要能从硬盘启动的主机（带网络适配器的厚机 PS2）。在显示完成之前请保持开机。'
   INTERNAL HDD  (its boot area): 内置硬盘  （其引导区）
-  Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: 记忆卡 %d 开机时启动 %s，而 BOOT LOCK 只能通过 PS2BBL 工作。
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -774,7 +766,6 @@ strings:
   '%s could not be written to %s. Check its free space and that it is not write protected.': 无法把 %s 写入 %s。请检查剩余空间以及是否写保护。
   '%s is installed in %s.': '%s 已安装到 %s。'
   ', some files could not be used': ，部分文件无法使用
-  A PS2BBL with RIPPS2's lock is on this console.: 这台主机上有带 RIPPS2 锁定的 PS2BBL。
   AUDIO folder: AUDIO 文件夹
   DRIVES: 驱动器
   MANAGE: 管理
@@ -1258,6 +1249,23 @@ strings:
   '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s 里没有 %s。RIPPOPS 在 %s 找到了 Sony 的 PS1 模拟器：START 会把 %s 复制到这里并启动游戏。'
   ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   : RIPPS2 没有看到 %s (在 %s%s)。POPSTARTER 需要 POPS_IOX.PAK 加 POPS.PAK，或 POPS_IOX.PAK 加 POPS.ELF 和 IOPRP252.IMG：来自你自己主机的 Sony PS1 模拟器。它可能在 RIPPS2 不找的地方找到它们 (如果你的游戏能启动，就是找到了)。START 启动，之后不会再询问这个驱动器。
+  ' (The configs found were set: %s.)': ' （找到的配置已设置：%s。）'
+  ' Save its settings once with its own configurator, then turn BOOT LOCK on again.': ' 请先用它自己的配置工具保存一次设置，然后再打开 BOOT LOCK。'
+  ? '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
+  : '%s 无法从 RIPPS2 现在所在的位置（%s）启动它，而 RIPPS2 不会复制自己。请把 RIPPS2.ELF 放到记忆卡或 USB 驱动器上，再从那里启动。'
+  ? BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
+  : BOOT LOCK 无法写入引导程序的配置。请检查记忆卡或驱动器没有写保护，然后重试。
+  BOOT LOCK found no boot loader config to change.: BOOT LOCK 没有找到可更改的引导程序配置。
+  BOOT LOCK is off. Your boot loader starts what it started before (%s).: BOOT LOCK 已关闭。你的引导程序会启动它以前启动的内容（%s）。
+  ? BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
+  : BOOT LOCK 已开启。%s 现在开机时启动 RIPPS2（%s），IGR路径留空时，游戏的 EXIT 也会沿同一条路返回。主机启动时按住它的任一按键可以进入其他内容。%s
+  ? 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  : BOOT LOCK 已把 RIPPS2 放在 OSDMenu 菜单的第一项（%s）。OSDMenu 自己不会启动任何东西：请在那里选择 RIPPS2，游戏的 EXIT 会回到那个菜单。若要主机开机直接启动 RIPPS2，BIBLE 会把 PS2BBL 1.2.0 装到记忆卡上（引导程序）。
+  BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.: BOOT LOCK 通过记忆卡上的引导程序工作（PS2BBL、FMCB 或 OSDMenu），而这里一个也没有。
+  The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).: 插槽 %d 的记忆卡开机时启动 %s，但 BOOT LOCK 没有找到它可更改的配置（它查找 %s）。
+  'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 插槽 %d 的记忆卡开机时启动 %s，BOOT LOCK 无法设置它：BOOT LOCK 通过 PS2BBL、FMCB 和 OSDMenu 工作。
+  A boot loader with RIPPS2's lock is on this console.: 这台主机上有带 RIPPS2 锁定的引导程序。
+  'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 游戏的 EXIT：浏览器，然后是你的引导程序（BOOT LOCK）
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。
@@ -1373,7 +1381,7 @@ labels:
   RIPPS2_ALL_GAMES: 全部游戏
   RIPPS2_SET_METADATA: 设置元数据
   RIPPS2_BOOT_LOCK: Boot Lock
-  HINT_RIPPS2_BOOT_LOCK: 通过 PS2BBL 在开机时启动 RIPPS2。关闭会恢复 PS2BBL 以前启动的内容。还没有 PS2BBL？“引导程序”会安装 BIBLE。
+  HINT_RIPPS2_BOOT_LOCK: 开机时通过你的引导程序启动 RIPPS2：PS2BBL 和 FMCB 会立即启动它，OSDMenu 会把它放在菜单第一项，游戏的 EXIT 也沿同一条路返回。关闭会恢复以前的内容。还没有？“引导程序”会安装 BIBLE。
   HINT_COLORS_TEXT: 游戏列表的文字颜色。主题有自己的颜色；这里修改的是内置主题的。
   HINT_COLORS_SELECTED: 所选游戏以及设置页面中所选行的颜色。
   HINT_COLORS_DIALOG: 设置页面和消息框的颜色。
@@ -1714,7 +1722,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 变化的按键提示或图标会像封面一样在变化时淡入；不变的保持原样，在每个页面和消息中都是如此。关闭：直接出现。主题：由主题决定（除非写有 hints_fade=0，否则开启）。
   RIPPS2_SIDEBAR_STYLE: 侧边栏样式
   HINT_RIPPS2_SIDEBAR_STYLE: 经典（分体）：图标在侧边栏的深色条中，旁边是彩色条带。XL（一体）：一条更宽的条，图标在中间。主题：由主题决定。
-  HINT_EXITPATH: 游戏内菜单中 EXIT 去哪里。最好留空，并设置好 BIBLE（状态 > 引导程序 > 管理，或你的 PS2BBL 上的 BOOT LOCK）：EXIT 会按主机自己的启动路径重置，PS2BBL 像开机时一样启动 RIPPS2，这是最安全的返回方式。浏览器：PS2 浏览器。记忆卡（mc0:/mc1:）或 FAT32 USB 驱动器（mass:/）上的 ELF 会在重置后立即加载，但并非每个游戏都会让主机为此做好准备；那时完全无法访问 MMCE。
+  HINT_EXITPATH: 游戏内菜单中 EXIT 去哪里。最好在 BOOT LOCK 开启时留空（PS2BBL、FMCB 或 OSDMenu，或已设置好 BIBLE）：EXIT 会经过浏览器，浏览器像开机时一样启动你的引导程序和 RIPPS2，这是最安全的返回方式。未锁定时留空：记忆卡或 FAT32 USB 驱动器上 RIPPS2 自己的 ELF 会在重置后立即加载，但并非每个游戏都会让主机为此做好准备。Browser：PS2 浏览器。那时完全无法访问 MMCE 上的 ELF。
   HINT_BDM_START: USB、iLink、MX4SIO 和 exFAT 硬盘。自动在开机时启动它们：对已插入的驱动器最快，其游戏从一开始就在全部游戏中。手动在你打开其页面时启动。
   NEUTRINO_VMC_HDD_UNSUPPORTED: Neutrino 无法使用 APA 硬盘上的 VMC（exFAT、USB 和 MX4SIO 可以）：这个游戏将使用该插槽中的真实记忆卡启动。
   RIPPS2_FAST_BOOT: Fast Boot

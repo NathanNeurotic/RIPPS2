@@ -215,7 +215,6 @@ strings:
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: この BIOS のサウンドバンクは RIPPS2 が知っているものではありません。何も書き込んでいません。
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
   : この本体の BIOS には SNDIMAGE がありません。SCPH-30000 以降の本体にはありますが、初期のモデルは別の方法でサウンドを持っており、RIPPS2 はまだ読み取れません。
-  ' (The PS2BBL configs found were set: %s.)': ' （見つかった PS2BBL の設定を変更しました：%s。）'
   ' (hold CIRCLE at power on to start it)': ' （起動するには電源投入時に丸を押し続ける）'
   ' (then ': ' （その後 '
   ' A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.': ' ビルド 68 が、それを読まないローダー向けに書いた SYS-CONF/PS2BBL.INI を削除しました。'
@@ -260,12 +259,6 @@ strings:
   'BIBLE: keeping the HDD''s boot program': BIBLE：HDD のブートプログラムを保存しています
   'BIBLE: putting the HDD''s boot program back': BIBLE：HDD のブートプログラムを戻しています
   'BIBLE: writing PS2BBL to the HDD''s boot area': BIBLE：PS2BBL を HDD のブート領域に書き込んでいます
-  BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK は PS2BBL の設定を書き込めませんでした。メモリーカードやドライブが書き込み禁止になっていないか確認して、もう一度お試しください。
-  BOOT LOCK found no PS2BBL config to change.: BOOT LOCK は変更できる PS2BBL の設定を見つけられませんでした。
-  BOOT LOCK is off. PS2BBL starts what it started before (%s).: BOOT LOCK はオフです。PS2BBL は以前に起動していたもの（%s）を起動します。
-  ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
-  : BOOT LOCK はオンです。PS2BBL は電源投入時に RIPPS2 を起動します（%s）。ほかのものに行くには、本体の起動中に PS2BBL のホットキーを押し続けてください。%s
-  BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK は PS2BBL（PlayStation 2 Basic BootLoader）を通じて動作しますが、ここのメモリーカードにはありません。
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -289,7 +282,6 @@ strings:
 
     HDD から起動できる本体（ネットワークアダプター付きの初期型 PS2）が必要です。完了と表示されるまで電源を入れておいてください。'
   INTERNAL HDD  (its boot area): 内蔵 HDD  （そのブート領域）
-  Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: メモリーカード %d は電源投入時に %s を起動しますが、BOOT LOCK は PS2BBL を通じてのみ動作します。
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -774,7 +766,6 @@ strings:
   '%s could not be written to %s. Check its free space and that it is not write protected.': '%s を %s に書き込めませんでした。空き容量と書き込み禁止になっていないかを確認してください。'
   '%s is installed in %s.': '%s を %s にインストールしました。'
   ', some files could not be used': 、一部のファイルは使えませんでした
-  A PS2BBL with RIPPS2's lock is on this console.: この本体には RIPPS2 のロック付きの PS2BBL があります。
   AUDIO folder: AUDIO フォルダ
   DRIVES: ドライブ
   MANAGE: 管理
@@ -1258,6 +1249,23 @@ strings:
   '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s には %s がありません。RIPPOPS が Sony の PS1 エミュレーターを %s で見つけました: START で %s をここへコピーしてゲームを起動します。'
   ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   : 'RIPPS2 には %s が見えません (%s%s)。POPSTARTER には POPS_IOX.PAK と POPS.PAK、または POPS_IOX.PAK と POPS.ELF と IOPRP252.IMG が必要です: あなた自身の本体の Sony 製 PS1 エミュレーターです。RIPPS2 が探さない場所で見つかることもあります (ゲームが起動するなら見つかっています)。START で起動し、このドライブについては二度と聞きません。'
+  ' (The configs found were set: %s.)': ' （見つかった設定を変更しました：%s。）'
+  ' Save its settings once with its own configurator, then turn BOOT LOCK on again.': ' その設定をそれ自身の設定ツールで一度保存してから、BOOT LOCK をもう一度オンにしてください。'
+  ? '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
+  : '%s は RIPPS2 を今ある場所（%s）から起動できません。RIPPS2 は自分をコピーしません。RIPPS2.ELF をメモリーカードか USB ドライブに置いて、そこから起動してください。'
+  ? BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
+  : BOOT LOCK はブートローダーの設定を書き込めませんでした。メモリーカードやドライブが書き込み禁止になっていないか確認して、もう一度お試しください。
+  BOOT LOCK found no boot loader config to change.: BOOT LOCK は変更できるブートローダーの設定を見つけられませんでした。
+  BOOT LOCK is off. Your boot loader starts what it started before (%s).: BOOT LOCK はオフです。ブートローダーは以前に起動していたもの（%s）を起動します。
+  ? BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
+  : BOOT LOCK はオンです。%s は電源投入時に RIPPS2 を起動します（%s）。IGRパスが空なら、ゲームの EXIT も同じ道で戻ります。ほかのものに行くには、本体の起動中にそのボタンのどれかを押し続けてください。%s
+  ? 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  : BOOT LOCK は OSDMenu のメニューの先頭に RIPPS2 を置きました（%s）。OSDMenu は自分では何も起動しません。そこで RIPPS2 を選んでください。ゲームの EXIT はそのメニューに戻ります。RIPPS2 をすぐに起動する本体にするには、BIBLE が PS2BBL 1.2.0 をメモリーカードに入れます（ブートローダー）。
+  BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.: BOOT LOCK はメモリーカード上のブートローダー（PS2BBL、FMCB、OSDMenu）を通じて動作しますが、ここには一つもありません。
+  The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).: スロット %d のメモリーカードは電源投入時に %s を起動しますが、BOOT LOCK が変更できるその設定は見つかりませんでした（%s を探します）。
+  'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': スロット %d のメモリーカードは電源投入時に %s を起動しますが、BOOT LOCK はこれを設定できません。BOOT LOCK は PS2BBL、FMCB、OSDMenu を通じて動作します。
+  A boot loader with RIPPS2's lock is on this console.: この本体には RIPPS2 のロック付きのブートローダーがあります。
+  'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': ゲームの EXIT：ブラウザー、次にブートローダー（BOOT LOCK）
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。
@@ -1372,7 +1380,7 @@ labels:
   RIPPS2_ALL_GAMES: すべてのゲーム
   RIPPS2_SET_METADATA: メタデータを設定
   RIPPS2_BOOT_LOCK: Boot Lock
-  HINT_RIPPS2_BOOT_LOCK: 電源投入時に PS2BBL を通じて RIPPS2 を起動します。オフにすると PS2BBL が以前に起動していたものに戻します。PS2BBL がまだない？「ブートローダー」で BIBLE をインストールできます。
+  HINT_RIPPS2_BOOT_LOCK: 電源投入時にブートローダーを通じて RIPPS2 を起動します。PS2BBL と FMCB はすぐに起動し、OSDMenu はメニューの先頭に置きます。ゲームの EXIT も同じ道で戻ります。オフにすると以前の状態に戻します。まだない？「ブートローダー」で BIBLE をインストールできます。
   HINT_COLORS_TEXT: ゲームリストの文字の色。テーマは独自の色を持っています。これは内蔵テーマの色を変えます。
   HINT_COLORS_SELECTED: 選んだゲームと、設定ページで選んだ行の色。
   HINT_COLORS_DIALOG: 設定ページとメッセージボックスの色。
@@ -1713,7 +1721,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 変わったボタンのヒントやアイコンは、カバーと同じように変わった瞬間にフェードインします。変わらないものはそのままです（すべてのページとメッセージで）。オフ：そのまま表示。テーマ：テーマが決めます（hints_fade=0 がなければオン）。
   RIPPS2_SIDEBAR_STYLE: サイドバーのスタイル
   HINT_RIPPS2_SIDEBAR_STYLE: クラシック（分割）：サイドバーの暗い帯にアイコン、その横に色の帯。XL（一体型）：幅の広い 1 本の帯の中央にアイコン。テーマ：テーマが決めます。
-  HINT_EXITPATH: ゲーム内メニューの EXIT の行き先。BIBLE を設定して（ステータス > ブートローダー > 管理、または PS2BBL の BOOT LOCK）空のままにするのがおすすめです。EXIT は本体自身の起動経路でリセットし、PS2BBL が電源投入時と同じように RIPPS2 を起動します。最も安全な戻り方です。ブラウザー：PS2 のブラウザー。メモリーカード（mc0:/mc1:）や FAT32 の USB ドライブ（mass:/）の ELF はリセット直後に読み込みますが、すべてのゲームが本体をその準備ができた状態にするとは限りません。そのとき MMCE には一切アクセスできません。
+  HINT_EXITPATH: ゲーム内メニューの EXIT の行き先。BOOT LOCK をオンにして（PS2BBL、FMCB、OSDMenu、または BIBLE を設定済み）空のままにするのがおすすめです。EXIT はブラウザーを通り、ブラウザーが電源投入時と同じようにブートローダーと RIPPS2 を起動します。最も安全な戻り方です。ロックなしで空のとき：メモリーカードや FAT32 の USB ドライブにある RIPPS2 自身の ELF をリセット直後に読み込みますが、すべてのゲームが本体をその準備ができた状態にするとは限りません。Browser：PS2 のブラウザー。そのとき MMCE 上の ELF には一切アクセスできません。
   HINT_BDM_START: USB、iLink、MX4SIO、exFAT の HDD。自動は起動時に開始します。つないでいるドライブには最速で、そのゲームは最初からすべてのゲームに並びます。手動はページを開いたときに開始します。
   NEUTRINO_VMC_HDD_UNSUPPORTED: Neutrino は APA の HDD 上の VMC を使えません（exFAT、USB、MX4SIO は使えます）。このゲームはそのスロットの本物のカードで起動します。
   RIPPS2_FAST_BOOT: Fast Boot

@@ -215,7 +215,6 @@ strings:
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Bank dźwięków tego BIOS-u nie jest tym, który zna RIPPS2. Nic nie zapisano.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
   : BIOS tej konsoli nie ma SNDIMAGE. Konsole od SCPH-30000 go mają; pierwsze modele przechowują dźwięki inaczej, czego RIPPS2 jeszcze nie odczytuje.
-  ' (The PS2BBL configs found were set: %s.)': ' (Ustawiono znalezione konfiguracje PS2BBL: %s.)'
   ' (hold CIRCLE at power on to start it)': ' (przytrzymaj KÓŁKO przy włączaniu, aby to uruchomić)'
   ' (then ': ' (następnie '
   ' A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.': ' Usunięto SYS-CONF/PS2BBL.INI, który kompilacja 68 zapisała dla programu ładującego, który nigdy go nie czyta.'
@@ -260,12 +259,6 @@ strings:
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: zachowywanie programu rozruchowego HDD'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: przywracanie programu rozruchowego HDD'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: zapisywanie PS2BBL w obszarze rozruchowym HDD'
-  BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK nie mógł zapisać konfiguracji PS2BBL. Sprawdź, czy karta pamięci lub dysk nie jest zabezpieczony przed zapisem, i spróbuj ponownie.
-  BOOT LOCK found no PS2BBL config to change.: BOOT LOCK nie znalazł konfiguracji PS2BBL do zmiany.
-  BOOT LOCK is off. PS2BBL starts what it started before (%s).: BOOT LOCK jest wyłączony. PS2BBL uruchamia to, co uruchamiał wcześniej (%s).
-  ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
-  : BOOT LOCK jest włączony. PS2BBL uruchamia teraz RIPPS2 przy włączaniu (%s). Przytrzymaj skrót PS2BBL podczas startu konsoli, aby dostać się do czegoś innego.%s
-  BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK działa przez PS2BBL (PlayStation 2 Basic BootLoader), a na kartach pamięci tutaj go nie ma.
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -289,7 +282,6 @@ strings:
 
     Potrzebna jest konsola, która startuje z HDD (gruba PS2 z adapterem sieciowym). Nie wyłączaj jej, aż pojawi się informacja o zakończeniu.'
   INTERNAL HDD  (its boot area): WEWNĘTRZNY HDD  (jego obszar rozruchowy)
-  Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Karta pamięci %d uruchamia przy włączaniu %s, a BOOT LOCK działa tylko przez PS2BBL.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -774,7 +766,6 @@ strings:
   '%s could not be written to %s. Check its free space and that it is not write protected.': Nie udało się zapisać %s w %s. Sprawdź wolne miejsce i czy nie jest zabezpieczony przed zapisem.
   '%s is installed in %s.': '%s jest zainstalowane w %s.'
   ', some files could not be used': ', niektórych plików nie dało się użyć'
-  A PS2BBL with RIPPS2's lock is on this console.: Na tej konsoli jest PS2BBL z blokadą RIPPS2.
   AUDIO folder: Folder AUDIO
   DRIVES: DYSKI
   MANAGE: ZARZĄDZAJ
@@ -1258,6 +1249,23 @@ strings:
   '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s nie ma %s. RIPPOPS znalazł emulator PS1 Sony na %s: START kopiuje %s tutaj i uruchamia grę.'
   ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   : 'RIPPS2 nie widzi %s w %s%s. POPSTARTER potrzebuje POPS_IOX.PAK z POPS.PAK albo z POPS.ELF i IOPRP252.IMG: emulatora PS1 Sony z twojej własnej konsoli. Może je znaleźć tam, gdzie RIPPS2 nie szuka (jeśli twoje gry się uruchamiają, to znajduje). START uruchamia, a o ten napęd nie będzie już pytania.'
+  ' (The configs found were set: %s.)': ' (Ustawiono znalezione konfiguracje: %s.)'
+  ' Save its settings once with its own configurator, then turn BOOT LOCK on again.': ' Zapisz raz jego ustawienia w jego własnym konfiguratorze, a potem włącz BOOT LOCK ponownie.'
+  ? '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
+  : '%s nie może uruchomić RIPPS2 z miejsca, w którym jest teraz (%s), a RIPPS2 nie kopiuje się sam. Umieść RIPPS2.ELF na karcie pamięci lub dysku USB i uruchom go stamtąd.'
+  ? BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
+  : BOOT LOCK nie mógł zapisać konfiguracji programu rozruchowego. Sprawdź, czy karta pamięci lub dysk nie jest chroniony przed zapisem, i spróbuj ponownie.
+  BOOT LOCK found no boot loader config to change.: BOOT LOCK nie znalazł konfiguracji programu rozruchowego do zmiany.
+  BOOT LOCK is off. Your boot loader starts what it started before (%s).: BOOT LOCK jest wyłączony. Twój program rozruchowy uruchamia to, co uruchamiał wcześniej (%s).
+  ? BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
+  : BOOT LOCK jest włączony. %s uruchamia teraz RIPPS2 przy włączaniu (%s), a pusta Ścieżka Dla IGR odsyła EXIT z gry tą samą drogą. Przytrzymaj jeden z jego przycisków podczas startu konsoli, aby dostać się do czegoś innego.%s
+  ? 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  : 'BOOT LOCK umieścił RIPPS2 na pierwszym miejscu w menu OSDMenu (%s). OSDMenu samo niczego nie uruchamia: wybierz tam RIPPS2, a EXIT z gry wraca do tego menu. Aby konsola od razu uruchamiała RIPPS2, BIBLE instaluje PS2BBL 1.2.0 na karcie pamięci (Program rozruchowy).'
+  BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.: BOOT LOCK działa przez program rozruchowy na karcie pamięci (PS2BBL, FMCB lub OSDMenu), a tutaj nie ma żadnego.
+  The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).: Karta pamięci w gnieździe %d uruchamia przy włączaniu %s, a BOOT LOCK nie znalazł jego konfiguracji do zmiany (szuka %s).
+  'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Karta pamięci w gnieździe %d uruchamia przy włączaniu %s, którego BOOT LOCK nie potrafi ustawić: działa przez PS2BBL, FMCB i OSDMenu.'
+  A boot loader with RIPPS2's lock is on this console.: Na tej konsoli jest program rozruchowy z blokadą RIPPS2.
+  'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT z gry: przeglądarka, potem twój program rozruchowy (BOOT LOCK)'
 labels:
   OK: OK
   START: Uruchom
@@ -1379,7 +1387,7 @@ labels:
   RIPPS2_ALL_GAMES: Wszystkie gry
   RIPPS2_SET_METADATA: Ustaw metadane
   RIPPS2_BOOT_LOCK: Boot Lock
-  HINT_RIPPS2_BOOT_LOCK: Uruchamia RIPPS2 przy włączaniu przez PS2BBL. Wył. przywraca to, co PS2BBL uruchamiał wcześniej. Nie masz jeszcze PS2BBL? Program rozruchowy zainstaluje BIBLE.
+  HINT_RIPPS2_BOOT_LOCK: 'Uruchamia RIPPS2 przy włączaniu przez twój program rozruchowy: PS2BBL i FMCB uruchamiają go od razu, OSDMenu stawia go na pierwszym miejscu w swoim menu, a EXIT z gry wraca tą samą drogą. Wył. przywraca to, co było wcześniej. Jeszcze żadnego? Program rozruchowy zainstaluje BIBLE.'
   HINT_COLORS_TEXT: Kolor tekstu listy gier. Motywy ustawiają własny; to zmienia go dla motywów wbudowanych.
   HINT_COLORS_SELECTED: Kolor wybranej gry i wybranego wiersza na stronach ustawień.
   HINT_COLORS_DIALOG: Kolor stron ustawień i okien komunikatów.
@@ -1720,7 +1728,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'Podpowiedź przycisku lub ikona, która się zmienia, pojawia się płynnie, jak okładki, w chwili zmiany; te, które zostają, pozostają nietknięte, na każdej stronie i w każdym komunikacie. Wyłączone: po prostu się pojawiają. Motyw: decyduje motyw (włączone, chyba że ma hints_fade=0).'
   RIPPS2_SIDEBAR_STYLE: Styl paska bocznego
   HINT_RIPPS2_SIDEBAR_STYLE: 'Klasyczny (dzielony): ikony w ciemnym pasie paska bocznego z kolorowym paskiem obok. XL (jednolity): jeden szerszy pas z ikonami pośrodku. Motyw: decyduje motyw.'
-  HINT_EXITPATH: 'Dokąd prowadzi EXIT w Menu w grze. Najlepiej zostawić puste, z ustawionym BIBLE (STAN > Program rozruchowy > Zarządzaj, albo BOOT LOCK w twoim PS2BBL): EXIT resetuje wtedy konsolę jej własną ścieżką startu, a PS2BBL uruchamia RIPPS2 jak po włączeniu, najbezpieczniejszy powrót. Przeglądarka: przeglądarka PS2. ELF na karcie pamięci (mc0:/mc1:) lub dysku USB FAT32 (mass:/) ładuje się zaraz po resecie, na co nie każda gra zostawia konsolę gotową; MMCE jest wtedy w ogóle nieosiągalne.'
+  HINT_EXITPATH: 'Dokąd prowadzi EXIT w Menu w grze. Najlepiej zostawić puste z włączonym BOOT LOCK (PS2BBL, FMCB lub OSDMenu, albo ustawionym BIBLE): EXIT idzie wtedy przez przeglądarkę, która uruchamia twój program rozruchowy i RIPPS2 jak po włączeniu, najbezpieczniejszy powrót. Puste bez blokady: własny ELF RIPPS2 na karcie pamięci lub dysku USB FAT32, ładowany zaraz po resecie, na co nie każda gra zostawia konsolę gotową. Browser: przeglądarka PS2. ELF na MMCE jest wtedy w ogóle nieosiągalny.'
   HINT_BDM_START: 'USB, iLink, MX4SIO i dysk HDD exFAT. Automatyczny uruchamia je przy starcie: najszybciej dla podłączonych dysków, z ich grami we Wszystkich grach od początku. Ręcznie uruchamia je, gdy otworzysz ich stronę.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino nie może używać VMC na dysku APA (exFAT, USB i MX4SIO mogą): ta gra uruchomi się z prawdziwą kartą w tym gnieździe.'
   RIPPS2_FAST_BOOT: Fast Boot

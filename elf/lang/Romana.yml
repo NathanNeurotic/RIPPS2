@@ -215,7 +215,6 @@ strings:
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Banca de sunete a acestui BIOS nu este cea pe care o cunoaște RIPPS2. Nu s-a scris nimic.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
   : BIOS-ul acestei console nu are SNDIMAGE. Consolele de la SCPH-30000 încoace au unul; primele modele își păstrează sunetele altfel, ceea ce RIPPS2 nu citește încă.
-  ' (The PS2BBL configs found were set: %s.)': ' (Configurațiile PS2BBL găsite au fost setate: %s.)'
   ' (hold CIRCLE at power on to start it)': ' (ține apăsat CERC la pornire ca să îl lansezi)'
   ' (then ': ' (apoi '
   ' A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.': ' A fost eliminat un SYS-CONF/PS2BBL.INI pe care versiunea 68 l-a scris pentru un încărcător care nu îl citește niciodată.'
@@ -260,12 +259,6 @@ strings:
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: păstrarea programului de pornire al HDD-ului'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: readucerea programului de pornire al HDD-ului'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: scrierea PS2BBL în zona de pornire a HDD-ului'
-  BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK nu a putut scrie configurația PS2BBL. Verifică dacă cardul de memorie sau unitatea nu sunt protejate la scriere și încearcă din nou.
-  BOOT LOCK found no PS2BBL config to change.: BOOT LOCK nu a găsit nicio configurație PS2BBL de modificat.
-  BOOT LOCK is off. PS2BBL starts what it started before (%s).: BOOT LOCK este oprit. PS2BBL pornește ce pornea înainte (%s).
-  ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
-  : BOOT LOCK este pornit. PS2BBL pornește acum RIPPS2 la pornire (%s). Ține apăsată o tastă rapidă PS2BBL cât timp pornește consola ca să ajungi la altceva.%s
-  BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK funcționează prin PS2BBL (PlayStation 2 Basic BootLoader), iar pe niciun card de memorie de aici nu există.
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -289,7 +282,6 @@ strings:
 
     Ai nevoie de o consolă care pornește de pe HDD (un PS2 gros cu adaptorul de rețea). Ține-o pornită până apare gata.'
   INTERNAL HDD  (its boot area): HDD INTERN  (zona lui de pornire)
-  Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Cardul de memorie %d pornește %s la pornire, iar BOOT LOCK funcționează doar prin PS2BBL.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -774,7 +766,6 @@ strings:
   '%s could not be written to %s. Check its free space and that it is not write protected.': '%s nu a putut fi scris în %s. Verifică spațiul liber și să nu fie protejat la scriere.'
   '%s is installed in %s.': '%s este instalat în %s.'
   ', some files could not be used': ', unele fișiere nu au putut fi folosite'
-  A PS2BBL with RIPPS2's lock is on this console.: Pe această consolă există un PS2BBL cu blocarea RIPPS2.
   AUDIO folder: folderul AUDIO
   DRIVES: UNITĂȚI
   MANAGE: GESTIONEAZĂ
@@ -1256,6 +1247,23 @@ strings:
   '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s nu are %s. RIPPOPS a găsit emulatorul PS1 Sony pe %s: START copiază %s aici și pornește jocul.'
   ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   : 'RIPPS2 nu vede %s în %s%s. POPSTARTER are nevoie de POPS_IOX.PAK cu POPS.PAK, sau cu POPS.ELF și IOPRP252.IMG: emulatorul PS1 Sony, de pe propria ta consolă. Le poate găsi unde RIPPS2 nu caută (dacă jocurile tale pornesc, le găsește). START pornește, iar despre această unitate nu se mai întreabă.'
+  ' (The configs found were set: %s.)': ' (Configurațiile găsite au fost setate: %s.)'
+  ' Save its settings once with its own configurator, then turn BOOT LOCK on again.': ' Salvează-i o dată setările cu propriul lui configurator, apoi pornește din nou BOOT LOCK.'
+  ? '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
+  : '%s nu poate porni RIPPS2 de unde este acum (%s), iar RIPPS2 nu se copiază singur. Pune RIPPS2.ELF pe un card de memorie sau pe o unitate USB și pornește-l de acolo.'
+  ? BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
+  : BOOT LOCK nu a putut scrie configurația încărcătorului de pornire. Verifică dacă cardul de memorie sau unitatea nu e protejată la scriere, apoi încearcă din nou.
+  BOOT LOCK found no boot loader config to change.: BOOT LOCK nu a găsit nicio configurație de încărcător de pornire de modificat.
+  BOOT LOCK is off. Your boot loader starts what it started before (%s).: BOOT LOCK este oprit. Încărcătorul tău de pornire pornește ce pornea înainte (%s).
+  ? BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
+  : BOOT LOCK este pornit. %s pornește acum RIPPS2 la pornire (%s), iar o cale IGR goală trimite EXIT-ul unui joc înapoi pe același drum. Ține apăsat unul dintre butoanele lui cât timp pornește consola ca să ajungi la altceva.%s
+  ? 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  : 'BOOT LOCK a pus RIPPS2 primul în meniul OSDMenu (%s). OSDMenu nu pornește nimic singur: alege RIPPS2 acolo, iar EXIT-ul unui joc revine în acel meniu. Pentru o consolă care pornește RIPPS2 imediat, BIBLE pune PS2BBL 1.2.0 pe un card de memorie (Boot Loader).'
+  BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.: BOOT LOCK funcționează printr-un încărcător de pornire pe un card de memorie (PS2BBL, FMCB sau OSDMenu), iar aici nu există niciunul.
+  The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).: Cardul de memorie din slotul %d pornește %s la pornire, iar BOOT LOCK nu a găsit nicio configurație a lui de modificat (caută %s).
+  'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Cardul de memorie din slotul %d pornește %s la pornire, pe care BOOT LOCK nu îl poate seta: funcționează prin PS2BBL, FMCB și OSDMenu.'
+  A boot loader with RIPPS2's lock is on this console.: Pe această consolă este un încărcător de pornire cu blocarea RIPPS2.
+  'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT-ul unui joc: browserul, apoi încărcătorul tău de pornire (BOOT LOCK)'
 labels:
   SETTINGS_SAVED: Setări salvate în %s
   REMOVE_ALL_SETTINGS: Elimină setările
@@ -1427,7 +1435,7 @@ labels:
   RIPPS2_ALL_GAMES: Toate jocurile
   RIPPS2_SET_METADATA: Setează metadatele
   RIPPS2_BOOT_LOCK: Boot Lock
-  HINT_RIPPS2_BOOT_LOCK: Pornește RIPPS2 la pornire prin PS2BBL. Oprit pune la loc ce pornea PS2BBL înainte. Încă nu ai PS2BBL? Boot Loader instalează BIBLE.
+  HINT_RIPPS2_BOOT_LOCK: 'Pornește RIPPS2 la pornire prin încărcătorul tău de pornire: PS2BBL și FMCB îl pornesc imediat, OSDMenu îl pune primul în meniul lui, iar EXIT-ul unui joc revine pe același drum. Oprit pune la loc ce era înainte. Încă niciunul? Boot Loader instalează BIBLE.'
   HINT_COLORS_TEXT: Culoarea textului din lista de jocuri. Temele își setează propria culoare; aceasta o schimbă pentru temele integrate.
   HINT_COLORS_SELECTED: Culoarea jocului ales și a rândului ales pe paginile de setări.
   HINT_COLORS_DIALOG: Culoarea paginilor de setări și a casetelor de mesaj.
@@ -1770,7 +1778,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'Un indiciu de buton sau o glifă care se schimbă apare estompat, ca și copertele, în clipa în care se schimbă; cele care rămân nu sunt atinse, pe fiecare pagină și mesaj. Oprit: pur și simplu apar. Temă: decide tema (pornit, dacă nu spune hints_fade=0).'
   RIPPS2_SIDEBAR_STYLE: Stilul barei laterale
   HINT_RIPPS2_SIDEBAR_STYLE: 'Clasic (împărțit): pictogramele în banda întunecată a barei laterale, cu fâșia colorată alături. XL (dintr-o bucată): o singură bandă mai lată, cu pictogramele la mijloc. Temă: decide tema.'
-  HINT_EXITPATH: 'Unde duce EXIT din Meniul în joc. Cel mai bine lăsat gol, cu BIBLE setat (STARE > Boot Loader > Gestionează, sau BOOT LOCK pe PS2BBL-ul tău): EXIT resetează atunci consola pe propria cale de pornire, iar PS2BBL pornește RIPPS2 ca la aprindere, cea mai sigură întoarcere. Browser: browserul PS2. Un ELF pe un card de memorie (mc0:/mc1:) sau pe o unitate USB FAT32 (mass:/) se încarcă imediat după resetare, pentru care nu orice joc lasă consola pregătită; MMCE nu poate fi atins deloc atunci.'
+  HINT_EXITPATH: 'Unde duce EXIT din Meniul în joc. Cel mai bine lăsat gol cu BOOT LOCK pornit (PS2BBL, FMCB sau OSDMenu, ori BIBLE setat): EXIT trece atunci prin browser, care pornește încărcătorul tău de pornire și RIPPS2 ca la aprindere, cea mai sigură întoarcere. Gol fără blocare: propriul ELF al RIPPS2 pe un card de memorie sau pe o unitate USB FAT32, încărcat imediat după resetare, pentru care nu orice joc lasă consola pregătită. Browser: browserul PS2. Un ELF pe MMCE nu poate fi atins deloc atunci.'
   HINT_BDM_START: 'USB, iLink, MX4SIO și HDD-ul exFAT. Automat le pornește la pornire: cel mai rapid pentru unitățile conectate, cu jocurile lor în Toate jocurile de la început. Manual le pornește când le deschizi pagina.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino nu poate folosi un VMC pe HDD-ul APA (exFAT, USB și MX4SIO pot): acest joc pornește cu cardul real în acel slot.'
   RIPPS2_FAST_BOOT: Fast Boot

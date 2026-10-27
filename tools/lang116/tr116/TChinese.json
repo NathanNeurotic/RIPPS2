@@ -1,0 +1,21 @@
+{
+ "s": {
+  "0": " （找到的設定已設好：%s。）",
+  "1": " 請先用它自己的設定工具儲存一次設定，再開啟 BOOT LOCK。",
+  "2": "%s 無法從 RIPPS2 現在所在的位置（%s）啟動它，而 RIPPS2 不會複製自己。請把 RIPPS2.ELF 放到記憶卡或 USB 磁碟機上，再從那裡啟動。",
+  "3": "BOOT LOCK 無法寫入開機程式的設定。請確認記憶卡或磁碟機沒有防寫，然後再試一次。",
+  "4": "BOOT LOCK 找不到可變更的開機程式設定。",
+  "5": "BOOT LOCK 已關閉。你的開機程式會啟動它以前啟動的內容（%s）。",
+  "6": "BOOT LOCK 已開啟。%s 現在開機時啟動 RIPPS2（%s），IGR 位置留空時，遊戲的 EXIT 也會沿同一條路返回。主機啟動時按住它的任一按鍵可進入其他內容。%s",
+  "7": "BOOT LOCK 已把 RIPPS2 放在 OSDMenu 選單的第一項（%s）。OSDMenu 自己不會啟動任何東西：請在那裡選擇 RIPPS2，遊戲的 EXIT 會回到那個選單。若要主機開機直接啟動 RIPPS2，BIBLE 會把 PS2BBL 1.2.0 裝到記憶卡上（開機程式）。",
+  "8": "BOOT LOCK 透過記憶卡上的開機程式運作（PS2BBL、FMCB 或 OSDMenu），而這裡一個也沒有。",
+  "9": "插槽 %d 的記憶卡開機時啟動 %s，但 BOOT LOCK 找不到它可變更的設定（它會尋找 %s）。",
+  "10": "插槽 %d 的記憶卡開機時啟動 %s，BOOT LOCK 無法設定它：BOOT LOCK 透過 PS2BBL、FMCB 和 OSDMenu 運作。",
+  "11": "這台主機上有帶 RIPPS2 鎖定的開機程式。",
+  "12": "遊戲的 EXIT：瀏覽器，然後是你的開機程式（BOOT LOCK）"
+ },
+ "l": {
+  "HINT_EXITPATH": "遊戲內選單中 EXIT 去哪裡。最好在 BOOT LOCK 開啟時留空（PS2BBL、FMCB 或 OSDMenu，或已設定好 BIBLE）：EXIT 會經過瀏覽器，瀏覽器像開機時一樣啟動你的開機程式和 RIPPS2，這是最安全的返回方式。未鎖定時留空：記憶卡或 FAT32 USB 磁碟機上 RIPPS2 自己的 ELF 會在重設後立即載入，但並非每個遊戲都會讓主機為此做好準備。Browser：PS2 瀏覽器。那時完全無法存取 MMCE 上的 ELF。",
+  "HINT_RIPPS2_BOOT_LOCK": "開機時透過你的開機程式啟動 RIPPS2：PS2BBL 和 FMCB 會立即啟動它，OSDMenu 會把它放在選單第一項，遊戲的 EXIT 也沿同一條路返回。關閉會還原以前的內容。還沒有？「開機程式」會安裝 BIBLE。"
+ }
+}

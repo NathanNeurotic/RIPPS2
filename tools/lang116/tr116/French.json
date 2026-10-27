@@ -1,0 +1,21 @@
+{
+ "s": {
+  "0": " (Les configurations trouvées ont été réglées : %s.)",
+  "1": " Enregistrez une fois ses réglages avec son propre configurateur, puis réactivez BOOT LOCK.",
+  "2": "%s ne peut pas lancer RIPPS2 depuis son emplacement actuel (%s), et RIPPS2 ne se copie pas. Mettez RIPPS2.ELF sur une carte mémoire ou une clé USB et lancez-le depuis là.",
+  "3": "BOOT LOCK n'a pas pu écrire la configuration du chargeur de démarrage. Vérifiez que la carte mémoire ou le lecteur n'est pas protégé en écriture, puis réessayez.",
+  "4": "BOOT LOCK n'a trouvé aucune configuration de chargeur de démarrage à modifier.",
+  "5": "BOOT LOCK est désactivé. Votre chargeur de démarrage lance ce qu'il lançait avant (%s).",
+  "6": "BOOT LOCK est activé. %s lance maintenant RIPPS2 à l'allumage (%s), et un Chemin IGR vide renvoie l'EXIT d'un jeu par le même chemin. Maintenez l'un de ses boutons pendant le démarrage de la console pour accéder à autre chose.%s",
+  "7": "BOOT LOCK a placé RIPPS2 en premier dans le menu d'OSDMenu (%s). OSDMenu ne lance rien de lui-même : choisissez RIPPS2 là, et l'EXIT d'un jeu revient à ce menu. Pour une console qui lance RIPPS2 tout de suite, BIBLE installe PS2BBL 1.2.0 sur une carte mémoire (Chargeur de démarrage).",
+  "8": "BOOT LOCK passe par un chargeur de démarrage sur une carte mémoire (PS2BBL, FMCB ou OSDMenu), et il n'y en a aucun ici.",
+  "9": "La carte mémoire du port %d lance %s à l'allumage, et BOOT LOCK n'a trouvé aucune de ses configurations à modifier (il cherche %s).",
+  "10": "La carte mémoire du port %d lance %s à l'allumage, que BOOT LOCK ne peut pas régler : il passe par PS2BBL, FMCB et OSDMenu.",
+  "11": "Un chargeur de démarrage avec le verrou de RIPPS2 est sur cette console.",
+  "12": "EXIT d'un jeu : le navigateur, puis votre chargeur de démarrage (BOOT LOCK)"
+ },
+ "l": {
+  "HINT_EXITPATH": "Où va EXIT dans le Menu en jeu. Mieux vaut le laisser vide avec BOOT LOCK activé (PS2BBL, FMCB ou OSDMenu, ou BIBLE installé) : EXIT passe alors par le navigateur, qui lance votre chargeur de démarrage et RIPPS2 comme à l'allumage, le retour le plus sûr. Vide sans le verrou : l'ELF de RIPPS2 lui-même sur une carte mémoire ou une clé USB FAT32, chargé juste après la réinitialisation, ce pour quoi tous les jeux ne laissent pas la console prête. Browser : le navigateur PS2. Un ELF sur MMCE n'est alors pas joignable du tout.",
+  "HINT_RIPPS2_BOOT_LOCK": "Lance RIPPS2 à l'allumage via votre chargeur de démarrage : PS2BBL et FMCB le lancent tout de suite, OSDMenu le met en premier dans son menu, et l'EXIT d'un jeu revient par le même chemin. Désactivé remet ce qu'il y avait avant. Aucun encore ? Chargeur de démarrage installe BIBLE."
+ }
+}

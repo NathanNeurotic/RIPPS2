@@ -215,7 +215,6 @@ strings:
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: De geluidsbank van deze BIOS is niet de bank die RIPPS2 kent. Er is niets geschreven.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
   : De BIOS van deze console heeft geen SNDIMAGE. Consoles vanaf SCPH-30000 hebben er een; de eerste modellen bewaren hun geluiden op een andere manier, die RIPPS2 nog niet leest.
-  ' (The PS2BBL configs found were set: %s.)': ' (De gevonden PS2BBL-configuraties zijn ingesteld: %s.)'
   ' (hold CIRCLE at power on to start it)': ' (houd CIRKEL ingedrukt bij aanzetten om het te starten)'
   ' (then ': ' (daarna '
   ' A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.': ' Een SYS-CONF/PS2BBL.INI die build 68 schreef voor een loader die hem nooit leest, is verwijderd.'
@@ -260,12 +259,6 @@ strings:
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: het opstartprogramma van de HDD bewaren'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: het opstartprogramma van de HDD terugzetten'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: PS2BBL naar het opstartgebied van de HDD schrijven'
-  BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK kon de PS2BBL-configuratie niet schrijven. Controleer of de geheugenkaart of schijf niet tegen schrijven beveiligd is en probeer het opnieuw.
-  BOOT LOCK found no PS2BBL config to change.: BOOT LOCK vond geen PS2BBL-configuratie om te wijzigen.
-  BOOT LOCK is off. PS2BBL starts what it started before (%s).: BOOT LOCK staat uit. PS2BBL start wat het eerder startte (%s).
-  ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
-  : BOOT LOCK staat aan. PS2BBL start RIPPS2 nu bij aanzetten (%s). Houd een PS2BBL-sneltoets ingedrukt terwijl de console start om iets anders te bereiken.%s
-  BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK werkt via PS2BBL (PlayStation 2 Basic BootLoader), en dat staat op geen enkele geheugenkaart hier.
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -289,7 +282,6 @@ strings:
 
     Hiervoor is een console nodig die vanaf de HDD opstart (een dikke PS2 met de netwerkadapter). Laat hem aan tot er klaar staat.'
   INTERNAL HDD  (its boot area): INTERNE HDD  (het opstartgebied)
-  Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Geheugenkaart %d start %s bij aanzetten, en BOOT LOCK werkt alleen via PS2BBL.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -774,7 +766,6 @@ strings:
   '%s could not be written to %s. Check its free space and that it is not write protected.': '%s kon niet naar %s worden geschreven. Controleer de vrije ruimte en of hij niet tegen schrijven beveiligd is.'
   '%s is installed in %s.': '%s is geïnstalleerd in %s.'
   ', some files could not be used': ', sommige bestanden konden niet worden gebruikt'
-  A PS2BBL with RIPPS2's lock is on this console.: Er staat een PS2BBL met de vergrendeling van RIPPS2 op deze console.
   AUDIO folder: map AUDIO
   DRIVES: SCHIJVEN
   MANAGE: BEHEREN
@@ -1256,6 +1247,23 @@ strings:
   '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s heeft geen %s. RIPPOPS vond de PS1-emulator van Sony op %s: START kopieert %s hierheen en start de game.'
   ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   : 'RIPPS2 ziet %s niet in %s%s. POPSTARTER heeft POPS_IOX.PAK nodig met POPS.PAK, of met POPS.ELF en IOPRP252.IMG: de PS1-emulator van Sony, van je eigen console. Hij vindt ze misschien waar RIPPS2 niet kijkt (als je games starten, lukt dat). START start, en naar deze schijf wordt niet meer gevraagd.'
+  ' (The configs found were set: %s.)': ' (De gevonden configuraties zijn ingesteld: %s.)'
+  ' Save its settings once with its own configurator, then turn BOOT LOCK on again.': ' Sla de instellingen ervan één keer op met de eigen configurator en zet BOOT LOCK dan opnieuw aan.'
+  ? '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
+  : '%s kan RIPPS2 niet starten vanaf de plek waar het nu staat (%s), en RIPPS2 kopieert zichzelf niet. Zet RIPPS2.ELF op een geheugenkaart of een USB-schijf en start het daarvandaan.'
+  ? BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
+  : BOOT LOCK kon de configuratie van de opstartlader niet schrijven. Controleer of de geheugenkaart of schijf niet tegen schrijven beveiligd is en probeer het opnieuw.
+  BOOT LOCK found no boot loader config to change.: BOOT LOCK vond geen configuratie van een opstartlader om te wijzigen.
+  BOOT LOCK is off. Your boot loader starts what it started before (%s).: BOOT LOCK staat uit. Je opstartlader start wat hij eerder startte (%s).
+  ? BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
+  : BOOT LOCK staat aan. %s start RIPPS2 nu bij aanzetten (%s), en een leeg IGR pad stuurt de EXIT van een game langs dezelfde weg terug. Houd een van zijn knoppen ingedrukt terwijl de console start om iets anders te bereiken.%s
+  ? 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  : 'BOOT LOCK heeft RIPPS2 bovenaan het menu van OSDMenu gezet (%s). OSDMenu start uit zichzelf niets: kies daar RIPPS2, en de EXIT van een game komt terug in dat menu. Voor een console die RIPPS2 meteen start, zet BIBLE PS2BBL 1.2.0 op een geheugenkaart (Opstartlader).'
+  BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.: BOOT LOCK werkt via een opstartlader op een geheugenkaart (PS2BBL, FMCB of OSDMenu), en die is hier niet.
+  The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).: De geheugenkaart in sleuf %d start %s bij aanzetten, en BOOT LOCK vond geen configuratie ervan om te wijzigen (het zoekt %s).
+  'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'De geheugenkaart in sleuf %d start %s bij aanzetten, wat BOOT LOCK niet kan instellen: het werkt via PS2BBL, FMCB en OSDMenu.'
+  A boot loader with RIPPS2's lock is on this console.: Op deze console staat een opstartlader met de vergrendeling van RIPPS2.
+  'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT van een game: de browser, dan je opstartlader (BOOT LOCK)'
 labels:
   SETTINGS_SAVED: Instellingen opgeslagen in %s
   OK: OK
@@ -1436,7 +1444,7 @@ labels:
   RIPPS2_ALL_GAMES: Alle games
   RIPPS2_SET_METADATA: Metadata instellen
   RIPPS2_BOOT_LOCK: Boot Lock
-  HINT_RIPPS2_BOOT_LOCK: Start RIPPS2 bij aanzetten via PS2BBL. Uit zet terug wat PS2BBL eerder startte. Nog geen PS2BBL? Opstartlader installeert BIBLE.
+  HINT_RIPPS2_BOOT_LOCK: 'Start RIPPS2 bij aanzetten via je opstartlader: PS2BBL en FMCB starten het meteen, OSDMenu zet het bovenaan zijn menu, en de EXIT van een game gaat langs dezelfde weg terug. Uit zet terug wat er eerder was. Nog geen? Opstartlader installeert BIBLE.'
   HINT_COLORS_TEXT: De kleur van de tekst in de gamelijst. Thema's stellen hun eigen kleur in; dit wijzigt hem voor de ingebouwde thema's.
   HINT_COLORS_SELECTED: De kleur van de gekozen game en de gekozen regel op instellingenpagina's.
   HINT_COLORS_DIALOG: De kleur van de instellingenpagina's en berichtvensters.
@@ -1777,7 +1785,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'Een knophint of symbool dat verandert, vervaagt erin, zoals de hoesjes, op het moment dat het verandert; wat blijft staan wordt met rust gelaten, op elke pagina en in elk bericht. Uit: ze verschijnen gewoon. Thema: het thema beslist (aan, tenzij het hints_fade=0 zegt).'
   RIPPS2_SIDEBAR_STYLE: Stijl van de zijbalk
   HINT_RIPPS2_SIDEBAR_STYLE: 'Klassiek (gedeeld): de pictogrammen in de donkere balk van de zijbalk, met de gekleurde strook ernaast. XL (uit één stuk): één bredere balk, de pictogrammen in het midden. Thema: het thema beslist.'
-  HINT_EXITPATH: 'Waar EXIT in het Menu in game heen gaat. Het best leeg gelaten, met BIBLE ingesteld (STATUS > Opstartlader > Beheren, of BOOT LOCK op je PS2BBL): EXIT reset de console dan via zijn eigen opstartroute en PS2BBL start RIPPS2 zoals bij aanzetten, de veiligste weg terug. Browser: de PS2-browser. Een ELF op een geheugenkaart (mc0:/mc1:) of een FAT32-USB-schijf (mass:/) laadt direct na de reset, waarvoor niet elke game de console klaar laat; MMCE is dan helemaal niet bereikbaar.'
+  HINT_EXITPATH: 'Waar EXIT in het Menu in game heen gaat. Het best leeg gelaten met BOOT LOCK aan (PS2BBL, FMCB of OSDMenu, of BIBLE ingesteld): EXIT gaat dan via de browser, die je opstartlader en RIPPS2 start zoals bij aanzetten, de veiligste weg terug. Leeg zonder de vergrendeling: de eigen ELF van RIPPS2 op een geheugenkaart of een FAT32-USB-schijf, direct na de reset geladen, waarvoor niet elke game de console klaar laat. Browser: de PS2-browser. Een ELF op MMCE is dan helemaal niet bereikbaar.'
   HINT_BDM_START: 'USB, iLink, MX4SIO en de exFAT-HDD. Automatisch start ze bij het opstarten: het snelst voor de schijven die je hebt aangesloten, hun games vanaf het begin in Alle games. Handmatig start ze als je hun pagina opent.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino kan geen VMC op de APA-HDD gebruiken (exFAT, USB en MX4SIO wel): deze game start met de echte kaart in die sleuf.'
   RIPPS2_FAST_BOOT: Fast Boot

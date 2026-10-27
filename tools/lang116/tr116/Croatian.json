@@ -1,0 +1,21 @@
+{
+ "s": {
+  "0": " (Pronađene konfiguracije su postavljene: %s.)",
+  "1": " Jednom spremi njegove postavke njegovim vlastitim konfiguratorom, pa ponovno uključi BOOT LOCK.",
+  "2": "%s ne može pokrenuti RIPPS2 s mjesta gdje je sada (%s), a RIPPS2 se ne kopira sam. Stavi RIPPS2.ELF na memorijsku karticu ili USB pogon i pokreni ga odande.",
+  "3": "BOOT LOCK nije mogao zapisati konfiguraciju učitavača. Provjeri da memorijska kartica ili pogon nisu zaštićeni od pisanja, pa pokušaj ponovno.",
+  "4": "BOOT LOCK nije pronašao konfiguraciju učitavača za promjenu.",
+  "5": "BOOT LOCK je isključen. Tvoj učitavač pokreće ono što je pokretao prije (%s).",
+  "6": "BOOT LOCK je uključen. %s sada pokreće RIPPS2 pri uključivanju (%s), a prazna IGR Putanja vraća EXIT iz igre istim putem. Drži jednu od njegovih tipki dok se konzola pokreće da dođeš do bilo čega drugog.%s",
+  "7": "BOOT LOCK je stavio RIPPS2 na prvo mjesto u izborniku OSDMenu-a (%s). OSDMenu sam ništa ne pokreće: odaberi ondje RIPPS2, a EXIT iz igre vraća se u taj izbornik. Za konzolu koja odmah pokreće RIPPS2, BIBLE stavlja PS2BBL 1.2.0 na memorijsku karticu (Učitavač).",
+  "8": "BOOT LOCK radi preko učitavača na memorijskoj kartici (PS2BBL, FMCB ili OSDMenu), a ovdje ga nema.",
+  "9": "Memorijska kartica u utoru %d pri uključivanju pokreće %s, a BOOT LOCK nije pronašao njegovu konfiguraciju za promjenu (traži %s).",
+  "10": "Memorijska kartica u utoru %d pri uključivanju pokreće %s, koji BOOT LOCK ne može postaviti: radi preko PS2BBL-a, FMCB-a i OSDMenu-a.",
+  "11": "Na ovoj konzoli je učitavač s RIPPS2 zaključavanjem.",
+  "12": "EXIT iz igre: preglednik, zatim tvoj učitavač (BOOT LOCK)"
+ },
+ "l": {
+  "HINT_EXITPATH": "Kamo vodi EXIT u Izborniku u igri. Najbolje ostaviti prazno s uključenim BOOT LOCK (PS2BBL, FMCB ili OSDMenu, ili postavljenim BIBLE): EXIT tada ide kroz preglednik, koji pokreće tvoj učitavač i RIPPS2 kao pri uključivanju, najsigurniji povratak. Prazno bez zaključavanja: RIPPS2-ov vlastiti ELF na memorijskoj kartici ili FAT32 USB pogonu, učitan odmah nakon reseta, za što ne ostavlja svaka igra konzolu spremnom. Browser: PS2 preglednik. ELF na MMCE-u tada uopće nije dostupan.",
+  "HINT_RIPPS2_BOOT_LOCK": "Pokreće RIPPS2 pri uključivanju preko tvog učitavača: PS2BBL i FMCB ga pokreću odmah, OSDMenu ga stavlja na prvo mjesto u svom izborniku, a EXIT iz igre vraća se istim putem. Isključeno vraća ono što je bilo prije. Još nijedan? Učitavač instalira BIBLE."
+ }
+}

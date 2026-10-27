@@ -215,7 +215,6 @@ strings:
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: 이 BIOS의 사운드 뱅크는 RIPPS2가 아는 것이 아닙니다. 아무것도 쓰지 않았습니다.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
   : 이 본체의 BIOS에는 SNDIMAGE가 없습니다. SCPH-30000 이후 본체에는 있지만, 초기 모델은 다른 방식으로 사운드를 보관하며 RIPPS2는 아직 이를 읽지 못합니다.
-  ' (The PS2BBL configs found were set: %s.)': ' (찾은 PS2BBL 설정을 변경했습니다: %s.)'
   ' (hold CIRCLE at power on to start it)': ' (시작하려면 전원을 켤 때 동그라미를 누르고 있기)'
   ' (then ': ' (그다음 '
   ' A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.': ' 빌드 68이 그것을 읽지 않는 로더용으로 쓴 SYS-CONF/PS2BBL.INI를 삭제했습니다.'
@@ -260,12 +259,6 @@ strings:
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: HDD의 부트 프로그램을 보관하는 중'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: HDD의 부트 프로그램을 되돌리는 중'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: PS2BBL을 HDD 부트 영역에 쓰는 중'
-  BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: BOOT LOCK이 PS2BBL 설정을 쓸 수 없었습니다. 메모리 카드나 드라이브가 쓰기 금지되어 있지 않은지 확인한 뒤 다시 시도하세요.
-  BOOT LOCK found no PS2BBL config to change.: BOOT LOCK이 바꿀 PS2BBL 설정을 찾지 못했습니다.
-  BOOT LOCK is off. PS2BBL starts what it started before (%s).: BOOT LOCK이 꺼져 있습니다. PS2BBL은 이전에 시작하던 것(%s)을 시작합니다.
-  ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
-  : BOOT LOCK이 켜져 있습니다. 이제 PS2BBL은 전원을 켤 때 RIPPS2를 시작합니다 (%s). 다른 것으로 가려면 본체가 시작될 때 PS2BBL 단축키를 누르고 있으세요.%s
-  BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: BOOT LOCK은 PS2BBL(PlayStation 2 Basic BootLoader)을 통해 작동하는데, 여기 있는 메모리 카드에는 없습니다.
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -289,7 +282,6 @@ strings:
 
     HDD로 부팅하는 본체(네트워크 어댑터가 있는 구형 PS2)가 필요합니다. 완료라고 표시될 때까지 켜 두세요.'
   INTERNAL HDD  (its boot area): 내장 HDD  (부트 영역)
-  Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: 메모리 카드 %d은(는) 전원을 켤 때 %s을(를) 시작하는데, BOOT LOCK은 PS2BBL을 통해서만 작동합니다.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -774,7 +766,6 @@ strings:
   '%s could not be written to %s. Check its free space and that it is not write protected.': '%s을(를) %s에 쓸 수 없었습니다. 남은 공간과 쓰기 금지 여부를 확인하세요.'
   '%s is installed in %s.': '%s이(가) %s에 설치되었습니다.'
   ', some files could not be used': ', 일부 파일은 사용할 수 없었음'
-  A PS2BBL with RIPPS2's lock is on this console.: 이 본체에는 RIPPS2 잠금이 있는 PS2BBL이 있습니다.
   AUDIO folder: AUDIO 폴더
   DRIVES: 드라이브
   MANAGE: 관리
@@ -1258,6 +1249,23 @@ strings:
   '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': '%s%s에 %s이(가) 없습니다. RIPPOPS가 %s에서 Sony의 PS1 에뮬레이터를 찾았습니다: START를 누르면 %s을(를) 여기로 복사하고 게임을 시작합니다.'
   ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   : 'RIPPS2에서 %s이(가) 보이지 않습니다(%s%s). POPSTARTER에는 POPS_IOX.PAK과 POPS.PAK, 또는 POPS_IOX.PAK과 POPS.ELF와 IOPRP252.IMG가 필요합니다: 여러분 콘솔의 Sony PS1 에뮬레이터입니다. RIPPS2가 찾지 않는 곳에서 찾을 수도 있습니다(게임이 시작된다면 찾은 것입니다). START로 실행하며, 이 드라이브는 다시 묻지 않습니다.'
+  ' (The configs found were set: %s.)': ' (찾은 설정을 변경했습니다: %s.)'
+  ' Save its settings once with its own configurator, then turn BOOT LOCK on again.': ' 그 설정을 자체 설정 도구로 한 번 저장한 다음 BOOT LOCK을 다시 켜세요.'
+  ? '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
+  : '%s은(는) 지금 있는 곳(%s)에서 RIPPS2를 시작할 수 없으며, RIPPS2는 자신을 복사하지 않습니다. RIPPS2.ELF를 메모리 카드나 USB 드라이브에 두고 거기서 시작하세요.'
+  ? BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
+  : BOOT LOCK이 부트 로더의 설정을 쓰지 못했습니다. 메모리 카드나 드라이브가 쓰기 보호되어 있지 않은지 확인한 뒤 다시 시도하세요.
+  BOOT LOCK found no boot loader config to change.: BOOT LOCK이 바꿀 부트 로더 설정을 찾지 못했습니다.
+  BOOT LOCK is off. Your boot loader starts what it started before (%s).: BOOT LOCK이 꺼져 있습니다. 부트 로더는 이전에 시작하던 것(%s)을 시작합니다.
+  ? BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
+  : BOOT LOCK이 켜져 있습니다. 이제 %s은(는) 전원을 켤 때 RIPPS2를 시작하며 (%s), IGR 경로가 비어 있으면 게임의 EXIT도 같은 길로 돌아옵니다. 다른 것으로 가려면 본체가 시작될 때 그 버튼 중 하나를 누르고 있으세요.%s
+  ? 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  : BOOT LOCK이 RIPPS2를 OSDMenu 메뉴의 맨 위에 두었습니다 (%s). OSDMenu는 스스로 아무것도 시작하지 않으니 거기서 RIPPS2를 고르세요. 게임의 EXIT는 그 메뉴로 돌아옵니다. RIPPS2를 바로 시작하는 본체가 되려면 BIBLE이 PS2BBL 1.2.0을 메모리 카드에 넣습니다(부트 로더).
+  BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.: BOOT LOCK은 메모리 카드의 부트 로더(PS2BBL, FMCB 또는 OSDMenu)를 통해 작동하는데, 여기에는 하나도 없습니다.
+  The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).: 슬롯 %d의 메모리 카드는 전원을 켤 때 %s을(를) 시작하는데, BOOT LOCK이 바꿀 그 설정을 찾지 못했습니다(%s을(를) 찾습니다).
+  'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 슬롯 %d의 메모리 카드는 전원을 켤 때 %s을(를) 시작하는데, BOOT LOCK은 이를 설정할 수 없습니다. BOOT LOCK은 PS2BBL, FMCB, OSDMenu를 통해 작동합니다.
+  A boot loader with RIPPS2's lock is on this console.: 이 본체에는 RIPPS2 잠금이 있는 부트 로더가 있습니다.
+  'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': '게임의 EXIT: 브라우저, 그다음 부트 로더 (BOOT LOCK)'
 labels:
   IP_ADDRESS_TYPE_STATIC: 고정
   HINT_NEUTRINO_AUTO_ELF: 게임의 부트 ELF를 Neutrino에 넘겨 타이틀별 설정을 찾게 합니다. 기본으로 켜져 있으며, 직접 설정한 Boot ELF 옵션이 우선합니다.
@@ -1372,7 +1380,7 @@ labels:
   RIPPS2_ALL_GAMES: 모든 게임
   RIPPS2_SET_METADATA: 메타데이터 설정
   RIPPS2_BOOT_LOCK: Boot Lock
-  HINT_RIPPS2_BOOT_LOCK: 전원을 켤 때 PS2BBL을 통해 RIPPS2를 시작합니다. 끄면 PS2BBL이 전에 시작하던 것으로 되돌립니다. 아직 PS2BBL이 없나요? 부트 로더에서 BIBLE을 설치하세요.
+  HINT_RIPPS2_BOOT_LOCK: 전원을 켤 때 부트 로더를 통해 RIPPS2를 시작합니다. PS2BBL과 FMCB는 바로 시작하고, OSDMenu는 메뉴 맨 위에 둡니다. 게임의 EXIT도 같은 길로 돌아옵니다. 끄면 이전 상태로 되돌립니다. 아직 없나요? 부트 로더에서 BIBLE을 설치하세요.
   HINT_COLORS_TEXT: 게임 목록 글자의 색. 테마는 자체 색을 정하며, 이것은 내장 테마의 색을 바꿉니다.
   HINT_COLORS_SELECTED: 고른 게임과 설정 페이지에서 고른 줄의 색.
   HINT_COLORS_DIALOG: 설정 페이지와 메시지 상자의 색.
@@ -1713,7 +1721,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: '바뀌는 버튼 힌트나 아이콘은 커버처럼 바뀌는 순간 페이드인합니다. 그대로인 것은 건드리지 않습니다(모든 페이지와 메시지에서). 끄기: 그냥 나타납니다. 테마: 테마가 정합니다(hints_fade=0이 없으면 켜짐).'
   RIPPS2_SIDEBAR_STYLE: 사이드바 스타일
   HINT_RIPPS2_SIDEBAR_STYLE: '클래식 (분리형): 사이드바의 어두운 띠에 아이콘, 옆에 색 띠. XL (일체형): 더 넓은 띠 하나, 가운데에 아이콘. 테마: 테마가 정합니다.'
-  HINT_EXITPATH: '게임 내 메뉴의 EXIT가 가는 곳. BIBLE을 설정하고(상태 > 부트 로더 > 관리, 또는 PS2BBL의 BOOT LOCK) 비워 두는 것이 가장 좋습니다. 그러면 EXIT는 본체 자체의 부팅 경로로 리셋하고 PS2BBL이 전원을 켤 때처럼 RIPPS2를 시작합니다. 가장 안전한 복귀입니다. 브라우저: PS2 브라우저. 메모리 카드(mc0:/mc1:)나 FAT32 USB 드라이브(mass:/)의 ELF는 리셋 직후 불러오는데, 모든 게임이 본체를 그에 맞게 두지는 않습니다. 그때 MMCE에는 전혀 접근할 수 없습니다.'
+  HINT_EXITPATH: '게임 내 메뉴의 EXIT가 가는 곳. BOOT LOCK을 켜고(PS2BBL, FMCB 또는 OSDMenu, 또는 BIBLE 설정) 비워 두는 것이 가장 좋습니다. 그러면 EXIT는 브라우저를 거치고, 브라우저가 전원을 켤 때처럼 부트 로더와 RIPPS2를 시작합니다. 가장 안전한 복귀입니다. 잠금 없이 비우면: 메모리 카드나 FAT32 USB 드라이브에 있는 RIPPS2 자체 ELF를 리셋 직후 불러오는데, 모든 게임이 본체를 그에 맞게 두지는 않습니다. Browser: PS2 브라우저. 그때 MMCE의 ELF에는 전혀 접근할 수 없습니다.'
   HINT_BDM_START: 'USB, iLink, MX4SIO, exFAT HDD. 자동은 부팅 때 시작합니다: 꽂아 둔 드라이브에 가장 빠르며, 그 게임이 처음부터 모든 게임에 있습니다. 수동은 페이지를 열 때 시작합니다.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Neutrino는 APA HDD의 VMC를 쓸 수 없습니다(exFAT, USB, MX4SIO는 가능): 이 게임은 그 슬롯의 실제 카드로 시작합니다.'
   RIPPS2_FAST_BOOT: Fast Boot

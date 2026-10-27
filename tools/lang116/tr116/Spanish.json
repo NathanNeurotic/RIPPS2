@@ -1,0 +1,21 @@
+{
+ "s": {
+  "0": " (Se ajustaron las configuraciones encontradas: %s.)",
+  "1": " Guarda sus ajustes una vez con su propio configurador y vuelve a activar BOOT LOCK.",
+  "2": "%s no puede iniciar RIPPS2 desde donde está ahora (%s), y RIPPS2 no se copia a sí mismo. Pon RIPPS2.ELF en una tarjeta de memoria o una unidad USB e inícialo desde allí.",
+  "3": "BOOT LOCK no pudo escribir la configuración del cargador de arranque. Comprueba que la tarjeta de memoria o la unidad no esté protegida contra escritura y vuelve a intentarlo.",
+  "4": "BOOT LOCK no encontró ninguna configuración de cargador de arranque que cambiar.",
+  "5": "BOOT LOCK está desactivado. Tu cargador de arranque inicia lo que iniciaba antes (%s).",
+  "6": "BOOT LOCK está activado. %s inicia ahora RIPPS2 al encender (%s), y una Ruta del IGR vacía devuelve el EXIT de un juego por el mismo camino. Mantén uno de sus botones mientras la consola arranca para llegar a otra cosa.%s",
+  "7": "BOOT LOCK puso RIPPS2 el primero en el menú de OSDMenu (%s). OSDMenu no inicia nada por sí mismo: elige RIPPS2 allí, y el EXIT de un juego vuelve a ese menú. Para una consola que inicie RIPPS2 al momento, BIBLE pone PS2BBL 1.2.0 en una tarjeta de memoria (Cargador de arranque).",
+  "8": "BOOT LOCK funciona a través de un cargador de arranque en una tarjeta de memoria (PS2BBL, FMCB u OSDMenu), y aquí no hay ninguno.",
+  "9": "La tarjeta de memoria de la ranura %d inicia %s al encender, y BOOT LOCK no encontró ninguna configuración suya que cambiar (busca %s).",
+  "10": "La tarjeta de memoria de la ranura %d inicia %s al encender, que BOOT LOCK no puede ajustar: funciona a través de PS2BBL, FMCB y OSDMenu.",
+  "11": "En esta consola hay un cargador de arranque con el bloqueo de RIPPS2.",
+  "12": "EXIT de un juego: el navegador, luego tu cargador de arranque (BOOT LOCK)"
+ },
+ "l": {
+  "HINT_EXITPATH": "Adónde va EXIT en el Menú dentro del juego. Mejor dejarlo vacío con BOOT LOCK activado (PS2BBL, FMCB u OSDMenu, o BIBLE preparado): EXIT pasa entonces por el navegador, que inicia tu cargador de arranque y RIPPS2 como al encender, la vuelta más segura. Vacío sin el bloqueo: el propio ELF de RIPPS2 en una tarjeta de memoria o una unidad USB FAT32, cargado justo tras el reinicio, para lo que no todos los juegos dejan la consola preparada. Browser: el navegador de PS2. Un ELF en MMCE no se puede alcanzar entonces.",
+  "HINT_RIPPS2_BOOT_LOCK": "Inicia RIPPS2 al encender a través de tu cargador de arranque: PS2BBL y FMCB lo inician al momento, OSDMenu lo pone el primero en su menú, y el EXIT de un juego vuelve por el mismo camino. Desactivado devuelve lo que había antes. ¿Aún ninguno? Cargador de arranque instala BIBLE."
+ }
+}

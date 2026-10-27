@@ -1,0 +1,21 @@
+{
+ "s": {
+  "0": " (Die gefundenen Konfigurationen wurden gesetzt: %s.)",
+  "1": " Speichere seine Einstellungen einmal mit seinem eigenen Konfigurator und schalte BOOT LOCK dann wieder ein.",
+  "2": "%s kann RIPPS2 nicht von seinem jetzigen Ort (%s) starten, und RIPPS2 kopiert sich nicht selbst. Lege RIPPS2.ELF auf eine Speicherkarte oder ein USB-Laufwerk und starte es von dort.",
+  "3": "BOOT LOCK konnte die Konfiguration des Bootloaders nicht schreiben. Prüfe, ob die Speicherkarte oder das Laufwerk schreibgeschützt ist, und versuche es erneut.",
+  "4": "BOOT LOCK fand keine Bootloader-Konfiguration zum Ändern.",
+  "5": "BOOT LOCK ist aus. Dein Bootloader startet wieder, was er vorher gestartet hat (%s).",
+  "6": "BOOT LOCK ist an. %s startet jetzt beim Einschalten RIPPS2 (%s), und ein leerer IGR-Pfad schickt das EXIT eines Spiels auf demselben Weg zurück. Halte beim Start der Konsole eine seiner Tasten, um etwas anderes zu erreichen.%s",
+  "7": "BOOT LOCK hat RIPPS2 an die erste Stelle im Menü von OSDMenu gesetzt (%s). OSDMenu startet von sich aus nichts: Wähle dort RIPPS2, und das EXIT eines Spiels führt zurück in dieses Menü. Für eine Konsole, die RIPPS2 sofort startet, legt BIBLE PS2BBL 1.2.0 auf eine Speicherkarte (Bootloader).",
+  "8": "BOOT LOCK arbeitet über einen Bootloader auf einer Speicherkarte (PS2BBL, FMCB oder OSDMenu), und hier gibt es keinen.",
+  "9": "Die Speicherkarte in Steckplatz %d startet beim Einschalten %s, und BOOT LOCK fand keine Konfiguration davon zum Ändern (gesucht wird %s).",
+  "10": "Die Speicherkarte in Steckplatz %d startet beim Einschalten %s, das BOOT LOCK nicht einstellen kann: Es arbeitet über PS2BBL, FMCB und OSDMenu.",
+  "11": "Auf dieser Konsole ist ein Bootloader mit der Sperre von RIPPS2.",
+  "12": "EXIT eines Spiels: der Browser, dann dein Bootloader (BOOT LOCK)"
+ },
+ "l": {
+  "HINT_EXITPATH": "Wohin EXIT im Menü im Spiel führt. Am besten leer lassen, mit BOOT LOCK an (PS2BBL, FMCB oder OSDMenu, oder BIBLE eingerichtet): EXIT führt dann über den Browser, der deinen Bootloader und RIPPS2 wie beim Einschalten startet, der sicherste Weg zurück. Leer ohne die Sperre: das eigene ELF von RIPPS2 auf einer Speicherkarte oder einem FAT32-USB-Laufwerk, direkt nach dem Reset geladen, wofür nicht jedes Spiel die Konsole bereit lässt. Browser: der PS2-Browser. Ein ELF auf MMCE ist dann gar nicht erreichbar.",
+  "HINT_RIPPS2_BOOT_LOCK": "Startet RIPPS2 beim Einschalten über deinen Bootloader: PS2BBL und FMCB starten es sofort, OSDMenu setzt es an die erste Stelle seines Menüs, und das EXIT eines Spiels führt auf demselben Weg zurück. Aus stellt wieder her, was vorher da war. Noch keiner? Bootloader installiert BIBLE."
+ }
+}

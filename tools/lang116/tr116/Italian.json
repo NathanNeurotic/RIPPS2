@@ -1,0 +1,21 @@
+{
+ "s": {
+  "0": " (Le configurazioni trovate sono state impostate: %s.)",
+  "1": " Salva una volta le sue impostazioni con il suo configuratore, poi riattiva BOOT LOCK.",
+  "2": "%s non può avviare RIPPS2 da dove si trova ora (%s), e RIPPS2 non si copia da solo. Metti RIPPS2.ELF su una memory card o un'unità USB e avvialo da lì.",
+  "3": "BOOT LOCK non ha potuto scrivere la configurazione del loader di avvio. Controlla che la memory card o l'unità non sia protetta da scrittura, poi riprova.",
+  "4": "BOOT LOCK non ha trovato nessuna configurazione del loader di avvio da modificare.",
+  "5": "BOOT LOCK è disattivo. Il tuo loader di avvio avvia ciò che avviava prima (%s).",
+  "6": "BOOT LOCK è attivo. %s ora avvia RIPPS2 all'accensione (%s), e un Percorso IGR vuoto riporta l'EXIT di un gioco per la stessa strada. Tieni premuto uno dei suoi tasti mentre la console si avvia per raggiungere altro.%s",
+  "7": "BOOT LOCK ha messo RIPPS2 per primo nel menu di OSDMenu (%s). OSDMenu non avvia nulla da solo: scegli RIPPS2 lì, e l'EXIT di un gioco torna a quel menu. Per una console che avvii subito RIPPS2, BIBLE mette PS2BBL 1.2.0 su una memory card (Loader di avvio).",
+  "8": "BOOT LOCK funziona tramite un loader di avvio su una memory card (PS2BBL, FMCB o OSDMenu), e qui non ce n'è nessuno.",
+  "9": "La memory card nello slot %d avvia %s all'accensione, e BOOT LOCK non ha trovato nessuna sua configurazione da modificare (cerca %s).",
+  "10": "La memory card nello slot %d avvia %s all'accensione, che BOOT LOCK non può impostare: funziona tramite PS2BBL, FMCB e OSDMenu.",
+  "11": "Su questa console c'è un loader di avvio con il blocco di RIPPS2.",
+  "12": "EXIT di un gioco: il browser, poi il tuo loader di avvio (BOOT LOCK)"
+ },
+ "l": {
+  "HINT_EXITPATH": "Dove porta EXIT nel Menu di gioco. Meglio lasciarlo vuoto con BOOT LOCK attivo (PS2BBL, FMCB o OSDMenu, o BIBLE impostato): EXIT passa allora dal browser, che avvia il tuo loader di avvio e RIPPS2 come all'accensione, il ritorno più sicuro. Vuoto senza il blocco: l'ELF di RIPPS2 stesso su una memory card o un'unità USB FAT32, caricato subito dopo il riavvio, per cui non tutti i giochi lasciano la console pronta. Browser: il browser della PS2. Un ELF su MMCE allora non è raggiungibile.",
+  "HINT_RIPPS2_BOOT_LOCK": "Avvia RIPPS2 all'accensione tramite il tuo loader di avvio: PS2BBL e FMCB lo avviano subito, OSDMenu lo mette per primo nel suo menu, e l'EXIT di un gioco torna per la stessa strada. Disattivo rimette ciò che c'era prima. Ancora nessuno? Loader di avvio installa BIBLE."
+ }
+}

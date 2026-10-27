@@ -1,0 +1,21 @@
+{
+ "s": {
+  "0": " （找到的配置已设置：%s。）",
+  "1": " 请先用它自己的配置工具保存一次设置，然后再打开 BOOT LOCK。",
+  "2": "%s 无法从 RIPPS2 现在所在的位置（%s）启动它，而 RIPPS2 不会复制自己。请把 RIPPS2.ELF 放到记忆卡或 USB 驱动器上，再从那里启动。",
+  "3": "BOOT LOCK 无法写入引导程序的配置。请检查记忆卡或驱动器没有写保护，然后重试。",
+  "4": "BOOT LOCK 没有找到可更改的引导程序配置。",
+  "5": "BOOT LOCK 已关闭。你的引导程序会启动它以前启动的内容（%s）。",
+  "6": "BOOT LOCK 已开启。%s 现在开机时启动 RIPPS2（%s），IGR路径留空时，游戏的 EXIT 也会沿同一条路返回。主机启动时按住它的任一按键可以进入其他内容。%s",
+  "7": "BOOT LOCK 已把 RIPPS2 放在 OSDMenu 菜单的第一项（%s）。OSDMenu 自己不会启动任何东西：请在那里选择 RIPPS2，游戏的 EXIT 会回到那个菜单。若要主机开机直接启动 RIPPS2，BIBLE 会把 PS2BBL 1.2.0 装到记忆卡上（引导程序）。",
+  "8": "BOOT LOCK 通过记忆卡上的引导程序工作（PS2BBL、FMCB 或 OSDMenu），而这里一个也没有。",
+  "9": "插槽 %d 的记忆卡开机时启动 %s，但 BOOT LOCK 没有找到它可更改的配置（它查找 %s）。",
+  "10": "插槽 %d 的记忆卡开机时启动 %s，BOOT LOCK 无法设置它：BOOT LOCK 通过 PS2BBL、FMCB 和 OSDMenu 工作。",
+  "11": "这台主机上有带 RIPPS2 锁定的引导程序。",
+  "12": "游戏的 EXIT：浏览器，然后是你的引导程序（BOOT LOCK）"
+ },
+ "l": {
+  "HINT_EXITPATH": "游戏内菜单中 EXIT 去哪里。最好在 BOOT LOCK 开启时留空（PS2BBL、FMCB 或 OSDMenu，或已设置好 BIBLE）：EXIT 会经过浏览器，浏览器像开机时一样启动你的引导程序和 RIPPS2，这是最安全的返回方式。未锁定时留空：记忆卡或 FAT32 USB 驱动器上 RIPPS2 自己的 ELF 会在重置后立即加载，但并非每个游戏都会让主机为此做好准备。Browser：PS2 浏览器。那时完全无法访问 MMCE 上的 ELF。",
+  "HINT_RIPPS2_BOOT_LOCK": "开机时通过你的引导程序启动 RIPPS2：PS2BBL 和 FMCB 会立即启动它，OSDMenu 会把它放在菜单第一项，游戏的 EXIT 也沿同一条路返回。关闭会恢复以前的内容。还没有？“引导程序”会安装 BIBLE。"
+ }
+}

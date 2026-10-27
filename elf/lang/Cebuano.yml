@@ -215,7 +215,6 @@ strings:
   This BIOS's sound bank is not the one RIPPS2 knows. Nothing was written.: Dili kini ang sound bank nga nailhan sa RIPPS2 niining BIOS. Walay nasulat.
   ? This console's BIOS has no SNDIMAGE. Consoles from SCPH-30000 on carry one; the first models keep their sounds another way, which RIPPS2 does not read yet.
   : Walay SNDIMAGE ang BIOS niining console. Aduna niini ang mga console gikan sa SCPH-30000 pataas; lahi ang pagtipig sa tunog sa unang mga modelo, nga wala pa mabasa sa RIPPS2.
-  ' (The PS2BBL configs found were set: %s.)': ' (Gi-set ang nakit-ang mga PS2BBL config: %s.)'
   ' (hold CIRCLE at power on to start it)': ' (pindota og dugay ang CIRCLE sa pag-on aron masugdan kini)'
   ' (then ': ' (unya '
   ' A SYS-CONF/PS2BBL.INI build 68 wrote for a loader that never reads it was removed.': ' Gitangtang ang SYS-CONF/PS2BBL.INI nga gisulat sa build 68 alang sa loader nga wala gyud mobasa niini.'
@@ -260,12 +259,6 @@ strings:
   'BIBLE: keeping the HDD''s boot program': 'BIBLE: gitipigan ang boot program sa HDD'
   'BIBLE: putting the HDD''s boot program back': 'BIBLE: gibalik ang boot program sa HDD'
   'BIBLE: writing PS2BBL to the HDD''s boot area': 'BIBLE: gisulat ang PS2BBL sa boot area sa HDD'
-  BOOT LOCK could not write the PS2BBL config. Check that the memory card or drive is not write protected, then try again.: Dili masulat sa BOOT LOCK ang PS2BBL config. Susiha nga dili naka-write-protect ang memory card o drive, unya sulayi pag-usab.
-  BOOT LOCK found no PS2BBL config to change.: Walay nakit-ang PS2BBL config ang BOOT LOCK nga usbon.
-  BOOT LOCK is off. PS2BBL starts what it started before (%s).: Gipalong ang BOOT LOCK. Gisugdan sa PS2BBL ang gisugdan niini kaniadto (%s).
-  ? BOOT LOCK is on. PS2BBL now starts RIPPS2 at power on (%s). Hold a PS2BBL hotkey while the console starts to reach anything else.%s
-  : Gibuksan ang BOOT LOCK. Gisugdan na sa PS2BBL ang RIPPS2 sa pag-on (%s). Pindota og dugay ang usa ka PS2BBL hotkey samtang nagsugod ang console aron makaadto sa uban.%s
-  BOOT LOCK works through PS2BBL (PlayStation 2 Basic BootLoader), and there is none on a memory card here.: Molihok ang BOOT LOCK pinaagi sa PS2BBL (PlayStation 2 Basic BootLoader), ug walay ingon niana sa bisan unsang memory card dinhi.
   ? 'INSTALL BIBLE ON THE INTERNAL HDD
 
     - RIPPS2 is copied to %s.
@@ -289,7 +282,6 @@ strings:
 
     Kinahanglan niini ang console nga mo-boot gikan sa HDD niini (tambok nga PS2 nga adunay network adapter). Ayaw kini palonga hangtod moingon nga humana.'
   INTERNAL HDD  (its boot area): INTERNAL HDD  (ang boot area niini)
-  Memory card %d starts %s at power on, and BOOT LOCK works only through PS2BBL.: Gisugdan sa memory card %d ang %s sa pag-on, ug molihok lang ang BOOT LOCK pinaagi sa PS2BBL.
   ? 'PUT BACK THE HDD''S OLD BOOT PROGRAM
 
     The one BIBLE kept (RIPPS2/MBR-BACKUP.KELF on the HDD) goes back in __mbr, in BIBLE''s place. RIPPS2 and the PS2BBL config stay where they are.'
@@ -774,7 +766,6 @@ strings:
   '%s could not be written to %s. Check its free space and that it is not write protected.': Dili masulat ang %s sa %s. Susiha ang libreng lugar niini ug nga dili kini naka-write-protect.
   '%s is installed in %s.': Naka-install ang %s sa %s.
   ', some files could not be used': ', may mga file nga dili magamit'
-  A PS2BBL with RIPPS2's lock is on this console.: Adunay PS2BBL nga may lock sa RIPPS2 niining console.
   AUDIO folder: AUDIO folder
   DRIVES: MGA DRIVE
   MANAGE: DUMALAHA
@@ -1254,6 +1245,23 @@ strings:
   '%s%s has no %s. RIPPOPS found Sony''s PS1 emulator on %s: START copies %s here and starts the game.': 'Ang %s%s walay %s. Nakit-an sa RIPPOPS ang PS1 emulator sa Sony sa %s: kopyahon sa START ang %s dinhi ug sugdan ang dula.'
   ? 'RIPPS2 does not see %s in %s%s. POPSTARTER needs POPS_IOX.PAK with POPS.PAK, or with POPS.ELF and IOPRP252.IMG: Sony''s PS1 emulator, from your own console. It may find them where RIPPS2 does not look (if your games start, it does). START launches, and this drive is not asked about again.'
   : 'Wala makita sa RIPPS2 ang %s sa %s%s. Kinahanglan sa POPSTARTER ang POPS_IOX.PAK uban sa POPS.PAK, o uban sa POPS.ELF ug IOPRP252.IMG: ang PS1 emulator sa Sony, gikan sa imong kaugalingong console. Mahimong makit-an niya kini diin dili mangita ang RIPPS2 (kon magsugod ang imong mga dula, makit-an niya). Molansad ang START, ug dili na pangutan-on pag-usab kining drive.'
+  ' (The configs found were set: %s.)': ' (Gi-set ang nakit-ang mga config: %s.)'
+  ' Save its settings once with its own configurator, then turn BOOT LOCK on again.': ' I-save makausa ang mga setting niini gamit ang kaugalingon niining configurator, unya i-on pag-usab ang BOOT LOCK.'
+  ? '%s cannot start RIPPS2 from where it is now (%s), and RIPPS2 does not copy itself. Put RIPPS2.ELF on a memory card or a USB drive and start it from there.'
+  : Dili masugdan sa %s ang RIPPS2 gikan sa nahimutangan niini karon (%s), ug dili kopyahon sa RIPPS2 ang kaugalingon. Ibutang ang RIPPS2.ELF sa memory card o USB drive ug sugdi kini gikan didto.
+  ? BOOT LOCK could not write the boot loader's config. Check that the memory card or drive is not write protected, then try again.
+  : Wala masulat sa BOOT LOCK ang config sa boot loader. Susiha nga dili write protected ang memory card o drive, unya sulayi pag-usab.
+  BOOT LOCK found no boot loader config to change.: Walay nakit-ang boot loader config ang BOOT LOCK nga usbon.
+  BOOT LOCK is off. Your boot loader starts what it started before (%s).: Gipalong ang BOOT LOCK. Gisugdan sa imong boot loader ang gisugdan niini kaniadto (%s).
+  ? BOOT LOCK is on. %s now starts RIPPS2 at power on (%s), and an empty IGR Path sends a game's EXIT back the same way. Hold one of its buttons while the console starts to reach anything else.%s
+  : Gibuksan ang BOOT LOCK. Gisugdan na sa %s ang RIPPS2 sa pag-on (%s), ug kung blangko ang IGR path, mobalik ang EXIT sa dula sa samang dalan. Pindota og dugay ang usa sa mga button niini samtang nagsugod ang console aron makaadto sa uban.%s
+  ? 'BOOT LOCK put RIPPS2 first in OSDMenu''s menu (%s). OSDMenu starts nothing by itself: pick RIPPS2 there, and a game''s EXIT comes back to that menu. For a console that starts RIPPS2 at once, BIBLE puts PS2BBL 1.2.0 on a memory card (Boot Loader).'
+  : 'Gibutang sa BOOT LOCK ang RIPPS2 nga una sa menu sa OSDMenu (%s). Walay gisugdan ang OSDMenu sa kaugalingon: pilia didto ang RIPPS2, ug mobalik sa maong menu ang EXIT sa dula. Para sa console nga dayon mosugod sa RIPPS2, ibutang sa BIBLE ang PS2BBL 1.2.0 sa memory card (Boot Loader).'
+  BOOT LOCK works through a boot loader on a memory card (PS2BBL, FMCB or OSDMenu), and there is none here.: Molihok ang BOOT LOCK pinaagi sa boot loader sa memory card (PS2BBL, FMCB o OSDMenu), ug walay bisan usa dinhi.
+  The memory card in slot %d starts %s at power on, and BOOT LOCK found no config of it to change (it looks for %s).: Gisugdan sa memory card sa slot %d ang %s sa pag-on, ug walay nakit-ang config niini ang BOOT LOCK nga usbon (gipangita niini ang %s).
+  'The memory card in slot %d starts %s at power on, which BOOT LOCK cannot set: it works through PS2BBL, FMCB and OSDMenu.': 'Gisugdan sa memory card sa slot %d ang %s sa pag-on, nga dili ma-set sa BOOT LOCK: molihok kini pinaagi sa PS2BBL, FMCB ug OSDMenu.'
+  A boot loader with RIPPS2's lock is on this console.: Adunay boot loader nga may lock sa RIPPS2 niining console.
+  'A game''s EXIT: the browser, then your boot loader (BOOT LOCK)': 'EXIT sa dula: ang browser, unya ang imong boot loader (BOOT LOCK)'
 labels:
   MEDIUM: Tunga-tunga
   BDMMODE: BDM Start Mode
@@ -1397,7 +1405,7 @@ labels:
   RIPPS2_ALL_GAMES: Tanang dula
   RIPPS2_SET_METADATA: I-set ang metadata
   RIPPS2_BOOT_LOCK: Boot Lock
-  HINT_RIPPS2_BOOT_LOCK: Sugdan ang RIPPS2 sa pag-on pinaagi sa PS2BBL. Ibalik sa Off ang gisugdan sa PS2BBL kaniadto. Wala pay PS2BBL? Mag-install og BIBLE ang Boot Loader.
+  HINT_RIPPS2_BOOT_LOCK: 'Sugdan ang RIPPS2 sa pag-on pinaagi sa imong boot loader: dayon kini sugdan sa PS2BBL ug FMCB, ibutang kini sa OSDMenu nga una sa menu niini, ug mobalik ang EXIT sa dula sa samang dalan. Ibalik sa Off ang naa kaniadto. Wala pa? Mag-install og BIBLE ang Boot Loader.'
   HINT_COLORS_TEXT: Ang kolor sa text sa lista sa dula. Adunay kaugalingong kolor ang mga tema; usbon kini alang sa built-in nga mga tema.
   HINT_COLORS_SELECTED: Ang kolor sa gipiling dula ug sa gipiling row sa mga settings page.
   HINT_COLORS_DIALOG: Ang kolor sa mga settings page ug mga message box.
@@ -1740,7 +1748,7 @@ labels:
   HINT_RIPPS2_HINT_FADE: 'Ang button hint o glyph nga mausab mo-fade in, sama sa mga cover, dayon pag-usab niini; ang nagpabilin dili hilabtan, sa matag page ug mensahe. Naka-off: motungha lang. Theme: ang theme ang modesisyon (naka-on gawas kon hints_fade=0 ang giingon niini).'
   RIPPS2_SIDEBAR_STYLE: Estilo sa Sidebar
   HINT_RIPPS2_SIDEBAR_STYLE: 'Classic (Bahin): ang mga icon sa itom nga bar sa sidebar nga adunay kolor nga linya tupad. XL (Usa ka Piraso): usa ka mas lapad nga bar, ang mga icon sa tunga. Theme: ang theme ang modesisyon.'
-  HINT_EXITPATH: 'Asa padulong ang EXIT sa Menu sulod sa dula. Mas maayo nga biyaan nga blangko, nga naka-set up ang BIBLE (STATUS > Boot Loader > Manage, o BOOT LOCK sa imong PS2BBL): i-reset sa EXIT ang console sa kaugalingong boot path niini ug sugdan sa PS2BBL ang RIPPS2 sama sa pag-on, ang labing luwas nga pagbalik. Browser: ang PS2 browser. Ang ELF sa memory card (mc0:/mc1:) o FAT32 USB drive (mass:/) mo-load dayon human sa reset, nga dili tanang dula mobiya sa console nga andam; dili maabot ang MMCE niana.'
+  HINT_EXITPATH: 'Asa padulong ang EXIT sa Menu sulod sa dula. Mas maayo nga biyaan nga blangko nga naka-on ang BOOT LOCK (PS2BBL, FMCB o OSDMenu, o naka-set up ang BIBLE): moagi ang EXIT sa browser, nga mosugod sa imong boot loader ug sa RIPPS2 sama sa pag-on, ang labing luwas nga pagbalik. Blangko nga walay lock: ang kaugalingong ELF sa RIPPS2 sa memory card o FAT32 USB drive, i-load dayon human sa reset, nga dili tanang dula mobiya sa console nga andam. Browser: ang PS2 browser. Dili maabot ang ELF sa MMCE niana.'
   HINT_BDM_START: 'USB, iLink, MX4SIO ug ang exFAT HDD. Sugdan sila sa Awto sa boot: labing paspas para sa mga drive nga nakasaksak, anaa sa Tanang dula ang ilang mga dula sukad sa sinugdanan. Sugdan sila sa Manwal kon imong ablihan ang ilang page.'
   NEUTRINO_VMC_HDD_UNSUPPORTED: 'Dili magamit sa Neutrino ang VMC sa APA HDD (kaya sa exFAT, USB ug MX4SIO): mosugod kini nga dula gamit ang tinuod nga card niana nga slot.'
   RIPPS2_FAST_BOOT: Fast Boot

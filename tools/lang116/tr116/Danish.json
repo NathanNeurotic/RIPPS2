@@ -1,0 +1,21 @@
+{
+ "s": {
+  "0": " (De fundne konfigurationer blev sat: %s.)",
+  "1": " Gem dens indstillinger én gang med dens egen konfigurator, og slå så BOOT LOCK til igen.",
+  "2": "%s kan ikke starte RIPPS2 derfra, hvor det ligger nu (%s), og RIPPS2 kopierer ikke sig selv. Læg RIPPS2.ELF på et memorykort eller et USB-drev, og start det derfra.",
+  "3": "BOOT LOCK kunne ikke skrive opstartsindlæserens konfiguration. Tjek, at memorykortet eller drevet ikke er skrivebeskyttet, og prøv igen.",
+  "4": "BOOT LOCK fandt ingen opstartsindlæser-konfiguration at ændre.",
+  "5": "BOOT LOCK er slået fra. Din opstartsindlæser starter det, den startede før (%s).",
+  "6": "BOOT LOCK er slået til. %s starter nu RIPPS2 ved opstart (%s), og en tom IGR-sti sender et spils EXIT tilbage samme vej. Hold en af dens knapper nede, mens konsollen starter, for at nå noget andet.%s",
+  "7": "BOOT LOCK satte RIPPS2 først i OSDMenus menu (%s). OSDMenu starter ikke noget af sig selv: vælg RIPPS2 der, og et spils EXIT vender tilbage til den menu. For en konsol, der starter RIPPS2 med det samme, lægger BIBLE PS2BBL 1.2.0 på et memorykort (Opstartsindlæser).",
+  "8": "BOOT LOCK virker gennem en opstartsindlæser på et memorykort (PS2BBL, FMCB eller OSDMenu), og her er ingen.",
+  "9": "Memorykortet i plads %d starter %s ved opstart, og BOOT LOCK fandt ingen konfiguration af den at ændre (den leder efter %s).",
+  "10": "Memorykortet i plads %d starter %s ved opstart, som BOOT LOCK ikke kan indstille: den virker gennem PS2BBL, FMCB og OSDMenu.",
+  "11": "En opstartsindlæser med RIPPS2's lås er på denne konsol.",
+  "12": "Et spils EXIT: browseren, derefter din opstartsindlæser (BOOT LOCK)"
+ },
+ "l": {
+  "HINT_EXITPATH": "Hvor EXIT i Menu i spillet fører hen. Bedst at lade stå tom med BOOT LOCK slået til (PS2BBL, FMCB eller OSDMenu, eller BIBLE sat op): EXIT går så gennem browseren, som starter din opstartsindlæser og RIPPS2 som ved opstart, den sikreste vej tilbage. Tom uden låsen: RIPPS2's egen ELF på et memorykort eller et FAT32-USB-drev, indlæst lige efter nulstillingen, som ikke alle spil efterlader konsollen klar til. Browser: PS2-browseren. En ELF på MMCE kan så slet ikke nås.",
+  "HINT_RIPPS2_BOOT_LOCK": "Starter RIPPS2 ved opstart gennem din opstartsindlæser: PS2BBL og FMCB starter det med det samme, OSDMenu sætter det først i sin menu, og et spils EXIT går tilbage samme vej. Fra sætter det tilbage, der var før. Ingen endnu? Opstartsindlæser installerer BIBLE."
+ }
+}
