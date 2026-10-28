@@ -10,9 +10,6 @@ The user's note of 10/28: the boot sound should play with the pillars, not secon
   in one line with the sizes and START copies `boot.adp` (about 360 KB) beside RIPPS2 on the card. The boot reads that
   copy before any drive's. Ripping again offers it again, so the copy follows the set; with no room on the card there
   is no offer and nothing changes. RIPPS2.elf is not any bigger.
-- **Audio up before the drives.** Audio came up only at the end of RIPPS2's start, so even a boot sound read from the
-  card waited over a second for it. It now comes up as soon as the settings are read, before the background loader's
-  first job; the boot sound's send to the sound chip stays the background loader's (the v1.1.8 hang rule).
 - Two new messages in all 32 languages (`tools/lang121`).
 
 ## Build 120 (beta, released in v1.2.1-beta), changes since build 119

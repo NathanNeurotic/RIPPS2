@@ -1,7 +1,6 @@
 """Build 121 (the user, 10/28: the boot sound with the pillars when the sounds live on a drive): BIOS Sounds > Rip offers a
-copy of boot.adp beside RIPPS2 on its memory card, the boot reads that copy before a drive's AUDIO folder, and audio comes
-up on the main thread with the settings read, before the IO worker has its first job (the boot sound's send stays the IO
-worker's).
+copy of boot.adp beside RIPPS2 on its memory card, and the boot reads that copy before a drive's AUDIO folder. Audio still
+comes up at the end of init (bringing it up before applyConfig stopped the boot on the sky in the lab).
 
 Static checks on the patched tree."""
 import os
@@ -31,15 +30,13 @@ if 'sfxLoad(' in early.replace('sfxBootEarlyUpload', ''):
     fail.append('sfxBootEarlyWork: the send to the SPU stays sfxBootEarlyUpload\'s')
 
 opl = rd('src/opl.c')
-i = opl.index('sfxBootEarlyQueue(themeID);')
-seg = opl[i - 300:i]
-if 'sfxBootStart();' not in seg:
-    fail.append('_loadConfig: audio up (sfxBootStart) before the boot sound is queued')
-if opl.index('sfxBootStart();', i - 300) > opl.index('applyConfig(themeID, langID, 0);', i):
-    fail.append('_loadConfig: audio up before applyConfig gives the IO worker the drives')
-start = body(snd, 'void sfxBootStart(void)')
-if 'if (done)\n        return;' not in start:
-    fail.append('sfxBootStart: once (init\'s own call after the boot finds it done)')
+# audio up only at the end of init: with it up during applyConfig, bgmMute / bgmUnMute called audsrv from the main thread
+# while the IO worker sent the boot sound through the same RPC client (the lab: stuck on the sky)
+q = opl.index('sfxBootEarlyQueue(themeID);')
+if 'sfxBootStart();' in opl[q - 300:opl.index('applyConfig(themeID, langID, 0);', q)]:
+    fail.append('_loadConfig: no audio start before applyConfig (audsrv from two threads)')
+if 'sfxBootStart(); // RIPPS2: the boot sound, as the towers start to rise' not in opl:
+    fail.append('init: audio up at its end, after applyConfig')
 
 bs = rd('src/ripps2biossnd.c')
 offer = body(bs, 'static void rbsOfferCardBoot(const char *dir)')
