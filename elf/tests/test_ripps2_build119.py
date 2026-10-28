@@ -125,7 +125,14 @@ need(snd, (("return gEnableBGM || bgmPcmExternal != NULL || bgmOverride[0] != '\
 if '(!gEnableBGM && bgmPcmExternal == NULL)' in snd:
     fail.append('sound.c: no stream gate left that only the disc CD player passes')
 
+# ---- BIBLE's sky: the theme's Storage sky saved with the settings, for BIBLE to read
+ui = rd('src/ripps2ui.c')
+need(ui, (('void ripps2BibleSky(char *out, size_t size)', "the theme's sky as BIBLE_COLOR text"),
+          ('static const unsigned char sky[3][3] = {{0x01, 0x02, 0x09}, {0x0B, 0x19, 0x4C}, {0x02, 0x04, 0x10}};', 'the Storage sky at rest'),
+          ('tintSolve(sw.c[0], &hue, &sat, &lift);', "a Color Sweep's first colour"),
+          ('configSetStr(config, "ripps2_bible_sky", line);', 'saved with the settings')), 'ripps2ui.c')
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build119: the sidebar on the info page; the ART Pack sized, timed, numbered and offered where it fits; the card icon whole; EXIT never black; no text past its box; the testers; the boot sound on the IO worker; tracks with Music off OK')
+print("build119: the sidebar on the info page; the ART Pack sized, timed, numbered and offered where it fits; the card icon whole; EXIT never black; no text past its box; the testers; the boot sound on the IO worker; tracks with Music off; BIBLE's sky saved OK")

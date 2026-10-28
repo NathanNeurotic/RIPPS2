@@ -54,6 +54,10 @@ The user's notes of 10/27 on v1.1.8.
 - **Your media plays with Music off.** The media player's tracks and the file CD player played nothing when Music
   (Settings > Audio) was off. Music off now keeps only the menu music away: your own tracks always play, as a disc in
   the CD player already did.
+- **BIBLE's splash in your colours.** RIPPS2 saves the sky its Storage page draws, in the Color Theme you picked (a
+  Color Sweep's first colour), with its settings (`ripps2_bible_sky`). BIBLE reads it from the RIPPS2 folder its AUTO
+  entry starts, so its splash matches your theme without RIPPS2 touching BIBLE's own config (a `BIBLE_COLOR` you set
+  there still wins).
 
 ## Build 118 (beta, v1.1.8-beta), changes since build 117
 

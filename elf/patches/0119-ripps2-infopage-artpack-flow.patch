@@ -12,7 +12,7 @@ index f0dbae8..4af1c08 100644
  void menuRenderGameMenu();
  void menuRenderAppMenu();
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 2a89b58..c09b774 100644
+index 2a89b58..31a64e1 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -40,7 +40,8 @@ int ripps2BootLockState(void);              // 1 when the config of the loader t
@@ -34,6 +34,14 @@ index 2a89b58..c09b774 100644
  int ripps2CopyFile(const char *src, const char *dst, const char *name) __attribute__((weak));
  void ripps2DiscWatch(void);         // every frame: the drive read after boot and after the tray closes
  int ripps2DiscQuiet(void);
+@@ -273,6 +276,7 @@ int ripps2SweepDelete(int i, int cur);                 // one of the user's own
+ void ripps2PaletteColor(int p, unsigned char out[3]); // the colour a Color Theme shows (Custom: the user's)
+ void ripps2ColorsLoadConfig(config_set_t *config);
+ void ripps2ColorsSaveConfig(config_set_t *config);
++void ripps2BibleSky(char *out, size_t size); // build 119: the theme's sky as RRGGBB,RRGGBB,RRGGBB for BIBLE
+ void ripps2HintsSaveConfig(config_set_t *config);
+ int ripps2EditFile(const char *path);                              // 1 when it saved
+ int ripps2EditMetadata(config_set_t *config, const char *gameName, int canRename); // 1 SAVE (values set, not written);
 diff --git a/include/themes.h b/include/themes.h
 index d9808c1..c856574 100644
 --- a/include/themes.h
@@ -1177,6 +1185,58 @@ index f3fa45e..c1ab19f 100644
      }
      stAdd(ROW_ACTION, ACT_CACHE, _t("CACHE SETTINGS"), stFromCache ? _t("back to Cache") : _t("Fast Cache, Trust Cache"))->hint =
          _t("Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press "
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 9317880..7392c2c 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -597,6 +597,38 @@ void ripps2SweepPreview(const ripps2_sweep_t *s)
+     sweepPreviewOn = s != NULL;
+ }
+ 
++// build 119: the sky the Storage page draws at rest (ripps2bg.c's drawSky with no glow) in the Color Theme in effect, a
++// Color Sweep's first colour when one runs, as "RRGGBB,RRGGBB,RRGGBB" (top, horizon, floor). Saved with the settings as
++// ripps2_bible_sky: BIBLE reads it from the RIPPS2 folder its AUTO entry starts, so its splash matches the theme.
++void ripps2BibleSky(char *out, size_t size)
++{
++    static const unsigned char sky[3][3] = {{0x01, 0x02, 0x09}, {0x0B, 0x19, 0x4C}, {0x02, 0x04, 0x10}};
++    float hue = 0.0f, sat = 1.0f, lift = 0.0f, o[3];
++    int p = gRipps2PaletteShown, tinted = 1, k, i, n = 0;
++    unsigned char c[3];
++    ripps2_sweep_t sw;
++
++    if (gRipps2Sweep > 0 && ripps2SweepGet(gRipps2Sweep, &sw))
++        tintSolve(sw.c[0], &hue, &sat, &lift);
++    else if (p == RIPPS2_PALETTE_CUSTOM)
++        tintSolve(gRipps2CustomColor, &hue, &sat, &lift);
++    else if (p > 0 && p < RIPPS2_PALETTE_COUNT) {
++        hue = paletteDef[p].hue;
++        sat = paletteDef[p].sat;
++        lift = paletteDef[p].lift;
++    } else
++        tinted = 0;
++    for (k = 0; k < 3 && n < (int)size; k++) {
++        if (tinted) {
++            tintApplyF(hue, sat, lift, sky[k], o);
++            for (i = 0; i < 3; i++)
++                c[i] = (unsigned char)(o[i] + 0.5f);
++        } else
++            memcpy(c, sky[k], 3);
++        n += snprintf(out + n, size - n, "%s%02X%02X%02X", k ? "," : "", c[0], c[1], c[2]);
++    }
++}
++
+ static float sweepEase(float f)
+ {
+     return 0.5f - 0.5f * cosf(f * 3.14159265f);
+@@ -740,6 +772,8 @@ void ripps2ColorsSaveConfig(config_set_t *config)
+     int i, k;
+     configSetColor(config, "ripps2_palette_custom", gRipps2CustomColor);
+     configSetInt(config, "ripps2_sweep", gRipps2Sweep);
++    ripps2BibleSky(line, sizeof(line)); // build 119: BIBLE's splash sky, read by BIBLE from this file
++    configSetStr(config, "ripps2_bible_sky", line);
+     {
+         int n = 0, any = 0;
+         for (i = 0; i < RIPPS2_SWEEP_BUILTIN && n < (int)sizeof(line); i++) {
 diff --git a/src/sound.c b/src/sound.c
 index 55047fc..1e07b33 100644
 --- a/src/sound.c
