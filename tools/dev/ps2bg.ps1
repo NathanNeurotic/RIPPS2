@@ -258,7 +258,10 @@ public class LabPanel : System.Windows.Forms.Form {
 
 $vk = @{ up=0x26; down=0x28; left=0x25; right=0x27; cross=0x58; circle=0x43; square=0x5A; triangle=0x53;
          start=0x0D; select=0x08; l1=0x51; r1=0x45; l2=0x31; r2=0x33; f8=0x77; f1=0x70; rec=0x7A; l3=0x56; r3=0x42;
-         rup=0x49; rdown=0x4B; rleft=0x4A; rright=0x4C }
+         rup=0x49; rdown=0x4B; rleft=0x4A; rright=0x4C;
+         # one key held for two buttons (posted keys reach PCSX2 one at a time; the lab ini binds T to TRIANGLE and
+         # CROSS, Y to L2 and R2)
+         tricross=0x54; l2r2=0x59 }
 $extended = @(0x25, 0x26, 0x27, 0x28)
 
 function KeyMsg([IntPtr]$h, [int]$code, [bool]$up) {
@@ -290,6 +293,8 @@ if ($Attach) {
   $fgBefore = [BG]::GetForegroundWindow()
   if (-not $env:PS2BG_NODESK) { if ([BG]::OpenDesk()) { "on the lab's own desktop ($([BG]::DeskName)): it cannot take the focus or show" } else { "could not make the lab desktop; running parked off screen" } }
   $launchArgs = $(if ($Bios) { "-bios" } else { "-fastboot -elf `"$Elf`"" }) # -Bios: the console's own menu (the browser), no ELF
+  # PS2BG_SLOWBOOT=1: the BIOS intro before the ELF, so buttons held from the start are down when it first reads the pad
+  if ($env:PS2BG_SLOWBOOT -and -not $Bios) { $launchArgs = "-slowboot -elf `"$Elf`"" }
   if ($Iso) { $launchArgs += " `"$Iso`"" }
   if (-not $NoPanel) { [LabPanel]::Start($(if ($Title) { $Title } else { $(if ($Bios) { "BIOS" } else { Split-Path -Leaf (Split-Path -Parent $Elf) }) }), $exe) }
   $pid2 = [BG]::Launch($exe, $launchArgs, $lab)
