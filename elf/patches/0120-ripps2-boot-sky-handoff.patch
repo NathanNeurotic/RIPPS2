@@ -95,7 +95,7 @@ index 14a233a..09a73ed 100644
          _loadConfig(); // only try to restore config if emergency key is not being pressed
          guiRenderGreetingScreen();
 diff --git a/src/renderman.c b/src/renderman.c
-index d65a540..46c0278 100644
+index d65a540..120f7ae 100644
 --- a/src/renderman.c
 +++ b/src/renderman.c
 @@ -236,6 +236,32 @@ static int rmOnVSync(int cause)
@@ -119,7 +119,7 @@ index d65a540..46c0278 100644
 +static void rmClearFirst(void)
 +{
 +    gsKit_clear(gsGlobal, gColBlack);
-+    if (bootSkySet) {
++    if (bootSkySet && !rmQueueFull()) {
 +        float w = (float)gsGlobal->Width, h = (float)gsGlobal->Height, hy = h * 290.0f / 480.0f;
 +        gsKit_prim_quad_gouraud(gsGlobal, 0.0f, 0.0f, w, 0.0f, 0.0f, hy, w, hy, 0, bootSky[0], bootSky[0], bootSky[1],
 +                                bootSky[1]);
