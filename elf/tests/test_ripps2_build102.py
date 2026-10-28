@@ -161,7 +161,7 @@ if 'iy += (texture->Height - 1 - vb) * ih / texture->Height;' not in thm or 'ele
     fail.append("valign=bottom must stand the art's lowest visible row on its box")
 ib = thm.find('theme_element_t *elem = (theme_element_t *)malloc(sizeof(theme_element_t));')
 head = thm[ib:thm.find('snprintf(elemProp, sizeof(elemProp), "%s_x", name);', ib)]
-for f in ('elem->blur = 0;', 'elem->wideCrop = 0;', 'elem->artBottom = 0;'):
+for f in ('elem->blur = 0;', 'elem->wideCrop = -1;', 'elem->artBottom = 0;'):
     if f not in head:
         fail.append('a new element must start with %s' % f)
 lg = grid['info3']  # info3 since build 114
