@@ -1,0 +1,222 @@
+diff --git a/include/renderman.h b/include/renderman.h
+index 7568573..5eaa93d 100644
+--- a/include/renderman.h
++++ b/include/renderman.h
+@@ -71,6 +71,7 @@ enum rm_aratio {
+ };
+ 
+ /** Initializes the rendering manager */
++void rmSetBootSky(const unsigned int sky[3]); // RIPPS2 build 120: the screen's first fill (0xRRGGBB: top, horizon, floor)
+ void rmInit();
+ 
+ /** Sets a new screen mode */
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 0a27aec..47cb4ab 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -328,7 +328,9 @@ void ripps2OpenMedia(const char *path);
+ void ripps2SetOrbInput(int showPaths, int boost); // Memory Files: L2 shows the paths, R2 builds the orbs to 2x
+ 
+ // ---- Boot swoop and launch light-up (ripps2bg.c) ----
+-void ripps2DrawBootFrame(void);     // the swoop's first frame, for boot screens before the intro
++void ripps2DrawBootFrame(void);     // build 120: the sky alone in the theme's colours, for boot screens before the intro
++void ripps2SetBootSky(const unsigned int sky[3]); // build 120: the saved sky (ripps2_bible_sky), read before the settings
++void ripps2DrawBootSky(void);       // build 120: that sky as saved, for the frame while the settings load
+ int ripps2IntroUiReady(void);       // the boot swoop has run long enough to bring the menu in
+ void ripps2PlayLaunchSequence(void); // pillars only, light-up and flash; the last frame holds
+ int ripps2LaunchScreenHeld(void);    // that frame is up: the teardown must not draw over it
+diff --git a/src/opl.c b/src/opl.c
+index 14a233a..09a73ed 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -6066,6 +6066,45 @@ static void setDefaults(void)
+     RemainSecs = 0;
+ }
+ 
++// RIPPS2 build 120 (the user, 10/28: no display pops from BIBLE into RIPPS2): the screen starts in the picture the
++// settings will show, before they load. Video Mode, Widescreen and the boot sky (ripps2_bible_sky) are read straight
++// from the settings file -- beside RIPPS2.ELF when it started from a memory card, else RIPPS2's card folders -- so the
++// first mode set is the user's (BIBLE starts in the same one: the TV keeps one signal across the hand-off) and the
++// first frames are the sky BIBLE left on screen. Memory cards only, as BIBLE reads them. _loadConfig reads every key
++// again as before; nothing here is saved, and no file leaves the defaults.
++static void ripps2BootDisplayPeek(void)
++{
++    static const char *const cards[] = {"mc0:/RIPPS2", "mc1:/RIPPS2"};
++    char path[300], line[256];
++    unsigned int sky[3];
++    int i, haveSky = 0;
++    FILE *fp = NULL;
++
++    if (!strncmp(gBootDir, "mc", 2) && strchr(gBootDir, '?') == NULL) {
++        snprintf(path, sizeof(path), "%s/%s", gBootDir, "settings_riptopl.cfg");
++        fp = fopen(path, "r");
++    }
++    for (i = 0; fp == NULL && i < 2; i++) {
++        snprintf(path, sizeof(path), "%s/%s", cards[i], "settings_riptopl.cfg");
++        fp = fopen(path, "r");
++    }
++    if (fp == NULL)
++        return;
++    while (fgets(line, sizeof(line), fp) != NULL) {
++        if (!strncmp(line, CONFIG_OPL_VMODE "=", sizeof(CONFIG_OPL_VMODE)))
++            gVMode = atoi(line + sizeof(CONFIG_OPL_VMODE));
++        else if (!strncmp(line, CONFIG_OPL_WIDESCREEN "=", sizeof(CONFIG_OPL_WIDESCREEN)))
++            gWideScreen = atoi(line + sizeof(CONFIG_OPL_WIDESCREEN)) != 0;
++        else if (!strncmp(line, "ripps2_bible_sky=", 17) && sscanf(line + 17, "%6x,%6x,%6x", &sky[0], &sky[1], &sky[2]) == 3)
++            haveSky = 1;
++    }
++    fclose(fp);
++    if (haveSky) {
++        rmSetBootSky(sky);
++        ripps2SetBootSky(sky);
++    }
++}
++
+ static void init(void)
+ {
+     // default variable values
+@@ -6076,6 +6115,7 @@ static void init(void)
+     configInit(gBootDir[0] ? gBootDir : NULL); // settings live in the boot dir (cwd), not a fixed MC default
+     metaDbInit(); // RIPPS2
+ 
++    ripps2BootDisplayPeek(); // build 120: the mode, the shape and the sky the settings will show
+     rmInit();
+     lngInit();
+     thmInit();
+@@ -6111,8 +6151,9 @@ static void init(void)
+         guiSetBootStatus(_l(_STR_BOOT_LOADING_CONFIG));
+         // build 115 (the user, 10/26: the boot colour of the pillars from the Color Theme): the towers' first pose waits
+         // for the settings, so it is in the user's Color Theme (or Color Sweep) from its first frame instead of RIPPS2's
+-        // blue until the menu; a black frame while they load
++        // blue until the menu; build 120: the boot sky while they load, not a black frame
+         guiStartFrame();
++        ripps2DrawBootSky();
+         guiEndFrame();
+         _loadConfig(); // only try to restore config if emergency key is not being pressed
+         guiRenderGreetingScreen();
+diff --git a/src/renderman.c b/src/renderman.c
+index d65a540..46c0278 100644
+--- a/src/renderman.c
++++ b/src/renderman.c
+@@ -236,6 +236,32 @@ static int rmOnVSync(int cause)
+     return 0;
+ }
+ 
++// RIPPS2 build 120: the boot sky (ripps2_bible_sky, read from the settings file before the screen starts): the screen's
++// first fill, so the first picture RIPPS2 shows is the sky BIBLE left on screen at its hand-off, not a black frame
++static int bootSkySet = 0;
++static u64 bootSky[3];
++
++void rmSetBootSky(const unsigned int sky[3])
++{
++    int k;
++    for (k = 0; k < 3; k++)
++        bootSky[k] = GS_SETREG_RGBAQ((sky[k] >> 16) & 0xFF, (sky[k] >> 8) & 0xFF, sky[k] & 0xFF, 0x80, 0x00);
++    bootSkySet = 1;
++}
++
++// black, then the boot sky when there is one: top to horizon (290 of 480 lines down), horizon to floor, as ripps2bg.c
++static void rmClearFirst(void)
++{
++    gsKit_clear(gsGlobal, gColBlack);
++    if (bootSkySet) {
++        float w = (float)gsGlobal->Width, h = (float)gsGlobal->Height, hy = h * 290.0f / 480.0f;
++        gsKit_prim_quad_gouraud(gsGlobal, 0.0f, 0.0f, w, 0.0f, 0.0f, hy, w, hy, 0, bootSky[0], bootSky[0], bootSky[1],
++                                bootSky[1]);
++        gsKit_prim_quad_gouraud(gsGlobal, 0.0f, hy, w, hy, 0.0f, h, w, h, 0, bootSky[1], bootSky[1], bootSky[2],
++                                bootSky[2]);
++    }
++}
++
+ void rmInit()
+ {
+     short int mode = gsKit_check_rom();
+@@ -371,11 +397,12 @@ int rmSetMode(int force)
+             // then restore the original active buffer so the following flip and all
+             // later rendering behave exactly as before. We are in GS_ONESHOT mode
+             // here, so each gsKit_clear() is drawn immediately.
+-            gsKit_clear(gsGlobal, gColBlack);
++            // build 120: rmClearFirst, the boot sky when one was read
++            rmClearFirst();
+             if (gsGlobal->DoubleBuffering == GS_SETTING_ON) {
+                 gsGlobal->ActiveBuffer ^= 1;
+                 gsKit_setactive(gsGlobal);
+-                gsKit_clear(gsGlobal, gColBlack);
++                rmClearFirst();
+                 gsGlobal->ActiveBuffer ^= 1;
+                 gsKit_setactive(gsGlobal);
+             }
+diff --git a/src/ripps2bg.c b/src/ripps2bg.c
+index 8e3f858..ee9fdda 100644
+--- a/src/ripps2bg.c
++++ b/src/ripps2bg.c
+@@ -187,6 +187,16 @@ static float easeInOutCubicf(float x)
+ #define BOOT_POSE_S 1.1f
+ static int bootFreeze = 0, bootPoseShown = 0;
+ 
++// Build 120 (the user, 10/28: no display pops from BIBLE into RIPPS2): the boot shows the sky alone -- the screen's
++// first fill (rmSetBootSky), the frame while the settings load, the frames until the swoop -- the sky BIBLE leaves on
++// screen at its hand-off; the scene then fades up over it in BOOT_FADE_S. The frames before the settings load draw
++// the saved sky as it is (it was saved in the theme's colours); from the greeting on, the theme's own. The swoop still
++// starts from the boot pose's time, so the menu comes in when it always did.
++#define BOOT_FADE_S 0.8f
++static unsigned int bootSkyRgb[3] = {0x010209, 0x0B194C, 0x020410};
++static int bootSkyShown = 0;
++static float bootFadeFrom = -1.0f;
++
+ static float sceneTime(void)
+ {
+     if (bootFreeze && sceneT0 < 0.0f)
+@@ -799,16 +809,49 @@ void ripps2DrawPillars(void)
+         if (fa > 0)
+             rmDrawRect(0, 0, 640, 480, RGBA(0xE8, 0xF0, 0xFF, fa));
+     }
++
++    // build 120: the boot comes in from the sky alone: the scene fades up over it
++    if (bootSkyShown) {
++        float now = nowSeconds(), k;
++        if (bootFadeFrom < 0.0f)
++            bootFadeFrom = now;
++        k = 1.0f - (now - bootFadeFrom) / BOOT_FADE_S;
++        if (k > 0.0f) {
++            int a = (int)(0x80 * k);
++            drawSky(RGBA(0x01, 0x02, 0x09, a), RGBA(0x0B, 0x19, 0x4C, a), RGBA(0x02, 0x04, 0x10, a));
++        } else
++            bootSkyShown = 0;
++    }
+ }
+ 
+ // ---- boot and launch hooks ----
+ 
++void ripps2SetBootSky(const unsigned int sky[3])
++{
++    int k;
++    for (k = 0; k < 3; k++)
++        bootSkyRgb[k] = sky[k] & 0xFFFFFF;
++}
++
++void ripps2DrawBootSky(void)
++{
++    int tint = gRipps2TintOn, k;
++    u64 c[3];
++    gRipps2TintOn = 0; // saved in the theme's colours already
++    for (k = 0; k < 3; k++)
++        c[k] = RGBA((bootSkyRgb[k] >> 16) & 0xFF, (bootSkyRgb[k] >> 8) & 0xFF, bootSkyRgb[k] & 0xFF, 0x80);
++    drawSky(c[0], c[1], c[2]);
++    gRipps2TintOn = tint;
++}
++
+ void ripps2DrawBootFrame(void)
+ {
++    // build 120: the sky alone in the theme's colours (see BOOT_FADE_S), where this was the swoop's held first pose
+     bootPoseShown = 1;
+-    bootFreeze = 1;
+-    ripps2DrawPillars();
+-    bootFreeze = 0;
++    bootSkyShown = 1;
++    wideUpdate();
++    ripps2PaletteSync();
++    drawSky(RGBA(0x01, 0x02, 0x09, 0x80), RGBA(0x0B, 0x19, 0x4C, 0x80), RGBA(0x02, 0x04, 0x10, 0x80));
+ }
+ 
+ int ripps2IntroUiReady(void)

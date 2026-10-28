@@ -1,5 +1,16 @@
 # RIPPS2 changelog
 
+## Build 120 (beta), changes since build 119
+
+The user's note of 10/28: no display pops from BIBLE into RIPPS2, and BIBLE in RIPPS2's video mode and Widescreen.
+
+- **RIPPS2 starts on the sky.** Before its settings load, RIPPS2 reads three keys straight from its settings file
+  (Video Mode, Widescreen and the sky saved for BIBLE), so the screen starts in the user's mode, not Auto first and
+  the saved mode a moment later. Its first fill and the frame while the settings load are that sky, not black, and
+  the boot shows the sky alone until the towers fade up over it. BIBLE (its `widescreen-hd` branch) starts in the
+  same mode, fades its logo away at a launch and leaves the same sky on screen, so the TV keeps one signal and one
+  picture from BIBLE into RIPPS2.
+
 ## Build 119 (beta, v1.1.9-beta when released), changes since build 118
 
 The user's notes of 10/27 on v1.1.8.
