@@ -1,3 +1,25 @@
+diff --git a/Makefile b/Makefile
+index e19ed26..a660b57 100644
+--- a/Makefile
++++ b/Makefile
+@@ -76,6 +76,8 @@ DTL_T10000 ?= 0
+ 
+ #Nor stripping neither compressing binary ELF after compiling.
+ NOT_PACKED ?= 0
++# RIPPS2 build 120: ps2-packer's options (e.g. -p n2e), to weigh its decompression time at boot against the file's size
++PACKER_FLAGS ?=
+ 
+ # ======== END OF CONFIGURABLE SECTION. DO NOT MODIFY VARIABLES AFTER THIS POINT!! ========
+ DEBUG ?= 0
+@@ -634,7 +636,7 @@ $(EE_BIN_STRIPPED): $(EE_BIN)
+ 
+ $(EE_BIN_PACKED): $(EE_BIN_STRIPPED)
+ 	echo "Compressing..."
+-	ps2-packer $< $@ > /dev/null
++	ps2-packer $(PACKER_FLAGS) $< $@ > /dev/null
+ 
+ $(EE_VPKD).ELF: $(EE_BIN_PACKED)
+ 	cp -f $< $@
 diff --git a/include/renderman.h b/include/renderman.h
 index 7568573..5eaa93d 100644
 --- a/include/renderman.h
