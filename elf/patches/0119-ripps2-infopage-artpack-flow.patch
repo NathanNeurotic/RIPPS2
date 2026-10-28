@@ -12,7 +12,7 @@ index f0dbae8..4af1c08 100644
  void menuRenderGameMenu();
  void menuRenderAppMenu();
 diff --git a/include/ripps2.h b/include/ripps2.h
-index 2a89b58..31a64e1 100644
+index 2a89b58..0a27aec 100644
 --- a/include/ripps2.h
 +++ b/include/ripps2.h
 @@ -40,7 +40,8 @@ int ripps2BootLockState(void);              // 1 when the config of the loader t
@@ -25,6 +25,15 @@ index 2a89b58..31a64e1 100644
  void ripps2BibleManage(void);               // BOOT LOADER > MANAGE: what each card starts; BIBLE (PS2BBL 1.2.0) to install or repair
  int ripps2RebootIopWith(const void *ioprp, int size); // opl.c: the IOP rebooted from an IOPRP image, the menu taken down and back
  int ripps2GetBootPath(char *out, int size); // opl.c: the path RIPPS2 was started from; 0 when unknown
+@@ -85,7 +86,7 @@ enum { RIPPS2_GLYPHS_HIDDEN = 0, RIPPS2_GLYPHS_SHOWN, RIPPS2_GLYPHS_FADE_IN, RIP
+ enum { RIPPS2_SHOW_ON = 0, RIPPS2_SHOW_IDLE, RIPPS2_SHOW_OFF, RIPPS2_SHOW_COUNT }; // shown / fade when idle / hidden
+ // build 80: Source Name has one more, Pop In; build 81: the name is not drawn over the list, it plays as
+ // a view word (ALL GAMES, HDD GAMES...) in the middle of the page when it changes
+-enum { RIPPS2_SRC_POP = RIPPS2_SHOW_COUNT, RIPPS2_SRC_COUNT };
++enum { RIPPS2_SRC_POP = RIPPS2_SHOW_COUNT, RIPPS2_SRC_POPNAME, RIPPS2_SRC_COUNT }; // build 119: Pop In and Name, both
+ int ripps2SourceNameMode(void);  // the setting, with a theme's source_name=pop standing in for Shown
+ void ripps2SourceToast(const char *text); // Pop In: call each frame the list's source name would draw
+ enum { RIPPS2_GLYPH_DRIVES = 0, RIPPS2_GLYPH_FORMATIONS }; // whose glyphs: Storage's drive name, Memory Files' formation
 @@ -180,6 +181,8 @@ void ripps2SizeText(long long bytes, char *out, int size);
  int ripps2StageFor(unsigned int clusterBytes, int floor); // a write stage of whole clusters, at least floor
  // build 114: the RIPPS2 progress bar (ripps2games.c) for a long job with nothing else on screen, and a file copied with it
@@ -43,7 +52,7 @@ index 2a89b58..31a64e1 100644
  int ripps2EditFile(const char *path);                              // 1 when it saved
  int ripps2EditMetadata(config_set_t *config, const char *gameName, int canRename); // 1 SAVE (values set, not written);
 diff --git a/include/themes.h b/include/themes.h
-index d9808c1..c856574 100644
+index d9808c1..d5e98d8 100644
 --- a/include/themes.h
 +++ b/include/themes.h
 @@ -132,7 +132,7 @@ typedef struct theme_element
@@ -55,7 +64,15 @@ index d9808c1..c856574 100644
      int artBottom;        // RIPPS2 build 102: GameImage art stands on its box's bottom (<name>_valign=bottom)
      // Per-device element filter (theme key devices=usb,hdd,...): bitmask over the thmDeviceVocab
      // table indices in themes.c. 0 = unfiltered (the pre-existing behavior). deviceCoverage is
-@@ -285,6 +285,7 @@ typedef struct theme
+@@ -252,6 +252,7 @@ typedef struct theme
+     const void *frostKey[2][2];
+     int frostCrop[2];      // RIPPS2 build 79: the frost's source is drawn widecrop // ... made from this texture memory, for this item (rebuilt when either changes)
+     int srcNamePop;        // RIPPS2 build 80: source_name=pop, the theme's Source Name is Pop In unless the user picked otherwise
++                           // (build 119: 2, source_name=pop_name, Pop In and Name)
+     int noTowers;          // RIPPS2 build 78: towers=0, the game pages never show the pillars (bg_color instead)
+     // RIPPS2 build 81: the theme's defaults for Colors and More (-1: none), each standing in while the
+     // setting is at its own default: color_theme, category_bar, button_hints, dpad_glyphs, source_name
+@@ -285,6 +286,7 @@ typedef struct theme
      int sbLeftList;                     // build 115: sidebar_left=list: Left / Right and L1 / R1 stay the list's (RIPFLOW's covers)
      int sbAutoHide;                     // build 115: sidebar_hide=1: the sidebar slides away until Circle calls it
      int flowTilt;                       // build 117: flowtilt=1: RIPFLOW's Up / Down (left stick) tip the centre case
@@ -64,7 +81,7 @@ index d9808c1..c856574 100644
      int hintsFlank, hintsFlankGap;      // build 115: hints_flank=1: RUN and SOURCE either side of the source name; the gap
      int badgeSet;                       // build 115: badge_set=ripps2 (1): RIPPS2's built-in badges, none of its own
 diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
-index 99d66fa..e551ed2 100644
+index 99d66fa..e546693 100644
 --- a/lng_tmpl/_base.yml
 +++ b/lng_tmpl/_base.yml
 @@ -305,7 +305,7 @@ gui_strings:
@@ -76,6 +93,15 @@ index 99d66fa..e551ed2 100644
  - label: HINT_SPINDOWN
    string: Value in minute(s), 0 to disable spin down.
  - label: HDD_SPINDOWN
+@@ -1514,7 +1514,7 @@ gui_strings:
+ - label: RIPPS2_SOURCE
+   string: Source
+ - label: HINT_RIPPS2_SOURCE_NAME
+-  string: "The source's name over the games (ALL GAMES, HDD GAMES and so on). Fade When Idle fades it with the category bar; Pop In shows it big in the middle of the page instead, the way L3 names the list, on the first list after boot and whenever the source changes, then fades. Themes can make Pop In their Shown. Theme: the theme decides."
++  string: "The source's name over the games (ALL GAMES, HDD GAMES and so on). Fade When Idle fades it with the category bar; Pop In shows it big in the middle of the page instead, the way L3 names the list, on the first list after boot and whenever the source changes, then fades. Pop In and Name does both. Themes can make Pop In their Shown. Theme: the theme decides."
+ - label: RIPPS2_RECENTS
+   string: Recent Games
+ - label: HINT_RIPPS2_RECENTS
 diff --git a/misc/ripps2.icn b/misc/ripps2.icn
 index f30b141cc317e7c0391fc95b1a813aa8d2a8aa44..4f59490c70e905eb2497b92a8b830c3b50cc6c01 100644
 GIT binary patch
@@ -386,10 +412,32 @@ zXz}d~cOHN8*kQ=dmXF?(?VFx#1@xBqbsh+uy<`n2c1j%@$DTaV(D%fBcKgqsac;)D
 zH1x8#2QB{m*xOMXp)5F|_0;2Y@~CH4E{X2u^H_1+_MbJp^_wiBft6DFf|GSW{>inl
 L?(vhFRQ&$~kl|c7
 
+diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
+index b90b720..e22face 100644
+--- a/misc/theme_coverflow.cfg
++++ b/misc/theme_coverflow.cfg
+@@ -12,6 +12,8 @@ sidebar_hide=1
+ flowtilt=1
+ # build 115: OSDSYS-style hints, RUN left of the source name and SOURCE right of it
+ hints_flank=1
++# build 119: the source's name shown under the covers (Source Name: Pop In or Pop In and Name bring the big name back)
++source_name=shown
+ # RIPPS2 build 91: as a game launches its disc pops in and spins up (Flow and Grid > Launch Disc can change it)
+ launch_disc=spin
+ default_font=builtin:ripflow
 diff --git a/src/gui.c b/src/gui.c
-index 3514a62..9feb00b 100644
+index 3514a62..61c5f61 100644
 --- a/src/gui.c
 +++ b/src/gui.c
+@@ -2989,7 +2989,7 @@ void guiShowArtworkConfig(void)
+ static const char *guiRipps2GlyphNames[] = {N_("Theme"), N_("Hidden"), N_("Shown"), N_("Fade In"), N_("Fade Out"), N_("Guidance"), NULL}; // build 115: Guidance
+ static const char *guiRipps2HintFadeNames[] = {N_("Theme"), N_("On"), N_("Off"), NULL}; // build 115
+ static const char *guiRipps2ShowNames[] = {N_("Theme"), N_("Shown"), N_("Fade When Idle"), N_("Hidden"), NULL};
+-static const char *guiRipps2SrcNames[] = {N_("Theme"), N_("Shown"), N_("Fade When Idle"), N_("Hidden"), N_("Pop In"), NULL}; // build 80
++static const char *guiRipps2SrcNames[] = {N_("Theme"), N_("Shown"), N_("Fade When Idle"), N_("Hidden"), N_("Pop In"), N_("Pop In and Name"), NULL}; // build 80; 119: Pop In and Name
+ static const char *guiRipps2OrderNames[] = {N_("Theme"), N_("Launch Disc First"), N_("Memory Files First"), NULL};
+ static const char *guiRipps2LayoutNames[] = {N_("Theme"), N_("Across the Top"), N_("Sidebar"), N_("Menu"), NULL}; // build 113; 115: Menu
+ static const char *guiRipps2SbStyleNames[] = {N_("Theme"), N_("Classic (Split)"), N_("XL (One Piece)"), NULL}; // build 115
 @@ -5761,7 +5761,8 @@ static void guiShow()
                  ripps2DrawPanelMorph(ax, ay, aw, ah, bx, by, bw, bh, (t - MORPH_CONCEAL_S) / MORPH_MOVE_S);
              // build 115 (the user, 10/26: the sidebar went missing between the list and the info page): it stays where it
@@ -1186,10 +1234,28 @@ index f3fa45e..c1ab19f 100644
      stAdd(ROW_ACTION, ACT_CACHE, _t("CACHE SETTINGS"), stFromCache ? _t("back to Cache") : _t("Fast Cache, Trust Cache"))->hint =
          _t("Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press "
 diff --git a/src/ripps2ui.c b/src/ripps2ui.c
-index 9317880..7392c2c 100644
+index 9317880..39ca408 100644
 --- a/src/ripps2ui.c
 +++ b/src/ripps2ui.c
-@@ -597,6 +597,38 @@ void ripps2SweepPreview(const ripps2_sweep_t *s)
+@@ -242,14 +242,15 @@ float ripps2CatBarAlpha(void)
+ 
+ int ripps2SourceNameMode(void)
+ {
+-    int def = gTheme == NULL ? -1 : gTheme->srcNamePop ? RIPPS2_SRC_POP : gTheme->srcNameDef; // build 80: pop; 81: the others
++    int def = gTheme == NULL ? -1 : gTheme->srcNamePop == 2 ? RIPPS2_SRC_POPNAME : gTheme->srcNamePop ? RIPPS2_SRC_POP
++                                                                                      : gTheme->srcNameDef; // build 80: pop; 81: the others; 119: pop_name
+     return themeDefault(gRipps2SrcName, RIPPS2_SHOW_ON, def, RIPPS2_SET_SRCNAME);
+ }
+ 
+ float ripps2SourceNameAlpha(void)
+ {
+     int mode = ripps2SourceNameMode();
+-    return mode == RIPPS2_SRC_POP ? 1.0f : showAlpha(mode); // build 71: the same idle fade as the category bar
++    return mode >= RIPPS2_SRC_POP ? 1.0f : showAlpha(mode); // build 71: the same idle fade as the category bar (Pop In: always)
+ }
+ 
+ // The D-pad glyphs beside a drive's name (Storage) and a formation's (Memory Files). Hidden by default:
+@@ -597,6 +598,38 @@ void ripps2SweepPreview(const ripps2_sweep_t *s)
      sweepPreviewOn = s != NULL;
  }
  
@@ -1228,7 +1294,7 @@ index 9317880..7392c2c 100644
  static float sweepEase(float f)
  {
      return 0.5f - 0.5f * cosf(f * 3.14159265f);
-@@ -740,6 +772,8 @@ void ripps2ColorsSaveConfig(config_set_t *config)
+@@ -740,6 +773,8 @@ void ripps2ColorsSaveConfig(config_set_t *config)
      int i, k;
      configSetColor(config, "ripps2_palette_custom", gRipps2CustomColor);
      configSetInt(config, "ripps2_sweep", gRipps2Sweep);
@@ -1334,7 +1400,7 @@ index 55047fc..1e07b33 100644
  }
  
 diff --git a/src/themes.c b/src/themes.c
-index 98773e6..8d6a1f0 100644
+index 98773e6..386a302 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -1234,6 +1234,8 @@ static void *thmItemKey(struct submenu_list *item)
@@ -1416,7 +1482,32 @@ index 98773e6..8d6a1f0 100644
      elem->artBottom = 0; // build 102
      elem->deviceFilter = 0;   // malloc'd without memset: MUST be zeroed explicitly (0 = unfiltered)
      elem->deviceCoverage = 0; // filled at validateGUIElems for unfiltered MenuIcon/ItemsList/HintText
-@@ -6713,6 +6745,11 @@ static int thmLoad(const char *themePath)
+@@ -4178,6 +4210,8 @@ static void drawMenuText(struct menu_list *menu, struct submenu_list *item, conf
+         ripps2SourceToast(text);
+         return;
+     }
++    if (ripps2SourceNameMode() == RIPPS2_SRC_POPNAME) // build 119: the big name as the source changes, and the line too
++        ripps2SourceToast(text);
+     // build 115: hints_flank=1 (OSDSYS style): the confirm button's RUN left of the name, the cancel button's SOURCE right
+     // of it when there is another source to step to, in the D-pad glyphs' place (the hint row leaves the two out)
+     if (gTheme->hintsFlank && elem->aligned && !ripps2SidebarOn()) {
+@@ -6572,11 +6606,12 @@ static int thmLoad(const char *themePath)
+     // RIPPS2 build 78: towers=0 keeps the pillars off the game pages (Settings still shows them)
+     if (configGetInt(themeConfig, "towers", &intValue) && intValue == 0)
+         newT->noTowers = 1;
+-    // RIPPS2 build 80: source_name=pop makes Pop In the theme's Source Name (the setting's Shown)
++    // RIPPS2 build 80: source_name=pop makes Pop In the theme's Source Name (the setting's Shown); build 119: pop_name
++    // makes it Pop In and Name (the big name as the source changes, and the name over the games as Shown has it)
+     {
+         const char *srcName = NULL;
+-        if (configGetStr(themeConfig, "source_name", &srcName) && srcName != NULL && !strcmp(srcName, "pop"))
+-            newT->srcNamePop = 1;
++        if (configGetStr(themeConfig, "source_name", &srcName) && srcName != NULL)
++            newT->srcNamePop = !strcmp(srcName, "pop") ? 1 : !strcmp(srcName, "pop_name") ? 2 : 0;
+     }
+     // RIPPS2 build 81: the rest of Colors and More from the theme, each standing in while the user's setting
+     // is at its default and untouched: color_theme=ripps2|ember|blood|ectoplasm|amethyst|bone, category_bar= and
+@@ -6713,6 +6748,11 @@ static int thmLoad(const char *themePath)
          // build 117 (the user, 10/27): flowtilt=1, a coverflow theme's Up / Down (and the left stick) tip the centre case
          // instead of changing the source, the sidebar on (its drawer has the sources)
          newT->flowTilt = configGetInt(themeConfig, "flowtilt", &intValue) && intValue == 1;

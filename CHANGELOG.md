@@ -58,6 +58,10 @@ The user's notes of 10/27 on v1.1.8.
   Color Sweep's first colour), with its settings (`ripps2_bible_sky`). BIBLE reads it from the RIPPS2 folder its AUTO
   entry starts, so its splash matches your theme without RIPPS2 touching BIBLE's own config (a `BIBLE_COLOR` you set
   there still wins).
+- **Source Name: Pop In and Name.** A new choice (Settings > Interface > Layout > Source Name) has both: the
+  source's name pops in big as the source changes, and stays under the games as Shown has it (on RIPFLOW with RUN and
+  SOURCE either side). RIPFLOW's own default is now written down as Shown; pick Pop In or Pop In and Name to bring the big
+  name back there. Themes can ask for it with `source_name=pop_name`. All 32 languages.
 
 ## Build 118 (beta, v1.1.8-beta), changes since build 117
 

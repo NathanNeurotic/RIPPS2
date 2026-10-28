@@ -132,7 +132,16 @@ need(ui, (('void ripps2BibleSky(char *out, size_t size)', "the theme's sky as BI
           ('tintSolve(sw.c[0], &hue, &sat, &lift);', "a Color Sweep's first colour"),
           ('configSetStr(config, "ripps2_bible_sky", line);', 'saved with the settings')), 'ripps2ui.c')
 
+# ---- Source Name: Pop In and Name, the big name as the source changes and the name over the games too
+need(rd('include/ripps2.h'), (('enum { RIPPS2_SRC_POP = RIPPS2_SHOW_COUNT, RIPPS2_SRC_POPNAME, RIPPS2_SRC_COUNT };', 'a fifth Source Name'),), 'ripps2.h')
+need(th2, (('if (ripps2SourceNameMode() == RIPPS2_SRC_POPNAME) // build 119: the big name as the source changes, and the line too', 'it pops the name in'),
+           ('newT->srcNamePop = !strcmp(srcName, "pop") ? 1 : !strcmp(srcName, "pop_name") ? 2 : 0;', 'source_name=pop_name')), 'themes.c')
+need(ui, (('return mode >= RIPPS2_SRC_POP ? 1.0f : showAlpha(mode);', 'and keeps the line drawn'),), 'ripps2ui.c')
+need(rd('src/gui.c'), (('"Pop In", "Pop In and Name", NULL};', 'its name in the list'),), 'gui.c')
+if 'source_name=shown' not in rd('misc/theme_coverflow.cfg'):
+    fail.append("theme_coverflow.cfg: RIPFLOW's Source Name is the name (Shown)")
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print("build119: the sidebar on the info page; the ART Pack sized, timed, numbered and offered where it fits; the card icon whole; EXIT never black; no text past its box; the testers; the boot sound on the IO worker; tracks with Music off; BIBLE's sky saved OK")
+print("build119: the sidebar on the info page; the ART Pack sized, timed, numbered and offered where it fits; the card icon whole; EXIT never black; no text past its box; the testers; the boot sound on the IO worker; tracks with Music off; BIBLE's sky saved; Pop In and Name OK")
