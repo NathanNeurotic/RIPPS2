@@ -10,7 +10,7 @@
 > 2. Copy it to a USB stick or memory card, and launch it from FreeMcBoot, PS2BBL, wLaunchELF or whatever you already use to start homebrew. In PCSX2: **System > Start File** and pick `RIPPS2.elf`.
 > 3. Tell us how it went: [the psx-place thread](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/), [an issue](https://github.com/akilluminati47/RIPPS2/issues), or **#RIPPS2** on the developers' Discord, [discord.gg/ggkCDWqhE](https://discord.gg/ggkCDWqhE) (invite good for October 2026).
 >
-> [What's new in build 118](https://github.com/akilluminati47/RIPPS2/releases/tag/v1.1.8-beta) | [Changelog](CHANGELOG.md) | **[Watch the v1.1.5 Short](https://akilluminati47.github.io/RIPPS2/media/b115/ripps2-v115-short.mp4)** (on GitHub, 0:39: the CD player for your own tracks, Fast Boot, where rips go, Set Metadata (Rename)); earlier: **[the v1.1.4 reel](https://youtu.be/UwuKWfRtUEs)** (7:55, chapters in its description), [the v1.1.4 wheel Short](https://youtube.com/shorts/iQqR9lsar9Q) ([or on GitHub](https://akilluminati47.github.io/RIPPS2/media/b114/ripps2-v114-wheels-short.mp4)), [the v1.1.0 reel](https://youtu.be/Q8ZLd6ArV8s), [the v1.1.2 sounds walkthrough](https://akilluminati47.github.io/RIPPS2/media/b112/ripps2-v112-sounds.mp4), [the beta reel](https://youtu.be/LPjdK_E1jjM), [the build 99 Short](https://www.youtube.com/shorts/Ov5iA-tMcI8), [build 88's](https://www.youtube.com/shorts/Sqprz22tdtg), [the build 83 reel](https://youtu.be/A27N9s6tumk) and [its Short](https://youtube.com/shorts/4QBe5UO2KxM)) | [Every release](https://github.com/akilluminati47/RIPPS2/releases) | [Talk about it on psx-place](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/)<br>
+> [What's new in build 118](https://github.com/akilluminati47/RIPPS2/releases/tag/v1.1.8-beta) | [Changelog](CHANGELOG.md) | **[Videos](#videos)** | [Every release](https://github.com/akilluminati47/RIPPS2/releases) | [Talk about it on psx-place](https://www.psx-place.com/threads/ripps2-a-ps2-front-end-in-one-elf-launch-disc-storage-memory-files.51316/)<br>
 > [Theme RIPPS2](https://github.com/akilluminati47/RIPPS2-themes) (no rebuild, agent friendly) | [Fill your AUDIO folder](#the-sound-ripps2-was-made-with) with RIPPS2 Audio Studio | [See a theme in true 720p and 1080i: RIPPCSX2](https://github.com/akilluminati47/RIPPCSX2/releases/latest) (PCSX2 with HDTV output)
 
 RIPPS2 is a PS2 front end in a single `.elf`: a teardown and rebuild of [RiptOPL](https://github.com/NathanNeurotic/Open-PS2-Loader) (the Open PS2 Loader fork), with rickgaiser's [Neutrino](https://github.com/rickgaiser/neutrino) inside as its second game core, and its own look, launchers, file browser and save tools. Glass towers stand behind your games and orbit formations behind your files, all drawn live by the PS2.
@@ -20,6 +20,21 @@ RIPPS2 is a PS2 front end in a single `.elf`: a teardown and rebuild of [RiptOPL
 - **MEMORY FILES** is a built-in file browser: copy, move and delete across memory cards, USB and HDD; open OPL's VMC card images like folders; export and import PSU saves; edit text files; open pictures and play AVI video full screen; Start opens its settings, where **SEARCH FILES** finds any file or folder by name on every started drive and opens the tree where it is. Square on a memory card opens the **CARD MANAGER**: back a card up to a VMC, write a VMC's saves back, erase the game saves, format.
 
 It is **beta** from build 100: a hundred builds of alpha, tested on consoles and in PCSX2 by ripto, nuno6573, zackcage6, eliminator1403, FifthFox and Mr.sus.60, and in the beta by lukeatmynose and ahavasi too, and by everyone testing on Discord, with special thanks to all the YouTube love as well. Keep your usual loader close by, and tell us what breaks: feedback is what makes RIPPS2. **The best way to get RIPPS2 updated is [an issue on GitHub](https://github.com/akilluminati47/RIPPS2/issues)**: DarkNerdShawny has opened three, and v1.1.7's FreeMcBoot fix came from one. Be like DarkNerdShawny.
+
+## Videos
+
+| Video | Length | What it shows |
+| --- | --- | --- |
+| [The v1.1.5 Short](https://akilluminati47.github.io/RIPPS2/media/b115/ripps2-v115-short.mp4) (on GitHub) | 0:39 | The CD player for your own tracks, Fast Boot, where rips go, Set Metadata (Rename) |
+| [The v1.1.4 reel](https://youtu.be/UwuKWfRtUEs) | 7:55 | Everything in v1.1.4, with chapters in its description |
+| [The v1.1.4 wheel Short](https://youtube.com/shorts/iQqR9lsar9Q) ([or on GitHub](https://akilluminati47.github.io/RIPPS2/media/b114/ripps2-v114-wheels-short.mp4)) | 1:10 | The wheels you hold SELECT for |
+| [The v1.1.2 sounds walkthrough](https://akilluminati47.github.io/RIPPS2/media/b112/ripps2-v112-sounds.mp4) (on GitHub) | 2:11 | Every sound ripped from the console, in one take, from the boot sound to a game launching |
+| [The v1.1.0 reel](https://youtu.be/Q8ZLd6ArV8s) | 3:57 | v1.1.0, cut to Over the Rainbow |
+| [The beta reel](https://youtu.be/LPjdK_E1jjM) | 9:45 | The first beta, v1.0.0: the web page RIPPS2 started as, then your games, your files and what is on board |
+| [The build 99 Short](https://www.youtube.com/shorts/Ov5iA-tMcI8) | Short | The last alpha |
+| [The build 88 Short](https://www.youtube.com/shorts/Sqprz22tdtg) | Short | Build 88, set to Slideshow |
+| [The build 83 reel](https://youtu.be/A27N9s6tumk) and [its Short](https://youtube.com/shorts/4QBe5UO2KxM) | | Build 83, alpha |
+| [The build 55 reel](media/ripps2-b55-reel.mp4) and [build 22's demo](media/ripps2-b22-demo.mp4) (on GitHub) | | The early alphas |
 
 ## Highlights
 
