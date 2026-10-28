@@ -35,9 +35,18 @@ index 2a89b58..c09b774 100644
  void ripps2DiscWatch(void);         // every frame: the drive read after boot and after the tray closes
  int ripps2DiscQuiet(void);
 diff --git a/include/themes.h b/include/themes.h
-index d9808c1..c0c1b8a 100644
+index d9808c1..c856574 100644
 --- a/include/themes.h
 +++ b/include/themes.h
+@@ -132,7 +132,7 @@ typedef struct theme_element
+     int glassTint;        // RIPPS2 build 79: Ripps2PanelGlass constant tint 0..128 (<name>_tint), -1 = the gradient
+     int glassFrame;       // RIPPS2 build 79: Ripps2PanelGlass frame line (<name>_frame, default 1)
+     unsigned char glassColor[3]; // RIPPS2 build 79: the tint's colour (<name>_tint_color, default RIPPS2 navy)
+-    int wideCrop;         // RIPPS2 build 79: Background in 16:9 shows the middle 3/4 of its height (<name>_widecrop=1)
++    int wideCrop;         // RIPPS2 build 79: Background in 16:9 shows the middle 3/4 of its height (<name>_widecrop=1); build 119: -1 (unset) = on its own for a game's pictures, 0 = never
+     int artBottom;        // RIPPS2 build 102: GameImage art stands on its box's bottom (<name>_valign=bottom)
+     // Per-device element filter (theme key devices=usb,hdd,...): bitmask over the thmDeviceVocab
+     // table indices in themes.c. 0 = unfiltered (the pre-existing behavior). deviceCoverage is
 @@ -285,6 +285,7 @@ typedef struct theme
      int sbLeftList;                     // build 115: sidebar_left=list: Left / Right and L1 / R1 stay the list's (RIPFLOW's covers)
      int sbAutoHide;                     // build 115: sidebar_hide=1: the sidebar slides away until Circle calls it
@@ -1169,10 +1178,89 @@ index f3fa45e..c1ab19f 100644
      stAdd(ROW_ACTION, ACT_CACHE, _t("CACHE SETTINGS"), stFromCache ? _t("back to Cache") : _t("Fast Cache, Trust Cache"))->hint =
          _t("Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press "
 diff --git a/src/themes.c b/src/themes.c
-index 98773e6..74ca961 100644
+index 98773e6..8d6a1f0 100644
 --- a/src/themes.c
 +++ b/src/themes.c
-@@ -6713,6 +6713,11 @@ static int thmLoad(const char *themePath)
+@@ -1234,6 +1234,8 @@ static void *thmItemKey(struct submenu_list *item)
+     return (void *)(uintptr_t)(h | 1);
+ }
+ 
++static int thmArtWideCrop(struct theme_element *e, mutable_image_t *gi); // build 119 (below, by drawGameImageArt)
++
+ static GSTEXTURE *thmFrostFor(struct submenu_list *item, struct theme_element *glass, float *fade)
+ {
+     int slot = glass->family == &gTheme->mainElems ? 0 : 1;
+@@ -1251,7 +1253,7 @@ static GSTEXTURE *thmFrostFor(struct submenu_list *item, struct theme_element *g
+             *fade = artFadeIn(e, thmItemKey(item), src);
+         else if (mi->defaultTexture != NULL)
+             src = &mi->defaultTexture->source;
+-        gTheme->frostCrop[slot] = e->wideCrop;
++        gTheme->frostCrop[slot] = thmArtWideCrop(e, mi); // build 119: as the backdrop it is made from is drawn
+     }
+     if (src == NULL || src->Mem == NULL)
+         return NULL;
+@@ -2050,6 +2052,25 @@ static int thmArtVisibleBottom(GSTEXTURE *t, const void *item)
+     return bottom;
+ }
+ 
++// RIPPS2 build 119 (the user, 10/28: "nobody sees aspect ratio crimes from any ART if they set wide with 1080i"): in
++// 16:9 a box made for 4:3 is shown 4/3 as wide, so a game's picture filling it (its BG, its screenshots) shows its
++// middle 3/4 instead of stretching, on every theme without asking. <name>_widecrop=1 still asks for it (any art),
++// <name>_widecrop=0 turns it off. Crop rather than squash: the picture keeps its shape.
++static int thmArtIsPicture(mutable_image_t *gi)
++{
++    const char *s = gi != NULL && gi->cache != NULL ? gi->cache->suffix : NULL;
++    return s != NULL && (!strncasecmp(s, "BG", 2) || !strncasecmp(s, "SCR", 3));
++}
++
++static int thmArtWideCrop(struct theme_element *e, mutable_image_t *gi)
++{
++    if (e->wideCrop >= 0)
++        return e->wideCrop;
++    if (e->scaled & SCALING_RATIO)
++        return 0; // a theme that keeps the art's shape itself
++    return thmArtIsPicture(gi);
++}
++
+ // One image of a GameImage at its box, overlay and reflection, slideW of the way in (drawGameImage)
+ static void drawGameImageArt(struct menu_list *menu, struct submenu_list *item, struct theme_element *drawElem, mutable_image_t *gameImage, GSTEXTURE *texture, float slideW)
+ {
+@@ -2085,11 +2106,22 @@ static void drawGameImageArt(struct menu_list *menu, struct submenu_list *item,
+                             gameImage->overlayTexture->lowerLeft_x, gameImage->overlayTexture->lowerLeft_y, gameImage->overlayTexture->lowerRight_x, gameImage->overlayTexture->lowerRight_y, drawElem->reflection);
+         if (gameImage->overlayTexture2)
+             rmDrawPixmap(&gameImage->overlayTexture2->source, drawElem->posX, drawElem->posY, drawElem->aligned, drawElem->width, drawElem->height, drawElem->scaled, imageCol, drawElem->reflection);
+-    } else if (drawElem->type == ELEM_TYPE_BACKGROUND && drawElem->wideCrop && gWideScreen)
+-        // build 79: 4:3 art on a 16:9 picture shows its middle 3/4 instead of stretching (a faux crop)
++    } else if (gWideScreen && thmArtWideCrop(drawElem, gameImage))
++        // build 79: 4:3 art on a 16:9 picture shows its middle 3/4 instead of stretching (a faux crop); build 119: on
++        // its own for a game's pictures (thmArtWideCrop)
+         rmDrawPixmapPart(texture, drawElem->posX, drawElem->posY, drawElem->aligned, drawElem->width, drawElem->height, drawElem->scaled,
+                          imageCol, 0.0f, texture->Height * 0.125f, (float)texture->Width, texture->Height * 0.875f);
+-    else
++    else if (gWideScreen && !(drawElem->scaled & SCALING_RATIO) && gameImage->cache != NULL && drawElem->width > 0 &&
++             drawElem->wideCrop != 0 && !thmArtIsPicture(gameImage)) {
++        // build 119: a game's cover, logo or icon in a box made for 4:3 keeps its shape in 16:9: 3/4 as wide, in the
++        // middle of the box, instead of stretched across it
++        int w = drawElem->width * 3 / 4, x = drawElem->posX;
++        if (!(drawElem->aligned & (ALIGN_HCENTER | ALIGN_RIGHT)))
++            x += (drawElem->width - w) / 2;
++        else if (drawElem->aligned & ALIGN_RIGHT)
++            x -= (drawElem->width - w) / 2;
++        rmDrawPixmap(texture, x, drawElem->posY, drawElem->aligned, w, drawElem->height, drawElem->scaled, imageCol, drawElem->reflection);
++    } else
+         rmDrawPixmap(texture, drawElem->posX, drawElem->posY, drawElem->aligned, drawElem->width, drawElem->height, drawElem->scaled, imageCol, drawElem->reflection);
+     rmSetReflectionYOffset(0); // don't leak the offset to any other reflection draw
+ }
+@@ -3951,7 +3983,7 @@ static theme_element_t *initBasic(const char *themePath, config_set_t *themeConf
+     elem->slide = 0;
+     elem->showRun = 1;
+     elem->blur = 0;      // build 102: these two were never set here, so an element that did not set them read
+-    elem->wideCrop = 0;  // whatever malloc left (frost or a crop on a theme that never asked for one)
++    elem->wideCrop = -1; // whatever malloc left (frost or a crop on a theme that never asked for one); build 119: -1 = on its own (thmArtWideCrop)
+     elem->artBottom = 0; // build 102
+     elem->deviceFilter = 0;   // malloc'd without memset: MUST be zeroed explicitly (0 = unfiltered)
+     elem->deviceCoverage = 0; // filled at validateGUIElems for unfiltered MenuIcon/ItemsList/HintText
+@@ -6713,6 +6745,11 @@ static int thmLoad(const char *themePath)
          // build 117 (the user, 10/27): flowtilt=1, a coverflow theme's Up / Down (and the left stick) tip the centre case
          // instead of changing the source, the sidebar on (its drawer has the sources)
          newT->flowTilt = configGetInt(themeConfig, "flowtilt", &intValue) && intValue == 1;

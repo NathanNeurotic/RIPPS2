@@ -97,6 +97,14 @@ if 'fntRenderString(' in bar:
 if 'fntRenderStringFit(RIPPS2_NOTE_FONT, 320, y + 26, ALIGN_CENTER, w - 40, head' not in ask:
     fail.append("ripps2AskHold: the head fitted to the panel too")
 
+# ---- 16:9: a game's pictures cropped, its covers and logos kept in shape (no stretched art in 1080i)
+th2 = rd('src/themes.c')
+need(th2, (('elem->wideCrop = -1;', 'widecrop unset means on its own'),
+           ('return s != NULL && (!strncasecmp(s, "BG", 2) || !strncasecmp(s, "SCR", 3));', "a game's pictures: its BG and screenshots"),
+           ('} else if (gWideScreen && thmArtWideCrop(drawElem, gameImage))', 'the middle 3/4 of a picture in 16:9, on every theme'),
+           ('int w = drawElem->width * 3 / 4, x = drawElem->posX;', 'a cover or logo 3/4 as wide, in the middle of its box'),
+           ('gTheme->frostCrop[slot] = thmArtWideCrop(e, mi);', 'the frost cropped as its backdrop is')), 'themes.c')
+
 # ---- the About page: every tester, a line for the ones to come, the music's decoders
 about = rd('src/ripps2about.c')
 need(about, (('"lukeatmynose - ahavasi - DarkNerdShawny"', 'the newest testers by name'),

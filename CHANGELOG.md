@@ -37,6 +37,11 @@ The user's notes of 10/27 on v1.1.8.
 - **No text past its box.** The chooser (the ART Pack's drives, BIBLE's cards, the editor's menus) ran a long item past
   its edge; the items are kept inside now, the chosen one scrolling. The progress bar's lines and the long jobs' panel
   head are fitted too, for the languages that run longer than English.
+- **No stretched art in 16:9.** In 1080i or 720p with widescreen on, a box made for 4:3 is shown 4/3 as wide, so a game's
+  picture filling it (its background art, its screenshots: the Storage viewport, the info page) was stretched. Now it shows
+  its middle 3/4 instead, cropped rather than squashed, on every theme without a key; a cover, logo or icon drawn in such
+  a box keeps its shape at 3/4 of the width, in the middle. A theme's `<name>_widecrop=1` still asks for the crop on any
+  art, and `<name>_widecrop=0` now turns it off.
 - **The About page's testers.** ahavasi (Discord) and DarkNerdShawny (GitHub issues) join the testers, and a line thanks
   everyone testing on Discord and opening issues on GitHub, so every tester after them is in it too. The music's
   decoders (Ogg Vorbis by Xiph.Org, minimp3 by lieff) are credited, and Roboto is named as the messages' face as well
