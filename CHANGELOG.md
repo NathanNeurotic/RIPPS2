@@ -1,6 +1,21 @@
 # RIPPS2 changelog
 
-## Build 120 (beta), changes since build 119
+## Build 121 (beta, v1.2.1-beta), changes since build 120
+
+The user's note of 10/28: the boot sound should play with the pillars, not seconds later, when the sounds live on a drive.
+
+- **The boot sound on the memory card.** RIPPS2 started from a memory card (through BIBLE, FMCB or OSDMenu) reads its
+  card from the first moment, but an AUDIO folder on the HDD or a USB drive only once that drive is up, so the boot
+  sound came about four seconds after the pillars. After BIOS Sounds > Rip writes the sounds to a drive, RIPPS2 says so
+  in one line with the sizes and START copies `boot.adp` (about 360 KB) beside RIPPS2 on the card. The boot reads that
+  copy before any drive's. Ripping again offers it again, so the copy follows the set; with no room on the card there
+  is no offer and nothing changes. RIPPS2.elf is not any bigger.
+- **Audio up before the drives.** Audio came up only at the end of RIPPS2's start, so even a boot sound read from the
+  card waited over a second for it. It now comes up as soon as the settings are read, before the background loader's
+  first job; the boot sound's send to the sound chip stays the background loader's (the v1.1.8 hang rule).
+- Two new messages in all 32 languages (`tools/lang121`).
+
+## Build 120 (beta, released in v1.2.1-beta), changes since build 119
 
 The user's note of 10/28: no display pops from BIBLE into RIPPS2, and BIBLE in RIPPS2's video mode and Widescreen.
 
@@ -11,7 +26,7 @@ The user's note of 10/28: no display pops from BIBLE into RIPPS2, and BIBLE in R
   same mode, fades its logo away at a launch and leaves the same sky on screen, so the TV keeps one signal and one
   picture from BIBLE into RIPPS2.
 
-## Build 119 (beta, v1.1.9-beta when released), changes since build 118
+## Build 119 (beta, released in v1.2.1-beta), changes since build 118
 
 The user's notes of 10/27 on v1.1.8.
 

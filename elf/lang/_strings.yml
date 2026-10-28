@@ -1008,6 +1008,9 @@ strings:
 - en: '%s could not be written to %s (%d of the sounds were, and the card has %d KB free now). Is the card write-protected?'
   in:
   - ripps2biossnd.c
+- en: '%s starts after the pillars, so the boot sound plays late. START copies boot.adp (%d KB) beside RIPPS2 on the memory card (%d KB free), where it plays as the pillars rise.'
+  in:
+  - ripps2biossnd.c
 - en: '%u.%u MB'
   in:
   - ripps2biossnd.c
@@ -1025,6 +1028,11 @@ strings:
   - ripps2edit.c
   - ripps2files.c
   - ripps2ui.c
+- en: COPY
+  in:
+  - ripps2biossnd.c
+  - ripps2cd.c
+  - ripps2files.c
 - en: RIP
   in:
   - ripps2biossnd.c
@@ -1063,6 +1071,9 @@ strings:
   in:
   - ripps2biossnd.c
 - en: THE RED SCREEN MUSIC (DISC WARNING)
+  in:
+  - ripps2biossnd.c
+- en: The boot sound could not be copied to %s. It still plays from %s.
   in:
   - ripps2biossnd.c
 - en: The folder %s could not be made. Is the drive full or write-protected? Nothing was written.
@@ -1590,10 +1601,6 @@ strings:
   - ripps2edit.c
   - ripps2files.c
   - ripps2media.c
-- en: COPY
-  in:
-  - ripps2cd.c
-  - ripps2files.c
 - en: COPY CANCELED
   in:
   - ripps2cd.c
