@@ -46,6 +46,14 @@ The user's notes of 10/27 on v1.1.8.
   everyone testing on Discord and opening issues on GitHub, so every tester after them is in it too. The music's
   decoders (Ogg Vorbis by Xiph.Org, minimp3 by lieff) are credited, and Roboto is named as the messages' face as well
   as RIPFLOW's. All in 33 languages.
+- **No boot stuck on the towers (v1.1.8).** With a language file on the memory card and a sound set in the AUDIO folder
+  beside RIPPS2, v1.1.8 could stop on the towers at boot. The language made the boot's first part take longer, and the
+  early boot sound (build 118) was then sent to the sound chip from the main thread while the I/O worker loaded a drive's
+  drivers; both take IOP memory through the same unguarded channel. The I/O worker sends it now, every time, right
+  after the job it is on, so it is still in for the towers' first frame.
+- **Your media plays with Music off.** The media player's tracks and the file CD player played nothing when Music
+  (Settings > Audio) was off. Music off now keeps only the menu music away: your own tracks always play, as a disc in
+  the CD player already did.
 
 ## Build 118 (beta, v1.1.8-beta), changes since build 117
 

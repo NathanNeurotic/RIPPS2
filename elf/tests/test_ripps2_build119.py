@@ -112,7 +112,20 @@ need(about, (('"lukeatmynose - ahavasi - DarkNerdShawny"', 'the newest testers b
              ('"Special thanks to all the YouTube love as well:"', 'the YouTube thanks kept'),
              ('"Ogg Vorbis by Xiph.Org (BSD), minimp3 by lieff (CC0)"', 'the music decoders credited')), 'ripps2about.c')
 
+# ---- the boot sound sent by the IO worker only (v1.1.8 stopped on the towers with a card language and a sound set)
+snd = rd('src/sound.c')
+start = body(snd, 'void sfxBootStart(void)')
+if 'sfxBootEarlyUpload();' in start or 'ioPutRequestFront(IO_CUSTOM_SIMPLEACTION, &sfxBootEarlyUpload)' not in start:
+    fail.append('sfxBootStart: the early boot sound goes to the SPU from the IO worker, never the main thread')
+
+# ---- Music off keeps only the menu music away: the media player's tracks and the file CD player still play
+need(snd, (("return gEnableBGM || bgmPcmExternal != NULL || bgmOverride[0] != '\\0';", "a track of the user's own plays with Music off"),
+           ('if (terminateFlag || !bgmStreamAllowed())', 'the decoder goes on for it'),
+           ('} while (!terminateFlag && bgmStreamAllowed() && !bgmPcmEnded);', 'and keeps going')), 'sound.c')
+if '(!gEnableBGM && bgmPcmExternal == NULL)' in snd:
+    fail.append('sound.c: no stream gate left that only the disc CD player passes')
+
 if fail:
     print('\n'.join(fail))
     sys.exit(1)
-print('build119: the sidebar on the info page; the ART Pack sized, timed, numbered and offered where it fits; the card icon whole; EXIT never black; no text past its box; the testers OK')
+print('build119: the sidebar on the info page; the ART Pack sized, timed, numbered and offered where it fits; the card icon whole; EXIT never black; no text past its box; the testers; the boot sound on the IO worker; tracks with Music off OK')

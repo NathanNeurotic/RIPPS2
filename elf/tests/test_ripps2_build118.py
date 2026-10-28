@@ -46,7 +46,9 @@ init = body(snd, 'int sfxInit(int bootSnd)')
 if 'if (!keepBoot) {' not in init or init.index('if (!keepBoot) {') > init.index('audsrv_adpcm_init();'):
     fail.append('sfxInit: no audsrv_adpcm_init under a boot sound that is already playing')
 start = body(snd, 'void sfxBootStart(void)')
-if 'sfxBootEarlyUpload();' not in start or start.index('audsrv_adpcm_init();') > start.index('sfxBootEarlyUpload();'):
+# build 119: the IO worker sends it (the main thread's send raced a drive's driver load for IOP memory)
+upl = '&sfxBootEarlyUpload)'
+if upl not in start or start.index('audsrv_adpcm_init();') > start.index(upl):
     fail.append('sfxBootStart: the early boot sound goes to the SPU after audio is up')
 opl = rd('src/opl.c')
 load = opl[opl.index('static void _loadConfig()'):]

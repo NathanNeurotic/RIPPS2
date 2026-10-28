@@ -1177,6 +1177,102 @@ index f3fa45e..c1ab19f 100644
      }
      stAdd(ROW_ACTION, ACT_CACHE, _t("CACHE SETTINGS"), stFromCache ? _t("back to Cache") : _t("Fast Cache, Trust Cache"))->hint =
          _t("Fast Cache shows each drive's last game list the moment the drive answers; Trust Cache keeps it until you press "
+diff --git a/src/sound.c b/src/sound.c
+index 55047fc..1e07b33 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -501,8 +501,12 @@ static void sfxBootPlay(void)
+    which the IO worker reaches only after every drive's start and list. Now it is the IO worker's first job at boot,
+    queued with the settings read (sfxBootEarlyQueue, before applyConfig starts the drives): one file from where the sounds
+    load (the AUDIO folder Fast Boot names, else the one beside RIPPS2) or the disk theme's own. Audio comes up on the main
+-   thread meanwhile (sfxBootStart); whichever of the two ends last sends it to the SPU, so it is ready for the first frame.
+-   The set's load later keeps it (sfxInit) rather than starting audsrv over under it. Still on the IO worker only. */
++   thread meanwhile (sfxBootStart); whichever of the two ends last has the IO worker send it to the SPU, so it is ready for
++   the first frame. The set's load later keeps it (sfxInit) rather than starting audsrv over under it.
++   Build 119: the send is the IO worker's too when the read ended first. sfxBootStart sent it from the main thread, and
++   audsrv's load takes IOP memory through the same unlocked RPC client the IO worker's driver loads use: with a language
++   on the memory card the main thread came late, sent it while the HDD's drivers were loading, and the boot stopped on
++   the towers (v1.1.8: any language but English with a sound set beside RIPPS2). */
+ #define SFX_EARLY_NONE  0
+ #define SFX_EARLY_READ  1 // in RAM, audio not up yet
+ #define SFX_EARLY_READY 2 // in the SPU: sfxInit(1) keeps it
+@@ -1148,8 +1152,10 @@ void sfxBootStart(void)
+         have = sfxBootEarly == SFX_EARLY_READ;
+         sfxAudioUp = 1;
+         EIntr();
+-        if (have)
+-            sfxBootEarlyUpload();
++        // build 119: on the IO worker, ahead of the drives' jobs still waiting; if it cannot be queued, the set's load
++        // (sfxInit) reads it again as before
++        if (have && ioPutRequestFront(IO_CUSTOM_SIMPLEACTION, &sfxBootEarlyUpload) != IO_OK)
++            sfxBootEarly = SFX_EARLY_NONE;
+     }
+ }
+ 
+@@ -1325,9 +1331,11 @@ static void bgmAdjustBufferedChunks(int delta)
+     EIntr();
+ }
+ 
++static int bgmStreamAllowed(void); // build 119 (below, by the CD player's and the media player's streams)
++
+ int bgmDiscretionaryIoAllowed(void)
+ {
+-    if (!bgmIsPlaying || !gEnableBGM)
++    if (!bgmIsPlaying || !bgmStreamAllowed())
+         return 1;
+ 
+     if (!bgmBufferPrimed)
+@@ -1347,7 +1355,7 @@ int bgmDiscretionaryIoAllowed(void)
+ // RIPPS2: the decoder is behind (a pure read, unlike the gate above, which steps its hysteresis)
+ int bgmReserveLow(void)
+ {
+-    return bgmIsPlaying && gEnableBGM && bgmBufferedChunks < BGM_IO_RESUME_WATER_CHUNKS;
++    return bgmIsPlaying && bgmStreamAllowed() && bgmBufferedChunks < BGM_IO_RESUME_WATER_CHUNKS;
+ }
+ 
+ // RIPPS2: the gate as a wait that always ends. since = when this load started waiting. A load held
+@@ -1372,6 +1380,14 @@ static int (*bgmPcmRead)(char *buf, int size) = NULL;
+ static char bgmOverride[256]; // build 115: the media player's track (bgmPlayFile), in the music's place
+ static int (*bgmPcmExternal)(char *buf, int size) = NULL;
+ static int bgmPcmRate = 44100, bgmPcmChannels = 2;
++
++// build 119 (the user, 10/28: Music off "should not gate users from hearing their media"): the media player's and the
++// file CD player's tracks play with the menu music turned off, as the disc CD player's stream always has. Music off
++// keeps only the menu music away.
++static int bgmStreamAllowed(void)
++{
++    return gEnableBGM || bgmPcmExternal != NULL || bgmOverride[0] != '\0';
++}
+ static volatile int bgmPcmEnded = 0;
+ static volatile int bgmStreamLive = 0; // build 115: a stream holds its threads, semas and file (bgmStart to bgmDeinit)
+ static volatile unsigned int bgmPlayed = 0; // bytes handed to audsrv since the stream started
+@@ -2011,7 +2027,7 @@ static void bgmIoThread(void *arg)
+     do {
+         WaitSema(inSema);
+ 
+-        if (terminateFlag || (!gEnableBGM && bgmPcmExternal == NULL)) // RIPPS2: a CD plays with the music off
++        if (terminateFlag || !bgmStreamAllowed()) // RIPPS2: a CD plays with the music off; build 119: a track too
+             break;
+ 
+         decodeTotal = BGM_RING_BUFFER_SIZE;
+@@ -2077,7 +2093,7 @@ static void bgmIoThread(void *arg)
+         bgmAdjustBufferedChunks(1);
+         bgmDecodePriority(); // build 71
+         SignalSema(outSema);
+-    } while (!terminateFlag && (gEnableBGM || bgmPcmExternal != NULL) && !bgmPcmEnded);
++    } while (!terminateFlag && bgmStreamAllowed() && !bgmPcmEnded);
+ 
+     bgmIoThreadRunning = 0;
+     if (!bgmPcmEnded) // RIPPS2: an ended PCM source lets what it queued play out first
+@@ -3115,7 +3131,7 @@ unsigned int bgmPlayedMs(void)
+ // build 102: a start that waited for a stopped stream's decoder to finish its read (bgmBootTick, every frame)
+ static void bgmStartWaiting(void)
+ {
+-    if (bgmStartWanted && !bgmIoThreadRunning && !bgmThreadRunning && (gEnableBGM || bgmPcmExternal != NULL))
++    if (bgmStartWanted && !bgmIoThreadRunning && !bgmThreadRunning && bgmStreamAllowed())
+         bgmStart();
+ }
+ 
 diff --git a/src/themes.c b/src/themes.c
 index 98773e6..8d6a1f0 100644
 --- a/src/themes.c
