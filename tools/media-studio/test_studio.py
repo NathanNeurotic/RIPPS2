@@ -1,9 +1,10 @@
-"""Drives RIPPS2 Audio Studio with key presses, off screen, and checks what lands in output/AUDIO.
+"""Drives RIPPS2 Media Studio with key presses, off screen, and checks what lands in output/AUDIO and output/MEDIA.
 
     python test_studio.py [bios.bin]
 """
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -36,6 +37,8 @@ def main():
     tone_wav(work / 'click 2.wav', 0.2, 1200.0)
     out = work / 'output' / 'AUDIO'          # never the real output folder
     studio.OUT_DIR = out
+    media = work / 'output' / 'MEDIA'
+    studio.MEDIA_DIR = media
     app = studio.Studio()
     app.vis, app.out_vis, app.pop_vis = [], [], []
     app.cwd = work
@@ -106,11 +109,46 @@ def main():
     key(pygame.K_p); run(2); key(pygame.K_RETURN); run(2)
     assert not (out / 'cursor.adp').exists(), 'Cross must delete it'
     print('delete modal: kept on Circle, deleted on Cross')
-    # 4. your BIOS
-    if len(sys.argv) > 1:
+    # 4. a video: a 1080 x 1920 phone clip at 60 fps with sound becomes the AVI RIPPS2 plays, in output/MEDIA
+    if studio.aio.ffmpeg_path():
+        clip = work / 'Phone Clip.mp4'
+        subprocess.run([studio.aio.ffmpeg_path(), '-v', 'error', '-f', 'lavfi', '-i', 'testsrc=size=1080x1920:rate=60:duration=3',
+                        '-f', 'lavfi', '-i', 'sine=frequency=440:duration=3', '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
+                        '-c:a', 'aac', '-shortest', str(clip)], check=True)
         key(pygame.K_TAB, pygame.KMOD_SHIFT); run(2)
+        assert app.tab == 0
+        app.list_dir()
+        names = [e[2] for e in app.entries]
+        app.sel = names.index('Phone Clip.mp4')
+        assert app.entries[app.sel][0] == 'video'
+        key(pygame.K_RETURN); run(2)
+        assert app.popup and app.popup['rows'][app.popup['sel']][0] == 'video', 'a video picks PS2 video first'
+        key(pygame.K_RETURN); run(2); settle()
+        avi = media / 'Phone Clip.avi'
+        assert avi.exists(), 'the PS2 video was not written'
+        info = studio.vio.probe(avi)
+        print('video ->', avi.name, avi.stat().st_size, info)
+        assert info['width'] <= 640 and info['height'] <= 480 and info['fps'] <= 30.5 and info['audio']
+        assert info['codec'] == 'mpeg4', info
+        p = subprocess.run([studio.vio.ffprobe_path(), '-v', 'error', '-show_entries', 'stream=codec_name,codec_tag_string,sample_rate,channels',
+                            '-of', 'csv=p=0', str(avi)], capture_output=True, text=True).stdout.split()
+        print('streams', p)
+        assert any('XVID' in x.upper() for x in p) and any(x.startswith('mp3') or x.startswith('mp2') for x in p) and any('48000' in x for x in p)
+        key(pygame.K_TAB); run(2); key(pygame.K_TAB); run(2)
+        assert app.tab == 2 and [v[0].name for v in app.media()] == ['Phone Clip.avi']
+        key(pygame.K_p); run(2)
+        assert app.popup and app.popup['kind'] == 'delete'
+        key(pygame.K_ESCAPE); run(2)
+        assert avi.exists()
+        pygame.image.save(app.screen, str(work / 'media_tab.png'))
+        print('MEDIA FOLDER lists it; Circle keeps it')
+    else:
+        print('no ffmpeg: the video step is skipped')
+    # 5. your BIOS
+    if len(sys.argv) > 1:
+        app.tab = 0
         app.load_bios(Path(sys.argv[1])); settle()
-        assert app.tab == 2 and app.bios
+        assert app.tab == 3 and app.bios
         print('bios items', len(app.bios['items']))
         app.bios_sel = 6
         key(pygame.K_SPACE); run(2); settle()

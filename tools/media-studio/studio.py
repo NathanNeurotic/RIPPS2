@@ -1,11 +1,12 @@
-"""RIPPS2 Audio Studio: make an AUDIO folder for RIPPS2 on your PC.
+"""RIPPS2 Media Studio: make the AUDIO and MEDIA folders for RIPPS2 on your PC.
 
 Browse to any sound or song, hear it as it is and as the PS2 will play it, and turn it into one of
-RIPPS2's sounds (boot, cursor, confirm ...) or into a music track. Or point it at your own PS2 BIOS
-dump and rip the console's own menu sounds and system music, rendered fresh from the BIOS.
+RIPPS2's sounds (boot, cursor, confirm ...) or into a music track. Turn any video into the AVI RIPPS2's
+Memory Files plays. Or point it at your own PS2 BIOS dump and rip the console's own menu sounds and
+system music, rendered fresh from the BIOS.
 
-Everything lands in output/AUDIO beside this app: copy that folder to a USB stick, and in RIPPS2's
-Memory Files put it beside RIPPS2.ELF.
+Sounds and music land in output/AUDIO beside this app, videos in output/MEDIA: copy them to a USB
+stick, and in RIPPS2's Memory Files put AUDIO beside RIPPS2.ELF and MEDIA on your biggest drive.
 
 Keyboard: arrows move, Enter opens or converts, Backspace goes back, Space plays the original,
 P plays the PS2 version, Q / E (or Tab) switch tabs, S converts a folder or rips a BIOS, O opens the
@@ -28,6 +29,7 @@ import pygame
 
 import audio_io as aio
 import ps2bios
+import video_io as vio
 
 W, H = 1280, 720
 FPS = 60
@@ -62,6 +64,7 @@ EVENTS = [  # RiptOPL's names first, then RIPPS2's additions
 ]
 EVENT = {e[0]: e for e in EVENTS}
 OUT_DIR = aio.HOME_DIR / 'output' / 'AUDIO'
+MEDIA_DIR = aio.HOME_DIR / 'output' / 'MEDIA'
 SFX_BUDGET = 0x200000 - 0x5010   # audsrv loads every sound into the SPU2's 2 MB of sound RAM, from 0x5010 up
 
 # What each menu sound of the BIOS is (matched against recordings of a real console), and the rip
@@ -115,6 +118,16 @@ def drives():
         except OSError:
             pass
     return out
+
+
+def open_file(p):
+    """A file in the PC's own app for it (a video in its player)."""
+    if os.name == 'nt':
+        os.startfile(str(p))
+    elif sys.platform == 'darwin':
+        subprocess.Popen(['open', str(p)])
+    else:
+        subprocess.Popen(['xdg-open', str(p)])
 
 
 def open_folder(p):
@@ -247,12 +260,12 @@ class Player:
 
 # ------------------------------------------------------------------------------ the app
 class Studio:
-    TABS = ['BROWSE', 'AUDIO FOLDER', 'YOUR BIOS']
+    TABS = ['BROWSE', 'AUDIO FOLDER', 'MEDIA FOLDER', 'YOUR BIOS']
 
     def __init__(self):
         pygame.mixer.pre_init(44100, -16, 2, 1024)
         pygame.init()
-        pygame.display.set_caption('RIPPS2 Audio Studio')
+        pygame.display.set_caption('RIPPS2 Media Studio')
         self.screen = pygame.display.set_mode((W, H), pygame.SCALED | pygame.RESIZABLE)
         icon = pygame.Surface((32, 32), pygame.SRCALPHA)
         for k, hh in enumerate((14, 24, 18, 28, 12)):
@@ -272,19 +285,22 @@ class Studio:
         self.cache = {}           # path -> stereo float (original)
         self.ps2 = {}             # key -> adp bytes (the PS2 version, small)
         self.popup = None
-        self.toast = ('Browse to a sound or a song. Enter converts it for RIPPS2.', time.time())
+        self.toast = ('Browse to a sound, a song or a video. Enter converts it for RIPPS2.', time.time())
         self.jobs = queue.Queue()
         self.results = queue.Queue()
         self.busy = None          # (label, fraction)
         threading.Thread(target=self.worker, daemon=True).start()
         self.out_sel, self.out_top = 0, 0
         self.bios = None          # dict(path, files, items, renders)
+        self.media_sel, self.media_top = 0, 0
+        self.probes = {}          # path -> a video's probe (None while it is read, False when it cannot be)
         self.bios_sel, self.bios_top = 0, 0
         self.pad = None
         self.repeat = {}
         self.last_click = (0, -1)
         self.running = True
         OUT_DIR.mkdir(parents=True, exist_ok=True)
+        MEDIA_DIR.mkdir(parents=True, exist_ok=True)
 
     # -------------------------------------------------------------- background work
     def worker(self):
@@ -324,7 +340,9 @@ class Studio:
                         ents.append(('dir', p, p.name, 0))
                     else:
                         ext = p.suffix.lower()
-                        if ext in aio.AUDIO_EXT:
+                        if ext in vio.VIDEO_EXT:
+                            ents.append(('video', p, p.name, p.stat().st_size))
+                        elif ext in aio.AUDIO_EXT:
                             ents.append(('audio', p, p.name, p.stat().st_size))
                         elif ext in aio.BIOS_EXT and p.stat().st_size >= 2 * 1024 * 1024:
                             ents.append(('bios', p, p.name, p.stat().st_size))
@@ -351,6 +369,8 @@ class Studio:
             self.list_dir()
         elif kind == 'audio':
             self.open_assign(('file', p))
+        elif kind == 'video':
+            self.open_assign(('file', p), video=True)
         elif kind == 'bios':
             self.load_bios(p)
 
@@ -361,6 +381,19 @@ class Studio:
         par = self.cwd.parent
         self.cwd = None if par == self.cwd else par
         self.list_dir(keep=old)
+
+    def probe(self, path):
+        """A video's length and size, read once in the background (None until then, False if unreadable)."""
+        if path not in self.probes:
+            self.probes[path] = None
+
+            def run():
+                try:
+                    self.probes[path] = vio.probe(path) or False
+                except Exception:
+                    self.probes[path] = False
+            threading.Thread(target=run, daemon=True).start()
+        return self.probes[path]
 
     def get_audio(self, src, then):
         """src is ('file', path) or ('bios', key): the original sound, loaded or rendered once."""
@@ -405,14 +438,26 @@ class Studio:
         self.get_audio(src, have)
 
     # -------------------------------------------------------------- converting
-    def open_assign(self, src):
-        rows = [('music', 'Music', 'A track for Settings > Audio Settings > Music')] + [(k, l, d) for k, l, d, _m in EVENTS]
-        guess = event_for_name(src[1].stem) if src[0] == 'file' else None
+    def open_assign(self, src, video=False):
+        rows = [('music', 'Music', 'A track for Audio Settings > Music in RIPPS2')] + [(k, l, d) for k, l, d, _m in EVENTS]
+        if video:
+            rows.insert(0, ('video', 'PS2 video', 'An AVI that Memory Files plays, in output/MEDIA'))
+        guess = 'video' if video else event_for_name(src[1].stem) if src[0] == 'file' else None
         sel = next((i for i, r in enumerate(rows) if r[0] == guess), 0)
         self.popup = dict(kind='assign', src=src, rows=rows, sel=sel, top=max(0, sel - 5))
 
     def convert(self, src, event, quiet=False, then=None):
         name = src[1].name if src[0] == 'file' else self.bios_label(src[1])
+        if event == 'video':
+            dst = vio.out_name(src[1], MEDIA_DIR)
+
+            def vdone(path):
+                if not quiet:
+                    self.say('Video: %s (%s), in output/MEDIA' % (path.name, human(path.stat().st_size)))
+                if then:
+                    then()
+            self.submit('MAKING THE PS2 VIDEO OF ' + name, lambda prog: vio.convert(src[1], dst, prog), vdone)
+            return
 
         def have(x):
             if event == 'music':
@@ -446,7 +491,7 @@ class Studio:
         if self.cwd is None:
             return
         files = [e[1] for e in self.entries if e[0] == 'audio']
-        plan = []
+        plan = [(e[1], 'video') for e in self.entries if e[0] == 'video']
         for p in files:
             ev = event_for_name(p.stem)
             if ev:
@@ -466,7 +511,7 @@ class Studio:
 
         def step(i=0):
             if i >= len(todo):
-                self.say('Done: %d files are in output/AUDIO.' % len(todo))
+                self.say('Done: %d files are in output/AUDIO and output/MEDIA.' % len(todo))
                 return
             src, ev = todo[i]
             self.convert(src, ev, quiet=True, then=lambda: step(i + 1))
@@ -487,7 +532,7 @@ class Studio:
         def done(b):
             self.bios = b
             self.bios_sel, self.bios_top = 0, 0
-            self.tab = 2
+            self.tab = 3
             ver = b['files']['_ROMVER'][:14].decode('latin1', 'replace')
             self.say('BIOS %s: %d menu sounds and %d pieces of system music.' % (
                 ver, sum(1 for i in b['items'] if i[0][0] == 'osd'), sum(1 for i in b['items'] if i[0][0] == 'seq')))
@@ -535,6 +580,11 @@ class Studio:
                 ev = p.stem if p.suffix.lower() == '.adp' else 'music'
                 rows.append((p, ev, p.stat().st_size))
         return rows
+
+    def media(self):
+        MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+        return [(p, p.stat().st_size) for p in sorted(MEDIA_DIR.iterdir(), key=lambda p: p.name.lower())
+                if p.is_file() and p.suffix.lower() == '.avi' and not p.name.endswith('.part.avi')]
 
     # -------------------------------------------------------------- drawing
     def _backdrop(self):
@@ -619,7 +669,7 @@ class Studio:
 
     def draw_tabs(self):
         self.tab_rects = []
-        xs = [W / 2 - 300, W / 2, W / 2 + 300]
+        xs = [W / 2 + (k - 1.5) * 250 for k in range(len(self.TABS))]
         for k, name in enumerate(self.TABS):
             active = k == self.tab
             r = self.text(name, 30 if active else 24, WHITE if active else DIM, (xs[k], 34), 'center')
@@ -630,9 +680,9 @@ class Studio:
                 g = pygame.Surface((110, 24), pygame.SRCALPHA)
                 pygame.draw.rect(g, (90, 160, 255, 60), (0, 0, 110, 24), border_radius=12)
                 self.screen.blit(g, (r.centerx - 55, r.bottom - 3))
-        self.text('L1', 16, FAINT, (xs[0] - 150, 34), 'center')
-        self.text('R1', 16, FAINT, (xs[2] + 150, 34), 'center')
-        self.text('RIPPS2 AUDIO STUDIO', 16, FAINT, (W - 24, H - 14), 'bottomright')
+        self.text('L1', 16, FAINT, (xs[0] - 130, 34), 'center')
+        self.text('R1', 16, FAINT, (xs[-1] + 130, 34), 'center')
+        self.text('RIPPS2 MEDIA STUDIO', 16, FAINT, (W - 24, H - 14), 'bottomright')
 
     def draw_list(self, rect, rows, sel, top, title):
         """rows: (icon, name, right text, color). Returns visible row rects (index, rect)."""
@@ -673,6 +723,9 @@ class Studio:
             for k in range(-6, 8, 4):
                 pygame.draw.line(self.screen, CYAN, (x + k, y - 10), (x + k, y - 7))
                 pygame.draw.line(self.screen, CYAN, (x + k, y + 7), (x + k, y + 10))
+        elif kind == 'video':
+            pygame.draw.rect(self.screen, CYAN, (x - 9, y - 7, 18, 14), 1)
+            pygame.draw.polygon(self.screen, CYAN, [(x - 3, y - 4), (x - 3, y + 4), (x + 4, y)])
         elif kind == 'music':
             pygame.draw.circle(self.screen, CYAN, (x - 4, y + 5), 4)
             pygame.draw.line(self.screen, CYAN, (x - 1, y + 5), (x - 1, y - 8), 2)
@@ -728,6 +781,8 @@ class Studio:
             self.screen_browse()
         elif self.tab == 1:
             self.screen_output()
+        elif self.tab == 2:
+            self.screen_media()
         else:
             self.screen_bios()
         if self.popup:
@@ -743,6 +798,8 @@ class Studio:
                 rows.append(('dir', name, '', WHITE))
             elif kind == 'bios':
                 rows.append(('bios', name, 'BIOS?  ' + human(size), CYAN))
+            elif kind == 'video':
+                rows.append(('video', name, 'VIDEO  ' + human(size), WHITE))
             else:
                 ev = event_for_name(p.stem)
                 rows.append(('file', name, (EVENT[ev][1].upper() + '  ' if ev else '') + human(size), WHITE))
@@ -762,6 +819,22 @@ class Studio:
                      'Triangle (P) plays it as the PS2 will: mono SPU2 ADPCM at 44.1 kHz.']
             if ev:
                 lines.append('Its name says %s: that is picked first.' % EVENT[ev][1])
+        elif self.entries and self.entries[self.sel][0] == 'video':
+            p = self.entries[self.sel][1]
+            self.text('A VIDEO', 20, SOFT, (tx, info.y + 12))
+            self.text(p.name, 24, WHITE, (tx, info.y + 44), maxw=info.w - 32)
+            pr = self.probe(p)
+            if pr is None:
+                lines = ['Reading it ...']
+            elif pr is False:
+                lines = ['ffmpeg cannot find a picture in this file (put ffmpeg.exe beside the app).']
+            else:
+                pl = vio.plan(pr)
+                lines = ['%s, %d x %d, %g fps, %s.' % (mmss(pr['duration']), pr['width'], pr['height'], round(pr['fps'], 2),
+                                                       pr['codec'] or 'video'),
+                         'Cross (Enter) makes the PS2 video: %d x %d, %g fps, XviD with MP3 sound in an AVI, about %s.' % (
+                             pl['width'], pl['height'], pl['fps'], human(pl['bytes'])),
+                         'Or make its sound into music or one of RIPPS2\'s sounds. Square (Space) plays the sound.']
         elif self.entries and self.entries[self.sel][0] == 'bios':
             self.text('A PS2 BIOS?', 20, SOFT, (tx, info.y + 12))
             self.text(self.entries[self.sel][2], 24, WHITE, (tx, info.y + 44), maxw=info.w - 32)
@@ -770,11 +843,11 @@ class Studio:
                      'rendered fresh, ready to rip into output/AUDIO.']
         else:
             self.text('MAKE AN AUDIO FOLDER', 20, SOFT, (tx, info.y + 12))
-            lines = ['Pick a sound or a song to convert it.',
-                     'Start (S) converts a whole folder: files named for an event (cursor.wav, boot.mp3) become that sound, long ones become music.',
+            lines = ['Pick a sound, a song or a video to convert it.',
+                     'Start (S) converts a whole folder: files named for an event (cursor.wav, boot.mp3) become that sound, long ones become music, videos become PS2 videos.',
                      'Pick your PS2 BIOS dump to rip the console\'s own sounds.',
                      '',
-                     'Everything lands in output/AUDIO beside this app. Copy it beside RIPPS2.ELF: a USB stick and RIPPS2\'s Memory Files are the easy way.']
+                     'Sounds and music land in output/AUDIO beside this app, videos in output/MEDIA. A USB stick and RIPPS2\'s Memory Files take them to the PS2.']
         self.para(lines, tx, info.y + 84, info.w - 32)
         self.hints([('cross', 'OPEN / CONVERT'), ('circle', 'BACK'), ('square', 'PLAY'), ('triangle', 'PS2 VERSION'),
                     ('start', 'CONVERT FOLDER'), ('l1', 'TABS')])
@@ -807,6 +880,29 @@ class Studio:
                  '%d of %d sounds made. The rest play RIPPS2\'s own.' % (len(EVENTS) - len(missing), len(EVENTS))]
         self.para(lines, tx, info.y + 98, info.w - 32, gap=10)
         self.hints([('square', 'PLAY'), ('triangle', 'DELETE'), ('start', 'OPEN FOLDER'), ('l1', 'TABS')])
+
+    def screen_media(self):
+        vids = self.media()
+        rows = []
+        for p, size in vids:
+            pr = self.probe(p)
+            rows.append(('video', p.name, ('%s  ' % mmss(pr['duration']) if pr else '') + human(size), WHITE))
+        self.media_vis = self.draw_list((40, 100, 720, 500), rows, self.media_sel, self.media_top,
+                                        str(MEDIA_DIR).replace('\\', '/'))
+        info = pygame.Rect(790, 100, 450, 500)
+        self.panel(info)
+        tx = info.x + 16
+        self.text('THE MEDIA FOLDER', 20, SOFT, (tx, info.y + 12))
+        self.text('%d video%s, %s' % (len(vids), '' if len(vids) == 1 else 's', human(sum(s for p, s in vids))), 20, WHITE,
+                  (tx, info.y + 46))
+        lines = ['PC: output/MEDIA, beside this app.',
+                 'PS2: copy the MEDIA folder to your biggest drive (a USB stick, the HDD or an SD2PSX) with RIPPS2\'s Memory Files.',
+                 'In Memory Files, Cross on a video plays it full screen. START pauses, Circle or SELECT stops.',
+                 'Every video here is an AVI as RIPPS2 plays it: XviD at %d kbps, MP3 sound at 48 kHz, %d x %d at most, %g frames a second at most.' % (
+                     vio.VIDEO_KBPS, vio.MAX_W, vio.MAX_H, vio.MAX_FPS),
+                 'Cross opens one in your PC\'s own player.']
+        self.para(lines, tx, info.y + 84, info.w - 32, gap=10)
+        self.hints([('cross', 'OPEN ON THE PC'), ('triangle', 'DELETE'), ('start', 'OPEN FOLDER'), ('l1', 'TABS')])
 
     def screen_bios(self):
         if not self.bios:
@@ -857,7 +953,7 @@ class Studio:
             self.panel(r, 240)
             self.text('DELETE THIS FILE?', 24, WHITE, (r.centerx, r.y + 22), 'midtop')
             self.text(pu['path'].name, 24, CYAN, (r.centerx, r.y + 64), 'midtop', maxw=r.w - 40)
-            self.text('It is removed from output/AUDIO for good.', 20, SOFT, (r.centerx, r.y + 106), 'midtop')
+            self.text('It is removed from output/%s for good.' % pu['path'].parent.name, 20, SOFT, (r.centerx, r.y + 106), 'midtop')
             self.pop_vis = []
             self.hints([('cross', 'DELETE'), ('circle', 'KEEP IT')], y=r.bottom - 32, center=r.centerx)
             return
@@ -867,15 +963,19 @@ class Studio:
             name = pu['src'][1].name if pu['src'][0] == 'file' else self.bios_label(pu['src'][1])
             self.text('MAKE IT ...', 20, SOFT, (r.x + 20, r.y + 12))
             self.text(name, 24, WHITE, (r.x + 20, r.y + 40), maxw=r.w - 40)
-            rows = [('music' if k == 'music' else 'file', l, d, WHITE) for k, l, d in pu['rows']]
+            rows = [(k if k in ('music', 'video') else 'file', l, d, WHITE) for k, l, d in pu['rows']]
             self.pop_vis = self.draw_list((r.x + 10, r.y + 76, r.w - 20, r.h - 86), rows, pu['sel'], pu['top'], 'RIPPS2 SOUNDS (RIPTOPL\'S NAMES FIRST)')
         else:
             plan = pu['plan']
             n_s = sum(1 for p, e in plan if e and e != 'music')
             n_m = sum(1 for p, e in plan if e == 'music')
             self.text('CONVERT THIS FOLDER', 20, SOFT, (r.x + 20, r.y + 12))
-            self.text('%d sounds, %d music, %d skipped' % (n_s, n_m, sum(1 for p, e in plan if not e)), 24, WHITE, (r.x + 20, r.y + 40))
-            rows = [('music' if e == 'music' else 'file', p.name, (EVENT[e][1] if e in EVENT else 'Music' if e else 'skipped').upper(),
+            n_v = sum(1 for p, e in plan if e == 'video')
+            n_s -= n_v
+            self.text('%d sounds, %d music, %d videos, %d skipped' % (n_s, n_m, n_v, sum(1 for p, e in plan if not e)), 24, WHITE,
+                      (r.x + 20, r.y + 40))
+            rows = [(e if e in ('music', 'video') else 'file', p.name,
+                     (EVENT[e][1] if e in EVENT else 'Music' if e == 'music' else 'PS2 video' if e else 'skipped').upper(),
                      WHITE if e else FAINT) for p, e in plan]
             self.pop_vis = self.draw_list((r.x + 10, r.y + 76, r.w - 20, r.h - 86), rows, pu['sel'], pu['top'], 'Cross converts them all, Circle cancels')
 
@@ -898,6 +998,10 @@ class Studio:
             n = len(self.outputs())
             self.out_sel = max(0, min(n - 1, self.out_sel + d))
             self.out_top = max(min(self.out_top, self.out_sel), self.out_sel - 14)
+        elif self.tab == 2:
+            n = len(self.media())
+            self.media_sel = max(0, min(n - 1, self.media_sel + d))
+            self.media_top = max(min(self.media_top, self.media_sel), self.media_sel - 14)
         elif self.bios:
             n = len(self.bios['items'])
             self.bios_sel = max(0, min(n - 1, self.bios_sel + d))
@@ -906,7 +1010,7 @@ class Studio:
     def act(self, b):
         """b: cross, circle, square, triangle, start, l1, r1, select."""
         if b in ('l1', 'r1') and not self.popup:
-            self.tab = (self.tab + (1 if b == 'r1' else -1)) % 3
+            self.tab = (self.tab + (1 if b == 'r1' else -1)) % len(self.TABS)
             return
         if self.popup:
             pu = self.popup
@@ -921,6 +1025,7 @@ class Studio:
                     self.cache.pop(('file', pu['path']), None)
                     self.say('Deleted ' + pu['path'].name)
                     self.out_sel = max(0, min(self.out_sel, len(self.outputs()) - 1))
+                    self.media_sel = max(0, min(self.media_sel, len(self.media()) - 1))
                 elif pu['kind'] == 'assign':
                     self.convert(pu['src'], pu['rows'][pu['sel']][0])
                 else:
@@ -931,7 +1036,7 @@ class Studio:
                 (self.play_original if ev == 'music' else (lambda s, n: self.play_ps2(s, n, ev)))(pu['src'], name)
             return
         if b == 'select':
-            open_folder(OUT_DIR)
+            open_folder(MEDIA_DIR if self.tab == 2 else OUT_DIR)
             return
         if self.tab == 0:
             ent = self.entries[self.sel] if self.entries else None
@@ -939,7 +1044,7 @@ class Studio:
                 self.enter()
             elif b == 'circle':
                 self.back()
-            elif b == 'square' and ent and ent[0] == 'audio':
+            elif b == 'square' and ent and ent[0] in ('audio', 'video'):
                 if self.player.playing:
                     self.player.stop()
                 else:
@@ -965,6 +1070,17 @@ class Studio:
                 self.popup = dict(kind='delete', path=p)
             elif b == 'start':
                 open_folder(OUT_DIR)
+        elif self.tab == 2:
+            vids = self.media()
+            if b == 'start' or not vids:
+                if b == 'start':
+                    open_folder(MEDIA_DIR)
+                return
+            p, _s = vids[min(self.media_sel, len(vids) - 1)]
+            if b == 'cross':
+                open_file(p)
+            elif b == 'triangle':
+                self.popup = dict(kind='delete', path=p)
         else:
             if not self.bios:
                 return
@@ -1030,7 +1146,7 @@ class Studio:
                 self.act('r1' if kind == 'l1' else kind)
                 return
         vis = (self.pop_vis if self.popup else self.vis if self.tab == 0 else self.out_vis if self.tab == 1
-               else getattr(self, 'bios_vis', []))
+               else getattr(self, 'media_vis', []) if self.tab == 2 else getattr(self, 'bios_vis', []))
         for k, rr in vis:
             if rr.collidepoint(pos):
                 double = self.last_click[1] == k and now - self.last_click[0] < 0.4
@@ -1041,6 +1157,8 @@ class Studio:
                     self.sel = k
                 elif self.tab == 1:
                     self.out_sel = k
+                elif self.tab == 2:
+                    self.media_sel = k
                 else:
                     self.bios_sel = k
                 if double:
@@ -1087,9 +1205,11 @@ class Studio:
 
 
 def selftest(args):
-    """python studio.py --convert <file> <event|music> | --rip <bios> : the app's work, no window."""
+    """python studio.py --convert <file> <event|music> | --video <file> | --rip <bios> : the app's work, no window."""
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    if args[0] == '--convert':
+    if args[0] == '--video':
+        print(vio.convert(args[1], vio.out_name(args[1], MEDIA_DIR)))
+    elif args[0] == '--convert':
         x = aio.load(args[1])
         if args[2] == 'music':
             print(aio.write_music(aio.loudness_match(x), OUT_DIR / ('bgm_01 ' + clean_title(Path(args[1]).stem))))

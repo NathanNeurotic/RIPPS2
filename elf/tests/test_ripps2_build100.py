@@ -45,7 +45,7 @@ if 'configGetInt(configOPL, "ripps2_vcd_usb", &last);' not in bdm or 'vcdBdmaEnv
 # Sound: the boot and launch rips (user: "spitty pops"). Programs 60 to 62 were read as the SPU2 noise and played
 # as a random level held for a tenth of a second; they are the bank's first sample (address 0)
 rip = rd('src/ripps2biossnd.c')
-studio = (Path(__file__).resolve().parents[2] / 'tools/audio-studio/ps2bios.py').read_text(encoding='utf-8')
+studio = (Path(__file__).resolve().parents[2] / 'tools/media-studio/ps2bios.py').read_text(encoding='utf-8')
 if 'tn->noise' in rip or 'RBS_NOISE_BASE' in rip or 'noise_voice' in studio or "noise=not (t[15] & 1)" in studio:
     fail.append('no sequence tone is the SPU2 noise: programs 60 to 62 play the sample at address 0')
 
