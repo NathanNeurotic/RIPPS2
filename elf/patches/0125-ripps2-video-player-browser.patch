@@ -1,0 +1,462 @@
+diff --git a/include/fntsys.h b/include/fntsys.h
+index 917e3c4..6288726 100644
+--- a/include/fntsys.h
++++ b/include/fntsys.h
+@@ -53,6 +53,8 @@ void fntSetSubUnit(float x, float y); // RIPPS2 build 102: the next strings move
+ /** Calculates the width of the given text string
+  * We can't use the height for alignment, as the horizontal center would depends of the contained text itself */
+ int fntCalcDimensions(int id, const char *str);
++// RIPPS2 build 125: text into an RGBA32 picture (alpha 0 to 0x80) for a screen RIPPS2 does not draw (the video player's)
++int fntRenderRGBA(int id, int px, const char *string, unsigned char *rgba, int w, int h, int x, int baseline, u32 rgb, int alpha);
+ 
+ /** RIPPS2 build 83: how far below a string's y (as passed to fntRenderString with `aligned`) the middle of
+  * the face's capitals sits, in unscaled units. Centre text on a row by drawing it at rowMiddle - this. */
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 9818510..c82e340 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -224,6 +224,8 @@ int ripps2HintText(int x, int y, const char *text, u64 colour); // build 70: a b
+ void ripps2HintSmall(int on); // build 104: the next hints a size smaller (a row a translation made too long)
+ int ripps2HintSmallFont(void); // build 104: that smaller font, for a theme's hint row (FNT_ERROR if it would not load)
+ int ripps2HintWidth(const char *text);
++int ripps2HintFontId(void);                                          // build 125: the font a hint row draws in
++const char *ripps2HintCaseText(const char *text, char *out, int size); // build 125: a hint's words as a row writes them
+ // build 85: what a PS1 handoff is about to do, written to mc0:/RIPPS2/LAUNCH.TXT for a tester to read back
+ // in Memory Files (the file, its size and CRC, its argv, Sony's POPS files or Ember's BIOS beside it, the
+ // cards' POPSTARTER folders, the settings that steer it). Best effort: never stops a launch.
+diff --git a/src/fntsys.c b/src/fntsys.c
+index d71c0fc..82ebd99 100644
+--- a/src/fntsys.c
++++ b/src/fntsys.c
+@@ -1396,6 +1396,59 @@ int fntCenterOffset(int id, short aligned)
+     return base - cap / 2;
+ }
+ 
++// RIPPS2 build 125: text into an RGBA32 picture, for a screen RIPPS2 does not draw (the video player's). The slot's font
++// is opened again on its own at px pixels, so the GUI's glyph caches and sizes are left as they are. The pen starts at
++// x with the baseline at baseline; each glyph goes over what is there at its coverage times alpha (0 to 0x80), in rgb
++// (0xRRGGBB). With rgba NULL it only measures. Returns the pen's x after the text.
++int fntRenderRGBA(int id, int px, const char *string, unsigned char *rgba, int w, int h, int x, int baseline, u32 rgb, int alpha)
++{
++    FT_Face face = NULL;
++    uint32_t st = UTF8_ACCEPT, cp = 0;
++
++    if (string == NULL || id < 0 || id >= FNT_MAX_COUNT || px <= 0)
++        return x;
++    fntLock();
++    font_t *font = &fonts[id];
++    if (!font->isValid || font->buffer == NULL ||
++        FT_New_Memory_Face(font_library, (FT_Byte *)font->buffer, font->bufferSize, 0, &face) != 0) {
++        fntUnlock();
++        return x;
++    }
++    FT_Set_Pixel_Sizes(face, 0, px);
++    for (; *string; ++string) {
++        if (utf8Decode(&st, &cp, *string))
++            continue;
++        if (FT_Load_Char(face, FNT_CAPS(font, cp), FT_LOAD_RENDER) != 0)
++            continue;
++        FT_GlyphSlot g = face->glyph;
++        if (rgba != NULL) {
++            int gx = x + g->bitmap_left, gy = baseline - g->bitmap_top, r, c;
++            for (r = 0; r < (int)g->bitmap.rows; r++) {
++                int yy = gy + r;
++                if (yy < 0 || yy >= h)
++                    continue;
++                for (c = 0; c < (int)g->bitmap.width; c++) {
++                    int xx = gx + c, a = g->bitmap.buffer[r * g->bitmap.pitch + c] * alpha / 255, da, oa;
++                    unsigned char *d;
++                    if (xx < 0 || xx >= w || a <= 0)
++                        continue;
++                    d = rgba + (yy * w + xx) * 4;
++                    da = d[3] * (0x80 - a) / 0x80;
++                    oa = a + da;
++                    d[0] = (((rgb >> 16) & 0xFF) * a + d[0] * da) / oa;
++                    d[1] = (((rgb >> 8) & 0xFF) * a + d[1] * da) / oa;
++                    d[2] = ((rgb & 0xFF) * a + d[2] * da) / oa;
++                    d[3] = oa;
++                }
++            }
++        }
++        x += g->advance.x >> 6;
++    }
++    FT_Done_Face(face);
++    fntUnlock();
++    return x;
++}
++
+ int fntCalcDimensions(int id, const char *str)
+ {
+     int w;
+diff --git a/src/ripps2media.c b/src/ripps2media.c
+index 6b986ea..89c90d3 100644
+--- a/src/ripps2media.c
++++ b/src/ripps2media.c
+@@ -9,10 +9,12 @@
+   texture.
+ 
+   Video (AVI: XviD or DivX, with MP3 or MP2 sound), played by libsmslite (elf/libsmslite, RIPPS2's fork of the
+-  SMS player's core): full screen, the picture letterboxed to its own shape. START pauses and carries on; the
+-  cancel button or SELECT stops. Nothing else on the pad is taken, so a player that needs the pad (DVD menus)
+-  can have the rest of it. The menu's music stops for it and comes back after, and RIPPS2's display is set up
+-  again when it ends.
++  SMS player's core): full screen, the picture letterboxed to its own shape. Build 125 (the user, 10/29): the
++  confirm button pauses and plays, the cancel button (or SELECT) stops, START loops it, L1 / R1 go 10 s back and on,
++  L2 / R2 turn it down and up in steps of 5. Its hints, in the theme's glyphs, are hidden as it starts (its first
++  frame is the video), come up on any button and fade soon after while it plays (paused, they stay); the volume
++  pops in as a number and fades quickly once the buttons are let go. The menu's music stops for it and comes back
++  after, and RIPPS2's display is set up again when it ends.
+ */
+ 
+ #include <stdio.h>
+@@ -798,23 +800,301 @@ void ripps2ViewSaveIcon(const char *path)
+ #ifdef RIPPS2_SMSLITE
+ // ---- video ----
+ static volatile int videoPadRun = 0, videoPadDone = 0;
+-static u8 videoPadStack[0x2000] __attribute__((aligned(16)));
++static u8 videoPadStack[0x8000] __attribute__((aligned(16))); // build 125: FreeType paints the hints on this thread
+ 
+-// The pad while the player has the screen: START pauses and carries on, the cancel button or SELECT stops.
++#define VP_HINT_W 640 // the hint row's picture (libsmslite's first overlay, at most 640 x 64)
++#define VP_HINT_H 40
++#define VP_POP_W 192 // the volume's (its second, at most 256 x 128)
++#define VP_POP_H 96
++#define VP_HINTS_HOLD 1.6f  // playing: the hints stay this long after the last button,
++#define VP_HINTS_FADE 0.35f // then fade over this
++#define VP_POP_HOLD 0.8f    // the volume, after its last step,
++#define VP_POP_FADE 0.25f   // fades over this
++#define VP_POP_IN 0.24f     // and pops in over this, from a little bigger (RIPPS2's ease out back)
++
++static unsigned char *vpHints, *vpPop;
++
++static float vpEaseOutBack(float x) // ripps2ui.c's easeOutBack
++{
++    const float c1 = 1.70158f, c3 = c1 + 1.0f;
++    return 1.0f + c3 * powf(x - 1.0f, 3.0f) + c1 * powf(x - 1.0f, 2.0f);
++}
++
++static float vpSince(clock_t t)
++{
++    return (float)(clock() - t) / CLOCKS_PER_SEC;
++}
++
++static void vpOver(unsigned char *d, int r, int g, int b, int a) // a (0 to 0x80) over what is there
++{
++    int da, oa;
++    if (a <= 0)
++        return;
++    if (a > 0x80)
++        a = 0x80;
++    da = d[3] * (0x80 - a) / 0x80;
++    oa = a + da;
++    d[0] = (r * a + d[0] * da) / oa;
++    d[1] = (g * a + d[1] * da) / oa;
++    d[2] = (b * a + d[2] * da) / oa;
++    d[3] = oa;
++}
++
++static void vpTexel(const GSTEXTURE *t, int u, int v, unsigned char *px) // RGBA, alpha 0 to 0x80
++{
++    const unsigned char *m = (const unsigned char *)t->Mem;
++    int i;
++    switch (t->PSM) {
++        case GS_PSM_CT32:
++            memcpy(px, m + (v * t->Width + u) * 4, 4);
++            break;
++        case GS_PSM_CT24:
++            memcpy(px, m + (v * t->Width + u) * 3, 3);
++            px[3] = 0x80;
++            break;
++        case GS_PSM_T8: // the palette is stored as the GS reads it: entries 8-15 and 16-23 of every 32 swapped
++            i = m[v * t->Width + u];
++            i = (i & ~0x18) | ((i & 0x08) << 1) | ((i & 0x10) >> 1);
++            memcpy(px, (const unsigned char *)t->Clut + i * 4, 4);
++            break;
++        case GS_PSM_T4: // two to a byte, the left one low
++            i = m[(v * t->Width + u) / 2];
++            i = (u & 1) ? i >> 4 : i & 15;
++            memcpy(px, (const unsigned char *)t->Clut + i * 4, 4);
++            break;
++        default:
++            px[0] = px[1] = px[2] = px[3] = 0;
++    }
++}
++
++// a theme glyph h pixels tall at x, its middle on cy, each pixel the average of the texels it covers; its width
++static int vpGlyph(unsigned char *buf, int bw, int bh, int icon, int x, int cy, int h, int alpha)
++{
++    GSTEXTURE *t = thmGetTexture(icon);
++    int w, X, Y;
++    if (t == NULL || t->Mem == NULL || t->Width == 0 || t->Height == 0 || (t->PSM != GS_PSM_CT32 && t->PSM != GS_PSM_CT24 && t->Clut == NULL))
++        return 0;
++    w = h * t->Width / t->Height;
++    if (buf == NULL)
++        return w;
++    for (Y = 0; Y < h; Y++) {
++        int yy = cy - h / 2 + Y, v0 = Y * t->Height / h, v1 = (Y + 1) * t->Height / h;
++        if (yy < 0 || yy >= bh)
++            continue;
++        if (v1 <= v0)
++            v1 = v0 + 1;
++        for (X = 0; X < w; X++) {
++            int xx = x + X, u0 = X * t->Width / w, u1 = (X + 1) * t->Width / w, r = 0, g = 0, b = 0, a = 0, n = 0, u, v;
++            unsigned char px[4];
++            if (xx < 0 || xx >= bw)
++                continue;
++            if (u1 <= u0)
++                u1 = u0 + 1;
++            for (v = v0; v < v1; v++)
++                for (u = u0; u < u1; u++, n++) {
++                    vpTexel(t, u, v, px);
++                    r += px[0] * px[3];
++                    g += px[1] * px[3];
++                    b += px[2] * px[3];
++                    a += px[3];
++                }
++            if (a > 0)
++                vpOver(buf + (yy * bw + xx) * 4, r / a, g / a, b / a, a / n * alpha / 0x80);
++        }
++    }
++    return w;
++}
++
++// text with a soft shadow under it; its width
++static int vpText(unsigned char *buf, int bw, int bh, int font, int px, const char *text, int x, int baseline, u32 rgb)
++{
++    if (buf != NULL)
++        fntRenderRGBA(font, px, text, buf, bw, bh, x + 1, baseline + 1, 0x000000, 0x50);
++    return fntRenderRGBA(font, px, text, buf, bw, bh, x, baseline, rgb, 0x80) - x;
++}
++
++// the hint row: Play / Pause, 10 s back and on, Volume, Loop, Stop, centred on a band that darkens toward the bottom
++static void vpPaintHints(int paused, int loop)
++{
++    static const struct
++    {
++        int icon, icon2;
++        const char *word;
++    } row[5] = {{-1, -1, NULL}, {L1_ICON, R1_ICON, "10 s"}, {L2_ICON, R2_ICON, "Volume"}, {START_ICON, -1, NULL}, {-2, -1, "Stop"}};
++    unsigned char *b = vpHints;
++    int font = ripps2HintFontId(), pass, i, x = 0, total = 0, cy = VP_HINT_H / 2 + 2, y;
++    char word[64];
++
++    memset(b, 0, VP_HINT_W * VP_HINT_H * 4);
++    for (y = 0; y < VP_HINT_H; y++) { // the band: clear at the top, about a third dark at the bottom
++        int a = 0x30 * y / VP_HINT_H, xx;
++        for (xx = 0; xx < VP_HINT_W; xx++) {
++            unsigned char *d = b + (y * VP_HINT_W + xx) * 4;
++            d[0] = 0x02;
++            d[1] = 0x03;
++            d[2] = 0x0A;
++            d[3] = a;
++        }
++    }
++    for (pass = 0; pass < 2; pass++) { // measure, then paint centred
++        x = pass ? (VP_HINT_W - total) / 2 : 0;
++        for (i = 0; i < 5; i++) {
++            int icon = row[i].icon, gw;
++            const char *w = row[i].word;
++            if (i == 0) {
++                icon = gSelectButton == KEY_CIRCLE ? CIRCLE_ICON : CROSS_ICON;
++                w = paused ? "Play" : "Pause";
++            } else if (i == 3)
++                w = loop ? "Loop on" : "Loop";
++            else if (icon == -2)
++                icon = gSelectButton == KEY_CIRCLE ? CROSS_ICON : CIRCLE_ICON;
++            gw = vpGlyph(pass ? b : NULL, VP_HINT_W, VP_HINT_H, icon, x, cy, 18, 0x80);
++            x += gw + 2;
++            if (row[i].icon2 >= 0) {
++                gw = vpGlyph(pass ? b : NULL, VP_HINT_W, VP_HINT_H, row[i].icon2, x, cy, 18, 0x80);
++                x += gw + 4;
++            }
++            x += vpText(pass ? b : NULL, VP_HINT_W, VP_HINT_H, font, 15, ripps2HintCaseText(w, word, sizeof(word)), x, cy + 5,
++                        i == 3 && loop ? 0xFFFFFF : 0xD8DEEC);
++            if (i < 4)
++                x += 18;
++        }
++        total = x;
++    }
++}
++
++// the volume: a dark rounded plate, the word, the number big in RIPPS2 Sleek, and a bar at its level
++static void vpPaintPop(int vol)
++{
++    unsigned char *b = vpPop;
++    int x, y, w, font = RIPPS2_UI_FONT, bar = 120 * vol / 100;
++    char num[8], word[32];
++
++    memset(b, 0, VP_POP_W * VP_POP_H * 4);
++    for (y = 0; y < VP_POP_H; y++)
++        for (x = 0; x < VP_POP_W; x++) {
++            int dx = x < 12 ? 12 - x : x > VP_POP_W - 13 ? x - (VP_POP_W - 13) : 0;
++            int dy = y < 12 ? 12 - y : y > VP_POP_H - 13 ? y - (VP_POP_H - 13) : 0;
++            if (dx * dx + dy * dy <= 144)
++                vpOver(b + (y * VP_POP_W + x) * 4, 0x06, 0x08, 0x12, 0x58);
++        }
++    ripps2HintCaseText("Volume", word, sizeof(word));
++    w = vpText(NULL, 0, 0, ripps2HintFontId(), 14, word, 0, 0, 0);
++    vpText(b, VP_POP_W, VP_POP_H, ripps2HintFontId(), 14, word, (VP_POP_W - w) / 2, 22, 0xA8B0C8);
++    snprintf(num, sizeof(num), "%d", vol);
++    w = vpText(NULL, 0, 0, font, 40, num, 0, 0, 0);
++    vpText(b, VP_POP_W, VP_POP_H, font, 40, num, (VP_POP_W - w) / 2, 66, 0xFFFFFF);
++    for (y = 78; y < 82; y++)
++        for (x = 0; x < 120; x++)
++            vpOver(b + (y * VP_POP_W + 36 + x) * 4, 0xFF, 0xFF, 0xFF, x < bar ? 0x70 : 0x18);
++}
++
++// The pad while the player has the screen (build 125: the buttons above), and the two pictures over the video.
+ static void videoPadThread(void *arg)
+ {
+-    int paused = 0;
++    int paused = 0, loop = 0, vol = 100, sw = 0, sh = 0, hintsShown = 0, popShown = 0, hintsDirty = 1, popDirty = 1;
++    int confirm = gSelectButton == KEY_CIRCLE ? KEY_CIRCLE : KEY_CROSS;
++    clock_t hintsAt = 0, popAt = 0, popIn = 0;
+     (void)arg;
+     while (videoPadRun) {
++        int r1, l1, up, down;
+         readPads();
+-        if (getKeyOn(KEY_START)) {
+-            paused = !paused;
+-            smsLitePause(paused);
+-        }
+         if (getKeyOn(guiCancelKey()) || getKeyOn(KEY_SELECT)) {
+             LOG("MEDIA: video stop asked\n");
++            smsLiteOverlayShow(SMSLITE_OVERLAY_HINTS, 0, 256);
++            smsLiteOverlayShow(SMSLITE_OVERLAY_POP, 0, 256);
+             smsLitePause(0);
+             smsLiteStop();
++            DelayThread(16 * 1000);
++            continue;
++        }
++        if (getKeyOn(confirm)) {
++            paused = !paused;
++            smsLitePause(paused);
++            hintsShown = hintsDirty = 1;
++            hintsAt = clock();
++        }
++        if (getKeyOn(KEY_START)) {
++            loop = !loop;
++            smsLiteSetLoop(loop);
++            hintsShown = hintsDirty = 1;
++            hintsAt = clock();
++        }
++        l1 = getKeyOn(KEY_L1);
++        r1 = getKeyOn(KEY_R1);
++        if (l1 || r1) {
++            if (paused) { // a skip plays on from where it lands (the player lets go of the pause as it starts again)
++                paused = 0;
++                hintsDirty = 1;
++            }
++            smsLiteSkip(r1 ? 10000 : -10000);
++            hintsShown = 1;
++            hintsAt = clock();
++        }
++        down = getKey(KEY_L2);
++        up = getKey(KEY_R2);
++        if (up || down) {
++            int v = vol + (up ? 5 : 0) - (down ? 5 : 0);
++            v = v < 0 ? 0 : v > 100 ? 100 : v;
++            if (v != vol) {
++                vol = v;
++                smsLiteSetVolume(vol);
++                popDirty = 1;
++            }
++            if (!popShown || vpSince(popAt) > VP_POP_HOLD + VP_POP_FADE)
++                popIn = clock();
++            popShown = 1;
++            popAt = clock();
++            hintsShown = 1;
++            hintsAt = clock();
++        }
++        if (getKeyOn(KEY_UP) || getKeyOn(KEY_DOWN) || getKeyOn(KEY_LEFT) || getKeyOn(KEY_RIGHT) || getKeyOn(KEY_TRIANGLE) ||
++            getKeyOn(KEY_SQUARE)) {
++            hintsShown = 1; // any other button: just the hints
++            hintsAt = clock();
++        }
++
++        if (sw == 0)
++            smsLiteScreenSize(&sw, &sh);
++        if (sw > 0 && vpHints != NULL && vpPop != NULL) {
++            float t;
++            if (hintsShown && hintsDirty) {
++                vpPaintHints(paused, loop);
++                smsLiteOverlaySet(SMSLITE_OVERLAY_HINTS, vpHints, VP_HINT_W, VP_HINT_H, (sw - VP_HINT_W) / 2, sh - VP_HINT_H - 14);
++                hintsDirty = 0;
++            }
++            if (popShown && popDirty) {
++                vpPaintPop(vol);
++                smsLiteOverlaySet(SMSLITE_OVERLAY_POP, vpPop, VP_POP_W, VP_POP_H, (sw - VP_POP_W) / 2, sh / 5);
++                popDirty = 0;
++            }
++            if (hintsShown) {
++                t = vpSince(hintsAt);
++                if (paused)
++                    smsLiteOverlayShow(SMSLITE_OVERLAY_HINTS, 0x80, 256);
++                else if (t < VP_HINTS_HOLD)
++                    smsLiteOverlayShow(SMSLITE_OVERLAY_HINTS, 0x80, 256);
++                else if (t < VP_HINTS_HOLD + VP_HINTS_FADE)
++                    smsLiteOverlayShow(SMSLITE_OVERLAY_HINTS, (int)(0x80 * (1.0f - (t - VP_HINTS_HOLD) / VP_HINTS_FADE)), 256);
++                else {
++                    smsLiteOverlayShow(SMSLITE_OVERLAY_HINTS, 0, 256);
++                    hintsShown = 0;
++                }
++            }
++            if (popShown) {
++                float in = vpSince(popIn), li = in < VP_POP_IN ? in / VP_POP_IN : 1.0f, s, a;
++                t = vpSince(popAt);
++                // RIPPS2's pop in: in from 1.16 times its size, settling with a little overshoot (easeOutBack)
++                s = 1.0f + 0.16f * (1.0f - vpEaseOutBack(li));
++                a = fminf(1.0f, li * 2.5f);
++                if (t > VP_POP_HOLD)
++                    a *= fmaxf(0.0f, 1.0f - (t - VP_POP_HOLD) / VP_POP_FADE);
++                smsLiteOverlayShow(SMSLITE_OVERLAY_POP, (int)(0x80 * a), (int)(256 * s));
++                if (t >= VP_POP_HOLD + VP_POP_FADE) {
++                    smsLiteOverlayShow(SMSLITE_OVERLAY_POP, 0, 256);
++                    popShown = 0;
++                }
++            }
+         }
+         DelayThread(16 * 1000);
+     }
+@@ -837,6 +1117,9 @@ void ripps2PlayVideo(const char *path)
+     guiRenderTextScreen(_t("Opening the video"));
+     if (music)
+         bgmStop();
++    // build 125: the hint row and the volume, painted on the pad's thread (freed after)
++    vpHints = (unsigned char *)memalign(64, VP_HINT_W * VP_HINT_H * 4);
++    vpPop = (unsigned char *)memalign(64, VP_POP_W * VP_POP_H * 4);
+ 
+     rmEnd(); // the player sets the screen up its own way; RIPPS2's goes again after
+ 
+@@ -861,6 +1144,9 @@ void ripps2PlayVideo(const char *path)
+         DelayThread(5000);
+     smsLitePause(0);
+     LOG("MEDIA: pad thread done\n");
++    free(vpHints);
++    free(vpPop);
++    vpHints = vpPop = NULL;
+ 
+     rmSetMode(1);
+     thmReloadScreenExtents();
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index a623099..0532079 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -2272,6 +2272,17 @@ int ripps2HintSmallFont(void)
+     return f;
+ }
+ 
++// build 125: for the video player, which paints its hints itself
++int ripps2HintFontId(void)
++{
++    return hintFont(thmPageFont(15));
++}
++
++const char *ripps2HintCaseText(const char *text, char *out, int size)
++{
++    return hintCase(_t(text), out, size);
++}
++
+ // build 104: the English handed in is translated here (a text already translated passes through), so the hint rows'
+ // tables of English read in the chosen language; 160 bytes, a hint in UTF-8
+ int ripps2HintWidth(const char *text)
