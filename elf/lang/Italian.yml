@@ -1305,6 +1305,51 @@ strings:
   : '%s parte dopo i pilastri, quindi il suono di avvio arriva in ritardo. START copia boot.adp (%d KB) accanto a RIPPS2 sulla memory card (%d KB liberi), dove suona mentre i pilastri si alzano.'
   The boot sound could not be copied to %s. It still plays from %s.: Non è stato possibile copiare il suono di avvio in %s. Suona ancora da %s.
   Zoom: Zoom
+  '%s could not be deleted; it stays as it was.': Impossibile eliminare %s; resta com'era.
+  '%s could not be read as a .tar archive. Nothing was changed.': Impossibile leggere %s come archivio .tar. Non è cambiato nulla.
+  '%s is deleted. %s is kept.': '%s è eliminato. %s viene tenuto.'
+  Art loads from it from now on.: Da ora le immagini si caricano da lì.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Eliminare il .tar unito?
+  
+    ELIMINATO: %s
+  
+    TENUTO: %s (la destinazione, ora con tutte le immagini di entrambi)'
+  Into %s (%s): In %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'TENUTO e aggiornato: %s (%d immagini)
+  
+    UNITO: %s (%d immagini)
+  
+    Immagini in entrambi: %d. Vince quella unita. Il .tar tenuto viene riscritto come nuovo file e sostituito solo quando è completo, quindi uno stop o un''unità piena lo lasciano com''era. Unire ora?'
+  MERGE .TAR: UNISCI .TAR
+  MERGE a .tar into the pack in %s: UNISCI un .tar nel pacchetto in %s
+  MERGING THE ART: UNIONE DELLE IMMAGINI
+  Merge in %s (%s): Unisci %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Unire il nuovo pacchetto a un altro .tar? Poi scegli il .tar da tenere e aggiornare; le immagini del nuovo pacchetto vanno lì.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Unito: %s ora contiene %d immagini (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Immagini in entrata: %d (%s). Stesso nome in entrambi: %d (vince quella unita).'
+  'Reading the archives: %s': 'Lettura degli archivi: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Fermare? Il .tar tenuto resta com'era; la copia incompleta viene rimossa.
+  Stopped. %s is as it was; the unfinished copy was removed.: Fermato. %s è com'era; la copia incompleta è stata rimossa.
+  The kept .tar is only replaced once the merged copy is whole.: Il .tar tenuto viene sostituito solo quando la copia unita è completa.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Impossibile scrivere l'unione sull'unità di %s (c'è spazio?). È com'era; nient'altro è cambiato.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : L'unione richiede circa %s liberi sull'unità di %s (il nuovo archivio viene scritto prima accanto al vecchio). Libera un po' di spazio e riprova.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'L''unione si è fermata tra due rinomine: il .tar tenuto è %s e quello unito %s. Ridai loro il nome con File di memoria.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Il .tar unito è stato scritto ma non ha potuto prendere il nome %s (una MMCE rinomina dal firmware 1.4.0). Il nuovo file è stato rimosso; il .tar tenuto è com'era.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Non c'è nessun altro .tar da unire in %s. Mettilo in questa cartella, nella cartella ART di un'unità o in cima a un'unità, poi riprova.
+  MERGE A .TAR INTO THIS: UNISCI UN .TAR QUI
 labels:
   'ON': Attivo
   'OFF': Disattivo

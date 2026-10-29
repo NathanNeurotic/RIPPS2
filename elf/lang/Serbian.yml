@@ -1306,6 +1306,51 @@ strings:
   : '%s se pokreće posle stubova, pa zvuk pokretanja kasni. START kopira boot.adp (%d KB) pored RIPPS2 na memorijsku karticu (%d KB slobodno), gde svira dok se stubovi dižu.'
   The boot sound could not be copied to %s. It still plays from %s.: Zvuk pokretanja nije mogao da se kopira u %s. I dalje svira iz %s.
   Zoom: Zumiranje
+  '%s could not be deleted; it stays as it was.': '%s nije mogao da se obriše; ostaje kakav je bio.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s nije mogao da se pročita kao .tar arhiva. Ništa nije promenjeno.'
+  '%s is deleted. %s is kept.': '%s je obrisan. %s se zadržava.'
+  Art loads from it from now on.: Slike se odsad učitavaju iz njega.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Obrisati spojeni .tar?
+  
+    BRIŠE SE: %s
+  
+    ZADRŽAVA SE: %s (odredište, sada sa svim slikama oba)'
+  Into %s (%s): U %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'ZADRŽAVA SE i ažurira: %s (%d slika)
+  
+    SPAJA SE: %s (%d slika)
+  
+    Slika u oba: %d. Pobeđuje spojeni. Zadržani .tar ponovo se upisuje kao nova datoteka i menja tek kad je ceo, pa ga zaustavljanje ili pun disk ostavljaju kakav je bio. Spojiti sada?'
+  MERGE .TAR: SPOJI .TAR
+  MERGE a .tar into the pack in %s: SPOJI .tar u paket u %s
+  MERGING THE ART: SPAJANJE SLIKA
+  Merge in %s (%s): Spoji %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Spojiti novi paket u drugi .tar? Zatim biraš .tar koji se zadržava i ažurira; slike novog paketa idu u njega.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Spojeno: %s sada sadrži %d slika (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Ulazi slika: %d (%s). Isto ime u oba: %d (pobeđuje spojeni).'
+  'Reading the archives: %s': 'Čitanje arhiva: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Zaustaviti? Zadržani .tar ostaje kakav je bio; nedovršena kopija se uklanja.
+  Stopped. %s is as it was; the unfinished copy was removed.: Zaustavljeno. %s je kakav je bio; nedovršena kopija je uklonjena.
+  The kept .tar is only replaced once the merged copy is whole.: Zadržani .tar se menja tek kad je spojena kopija cela.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Spajanje nije moglo da se upiše na disk od %s (ima li mesta?). Ostao je kakav je bio; ništa drugo nije promenjeno.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Spajanju treba oko %s slobodno na disku od %s (nova arhiva se najpre upisuje pored stare). Oslobodi malo mesta pa pokušaj ponovo.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Spajanje je stalo između dva preimenovanja: zadržani .tar je %s, a spojeni %s. Vrati im imena u Memorijskim datotekama.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Spojeni .tar je upisan, ali nije mogao da preuzme ime %s (MMCE preimenuje od firmvera 1.4.0). Nova datoteka je uklonjena; zadržani .tar je kakav je bio.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Nema drugog .tar za spajanje u %s. Stavi ga u ovu fasciklu, u fasciklu ART nekog diska ili na vrh diska pa pokušaj ponovo.
+  MERGE A .TAR INTO THIS: SPOJI .TAR U OVAJ
 labels:
   ERROR_SAVING_SETTINGS_TO: Podešavanja nisu mogla da se upišu u %s (greška %d)
   LAUNCH_PS2_DISC: Pokreni PS2 disk

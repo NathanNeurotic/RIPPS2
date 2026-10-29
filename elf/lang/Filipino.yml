@@ -1303,6 +1303,51 @@ strings:
   : Nagsisimula ang %s pagkatapos ng mga haligi, kaya huli ang tunog ng pag-boot. Kinokopya ng START ang boot.adp (%d KB) katabi ng RIPPS2 sa memory card (%d KB ang bakante), kung saan ito tumutunog habang umaangat ang mga haligi.
   The boot sound could not be copied to %s. It still plays from %s.: Hindi makopya ang tunog ng pag-boot sa %s. Tumutunog pa rin ito mula sa %s.
   Zoom: Zoom
+  '%s could not be deleted; it stays as it was.': Hindi mabura ang %s; mananatili itong gaya ng dati.
+  '%s could not be read as a .tar archive. Nothing was changed.': Hindi mabasa ang %s bilang .tar archive. Walang binago.
+  '%s is deleted. %s is kept.': Nabura ang %s. Itinatabi ang %s.
+  Art loads from it from now on.: Mula rito na maglo-load ang mga larawan.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Burahin ang pinagsamang .tar?
+  
+    BUBURAHIN: %s
+  
+    ITATABI: %s (ang destinasyon, ngayon ay may bawat larawan ng dalawa)'
+  Into %s (%s): Sa %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'ITATABI at ia-update: %s (%d larawan)
+  
+    IPAGSASAMA: %s (%d larawan)
+  
+    Mga larawang nasa dalawa: %d. Ang pinagsama ang mananalo. Isusulat muli ang itinatabing .tar bilang bagong file at papalitan lang kapag buo na, kaya hindi ito nagagalaw ng paghinto o punong drive. Pagsamahin na?'
+  MERGE .TAR: PAGSAMAHIN ANG .TAR
+  MERGE a .tar into the pack in %s: PAGSAMAHIN ang .tar sa pack sa %s
+  MERGING THE ART: PINAGSASAMA ANG MGA LARAWAN
+  Merge in %s (%s): Isama ang %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Isama ang bagong pack sa ibang .tar? Pipiliin mo pagkatapos ang .tar na itatabi at ia-update; doon mapupunta ang mga larawan ng bagong pack.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Napagsama: ang %s ay may %d larawan na ngayon (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Mga larawang papasok: %d (%s). Parehong pangalan sa dalawa: %d (ang pinagsama ang mananalo).'
+  'Reading the archives: %s': 'Binabasa ang mga archive: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Ihinto? Mananatiling gaya ng dati ang itinatabing .tar; aalisin ang hindi tapos na kopya.
+  Stopped. %s is as it was; the unfinished copy was removed.: Huminto. Ang %s ay gaya ng dati; inalis ang hindi tapos na kopya.
+  The kept .tar is only replaced once the merged copy is whole.: Papalitan lang ang itinatabing .tar kapag buo na ang pinagsamang kopya.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Hindi maisulat ang pagsasama sa drive ng %s (may puwang ba?). Gaya pa rin ito ng dati; walang ibang binago.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Kailangan ng pagsasama ng mga %s na bakante sa drive ng %s (isinusulat muna ang bagong archive sa tabi ng luma). Magbakante ng puwang, pagkatapos ay subukan muli.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Huminto ang pagsasama sa pagitan ng dalawang pag-rename: ang itinatabing .tar ay %s at ang pinagsama ay %s. I-rename sila pabalik gamit ang Memory files.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Naisulat ang pinagsamang .tar pero hindi nito makuha ang pangalang %s (nagre-rename ang MMCE mula firmware 1.4.0). Inalis ang bagong file; gaya ng dati ang itinatabing .tar.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Walang ibang .tar na maisasama sa %s. Ilagay ito sa folder na ito, sa ART folder ng isang drive o sa itaas ng isang drive, pagkatapos ay subukan muli.
+  MERGE A .TAR INTO THIS: ISAMA ANG .TAR DITO
 labels:
   SETTINGS_SAVED: Na-save ang settings sa %s
   SETTINGS: Settings

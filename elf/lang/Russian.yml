@@ -1306,6 +1306,51 @@ strings:
   : '%s запускается после колонн, поэтому звук запуска опаздывает. START копирует boot.adp (%d КБ) рядом с RIPPS2 на карту памяти (свободно %d КБ), где он звучит, пока поднимаются колонны.'
   The boot sound could not be copied to %s. It still plays from %s.: Не удалось скопировать звук запуска в %s. Он по-прежнему звучит из %s.
   Zoom: Приближение
+  '%s could not be deleted; it stays as it was.': Не удалось удалить %s; он остаётся как был.
+  '%s could not be read as a .tar archive. Nothing was changed.': Не удалось прочитать %s как архив .tar. Ничего не изменено.
+  '%s is deleted. %s is kept.': '%s удалён. %s сохранён.'
+  Art loads from it from now on.: Теперь изображения загружаются из него.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Удалить влитый .tar?
+  
+    УДАЛЯЕТСЯ: %s
+  
+    ОСТАЁТСЯ: %s (цель, теперь со всеми изображениями обоих)'
+  Into %s (%s): В %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'ОСТАЁТСЯ и обновляется: %s (%d изображений)
+  
+    ВЛИВАЕТСЯ: %s (%d изображений)
+  
+    Изображений в обоих: %d. Побеждает вливаемый. Оставляемый .tar записывается заново как новый файл и подменяется только целым, так что остановка или полный диск оставляют его как был. Объединить сейчас?'
+  MERGE .TAR: ОБЪЕДИНИТЬ .TAR
+  MERGE a .tar into the pack in %s: ВЛИТЬ .tar в пакет в %s
+  MERGING THE ART: ОБЪЕДИНЕНИЕ ИЗОБРАЖЕНИЙ
+  Merge in %s (%s): Влить %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Влить новый пакет в другой .tar? Затем вы выберете .tar, который останется и обновится; изображения нового пакета попадут в него.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Объединено: в %s теперь %d изображений (%d МБ), %d с.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Входит изображений: %d (%s). С тем же именем в обоих: %d (побеждает вливаемый).'
+  'Reading the archives: %s': 'Чтение архивов: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Остановить? Оставляемый .tar останется как был; незаконченная копия удаляется.
+  Stopped. %s is as it was; the unfinished copy was removed.: Остановлено. %s как был; незаконченная копия удалена.
+  The kept .tar is only replaced once the merged copy is whole.: Оставляемый .tar заменяется только когда объединённая копия целая.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Не удалось записать объединение на диск с %s (есть место?). Он как был; больше ничего не изменилось.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Объединению нужно около %s свободного места на диске с %s (новый архив сначала пишется рядом со старым). Освободите место и попробуйте снова.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Объединение остановилось между двумя переименованиями: оставляемый .tar сейчас %s, а влитый %s. Верните им имена в Файлах памяти.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Объединённый .tar записан, но не смог получить имя %s (MMCE переименовывает с прошивки 1.4.0). Новый файл удалён; оставляемый .tar как был.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Нет другого .tar, чтобы влить в %s. Положите его в эту папку, в папку ART диска или в корень диска и попробуйте снова.
+  MERGE A .TAR INTO THIS: ВЛИТЬ .TAR В ЭТОТ
 labels:
   DS34BT_MODE: DualShock3/4 по Bluetooth
   HINT_NEUTRINO_AUTO_ELF: Передаёт загрузочный ELF игры в Neutrino, чтобы найти настройки для этой игры. Включено по умолчанию; заданный вручную параметр Boot ELF важнее.

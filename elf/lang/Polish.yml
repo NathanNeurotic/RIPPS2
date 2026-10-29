@@ -1306,6 +1306,51 @@ strings:
   : '%s startuje po filarach, więc dźwięk startowy gra za późno. START kopiuje boot.adp (%d KB) obok RIPPS2 na kartę pamięci (%d KB wolne), gdzie gra, gdy filary się wznoszą.'
   The boot sound could not be copied to %s. It still plays from %s.: Nie udało się skopiować dźwięku startowego do %s. Nadal gra z %s.
   Zoom: Przybliżenie
+  '%s could not be deleted; it stays as it was.': Nie udało się usunąć %s; zostaje bez zmian.
+  '%s could not be read as a .tar archive. Nothing was changed.': Nie udało się odczytać %s jako archiwum .tar. Nic nie zmieniono.
+  '%s is deleted. %s is kept.': '%s usunięto. %s zostaje.'
+  Art loads from it from now on.: Odtąd obrazy wczytują się z niego.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Usunąć dołączony .tar?
+  
+    USUWANY: %s
+  
+    ZOSTAJE: %s (cel, teraz z każdym obrazem z obu)'
+  Into %s (%s): Do %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'ZOSTAJE i jest aktualizowany: %s (%d obrazów)
+  
+    DOŁĄCZANY: %s (%d obrazów)
+  
+    Obrazy w obu: %d. Wygrywa dołączany. Zachowany .tar zapisuje się od nowa jako nowy plik i podmienia dopiero, gdy jest cały, więc zatrzymanie lub pełny dysk zostawia go bez zmian. Scalić teraz?'
+  MERGE .TAR: SCAL .TAR
+  MERGE a .tar into the pack in %s: SCAL .tar z paczką w %s
+  MERGING THE ART: SCALANIE OBRAZÓW
+  Merge in %s (%s): Dołącz %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Dołączyć nową paczkę do innego .tar? Potem wybierasz .tar, który zostaje i jest aktualizowany; obrazy nowej paczki trafiają do niego.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Scalono: %s ma teraz %d obrazów (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Wchodzące obrazy: %d (%s). Ta sama nazwa w obu: %d (wygrywa dołączany).'
+  'Reading the archives: %s': 'Odczyt archiwów: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Zatrzymać? Zachowany .tar zostaje bez zmian; niedokończona kopia jest usuwana.
+  Stopped. %s is as it was; the unfinished copy was removed.: Zatrzymano. %s jest bez zmian; niedokończoną kopię usunięto.
+  The kept .tar is only replaced once the merged copy is whole.: Zachowany .tar jest podmieniany dopiero, gdy scalona kopia jest cała.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Nie udało się zapisać scalenia na dysku %s (jest miejsce?). Jest bez zmian; nic innego się nie zmieniło.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Scalenie potrzebuje około %s wolnego miejsca na dysku %s (nowe archiwum zapisuje się najpierw obok starego). Zwolnij trochę miejsca i spróbuj ponownie.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Scalanie zatrzymało się między dwiema zmianami nazwy: zachowany .tar to %s, a dołączany %s. Przywróć im nazwy w Plikach pamięci.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Scalony .tar został zapisany, ale nie mógł przyjąć nazwy %s (MMCE zmienia nazwy od firmware 1.4.0). Nowy plik usunięto; zachowany .tar jest bez zmian.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Nie ma innego .tar do dołączenia do %s. Umieść go w tym folderze, w folderze ART dysku lub na górze dysku i spróbuj ponownie.
+  MERGE A .TAR INTO THIS: DOŁĄCZ .TAR DO TEGO
 labels:
   OK: OK
   START: Uruchom

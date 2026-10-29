@@ -1305,6 +1305,51 @@ strings:
   : '%s démarre après les piliers, donc le son de démarrage arrive en retard. START copie boot.adp (%d Ko) à côté de RIPPS2 sur la carte mémoire (%d Ko libres), où il joue pendant que les piliers s''élèvent.'
   The boot sound could not be copied to %s. It still plays from %s.: Le son de démarrage n'a pas pu être copié vers %s. Il joue toujours depuis %s.
   Zoom: Zoom
+  '%s could not be deleted; it stays as it was.': '%s n''a pas pu être supprimé ; il reste tel quel.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s n''a pas pu être lu comme une archive .tar. Rien n''a changé.'
+  '%s is deleted. %s is kept.': '%s est supprimé. %s est gardé.'
+  Art loads from it from now on.: Les images se chargent depuis celui-ci désormais.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Supprimer le .tar fusionné ?
+  
+    SUPPRIMÉ : %s
+  
+    GARDÉ : %s (la destination, avec désormais toutes les images des deux)'
+  Into %s (%s): Dans %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'GARDÉ et mis à jour : %s (%d images)
+  
+    FUSIONNÉ : %s (%d images)
+  
+    Images présentes dans les deux : %d. Celle du fusionné l''emporte. Le .tar gardé est réécrit comme un nouveau fichier et n''est remplacé que lorsqu''il est complet, donc un arrêt ou un périphérique plein le laisse tel quel. Fusionner maintenant ?'
+  MERGE .TAR: FUSIONNER .TAR
+  MERGE a .tar into the pack in %s: FUSIONNER un .tar dans le pack de %s
+  MERGING THE ART: FUSION DES IMAGES
+  Merge in %s (%s): Fusionner %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Fusionner le nouveau pack dans un autre .tar ? Vous choisissez ensuite le .tar à garder et à mettre à jour ; les images du nouveau pack y entrent.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Fusionné : %s contient maintenant %d images (%d Mo), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Images ajoutées : %d (%s). Même nom dans les deux : %d (celle du fusionné l''emporte).'
+  'Reading the archives: %s': 'Lecture des archives : %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Arrêter ? Le .tar gardé reste tel quel ; la copie inachevée est supprimée.
+  Stopped. %s is as it was; the unfinished copy was removed.: Arrêté. %s est tel quel ; la copie inachevée a été supprimée.
+  The kept .tar is only replaced once the merged copy is whole.: Le .tar gardé n'est remplacé qu'une fois la copie fusionnée complète.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: La fusion n'a pas pu être écrite sur le périphérique de %s (y a-t-il de la place ?). Il est tel quel ; rien d'autre n'a changé.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : La fusion demande environ %s libres sur le périphérique de %s (la nouvelle archive est d'abord écrite à côté de l'ancienne). Libérez de la place, puis réessayez.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'La fusion s''est arrêtée entre deux renommages : le .tar gardé est %s et le fusionné %s. Rendez-leur leur nom avec Fichiers mémoire.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Le .tar fusionné a été écrit mais n'a pas pu prendre le nom %s (une MMCE renomme à partir du firmware 1.4.0). Le nouveau fichier a été supprimé ; le .tar gardé est tel quel.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Aucun autre .tar à fusionner dans %s. Mettez-le dans ce dossier, dans le dossier ART d'un périphérique ou à la racine d'un périphérique, puis réessayez.
+  MERGE A .TAR INTO THIS: FUSIONNER UN .TAR ICI
 labels:
   HINT_NEUTRINO_AUTO_ELF: Transmet l'ELF de démarrage du jeu à Neutrino pour chercher sa configuration par titre. Activé par défaut ; une option Boot ELF réglée à la main a la priorité.
   HINT_POPSTARTER_PATH: Emplacement de POPSTARTER.ELF. Laissé vide, RIPPS2 en renseigne un qu'il trouve sur un périphérique ; écrivez par-dessus pour en utiliser un autre, comme usb:/POPS/POPSTARTER.ELF

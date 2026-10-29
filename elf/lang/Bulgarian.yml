@@ -1306,6 +1306,51 @@ strings:
   : '%s стартира след колоните, затова звукът при стартиране закъснява. START копира boot.adp (%d KB) до RIPPS2 на картата памет (%d KB свободни), където звучи, докато колоните се издигат.'
   The boot sound could not be copied to %s. It still plays from %s.: Звукът при стартиране не можа да се копира в %s. Той все още звучи от %s.
   Zoom: Увеличение
+  '%s could not be deleted; it stays as it was.': '%s не можа да се изтрие; остава какъвто беше.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s не можа да се прочете като архив .tar. Нищо не беше променено.'
+  '%s is deleted. %s is kept.': '%s е изтрит. %s се запазва.'
+  Art loads from it from now on.: Изображенията се зареждат от него оттук нататък.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Да се изтрие ли сливаният .tar?
+  
+    ИЗТРИВА СЕ: %s
+  
+    ЗАПАЗВА СЕ: %s (целта, вече с всички изображения от двата)'
+  Into %s (%s): В %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'ЗАПАЗВА СЕ и се обновява: %s (%d изображения)
+  
+    СЛИВА СЕ: %s (%d изображения)
+  
+    Изображения и в двата: %d. Печели сливаното. Запазеният .tar се записва наново като нов файл и се подменя едва когато е цял, така че спиране или пълно устройство го оставят какъвто беше. Да се слее ли сега?'
+  MERGE .TAR: СЛИВАНЕ НА .TAR
+  MERGE a .tar into the pack in %s: СЛЕЙ .tar в пакета в %s
+  MERGING THE ART: СЛИВАНЕ НА ИЗОБРАЖЕНИЯТА
+  Merge in %s (%s): Слей %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Да се слее ли новият пакет в друг .tar? След това избираш .tar, който да се запази и обнови; изображенията на новия пакет отиват в него.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Слято: %s вече съдържа %d изображения (%d MB), %d с.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Влизащи изображения: %d (%s). Със същото име и в двата: %d (печели сливаното).'
+  'Reading the archives: %s': 'Четене на архивите: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Спиране? Запазеният .tar остава какъвто беше; недовършеното копие се премахва.
+  Stopped. %s is as it was; the unfinished copy was removed.: Спряно. %s е какъвто беше; недовършеното копие беше премахнато.
+  The kept .tar is only replaced once the merged copy is whole.: Запазеният .tar се подменя едва когато сливаното копие е цяло.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Сливането не можа да се запише на устройството на %s (има ли място?). Той е какъвто беше; нищо друго не се промени.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Сливането иска около %s свободни на устройството на %s (новият архив първо се записва до стария). Освободи малко място и опитай отново.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Сливането спря между две преименувания: запазеният .tar е %s, а сливаният %s. Преименувай ги обратно с Файлове в паметта.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Сливаният .tar беше записан, но не можа да приеме името %s (MMCE преименува от фърмуер 1.4.0 нагоре). Новият файл беше премахнат; запазеният .tar е какъвто беше.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Няма друг .tar за сливане в %s. Сложи го в тази папка, в папката ART на устройство или в корена на устройство и опитай отново.
+  MERGE A .TAR INTO THIS: СЛЕЙ .TAR В ТОЗИ
 labels:
   BDMMODE: Режим на стартиране на BDM
   GAME_ID: ID на играта

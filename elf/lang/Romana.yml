@@ -1304,6 +1304,51 @@ strings:
   : '%s pornește după coloane, așa că sunetul de pornire se aude târziu. START copiază boot.adp (%d KB) lângă RIPPS2 pe cardul de memorie (%d KB liberi), unde se aude pe măsură ce coloanele se înalță.'
   The boot sound could not be copied to %s. It still plays from %s.: Sunetul de pornire nu a putut fi copiat în %s. Se aude în continuare din %s.
   Zoom: Mărire
+  '%s could not be deleted; it stays as it was.': '%s nu a putut fi șters; rămâne cum era.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s nu a putut fi citit ca arhivă .tar. Nu s-a schimbat nimic.'
+  '%s is deleted. %s is kept.': '%s este șters. %s este păstrat.'
+  Art loads from it from now on.: De acum imaginile se încarcă din el.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Ștergi .tar-ul îmbinat?
+  
+    SE ȘTERGE: %s
+  
+    SE PĂSTREAZĂ: %s (destinația, acum cu fiecare imagine din ambele)'
+  Into %s (%s): În %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'SE PĂSTREAZĂ și se actualizează: %s (%d imagini)
+  
+    SE ÎMBINĂ: %s (%d imagini)
+  
+    Imagini în ambele: %d. Câștigă cel îmbinat. .tar-ul păstrat se scrie din nou ca fișier nou și se înlocuiește doar când este întreg, deci o oprire sau o unitate plină îl lasă cum era. Îmbini acum?'
+  MERGE .TAR: ÎMBINĂ .TAR
+  MERGE a .tar into the pack in %s: ÎMBINĂ un .tar în pachetul din %s
+  MERGING THE ART: SE ÎMBINĂ IMAGINILE
+  Merge in %s (%s): Îmbină %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Îmbini pachetul nou într-un alt .tar? Apoi alegi .tar-ul de păstrat și actualizat; imaginile pachetului nou intră în el.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Îmbinat: %s are acum %d imagini (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Imagini care intră: %d (%s). Același nume în ambele: %d (câștigă cel îmbinat).'
+  'Reading the archives: %s': 'Se citesc arhivele: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Te oprești? .tar-ul păstrat rămâne cum era; copia neterminată se șterge.
+  Stopped. %s is as it was; the unfinished copy was removed.: Oprit. %s este cum era; copia neterminată a fost ștearsă.
+  The kept .tar is only replaced once the merged copy is whole.: .tar-ul păstrat se înlocuiește doar când copia îmbinată este întreagă.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Îmbinarea nu a putut fi scrisă pe unitatea lui %s (este loc?). Este cum era; nimic altceva nu s-a schimbat.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Îmbinarea are nevoie de circa %s liberi pe unitatea lui %s (arhiva nouă se scrie întâi lângă cea veche). Eliberează puțin loc, apoi încearcă din nou.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Îmbinarea s-a oprit între două redenumiri: .tar-ul păstrat este %s, iar cel îmbinat %s. Redă-le numele cu Fișiere de memorie.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : .tar-ul îmbinat a fost scris, dar nu a putut lua numele %s (un MMCE redenumește de la firmware-ul 1.4.0). Fișierul nou a fost șters; .tar-ul păstrat este cum era.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Nu există alt .tar de îmbinat în %s. Pune-l în acest folder, în folderul ART al unei unități sau în rădăcina unei unități, apoi încearcă din nou.
+  MERGE A .TAR INTO THIS: ÎMBINĂ UN .TAR AICI
 labels:
   SETTINGS_SAVED: Setări salvate în %s
   REMOVE_ALL_SETTINGS: Elimină setările

@@ -1306,6 +1306,51 @@ strings:
   : '%s 在柱子之後才啟動，所以開機音效會晚到。START 會把 boot.adp（%d KB）複製到記憶卡上 RIPPS2 旁邊（剩餘 %d KB），這樣它會在柱子升起時響起。'
   The boot sound could not be copied to %s. It still plays from %s.: 無法將開機音效複製到 %s。它仍從 %s 播放。
   Zoom: 放大
+  '%s could not be deleted; it stays as it was.': 無法刪除 %s；它保持原樣。
+  '%s could not be read as a .tar archive. Nothing was changed.': 無法將 %s 當作 .tar 封存讀取。沒有任何變更。
+  '%s is deleted. %s is kept.': '%s 已刪除。%s 保留。'
+  Art loads from it from now on.: 從現在起圖片從它載入。
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : '刪除併入的 .tar？
+  
+    刪除：%s
+  
+    保留：%s（目標，現已包含兩者的所有圖片）'
+  Into %s (%s): 併入 %s（%s）
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : '保留並更新：%s（%d 張圖片）
+  
+    併入：%s（%d 張圖片）
+  
+    兩者都有的圖片：%d。以併入的為準。保留的 .tar 會以新檔案重新寫入，完整後才替換，所以中途停止或磁碟已滿都會讓它保持原樣。現在合併？'
+  MERGE .TAR: 合併 .TAR
+  MERGE a .tar into the pack in %s: 將 .tar 合併到 %s 中的包
+  MERGING THE ART: 正在合併圖片
+  Merge in %s (%s): 併入 %s（%s）
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: 把新包合併到另一個 .tar？接下來選擇要保留並更新的 .tar；新包的圖片會放進去。
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 已合併：%s 現有 %d 張圖片（%d MB），%d 秒。
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 併入的圖片：%d（%s）。兩者同名：%d（以併入的為準）。
+  'Reading the archives: %s': 正在讀取封存：%s
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: 停止？保留的 .tar 保持原樣；未完成的副本會被刪除。
+  Stopped. %s is as it was; the unfinished copy was removed.: 已停止。%s 保持原樣；未完成的副本已刪除。
+  The kept .tar is only replaced once the merged copy is whole.: 只有合併後的副本完整時才會替換保留的 .tar。
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: 無法把合併結果寫入 %s 所在的磁碟（空間夠嗎？）。它保持原樣；其他也沒有變更。
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : 合併需要約 %s 的可用空間，位於 %s 所在的磁碟（新封存先寫在舊封存旁邊）。請騰出一些空間後重試。
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 合併在兩次重新命名之間停止：保留的 .tar 現在是 %s，併入的是 %s。請用記憶檔案把名稱改回來。
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : 合併後的 .tar 已寫入，但無法命名為 %s（MMCE 從韌體 1.4.0 起支援重新命名）。新檔案已刪除；保留的 .tar 保持原樣。
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : 沒有其他 .tar 可以合併到 %s。請把它放在此資料夾、某個磁碟的 ART 資料夾或磁碟根目錄，然後重試。
+  MERGE A .TAR INTO THIS: 將 .TAR 合併到此
 labels:
   BDMMODE: BDM 裝置啟動模式
   RESETCOLOR: 重設顏色

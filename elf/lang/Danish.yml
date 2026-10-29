@@ -1305,6 +1305,51 @@ strings:
   : '%s starter efter søjlerne, så opstartslyden spiller for sent. START kopierer boot.adp (%d KB) ved siden af RIPPS2 på hukommelseskortet (%d KB fri), hvor den spiller, mens søjlerne rejser sig.'
   The boot sound could not be copied to %s. It still plays from %s.: Opstartslyden kunne ikke kopieres til %s. Den spiller stadig fra %s.
   Zoom: Zoom
+  '%s could not be deleted; it stays as it was.': '%s kunne ikke slettes; den forbliver, som den var.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s kunne ikke læses som et .tar-arkiv. Intet blev ændret.'
+  '%s is deleted. %s is kept.': '%s er slettet. %s beholdes.'
+  Art loads from it from now on.: Billederne indlæses fra den fra nu af.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Slet den flettede .tar?
+  
+    SLETTES: %s
+  
+    BEHOLDES: %s (destinationen, nu med alle billeder fra begge)'
+  Into %s (%s): Ind i %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'BEHOLDES og opdateres: %s (%d billeder)
+  
+    FLETTES IND: %s (%d billeder)
+  
+    Billeder i begge: %d. Den flettede vinder. Den beholdte .tar skrives igen som en ny fil og byttes kun ind, når den er hel, så et stop eller et fuldt drev lader den være, som den var. Flet nu?'
+  MERGE .TAR: FLET .TAR
+  MERGE a .tar into the pack in %s: FLET en .tar ind i pakken i %s
+  MERGING THE ART: FLETTER BILLEDERNE
+  Merge in %s (%s): Flet %s ind (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Flet den nye pakke ind i en anden .tar? Du vælger derefter den .tar, der beholdes og opdateres; den nye pakkes billeder går ind i den.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Flettet: %s rummer nu %d billeder (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Billeder ind: %d (%s). Samme navn i begge: %d (den flettede vinder).'
+  'Reading the archives: %s': 'Læser arkiverne: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Stop? Den beholdte .tar forbliver, som den var; den ufærdige kopi fjernes.
+  Stopped. %s is as it was; the unfinished copy was removed.: Stoppet. %s er, som den var; den ufærdige kopi blev fjernet.
+  The kept .tar is only replaced once the merged copy is whole.: Den beholdte .tar erstattes først, når den flettede kopi er hel.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Fletningen kunne ikke skrives på drevet med %s (er der plads?). Den er, som den var; intet andet blev ændret.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Fletningen kræver omkring %s ledigt på drevet med %s (det nye arkiv skrives først ved siden af det gamle). Frigør lidt plads, og prøv igen.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Fletningen stoppede mellem to omdøbninger: den beholdte .tar er %s og den flettede %s. Omdøb dem tilbage med Hukommelsesfiler.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Den flettede .tar blev skrevet, men kunne ikke få navnet %s (en MMCE omdøber fra firmware 1.4.0). Den nye fil blev fjernet; den beholdte .tar er, som den var.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Der er ingen anden .tar at flette ind i %s. Læg den i denne mappe, i et drevs ART-mappe eller øverst på et drev, og prøv igen.
+  MERGE A .TAR INTO THIS: FLET EN .TAR IND I DENNE
 labels:
   OK: OK
   MEDIUM: Mellem

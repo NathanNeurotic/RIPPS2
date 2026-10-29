@@ -1305,6 +1305,51 @@ strings:
   : '%s mulai setelah pilar, jadi suara boot terlambat. START menyalin boot.adp (%d KB) di samping RIPPS2 di kartu memori (%d KB kosong), tempat suara itu diputar saat pilar naik.'
   The boot sound could not be copied to %s. It still plays from %s.: Suara boot tidak dapat disalin ke %s. Suara itu masih diputar dari %s.
   Zoom: Zoom
+  '%s could not be deleted; it stays as it was.': '%s tidak dapat dihapus; tetap seperti semula.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s tidak dapat dibaca sebagai arsip .tar. Tidak ada yang diubah.'
+  '%s is deleted. %s is kept.': '%s dihapus. %s disimpan.'
+  Art loads from it from now on.: Gambar dimuat darinya mulai sekarang.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Hapus .tar yang digabungkan?
+  
+    DIHAPUS: %s
+  
+    DISIMPAN: %s (tujuan, kini dengan setiap gambar dari keduanya)'
+  Into %s (%s): Ke %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'DISIMPAN dan diperbarui: %s (%d gambar)
+  
+    DIGABUNGKAN: %s (%d gambar)
+  
+    Gambar di keduanya: %d. Yang digabungkan menang. .tar yang disimpan ditulis ulang sebagai file baru dan baru ditukar saat sudah utuh, jadi berhenti atau drive penuh membiarkannya seperti semula. Gabungkan sekarang?'
+  MERGE .TAR: GABUNGKAN .TAR
+  MERGE a .tar into the pack in %s: GABUNGKAN .tar ke paket di %s
+  MERGING THE ART: MENGGABUNGKAN GAMBAR
+  Merge in %s (%s): Gabungkan %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Gabungkan paket baru ke .tar lain? Berikutnya kamu memilih .tar yang disimpan dan diperbarui; gambar paket baru masuk ke sana.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Digabungkan: %s kini berisi %d gambar (%d MB), %d d.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Gambar masuk: %d (%s). Nama sama di keduanya: %d (yang digabungkan menang).'
+  'Reading the archives: %s': 'Membaca arsip: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Berhenti? .tar yang disimpan tetap seperti semula; salinan yang belum selesai dihapus.
+  Stopped. %s is as it was; the unfinished copy was removed.: Dihentikan. %s tetap seperti semula; salinan yang belum selesai telah dihapus.
+  The kept .tar is only replaced once the merged copy is whole.: .tar yang disimpan baru diganti setelah salinan gabungan utuh.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Gabungan tidak dapat ditulis ke drive %s (ada ruang?). Tetap seperti semula; tidak ada lagi yang diubah.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Gabungan butuh sekitar %s ruang kosong di drive %s (arsip baru ditulis dulu di samping yang lama). Kosongkan sedikit ruang, lalu coba lagi.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Gabungan berhenti di antara dua penggantian nama: .tar yang disimpan adalah %s dan yang digabungkan %s. Kembalikan namanya dengan File Memori.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : .tar gabungan sudah ditulis tetapi tidak dapat memakai nama %s (MMCE bisa mengganti nama mulai firmware 1.4.0). File baru dihapus; .tar yang disimpan tetap seperti semula.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Tidak ada .tar lain untuk digabungkan ke %s. Taruh di folder ini, di folder ART suatu drive atau di bagian teratas drive, lalu coba lagi.
+  MERGE A .TAR INTO THIS: GABUNGKAN .TAR KE SINI
 labels:
   BDM_GAMES: Game BDM
   HDD_GAMES: Game HDD

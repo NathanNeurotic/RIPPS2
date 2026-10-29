@@ -1306,6 +1306,51 @@ strings:
   : '%s ເລີ່ມຫຼັງຈາກເສົາ, ສະນັ້ນສຽງເປີດເຄື່ອງດັງຊ້າ. START ສຳເນົາ boot.adp (%d KB) ໄວ້ຂ້າງ RIPPS2 ໃນເມມໂມຣີກາດ (ວ່າງ %d KB), ບ່ອນທີ່ມັນດັງຂຶ້ນເມື່ອເສົາຕັ້ງຂຶ້ນ.'
   The boot sound could not be copied to %s. It still plays from %s.: ບໍ່ສາມາດສຳເນົາສຽງເປີດເຄື່ອງໄປທີ່ %s ໄດ້. ມັນຍັງດັງຈາກ %s.
   Zoom: ຂະຫຍາຍ
+  '%s could not be deleted; it stays as it was.': ບໍ່ສາມາດລຶບ %s ໄດ້; ມັນຍັງຢູ່ຄືເກົ່າ.
+  '%s could not be read as a .tar archive. Nothing was changed.': ບໍ່ສາມາດອ່ານ %s ເປັນ archive .tar ໄດ້. ບໍ່ມີຫຍັງປ່ຽນແປງ.
+  '%s is deleted. %s is kept.': ລຶບ %s ແລ້ວ. ເກັບ %s ໄວ້.
+  Art loads from it from now on.: ຕໍ່ໄປນີ້ຮູບຈະໂຫຼດຈາກມັນ.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'ລຶບ .tar ທີ່ລວມເຂົ້າແລ້ວບໍ?
+  
+    ລຶບ: %s
+  
+    ເກັບໄວ້: %s (ປາຍທາງ, ຕອນນີ້ມີທຸກຮູບຂອງທັງສອງ)'
+  Into %s (%s): ເຂົ້າໄປໃນ %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'ເກັບໄວ້ ແລະ ອັບເດດ: %s (%d ຮູບ)
+  
+    ລວມເຂົ້າ: %s (%d ຮູບ)
+  
+    ຮູບທີ່ມີໃນທັງສອງ: %d. ອັນທີ່ລວມເຂົ້າຊະນະ. .tar ທີ່ເກັບໄວ້ຖືກຂຽນໃໝ່ເປັນໄຟລ໌ໃໝ່ ແລະ ສັບປ່ຽນເມື່ອມັນສົມບູນແລ້ວເທົ່ານັ້ນ, ສະນັ້ນການຢຸດ ຫຼື ໄດຣຟ໌ເຕັມຈະປະມັນໄວ້ຄືເກົ່າ. ລວມຕອນນີ້ບໍ?'
+  MERGE .TAR: ລວມ .TAR
+  MERGE a .tar into the pack in %s: ລວມ .tar ເຂົ້າໃນແພັກໃນ %s
+  MERGING THE ART: ກຳລັງລວມຮູບ
+  Merge in %s (%s): ລວມ %s ເຂົ້າ (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: ລວມແພັກໃໝ່ເຂົ້າໃນ .tar ອື່ນບໍ? ຕໍ່ໄປທ່ານເລືອກ .tar ທີ່ຈະເກັບໄວ້ ແລະ ອັບເດດ; ຮູບຂອງແພັກໃໝ່ຈະເຂົ້າໄປໃນມັນ.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'ລວມແລ້ວ: %s ຕອນນີ້ມີ %d ຮູບ (%d MB), %d ວິ.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'ຮູບທີ່ເຂົ້າມາ: %d (%s). ຊື່ດຽວກັນໃນທັງສອງ: %d (ອັນທີ່ລວມເຂົ້າຊະນະ).'
+  'Reading the archives: %s': 'ກຳລັງອ່ານ archive: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: ຢຸດບໍ? .tar ທີ່ເກັບໄວ້ຍັງຢູ່ຄືເກົ່າ; ສຳເນົາທີ່ບໍ່ສຳເລັດຈະຖືກລຶບອອກ.
+  Stopped. %s is as it was; the unfinished copy was removed.: ຢຸດແລ້ວ. %s ຍັງຄືເກົ່າ; ສຳເນົາທີ່ບໍ່ສຳເລັດຖືກລຶບອອກແລ້ວ.
+  The kept .tar is only replaced once the merged copy is whole.: .tar ທີ່ເກັບໄວ້ຈະຖືກແທນທີ່ເມື່ອສຳເນົາທີ່ລວມແລ້ວສົມບູນເທົ່ານັ້ນ.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: ບໍ່ສາມາດຂຽນການລວມລົງໃນໄດຣຟ໌ຂອງ %s ໄດ້ (ມີບ່ອນວ່າງບໍ?). ມັນຍັງຄືເກົ່າ; ບໍ່ມີຫຍັງອື່ນປ່ຽນແປງ.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : ການລວມຕ້ອງການບ່ອນວ່າງປະມານ %s ໃນໄດຣຟ໌ຂອງ %s (archive ໃໝ່ຖືກຂຽນໄວ້ຂ້າງອັນເກົ່າກ່ອນ). ເຮັດໃຫ້ມີບ່ອນວ່າງ, ແລ້ວລອງໃໝ່.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'ການລວມຢຸດລະຫວ່າງການປ່ຽນຊື່ສອງຄັ້ງ: .tar ທີ່ເກັບໄວ້ແມ່ນ %s ແລະ ອັນທີ່ລວມແມ່ນ %s. ປ່ຽນຊື່ພວກມັນຄືນດ້ວຍ ໄຟລ໌ໃນໜ່ວຍຄວາມຈຳ.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : ຂຽນ .tar ທີ່ລວມແລ້ວ ແຕ່ບໍ່ສາມາດໃຊ້ຊື່ %s ໄດ້ (MMCE ປ່ຽນຊື່ໄດ້ຕັ້ງແຕ່ firmware 1.4.0). ລຶບໄຟລ໌ໃໝ່ອອກແລ້ວ; .tar ທີ່ເກັບໄວ້ຍັງຄືເກົ່າ.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : ບໍ່ມີ .tar ອື່ນທີ່ຈະລວມເຂົ້າໃນ %s. ວາງມັນໄວ້ໃນໂຟນເດີນີ້, ໃນໂຟນເດີ ART ຂອງໄດຣຟ໌ ຫຼື ຢູ່ເທິງສຸດຂອງໄດຣຟ໌, ແລ້ວລອງໃໝ່.
+  MERGE A .TAR INTO THIS: ລວມ .TAR ເຂົ້າໃນອັນນີ້
 labels:
   SETTINGS_SAVED: ບັນທຶກການຕັ້ງຄ່າ ໄວ້ໃນ %s ແລ້ວ
   REMOVE_ALL_SETTINGS: ລົບການຕັ້ງຄ່າ

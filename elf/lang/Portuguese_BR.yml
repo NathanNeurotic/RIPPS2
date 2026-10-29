@@ -1304,6 +1304,51 @@ strings:
   : '%s inicia depois dos pilares, então o som de inicialização toca atrasado. START copia boot.adp (%d KB) ao lado do RIPPS2 no memory card (%d KB livres), onde ele toca enquanto os pilares sobem.'
   The boot sound could not be copied to %s. It still plays from %s.: Não foi possível copiar o som de inicialização para %s. Ele ainda toca de %s.
   Zoom: Ampliar
+  '%s could not be deleted; it stays as it was.': Não foi possível apagar %s; ele fica como estava.
+  '%s could not be read as a .tar archive. Nothing was changed.': Não foi possível ler %s como arquivo .tar. Nada foi alterado.
+  '%s is deleted. %s is kept.': '%s foi apagado. %s foi mantido.'
+  Art loads from it from now on.: As imagens passam a carregar dele daqui em diante.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Apagar o .tar mesclado?
+  
+    APAGADO: %s
+  
+    MANTIDO: %s (o destino, agora com todas as imagens dos dois)'
+  Into %s (%s): Em %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'MANTIDO e atualizado: %s (%d imagens)
+  
+    MESCLADO: %s (%d imagens)
+  
+    Imagens nos dois: %d. Vence a do mesclado. O .tar mantido é gravado de novo como um arquivo novo e só é trocado quando está completo, então uma parada ou um drive cheio o deixa como estava. Mesclar agora?'
+  MERGE .TAR: MESCLAR .TAR
+  MERGE a .tar into the pack in %s: MESCLAR um .tar no pacote em %s
+  MERGING THE ART: MESCLANDO AS IMAGENS
+  Merge in %s (%s): Mesclar %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Mesclar o pacote novo em outro .tar? Em seguida você escolhe o .tar a manter e atualizar; as imagens do pacote novo vão para ele.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Mesclado: %s agora tem %d imagens (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Imagens que entram: %d (%s). Mesmo nome nos dois: %d (vence a do mesclado).'
+  'Reading the archives: %s': 'Lendo os arquivos: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Parar? O .tar mantido fica como estava; a cópia incompleta é removida.
+  Stopped. %s is as it was; the unfinished copy was removed.: Parado. %s está como estava; a cópia incompleta foi removida.
+  The kept .tar is only replaced once the merged copy is whole.: O .tar mantido só é substituído quando a cópia mesclada está completa.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Não foi possível gravar a mesclagem no drive de %s (há espaço?). Está como estava; nada mais mudou.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : A mesclagem precisa de cerca de %s livres no drive de %s (o arquivo novo é gravado primeiro ao lado do antigo). Libere algum espaço e tente de novo.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'A mesclagem parou entre duas renomeações: o .tar mantido é %s e o mesclado %s. Renomeie-os de volta com Arquivos de memória.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : O .tar mesclado foi gravado mas não pôde receber o nome %s (um MMCE renomeia a partir do firmware 1.4.0). O arquivo novo foi removido; o .tar mantido está como estava.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Não há outro .tar para mesclar em %s. Coloque-o nesta pasta, na pasta ART de um drive ou na raiz de um drive e tente de novo.
+  MERGE A .TAR INTO THIS: MESCLAR UM .TAR AQUI
 labels:
   MANUAL: Manual
   ENTER: Entrar
