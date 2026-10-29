@@ -2039,7 +2039,19 @@ strings:
 - en: '%d FOLDERS, %d FOUND'
   in:
   - ripps2files.c
+- en: '%d ITEMS   %d MARKED   %s'
+  in:
+  - ripps2files.c
+- en: '%d ITEMS   %d MARKED   %s   %s FREE'
+  in:
+  - ripps2files.c
 - en: '%s BYTES'
+  in:
+  - ripps2files.c
+- en: '%s IN %d'
+  in:
+  - ripps2files.c
+- en: '%s IN %d, %s FREE'
   in:
   - ripps2files.c
 - en: '%s does not look like a text file. Open it in the text editor anyway?'
@@ -2048,6 +2060,10 @@ strings:
 - en: '%u KB FREE%s'
   in:
   - ripps2files.c
+- en: '%u.%u GB'
+  in:
+  - ripps2files.c
+  - ripps2hdd.c
 - en: ', %d COPIED ONLY'
   in:
   - ripps2files.c
@@ -2241,6 +2257,9 @@ strings:
   in:
   - ripps2files.c
   - ripps2ui.c
+- en: INVERT MARKS
+  in:
+  - ripps2files.c
 - en: IS ALREADY HERE (%d MORE TO GO). REPLACE IT?
   in:
   - ripps2files.c
@@ -2479,6 +2498,9 @@ strings:
   - ripps2shot.c
   - ripps2status.c
 - en: SETTINGS
+  in:
+  - ripps2files.c
+- en: SIZE AND FREE SPACE
   in:
   - ripps2files.c
 - en: SLOW
@@ -2867,9 +2889,6 @@ strings:
   in:
   - ripps2hdd.c
 - en: '%s IS IN USE: TRY AGAIN'
-  in:
-  - ripps2hdd.c
-- en: '%u.%u GB'
   in:
   - ripps2hdd.c
 - en: COULD NOT REMOVE %s (%d)
