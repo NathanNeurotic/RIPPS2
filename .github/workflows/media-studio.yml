@@ -1,0 +1,152 @@
+name: Build RIPPS2 Media Studio
+
+# RIPPS2 Media Studio for Windows, ready to run: the app as one .exe with ffmpeg beside it, zipped, on a
+# release of its own (tag media-studio) that is never the repository's latest, so every
+# releases/latest/download/RIPPS2.elf link keeps pointing at RIPPS2.
+
+on:
+  push:
+    branches: [main]
+    paths: ["tools/media-studio/**", ".github/workflows/media-studio.yml"]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Put the zip on the media-studio release (off: the run's artifact only)"
+        type: boolean
+        default: true
+
+concurrency:
+  group: media-studio-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  # GyanD/codexffmpeg's versioned essentials build (GPL-3.0), pinned by its SHA-256
+  FFMPEG_VERSION: "8.1.1"
+  FFMPEG_SHA256: "6f58ce889f59c311410f7d2b18895b33c03456463486f3b1ebc93d97a0f54541"
+  PYINSTALLER_VERSION: "6.22.3"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: tools/media-studio
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: ffmpeg (pinned)
+        run: |
+          $zip = "$env:RUNNER_TEMP\ffmpeg.zip"
+          Invoke-WebRequest "https://github.com/GyanD/codexffmpeg/releases/download/$env:FFMPEG_VERSION/ffmpeg-$env:FFMPEG_VERSION-essentials_build.zip" -OutFile $zip
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+          if ($sha -ne $env:FFMPEG_SHA256) { throw "ffmpeg zip SHA-256 $sha is not the pinned one" }
+          Expand-Archive $zip "$env:RUNNER_TEMP\ffmpeg"
+          $root = Get-ChildItem "$env:RUNNER_TEMP\ffmpeg" -Directory | Select-Object -First 1
+          Copy-Item "$($root.FullName)\bin\ffmpeg.exe", "$($root.FullName)\bin\ffprobe.exe" .
+          Copy-Item "$($root.FullName)\LICENSE" FFMPEG-LICENSE.txt
+          .\ffmpeg.exe -hide_banner -version | Select-Object -First 1
+          .\ffmpeg.exe -hide_banner -encoders | Select-String "libxvid|libmp3lame| mpeg4 | mp2 "
+
+      - name: Python packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt "pyinstaller==$env:PYINSTALLER_VERSION"
+
+      # the app's own test, the phone video included: a broken studio never ships
+      - name: Test
+        run: python test_studio.py
+
+      - name: Build the .exe
+        run: cmd /c build_exe.bat
+
+      # the .exe itself makes a PS2 video, with ffmpeg beside it as a user will have it
+      - name: Check the .exe
+        run: |
+          Copy-Item ffmpeg.exe, ffprobe.exe dist
+          .\ffmpeg.exe -v error -f lavfi -i testsrc=size=1280x720:rate=30:duration=2 -f lavfi -i sine=duration=2 -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$env:RUNNER_TEMP\clip.mp4"
+          Start-Process "dist\RIPPS2 Media Studio.exe" -ArgumentList "--video", "`"$env:RUNNER_TEMP\clip.mp4`"" -Wait
+          $avi = Get-ChildItem dist\output\MEDIA\*.avi
+          if (-not $avi) { throw "the .exe made no PS2 video" }
+          .\ffprobe.exe -v error -show_entries stream=codec_name,codec_tag_string,width,height,sample_rate -of csv=p=0 $avi.FullName
+
+      - name: Package
+        run: |
+          $pkg = "$env:RUNNER_TEMP\RIPPS2-Media-Studio"
+          New-Item -ItemType Directory $pkg | Out-Null
+          Copy-Item "dist\RIPPS2 Media Studio.exe", ffmpeg.exe, ffprobe.exe, FFMPEG-LICENSE.txt $pkg
+          @"
+          RIPPS2 Media Studio
+          ===================
+
+          Double-click "RIPPS2 Media Studio.exe". No install, no Python.
+
+          It makes RIPPS2's AUDIO and MEDIA folders on your PC: your sounds and music in the
+          formats the PS2 plays, your videos as the AVI RIPPS2's Memory Files plays, and the
+          console's own menu sounds and music from your own PS2 BIOS dump.
+
+          Everything it makes lands in an "output" folder beside the .exe. Copy AUDIO beside
+          RIPPS2.ELF and MEDIA to your biggest drive, with a USB stick and RIPPS2's Memory Files.
+
+          Keep ffmpeg.exe and ffprobe.exe beside the .exe: they do the video work.
+
+          How to use it: https://github.com/akilluminati47/RIPPS2/tree/main/tools/media-studio
+          Built from: https://github.com/akilluminati47/RIPPS2/commit/$env:GITHUB_SHA
+
+          ffmpeg $env:FFMPEG_VERSION (essentials build by Gyan Doshi) is a separate program that rides
+          along unchanged, under the GPL version 3 (FFMPEG-LICENSE.txt). Its builds:
+          https://github.com/GyanD/codexffmpeg/releases/tag/$env:FFMPEG_VERSION
+          and the source it is built from: https://ffmpeg.org/download.html and
+          https://git.ffmpeg.org/ffmpeg.git (tag n$env:FFMPEG_VERSION).
+          "@ | Set-Content "$pkg\README.txt" -Encoding utf8
+          Compress-Archive "$pkg\*" "$env:GITHUB_WORKSPACE\RIPPS2-Media-Studio.zip"
+          Get-Item "$env:GITHUB_WORKSPACE\RIPPS2-Media-Studio.zip" | Format-List Name, Length
+
+      - name: Upload the zip
+        uses: actions/upload-artifact@v6
+        with:
+          name: RIPPS2-Media-Studio
+          path: RIPPS2-Media-Studio.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      # its own release, never the latest: create it once, then replace the zip and the notes
+      - name: Publish on the media-studio release
+        if: github.event_name == 'push' || inputs.publish
+        working-directory: ${{ github.workspace }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $notes = @"
+          **RIPPS2 Media Studio for Windows**, ready to run: download **RIPPS2-Media-Studio.zip**, unzip it anywhere and double-click ``RIPPS2 Media Studio.exe``. No install, no Python.
+
+          - Turns any sound or song into RIPPS2's menu sounds and music, and renders your own PS2's menu sounds and music from your BIOS dump.
+          - Turns any video (a phone's MP4 included) into the AVI RIPPS2's Memory Files plays: XviD with MP3 sound, 640 x 480 and 30 fps at most.
+          - Everything lands in ``output/AUDIO`` and ``output/MEDIA`` beside the .exe.
+
+          How to use it: [tools/media-studio](https://github.com/akilluminati47/RIPPS2/tree/main/tools/media-studio). This page is the studio's own; RIPPS2 itself is on the [latest release](https://github.com/akilluminati47/RIPPS2/releases/latest).
+
+          Built from $($env:GITHUB_SHA.Substring(0,7)) on $(Get-Date -Format yyyy-MM-dd). ffmpeg $env:FFMPEG_VERSION ([Gyan Doshi's essentials build](https://github.com/GyanD/codexffmpeg/releases/tag/$env:FFMPEG_VERSION), GPL-3.0) rides along unchanged as a separate program, with its licence in the zip.
+          "@
+          Set-Content "$env:RUNNER_TEMP\notes.md" $notes -Encoding utf8
+          gh release view media-studio *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create media-studio --title "RIPPS2 Media Studio" --notes-file "$env:RUNNER_TEMP\notes.md" --target $env:GITHUB_SHA --latest=false
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+          gh release upload media-studio RIPPS2-Media-Studio.zip --clobber
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          gh release edit media-studio --notes-file "$env:RUNNER_TEMP\notes.md" --latest=false
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $latest = gh release view --json tagName -q .tagName
+          Write-Host "The repository's latest release is still $latest"
+          if ($latest -eq "media-studio") { throw "media-studio became the latest release" }
