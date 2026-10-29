@@ -88,8 +88,393 @@ index d71c0fc..82ebd99 100644
  int fntCalcDimensions(int id, const char *str)
  {
      int w;
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index 7c1cff8..7f40ab1 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -17,6 +17,10 @@
+   - Pasting a save folder (one with an icon.sys) onto a memory card always lands it in the card's
+     root, where the console looks for saves, wherever on the card you are.
+   - The clipboard count and what happened last (COPIED, CUT, PASTED, DELETED) sit top right.
++  - Build 125 (the user, 10/29): the open folder is the list's first row. It says how many entries are here, how
++    many are marked, the size of the files and the drive's free space; Cross or Square on it marks them all (or,
++    any marked, none). ACTIONS adds INVERT MARKS and SIZE AND FREE SPACE (the marked entries, folders all the way
++    down).
+ 
+   Reading folders and copying run on the IO worker; the screen keeps animating and shows progress.
+   The list is only read by the GUI while the worker is idle (fbBusy), so it needs no lock.
+@@ -84,7 +88,7 @@
+ #define FB_SOFT GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)
+ #define FB_PRIM(r, g, b, a) GS_SETREG_RGBAQ((r), (g), (b), (a), 0x00)
+ 
+-enum { FB_KIND_DEVICE = 0, FB_KIND_START, FB_KIND_DIR, FB_KIND_SAVE, FB_KIND_FILE, FB_KIND_ELF, FB_KIND_VMC, FB_KIND_PSU, FB_KIND_VCD };
++enum { FB_KIND_DEVICE = 0, FB_KIND_START, FB_KIND_DIR, FB_KIND_SAVE, FB_KIND_FILE, FB_KIND_ELF, FB_KIND_VMC, FB_KIND_PSU, FB_KIND_VCD, FB_KIND_HERE };
+ 
+ typedef struct
+ {
+@@ -106,7 +110,7 @@ static volatile int fbDrivesDone = 0; // ...and has just finished: read the driv
+ static int fbMmceSlot[2] = {0, 0};      // START DRIVES found an MMCE in that slot (its ping answered)
+ 
+ // what happened last, shown top right for a moment
+-static char fbToast[48];
++static char fbToast[64];
+ static clock_t fbToastAt = 0;
+ 
+ // the clipboard: names in one folder
+@@ -187,15 +191,15 @@ static void fbNoteFail(const char *verb, const char *path)
+     snprintf(fbFailWhat, sizeof(fbFailWhat), "%s: %s %s", word != NULL ? word : why, verb, name && name[1] ? name + 1 : path);
+ }
+ static int fbOp = 0; // what the worker runs next
+-enum { FB_OP_SCAN = 0, FB_OP_PASTE, FB_OP_DELETE, FB_OP_UNPACK };
++enum { FB_OP_SCAN = 0, FB_OP_PASTE, FB_OP_DELETE, FB_OP_UNPACK, FB_OP_SIZE };
+ static char fbUnpackName[FB_NAME]; // Cross on a .psu: the one to unpack here
+ static char fbDeleteNames[FB_CLIP_MAX][FB_NAME];
+ static unsigned char fbDeleteIsDir[FB_CLIP_MAX];
+ static int fbDeleteCount = 0;
+ 
+ // the actions menu (Triangle)
+-enum { FB_ACT_EDIT = 0, FB_ACT_COPY, FB_ACT_CUT, FB_ACT_PASTE, FB_ACT_PASTE_PSU, FB_ACT_UNPACK, FB_ACT_DELETE, FB_ACT_RENAME, FB_ACT_NEWDIR, FB_ACT_MARKALL, FB_ACT_CARDS, FB_ACT_RIPICON, FB_ACT_TARMERGE, FB_ACT_COUNT };
+-static const char *fbActName[FB_ACT_COUNT] = {N_("EDIT"), N_("COPY"), N_("CUT"), N_("PASTE"), N_("PASTE AS PSU"), N_("UNPACK PSU HERE"), N_("DELETE"), N_("RENAME"), N_("NEW FOLDER"), N_("MARK ALL"), N_("CARD MANAGER"), N_("RIP 3D ICON"), N_("MERGE A .TAR INTO THIS")};
++enum { FB_ACT_EDIT = 0, FB_ACT_COPY, FB_ACT_CUT, FB_ACT_PASTE, FB_ACT_PASTE_PSU, FB_ACT_UNPACK, FB_ACT_DELETE, FB_ACT_RENAME, FB_ACT_NEWDIR, FB_ACT_MARKALL, FB_ACT_INVERT, FB_ACT_SIZE, FB_ACT_CARDS, FB_ACT_RIPICON, FB_ACT_TARMERGE, FB_ACT_COUNT };
++static const char *fbActName[FB_ACT_COUNT] = {N_("EDIT"), N_("COPY"), N_("CUT"), N_("PASTE"), N_("PASTE AS PSU"), N_("UNPACK PSU HERE"), N_("DELETE"), N_("RENAME"), N_("NEW FOLDER"), N_("MARK ALL"), N_("INVERT MARKS"), N_("SIZE AND FREE SPACE"), N_("CARD MANAGER"), N_("RIP 3D ICON"), N_("MERGE A .TAR INTO THIS")};
+ static int fbMenuOpen = 0, fbMenuSel = 0, fbMenuItems[FB_ACT_COUNT], fbMenuCount = 0;
+ 
+ static const char *fbDevices[] = {"mc0:/", "mc1:/", "mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/",
+@@ -520,6 +524,54 @@ static void fbScanDevices(void)
+ // A PS2 card image: a .vmc / .ps2 / .mc2, or a .bin of a card's size (OPL's VMC folder) that starts with
+ // the card format's own words (so a PS1 game's .bin is not taken for one). Build 115: an SD2PSX's own cards too, the
+ // .mcd files of MemoryCards/PS2 on its SD (the same raw format; its PS1 cards are 128 KB and stay files)
++// build 125: the open folder as the list's first row (FB_KIND_HERE, named "."), with what it shows beside it: the size of
++// the files here and the drive's free space (KB, -1 when the drive cannot say). On the IO worker, after a read.
++static unsigned long long fbHereBytes = 0;
++static int fbHereFreeKb = -1;
++static int fbLandFirst = 0; // a folder just opened: the cursor goes to its first entry, under the folder row
++
++static void fbAddHere(int n)
++{
++    ripps2_vol_t vol;
++    int i;
++
++    if (n >= FB_MAX)
++        n = FB_MAX - 1;
++    memmove(&fbList[1], &fbList[0], n * sizeof(fb_entry_t));
++    memset(&fbList[0], 0, sizeof(fb_entry_t));
++    fbList[0].kind = FB_KIND_HERE;
++    snprintf(fbList[0].name, sizeof(fbList[0].name), ".");
++    fbHereBytes = 0;
++    for (i = 1; i <= n; i++)
++        if (fbList[i].kind != FB_KIND_DIR && fbList[i].kind != FB_KIND_SAVE)
++            fbHereBytes += fbList[i].size;
++    fbHereFreeKb = -1;
++    if (fbVmc[0] && fbVmcPath(fbVmc, fbPath, NULL, 0))
++        fbHereFreeKb = (int)fbVmcFreeKb;
++    else if (fbIsMc(fbPath))
++        fbHereFreeKb = ripps2CardFreeKb(fbPath[2] - '0');
++    else if (ripps2VolInfo(fbPath, &vol) && vol.freeKb > 0)
++        fbHereFreeKb = (int)vol.freeKb;
++    fbCount = n + 1;
++}
++
++static int fbOnItem(void) // the cursor is on an entry (not on the folder row, not on nothing)
++{
++    return fbCount > 0 && fbCursor >= 0 && fbCursor < fbCount && fbList[fbCursor].kind != FB_KIND_HERE;
++}
++
++static void fbSizeText64(unsigned long long size, char *out, int n)
++{
++    if (size >= 1024ULL * 1024 * 1024)
++        snprintf(out, n, _t("%u.%u GB"), (unsigned)(size >> 30), (unsigned)(((size & 0x3FFFFFFFULL) * 10) >> 30));
++    else if (size >= 1024 * 1024)
++        snprintf(out, n, _t("%u.%u MB"), (unsigned)(size >> 20), (unsigned)(((size & 0xFFFFF) * 10) >> 20));
++    else if (size >= 1024)
++        snprintf(out, n, _t("%u KB"), (unsigned)((size + 1023) >> 10));
++    else
++        snprintf(out, n, "%u B", (unsigned)size);
++}
++
+ static int fbIsCardImage(const char *path, const char *name, u32 size)
+ {
+     char magic[28];
+@@ -555,7 +607,7 @@ static void fbScanVmc(const char *save)
+     }
+     free(list);
+     qsort(fbList, n, sizeof(fb_entry_t), &fbCompare);
+-    fbCount = n;
++    fbAddHere(n); // build 125
+ }
+ 
+ static void fbScanDir(void)
+@@ -609,7 +661,7 @@ static void fbScanDir(void)
+         }
+     }
+     qsort(fbList, n, sizeof(fb_entry_t), &fbCompare);
+-    fbCount = n;
++    fbAddHere(n); // build 125
+ }
+ 
+ // ---- copying and deleting (all on the IO worker) ----
+@@ -1152,6 +1204,21 @@ static void fbReport(const char *verb, int done)
+     ripps2Diag("files: %s in %s: %d ok, %d skipped, %d failed %s", verb, fbPath, ok, fbSkipped, fbFailed, fbFailWhat);
+ }
+ 
++// build 125: SIZE AND FREE SPACE: the marked entries (or the one under the cursor), folders all the way down
++static unsigned long long fbSizeTotal = 0;
++static void fbSizeWork(void)
++{
++    char p[384];
++    int i;
++    fbSizeTotal = 0;
++    fbTotalItems = fbDeleteCount;
++    for (i = 0; i < fbDeleteCount; i++) {
++        fbJoin(p, sizeof(p), fbPath, fbDeleteNames[i]);
++        fbSizeTotal += fbTreeSize(p, fbDeleteIsDir[i], 0);
++        fbDoneItems++;
++    }
++}
++
+ static void fbWorker(void)
+ {
+     // build 114: no background write of RIPPS2's while a copy grows its files (the lab, 10/23: ps2sdk's exFAT driver loses
+@@ -1168,12 +1235,23 @@ static void fbWorker(void)
+     } else if (fbOp == FB_OP_DELETE) {
+         fbDeleteWork();
+         fbReport(_t("DELETED"), fbDoneItems);
+-    }
++    } else if (fbOp == FB_OP_SIZE)
++        fbSizeWork();
+     ioLaunchCancel();
+     if (fbPath[0])
+         fbScanDir();
+     else
+         fbScanDevices();
++    if (fbOp == FB_OP_SIZE) { // build 125: after the read, so the free space is the drive's now
++        char size[24], room[24], text[64];
++        fbSizeText64(fbSizeTotal, size, sizeof(size));
++        if (fbHereFreeKb >= 0) {
++            fbSizeText64((unsigned long long)fbHereFreeKb * 1024, room, sizeof(room));
++            snprintf(text, sizeof(text), _t("%s IN %d, %s FREE"), size, fbDoneItems, room);
++        } else
++            snprintf(text, sizeof(text), _t("%s IN %d"), size, fbDoneItems);
++        fbSetToast(text);
++    }
+     fbBusy = 0;
+ }
+ 
+@@ -1336,6 +1414,7 @@ static void fbOpenPath(const char *path, const char *keep)
+         fbVmc[0] = '\0';
+     snprintf(fbPath, sizeof(fbPath), "%s", path);
+     snprintf(fbKeepName, sizeof(fbKeepName), "%s", keep ? keep : "");
++    fbLandFirst = path[0] != '\0' && fbKeepName[0] == '\0'; // build 125: on the first entry, under the folder row
+     fbCursor = fbTop = 0;
+     fbMenuOpen = 0;
+     fbRun(FB_OP_SCAN, _t("READING"));
+@@ -1345,6 +1424,11 @@ static void fbOpenPath(const char *path, const char *keep)
+ static void fbRestoreCursor(void)
+ {
+     int i;
++    if (fbLandFirst) { // build 125
++        fbLandFirst = 0;
++        fbCursor = fbCount > 1 && fbList[0].kind == FB_KIND_HERE ? 1 : 0;
++        fbFixScroll();
++    }
+     if (!fbKeepName[0])
+         return;
+     for (i = 0; i < fbCount; i++)
+@@ -1418,7 +1502,7 @@ static int fbSelection(char names[][FB_NAME], unsigned char *isDir, int max)
+             snprintf(names[n], FB_NAME, "%s", fbList[i].name);
+             isDir[n++] = fbList[i].kind == FB_KIND_DIR || fbList[i].kind == FB_KIND_SAVE;
+         }
+-    if (n == 0 && fbCount > 0) {
++    if (n == 0 && fbOnItem()) {
+         snprintf(names[0], FB_NAME, "%s", fbList[fbCursor].name);
+         isDir[0] = fbList[fbCursor].kind == FB_KIND_DIR || fbList[fbCursor].kind == FB_KIND_SAVE;
+         n = 1;
+@@ -1863,10 +1947,24 @@ int ripps2CardFreeKb(int port)
+     return freeKb;
+ }
+ 
++static void fbMarkAll(void) // build 125: every entry marked, or (any marked) none; the folder row is never one
++{
++    int any = 0, i;
++    for (i = 0; i < fbCount; i++)
++        any |= fbList[i].kind != FB_KIND_HERE && fbList[i].marked;
++    for (i = 0; i < fbCount; i++)
++        fbList[i].marked = fbList[i].kind != FB_KIND_HERE && !any;
++    sfxPlay(SFX_CURSOR);
++}
++
+ static void fbOpen(void)
+ {
+     if (fbCount == 0)
+         return;
++    if (fbList[fbCursor].kind == FB_KIND_HERE) { // build 125: the folder row marks them all
++        fbMarkAll();
++        return;
++    }
+     fb_entry_t *e = &fbList[fbCursor];
+     char path[256];
+ 
+@@ -1999,13 +2097,15 @@ static int fbClipHas(int dirs)
+ static void fbMenuBuild(void)
+ {
+     char save[40];
+-    int inFolder = fbPath[0] != '\0', haveItem = inFolder && fbCount > 0;
++    int inFolder = fbPath[0] != '\0', haveItem = inFolder && fbOnItem(), haveSel = haveItem, i;
++    for (i = 0; inFolder && i < fbCount; i++) // build 125: on the folder row, the marked entries are what COPY / CUT / DELETE take
++        haveSel |= fbList[i].marked;
+     int inVmc = fbVmcPath(fbVmc, fbPath, save, sizeof(save)), vmcTop = inVmc && !save[0] && !fbVmcRO;
+     int canChange = !inVmc || vmcTop; // a card image takes whole saves at its top, and only without ECC
+     fbMenuCount = 0;
+     if (haveItem && !inVmc && fbList[fbCursor].kind == FB_KIND_FILE)
+         fbMenuItems[fbMenuCount++] = FB_ACT_EDIT; // first: the file under the cursor, in the text editor
+-    if (haveItem) {
++    if (haveSel) {
+         fbMenuItems[fbMenuCount++] = FB_ACT_COPY;
+         if (canChange)
+             fbMenuItems[fbMenuCount++] = FB_ACT_CUT;
+@@ -2016,14 +2116,18 @@ static void fbMenuBuild(void)
+         fbMenuItems[fbMenuCount++] = FB_ACT_PASTE_PSU;
+     if (inFolder && !inVmc && fbClipHas(0))
+         fbMenuItems[fbMenuCount++] = FB_ACT_UNPACK;
+-    if (haveItem && canChange)
++    if (haveSel && canChange)
+         fbMenuItems[fbMenuCount++] = FB_ACT_DELETE;
+     if (haveItem && !inVmc)
+         fbMenuItems[fbMenuCount++] = FB_ACT_RENAME;
+     if (inFolder && !inVmc)
+         fbMenuItems[fbMenuCount++] = FB_ACT_NEWDIR;
+-    if (inFolder && fbCount > 0)
++    if (inFolder && fbCount > 1) {
+         fbMenuItems[fbMenuCount++] = FB_ACT_MARKALL;
++        fbMenuItems[fbMenuCount++] = FB_ACT_INVERT; // build 125
++    }
++    if (inFolder && !inVmc && (haveItem || fbCount > 1))
++        fbMenuItems[fbMenuCount++] = FB_ACT_SIZE; // build 125
+     if (haveItem && !inVmc && fbList[fbCursor].kind == FB_KIND_VMC)
+         fbMenuItems[fbMenuCount++] = FB_ACT_CARDS; // build 86: the card image under the cursor
+     if (haveItem && !inVmc && fbList[fbCursor].kind == FB_KIND_FILE && ripps2MediaKind(fbList[fbCursor].name) == RIPPS2_MEDIA_ICON)
+@@ -2143,15 +2247,29 @@ static void fbAction(int act)
+                 fbRun(FB_OP_SCAN, _t("READING"));
+             }
+             break;
+-        case FB_ACT_MARKALL: {
+-            int any = 0, i;
+-            for (i = 0; i < fbCount; i++)
+-                any |= fbList[i].marked;
++        case FB_ACT_MARKALL:
++            fbMarkAll();
++            break;
++        case FB_ACT_INVERT: { // build 125
++            int i;
+             for (i = 0; i < fbCount; i++)
+-                fbList[i].marked = !any;
++                fbList[i].marked = fbList[i].kind != FB_KIND_HERE && !fbList[i].marked;
+             sfxPlay(SFX_CURSOR);
+             break;
+         }
++        case FB_ACT_SIZE: // build 125: the marked entries, or the one under the cursor (on the folder row: all of them)
++            if (!fbOnItem()) {
++                int i, any = 0;
++                for (i = 0; i < fbCount; i++)
++                    any |= fbList[i].marked;
++                if (!any)
++                    for (i = 0; i < fbCount; i++)
++                        fbList[i].marked = fbList[i].kind != FB_KIND_HERE;
++            }
++            fbDeleteCount = fbSelection(fbDeleteNames, fbDeleteIsDir, FB_CLIP_MAX);
++            sfxPlay(SFX_CONFIRM);
++            fbRun(FB_OP_SIZE, _t("READING"));
++            break;
+         case FB_ACT_CARDS: // build 86
+             fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
+             sfxPlay(SFX_CONFIRM);
+@@ -2522,7 +2640,7 @@ static void fbTile(int t)
+             break;
+         case FB_TILE_EDITOR:
+             sfxPlay(SFX_CONFIRM);
+-            if (fbPath[0] && fbCount > 0 && fbIsText(fbList[fbCursor].name)) {
++            if (fbPath[0] && fbOnItem() && fbIsText(fbList[fbCursor].name)) {
+                 fbGridOpen = 0;
+                 fbEdit(fbList[fbCursor].name);
+             } else if (fbPath[0]) { // a new file in this folder
+@@ -2805,7 +2923,9 @@ void ripps2HandleInputFiles(void)
+     } else if (getKeyOn(backKey)) {
+         fbUp();
+     } else if (getKeyOn(KEY_SQUARE)) {
+-        if (fbPath[0] && fbCount > 0) {
++        if (fbPath[0] && fbCount > 0 && fbList[fbCursor].kind == FB_KIND_HERE) {
++            fbMarkAll(); // build 125: on the folder row, all of them
++        } else if (fbPath[0] && fbCount > 0) {
+             fbList[fbCursor].marked ^= 1;
+             if (fbCursor < fbCount - 1)
+                 fbCursor++;
+@@ -3091,7 +3211,7 @@ static void fbDrawTip(void)
+         return;
+     }
+     e = &fbList[fbCursor];
+-    if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START)
++    if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START || e->kind == FB_KIND_HERE) // build 125: its row says it all
+         return;
+     snprintf(path, sizeof(path), "%s%s", fbPath, e->name);
+     if (fbCursor != fbTipCursor || strcmp(path, fbTipPath) != 0) { // moved: the rest starts again
+@@ -3189,7 +3309,7 @@ void ripps2RenderFiles(void)
+         return;
+     }
+ 
+-    if (fbCount == 0)
++    if (fbCount == 0 || (fbCount == 1 && fbList[0].kind == FB_KIND_HERE))
+         fntRenderString(uiFont, 320, 200, ALIGN_CENTER, 0, 0, fbPath[0] ? _t("EMPTY") : _t("NO DRIVES"), FB_DIM);
+ 
+     for (i = 0; i < FB_ROWS && fbTop + i < fbCount; i++) {
+@@ -3202,9 +3322,31 @@ void ripps2RenderFiles(void)
+         }
+         if (e->marked)
+             rmDrawRect(FB_X, y + 6, 6, 6, FB_PRIM(0x6A, 0x9A, 0xFF, 0x80));
+-        fbGlyph(e->kind, FB_X + 12, y + 1, cur ? FB_PRIM(0x9C, 0xB8, 0xFF, 0x80) : FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        fbGlyph(e->kind == FB_KIND_HERE ? FB_KIND_DIR : e->kind, FB_X + 12, y + 1, cur ? FB_PRIM(0x9C, 0xB8, 0xFF, 0x80) : FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
+         int tx = FB_X + 36;
+-        if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START) {
++        if (e->kind == FB_KIND_HERE) {
++            // build 125: the open folder: its name, then how many entries, how many marked, the files' size, the free space
++            char name[FB_NAME], size[24], room[24];
++            int len = strlen(fbPath), k, marks = 0, sx;
++            for (k = len - 2; k >= 0 && fbPath[k] != '/'; k--)
++                ;
++            if (len >= 2 && fbPath[len - 2] == ':')
++                snprintf(name, sizeof(name), "%s", fbPath); // a drive's root
++            else
++                snprintf(name, sizeof(name), "%.*s", len - 2 - k, fbPath + k + 1);
++            for (k = 1; k < fbCount; k++)
++                marks += fbList[k].marked;
++            fbSizeText64(fbHereBytes, size, sizeof(size));
++            if (fbHereFreeKb >= 0) {
++                fbSizeText64((unsigned long long)fbHereFreeKb * 1024, room, sizeof(room));
++                snprintf(buf, sizeof(buf), _t("%d ITEMS   %d MARKED   %s   %s FREE"), fbCount - 1, marks, size, room);
++            } else
++                snprintf(buf, sizeof(buf), _t("%d ITEMS   %d MARKED   %s"), fbCount - 1, marks, size);
++            sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, buf));
++            fntRenderStringFit(rowFont, tx, y + 9, ALIGN_VCENTER, sx - 12 - tx, name, cur ? FB_LIT : FB_SOFT, cur);
++            fntRenderString(smallFont, sx, y + 9, ALIGN_VCENTER, 0, 0, buf, marks > 0 ? FB_SOFT : FB_DIM);
++            rmDrawLine(FB_X, y + FB_ROW_H - 2, FB_RIGHT, y + FB_ROW_H - 2, FB_PRIM(0x4A, 0x72, 0xDC, 0x30));
++        } else if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START) {
+             // a drive: its label, its path on the right; the start row: START DRIVES, what it starts
+             const char *main = e->kind == FB_KIND_DEVICE ? e->title : e->name, *side = e->kind == FB_KIND_DEVICE ? e->name : e->title;
+             int sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, side));
+@@ -3266,10 +3408,10 @@ void ripps2RenderFiles(void)
+         fbHint(backIcon, _t("CLOSE"), &hx, hy);
+     } else {
+         fb_entry_t *e = fbCount > 0 ? &fbList[fbCursor] : NULL;
+-        int icons[6], n = 0;
++        int icons[6], n = 0, here = e != NULL && e->kind == FB_KIND_HERE;
+         const char *texts[6];
+         icons[n] = selIcon;
+-        texts[n++] = e != NULL && e->kind == FB_KIND_ELF ? _t("RUN") : e != NULL && e->kind == FB_KIND_VCD ? _t("PLAY") : _t("OPEN");
++        texts[n++] = here ? _t("MARK ALL") : e != NULL && e->kind == FB_KIND_ELF ? _t("RUN") : e != NULL && e->kind == FB_KIND_VCD ? _t("PLAY") : _t("OPEN");
+         icons[n] = backIcon;
+         texts[n++] = fbPath[0] ? _t("BACK") : _t("EXIT");
+         if (fbPath[0]) {
 diff --git a/src/ripps2media.c b/src/ripps2media.c
-index 6b986ea..89c90d3 100644
+index 6b986ea..eb245d4 100644
 --- a/src/ripps2media.c
 +++ b/src/ripps2media.c
 @@ -9,10 +9,12 @@
@@ -235,7 +620,7 @@ index 6b986ea..89c90d3 100644
 +    {
 +        int icon, icon2;
 +        const char *word;
-+    } row[5] = {{-1, -1, NULL}, {L1_ICON, R1_ICON, "10 s"}, {L2_ICON, R2_ICON, "Volume"}, {START_ICON, -1, NULL}, {-2, -1, "Stop"}};
++    } row[5] = {{-1, -1, NULL}, {L1_ICON, R1_ICON, "10 s"}, {R2_ICON, -1, "Volume"}, {START_ICON, -1, NULL}, {-2, -1, "Stop"}};
 +    unsigned char *b = vpHints;
 +    int font = ripps2HintFontId(), pass, i, x = 0, total = 0, cy = VP_HINT_H / 2 + 2, y;
 +    char word[64];
