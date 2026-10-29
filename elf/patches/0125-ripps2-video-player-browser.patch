@@ -79,6 +79,25 @@ index 68ca5b6..073e079 100644
 +int ripps2TarRemove(const char *tar, char (*names)[128], int n);
 +
  #endif
+diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
+index a020021..d3a2b90 100644
+--- a/misc/theme_coverflow.cfg
++++ b/misc/theme_coverflow.cfg
+@@ -583,6 +583,14 @@ info27:
+ 	overlay_lly=149
+ 	overlay_lrx=199
+ 	overlay_lry=149
++# build 125 (the user, 10/29): the source's name on the info page too, RUN and BACK either side of it (hints_flank)
++info30:
++	type=MenuText
++	font=7
++	x=POS_MID
++	y=-30
++	aligned=1
++	color=#5C6478
+ info16:
+ 	type=SaveIcon
+ 	x=319
 diff --git a/src/config.c b/src/config.c
 index 52a645e..0699ae1 100644
 --- a/src/config.c
@@ -1915,3 +1934,48 @@ index 91b7135..c1aa4a6 100644
  
      if (!texture->Mem) {
          texFree(texture); // free the already-allocated paletted-PNG Clut before bailing (Gemini review);
+diff --git a/src/themes.c b/src/themes.c
+index b1a9f4e..389ce02 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -4185,6 +4185,14 @@ static int findMenuPrev(struct menu_list *menu)
+     return prev == NULL ? 0 : prev->item->visible;
+ }
+ 
++// build 125: an info page's family (games, apps, PS1, and Favourites' own), as against a main page's
++static int thmIsInfoFamily(const theme_elems_t *f)
++{
++    return f != NULL && gTheme != NULL &&
++           (f == &gTheme->infoElems || f == &gTheme->appsInfoElems || f == &gTheme->favsInfoElems || f == &gTheme->vcdInfoElems ||
++            f == &gTheme->favsVcdInfoElems || f == &gTheme->favsAppsInfoElems);
++}
++
+ static void drawMenuText(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
+ {
+     GSTEXTURE *leftIconTex = NULL, *rightIconTex = NULL;
+@@ -4222,7 +4230,10 @@ static void drawMenuText(struct menu_list *menu, struct submenu_list *item, conf
+         u64 ic = GS_SETREG_RGBA(0x80, 0x80, 0x80, (int)(0x80 * srcA));
+         guiDrawIconAndTextNoFade(confirm, _STR_RUN, elem->font, elem->posX - half - gTheme->hintsFlankGap - guiIconTextWidth(confirm, _STR_RUN, elem->font),
+                                  elem->posY - 10, c, ic);
+-        if (findMenuNext(menu) != 0 || findMenuPrev(menu) != 0)
++        // build 125 (the user, 10/29): on the info page the cancel button goes back, so it says BACK there
++        if (thmIsInfoFamily(elem->family))
++            guiDrawIconAndTextNoFade(guiCancelIcon(), _STR_BACK, elem->font, elem->posX + half + gTheme->hintsFlankGap, elem->posY - 10, c, ic);
++        else if (findMenuNext(menu) != 0 || findMenuPrev(menu) != 0)
+             guiDrawIconAndTextNoFade(guiCancelIcon(), _STR_RIPPS2_SOURCE, elem->font, elem->posX + half + gTheme->hintsFlankGap, elem->posY - 10, c, ic);
+         fntRenderString(elem->font, elem->posX, elem->posY, elem->aligned, 0, 0, text, c);
+         return;
+@@ -4851,6 +4862,13 @@ static void drawInfoHintText(struct menu_list *menu, struct submenu_list *item,
+     float hintA = ripps2HintsAlpha(); // RIPPS2 build 70: RIPPSettings (Back still works with them hidden)
+     if (hintA <= 0.0f)
+         return;
++    // build 125: an info page with the source's name (a MenuText) and hints_flank has RUN and BACK beside that name
++    if (gTheme->hintsFlank && !ripps2SidebarOn() && ripps2SourceNameMode() != RIPPS2_SRC_POP) {
++        theme_element_t *e;
++        for (e = elem->family != NULL ? elem->family->first : NULL; e != NULL; e = e->next)
++            if (e->type == ELEM_TYPE_MENU_TEXT && e->aligned)
++                return;
++    }
+     u64 col = hintFade(elem->color, hintA), iconCol = hintFade(gDefaultCol, hintA);
+ 
+     if (elem->aligned)
