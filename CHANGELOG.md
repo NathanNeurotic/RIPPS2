@@ -4,9 +4,14 @@
 
 The user's notes of 10/28.
 
-- **The disc spins in on every built-in theme.** The default theme and RIPGRID show no disc on their main page, so a
-  game's disc now spins in as it launches there too, as it does on RIPFLOW (RIPGRID's popped in and held). Flow and
-  Grid > Launch Disc still picks Off, Pop In or Spin for any theme. Adapt and Adapt Rx do the same from theme edition 122.
+- **Zoom, a new Launch Disc.** The disc arrives as Pop In's does, holds a moment, then grows smoothly to a size that
+  reads clearly and stays there until the game takes the screen. It is RIPFLOW's now (it spun), and Adapt's and Adapt
+  Rx's from theme edition 122 (`launch_disc=zoom`). Flow and Grid > Launch Disc lists it after Spin.
+- **A launch disc on every theme.** The default theme and RIPGRID show no disc on their main page, so the game's disc
+  spins in as it launches there (RIPGRID's popped in). A theme that does not say (any theme made before
+  `launch_disc`) pops the disc in, so everyone sees it and can turn it off: Flow and Grid > Launch Disc always wins,
+  and a theme can say `launch_disc=off`.
+- Zoom and the Launch Disc hint in all 32 languages (`tools/lang122`).
 - Tried and left out: bringing audio up right after the settings, before the fonts and languages. In the lab the
   boot sound came at the same moment either way (3.90 s after the sky, the copy on the card), so the wait is not in
   that part of start-up and audio still comes up at its end.

@@ -1,3 +1,29 @@
+diff --git a/include/themes.h b/include/themes.h
+index d5e98d8..01b966c 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -268,7 +268,7 @@ typedef struct theme
+     int pageButtonsDef;                 // build 96: page_buttons= l1r1 (1) | l2r2 (2); 0: RIPPS2's own (L2 top, R2 end)
+     int glyphSetLoaded;                 // the set its glyph textures hold now
+     char glyphPath[192];                // where its own glyph PNGs load from ("" for a built-in theme)
+-    int launchDiscDef;                  // RIPPS2 build 91: launch_disc: 0 off, 1 pop, 2 spin
++    int launchDiscDef;                  // RIPPS2 build 91: launch_disc: 0 off, 1 pop, 2 spin; 122: 3 zoom, no key 1
+     // RIPPS2 build 92: the category bar as the theme sets it (ripps2ui.c draws it)
+     int catFontTheme;                   // category_font=theme: the theme's font2 / font7 (else RIPPS2's own face)
+     int catColumn, catX, catY, catSpacing; // category_layout=column, category_x/_y/_spacing (-1: RIPPS2's)
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index e546693..2d1b977 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1574,7 +1574,7 @@ gui_strings:
+ - label: RIPPS2_LAUNCH_DISC
+   string: Launch Disc
+ - label: HINT_RIPPS2_LAUNCH_DISC
+-  string: "A game's disc comes in as it launches. Pop In settles and fades; Spin turns faster and faster until the game starts."
++  string: "A game's disc comes in as it launches. Pop In settles and fades; Spin turns faster and faster until the game starts; Zoom settles, then grows to read clearly and stays."
+ - label: RIPPS2_TRANSITION
+   string: Page Transition
+ - label: HINT_RIPPS2_TRANSITION
 diff --git a/misc/conf_theme_OPL.cfg b/misc/conf_theme_OPL.cfg
 index 54a2ba9..0c29e29 100755
 --- a/misc/conf_theme_OPL.cfg
@@ -9,6 +35,22 @@ index 54a2ba9..0c29e29 100755
  main0:
  	type=Background
  	pattern=BG
+diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
+index e22face..a020021 100644
+--- a/misc/theme_coverflow.cfg
++++ b/misc/theme_coverflow.cfg
+@@ -14,8 +14,9 @@ flowtilt=1
+ hints_flank=1
+ # build 119: the source's name shown under the covers (Source Name: Pop In or Pop In and Name bring the big name back)
+ source_name=shown
+-# RIPPS2 build 91: as a game launches its disc pops in and spins up (Flow and Grid > Launch Disc can change it)
+-launch_disc=spin
++# RIPPS2 build 91: as a game launches its disc comes in (Flow and Grid > Launch Disc can change it); build 122 (the user,
++# 10/28): it zooms up to read clearly and stays, where it spun before
++launch_disc=zoom
+ default_font=builtin:ripflow
+ default_font_size=17
+ font1=builtin:ripflow
 diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
 index 3f257e4..1952991 100644
 --- a/misc/theme_ripgrid.cfg
@@ -24,6 +66,76 @@ index 3f257e4..1952991 100644
  # RIPPS2 build 96: L2 / R2 turn the grid's pages (Controller Settings > Page Buttons can change it)
  page_buttons=l2r2
  # build 102: the Standard glyph set (L3 and R3 included); Controller Settings > Hints and Glyphs can change it
+diff --git a/src/gui.c b/src/gui.c
+index 61c5f61..7a3cf3d 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -3430,7 +3430,7 @@ void guiShowCoverflowConfig(void)
+     const char *animSpeeds[] = {_l(_STR_OFF), _l(_STR_FAST), _l(_STR_NORMAL), _l(_STR_SLOW), NULL};
+     // RIPPS2 build 91: Grid Layout and Launch Disc, each starting on the theme's
+     static const char *gridLayouts[] = {N_("Theme"), "4 x 2", "5 x 2", N_("3 x 2 Large"), N_("6 x 3 Compact"), NULL};
+-    static const char *launchDiscs[] = {N_("Theme"), N_("Off"), N_("Pop In"), N_("Spin"), NULL};
++    static const char *launchDiscs[] = {N_("Theme"), N_("Off"), N_("Pop In"), N_("Spin"), N_("Zoom"), NULL}; // build 122: Zoom
+     int keepLayout = gRipps2GridLayout;
+     // build 114: the category rows (here from Colors and More), each shown live; Back puts them back
+     int keepCat[6] = {gRipps2CatBar, gRipps2CatSwap, gRipps2SrcName, gRipps2Transition, gRipps2CatLayout, gRipps2UserSet};
+diff --git a/src/opl.c b/src/opl.c
+index 09a73ed..3643974 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -4008,7 +4008,7 @@ static void _loadConfig()
+                 gRipps2TextWeight = value > 0; // build 114: Text Weight, on the faces already loaded; 115: Medium is Bold now
+                 ripps2ApplyTextWeight();
+             }
+-            if (configGetInt(configOPL, "ripps2_launch_disc", &value) && value >= 0 && value <= 3)
++            if (configGetInt(configOPL, "ripps2_launch_disc", &value) && value >= 0 && value <= 4) // build 122: 4 Zoom
+                 gRipps2LaunchDisc = value; // build 91: Flow and Grid > Launch Disc
+             if (configGetInt(configOPL, "ripps2_vignette", &value) && value >= 0 && value <= 2)
+                 gRipps2Vignette = value; // build 98: 0 Off, 1 Weak (the old On reads as Weak), 2 Full
+diff --git a/src/ripps2ui.c b/src/ripps2ui.c
+index 39ca408..a623099 100644
+--- a/src/ripps2ui.c
++++ b/src/ripps2ui.c
+@@ -1163,6 +1163,8 @@ static u64 withAlpha(u64 c, int a)
+ // the game's own disc art (ICO), else RIPPS2's disc (a theme's launch_disc.png). pop: it arrives the way the
+ // L3 logos do (a touch large, settling, with a glow), holds and fades. spin: it arrives the same way, then
+ // turns, faster and faster up to a cap, and never fades: it is still turning when the game takes the screen.
++// Build 122 (the user, 10/28): zoom: it arrives the same way, holds a moment, then grows (eased in and out) to a size
++// that reads clearly and stays on that last frame, as spin does, until the game takes the screen.
+ #define DISC_SIZE   150
+ #define DISC_Y      228   // the view word's line
+ #define DISC_IN_S   0.40f
+@@ -1171,6 +1173,9 @@ static u64 withAlpha(u64 c, int a)
+ #define DISC_REV0   0.25f // turns a second as it lands
+ #define DISC_RAMP   0.90f // and faster by this, each second
+ #define DISC_REVMAX 2.20f // the cap: past this a 50 Hz picture strobes the turn
++#define DISC_ZOOM_AT (DISC_IN_S + 0.35f) // zoom: Pop In's arrival and a short hold, then
++#define DISC_ZOOM_S  0.90f               // the eased zoom up to
++#define DISC_ZOOM_TO 1.85f               // this size, held until the game takes the screen
+ #define DISC_ICO_WAIT 500 // art worker ticks to wait for it to let go before the ICO is read
+ int gRipps2LaunchDisc = 0;
+ static GSTEXTURE launchIco;
+@@ -1181,7 +1186,7 @@ int ripps2LaunchDiscMode(void)
+ {
+     if (gRipps2LaunchDisc == 1)
+         return 0;
+-    if (gRipps2LaunchDisc >= 2 && gRipps2LaunchDisc <= 3)
++    if (gRipps2LaunchDisc >= 2 && gRipps2LaunchDisc <= 4) // Pop In, Spin, build 122: Zoom
+         return gRipps2LaunchDisc - 1;
+     return gTheme != NULL ? gTheme->launchDiscDef : 0;
+ }
+@@ -1257,6 +1262,11 @@ int ripps2DrawLaunchDisc(void)
+     }
+     float li = t < DISC_IN_S ? t / DISC_IN_S : 1.0f;
+     float s = (1.0f + 0.16f * (1.0f - easeOutBack(li))) * (1.0f + 0.10f * out);
++    if (launchMode == 3 && t > DISC_ZOOM_AT) { // build 122: the zoom, eased in and out, then held
++        float u = fminf(1.0f, (t - DISC_ZOOM_AT) / DISC_ZOOM_S);
++        float e = u < 0.5f ? 4.0f * u * u * u : 1.0f - 4.0f * (1.0f - u) * (1.0f - u) * (1.0f - u);
++        s *= 1.0f + (DISC_ZOOM_TO - 1.0f) * e;
++    }
+     float flare = sinf(3.14159265f * li);
+     int a = (int)(0x80 * fminf(1.0f, li * 1.8f) * keep);
+     int h = DISC_SIZE, w = DISC_SIZE * tex->Width / tex->Height;
 diff --git a/src/sound.c b/src/sound.c
 index 55ae996..1954394 100644
 --- a/src/sound.c
@@ -38,3 +150,23 @@ index 55ae996..1954394 100644
  void sfxBootStart(void)
  {
      static int done = 0;
+diff --git a/src/themes.c b/src/themes.c
+index 386a302..b1a9f4e 100644
+--- a/src/themes.c
++++ b/src/themes.c
+@@ -6684,10 +6684,12 @@ static int thmLoad(const char *themePath)
+         newT->pageButtonsDef = 0;
+         if (configGetStr(themeConfig, "page_buttons", &v) && v != NULL)
+             newT->pageButtonsDef = !strcasecmp(v, "l2r2") ? 2 : !strcasecmp(v, "l1r1") ? 1 : 0;
+-        // build 91: launch_disc=pop|spin, the disc that comes in as a game launches (off unless a theme or
+-        // Flow and Grid > Launch Disc asks for it)
++        // build 91: launch_disc=pop|spin, the disc that comes in as a game launches. Build 122 (the user, 10/28): zoom,
++        // and off; a theme without the key (any theme made before it) pops the disc in, so it is found and can be
++        // turned off in Flow and Grid > Launch Disc, which always wins
++        newT->launchDiscDef = 1;
+         if (configGetStr(themeConfig, "launch_disc", &v) && v != NULL)
+-            newT->launchDiscDef = !strcasecmp(v, "spin") ? 2 : !strcasecmp(v, "pop") ? 1 : 0;
++            newT->launchDiscDef = !strcasecmp(v, "spin") ? 2 : !strcasecmp(v, "zoom") ? 3 : !strcasecmp(v, "off") ? 0 : 1;
+         // build 92: the category bar. category_font=theme keeps the theme's own faces (RIPPS2's otherwise,
+         // the same on every theme); category_layout=column stacks LAUNCH DISC / STORAGE / MEMORY FILES from
+         // category_x / category_y, category_spacing apart (a sidebar), and in a row category_y moves the bar;
