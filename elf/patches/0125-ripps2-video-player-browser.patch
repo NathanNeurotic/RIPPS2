@@ -1,3 +1,21 @@
+diff --git a/include/config.h b/include/config.h
+index 70238f4..1c2632a 100644
+--- a/include/config.h
++++ b/include/config.h
+@@ -310,6 +310,13 @@ int configOplIsOfficialSeed(void);
+ void configSetCarryOverDir(const char *dir);
+ int configOplIsCarryOver(void);
+ int configWrite(config_set_t *configSet);
++// RIPPS2 build 125: recent games' settings (their CFG with the metadata pack's keys merged in), kept in at most 64 KB as
++// packed text so a game looked at again needs no read. Get fills c (made with that path) and is 1 on a hit; Put keeps
++// c; Drop forgets one file (any write does), Clear all of them (a drive or file change, or memory wanted elsewhere).
++int configCacheGet(const char *path, config_set_t *c);
++void configCachePut(const config_set_t *c);
++void configCacheDrop(const char *path);
++void configCacheClear(void);
+ int configWriteMulti(int types);
+ void configClear(config_set_t *configSet);
+ 
 diff --git a/include/fntsys.h b/include/fntsys.h
 index 917e3c4..6288726 100644
 --- a/include/fntsys.h
@@ -48,6 +66,180 @@ index 68ca5b6..073e079 100644
 +int ripps2TarRemove(const char *tar, char (*names)[128], int n);
 +
  #endif
+diff --git a/src/config.c b/src/config.c
+index 52a645e..0699ae1 100644
+--- a/src/config.c
++++ b/src/config.c
+@@ -337,11 +337,161 @@ static void configBuildPath(char *out, size_t outSize, const char *prefix, const
+     }
+ }
+ 
++// ---- RIPPS2 build 125: recent games' settings, kept small ----
++// Each one is a single block: its path, then key and value after key and value, every string with its NUL (a game's
++// is about 0.5 to 2 KB this way; its config_set_t would be 300 bytes a key). At most CFG_CACHE_BYTES in all, the least
++// recently used given up first; a block bigger than an eighth of that is not kept.
++#define CFG_CACHE_BYTES (64 * 1024)
++#define CFG_CACHE_SLOTS 64
++
++typedef struct
++{
++    char *blob;
++    int len, format;
++    unsigned int stamp;
++} cfg_cache_t;
++
++static cfg_cache_t cfgCache[CFG_CACHE_SLOTS];
++static int cfgCacheBytes = 0, cfgCacheSema = -1;
++static unsigned int cfgCacheStamp = 0;
++
++static void cfgCacheDropAt(int i)
++{
++    free(cfgCache[i].blob);
++    cfgCacheBytes -= cfgCache[i].len;
++    memset(&cfgCache[i], 0, sizeof(cfgCache[i]));
++}
++
++static int cfgCacheFind(const char *path)
++{
++    int i;
++    for (i = 0; i < CFG_CACHE_SLOTS; i++)
++        if (cfgCache[i].blob != NULL && !strcmp(cfgCache[i].blob, path))
++            return i;
++    return -1;
++}
++
++int configCacheGet(const char *path, config_set_t *c)
++{
++    int i, ok = 0;
++
++    if (path == NULL || c == NULL || cfgCacheSema < 0)
++        return 0;
++    WaitSema(cfgCacheSema);
++    if ((i = cfgCacheFind(path)) >= 0) {
++        const char *p = cfgCache[i].blob + strlen(path) + 1, *end = cfgCache[i].blob + cfgCache[i].len;
++        ok = 1;
++        while (p < end) {
++            const char *v = p + strlen(p) + 1;
++            if (v >= end || !addConfigValue(c, p, v)) {
++                ok = 0;
++                break;
++            }
++            p = v + strlen(v) + 1;
++        }
++        c->format = cfgCache[i].format;
++        c->modified = 0;
++        cfgCache[i].stamp = ++cfgCacheStamp;
++    }
++    SignalSema(cfgCacheSema);
++    if (!ok) { // a part-filled set (out of memory) goes back empty, and the file is read as before
++        struct config_value_t *it = c->head;
++        while (it != NULL) {
++            struct config_value_t *next = it->next;
++            free(it);
++            it = next;
++        }
++        c->head = c->tail = NULL;
++    }
++    return ok;
++}
++
++void configCachePut(const config_set_t *c)
++{
++    struct config_value_t *it;
++    char *blob, *p;
++    int len, i, slot;
++
++    if (c == NULL || c->filename == NULL || cfgCacheSema < 0)
++        return;
++    len = strlen(c->filename) + 1;
++    for (it = c->head; it != NULL; it = it->next)
++        len += strlen(it->key) + 1 + strlen(it->val) + 1;
++    if (len > CFG_CACHE_BYTES / 8 || (blob = malloc(len)) == NULL)
++        return;
++    p = blob;
++    p += strlen(strcpy(p, c->filename)) + 1;
++    for (it = c->head; it != NULL; it = it->next) {
++        p += strlen(strcpy(p, it->key)) + 1;
++        p += strlen(strcpy(p, it->val)) + 1;
++    }
++    WaitSema(cfgCacheSema);
++    if ((i = cfgCacheFind(c->filename)) >= 0)
++        cfgCacheDropAt(i);
++    for (;;) { // room: a free slot and the bytes, the oldest given up until there is
++        int oldest = -1;
++        slot = -1;
++        for (i = 0; i < CFG_CACHE_SLOTS; i++) {
++            if (cfgCache[i].blob == NULL) {
++                if (slot < 0)
++                    slot = i;
++            } else if (oldest < 0 || cfgCache[i].stamp < cfgCache[oldest].stamp)
++                oldest = i;
++        }
++        if (slot >= 0 && cfgCacheBytes + len <= CFG_CACHE_BYTES)
++            break;
++        if (oldest < 0)
++            break;
++        cfgCacheDropAt(oldest);
++    }
++    if (slot >= 0 && cfgCacheBytes + len <= CFG_CACHE_BYTES) {
++        cfgCache[slot].blob = blob;
++        cfgCache[slot].len = len;
++        cfgCache[slot].format = c->format;
++        cfgCache[slot].stamp = ++cfgCacheStamp;
++        cfgCacheBytes += len;
++        blob = NULL;
++    }
++    SignalSema(cfgCacheSema);
++    free(blob);
++}
++
++void configCacheDrop(const char *path)
++{
++    int i;
++    if (path == NULL || cfgCacheSema < 0)
++        return;
++    WaitSema(cfgCacheSema);
++    if ((i = cfgCacheFind(path)) >= 0)
++        cfgCacheDropAt(i);
++    SignalSema(cfgCacheSema);
++}
++
++void configCacheClear(void)
++{
++    int i;
++    if (cfgCacheSema < 0)
++        return;
++    WaitSema(cfgCacheSema);
++    for (i = 0; i < CFG_CACHE_SLOTS; i++)
++        if (cfgCache[i].blob != NULL)
++            cfgCacheDropAt(i);
++    SignalSema(cfgCacheSema);
++}
++
+ void configInit(char *prefix)
+ {
+     char path[256];
+     int i;
+ 
++    if (cfgCacheSema < 0) { // build 125: the settings cache, between the IO worker and the GUI thread
++        ee_sema_t sema;
++        memset(&sema, 0, sizeof(sema));
++        sema.init_count = 1;
++        sema.max_count = 1;
++        cfgCacheSema = CreateSema(&sema);
++    }
++
+     if (!prefix)
+         prefix = gBaseMCDir;
+ 
+@@ -1434,6 +1584,7 @@ int configWrite(config_set_t *configSet)
+ {
+     if (configSet == NULL)
+         return 0;
++    configCacheDrop(configSet->filename); // build 125: read fresh next time
+ 
+     // A config can be re-homed after it was read (legacy migration, missing-config recovery,
+     // boot-home self-migration). configMove/configSetMove intentionally preserve the in-memory
 diff --git a/src/fntsys.c b/src/fntsys.c
 index d71c0fc..82ebd99 100644
 --- a/src/fntsys.c
@@ -112,6 +304,18 @@ index d71c0fc..82ebd99 100644
  int fntCalcDimensions(int id, const char *str)
  {
      int w;
+diff --git a/src/metadb.c b/src/metadb.c
+index 38c1414..5e5fe80 100644
+--- a/src/metadb.c
++++ b/src/metadb.c
+@@ -53,6 +53,7 @@ void metaDbInvalidate(void)
+     WaitSema(metaSemaId);
+     tarInvalidate(TAR_KIND_CFG);
+     metaMissCount = 0;
++    configCacheClear(); // build 125: the settings cached hold this database's keys
+     SignalSema(metaSemaId);
+ }
+ 
 diff --git a/src/ripps2art.c b/src/ripps2art.c
 index e81cf41..0ed3322 100644
 --- a/src/ripps2art.c
@@ -258,7 +462,7 @@ index e81cf41..0ed3322 100644
                  snprintf(err, sizeof(err), _t("%s: the picture would not decode."), t->serial);
              else if ((len = artEncode(rgb, body, ART_MAX_BYTES)) <= 0)
 diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
-index 6c49fb3..775bc15 100644
+index 6c49fb3..d0a5595 100644
 --- a/src/ripps2artpack.c
 +++ b/src/ripps2artpack.c
 @@ -36,6 +36,9 @@
@@ -271,7 +475,7 @@ index 6c49fb3..775bc15 100644
  
  #include "include/opl.h"
  #include "include/gui.h"
-@@ -1603,6 +1606,426 @@ out:
+@@ -1603,6 +1606,428 @@ out:
      return changed;
  }
  
@@ -385,8 +589,10 @@ index 6c49fb3..775bc15 100644
 +    gEnableArtTar = wasTar;
 +    ripps2ArtPackApplySettings();
 +    tarInvalidate(TAR_KIND_ART);
++    tarInvalidate(TAR_KIND_CFG); // a cfg.tar changed here is read again, and the settings cached from it forgotten
 +    artIndexInvalidate();
 +    cacheInvalidateFailMemo();
++    configCacheClear();
 +    return r;
 +}
 +
@@ -699,7 +905,7 @@ index 6c49fb3..775bc15 100644
  {
      char paths[TM_PICK][256], msg[400];
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 7c1cff8..cfd3a95 100644
+index 7c1cff8..3a2be42 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -17,6 +17,13 @@
@@ -912,13 +1118,15 @@ index 7c1cff8..cfd3a95 100644
  static void fbWorker(void)
  {
      // build 114: no background write of RIPPS2's while a copy grows its files (the lab, 10/23: ps2sdk's exFAT driver loses
-@@ -1168,12 +1276,23 @@ static void fbWorker(void)
+@@ -1168,12 +1276,25 @@ static void fbWorker(void)
      } else if (fbOp == FB_OP_DELETE) {
          fbDeleteWork();
          fbReport(_t("DELETED"), fbDoneItems);
 -    }
 +    } else if (fbOp == FB_OP_SIZE)
 +        fbSizeWork();
++    if (fbOp != FB_OP_SCAN && fbOp != FB_OP_SIZE)
++        configCacheClear(); // build 125: a game's CFG may have been pasted over, moved or deleted
      ioLaunchCancel();
      if (fbPath[0])
          fbScanDir();
@@ -937,7 +1145,7 @@ index 7c1cff8..cfd3a95 100644
      fbBusy = 0;
  }
  
-@@ -1334,8 +1453,11 @@ static void fbOpenPath(const char *path, const char *keep)
+@@ -1334,8 +1455,11 @@ static void fbOpenPath(const char *path, const char *keep)
  {
      if (fbVmc[0] && !fbVmcPath(fbVmc, path, NULL, 0))
          fbVmc[0] = '\0';
@@ -949,7 +1157,7 @@ index 7c1cff8..cfd3a95 100644
      fbCursor = fbTop = 0;
      fbMenuOpen = 0;
      fbRun(FB_OP_SCAN, _t("READING"));
-@@ -1345,6 +1467,11 @@ static void fbOpenPath(const char *path, const char *keep)
+@@ -1345,6 +1469,11 @@ static void fbOpenPath(const char *path, const char *keep)
  static void fbRestoreCursor(void)
  {
      int i;
@@ -961,7 +1169,7 @@ index 7c1cff8..cfd3a95 100644
      if (!fbKeepName[0])
          return;
      for (i = 0; i < fbCount; i++)
-@@ -1418,7 +1545,7 @@ static int fbSelection(char names[][FB_NAME], unsigned char *isDir, int max)
+@@ -1418,7 +1547,7 @@ static int fbSelection(char names[][FB_NAME], unsigned char *isDir, int max)
              snprintf(names[n], FB_NAME, "%s", fbList[i].name);
              isDir[n++] = fbList[i].kind == FB_KIND_DIR || fbList[i].kind == FB_KIND_SAVE;
          }
@@ -970,7 +1178,7 @@ index 7c1cff8..cfd3a95 100644
          snprintf(names[0], FB_NAME, "%s", fbList[fbCursor].name);
          isDir[0] = fbList[fbCursor].kind == FB_KIND_DIR || fbList[fbCursor].kind == FB_KIND_SAVE;
          n = 1;
-@@ -1863,14 +1990,42 @@ int ripps2CardFreeKb(int port)
+@@ -1863,14 +1992,42 @@ int ripps2CardFreeKb(int port)
      return freeKb;
  }
  
@@ -1013,7 +1221,7 @@ index 7c1cff8..cfd3a95 100644
          case FB_KIND_START:
              if (fbStarted)
                  break;
-@@ -1999,13 +2154,29 @@ static int fbClipHas(int dirs)
+@@ -1999,13 +2156,29 @@ static int fbClipHas(int dirs)
  static void fbMenuBuild(void)
  {
      char save[40];
@@ -1045,7 +1253,7 @@ index 7c1cff8..cfd3a95 100644
          fbMenuItems[fbMenuCount++] = FB_ACT_COPY;
          if (canChange)
              fbMenuItems[fbMenuCount++] = FB_ACT_CUT;
-@@ -2016,19 +2187,23 @@ static void fbMenuBuild(void)
+@@ -2016,19 +2189,23 @@ static void fbMenuBuild(void)
          fbMenuItems[fbMenuCount++] = FB_ACT_PASTE_PSU;
      if (inFolder && !inVmc && fbClipHas(0))
          fbMenuItems[fbMenuCount++] = FB_ACT_UNPACK;
@@ -1072,7 +1280,7 @@ index 7c1cff8..cfd3a95 100644
          fbMenuItems[fbMenuCount++] = FB_ACT_TARMERGE; // build 123: this .tar kept, another merged into it
      fbMenuSel = 0;
  }
-@@ -2080,6 +2255,7 @@ static void fbAction(int act)
+@@ -2080,6 +2257,7 @@ static void fbAction(int act)
              fbClipCount = fbSelection(fbClip, fbClipIsDir, FB_CLIP_MAX);
              snprintf(fbClipDir, sizeof(fbClipDir), "%s", fbPath);
              snprintf(fbClipVmc, sizeof(fbClipVmc), "%s", fbVmcPath(fbVmc, fbPath, NULL, 0) ? fbVmc : "");
@@ -1080,7 +1288,7 @@ index 7c1cff8..cfd3a95 100644
              fbClipCut = act == FB_ACT_CUT;
              fbClearMarks();
              fbClipWhat(ask, sizeof(ask));
-@@ -2093,6 +2269,41 @@ static void fbAction(int act)
+@@ -2093,6 +2271,41 @@ static void fbAction(int act)
                  fbPasteRipped();
                  break;
              }
@@ -1122,7 +1330,7 @@ index 7c1cff8..cfd3a95 100644
              sfxPlay(SFX_CONFIRM);
              fbPasteMode = act == FB_ACT_PASTE_PSU ? FB_PASTE_PSU : act == FB_ACT_UNPACK ? FB_PASTE_UNPACK : FB_PASTE_PLAIN;
              fbTotalItems = fbClipCount;
-@@ -2112,7 +2323,13 @@ static void fbAction(int act)
+@@ -2112,7 +2325,13 @@ static void fbAction(int act)
                  snprintf(ask, sizeof(ask), _t("Delete %s?"), fbDeleteNames[0]);
              else
                  snprintf(ask, sizeof(ask), _t("Delete %d items?"), n);
@@ -1137,7 +1345,15 @@ index 7c1cff8..cfd3a95 100644
                  fbDeleteCount = n;
                  fbTotalItems = n;
                  fbClearMarks();
-@@ -2143,15 +2360,29 @@ static void fbAction(int act)
+@@ -2130,6 +2349,7 @@ static void fbAction(int act)
+                     fbMusicPaused = 1;
+                 }
+                 fbSetToast(rename(from, to) == 0 ? _t("RENAMED") : _t("RENAME FAILED"));
++                configCacheClear(); // build 125: it may have been a game's CFG
+                 snprintf(fbKeepName, sizeof(fbKeepName), "%s", name);
+                 fbRun(FB_OP_SCAN, _t("READING"));
+             }
+@@ -2143,15 +2363,29 @@ static void fbAction(int act)
                  fbRun(FB_OP_SCAN, _t("READING"));
              }
              break;
@@ -1172,7 +1388,7 @@ index 7c1cff8..cfd3a95 100644
          case FB_ACT_CARDS: // build 86
              fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
              sfxPlay(SFX_CONFIRM);
-@@ -2522,7 +2753,7 @@ static void fbTile(int t)
+@@ -2522,7 +2756,7 @@ static void fbTile(int t)
              break;
          case FB_TILE_EDITOR:
              sfxPlay(SFX_CONFIRM);
@@ -1181,7 +1397,7 @@ index 7c1cff8..cfd3a95 100644
                  fbGridOpen = 0;
                  fbEdit(fbList[fbCursor].name);
              } else if (fbPath[0]) { // a new file in this folder
-@@ -2805,7 +3036,9 @@ void ripps2HandleInputFiles(void)
+@@ -2805,7 +3039,9 @@ void ripps2HandleInputFiles(void)
      } else if (getKeyOn(backKey)) {
          fbUp();
      } else if (getKeyOn(KEY_SQUARE)) {
@@ -1192,7 +1408,7 @@ index 7c1cff8..cfd3a95 100644
              fbList[fbCursor].marked ^= 1;
              if (fbCursor < fbCount - 1)
                  fbCursor++;
-@@ -3091,7 +3324,7 @@ static void fbDrawTip(void)
+@@ -3091,7 +3327,7 @@ static void fbDrawTip(void)
          return;
      }
      e = &fbList[fbCursor];
@@ -1201,7 +1417,7 @@ index 7c1cff8..cfd3a95 100644
          return;
      snprintf(path, sizeof(path), "%s%s", fbPath, e->name);
      if (fbCursor != fbTipCursor || strcmp(path, fbTipPath) != 0) { // moved: the rest starts again
-@@ -3189,7 +3422,7 @@ void ripps2RenderFiles(void)
+@@ -3189,7 +3425,7 @@ void ripps2RenderFiles(void)
          return;
      }
  
@@ -1210,7 +1426,7 @@ index 7c1cff8..cfd3a95 100644
          fntRenderString(uiFont, 320, 200, ALIGN_CENTER, 0, 0, fbPath[0] ? _t("EMPTY") : _t("NO DRIVES"), FB_DIM);
  
      for (i = 0; i < FB_ROWS && fbTop + i < fbCount; i++) {
-@@ -3202,9 +3435,39 @@ void ripps2RenderFiles(void)
+@@ -3202,9 +3438,39 @@ void ripps2RenderFiles(void)
          }
          if (e->marked)
              rmDrawRect(FB_X, y + 6, 6, 6, FB_PRIM(0x6A, 0x9A, 0xFF, 0x80));
@@ -1252,7 +1468,7 @@ index 7c1cff8..cfd3a95 100644
              // a drive: its label, its path on the right; the start row: START DRIVES, what it starts
              const char *main = e->kind == FB_KIND_DEVICE ? e->title : e->name, *side = e->kind == FB_KIND_DEVICE ? e->name : e->title;
              int sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, side));
-@@ -3266,10 +3529,10 @@ void ripps2RenderFiles(void)
+@@ -3266,10 +3532,10 @@ void ripps2RenderFiles(void)
          fbHint(backIcon, _t("CLOSE"), &hx, hy);
      } else {
          fb_entry_t *e = fbCount > 0 ? &fbList[fbCursor] : NULL;
@@ -1637,3 +1853,52 @@ index a623099..0532079 100644
  // build 104: the English handed in is translated here (a text already translated passes through), so the hint rows'
  // tables of English read in the chosen language; 160 bytes, a hint in UTF-8
  int ripps2HintWidth(const char *text)
+diff --git a/src/supportbase.c b/src/supportbase.c
+index 51f94c7..a584803 100644
+--- a/src/supportbase.c
++++ b/src/supportbase.c
+@@ -1419,12 +1419,15 @@ config_set_t *sbPopulateConfig(base_game_info_t *game, const char *prefix, const
+     config_set_t *config = configAlloc(0, NULL, path);
+     if (config == NULL)
+         return NULL;
+-    int configLoaded = configRead(config); // Does not matter if the config file could be loaded or not.
++    // RIPPS2 build 125: a game looked at before comes from the settings cache (its CFG and the pack's keys, as merged
++    // last time): no read at all. Otherwise it is read and merged as before, and kept.
++    int cached = configCacheGet(path, config);
++    int configLoaded = cached ? 1 : configRead(config); // Does not matter if the config file could be loaded or not.
+ 
+     // Compatibility only: filename remains the VCD identity, but an existing disc-ID config may be
+     // loaded when the primary filename config is absent. Keep the primary object if both miss so a
+     // future save creates CFG/<filename>.cfg rather than inventing an ID-keyed file.
+-    if (!configLoaded && isVcd) {
++    if (!cached && !configLoaded && isVcd) {
+         char fallbackKey[VCD_ID_MAX];
+         if (vcdExtractGameId(game->name, fallbackKey, sizeof(fallbackKey))) {
+             snprintf(path, sizeof(path), "%sCFG%s%s.cfg", prefix, sep, fallbackKey);
+@@ -1441,7 +1444,10 @@ config_set_t *sbPopulateConfig(base_game_info_t *game, const char *prefix, const
+ 
+     // RIPPS2: what the game's CFG does not say comes from the drive's metadata database (CFG/cfg.tar),
+     // as runtime-only keys: the user's own values win and a settings save never copies the database
+-    metaDbMerge(config, prefix, sep, cfgKey);
++    if (!cached) {
++        metaDbMerge(config, prefix, sep, cfgKey);
++        configCachePut(config);
++    }
+ 
+     // Get game size if not already set (deferred off the scroll path; see sbConfigStatSize). A .VCD (PS1) has
+     // no meaningful ISO size and its file lives in POPS/, not CD/DVD/, so statting the CD/DVD path always
+diff --git a/src/textures.c b/src/textures.c
+index 91b7135..c1aa4a6 100644
+--- a/src/textures.c
++++ b/src/textures.c
+@@ -810,6 +810,10 @@ static int texReadData(GSTEXTURE *texture, png_structp pngPtr, png_infop infoPtr
+     png_bytep rowBuffer;
+ 
+     texture->Mem = memalign(128, size);
++    if (!texture->Mem) { // RIPPS2 build 125: the settings cache gives its room to a picture first
++        configCacheClear();
++        texture->Mem = memalign(128, size);
++    }
+ 
+     if (!texture->Mem) {
+         texFree(texture); // free the already-allocated paletted-PNG Clut before bailing (Gemini review);
