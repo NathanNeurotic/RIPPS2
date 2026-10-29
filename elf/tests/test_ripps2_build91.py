@@ -36,8 +36,9 @@ if 'ripps2DrawLaunchDisc();' not in bg or 'if (!ripps2DrawLaunchDisc())' not in 
     fail.append('the launch light-up and its waits must draw the disc')
 if '"ICO"' not in ui or 'DISC_REVMAX' not in ui:
     fail.append("the disc is the game's ICO art, and the spin ramps to a cap")
-if 'launch_disc=spin' not in rd('misc/theme_coverflow.cfg') or 'launch_disc=pop' not in rd('misc/theme_ripgrid.cfg'):
-    fail.append('RIPFLOW spins its disc and RIPGRID pops its in')
+# build 122: RIPGRID's spins too (it popped in before)
+if 'launch_disc=spin' not in rd('misc/theme_coverflow.cfg') or 'launch_disc=spin' not in rd('misc/theme_ripgrid.cfg'):
+    fail.append('RIPFLOW and RIPGRID spin their disc in')
 if 'ripps2_launch_disc' not in opl:
     fail.append('Launch Disc must be saved')
 
