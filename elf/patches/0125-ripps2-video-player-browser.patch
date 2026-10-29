@@ -1,3 +1,16 @@
+diff --git a/.github/scripts/test_config_null_allocation.py b/.github/scripts/test_config_null_allocation.py
+index d9e2096..0dc7960 100644
+--- a/.github/scripts/test_config_null_allocation.py
++++ b/.github/scripts/test_config_null_allocation.py
+@@ -24,7 +24,7 @@ assert "int configGetStat(config_set_t *configSet, iox_stat_t *stat)\n{\n    if
+ 
+ # Check sbPopulateConfig NULL check before configRead
+ sb_alloc = supportbase_c.index("config_set_t *config = configAlloc(0, NULL, path);")
+-sb_read = supportbase_c.index("int configLoaded = configRead(config);", sb_alloc)
++sb_read = supportbase_c.index("int configLoaded = ", sb_alloc)  # build 125: the settings cache may answer first
+ sb_slice = supportbase_c[sb_alloc:sb_read]
+ assert "if (config == NULL)\n        return NULL;" in sb_slice
+ 
 diff --git a/include/config.h b/include/config.h
 index 70238f4..1c2632a 100644
 --- a/include/config.h
