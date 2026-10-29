@@ -1,5 +1,17 @@
 # RIPPS2 changelog
 
+## Build 124 (beta), changes since build 123
+
+The user's notes of 10/28.
+
+- **The picture's position for each video mode.** Settings > Interface > Screen keeps H-POS, V-POS and Overscan for
+  each Video Mode, so 1080i and 480i each keep their own centring: picking another mode brings back the position it
+  had, and moving the picture saves it for the mode on screen. A mode never set starts from the shared position, so
+  nothing moves on update, and the shared values are still written (an older build and BIBLE's early read see the mode
+  in use's). The three hints end with the same note, in all 32 languages (`tools/lang124`).
+- A test build's watchdog (`RIPPS2_HANG_WATCH`, never in a release) logs every thread's state every 2 s, to trace the
+  freeze seen in the lab on a 38-game library with the menu music on.
+
 ## Build 123 (beta), changes since build 122
 
 The user's notes of 10/28: pack the HDD's art and the MMCE's art apart (moving thousands of small files over USB has

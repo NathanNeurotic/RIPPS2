@@ -1,0 +1,204 @@
+diff --git a/Makefile b/Makefile
+index a660b57..03f1533 100644
+--- a/Makefile
++++ b/Makefile
+@@ -350,6 +350,11 @@ endif
+ ifeq ($(RIPPS2_IO_STALL_TEST),1)
+   EE_CFLAGS += -DRIPPS2_IO_STALL_TEST
+ endif
++# RIPPS2 build 124: a test build (with DEBUG) whose watchdog logs every thread's state every 2 s, to see which thread
++# runs and which waits in a hang (the full-library freeze of 10/28). Never for a release.
++ifeq ($(RIPPS2_HANG_WATCH),1)
++  EE_CFLAGS += -DRIPPS2_HANG_WATCH
++endif
+ 
+ ifeq ($(INGAMEDIAG),1)
+   ifeq ($(RETROACHIEVEMENTS),1)
+diff --git a/include/opl.h b/include/opl.h
+index 64274a7..dec2b78 100644
+--- a/include/opl.h
++++ b/include/opl.h
+@@ -355,6 +355,8 @@ extern int gVMode; // 0 - Auto, 1 - PAL, 2 - NTSC
+ extern int gXOff;
+ extern int gYOff;
+ extern int gOverscan;
++void ripps2PosRecall(int vmode); // RIPPS2 build 124: the picture's position kept for each video mode
++void ripps2PosStore(int vmode);
+ extern int gSelectButton;
+ extern int gHDDGameListCache;
+ 
+diff --git a/lng_tmpl/_base.yml b/lng_tmpl/_base.yml
+index 2d1b977..f716851 100644
+--- a/lng_tmpl/_base.yml
++++ b/lng_tmpl/_base.yml
+@@ -1794,11 +1794,11 @@ gui_strings:
+ - label: HINT_WIDESCREEN
+   string: "Draws the menu for a 16:9 TV."
+ - label: HINT_XOFF
+-  string: "Moves the menu left or right on screen."
++  string: "Moves the menu left or right on screen. Kept for each video mode."
+ - label: HINT_YOFF
+-  string: "Moves the menu up or down on screen."
++  string: "Moves the menu up or down on screen. Kept for each video mode."
+ - label: HINT_MENU_OVERSCAN
+-  string: "Shrinks the menu inward if the TV cuts off its edges."
++  string: "Shrinks the menu inward if the TV cuts off its edges. Kept for each video mode."
+ - label: HINT_APPLYGAMEID
+   string: "Shows a barcode as a game starts, so Pixel FX, RetroGEM and PS2Digital devices switch profiles."
+ - label: HINT_NEUTRINO_DEFAULTS_BUTTON
+diff --git a/src/gui.c b/src/gui.c
+index 7a3cf3d..a1a74bc 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -4118,14 +4118,22 @@ static void guiShowScreenConfig(void)
+     diaGetInt(diaDisplayConfig, UICFG_OVERSCAN, &gOverscan);
+     if (gVMode != keepVMode || gWideScreen != keepWide || gXOff != keepX || gYOff != keepY || gOverscan != keepOver)
+         guiSettingsSavePending = 1;
++    // build 124: a new video mode with the position untouched brings back that mode's own centring; a position
++    // moved here is kept for the mode the picture ends up in
++    if (gVMode != keepVMode && gXOff == keepX && gYOff == keepY && gOverscan == keepOver)
++        ripps2PosRecall(gVMode);
+     if (gVMode != keepVMode) {
+         guiFadeCurrentScreenToBlack();
+         applyConfig(-1, -1, 1);
+         if (guiConfirmVideoMode() == 0) {
+             gVMode = keepVMode;
++            gXOff = keepX; // build 124: and its position with it
++            gYOff = keepY;
++            gOverscan = keepOver;
+             applyConfig(-1, -1, 1);
+         }
+     }
++    ripps2PosStore(gVMode); // build 124
+ }
+ 
+ static int guiSettingsShowInterface(void)
+diff --git a/src/opl.c b/src/opl.c
+index 3643974..15c82c3 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -262,6 +262,31 @@ int gVMode; // 0 - Auto, 1 - PAL, 2 - NTSC
+ int gXOff;
+ int gYOff;
+ int gOverscan;
++// RIPPS2 build 124 (the user, 10/28): the picture's position for each video mode (H-POS, V-POS, Overscan), so 1080i and
++// 480i each keep their own centring. A mode never set takes the shared values (xoff, yoff, overscan), which are still
++// written as the mode in use's, so an older build and BIBLE's early read see what they always did.
++#define RIPPS2_POS_MODES 16
++static int gPosX[RIPPS2_POS_MODES], gPosY[RIPPS2_POS_MODES], gPosOver[RIPPS2_POS_MODES];
++static unsigned char gPosSet[RIPPS2_POS_MODES];
++
++void ripps2PosRecall(int vmode)
++{
++    if (vmode < 0 || vmode >= RIPPS2_POS_MODES || !gPosSet[vmode])
++        return; // never set for this mode: the current values carry over, as before
++    gXOff = gPosX[vmode];
++    gYOff = gPosY[vmode];
++    gOverscan = gPosOver[vmode];
++}
++
++void ripps2PosStore(int vmode)
++{
++    if (vmode < 0 || vmode >= RIPPS2_POS_MODES)
++        return;
++    gPosX[vmode] = gXOff;
++    gPosY[vmode] = gYOff;
++    gPosOver[vmode] = gOverscan;
++    gPosSet[vmode] = 1;
++}
+ int gSelectButton;
+ int gHDDGameListCache;
+ int gEnableSFX;
+@@ -4063,6 +4088,18 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_XOFF, &gXOff);
+             configGetInt(configOPL, CONFIG_OPL_YOFF, &gYOff);
+             configGetInt(configOPL, CONFIG_OPL_OVERSCAN, &gOverscan);
++            { // build 124: each mode's own position, where one was saved
++                int m;
++                for (m = 0; m < RIPPS2_POS_MODES; m++) {
++                    char kx[16], ky[16], ko[20];
++                    snprintf(kx, sizeof(kx), "xoff_%d", m);
++                    snprintf(ky, sizeof(ky), "yoff_%d", m);
++                    snprintf(ko, sizeof(ko), "overscan_%d", m);
++                    gPosSet[m] = configGetInt(configOPL, kx, &gPosX[m]) && configGetInt(configOPL, ky, &gPosY[m]) &&
++                                 configGetInt(configOPL, ko, &gPosOver[m]);
++                }
++                ripps2PosRecall(gVMode);
++            }
+ 
+             configGetInt(configOPL, CONFIG_OPL_BDM_CACHE, &bdmCacheSize);
+             configGetInt(configOPL, CONFIG_OPL_HDD_CACHE, &hddCacheSize);
+@@ -4802,6 +4839,21 @@ static void _saveConfig()
+         configSetInt(configOPL, CONFIG_OPL_XOFF, gXOff);
+         configSetInt(configOPL, CONFIG_OPL_YOFF, gYOff);
+         configSetInt(configOPL, CONFIG_OPL_OVERSCAN, gOverscan);
++        ripps2PosStore(gVMode); // build 124: the mode in use keeps what it shows now
++        {
++            int m;
++            for (m = 0; m < RIPPS2_POS_MODES; m++) {
++                char k[20];
++                if (!gPosSet[m])
++                    continue;
++                snprintf(k, sizeof(k), "xoff_%d", m);
++                configSetInt(configOPL, k, gPosX[m]);
++                snprintf(k, sizeof(k), "yoff_%d", m);
++                configSetInt(configOPL, k, gPosY[m]);
++                snprintf(k, sizeof(k), "overscan_%d", m);
++                configSetInt(configOPL, k, gPosOver[m]);
++            }
++        }
+         configSetInt(configOPL, CONFIG_OPL_DISABLE_DEBUG, gEnableDebug);
+         configSetInt(configOPL, CONFIG_OPL_PS2LOGO, gPS2Logo);
+         configSetInt(configOPL, CONFIG_OPL_AUTO_CREATE_VMC, gAutoCreateVmc);
+@@ -6105,8 +6157,51 @@ static void ripps2BootDisplayPeek(void)
+     }
+ }
+ 
++#ifdef RIPPS2_HANG_WATCH
++// RIPPS2 build 124, a test build only: at the top priority, every 2 s, each live thread's priority, state and what it
++// waits on (type and id), so a freeze shows which thread holds the CPU and which waits behind it
++extern void *_gp;
++static u8 hangWatchStack[0x1000] __attribute__((aligned(16)));
++
++static void hangWatch(void *arg)
++{
++    ee_thread_status_t st;
++    int id, tick = 0;
++
++    for (;;) {
++        DelayThread(2000 * 1000);
++        LOG("HANGWATCH %d s:", 2 * ++tick);
++        for (id = 1; id < 64; id++) {
++            if (ReferThreadStatus(id, &st) < 0 || (st.status & THS_DORMANT))
++                continue;
++            LOG(" [%d p%d s%x w%d/%d f%p]", id, st.current_priority, st.status, st.wait_type, st.wait_id, st.func);
++        }
++        LOG("\n");
++    }
++}
++
++static void hangWatchStart(void)
++{
++    ee_thread_t t;
++    int id;
++
++    memset(&t, 0, sizeof(t));
++    t.func = (void *)hangWatch;
++    t.stack = hangWatchStack;
++    t.stack_size = sizeof(hangWatchStack);
++    t.gp_reg = &_gp;
++    t.initial_priority = 1;
++    id = CreateThread(&t);
++    if (id >= 0)
++        StartThread(id, NULL);
++}
++#endif
++
+ static void init(void)
+ {
++#ifdef RIPPS2_HANG_WATCH
++    hangWatchStart();
++#endif
+     // default variable values
+     setDefaults();
+ 
