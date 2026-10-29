@@ -74,7 +74,7 @@ index 7a3cf3d..a1a74bc 100644
  
  static int guiSettingsShowInterface(void)
 diff --git a/src/opl.c b/src/opl.c
-index 3643974..15c82c3 100644
+index 3643974..4b63eff 100644
 --- a/src/opl.c
 +++ b/src/opl.c
 @@ -262,6 +262,31 @@ int gVMode; // 0 - Auto, 1 - PAL, 2 - NTSC
@@ -171,7 +171,7 @@ index 3643974..15c82c3 100644
 +        for (id = 1; id < 64; id++) {
 +            if (ReferThreadStatus(id, &st) < 0 || (st.status & THS_DORMANT))
 +                continue;
-+            LOG(" [%d p%d s%x w%d/%d f%p]", id, st.current_priority, st.status, st.wait_type, st.wait_id, st.func);
++            LOG(" [%d p%d s%x w%d/%d f%p]", id, st.current_priority, st.status, st.waitType, st.waitId, st.func);
 +        }
 +        LOG("\n");
 +    }
