@@ -25,7 +25,7 @@ index c707dc0..68ca5b6 100644
  
  #endif
 diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
-index 05a862f..8149304 100644
+index 05a862f..6c49fb3 100644
 --- a/src/ripps2artpack.c
 +++ b/src/ripps2artpack.c
 @@ -35,6 +35,7 @@
@@ -53,7 +53,7 @@ index 05a862f..8149304 100644
      const char *colon = strchr(probe, ':'), *slash = strrchr(probe, '/'), *at;
      char root[24], dir[40];
      int i, atRoot;
-@@ -799,6 +803,839 @@ done:
+@@ -799,6 +803,837 @@ done:
      return ok ? 1 : (stopped ? 0 : -1);
  }
  
@@ -693,8 +693,8 @@ index 05a862f..8149304 100644
 +    return 0;
 +}
 +
-+// the merged-in .tar removed (and RIPPS2's files beside it when it was an art.tar: its index, and the pack's notes when it
-+// was the pack in use). 1 gone
++// the merged-in .tar removed (and RIPPS2's files beside it when it was an art.tar: its index and the pack's notes, which
++// only an ART Pack in that folder reads, and that was this one). 1 gone
 +static int tmDelete(const char *source)
 +{
 +    const char *base = strrchr(source, '/');
@@ -709,10 +709,8 @@ index 05a862f..8149304 100644
 +        apPackDir(source, dir, sizeof(dir));
 +        snprintf(path, sizeof(path), "%sart_cache.bin", dir);
 +        remove(path);
-+        if (apSamePath(source, gRipps2ArtPack)) {
-+            snprintf(path, sizeof(path), "%s%s", dir, AP_NEW);
-+            remove(path);
-+        }
++        snprintf(path, sizeof(path), "%s%s", dir, AP_NEW);
++        remove(path);
 +    }
 +    ioWriteEnd();
 +    return ok;
@@ -733,7 +731,7 @@ index 05a862f..8149304 100644
 +    snprintf(msg, sizeof(msg), _t("Reading the archives: %s"), source);
 +    guiRenderTextScreen(msg);
 +    for (r = 0; r < 2; r++)
-+        if (tmScan(&p, tars[r], r) < 0 || (r == 1 && !tmPlan(&p))) {
++        if (strlen(tars[r]) + 5 >= sizeof(tmp) || tmScan(&p, tars[r], r) < 0 || (r == 1 && !tmPlan(&p))) { // (+5: ".tmp")
 +            snprintf(msg, sizeof(msg), _t("%s could not be read as a .tar archive. Nothing was changed."), tars[r]);
 +            guiMsgBoxSound(SFX_ERROR);
 +            guiMsgBox(msg, 0, NULL);
@@ -893,7 +891,7 @@ index 05a862f..8149304 100644
  static int apSpeedCmp(const void *a, const void *b)
  {
      return apSrc[*(const int *)b].kbps - apSrc[*(const int *)a].kbps;
-@@ -806,10 +1643,10 @@ static int apSpeedCmp(const void *a, const void *b)
+@@ -806,10 +1641,10 @@ static int apSpeedCmp(const void *a, const void *b)
  
  int ripps2ArtPackDialog(void)
  {
@@ -907,7 +905,7 @@ index 05a862f..8149304 100644
      int wasTar = gEnableArtTar; // Artwork > .tar art as it was: put back when a build does not finish
      clock_t start;
  
-@@ -853,10 +1690,14 @@ int ripps2ArtPackDialog(void)
+@@ -853,10 +1688,14 @@ int ripps2ArtPackDialog(void)
                   apSrc[order[i]].root, rate, room);
          list[i] = items[i];
      }
@@ -924,7 +922,7 @@ index 05a862f..8149304 100644
  
      result = 0;
      if (n == 0 && !removable) {
-@@ -869,10 +1710,15 @@ int ripps2ArtPackDialog(void)
+@@ -869,10 +1708,15 @@ int ripps2ArtPackDialog(void)
              guiMsgBox(_t("There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back."), 0, NULL);
          goto out;
      }
@@ -942,7 +940,7 @@ index 05a862f..8149304 100644
          snprintf(msg, sizeof(msg), _t("Remove the ART Pack in %s? The ART folders stay as they are."), gRipps2ArtPack);
          if (!guiMsgBox(msg, 1, NULL))
              goto out;
-@@ -964,6 +1810,8 @@ int ripps2ArtPackDialog(void)
+@@ -964,6 +1808,8 @@ int ripps2ArtPackDialog(void)
          guiMsgBoxSound(SFX_ERROR);
      }
      guiMsgBox(msg, 0, NULL);
