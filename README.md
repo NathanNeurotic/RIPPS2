@@ -125,10 +125,10 @@ RIPPS2 is voiced like a PS2 that never left the living room: **Sony's own consol
 
 | Music | Track | From | Get it |
 |---|---|---|---|
+| `bgm_00 Menu.wav` | **Menu** (the clock, 5:04) | PS2 system music (Sony): the browser's main menu, the piece the clock plays | **Settings > Audio > BIOS Music > THE MENU MUSIC**, from this console's own BIOS; it plays when no other track is picked |
+| `bgm_01 Red Screen.wav` | **Red Screen** (the disc warning, 5:31) | PS2 system music (Sony): the red "insert a disc" screen's piece | **Settings > Audio > BIOS Music > THE RED SCREEN MUSIC** (or **BOTH** for the two at once) |
 | `bgm_01 Slideshow.ogg` | **Slideshow (Daytime)** | the Wii's [News Channel](https://en.wikipedia.org/wiki/News_Channel_(Wii)), by [Kazumi Totaka](https://en.wikipedia.org/wiki/Kazumi_Totaka) (Nintendo, 2006): the suggestion RIPPS2 was paced to | your own copy, converted in Audio Studio |
 | `bgm_02 Details.ogg` | **Details** | x-Radar Portable, [PSP system music](https://en.wikipedia.org/wiki/PlayStation_Portable_system_software) (Sony, 2010) | your own copy, converted in Audio Studio |
-| `bgm_03 Menu.ogg` | **Menu** | PS2 system music (Sony), the console's menu theme | your own copy, converted in Audio Studio |
-
 ## Covers from one file (ART Pack)
 
 From build 118, **Settings > Game Sources > Cache > ART Pack** packs the `ART` folder of every started drive into one `art.tar` in the `ART` folder of the drive you pick. RIPPS2 measures how fast each drive reads its own art and lists the fastest first, so X takes it (an SD2PSX's SD, say). The pictures go in as they are (PNG and JPG are compressed already: the tar only bundles them, and a PC opens it as any tar), and the `ART` folders are left alone. From then on covers load from that one file through one index (written with the pack, so the first boot needs no scan of it), and a game the pack was built for never has its `ART` folder asked one picture at a time, missing pictures included: less reading on the drive the music streams from, and art that keeps up with the cursor. Art RIPPS2 fetches or shoots later shows at once; art you copy in on a PC shows after you build the pack again. You can copy `art.tar` into another drive's `ART` folder with Memory Files, but build it on the drive you browse from. The same button removes the pack.
