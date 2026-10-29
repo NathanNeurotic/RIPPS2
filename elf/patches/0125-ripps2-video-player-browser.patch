@@ -1935,7 +1935,7 @@ index 91b7135..c1aa4a6 100644
      if (!texture->Mem) {
          texFree(texture); // free the already-allocated paletted-PNG Clut before bailing (Gemini review);
 diff --git a/src/themes.c b/src/themes.c
-index b1a9f4e..389ce02 100644
+index b1a9f4e..cc50646 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -4185,6 +4185,14 @@ static int findMenuPrev(struct menu_list *menu)
@@ -1979,3 +1979,13 @@ index b1a9f4e..389ce02 100644
      u64 col = hintFade(elem->color, hintA), iconCol = hintFade(gDefaultCol, hintA);
  
      if (elem->aligned)
+@@ -6746,7 +6764,8 @@ static int thmLoad(const char *themePath)
+         // auto hide itself"): sidebar_left=list keeps Left / Right and L1 / R1 the list's; sidebar_hide=1 keeps the bar
+         // out of sight until Circle brings it out
+         newT->sbLeftList = configGetStr(themeConfig, "sidebar_left", &v) && v != NULL && !strcasecmp(v, "list");
+-        newT->sbAutoHide = configGetInt(themeConfig, "sidebar_hide", &intValue) && intValue == 1;
++        newT->sbAutoHide = configGetInt(themeConfig, "sidebar_hide", &intValue) ? intValue == 1 : newT->catLegacy; // build 125 (the user,
++        // 10/29): a theme made for Open PS2 Loader keeps the sidebar out of sight until Circle, unless it says otherwise
+         // build 117 (the user, 10/27): flowtilt=1, a coverflow theme's Up / Down (and the left stick) tip the centre case
+         // instead of changing the source, the sidebar on (its drawer has the sources)
+         newT->flowTilt = configGetInt(themeConfig, "flowtilt", &intValue) && intValue == 1;
