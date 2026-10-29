@@ -112,6 +112,151 @@ index d71c0fc..82ebd99 100644
  int fntCalcDimensions(int id, const char *str)
  {
      int w;
+diff --git a/src/ripps2art.c b/src/ripps2art.c
+index e81cf41..0ed3322 100644
+--- a/src/ripps2art.c
++++ b/src/ripps2art.c
+@@ -6,7 +6,8 @@
+   drive's ART folder as <ID>_COV.png, where RIPPS2 already looks for covers. Nothing else is touched:
+   a game that already has a cover keeps it. The collection's covers are 512x736 JPEGs and RIPPS2 reads
+   PNG only, so each one is decoded here (libjpeg-turbo, its DCT scaling does most of the shrink) and
+-  saved as OPL's covers are: 140x200, 8-bit (256 colours by median cut, dithered), about 20 KB.
++  saved as OPL's covers are: 140x200, 8-bit (256 colours by median cut, dithered), about 20 KB. Build 125 (the user,
++  10/29: OPL's size reads crunchy on an HD screen): HD is offered first, 280x400 from the same picture, about 70 KB.
+ 
+   Each source is asked where its covers live by drawing nothing: texDiscoverLoad in probe mode reports
+   the path the source would try (texSetProbe), so every drive type, HDD and network included, gets
+@@ -438,8 +439,14 @@ tls:
+ }
+ 
+ // ---------------------------------------------------------------- JPEG in, PNG out
+-#define ART_COV_W 140 // OPL's cover size (themes.c THM_COVER_W)
+-#define ART_COV_H 200
++// build 125: Standard is OPL's cover size (themes.c THM_COVER_W), HD twice it each way; the run's choice in artCovW / H
++#define ART_STD_W 140
++#define ART_STD_H 200
++#define ART_HD_W 280
++#define ART_HD_H 400
++static int artCovW = ART_STD_W, artCovH = ART_STD_H;
++#define ART_COV_W artCovW
++#define ART_COV_H artCovH
+ 
+ struct artJpegErr {
+     struct jpeg_error_mgr pub;
+@@ -451,7 +458,7 @@ static void artJpegFail(j_common_ptr c)
+     longjmp(((struct artJpegErr *)c->err)->jb, 1);
+ }
+ 
+-// The cover as 140x200 RGB in out, or 0 for a picture libjpeg will not read
++// The cover as ART_COV_W x ART_COV_H RGB in out (Standard or HD), or 0 for a picture libjpeg will not read
+ static int artDecode(const unsigned char *jpg, int len, unsigned char *out)
+ {
+     static struct jpeg_decompress_struct d;
+@@ -471,7 +478,7 @@ static int artDecode(const unsigned char *jpg, int len, unsigned char *out)
+     jpeg_mem_src(&d, (unsigned char *)jpg, len);
+     jpeg_read_header(&d, TRUE);
+     d.out_color_space = JCS_RGB;
+-    d.scale_num = 1; // the smallest 1/2^n the decoder can give that still covers 140x200
++    d.scale_num = 1; // the smallest 1/2^n the decoder can give that still covers the cover size
+     d.scale_denom = 1;
+     while (d.scale_denom < 8 && d.image_width / (d.scale_denom * 2) >= ART_COV_W && d.image_height / (d.scale_denom * 2) >= ART_COV_H)
+         d.scale_denom *= 2;
+@@ -487,7 +494,7 @@ static int artDecode(const unsigned char *jpg, int len, unsigned char *out)
+     jpeg_finish_decompress(&d);
+     jpeg_destroy_decompress(&d);
+ 
+-    // the rest of the way by averaging boxes (256x368 to 140x200 for the collection's covers)
++    // the rest of the way by averaging boxes (256x368 to 140x200, or 512x736 to 280x400, for the collection's covers)
+     for (y = 0; y < ART_COV_H; y++) {
+         unsigned int y0 = y * sh / ART_COV_H, y1 = (y + 1) * sh / ART_COV_H;
+         if (y1 <= y0)
+@@ -536,7 +543,7 @@ typedef struct {
+     int chan, range; // its widest channel and how wide
+ } art_box_t;
+ 
+-static void artBoxMeasure(const unsigned char *rgb, const unsigned short *order, art_box_t *b)
++static void artBoxMeasure(const unsigned char *rgb, const unsigned int *order, art_box_t *b)
+ {
+     int mn[3] = {255, 255, 255}, mx[3] = {0, 0, 0}, i, c;
+     for (i = b->lo; i < b->hi; i++) {
+@@ -558,10 +565,10 @@ static void artBoxMeasure(const unsigned char *rgb, const unsigned short *order,
+ }
+ 
+ // rgb (ART_PIX pixels) as palette indexes in idx; the palette's size
+-static int artQuantize(const unsigned char *rgb, unsigned short *order, unsigned short *tmp, unsigned char *idx, png_color *pal)
++static int artQuantize(const unsigned char *rgb, unsigned int *order, unsigned int *tmp, unsigned char *idx, png_color *pal)
+ {
+     static art_box_t box[256];
+-    static short errA[(ART_COV_W + 2) * 3], errB[(ART_COV_W + 2) * 3];
++    static short errA[(ART_HD_W + 2) * 3], errB[(ART_HD_W + 2) * 3]; // build 125: HD's 112,000 pixels: ints, not shorts
+     short *cur = errA, *nxt = errB, *sw;
+     int nb = 1, i, k, x, y, c;
+ 
+@@ -653,7 +660,7 @@ static int artQuantize(const unsigned char *rgb, unsigned short *order, unsigned
+     return nb;
+ }
+ 
+-// 140x200 RGB as an 8-bit palette PNG in out; its length, or 0
++// the cover RGB as an 8-bit palette PNG in out; its length, or 0
+ static int artEncode(const unsigned char *rgb, unsigned char *out, int cap)
+ {
+     static art_mem_t m;
+@@ -664,10 +671,10 @@ static int artEncode(const unsigned char *rgb, unsigned char *out, int cap)
+     unsigned char *idx;
+     int y, n;
+ 
+-    if ((work = (unsigned char *)malloc(ART_PIX * 5)) == NULL)
++    if ((work = (unsigned char *)malloc(ART_PIX * 9)) == NULL)
+         return 0;
+-    idx = work + ART_PIX * 4; // after order[] and tmp[], two shorts a pixel each
+-    n = artQuantize(rgb, (unsigned short *)work, (unsigned short *)work + ART_PIX, idx, pal);
++    idx = work + ART_PIX * 8; // after order[] and tmp[], an int a pixel each
++    n = artQuantize(rgb, (unsigned int *)work, (unsigned int *)work + ART_PIX, idx, pal);
+     png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+     info = png != NULL ? png_create_info_struct(png) : NULL;
+     if (png == NULL || info == NULL) {
+@@ -735,7 +742,7 @@ void ripps2ArtDownload(void)
+     artCount = 0;
+     artTargets = (art_target_t *)malloc(sizeof(art_target_t) * ART_MAX_GAMES);
+     body = (unsigned char *)malloc(ART_MAX_BYTES);
+-    rgb = (unsigned char *)malloc(ART_COV_W * ART_COV_H * 3);
++    rgb = (unsigned char *)malloc(ART_HD_W * ART_HD_H * 3); // either size
+     if (artTargets == NULL || body == NULL || rgb == NULL) {
+         free(artTargets);
+         free(body);
+@@ -759,6 +766,23 @@ void ripps2ArtDownload(void)
+         return;
+     }
+ 
++    // build 125: the size, HD first; a game with a cover keeps it either way
++    {
++        int pick;
++        guiMsgBoxStartOption(_t("STANDARD"));
++        pick = guiMsgBox(_t("Download the covers in HD (280 x 400)? Sharper on an HD screen, about 70 KB each. START: Standard (140 x 200, as Open PS2 Loader's), about 20 KB each. A game that already has a cover keeps it."),
++                         1, NULL);
++        if (pick == 0) {
++            free(artTargets);
++            free(body);
++            free(rgb);
++            artTargets = NULL;
++            return;
++        }
++        artCovW = pick == 2 ? ART_STD_W : ART_HD_W;
++        artCovH = pick == 2 ? ART_STD_H : ART_HD_H;
++    }
++
+     artStage = _t("Starting the network...");
+     artDraw();
+     if (netLoadInitModules(NET_PROTO_SMB) != 0) {
+@@ -795,7 +819,7 @@ void ripps2ArtDownload(void)
+         }
+         saved = 0;
+         if (status == 200 && len > 4 && body[0] == 0xFF && body[1] == 0xD8) {
+-            // the JPEG becomes a 140x200 8-bit PNG in the same buffer (the JPEG is done with by then)
++            // the JPEG becomes an 8-bit PNG of the chosen size in the same buffer (the JPEG is done with by then)
+             if (!artDecode(body, len, rgb))
+                 snprintf(err, sizeof(err), _t("%s: the picture would not decode."), t->serial);
+             else if ((len = artEncode(rgb, body, ART_MAX_BYTES)) <= 0)
 diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
 index 6c49fb3..775bc15 100644
 --- a/src/ripps2artpack.c
@@ -554,7 +699,7 @@ index 6c49fb3..775bc15 100644
  {
      char paths[TM_PICK][256], msg[400];
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 7c1cff8..2b1aaf9 100644
+index 7c1cff8..cfd3a95 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
 @@ -17,6 +17,13 @@
@@ -1065,16 +1210,18 @@ index 7c1cff8..2b1aaf9 100644
          fntRenderString(uiFont, 320, 200, ALIGN_CENTER, 0, 0, fbPath[0] ? _t("EMPTY") : _t("NO DRIVES"), FB_DIM);
  
      for (i = 0; i < FB_ROWS && fbTop + i < fbCount; i++) {
-@@ -3202,9 +3435,37 @@ void ripps2RenderFiles(void)
+@@ -3202,9 +3435,39 @@ void ripps2RenderFiles(void)
          }
          if (e->marked)
              rmDrawRect(FB_X, y + 6, 6, 6, FB_PRIM(0x6A, 0x9A, 0xFF, 0x80));
 -        fbGlyph(e->kind, FB_X + 12, y + 1, cur ? FB_PRIM(0x9C, 0xB8, 0xFF, 0x80) : FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
-+        if (e->kind == FB_KIND_TAR) // build 125: a blue folder, lighter than a folder, a band across it
++        // build 125: a .tar is a blue folder, lighter than a folder, a band across it; so is the folder row inside one
++        int tarRow = e->kind == FB_KIND_TAR || (e->kind == FB_KIND_HERE && fbInTar());
++        if (tarRow)
 +            fbGlyph(FB_KIND_DIR, FB_X + 12, y + 1, cur ? FB_PRIM(0xA8, 0xD8, 0xFF, 0x80) : FB_PRIM(0x38, 0xA0, 0xF0, 0x80));
 +        else
 +            fbGlyph(e->kind == FB_KIND_HERE ? FB_KIND_DIR : e->kind, FB_X + 12, y + 1, cur ? FB_PRIM(0x9C, 0xB8, 0xFF, 0x80) : FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
-+        if (e->kind == FB_KIND_TAR)
++        if (tarRow)
 +            rmDrawRect(FB_X + 12, y + 9, 16, 2, FB_PRIM(0x03, 0x08, 0x22, 0x80));
          int tx = FB_X + 36;
 -        if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START) {
@@ -1105,7 +1252,7 @@ index 7c1cff8..2b1aaf9 100644
              // a drive: its label, its path on the right; the start row: START DRIVES, what it starts
              const char *main = e->kind == FB_KIND_DEVICE ? e->title : e->name, *side = e->kind == FB_KIND_DEVICE ? e->name : e->title;
              int sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, side));
-@@ -3266,10 +3527,10 @@ void ripps2RenderFiles(void)
+@@ -3266,10 +3529,10 @@ void ripps2RenderFiles(void)
          fbHint(backIcon, _t("CLOSE"), &hx, hy);
      } else {
          fb_entry_t *e = fbCount > 0 ? &fbList[fbCursor] : NULL;
