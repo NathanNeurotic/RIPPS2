@@ -1,6 +1,6 @@
-"""Build 122 (the user, 10/28: the boot sound sooner): audio comes up right after _loadConfig, once applyConfig's
-bgmMute / bgmUnMute are done, instead of after the fonts and the languages at the end of init. Never before applyConfig
-(build 121 stopped on the sky that way: audsrv from two threads).
+"""Build 122 (the user, 10/28): the default theme and RIPGRID show no disc on their main page, so the game's disc spins
+in as it launches there too, as on RIPFLOW. Bringing audio up right after _loadConfig was tried in this build and gave
+the boot sound no sooner in the lab (3.90 s after the sky either way), so audio still comes up at the end of init.
 
 Static checks on the patched tree."""
 import os
@@ -18,23 +18,14 @@ def body(text, head):
     return text[i:text.index('\n}\n', i) + 3]
 
 
-opl = rd('src/opl.c')
-load = body(opl, 'static void _loadConfig()')
-if 'sfxBootStart();' in load:
-    fail.append('_loadConfig: no audio start in it (applyConfig\'s bgmMute / bgmUnMute and the IO worker\'s send met in audsrv)')
-init = body(opl, 'static void init(void)')
-cfg = init.find('_loadConfig();')
-early = init.find('sfxBootStart();', cfg)
-fonts = init.find('lngInitFallbackFont();')
-if cfg < 0 or early < 0 or fonts < 0 or not cfg < early < fonts:
-    fail.append('init: audio up right after _loadConfig, before the fonts and the languages')
-if init.count('sfxBootStart();') != 2:
-    fail.append('init: the end-of-init call stays for a boot with the settings skipped (START)')
+for cfg in ('misc/conf_theme_OPL.cfg', 'misc/theme_ripgrid.cfg', 'misc/theme_coverflow.cfg'):
+    if 'launch_disc=spin' not in (root / cfg).read_text(encoding='utf-8').splitlines():
+        fail.append(cfg + ': launch_disc=spin (no disc on the main page, so it spins in at a launch)')
 
-snd = rd('src/sound.c')
-start = body(snd, 'void sfxBootStart(void)')
-if 'static int done' not in start:
-    fail.append('sfxBootStart: runs once (the second call is a no-op)')
+opl = rd('src/opl.c')
+init = body(opl, 'static void init(void)')
+if init.count('sfxBootStart();') != 1 or init.find('sfxBootStart();') < init.find('lngAddHomeLanguages();'):
+    fail.append('init: audio up once, at its end (moving it earlier gained nothing)')
 
 if fail:
     print('\n'.join(fail))

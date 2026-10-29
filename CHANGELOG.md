@@ -2,11 +2,14 @@
 
 ## Build 122 (beta), changes since build 121
 
-The user's note of 10/28: the boot sound sooner after the pillars.
+The user's notes of 10/28.
 
-- **Audio up right after the settings.** The sound driver now starts as soon as the settings are applied, before
-  RIPPS2 looks for its fonts and languages, instead of at the very end of start-up. It still waits for the video mode
-  change to finish its volume steps (starting it any earlier stopped build 121's boot on the sky).
+- **The disc spins in on every built-in theme.** The default theme and RIPGRID show no disc on their main page, so a
+  game's disc now spins in as it launches there too, as it does on RIPFLOW (RIPGRID's popped in and held). Flow and
+  Grid > Launch Disc still picks Off, Pop In or Spin for any theme. Adapt and Adapt Rx do the same from theme edition 122.
+- Tried and left out: bringing audio up right after the settings, before the fonts and languages. In the lab the
+  boot sound came at the same moment either way (3.90 s after the sky, the copy on the card), so the wait is not in
+  that part of start-up and audio still comes up at its end.
 
 ## Build 121 (beta, v1.2.1-beta), changes since build 120
 

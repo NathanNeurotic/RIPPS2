@@ -1,0 +1,40 @@
+diff --git a/misc/conf_theme_OPL.cfg b/misc/conf_theme_OPL.cfg
+index 54a2ba9..0c29e29 100755
+--- a/misc/conf_theme_OPL.cfg
++++ b/misc/conf_theme_OPL.cfg
+@@ -1,3 +1,6 @@
++# RIPPS2 build 122 (the user, 10/28): the main page shows no disc, so the game's disc spins in as it launches (Flow and
++# Grid > Launch Disc can change it)
++launch_disc=spin
+ main0:
+ 	type=Background
+ 	pattern=BG
+diff --git a/misc/theme_ripgrid.cfg b/misc/theme_ripgrid.cfg
+index 3f257e4..1952991 100644
+--- a/misc/theme_ripgrid.cfg
++++ b/misc/theme_ripgrid.cfg
+@@ -1,7 +1,7 @@
+ # RIPPS2 build 91: <RIPGRID>, built in. The theme pack's thm_RIPGRID (RIPPS2-themes) with RIPPS2's own
+-# images in place of the folder's (the screenshots go without the pack's SCR43 frame). The launch disc
+-# pops in as a game starts; RIPFLOW's spins.
+-launch_disc=pop
++# images in place of the folder's (the screenshots go without the pack's SCR43 frame). Build 122 (the user, 10/28):
++# the grid shows no disc, so the game's disc spins in as it launches, as RIPFLOW's does (it popped in before).
++launch_disc=spin
+ # RIPPS2 build 96: L2 / R2 turn the grid's pages (Controller Settings > Page Buttons can change it)
+ page_buttons=l2r2
+ # build 102: the Standard glyph set (L3 and R3 included); Controller Settings > Hints and Glyphs can change it
+diff --git a/src/sound.c b/src/sound.c
+index 55ae996..1954394 100644
+--- a/src/sound.c
++++ b/src/sound.c
+@@ -1169,7 +1169,8 @@ void ripps2QuietBootMark(int bootSoundOn)
+ // (deferredAudioInit), so no sound file is read here (build 95). Build 121 tried it with the settings read, before
+ // applyConfig: the boot stopped on the sky in the lab (a boot sound on the card), as applyConfig's bgmMute / bgmUnMute
+ // then called audsrv from this thread while the IO worker sent the boot sound through the same RPC client. It stays at
+-// the end of init, after applyConfig.
++// the end of init, after applyConfig. Build 122 moved it to right after _loadConfig: the lab boot sound came at the
++// same moment (3.90 s after the sky either way), so the wait is not in the fonts and languages, and it stays here.
+ void sfxBootStart(void)
+ {
+     static int done = 0;
