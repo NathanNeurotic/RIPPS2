@@ -24,6 +24,30 @@ index 9818510..c82e340 100644
  // build 85: what a PS1 handoff is about to do, written to mc0:/RIPPS2/LAUNCH.TXT for a tester to read back
  // in Memory Files (the file, its size and CRC, its argv, Sony's POPS files or Ember's BIOS beside it, the
  // cards' POPSTARTER folders, the settings that steer it). Best effort: never stops a launch.
+diff --git a/include/ripps2artpack.h b/include/ripps2artpack.h
+index 68ca5b6..073e079 100644
+--- a/include/ripps2artpack.h
++++ b/include/ripps2artpack.h
+@@ -26,4 +26,19 @@ int ripps2ArtKeyOf(const char *name, char *key, int size);
+ // Pack's settings changed (the caller saves them)
+ int ripps2TarMergeInto(const char *target, const char *here);
+ 
++// build 125: a .tar as a folder in Memory Files. Its members (RIPPS2's list of games left out), at most max; -1: not a tar
++typedef struct
++{
++    char name[48];
++    unsigned int size;
++} ripps2_tar_entry_t;
++int ripps2TarList(const char *tar, ripps2_tar_entry_t *out, int max);
++// one member written out as the file dst (the first of its name, as RIPPS2 reads it); 1 written
++int ripps2TarExtract(const char *tar, const char *member, const char *dst);
++// files of dir (ending in '/') put into the .tar, pictures made ready first; on the GUI thread, with its own screens.
++// The members that went in (-1: the .tar was not changed), what was refused in *refused, a line for a toast in report
++int ripps2TarAddFiles(const char *tar, const char *dir, char (*names)[128], int n, int *refused, char *report, int reportSize);
++// members taken out (the archive written again without them); how many, -1: not changed
++int ripps2TarRemove(const char *tar, char (*names)[128], int n);
++
+ #endif
 diff --git a/src/fntsys.c b/src/fntsys.c
 index d71c0fc..82ebd99 100644
 --- a/src/fntsys.c
@@ -88,11 +112,452 @@ index d71c0fc..82ebd99 100644
  int fntCalcDimensions(int id, const char *str)
  {
      int w;
+diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
+index 6c49fb3..775bc15 100644
+--- a/src/ripps2artpack.c
++++ b/src/ripps2artpack.c
+@@ -36,6 +36,9 @@
+ #include <sys/stat.h>
+ #include <kernel.h>
+ #include <ps2sdkapi.h> // build 123: lseek64, a merge over 2 GB
++#include <malloc.h>
++#include <setjmp.h>
++#include <png.h> // build 125: a picture made ready for a .tar (a BMP, or one too big), written as a PNG
+ 
+ #include "include/opl.h"
+ #include "include/gui.h"
+@@ -1603,6 +1606,426 @@ out:
+     return changed;
+ }
+ 
++// ---------------------------------------------------------------- build 125: a .tar as a folder
++// The user, 10/29: a .tar shows in Memory Files as a blue folder. Opened, it lists what it holds. Files pasted into it go
++// in through the merge above (a member of the same name is replaced), pictures made ready first: PNG and JPG as they
++// are (RIPPS2 reads both) unless bigger than 512 on a side (shrunk to fit, written as a full-colour PNG), a BMP made a
++// PNG, any other kind of picture refused (nothing would read it); other files (a CFG pack's .cfg) as they are. Copied
++// out, a member is written as a file; deleted, the archive is written again without it. Every change is the merge's own
++// write: beside the archive, swapped in only once it is whole.
++
++#define TB_MAX_FILE (16 * 1024 * 1024)
++#define TB_ART_SIDE 512 // what the art loader keeps of a picture: anything bigger is shrunk at every load
++
++static const char *tbBase(const char *name)
++{
++    const char *b = strrchr(name, '/');
++    return b != NULL ? b + 1 : name;
++}
++
++int ripps2TarList(const char *tar, ripps2_tar_entry_t *out, int max)
++{
++    tm_plan_t p;
++    int i, n = 0;
++
++    memset(&p, 0, sizeof(p));
++    if (tmScan(&p, tar, 0) < 0) {
++        tmFree(&p);
++        return -1;
++    }
++    for (i = 0; i < p.count && n < max; i++) {
++        if (p.m[i].drop == 2)
++            continue;
++        snprintf(out[n].name, sizeof(out[n].name), "%s", tbBase(p.m[i].name));
++        out[n].size = p.m[i].size;
++        n++;
++    }
++    tmFree(&p);
++    return n;
++}
++
++int ripps2TarExtract(const char *tar, const char *member, const char *dst)
++{
++    tm_plan_t p;
++    unsigned char *buf = NULL;
++    unsigned int left;
++    int i, fd = -1, out = -1, ok = 0;
++
++    memset(&p, 0, sizeof(p));
++    if (tmScan(&p, tar, 0) < 0)
++        goto done;
++    for (i = 0; i < p.count; i++)
++        if (p.m[i].drop != 2 && !strcasecmp(tbBase(p.m[i].name), member))
++            break;
++    if (i == p.count || (buf = malloc(TM_CHUNK)) == NULL || (fd = open(tar, O_RDONLY)) < 0)
++        goto done;
++    if (lseek64(fd, p.m[i].head + 512, SEEK_SET) != (long long)(p.m[i].head + 512) ||
++        (out = open(dst, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
++        goto done;
++    for (left = p.m[i].size; left > 0;) {
++        int k = left > TM_CHUNK ? TM_CHUNK : (int)left;
++        if (!tmReadAll(fd, buf, k) || write(out, buf, k) != k)
++            break;
++        left -= k;
++    }
++    ok = left == 0;
++done:
++    if (out >= 0) {
++        close(out);
++        if (!ok)
++            remove(dst);
++    }
++    if (fd >= 0)
++        close(fd);
++    free(buf);
++    tmFree(&p);
++    return ok;
++}
++
++// the plan written beside target and swapped in, its index beside it, the art engine told: tmRun's steps without its
++// questions. 1 done; else tmRun's codes (0 stopped, -1 not written, -2 read short, -3 / -4 a rename)
++static int tbCommit(tm_plan_t *p, const char *const tars[2], const char *target)
++{
++    char tmp[260], old[260];
++    int r, wasTar = gEnableArtTar;
++
++    snprintf(tmp, sizeof(tmp), "%s.tmp", target);
++    gEnableArtTar = 0;
++    tarInvalidate(TAR_KIND_ART);
++    ioBlockOps(1);
++    tmBegan = clock();
++    tmShown = target;
++    if (!ioWriteBegin())
++        r = -1;
++    else {
++        r = tmWrite(p, tars, tmp, tmProgress);
++        if (r == 1) {
++            r = tmSwap(target, tmp, old, sizeof(old));
++            if (r == 1)
++                tmWriteIndex(p, target);
++            else
++                r = r == -1 ? -3 : -4;
++        }
++        ioWriteEnd();
++    }
++    ioBlockOps(0);
++    if (r == 1 && apSamePath(gRipps2ArtPack, target)) {
++        gRipps2ArtPackCount = p->out;
++        gRipps2ArtPackKb = (int)(p->outBytes >> 10);
++    }
++    gEnableArtTar = wasTar;
++    ripps2ArtPackApplySettings();
++    tarInvalidate(TAR_KIND_ART);
++    artIndexInvalidate();
++    cacheInvalidateFailMemo();
++    return r;
++}
++
++static unsigned char *tbReadWhole(const char *path, int *len)
++{
++    int fd = open(path, O_RDONLY);
++    long long size;
++    unsigned char *b;
++
++    if (fd < 0)
++        return NULL;
++    size = lseek64(fd, 0, SEEK_END);
++    if (size <= 0 || size > TB_MAX_FILE || lseek64(fd, 0, SEEK_SET) != 0 || (b = malloc((int)size)) == NULL) {
++        close(fd);
++        return NULL;
++    }
++    if (!tmReadAll(fd, b, (int)size)) {
++        free(b);
++        close(fd);
++        return NULL;
++    }
++    close(fd);
++    *len = (int)size;
++    return b;
++}
++
++static int tbHasExt(const char *name, const char *ext)
++{
++    const char *dot = strrchr(name, '.');
++    return dot != NULL && !strcasecmp(dot + 1, ext);
++}
++
++static unsigned int tbLe(const unsigned char *b, int n)
++{
++    unsigned int v = 0;
++    while (n-- > 0)
++        v = (v << 8) | b[n];
++    return v;
++}
++
++// a BMP of 24 or 32 bits, not compressed: RGBA with the GS's alpha (opaque), memalign'd; NULL for any other
++static unsigned char *tbBmp(const unsigned char *b, int len, int *w, int *h)
++{
++    int off, W, H, bpp, comp, flip = 1, stride, x, y;
++    unsigned char *out;
++
++    if (len < 54 || b[0] != 'B' || b[1] != 'M')
++        return NULL;
++    off = (int)tbLe(b + 10, 4);
++    W = (int)tbLe(b + 18, 4);
++    H = (int)tbLe(b + 22, 4);
++    bpp = (int)tbLe(b + 28, 2);
++    comp = (int)tbLe(b + 30, 4);
++    if (H < 0) {
++        H = -H;
++        flip = 0;
++    }
++    if (W <= 0 || H <= 0 || W > 4096 || H > 4096 || (bpp != 24 && bpp != 32) || (comp != 0 && comp != 3))
++        return NULL;
++    stride = (W * (bpp / 8) + 3) & ~3;
++    if (off < 54 || (long long)off + (long long)stride * H > len || (out = memalign(64, W * H * 4)) == NULL)
++        return NULL;
++    for (y = 0; y < H; y++) {
++        const unsigned char *row = b + off + (flip ? H - 1 - y : y) * stride;
++        unsigned char *d = out + y * W * 4;
++        for (x = 0; x < W; x++, row += bpp / 8, d += 4) {
++            d[0] = row[2];
++            d[1] = row[1];
++            d[2] = row[0];
++            d[3] = 0x80;
++        }
++    }
++    *w = W;
++    *h = H;
++    return out;
++}
++
++// at most side on a side, each pixel the average of those it covers (the picture itself when it fits)
++static unsigned char *tbShrink(unsigned char *src, int w, int h, int side, int *nw, int *nh)
++{
++    unsigned char *out;
++    int W, H, x, y;
++
++    if (w <= side && h <= side) {
++        *nw = w;
++        *nh = h;
++        return src;
++    }
++    W = w >= h ? side : w * side / h;
++    H = w >= h ? h * side / w : side;
++    if (W < 1)
++        W = 1;
++    if (H < 1)
++        H = 1;
++    if ((out = memalign(64, W * H * 4)) == NULL)
++        return NULL;
++    for (y = 0; y < H; y++)
++        for (x = 0; x < W; x++) {
++            int x0 = x * w / W, x1 = (x + 1) * w / W, y0 = y * h / H, y1 = (y + 1) * h / H, s[4] = {0, 0, 0, 0}, n = 0, u, v, c;
++            for (v = y0; v < y1; v++)
++                for (u = x0; u < x1; u++, n++)
++                    for (c = 0; c < 4; c++)
++                        s[c] += src[(v * w + u) * 4 + c];
++            for (c = 0; c < 4; c++)
++                out[(y * W + x) * 4 + c] = (unsigned char)(s[c] / (n > 0 ? n : 1));
++        }
++    *nw = W;
++    *nh = H;
++    return out;
++}
++
++typedef struct
++{
++    unsigned char *b;
++    int n, cap;
++} tb_mem_t;
++
++static void tbPngWrite(png_structp png, png_bytep d, png_size_t len)
++{
++    tb_mem_t *m = (tb_mem_t *)png_get_io_ptr(png);
++    if (m->n + (int)len > m->cap) {
++        int cap = (m->n + (int)len) * 2;
++        unsigned char *nb = realloc(m->b, cap);
++        if (nb == NULL)
++            png_error(png, "out of memory");
++        m->b = nb;
++        m->cap = cap;
++    }
++    memcpy(m->b + m->n, d, len);
++    m->n += (int)len;
++}
++
++static void tbPngFlush(png_structp png)
++{
++    (void)png;
++}
++
++// RGBA with the GS's alpha as a PNG in memory (RGB when every pixel is opaque); NULL on a failure
++static unsigned char *tbPng(const unsigned char *rgba, int w, int h, int *len)
++{
++    png_structp png;
++    png_infop info = NULL;
++    tb_mem_t m = {NULL, 0, 0};
++    unsigned char *row;
++    int x, y, alpha = 0;
++
++    for (x = 0; x < w * h && !alpha; x++)
++        alpha = rgba[x * 4 + 3] < 0x80;
++    if ((png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL)) == NULL)
++        return NULL;
++    info = png_create_info_struct(png);
++    row = malloc(w * 4);
++    if (info == NULL || row == NULL || setjmp(png_jmpbuf(png))) {
++        png_destroy_write_struct(&png, &info);
++        free(row);
++        free(m.b);
++        return NULL;
++    }
++    png_set_write_fn(png, &m, tbPngWrite, tbPngFlush);
++    png_set_IHDR(png, info, w, h, 8, alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
++                 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
++    png_write_info(png, info);
++    for (y = 0; y < h; y++) {
++        const unsigned char *s = rgba + y * w * 4;
++        unsigned char *d = row;
++        for (x = 0; x < w; x++, s += 4) {
++            *d++ = s[0];
++            *d++ = s[1];
++            *d++ = s[2];
++            if (alpha)
++                *d++ = s[3] >= 0x80 ? 0xFF : (unsigned char)(s[3] * 2);
++        }
++        png_write_row(png, row);
++    }
++    png_write_end(png, NULL);
++    png_destroy_write_struct(&png, &info);
++    free(row);
++    *len = m.n;
++    return m.b;
++}
++
++// one file of the paste as it goes in: its bytes (the file's own, or a PNG made of it) and its name in the .tar. 1 ready,
++// 0 refused (a picture nothing would read, or a file that could not be read)
++static int tbReady(const char *path, const char *name, unsigned char **data, int *len, char *member, int memberSize)
++{
++    static const char *const unread[] = {"gif", "webp", "tga", "tif", "tiff", "ico", "heic", "avif", "psd", NULL};
++    unsigned char *raw, *rgba = NULL, *fit;
++    int rawLen = 0, w = 0, h = 0, ow = 0, oh = 0, fw, fh, i;
++    const char *dot = strrchr(name, '.');
++
++    for (i = 0; unread[i] != NULL; i++)
++        if (tbHasExt(name, unread[i]))
++            return 0;
++    if ((raw = tbReadWhole(path, &rawLen)) == NULL)
++        return 0;
++    snprintf(member, memberSize, "%s", name);
++    if (tbHasExt(name, "bmp"))
++        rgba = tbBmp(raw, rawLen, &w, &h);
++    else if (apIsPicture(name)) {
++        if (!ripps2DecodePicture(raw, rawLen, TB_ART_SIDE, TB_ART_SIDE, &rgba, &w, &h, &ow, &oh, NULL)) {
++            free(raw);
++            return 0;
++        }
++        if (ow <= TB_ART_SIDE && oh <= TB_ART_SIDE) { // it fits: in as it is
++            free(rgba);
++            *data = raw;
++            *len = rawLen;
++            return 1;
++        }
++    } else { // not a picture: in as it is
++        *data = raw;
++        *len = rawLen;
++        return 1;
++    }
++    free(raw);
++    if (rgba == NULL)
++        return 0;
++    fit = tbShrink(rgba, w, h, TB_ART_SIDE, &fw, &fh);
++    *data = fit != NULL ? tbPng(fit, fw, fh, len) : NULL;
++    if (fit != rgba)
++        free(fit);
++    free(rgba);
++    if (*data == NULL)
++        return 0;
++    if (dot != NULL && (int)(dot - name) + 5 < memberSize) // the same name, as a .png
++        snprintf(member + (dot - name), memberSize - (dot - name), ".png");
++    return 1;
++}
++
++int ripps2TarAddFiles(const char *tar, const char *dir, char (*names)[128], int n, int *refused, char *report, int reportSize)
++{
++    char add[260], path[384], member[AP_NAME], msg[300];
++    const char *tars[2] = {tar, add};
++    unsigned char head[512], *data;
++    tm_plan_t p;
++    FILE *out;
++    int i, len, in = 0, r = -1;
++
++    *refused = 0;
++    report[0] = '\0';
++    if (snprintf(add, sizeof(add), "%s.add", tar) >= (int)sizeof(add) - 5 || (out = fopen(add, "wb")) == NULL) {
++        snprintf(report, reportSize, "%s", _t("COULD NOT WRITE"));
++        return -1;
++    }
++    for (i = 0; i < n; i++) {
++        snprintf(msg, sizeof(msg), _t("Getting it ready: %s"), names[i]);
++        guiRenderTextScreen(msg);
++        snprintf(path, sizeof(path), "%s%s", dir, names[i]);
++        data = NULL;
++        if (!tbReady(path, names[i], &data, &len, member, sizeof(member))) {
++            (*refused)++;
++            continue;
++        }
++        apHeader(head, member, (unsigned int)len, (unsigned int)time(NULL));
++        if (fwrite(head, 1, 512, out) != 512 || fwrite(data, 1, len, out) != (size_t)len || !apWriteZeros(out, (512 - len % 512) % 512)) {
++            free(data);
++            fclose(out);
++            remove(add);
++            snprintf(report, reportSize, "%s", _t("COULD NOT WRITE"));
++            return -1;
++        }
++        free(data);
++        in++;
++    }
++    if (!apWriteZeros(out, 1024) || fclose(out) != 0 || in == 0) {
++        remove(add);
++        snprintf(report, reportSize, "%s", in == 0 ? _t("NOTHING TO PUT IN") : _t("COULD NOT WRITE"));
++        return -1;
++    }
++    memset(&p, 0, sizeof(p));
++    if (tmScan(&p, tar, 0) < 0 || tmScan(&p, add, 1) < 0 || !tmPlan(&p))
++        snprintf(report, reportSize, "%s", _t("NOT A .TAR"));
++    else if ((r = tbCommit(&p, tars, tar)) == 1) {
++        if (p.same > 0)
++            snprintf(report, reportSize, _t("%d IN, %d REPLACED"), in, p.same);
++        else
++            snprintf(report, reportSize, _t("%d IN"), in);
++    } else
++        snprintf(report, reportSize, "%s", _t("NOTHING CHANGED"));
++    tmFree(&p);
++    remove(add);
++    return r == 1 ? in : -1;
++}
++
++int ripps2TarRemove(const char *tar, char (*names)[128], int n)
++{
++    const char *tars[2] = {tar, tar};
++    tm_plan_t p;
++    int i, k, gone = 0, r = -1;
++
++    memset(&p, 0, sizeof(p));
++    if (tmScan(&p, tar, 0) < 0) {
++        tmFree(&p);
++        return -1;
++    }
++    for (i = 0; i < p.count; i++)
++        for (k = 0; k < n && p.m[i].drop != 2; k++)
++            if (!strcasecmp(tbBase(p.m[i].name), names[k])) {
++                p.m[i].drop = 1;
++                gone++;
++                break;
++            }
++    if (gone > 0 && tmPlan(&p))
++        r = tbCommit(&p, tars, tar);
++    tmFree(&p);
++    return r == 1 ? gone : -1;
++}
++
+ int ripps2TarMergeInto(const char *target, const char *here)
+ {
+     char paths[TM_PICK][256], msg[400];
 diff --git a/src/ripps2files.c b/src/ripps2files.c
-index 7c1cff8..7f40ab1 100644
+index 7c1cff8..2b1aaf9 100644
 --- a/src/ripps2files.c
 +++ b/src/ripps2files.c
-@@ -17,6 +17,10 @@
+@@ -17,6 +17,13 @@
    - Pasting a save folder (one with an icon.sys) onto a memory card always lands it in the card's
      root, where the console looks for saves, wherever on the card you are.
    - The clipboard count and what happened last (COPIED, CUT, PASTED, DELETED) sit top right.
@@ -100,19 +565,22 @@ index 7c1cff8..7f40ab1 100644
 +    many are marked, the size of the files and the drive's free space; Cross or Square on it marks them all (or,
 +    any marked, none). ACTIONS adds INVERT MARKS and SIZE AND FREE SPACE (the marked entries, folders all the way
 +    down).
++  - Build 125: a .tar is a blue folder (MERGE A .TAR INTO THIS stays in its ACTIONS). Opened, it lists its members;
++    PASTE puts files in (pictures made ready: ripps2TarAddFiles), COPY then PASTE elsewhere writes members out, DELETE
++    takes them out; each through the merge's write, swapped in only once whole.
  
    Reading folders and copying run on the IO worker; the screen keeps animating and shows progress.
    The list is only read by the GUI while the worker is idle (fbBusy), so it needs no lock.
-@@ -84,7 +88,7 @@
+@@ -84,7 +91,7 @@
  #define FB_SOFT GS_SETREG_RGBA(0x67, 0x6C, 0x7A, 0x80)
  #define FB_PRIM(r, g, b, a) GS_SETREG_RGBAQ((r), (g), (b), (a), 0x00)
  
 -enum { FB_KIND_DEVICE = 0, FB_KIND_START, FB_KIND_DIR, FB_KIND_SAVE, FB_KIND_FILE, FB_KIND_ELF, FB_KIND_VMC, FB_KIND_PSU, FB_KIND_VCD };
-+enum { FB_KIND_DEVICE = 0, FB_KIND_START, FB_KIND_DIR, FB_KIND_SAVE, FB_KIND_FILE, FB_KIND_ELF, FB_KIND_VMC, FB_KIND_PSU, FB_KIND_VCD, FB_KIND_HERE };
++enum { FB_KIND_DEVICE = 0, FB_KIND_START, FB_KIND_DIR, FB_KIND_SAVE, FB_KIND_FILE, FB_KIND_ELF, FB_KIND_VMC, FB_KIND_PSU, FB_KIND_VCD, FB_KIND_HERE, FB_KIND_TAR };
  
  typedef struct
  {
-@@ -106,7 +110,7 @@ static volatile int fbDrivesDone = 0; // ...and has just finished: read the driv
+@@ -106,7 +113,7 @@ static volatile int fbDrivesDone = 0; // ...and has just finished: read the driv
  static int fbMmceSlot[2] = {0, 0};      // START DRIVES found an MMCE in that slot (its ping answered)
  
  // what happened last, shown top right for a moment
@@ -121,7 +589,16 @@ index 7c1cff8..7f40ab1 100644
  static clock_t fbToastAt = 0;
  
  // the clipboard: names in one folder
-@@ -187,15 +191,15 @@ static void fbNoteFail(const char *verb, const char *path)
+@@ -117,6 +124,8 @@ static int fbClipCount = 0, fbClipCut = 0;
+ static unsigned char fbClipReplace[FB_CLIP_MAX]; // build 98: a name already there, replaced by this paste (asked first)
+ static volatile int fbReplacing = 0;             // build 98: the copy running now replaces what it finds
+ static char fbClipVmc[256]; // the card image the clipboard was filled in ("" = none)
++static char fbTar[256];     // build 125: the .tar open as a folder ("" = none); its folder path is fbTar + "/"
++static char fbClipTar[256]; // build 125: the .tar the clipboard was filled in ("" = none)
+ static char fbRipWhat[48];  // build 105: RIPDISC's media on the clipboard ("AUDIO CD"), ripped where it is pasted
+ 
+ // inside a PS2 card image: its path ("" = not in one), whether it is read only, its free space
+@@ -187,15 +196,15 @@ static void fbNoteFail(const char *verb, const char *path)
      snprintf(fbFailWhat, sizeof(fbFailWhat), "%s: %s %s", word != NULL ? word : why, verb, name && name[1] ? name + 1 : path);
  }
  static int fbOp = 0; // what the worker runs next
@@ -140,7 +617,17 @@ index 7c1cff8..7f40ab1 100644
  static int fbMenuOpen = 0, fbMenuSel = 0, fbMenuItems[FB_ACT_COUNT], fbMenuCount = 0;
  
  static const char *fbDevices[] = {"mc0:/", "mc1:/", "mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/",
-@@ -520,6 +524,54 @@ static void fbScanDevices(void)
+@@ -375,7 +384,8 @@ static int fbHasSuffix(const char *name, const char *suffix)
+ static int fbCompare(const void *a, const void *b)
+ {
+     const fb_entry_t *x = (const fb_entry_t *)a, *y = (const fb_entry_t *)b;
+-    int xd = x->kind == FB_KIND_DIR || x->kind == FB_KIND_SAVE, yd = y->kind == FB_KIND_DIR || y->kind == FB_KIND_SAVE;
++    int xd = x->kind == FB_KIND_DIR || x->kind == FB_KIND_SAVE || x->kind == FB_KIND_TAR; // build 125: a .tar with the folders
++    int yd = y->kind == FB_KIND_DIR || y->kind == FB_KIND_SAVE || y->kind == FB_KIND_TAR;
+     if (xd != yd)
+         return xd ? -1 : 1;
+     return strcasecmp(x->name, y->name);
+@@ -520,6 +530,83 @@ static void fbScanDevices(void)
  // A PS2 card image: a .vmc / .ps2 / .mc2, or a .bin of a card's size (OPL's VMC folder) that starts with
  // the card format's own words (so a PS1 game's .bin is not taken for one). Build 115: an SD2PSX's own cards too, the
  // .mcd files of MemoryCards/PS2 on its SD (the same raw format; its PS1 cards are 128 KB and stay files)
@@ -175,6 +662,35 @@ index 7c1cff8..7f40ab1 100644
 +    fbCount = n + 1;
 +}
 +
++// build 125: inside the open .tar
++static int fbInTar(void)
++{
++    int n = strlen(fbTar);
++    return n > 0 && !strncmp(fbPath, fbTar, n) && fbPath[n] == '/' && fbPath[n + 1] == '\0';
++}
++
++static void fbScanTar(void)
++{
++    ripps2_tar_entry_t *t = malloc(FB_MAX * sizeof(ripps2_tar_entry_t));
++    int n = t != NULL ? ripps2TarList(fbTar, t, FB_MAX - 1) : -1, i;
++
++    if (n < 0) {
++        free(t);
++        fbCount = 0;
++        return;
++    }
++    for (i = 0; i < n; i++) {
++        fb_entry_t *e = &fbList[i];
++        memset(e, 0, sizeof(*e));
++        snprintf(e->name, sizeof(e->name), "%s", t[i].name);
++        e->size = t[i].size;
++        e->kind = FB_KIND_FILE;
++    }
++    free(t);
++    qsort(fbList, n, sizeof(fb_entry_t), &fbCompare);
++    fbAddHere(n);
++}
++
 +static int fbOnItem(void) // the cursor is on an entry (not on the folder row, not on nothing)
 +{
 +    return fbCount > 0 && fbCursor >= 0 && fbCursor < fbCount && fbList[fbCursor].kind != FB_KIND_HERE;
@@ -195,7 +711,7 @@ index 7c1cff8..7f40ab1 100644
  static int fbIsCardImage(const char *path, const char *name, u32 size)
  {
      char magic[28];
-@@ -555,7 +607,7 @@ static void fbScanVmc(const char *save)
+@@ -555,7 +642,7 @@ static void fbScanVmc(const char *save)
      }
      free(list);
      qsort(fbList, n, sizeof(fb_entry_t), &fbCompare);
@@ -204,7 +720,23 @@ index 7c1cff8..7f40ab1 100644
  }
  
  static void fbScanDir(void)
-@@ -609,7 +661,7 @@ static void fbScanDir(void)
+@@ -569,6 +656,10 @@ static void fbScanDir(void)
+         fbScanVmc(save);
+         return;
+     }
++    if (fbInTar()) { // build 125
++        fbScanTar();
++        return;
++    }
+     d = opendir(fbPath);
+     if (d == NULL) {
+         fbCount = 0;
+@@ -606,10 +697,12 @@ static void fbScanDir(void)
+                 e->kind = FB_KIND_VCD;
+             else if (fbIsCardImage(child, e->name, e->size))
+                 e->kind = FB_KIND_VMC;
++            else if (fbHasSuffix(e->name, ".tar") && !fbIsMc(fbPath))
++                e->kind = FB_KIND_TAR; // build 125: a blue folder
          }
      }
      qsort(fbList, n, sizeof(fb_entry_t), &fbCompare);
@@ -213,7 +745,7 @@ index 7c1cff8..7f40ab1 100644
  }
  
  // ---- copying and deleting (all on the IO worker) ----
-@@ -1152,6 +1204,21 @@ static void fbReport(const char *verb, int done)
+@@ -1152,6 +1245,21 @@ static void fbReport(const char *verb, int done)
      ripps2Diag("files: %s in %s: %d ok, %d skipped, %d failed %s", verb, fbPath, ok, fbSkipped, fbFailed, fbFailWhat);
  }
  
@@ -235,7 +767,7 @@ index 7c1cff8..7f40ab1 100644
  static void fbWorker(void)
  {
      // build 114: no background write of RIPPS2's while a copy grows its files (the lab, 10/23: ps2sdk's exFAT driver loses
-@@ -1168,12 +1235,23 @@ static void fbWorker(void)
+@@ -1168,12 +1276,23 @@ static void fbWorker(void)
      } else if (fbOp == FB_OP_DELETE) {
          fbDeleteWork();
          fbReport(_t("DELETED"), fbDoneItems);
@@ -260,15 +792,19 @@ index 7c1cff8..7f40ab1 100644
      fbBusy = 0;
  }
  
-@@ -1336,6 +1414,7 @@ static void fbOpenPath(const char *path, const char *keep)
+@@ -1334,8 +1453,11 @@ static void fbOpenPath(const char *path, const char *keep)
+ {
+     if (fbVmc[0] && !fbVmcPath(fbVmc, path, NULL, 0))
          fbVmc[0] = '\0';
++    if (fbTar[0] && (strncmp(path, fbTar, strlen(fbTar)) || path[strlen(fbTar)] != '/'))
++        fbTar[0] = '\0'; // build 125: out of the .tar
      snprintf(fbPath, sizeof(fbPath), "%s", path);
      snprintf(fbKeepName, sizeof(fbKeepName), "%s", keep ? keep : "");
 +    fbLandFirst = path[0] != '\0' && fbKeepName[0] == '\0'; // build 125: on the first entry, under the folder row
      fbCursor = fbTop = 0;
      fbMenuOpen = 0;
      fbRun(FB_OP_SCAN, _t("READING"));
-@@ -1345,6 +1424,11 @@ static void fbOpenPath(const char *path, const char *keep)
+@@ -1345,6 +1467,11 @@ static void fbOpenPath(const char *path, const char *keep)
  static void fbRestoreCursor(void)
  {
      int i;
@@ -280,7 +816,7 @@ index 7c1cff8..7f40ab1 100644
      if (!fbKeepName[0])
          return;
      for (i = 0; i < fbCount; i++)
-@@ -1418,7 +1502,7 @@ static int fbSelection(char names[][FB_NAME], unsigned char *isDir, int max)
+@@ -1418,7 +1545,7 @@ static int fbSelection(char names[][FB_NAME], unsigned char *isDir, int max)
              snprintf(names[n], FB_NAME, "%s", fbList[i].name);
              isDir[n++] = fbList[i].kind == FB_KIND_DIR || fbList[i].kind == FB_KIND_SAVE;
          }
@@ -289,7 +825,7 @@ index 7c1cff8..7f40ab1 100644
          snprintf(names[0], FB_NAME, "%s", fbList[fbCursor].name);
          isDir[0] = fbList[fbCursor].kind == FB_KIND_DIR || fbList[fbCursor].kind == FB_KIND_SAVE;
          n = 1;
-@@ -1863,10 +1947,24 @@ int ripps2CardFreeKb(int port)
+@@ -1863,14 +1990,42 @@ int ripps2CardFreeKb(int port)
      return freeKb;
  }
  
@@ -314,7 +850,25 @@ index 7c1cff8..7f40ab1 100644
      fb_entry_t *e = &fbList[fbCursor];
      char path[256];
  
-@@ -1999,13 +2097,15 @@ static int fbClipHas(int dirs)
++    if (fbInTar()) { // build 125: a member is opened from a copy of it
++        sfxPlay(SFX_CANCEL);
++        fbSetToast(_t("COPY IT OUT TO OPEN IT"));
++        return;
++    }
+     switch (e->kind) {
++        case FB_KIND_TAR: // build 125: the blue folder
++            sfxPlay(SFX_CONFIRM);
++            fbJoin(path, sizeof(path), fbPath, e->name);
++            snprintf(fbTar, sizeof(fbTar), "%s", path);
++            if (strlen(path) + 2 < sizeof(path)) {
++                strcat(path, "/");
++                fbOpenPath(path, NULL);
++            }
++            break;
+         case FB_KIND_START:
+             if (fbStarted)
+                 break;
+@@ -1999,13 +2154,29 @@ static int fbClipHas(int dirs)
  static void fbMenuBuild(void)
  {
      char save[40];
@@ -325,6 +879,20 @@ index 7c1cff8..7f40ab1 100644
      int inVmc = fbVmcPath(fbVmc, fbPath, save, sizeof(save)), vmcTop = inVmc && !save[0] && !fbVmcRO;
      int canChange = !inVmc || vmcTop; // a card image takes whole saves at its top, and only without ECC
      fbMenuCount = 0;
++    if (fbInTar()) { // build 125: in a .tar: copy out, paste in, delete, the marks
++        if (haveSel)
++            fbMenuItems[fbMenuCount++] = FB_ACT_COPY;
++        if (fbClipCount > 0 && !fbClipTar[0])
++            fbMenuItems[fbMenuCount++] = FB_ACT_PASTE;
++        if (haveSel)
++            fbMenuItems[fbMenuCount++] = FB_ACT_DELETE;
++        if (fbCount > 1) {
++            fbMenuItems[fbMenuCount++] = FB_ACT_MARKALL;
++            fbMenuItems[fbMenuCount++] = FB_ACT_INVERT;
++        }
++        fbMenuSel = 0;
++        return;
++    }
      if (haveItem && !inVmc && fbList[fbCursor].kind == FB_KIND_FILE)
          fbMenuItems[fbMenuCount++] = FB_ACT_EDIT; // first: the file under the cursor, in the text editor
 -    if (haveItem) {
@@ -332,7 +900,7 @@ index 7c1cff8..7f40ab1 100644
          fbMenuItems[fbMenuCount++] = FB_ACT_COPY;
          if (canChange)
              fbMenuItems[fbMenuCount++] = FB_ACT_CUT;
-@@ -2016,14 +2116,18 @@ static void fbMenuBuild(void)
+@@ -2016,19 +2187,23 @@ static void fbMenuBuild(void)
          fbMenuItems[fbMenuCount++] = FB_ACT_PASTE_PSU;
      if (inFolder && !inVmc && fbClipHas(0))
          fbMenuItems[fbMenuCount++] = FB_ACT_UNPACK;
@@ -353,7 +921,78 @@ index 7c1cff8..7f40ab1 100644
      if (haveItem && !inVmc && fbList[fbCursor].kind == FB_KIND_VMC)
          fbMenuItems[fbMenuCount++] = FB_ACT_CARDS; // build 86: the card image under the cursor
      if (haveItem && !inVmc && fbList[fbCursor].kind == FB_KIND_FILE && ripps2MediaKind(fbList[fbCursor].name) == RIPPS2_MEDIA_ICON)
-@@ -2143,15 +2247,29 @@ static void fbAction(int act)
+         fbMenuItems[fbMenuCount++] = FB_ACT_RIPICON; // build 98: a save's 3D icon, for a PC
+-    if (haveItem && !inVmc && !fbIsMc(fbPath) && fbList[fbCursor].kind == FB_KIND_FILE && fbHasSuffix(fbList[fbCursor].name, ".tar"))
++    if (haveItem && !inVmc && !fbIsMc(fbPath) && fbList[fbCursor].kind == FB_KIND_TAR)
+         fbMenuItems[fbMenuCount++] = FB_ACT_TARMERGE; // build 123: this .tar kept, another merged into it
+     fbMenuSel = 0;
+ }
+@@ -2080,6 +2255,7 @@ static void fbAction(int act)
+             fbClipCount = fbSelection(fbClip, fbClipIsDir, FB_CLIP_MAX);
+             snprintf(fbClipDir, sizeof(fbClipDir), "%s", fbPath);
+             snprintf(fbClipVmc, sizeof(fbClipVmc), "%s", fbVmcPath(fbVmc, fbPath, NULL, 0) ? fbVmc : "");
++            snprintf(fbClipTar, sizeof(fbClipTar), "%s", fbInTar() ? fbTar : ""); // build 125
+             fbClipCut = act == FB_ACT_CUT;
+             fbClearMarks();
+             fbClipWhat(ask, sizeof(ask));
+@@ -2093,6 +2269,41 @@ static void fbAction(int act)
+                 fbPasteRipped();
+                 break;
+             }
++            if (act == FB_ACT_PASTE && fbInTar()) { // build 125: the clipboard's files into the .tar (its folders left out)
++                char files[FB_CLIP_MAX][FB_NAME], report[64];
++                int k = 0, refused = 0, in;
++                for (n = 0; n < fbClipCount; n++)
++                    if (!fbClipIsDir[n])
++                        snprintf(files[k++], FB_NAME, "%s", fbClip[n]);
++                sfxPlay(SFX_CONFIRM);
++                in = k > 0 ? ripps2TarAddFiles(fbTar, fbClipDir, files, k, &refused, report, sizeof(report)) : -1;
++                if (k == 0)
++                    snprintf(report, sizeof(report), "%s", _t("NO FILES ON THE CLIPBOARD"));
++                if (in > 0 && refused + (fbClipCount - k) > 0)
++                    snprintf(report + strlen(report), sizeof(report) - strlen(report), _t(", %d LEFT OUT"), refused + fbClipCount - k);
++                sfxPlay(in > 0 ? SFX_SAVE : SFX_ERROR);
++                fbRun(FB_OP_SCAN, _t("READING"));
++                fbSetToast(report);
++                break;
++            }
++            if (act == FB_ACT_PASTE && fbClipTar[0]) { // build 125: members written out here, each as a file
++                char dst[384], msg[300];
++                int out = 0;
++                sfxPlay(SFX_CONFIRM);
++                for (n = 0; n < fbClipCount; n++) {
++                    snprintf(msg, sizeof(msg), _t("Copying out: %s"), fbClip[n]);
++                    guiRenderTextScreen(msg);
++                    fbJoin(dst, sizeof(dst), fbPath, fbClip[n]);
++                    if (fbExists(dst)) // never over the top of a file that is there
++                        continue;
++                    out += ripps2TarExtract(fbClipTar, fbClip[n], dst);
++                }
++                snprintf(msg, sizeof(msg), _t("%d COPIED OUT"), out);
++                sfxPlay(out > 0 ? SFX_SAVE : SFX_ERROR);
++                fbRun(FB_OP_SCAN, _t("READING"));
++                fbSetToast(msg);
++                break;
++            }
+             sfxPlay(SFX_CONFIRM);
+             fbPasteMode = act == FB_ACT_PASTE_PSU ? FB_PASTE_PSU : act == FB_ACT_UNPACK ? FB_PASTE_UNPACK : FB_PASTE_PLAIN;
+             fbTotalItems = fbClipCount;
+@@ -2112,7 +2323,13 @@ static void fbAction(int act)
+                 snprintf(ask, sizeof(ask), _t("Delete %s?"), fbDeleteNames[0]);
+             else
+                 snprintf(ask, sizeof(ask), _t("Delete %d items?"), n);
+-            if (guiMsgBox(ask, 1, NULL)) {
++            if (fbInTar() && guiMsgBox(ask, 1, NULL)) { // build 125: out of the .tar, written again without them
++                int gone = ripps2TarRemove(fbTar, fbDeleteNames, n);
++                fbClearMarks();
++                sfxPlay(gone > 0 ? SFX_SAVE : SFX_ERROR);
++                fbRun(FB_OP_SCAN, _t("READING"));
++                fbSetToast(gone > 0 ? _t("DELETED") : _t("NOTHING CHANGED"));
++            } else if (!fbInTar() && guiMsgBox(ask, 1, NULL)) {
+                 fbDeleteCount = n;
+                 fbTotalItems = n;
+                 fbClearMarks();
+@@ -2143,15 +2360,29 @@ static void fbAction(int act)
                  fbRun(FB_OP_SCAN, _t("READING"));
              }
              break;
@@ -388,7 +1027,7 @@ index 7c1cff8..7f40ab1 100644
          case FB_ACT_CARDS: // build 86
              fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
              sfxPlay(SFX_CONFIRM);
-@@ -2522,7 +2640,7 @@ static void fbTile(int t)
+@@ -2522,7 +2753,7 @@ static void fbTile(int t)
              break;
          case FB_TILE_EDITOR:
              sfxPlay(SFX_CONFIRM);
@@ -397,7 +1036,7 @@ index 7c1cff8..7f40ab1 100644
                  fbGridOpen = 0;
                  fbEdit(fbList[fbCursor].name);
              } else if (fbPath[0]) { // a new file in this folder
-@@ -2805,7 +2923,9 @@ void ripps2HandleInputFiles(void)
+@@ -2805,7 +3036,9 @@ void ripps2HandleInputFiles(void)
      } else if (getKeyOn(backKey)) {
          fbUp();
      } else if (getKeyOn(KEY_SQUARE)) {
@@ -408,16 +1047,16 @@ index 7c1cff8..7f40ab1 100644
              fbList[fbCursor].marked ^= 1;
              if (fbCursor < fbCount - 1)
                  fbCursor++;
-@@ -3091,7 +3211,7 @@ static void fbDrawTip(void)
+@@ -3091,7 +3324,7 @@ static void fbDrawTip(void)
          return;
      }
      e = &fbList[fbCursor];
 -    if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START)
-+    if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START || e->kind == FB_KIND_HERE) // build 125: its row says it all
++    if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START || e->kind == FB_KIND_HERE || fbInTar()) // build 125
          return;
      snprintf(path, sizeof(path), "%s%s", fbPath, e->name);
      if (fbCursor != fbTipCursor || strcmp(path, fbTipPath) != 0) { // moved: the rest starts again
-@@ -3189,7 +3309,7 @@ void ripps2RenderFiles(void)
+@@ -3189,7 +3422,7 @@ void ripps2RenderFiles(void)
          return;
      }
  
@@ -426,12 +1065,17 @@ index 7c1cff8..7f40ab1 100644
          fntRenderString(uiFont, 320, 200, ALIGN_CENTER, 0, 0, fbPath[0] ? _t("EMPTY") : _t("NO DRIVES"), FB_DIM);
  
      for (i = 0; i < FB_ROWS && fbTop + i < fbCount; i++) {
-@@ -3202,9 +3322,31 @@ void ripps2RenderFiles(void)
+@@ -3202,9 +3435,37 @@ void ripps2RenderFiles(void)
          }
          if (e->marked)
              rmDrawRect(FB_X, y + 6, 6, 6, FB_PRIM(0x6A, 0x9A, 0xFF, 0x80));
 -        fbGlyph(e->kind, FB_X + 12, y + 1, cur ? FB_PRIM(0x9C, 0xB8, 0xFF, 0x80) : FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
-+        fbGlyph(e->kind == FB_KIND_HERE ? FB_KIND_DIR : e->kind, FB_X + 12, y + 1, cur ? FB_PRIM(0x9C, 0xB8, 0xFF, 0x80) : FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        if (e->kind == FB_KIND_TAR) // build 125: a blue folder, lighter than a folder, a band across it
++            fbGlyph(FB_KIND_DIR, FB_X + 12, y + 1, cur ? FB_PRIM(0xA8, 0xD8, 0xFF, 0x80) : FB_PRIM(0x38, 0xA0, 0xF0, 0x80));
++        else
++            fbGlyph(e->kind == FB_KIND_HERE ? FB_KIND_DIR : e->kind, FB_X + 12, y + 1, cur ? FB_PRIM(0x9C, 0xB8, 0xFF, 0x80) : FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
++        if (e->kind == FB_KIND_TAR)
++            rmDrawRect(FB_X + 12, y + 9, 16, 2, FB_PRIM(0x03, 0x08, 0x22, 0x80));
          int tx = FB_X + 36;
 -        if (e->kind == FB_KIND_DEVICE || e->kind == FB_KIND_START) {
 +        if (e->kind == FB_KIND_HERE) {
@@ -449,9 +1093,10 @@ index 7c1cff8..7f40ab1 100644
 +            fbSizeText64(fbHereBytes, size, sizeof(size));
 +            if (fbHereFreeKb >= 0) {
 +                fbSizeText64((unsigned long long)fbHereFreeKb * 1024, room, sizeof(room));
-+                snprintf(buf, sizeof(buf), _t("%d ITEMS   %d MARKED   %s   %s FREE"), fbCount - 1, marks, size, room);
++                snprintf(buf, sizeof(buf), fbCount == 2 ? _t("%d ITEM   %d MARKED   %s   %s FREE") : _t("%d ITEMS   %d MARKED   %s   %s FREE"),
++                         fbCount - 1, marks, size, room);
 +            } else
-+                snprintf(buf, sizeof(buf), _t("%d ITEMS   %d MARKED   %s"), fbCount - 1, marks, size);
++                snprintf(buf, sizeof(buf), fbCount == 2 ? _t("%d ITEM   %d MARKED   %s") : _t("%d ITEMS   %d MARKED   %s"), fbCount - 1, marks, size);
 +            sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, buf));
 +            fntRenderStringFit(rowFont, tx, y + 9, ALIGN_VCENTER, sx - 12 - tx, name, cur ? FB_LIT : FB_SOFT, cur);
 +            fntRenderString(smallFont, sx, y + 9, ALIGN_VCENTER, 0, 0, buf, marks > 0 ? FB_SOFT : FB_DIM);
@@ -460,7 +1105,7 @@ index 7c1cff8..7f40ab1 100644
              // a drive: its label, its path on the right; the start row: START DRIVES, what it starts
              const char *main = e->kind == FB_KIND_DEVICE ? e->title : e->name, *side = e->kind == FB_KIND_DEVICE ? e->name : e->title;
              int sx = FB_RIGHT - rmUnScaleX(fntCalcDimensions(smallFont, side));
-@@ -3266,10 +3408,10 @@ void ripps2RenderFiles(void)
+@@ -3266,10 +3527,10 @@ void ripps2RenderFiles(void)
          fbHint(backIcon, _t("CLOSE"), &hx, hy);
      } else {
          fb_entry_t *e = fbCount > 0 ? &fbList[fbCursor] : NULL;

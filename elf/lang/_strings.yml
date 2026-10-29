@@ -908,6 +908,12 @@ strings:
 - en: The server sent a chunked answer.
   in:
   - ripps2art.c
+- en: '%d IN'
+  in:
+  - ripps2artpack.c
+- en: '%d IN, %d REPLACED'
+  in:
+  - ripps2artpack.c
 - en: '%s could not be deleted; it stays as it was.'
   in:
   - ripps2artpack.c
@@ -940,6 +946,9 @@ strings:
 - en: Art loads from it from now on.
   in:
   - ripps2artpack.c
+- en: COULD NOT WRITE
+  in:
+  - ripps2artpack.c
 - en: DELETE IT
   in:
   - ripps2artpack.c
@@ -949,6 +958,9 @@ strings:
     DELETE: %s
 
     KEEP: %s (the destination, now with every picture of both)'
+  in:
+  - ripps2artpack.c
+- en: 'Getting it ready: %s'
   in:
   - ripps2artpack.c
 - en: 'In use: %s, %d pictures, %d MB'
@@ -995,6 +1007,16 @@ strings:
   in:
   - ripps2artpack.c
 - en: 'Merged: %s now holds %d pictures (%d MB), %d s.'
+  in:
+  - ripps2artpack.c
+- en: NOT A .TAR
+  in:
+  - ripps2artpack.c
+- en: NOTHING CHANGED
+  in:
+  - ripps2artpack.c
+  - ripps2files.c
+- en: NOTHING TO PUT IN
   in:
   - ripps2artpack.c
 - en: 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
@@ -2033,10 +2055,19 @@ strings:
 - en: '%d / %d FILES'
   in:
   - ripps2files.c
+- en: '%d COPIED OUT'
+  in:
+  - ripps2files.c
 - en: '%d FOLDERS AND CONTENTS'
   in:
   - ripps2files.c
 - en: '%d FOLDERS, %d FOUND'
+  in:
+  - ripps2files.c
+- en: '%d ITEM   %d MARKED   %s'
+  in:
+  - ripps2files.c
+- en: '%d ITEM   %d MARKED   %s   %s FREE'
   in:
   - ripps2files.c
 - en: '%d ITEMS   %d MARKED   %s'
@@ -2068,6 +2099,9 @@ strings:
   in:
   - ripps2files.c
 - en: ', %d FAILED'
+  in:
+  - ripps2files.c
+- en: ', %d LEFT OUT'
   in:
   - ripps2files.c
 - en: ', %d SKIPPED'
@@ -2137,6 +2171,9 @@ strings:
 - en: COPIED
   in:
   - ripps2files.c
+- en: COPY IT OUT TO OPEN IT
+  in:
+  - ripps2files.c
 - en: COULD NOT MAKE IT
   in:
   - ripps2files.c
@@ -2153,6 +2190,9 @@ strings:
   in:
   - ripps2files.c
 - en: Cheats, a file a game
+  in:
+  - ripps2files.c
+- en: 'Copying out: %s'
   in:
   - ripps2files.c
 - en: DELETE WHOLE SAVES HERE
@@ -2309,6 +2349,9 @@ strings:
   in:
   - ripps2files.c
 - en: NO DRIVES
+  in:
+  - ripps2files.c
+- en: NO FILES ON THE CLIPBOARD
   in:
   - ripps2files.c
 - en: NO, KEEP IT
