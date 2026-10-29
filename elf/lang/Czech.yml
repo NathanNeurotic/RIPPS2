@@ -1306,6 +1306,51 @@ strings:
   : '%s se spouští až po sloupech, takže zvuk spuštění hraje pozdě. START zkopíruje boot.adp (%d KB) vedle RIPPS2 na paměťovou kartu (%d KB volno), kde hraje, když se sloupy zvedají.'
   The boot sound could not be copied to %s. It still plays from %s.: Zvuk spuštění se nepodařilo zkopírovat do %s. Stále hraje z %s.
   Zoom: Přiblížení
+  '%s could not be deleted; it stays as it was.': '%s se nepodařilo smazat; zůstává, jak byl.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s se nepodařilo přečíst jako archiv .tar. Nic se nezměnilo.'
+  '%s is deleted. %s is kept.': '%s je smazán. %s se ponechává.'
+  Art loads from it from now on.: Obrázky se od teď načítají z něj.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Smazat sloučený .tar?
+  
+    SMAZAT: %s
+  
+    PONECHAT: %s (cíl, nyní se všemi obrázky z obou)'
+  Into %s (%s): Do %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'PONECHÁ SE a aktualizuje: %s (%d obrázků)
+  
+    SLUČUJE SE: %s (%d obrázků)
+  
+    Obrázky v obou: %d. Vyhrává sloučený. Ponechaný .tar se zapíše znovu jako nový soubor a vymění se, až když je celý, takže zastavení nebo plný disk ho nechají, jak byl. Sloučit teď?'
+  MERGE .TAR: SLOUČIT .TAR
+  MERGE a .tar into the pack in %s: SLOUČIT .tar do balíčku v %s
+  MERGING THE ART: SLUČOVÁNÍ OBRÁZKŮ
+  Merge in %s (%s): Sloučit %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Sloučit nový balíček do jiného .tar? Pak vybereš .tar, který se ponechá a aktualizuje; obrázky nového balíčku půjdou do něj.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Sloučeno: %s teď obsahuje %d obrázků (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Vstupuje obrázků: %d (%s). Stejný název v obou: %d (vyhrává sloučený).'
+  'Reading the archives: %s': 'Čtení archivů: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Zastavit? Ponechaný .tar zůstane, jak byl; nedokončená kopie se odstraní.
+  Stopped. %s is as it was; the unfinished copy was removed.: Zastaveno. %s je, jak byl; nedokončená kopie byla odstraněna.
+  The kept .tar is only replaced once the merged copy is whole.: Ponechaný .tar se nahradí, až když je sloučená kopie celá.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Sloučení se nepodařilo zapsat na disk s %s (je tam místo?). Je, jak byl; nic dalšího se nezměnilo.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Sloučení potřebuje asi %s volného místa na disku s %s (nový archiv se nejdřív zapíše vedle starého). Uvolni trochu místa a zkus to znovu.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Sloučení se zastavilo mezi dvěma přejmenováními: ponechaný .tar je %s a sloučený %s. Přejmenuj je zpět v Paměťových souborech.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Sloučený .tar byl zapsán, ale nemohl dostat název %s (MMCE přejmenovává od firmwaru 1.4.0). Nový soubor byl odstraněn; ponechaný .tar je, jak byl.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Není žádný další .tar ke sloučení do %s. Dej ho do této složky, do složky ART některého disku nebo do kořene disku a zkus to znovu.
+  MERGE A .TAR INTO THIS: SLOUČIT .TAR DO TOHOTO
 labels:
   HINT_NEUTRINO_AUTO_ELF: Předá zaváděcí ELF hry Neutrinu, aby vyhledalo nastavení pro daný titul. Ve výchozím stavu zapnuto; ručně nastavená volba Boot ELF má přednost.
   HINT_POPSTARTER_PATH: Kde je POPSTARTER.ELF. Když zůstane prázdné, RIPPS2 doplní ten, který najde na disku; přepište, chcete-li jiný, např. usb:/POPS/POPSTARTER.ELF

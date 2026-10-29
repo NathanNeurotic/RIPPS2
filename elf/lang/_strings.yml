@@ -908,7 +908,16 @@ strings:
 - en: The server sent a chunked answer.
   in:
   - ripps2art.c
+- en: '%s could not be deleted; it stays as it was.'
+  in:
+  - ripps2artpack.c
+- en: '%s could not be read as a .tar archive. Nothing was changed.'
+  in:
+  - ripps2artpack.c
 - en: '%s free'
+  in:
+  - ripps2artpack.c
+- en: '%s is deleted. %s is kept.'
   in:
   - ripps2artpack.c
 - en: '%sART/art.tar: reads %s/s, %s'
@@ -928,7 +937,35 @@ strings:
 - en: About %d min
   in:
   - ripps2artpack.c
+- en: Art loads from it from now on.
+  in:
+  - ripps2artpack.c
+- en: DELETE IT
+  in:
+  - ripps2artpack.c
+  - ripps2games.c
+- en: 'Delete the merged-in .tar?
+
+    DELETE: %s
+
+    KEEP: %s (the destination, now with every picture of both)'
+  in:
+  - ripps2artpack.c
 - en: 'In use: %s, %d pictures, %d MB'
+  in:
+  - ripps2artpack.c
+- en: Into %s (%s)
+  in:
+  - ripps2artpack.c
+- en: KEEP IT
+  in:
+  - ripps2artpack.c
+  - ripps2files.c
+- en: 'KEPT and updated: %s (%d pictures)
+
+    MERGED IN: %s (%d pictures)
+
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
   in:
   - ripps2artpack.c
 - en: LESS THAN A MINUTE LEFT
@@ -939,7 +976,25 @@ strings:
 - en: 'Looking at the ART folders: %d pictures, %s'
   in:
   - ripps2artpack.c
+- en: MERGE .TAR
+  in:
+  - ripps2artpack.c
+- en: MERGE a .tar into the pack in %s
+  in:
+  - ripps2artpack.c
+- en: MERGING THE ART
+  in:
+  - ripps2artpack.c
 - en: 'Measuring how fast each drive reads its art: %s'
+  in:
+  - ripps2artpack.c
+- en: Merge in %s (%s)
+  in:
+  - ripps2artpack.c
+- en: Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.
+  in:
+  - ripps2artpack.c
+- en: 'Merged: %s now holds %d pictures (%d MB), %d s.'
   in:
   - ripps2artpack.c
 - en: 'No started drive has room for the ART Pack: it needs about %s. Free some room on the drive you browse from, then try again.'
@@ -954,6 +1009,9 @@ strings:
 - en: PICTURE %d OF %d
   in:
   - ripps2artpack.c
+- en: 'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).'
+  in:
+  - ripps2artpack.c
 - en: 'Pictures: %d (%s). ART folders: %d.'
   in:
   - ripps2artpack.c
@@ -963,10 +1021,19 @@ strings:
 - en: REMOVE the pack in %s (the ART folders stay as they are)
   in:
   - ripps2artpack.c
+- en: 'Reading the archives: %s'
+  in:
+  - ripps2artpack.c
 - en: Remove the ART Pack in %s? The ART folders stay as they are.
   in:
   - ripps2artpack.c
+- en: Stop? The kept .tar stays as it was; the unfinished copy is removed.
+  in:
+  - ripps2artpack.c
 - en: Stop? The unfinished pack is removed; the ART folders stay as they are.
+  in:
+  - ripps2artpack.c
+- en: Stopped. %s is as it was; the unfinished copy was removed.
   in:
   - ripps2artpack.c
 - en: Stopped. The unfinished pack was removed, and art loads from the ART folders as before.
@@ -984,7 +1051,25 @@ strings:
 - en: 'The ART folders stay as they are: the pack is a copy.'
   in:
   - ripps2artpack.c
+- en: The kept .tar is only replaced once the merged copy is whole.
+  in:
+  - ripps2artpack.c
+- en: The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.
+  in:
+  - ripps2artpack.c
+- en: The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  in:
+  - ripps2artpack.c
+- en: 'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.'
+  in:
+  - ripps2artpack.c
+- en: The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  in:
+  - ripps2artpack.c
 - en: There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back.
+  in:
+  - ripps2artpack.c
+- en: There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
   in:
   - ripps2artpack.c
 - en: Under a minute
@@ -2162,9 +2247,6 @@ strings:
 - en: IS ALREADY HERE. REPLACE IT?
   in:
   - ripps2files.c
-- en: KEEP IT
-  in:
-  - ripps2files.c
 - en: LOW
   in:
   - ripps2files.c
@@ -2181,6 +2263,9 @@ strings:
   in:
   - ripps2files.c
 - en: MEMORY FILES SETTINGS
+  in:
+  - ripps2files.c
+- en: MERGE A .TAR INTO THIS
   in:
   - ripps2files.c
 - en: MODIFIED  %s
@@ -2601,9 +2686,6 @@ strings:
   in:
   - ripps2games.c
 - en: DELETE FOR GOOD
-  in:
-  - ripps2games.c
-- en: DELETE IT
   in:
   - ripps2games.c
 - en: 'DELETED %s: %s FREED'

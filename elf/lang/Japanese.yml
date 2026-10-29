@@ -1306,6 +1306,51 @@ strings:
   : '%s は柱のあとに起動するため、起動音が遅れます。START で boot.adp（%d KB）をメモリーカードの RIPPS2 の横にコピーします（空き %d KB）。そこなら柱が立ち上がると同時に鳴ります。'
   The boot sound could not be copied to %s. It still plays from %s.: 起動音を %s にコピーできませんでした。引き続き %s から鳴ります。
   Zoom: ズーム
+  '%s could not be deleted; it stays as it was.': '%s を削除できませんでした。そのまま残ります。'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s を .tar アーカイブとして読み込めませんでした。何も変更していません。'
+  '%s is deleted. %s is kept.': '%s を削除しました。%s は残ります。'
+  Art loads from it from now on.: これからは画像をここから読み込みます。
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : '結合した側の .tar を削除しますか？
+  
+    削除: %s
+  
+    残す: %s（結合先。両方のすべての画像が入っています）'
+  Into %s (%s): 結合先 %s（%s）
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : '残して更新: %s（%d 枚）
+  
+    結合する: %s（%d 枚）
+  
+    両方にある画像: %d。結合する側が優先されます。残す .tar は新しいファイルとして書き直し、完成してから入れ替えるので、中止やドライブの容量不足でも元のままです。今すぐ結合しますか？'
+  MERGE .TAR: .TAR を結合
+  MERGE a .tar into the pack in %s: '%s のパックに .tar を結合'
+  MERGING THE ART: 画像を結合しています
+  Merge in %s (%s): 結合する %s（%s）
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: 新しいパックを別の .tar に結合しますか？ 次に残して更新する .tar を選びます。新しいパックの画像がそこに入ります。
+  'Merged: %s now holds %d pictures (%d MB), %d s.': '結合しました: %s の画像は %d 枚（%d MB）、%d 秒。'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': '入る画像: %d（%s）。両方にある同名: %d（結合する側が優先）。'
+  'Reading the archives: %s': 'アーカイブを読み込んでいます: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: 中止しますか？ 残す .tar は元のままで、未完成のコピーは削除されます。
+  Stopped. %s is as it was; the unfinished copy was removed.: 中止しました。%s は元のままです。未完成のコピーは削除しました。
+  The kept .tar is only replaced once the merged copy is whole.: 残す .tar は、結合したコピーが完成してから置き換えます。
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: 結合を %s のドライブに書き込めませんでした（空きはありますか？）。元のままで、ほかは何も変わっていません。
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : '結合には約 %s の空きが必要です（ドライブ: %s。新しいアーカイブをまず古いものの横に書き込みます）。空きを作ってからやり直してください。'
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 2 回の名前変更の間で結合が止まりました。残す .tar は %s、結合したものは %s です。メモリーファイルで名前を戻してください。
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : 結合した .tar は書き込めましたが、%s という名前にできませんでした（MMCE はファームウェア 1.4.0 以降で名前変更できます）。新しいファイルは削除しました。残す .tar は元のままです。
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : '%s に結合できるほかの .tar がありません。このフォルダー、ドライブの ART フォルダー、またはドライブの一番上に置いてから、やり直してください。'
+  MERGE A .TAR INTO THIS: ここに .TAR を結合
 labels:
   IP_ADDRESS_TYPE_STATIC: 固定
   HINT_NEUTRINO_AUTO_ELF: ゲームの起動 ELF を Neutrino に渡し、タイトルごとの設定を探させます。既定でオン。手動で設定した Boot ELF オプションが優先されます。

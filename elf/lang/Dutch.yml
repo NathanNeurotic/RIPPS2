@@ -1304,6 +1304,51 @@ strings:
   : '%s start na de pilaren, dus het opstartgeluid klinkt te laat. START kopieert boot.adp (%d KB) naast RIPPS2 op de geheugenkaart (%d KB vrij), waar het klinkt terwijl de pilaren oprijzen.'
   The boot sound could not be copied to %s. It still plays from %s.: Het opstartgeluid kon niet naar %s worden gekopieerd. Het klinkt nog steeds vanaf %s.
   Zoom: Inzoomen
+  '%s could not be deleted; it stays as it was.': '%s kon niet worden verwijderd; het blijft zoals het was.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s kon niet als .tar-archief worden gelezen. Er is niets veranderd.'
+  '%s is deleted. %s is kept.': '%s is verwijderd. %s blijft behouden.'
+  Art loads from it from now on.: Afbeeldingen laden er voortaan uit.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Het samengevoegde .tar verwijderen?
+  
+    VERWIJDEREN: %s
+  
+    BEHOUDEN: %s (de bestemming, nu met elke afbeelding van beide)'
+  Into %s (%s): In %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'BEHOUDEN en bijgewerkt: %s (%d afbeeldingen)
+  
+    SAMENGEVOEGD: %s (%d afbeeldingen)
+  
+    Afbeeldingen in beide: %d. Het samengevoegde wint. Het behouden .tar wordt opnieuw geschreven als nieuw bestand en pas vervangen als het heel is, dus een stop of een volle schijf laat het zoals het was. Nu samenvoegen?'
+  MERGE .TAR: .TAR SAMENVOEGEN
+  MERGE a .tar into the pack in %s: Een .tar SAMENVOEGEN in het pakket in %s
+  MERGING THE ART: AFBEELDINGEN SAMENVOEGEN
+  Merge in %s (%s): '%s samenvoegen (%s)'
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Het nieuwe pakket in een ander .tar samenvoegen? Je kiest daarna het .tar dat behouden en bijgewerkt wordt; de afbeeldingen van het nieuwe pakket gaan erin.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Samengevoegd: %s bevat nu %d afbeeldingen (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Afbeeldingen erin: %d (%s). Zelfde naam in beide: %d (het samengevoegde wint).'
+  'Reading the archives: %s': 'De archieven lezen: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Stoppen? Het behouden .tar blijft zoals het was; de onafgemaakte kopie wordt verwijderd.
+  Stopped. %s is as it was; the unfinished copy was removed.: Gestopt. %s is zoals het was; de onafgemaakte kopie is verwijderd.
+  The kept .tar is only replaced once the merged copy is whole.: Het behouden .tar wordt pas vervangen als de samengevoegde kopie heel is.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: De samenvoeging kon niet worden geschreven op de schijf van %s (is er ruimte?). Het is zoals het was; verder is er niets veranderd.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : De samenvoeging heeft ongeveer %s vrij nodig op de schijf van %s (het nieuwe archief wordt eerst naast het oude geschreven). Maak wat ruimte vrij en probeer het opnieuw.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'De samenvoeging stopte tussen twee hernoemingen: het behouden .tar is %s en het samengevoegde %s. Hernoem ze terug met Geheugenbestanden.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Het samengevoegde .tar is geschreven, maar kon de naam %s niet krijgen (een MMCE hernoemt vanaf firmware 1.4.0). Het nieuwe bestand is verwijderd; het behouden .tar is zoals het was.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Er is geen ander .tar om in %s samen te voegen. Zet het in deze map, in de ART-map van een schijf of bovenaan een schijf en probeer het opnieuw.
+  MERGE A .TAR INTO THIS: EEN .TAR HIERIN SAMENVOEGEN
 labels:
   SETTINGS_SAVED: Instellingen opgeslagen in %s
   OK: OK

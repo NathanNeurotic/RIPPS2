@@ -1306,6 +1306,51 @@ strings:
   : يبدأ %s بعد الأعمدة، لذا يتأخر صوت الإقلاع. يضغط START لنسخ boot.adp (%d KB) بجانب RIPPS2 على بطاقة الذاكرة (%d KB متاحة)، حيث يُعزف مع ارتفاع الأعمدة.
   The boot sound could not be copied to %s. It still plays from %s.: تعذر نسخ صوت الإقلاع إلى %s. ما زال يُعزف من %s.
   Zoom: تكبير
+  '%s could not be deleted; it stays as it was.': تعذر حذف %s؛ يبقى كما كان.
+  '%s could not be read as a .tar archive. Nothing was changed.': تعذرت قراءة %s كأرشيف .tar. لم يتغير شيء.
+  '%s is deleted. %s is kept.': حُذف %s. يُبقى على %s.
+  Art loads from it from now on.: تُحمَّل الصور منه من الآن فصاعدًا.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'حذف ملف .tar المدموج؟
+  
+    يُحذف: %s
+  
+    يُبقى: %s (الوجهة، وفيها الآن كل صور الاثنين)'
+  Into %s (%s): إلى %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'يُبقى ويُحدَّث: %s (%d صورة)
+  
+    يُدمج: %s (%d صورة)
+  
+    صور في الاثنين: %d. يفوز المدموج. يُكتب ملف .tar المُبقى من جديد كملف جديد ولا يحل محله إلا حين يكتمل، فالإيقاف أو امتلاء المحرك يتركه كما كان. الدمج الآن؟'
+  MERGE .TAR: دمج .TAR
+  MERGE a .tar into the pack in %s: دمج ملف .tar في الحزمة في %s
+  MERGING THE ART: جارٍ دمج الصور
+  Merge in %s (%s): دمج %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: دمج الحزمة الجديدة في ملف .tar آخر؟ تختار بعد ذلك ملف .tar الذي يُبقى عليه ويُحدَّث؛ تذهب إليه صور الحزمة الجديدة.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'تم الدمج: يحمل %s الآن %d صورة (%d MB)، %d ث.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'صور داخلة: %d (%s). بالاسم نفسه في الاثنين: %d (يفوز المدموج).'
+  'Reading the archives: %s': 'جارٍ قراءة الأرشيفات: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: إيقاف؟ يبقى ملف .tar المُبقى كما كان؛ تُزال النسخة غير المكتملة.
+  Stopped. %s is as it was; the unfinished copy was removed.: توقف. %s كما كان؛ أُزيلت النسخة غير المكتملة.
+  The kept .tar is only replaced once the merged copy is whole.: لا يُستبدل ملف .tar المُبقى إلا حين تكتمل النسخة المدموجة.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: تعذرت كتابة الدمج على محرك %s (هل توجد مساحة؟). هو كما كان؛ لم يتغير شيء آخر.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : يحتاج الدمج إلى نحو %s من المساحة الحرة على محرك %s (يُكتب الأرشيف الجديد بجانب القديم أولًا). أفرغ بعض المساحة ثم أعد المحاولة.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'توقف الدمج بين عمليتي إعادة تسمية: ملف .tar المُبقى هو %s والمدموج %s. أعد تسميتهما بملفات الذاكرة.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : كُتب ملف .tar المدموج لكنه لم يأخذ الاسم %s (يعيد MMCE التسمية بدءًا من البرنامج الثابت 1.4.0). أُزيل الملف الجديد؛ ملف .tar المُبقى كما كان.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : لا يوجد ملف .tar آخر لدمجه في %s. ضعه في هذا المجلد أو في مجلد ART لمحرك ما أو في أعلى محرك، ثم أعد المحاولة.
+  MERGE A .TAR INTO THIS: ادمج ملف .TAR في هذا
 labels:
   SETTINGS_SAVED: حُفظت الإعدادات في %s
   CONFIRMATION_EXIT: الخروج إلى المتصفح؟

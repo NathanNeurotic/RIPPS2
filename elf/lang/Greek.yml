@@ -1306,6 +1306,51 @@ strings:
   : Το %s ξεκινά μετά τις κολόνες, οπότε ο ήχος εκκίνησης παίζει αργά. Το START αντιγράφει το boot.adp (%d KB) δίπλα στο RIPPS2 στην κάρτα μνήμης (%d KB ελεύθερα), όπου παίζει καθώς υψώνονται οι κολόνες.
   The boot sound could not be copied to %s. It still plays from %s.: Ο ήχος εκκίνησης δεν αντιγράφηκε στο %s. Παίζει ακόμα από το %s.
   Zoom: Μεγέθυνση
+  '%s could not be deleted; it stays as it was.': Το %s δεν διαγράφηκε· μένει όπως ήταν.
+  '%s could not be read as a .tar archive. Nothing was changed.': Το %s δεν διαβάστηκε ως αρχείο .tar. Δεν άλλαξε τίποτα.
+  '%s is deleted. %s is kept.': Το %s διαγράφηκε. Το %s κρατιέται.
+  Art loads from it from now on.: Οι εικόνες φορτώνουν από αυτό από εδώ και πέρα.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Διαγραφή του .tar που συγχωνεύτηκε;
+  
+    ΔΙΑΓΡΑΦΕΤΑΙ: %s
+  
+    ΚΡΑΤΙΕΤΑΙ: %s (ο προορισμός, τώρα με κάθε εικόνα και των δύο)'
+  Into %s (%s): Στο %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'ΚΡΑΤΙΕΤΑΙ και ενημερώνεται: %s (%d εικόνες)
+  
+    ΣΥΓΧΩΝΕΥΕΤΑΙ: %s (%d εικόνες)
+  
+    Εικόνες και στα δύο: %d. Κερδίζει αυτό που συγχωνεύεται. Το .tar που κρατιέται γράφεται ξανά ως νέο αρχείο και μπαίνει στη θέση του μόνο όταν είναι ολόκληρο, οπότε μια διακοπή ή ένας γεμάτος δίσκος το αφήνουν όπως ήταν. Συγχώνευση τώρα;'
+  MERGE .TAR: ΣΥΓΧΩΝΕΥΣΗ .TAR
+  MERGE a .tar into the pack in %s: ΣΥΓΧΩΝΕΥΣΗ ενός .tar στο πακέτο στο %s
+  MERGING THE ART: ΣΥΓΧΩΝΕΥΣΗ ΤΩΝ ΕΙΚΟΝΩΝ
+  Merge in %s (%s): Συγχώνευση του %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Συγχώνευση του νέου πακέτου σε άλλο .tar; Μετά διαλέγεις το .tar που κρατιέται και ενημερώνεται· οι εικόνες του νέου πακέτου μπαίνουν σε αυτό.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Συγχωνεύτηκε: το %s έχει τώρα %d εικόνες (%d MB), %d δ.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Εικόνες που μπαίνουν: %d (%s). Ίδιο όνομα και στα δύο: %d (κερδίζει αυτό που συγχωνεύεται).'
+  'Reading the archives: %s': 'Ανάγνωση των αρχείων: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Διακοπή; Το .tar που κρατιέται μένει όπως ήταν· το ημιτελές αντίγραφο αφαιρείται.
+  Stopped. %s is as it was; the unfinished copy was removed.: Διακόπηκε. Το %s είναι όπως ήταν· το ημιτελές αντίγραφο αφαιρέθηκε.
+  The kept .tar is only replaced once the merged copy is whole.: Το .tar που κρατιέται αντικαθίσταται μόνο όταν το συγχωνευμένο αντίγραφο είναι ολόκληρο.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Η συγχώνευση δεν γράφτηκε στον δίσκο του %s (υπάρχει χώρος;). Είναι όπως ήταν· τίποτε άλλο δεν άλλαξε.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Η συγχώνευση χρειάζεται περίπου %s ελεύθερα στον δίσκο του %s (το νέο αρχείο γράφεται πρώτα δίπλα στο παλιό). Ελευθέρωσε λίγο χώρο και δοκίμασε ξανά.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Η συγχώνευση σταμάτησε ανάμεσα σε δύο μετονομασίες: το .tar που κρατιέται είναι το %s και το συγχωνευμένο το %s. Δώσε τους πίσω τα ονόματα με τα Αρχεία μνήμης.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Το συγχωνευμένο .tar γράφτηκε αλλά δεν πήρε το όνομα %s (μια MMCE μετονομάζει από το firmware 1.4.0 και μετά). Το νέο αρχείο αφαιρέθηκε· το .tar που κρατιέται είναι όπως ήταν.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Δεν υπάρχει άλλο .tar για συγχώνευση στο %s. Βάλ' το σε αυτόν τον φάκελο, στον φάκελο ART ενός δίσκου ή στη ρίζα ενός δίσκου και δοκίμασε ξανά.
+  MERGE A .TAR INTO THIS: ΣΥΓΧΩΝΕΥΣΗ .TAR ΕΔΩ
 labels:
   OK: OK
   WIDE_SCREEN: Ευρεία οθόνη

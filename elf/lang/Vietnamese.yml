@@ -1306,6 +1306,51 @@ strings:
   : '%s khởi động sau các cột trụ, nên âm thanh khởi động phát muộn. START sao chép boot.adp (%d KB) cạnh RIPPS2 trên thẻ nhớ (còn trống %d KB), nơi nó phát khi các cột trụ vươn lên.'
   The boot sound could not be copied to %s. It still plays from %s.: Không thể sao chép âm thanh khởi động vào %s. Nó vẫn phát từ %s.
   Zoom: Phóng to
+  '%s could not be deleted; it stays as it was.': Không thể xóa %s; nó vẫn như cũ.
+  '%s could not be read as a .tar archive. Nothing was changed.': Không thể đọc %s như một kho lưu trữ .tar. Không có gì thay đổi.
+  '%s is deleted. %s is kept.': Đã xóa %s. Giữ lại %s.
+  Art loads from it from now on.: Từ giờ hình được tải từ nó.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Xóa tệp .tar đã gộp vào?
+  
+    XÓA: %s
+  
+    GIỮ: %s (đích, giờ có mọi hình của cả hai)'
+  Into %s (%s): Vào %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'GIỮ và cập nhật: %s (%d hình)
+  
+    GỘP VÀO: %s (%d hình)
+  
+    Hình có ở cả hai: %d. Tệp gộp vào thắng. Tệp .tar được giữ được ghi lại thành tệp mới và chỉ thay thế khi đã trọn vẹn, nên việc dừng hay ổ đầy sẽ để nó như cũ. Gộp ngay?'
+  MERGE .TAR: GỘP .TAR
+  MERGE a .tar into the pack in %s: GỘP một .tar vào gói trong %s
+  MERGING THE ART: ĐANG GỘP HÌNH
+  Merge in %s (%s): Gộp %s vào (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Gộp gói mới vào một .tar khác? Tiếp theo bạn chọn .tar để giữ và cập nhật; hình của gói mới sẽ vào đó.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Đã gộp: %s giờ có %d hình (%d MB), %d giây.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Hình gộp vào: %d (%s). Cùng tên ở cả hai: %d (tệp gộp vào thắng).'
+  'Reading the archives: %s': 'Đang đọc các kho lưu trữ: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Dừng? Tệp .tar được giữ vẫn như cũ; bản sao dở dang sẽ bị xóa.
+  Stopped. %s is as it was; the unfinished copy was removed.: Đã dừng. %s vẫn như cũ; bản sao dở dang đã bị xóa.
+  The kept .tar is only replaced once the merged copy is whole.: Tệp .tar được giữ chỉ được thay khi bản gộp đã trọn vẹn.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Không thể ghi bản gộp lên ổ của %s (còn chỗ không?). Nó vẫn như cũ; không có gì khác thay đổi.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Việc gộp cần khoảng %s trống trên ổ của %s (kho mới được ghi cạnh kho cũ trước). Hãy giải phóng chỗ rồi thử lại.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Việc gộp dừng giữa hai lần đổi tên: tệp .tar được giữ là %s và tệp gộp là %s. Hãy đổi tên lại bằng Tệp bộ nhớ.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Đã ghi tệp .tar gộp nhưng không thể đặt tên %s (MMCE đổi tên được từ firmware 1.4.0). Tệp mới đã bị xóa; tệp .tar được giữ vẫn như cũ.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Không có .tar nào khác để gộp vào %s. Hãy đặt nó trong thư mục này, trong thư mục ART của một ổ hoặc ở gốc một ổ, rồi thử lại.
+  MERGE A .TAR INTO THIS: GỘP MỘT .TAR VÀO ĐÂY
 labels:
   NETCONFIG: Cài đặt mạng
   SETTINGS_SAVED: Đã lưu cài đặt vào %s

@@ -1,5 +1,32 @@
 # RIPPS2 changelog
 
+## Build 123 (beta), changes since build 122
+
+The user's notes of 10/28: pack the HDD's art and the MMCE's art apart (moving thousands of small files over USB has
+failed before), then merge one `.tar` into the other; later pack only the new games' art and merge that small `.tar`
+into the master instead of packing every ART folder again.
+
+- **Merge one ART `.tar` into another.** In Memory Files, Triangle on a `.tar` offers MERGE A .TAR INTO THIS: that
+  `.tar` is the one kept and updated, and RIPPS2 lists the other `.tar` files to merge in (the ones in that folder, in
+  each started drive's ART folder and at its top). Cache > ART Pack offers MERGE a .tar into the pack in use, and right
+  after a pack is built it offers to merge the new pack into another `.tar`. The panel every long job has comes first
+  (what goes in, its size, how many pictures are in both, about how long), SELECT held to go on, then a box that names
+  the kept `.tar` and the merged-in one with their picture counts. The merge draws RIPPS2's progress bar (which picture
+  of how many, the time left; the back key asks before it stops).
+- **The merged-in pictures win.** A picture in both (the same name, a PNG and a JPG of it alike, as the themes ask for
+  them) comes from the merged-in `.tar`, the newer one. The two lists of games the ART Pack keeps (`RIPPS2ART.LST`) become
+  one, so the games of both are still answered from the pack without their ART folders being asked. Members go across
+  as they are, so a PC still opens the result as any tar.
+- **The kept `.tar` is never at risk.** The merge is written as a new file beside it (`art.tar.tmp`) and only takes its
+  name once it is whole and the drive holds every byte: a stop, a full drive or a pulled card leaves the kept `.tar` as it
+  was and removes the unfinished copy. The room is checked first on drives that can say (MMCE and the APA HDD cannot: a
+  full one stops the write cleanly). A merged `art.tar` gets its index beside it (`art_cache.bin`), so the next boot reads
+  no headers, and when it is an `art.tar` at the top of a drive's ART folder it becomes the pack in use.
+- **Then the merged-in `.tar` can go.** A last box asks, naming both: DELETE (the merged-in one) and KEEP (the
+  destination, now with every picture of both). START deletes it, Back keeps it. The kept `.tar` is never offered for
+  deletion.
+- 24 new strings in all 32 languages (`tools/lang123`). Memory Files' Triangle menu is as wide as its longest action.
+
 ## Build 122 (beta), changes since build 121
 
 The user's notes of 10/28.

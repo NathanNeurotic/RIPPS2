@@ -1305,6 +1305,51 @@ strings:
   : '%s arranca depois dos pilares, por isso o som de arranque toca tarde. START copia boot.adp (%d KB) para junto do RIPPS2 no cartão de memória (%d KB livres), onde toca enquanto os pilares sobem.'
   The boot sound could not be copied to %s. It still plays from %s.: Não foi possível copiar o som de arranque para %s. Continua a tocar a partir de %s.
   Zoom: Ampliar
+  '%s could not be deleted; it stays as it was.': Não foi possível apagar %s; fica como estava.
+  '%s could not be read as a .tar archive. Nothing was changed.': Não foi possível ler %s como arquivo .tar. Nada foi alterado.
+  '%s is deleted. %s is kept.': '%s foi apagado. %s é mantido.'
+  Art loads from it from now on.: As imagens passam a carregar a partir dele.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Apagar o .tar fundido?
+  
+    APAGADO: %s
+  
+    MANTIDO: %s (o destino, agora com todas as imagens dos dois)'
+  Into %s (%s): Em %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'MANTIDO e atualizado: %s (%d imagens)
+  
+    FUNDIDO: %s (%d imagens)
+  
+    Imagens nos dois: %d. Vence a do fundido. O .tar mantido é escrito de novo como ficheiro novo e só é trocado quando está completo, por isso uma paragem ou uma unidade cheia deixa-o como estava. Fundir agora?'
+  MERGE .TAR: FUNDIR .TAR
+  MERGE a .tar into the pack in %s: FUNDIR um .tar no pacote em %s
+  MERGING THE ART: A FUNDIR AS IMAGENS
+  Merge in %s (%s): Fundir %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Fundir o pacote novo noutro .tar? A seguir escolhe o .tar a manter e atualizar; as imagens do pacote novo entram nele.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Fundido: %s tem agora %d imagens (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Imagens que entram: %d (%s). Mesmo nome nos dois: %d (vence a do fundido).'
+  'Reading the archives: %s': 'A ler os arquivos: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Parar? O .tar mantido fica como estava; a cópia inacabada é removida.
+  Stopped. %s is as it was; the unfinished copy was removed.: Parado. %s está como estava; a cópia inacabada foi removida.
+  The kept .tar is only replaced once the merged copy is whole.: O .tar mantido só é substituído quando a cópia fundida está completa.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Não foi possível escrever a fusão na unidade de %s (há espaço?). Está como estava; nada mais mudou.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : A fusão precisa de cerca de %s livres na unidade de %s (o arquivo novo é escrito primeiro ao lado do antigo). Liberte algum espaço e tente de novo.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'A fusão parou entre duas mudanças de nome: o .tar mantido é %s e o fundido %s. Reponha os nomes com Ficheiros de memória.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : O .tar fundido foi escrito mas não pôde ficar com o nome %s (uma MMCE muda nomes a partir do firmware 1.4.0). O ficheiro novo foi removido; o .tar mantido está como estava.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Não há outro .tar para fundir em %s. Coloque-o nesta pasta, na pasta ART de uma unidade ou na raiz de uma unidade e tente de novo.
+  MERGE A .TAR INTO THIS: FUNDIR UM .TAR AQUI
 labels:
   MANUAL: Manual
   ENTER: Entrar

@@ -1306,6 +1306,51 @@ strings:
   : '%s 在柱子之后才启动，所以开机音效会晚到。START 会把 boot.adp（%d KB）复制到记忆卡上 RIPPS2 旁边（剩余 %d KB），这样它会在柱子升起时响起。'
   The boot sound could not be copied to %s. It still plays from %s.: 无法将开机音效复制到 %s。它仍从 %s 播放。
   Zoom: 放大
+  '%s could not be deleted; it stays as it was.': 无法删除 %s；它保持原样。
+  '%s could not be read as a .tar archive. Nothing was changed.': 无法将 %s 作为 .tar 归档读取。没有任何改动。
+  '%s is deleted. %s is kept.': '%s 已删除。%s 保留。'
+  Art loads from it from now on.: 从现在起图片从它加载。
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : '删除并入的 .tar？
+  
+    删除：%s
+  
+    保留：%s（目标，现已包含两者的所有图片）'
+  Into %s (%s): 并入 %s（%s）
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : '保留并更新：%s（%d 张图片）
+  
+    并入：%s（%d 张图片）
+  
+    两者都有的图片：%d。以并入的为准。保留的 .tar 会作为新文件重新写入，完整后才替换，所以中途停止或驱动器已满都会让它保持原样。现在合并？'
+  MERGE .TAR: 合并 .TAR
+  MERGE a .tar into the pack in %s: 将 .tar 合并到 %s 中的包
+  MERGING THE ART: 正在合并图片
+  Merge in %s (%s): 并入 %s（%s）
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: 把新包合并到另一个 .tar？接下来选择要保留并更新的 .tar；新包的图片会放进去。
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 已合并：%s 现有 %d 张图片（%d MB），%d 秒。
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 并入的图片：%d（%s）。两者同名：%d（以并入的为准）。
+  'Reading the archives: %s': 正在读取归档：%s
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: 停止？保留的 .tar 保持原样；未完成的副本会被删除。
+  Stopped. %s is as it was; the unfinished copy was removed.: 已停止。%s 保持原样；未完成的副本已删除。
+  The kept .tar is only replaced once the merged copy is whole.: 只有合并后的副本完整时才会替换保留的 .tar。
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: 无法把合并结果写入 %s 所在的驱动器（空间够吗？）。它保持原样；其他也没有改动。
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : 合并需要约 %s 的可用空间，位于 %s 所在的驱动器（新归档先写在旧归档旁边）。请腾出一些空间后重试。
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 合并在两次重命名之间停止：保留的 .tar 现在是 %s，并入的是 %s。请用记忆文件把名字改回来。
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : 合并后的 .tar 已写入，但无法改名为 %s（MMCE 从固件 1.4.0 起支持重命名）。新文件已删除；保留的 .tar 保持原样。
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : 没有其他 .tar 可以合并到 %s。请把它放在此文件夹、某个驱动器的 ART 文件夹或驱动器根目录，然后重试。
+  MERGE A .TAR INTO THIS: 将 .TAR 合并到此
 labels:
   MTAP_ENABLE: 多分插模拟
   HINT_PADEMU_WORKAROUND: 部分仿制 DS3 需要变通处理，此选项会启用它。

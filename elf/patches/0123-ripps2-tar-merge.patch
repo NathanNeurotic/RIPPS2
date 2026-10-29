@@ -1,0 +1,1032 @@
+diff --git a/include/ripps2.h b/include/ripps2.h
+index 47cb4ab..9818510 100644
+--- a/include/ripps2.h
++++ b/include/ripps2.h
+@@ -312,6 +312,7 @@ int ripps2VmcReadFile(const char *image, const char *save, const char *file, voi
+ int ripps2VmcExtractFile(const char *image, const char *save, const char *file, const char *dst);
+ int ripps2VmcDeleteSave(const char *image, const char *save);
+ int ripps2PickList(const char *const *items, int count); // ripps2edit.c: a small glass list; -1 = none
++int ripps2FilesDriveUp(const char *root); // build 123: Memory Files would list this drive ("mass0:/"): worth a look
+ void ripps2CardManager(int slot, const char *image); // ripps2card.c (build 86): memory card 1/2 (slot 0/1), or a card image (slot -1)
+ // ripps2media.c (build 93): Memory Files opens pictures (PNG, JPG) and video (AVI, with libsmslite)
+ enum { RIPPS2_MEDIA_NONE = 0, RIPPS2_MEDIA_PICTURE, RIPPS2_MEDIA_VIDEO, RIPPS2_MEDIA_SOUND, RIPPS2_MEDIA_ICON,
+diff --git a/include/ripps2artpack.h b/include/ripps2artpack.h
+index c707dc0..68ca5b6 100644
+--- a/include/ripps2artpack.h
++++ b/include/ripps2artpack.h
+@@ -21,5 +21,9 @@ int ripps2ArtPackAnswers(const char *key);
+ void ripps2ArtPackNoteNew(const char *path);
+ // "SLUS_210.50_COV.png" (or a path ending in it) -> "SLUS_210.50": the game a picture belongs to; 0 when not art
+ int ripps2ArtKeyOf(const char *name, char *key, int size);
++// build 123: another .tar merged into target (the kept one): picked from those in here (a folder, or NULL), in each started
++// drive's ART folder and at its top; the merged-in one's pictures win, then it is offered for deletion. 1 when the ART
++// Pack's settings changed (the caller saves them)
++int ripps2TarMergeInto(const char *target, const char *here);
+ 
+ #endif
+diff --git a/src/ripps2artpack.c b/src/ripps2artpack.c
+index 05a862f..6c49fb3 100644
+--- a/src/ripps2artpack.c
++++ b/src/ripps2artpack.c
+@@ -35,6 +35,7 @@
+ #include <time.h>
+ #include <sys/stat.h>
+ #include <kernel.h>
++#include <ps2sdkapi.h> // build 123: lseek64, a merge over 2 GB
+ 
+ #include "include/opl.h"
+ #include "include/gui.h"
+@@ -383,11 +384,14 @@ static void apKeyOut(const char *name)
+         k->out = 1;
+ }
+ 
++// the drives the sweep looks on for ART/art.tar (tar.c gDevices, less the network)
++static const char *const apRoots[] = {"mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/", "mass7:/",
++                                      "mmce0:/", "mmce1:/", "pfs0:/", NULL};
++
+ // the drive root of a source's ART folder from the path it would read a cover at ("mass0:ART/SLUS_210.50_COV")
+ static int apSourceOf(const char *probe)
+ {
+-    static const char *const targets[] = {"mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/", "mass7:/",
+-                                          "mmce0:/", "mmce1:/", "pfs0:/", NULL};
++    const char *const *targets = apRoots;
+     const char *colon = strchr(probe, ':'), *slash = strrchr(probe, '/'), *at;
+     char root[24], dir[40];
+     int i, atRoot;
+@@ -799,6 +803,837 @@ done:
+     return ok ? 1 : (stopped ? 0 : -1);
+ }
+ 
++// ---------------------------------------------------------------- build 123: one .tar merged into another
++
++/*
++  The user, 10/28: the HDD's art and the MMCE's art packed apart (moving thousands of small files over USB has failed
++  before), then one .tar merged into the other; later a small .tar of only the new games' art merged into the master
++  instead of packing every ART folder again. The kept .tar (the destination) is written again as a new file beside
++  itself: its members (less the ones the merged-in .tar replaces), then the merged-in .tar's, then one list of the games
++  both were built for (RIPPS2ART.LST, the two lists together), and it is swapped in only once that file is whole. A
++  stop, a full drive or a pulled card leaves the kept .tar as it was. A picture in both (the same name, PNG or JPG alike:
++  the art worker asks for "<game>_<kind>.") comes from the merged-in .tar, the newer. Members go across as they are,
++  header and all, so a PC reads the merge as any tar. Only files the art engine serves are kept (a folder entry, or a
++  member over 4 MB, which tar.c never indexes, stays out).
++*/
++
++#define TM_MAX_MEMBERS 32768
++#define TM_PICK        10 // .tar files offered to pick from (the glass list's room)
++#define TM_CHUNK       (256 * 1024)
++
++typedef struct
++{
++    unsigned long long head; // its 512-byte header, in its archive
++    unsigned int size;
++    unsigned int hash;  // apHash of its stem (tmStem)
++    char name[48];      // as tar.c keys it: a "./" and an "ART/" off, 46 characters at most
++    unsigned char from; // 0 the kept .tar, 1 the merged-in one
++    unsigned char drop; // 1 not in the merge (the newer one of its name is), 2 its archive's RIPPS2ART.LST
++} tm_member_t;
++
++typedef struct
++{
++    tm_member_t *m;
++    int count, cap;
++    int pictures[2];       // each archive's members (its list of games not counted)
++    char *list[2];         // and that list's text (NULL: none)
++    int listLen[2];
++    int out, in, same;     // members in the merge, the merged-in .tar's among them, and pictures that were in both
++    long long inBytes;     // the merged-in .tar's members' bytes in the merge
++    char *lst;             // the merge's list of games (NULL: neither .tar had one)
++    int lstLen;
++    long long outBytes;    // the merge's size, to the byte
++    TarEntryArt *index;    // its index as tar.c makes it (art_cache.bin), filled in as it is written
++    int indexCount;
++} tm_plan_t;
++
++static void tmFree(tm_plan_t *p)
++{
++    free(p->m);
++    free(p->list[0]);
++    free(p->list[1]);
++    free(p->lst);
++    free(p->index);
++    memset(p, 0, sizeof(*p));
++}
++
++static unsigned long long tmOctal(const unsigned char *s, int len)
++{
++    unsigned long long v = 0;
++    int i;
++    for (i = 0; i < len && s[i] == ' '; i++)
++        ;
++    for (; i < len && s[i] >= '0' && s[i] <= '7'; i++)
++        v = (v << 3) + (unsigned long long)(s[i] - '0');
++    return v;
++}
++
++// a tar header: its checksum adds up (bytes unsigned, or signed as some old tars counted them)
++static int tmHeadOk(const unsigned char h[512])
++{
++    unsigned int sum = 0;
++    int ssum = 0, i;
++    long long want = (long long)tmOctal(h + 148, 8);
++    for (i = 0; i < 512; i++) {
++        unsigned char c = (i >= 148 && i < 156) ? ' ' : h[i];
++        sum += c;
++        ssum += (signed char)c;
++    }
++    return want == (long long)sum || want == (long long)ssum;
++}
++
++static int tmZero(const unsigned char h[512])
++{
++    int i;
++    for (i = 0; i < 512; i++)
++        if (h[i])
++            return 0;
++    return 1;
++}
++
++// a member's name as tar.c keys it (tarParseFile): the ustar prefix and name, a "./" and an "ART/" off, 46 characters
++static void tmClean(const unsigned char h[512], char out[48])
++{
++    char name[101], prefix[156], full[260];
++    const char *c = full;
++    int i;
++
++    memcpy(name, h, 100);
++    name[100] = '\0';
++    for (i = 99; i >= 0 && (name[i] == ' ' || name[i] == '\0'); i--)
++        name[i] = '\0';
++    memcpy(prefix, h + 345, 155);
++    prefix[155] = '\0';
++    for (i = 154; i >= 0 && (prefix[i] == ' ' || prefix[i] == '\0'); i--)
++        prefix[i] = '\0';
++    if (prefix[0])
++        snprintf(full, sizeof(full), "%s/%s", prefix, name);
++    else
++        snprintf(full, sizeof(full), "%s", name);
++    if (!strncasecmp(c, "./", 2))
++        c += 2;
++    if (!strncasecmp(c, "ART/", 4) || !strncasecmp(c, "CFG/", 4) || !strncasecmp(c, "CHT/", 4))
++        c += 4;
++    memset(out, 0, 48);
++    strncpy(out, c, 47);
++    out[46] = '\0';
++}
++
++// a member's name after any folder, a picture's .png / .jpg / .jpeg off: the art worker asks for "SLUS_210.50_COV."
++static void tmStem(const char *name, char *out, int size)
++{
++    const char *base = strrchr(name, '/'), *dot;
++    base = base != NULL ? base + 1 : name;
++    snprintf(out, size, "%s", base);
++    dot = strrchr(out, '.');
++    if (dot != NULL && dot != out && apIsPicture(out))
++        out[dot - out] = '\0';
++}
++
++// n bytes whole (a device may hand a long read over in pieces); 1 read
++static int tmReadAll(int fd, void *buf, int n)
++{
++    int got = 0, r;
++    while (got < n && (r = read(fd, (char *)buf + got, n - got)) > 0)
++        got += r;
++    return got == n;
++}
++
++static int tmAdd(tm_plan_t *p, unsigned long long head, unsigned int size, const char *name, int from)
++{
++    char stem[64];
++    tm_member_t *e;
++
++    if (p->count >= p->cap) {
++        int cap = p->cap ? p->cap * 2 : 512;
++        tm_member_t *m;
++        if (cap > TM_MAX_MEMBERS || (m = realloc(p->m, cap * sizeof(tm_member_t))) == NULL)
++            return 0;
++        p->m = m;
++        p->cap = cap;
++    }
++    e = &p->m[p->count++];
++    memset(e, 0, sizeof(*e));
++    e->head = head;
++    e->size = size;
++    snprintf(e->name, sizeof(e->name), "%s", name);
++    tmStem(e->name, stem, sizeof(stem));
++    e->hash = apHash(stem);
++    e->from = (unsigned char)from;
++    return 1;
++}
++
++// an art.tar's own index beside it (art_cache.bin, as tar.c and the ART Pack write it) when it is this archive's: the
++// members without reading their headers one at a time (a master pack of thousands of pictures on an MMCE). 1 used
++static int tmFromIndex(tm_plan_t *p, const char *tar, int from, long long tarSize)
++{
++    const char *base = strrchr(tar, '/');
++    char path[260];
++    TarCacheHeader ch;
++    TarEntryArt *e = NULL;
++    int fd, i, ok = 0, start = p->count;
++
++    if (base == NULL || strcasecmp(base + 1, "art.tar"))
++        return 0;
++    apPackDir(tar, path, sizeof(path));
++    snprintf(path + strlen(path), sizeof(path) - strlen(path), "art_cache.bin");
++    if ((fd = open(path, O_RDONLY)) < 0)
++        return 0;
++    if (read(fd, &ch, sizeof(ch)) == (int)sizeof(ch) && !memcmp(ch.magic, ARC_MAGIC, 4) && ch.version == ARC_VERSION &&
++        (long long)ch.tarSize == tarSize && ch.entryCount <= TM_MAX_MEMBERS &&
++        (e = malloc((ch.entryCount + 1) * sizeof(TarEntryArt))) != NULL &&
++        tmReadAll(fd, e, ch.entryCount * sizeof(TarEntryArt))) {
++        ok = 1;
++        for (i = 0; i < (int)ch.entryCount && ok; i++) {
++            e[i].filename[sizeof(e[i].filename) - 1] = '\0';
++            if (e[i].base.offset < 512 || e[i].base.rawSize > MAX_FILE_SIZE || (long long)(e[i].base.offset + e[i].base.rawSize) > tarSize ||
++                !tmAdd(p, e[i].base.offset - 512, e[i].base.rawSize, e[i].filename, from))
++                ok = 0;
++        }
++    }
++    close(fd);
++    free(e);
++    if (!ok)
++        p->count = start;
++    return ok;
++}
++
++// an archive's members into the plan (and its list of games aside). 0 read, -1 not a .tar or not readable
++static int tmScan(tm_plan_t *p, const char *tar, int from)
++{
++    unsigned char h[512];
++    char name[48];
++    long long size, pos = 0;
++    int fd = open(tar, O_RDONLY), i, r, start = p->count;
++
++    if (fd < 0)
++        return -1;
++    size = lseek64(fd, 0, SEEK_END);
++    if (size < 0 || lseek64(fd, 0, SEEK_SET) != 0)
++        goto bad;
++    if (!tmFromIndex(p, tar, from, size))
++        for (;;) {
++            if ((r = read(fd, h, 512)) == 0)
++                break;
++            if (r != 512)
++                goto bad;
++            if (tmZero(h)) { // an end-of-archive mark: a concatenated tar goes on after it (as tar.c reads one)
++                pos += 512;
++                continue;
++            }
++            if (!tmHeadOk(h))
++                goto bad;
++            unsigned long long len = tmOctal(h + 124, 12), pad = (len + 511) / 512 * 512;
++            if ((h[156] == '0' || h[156] == '\0') && len <= MAX_FILE_SIZE) {
++                tmClean(h, name);
++                if (!tmAdd(p, pos, (unsigned int)len, name, from))
++                    goto bad;
++            }
++            pos += 512 + pad;
++            if (pos > size || lseek64(fd, pos, SEEK_SET) != pos)
++                goto bad; // cut short
++        }
++    // its list of games (the first, if a concatenated pack has two), read aside: the merge carries one for both
++    for (i = start; i < p->count; i++) {
++        tm_member_t *e = &p->m[i];
++        const char *base = strrchr(e->name, '/');
++        if (strcasecmp(base != NULL ? base + 1 : e->name, AP_LIST))
++            continue;
++        e->drop = 2;
++        if (p->list[from] != NULL || e->size == 0 || e->size > AP_MAX_KEYS * AP_KEY || (p->list[from] = malloc(e->size + 1)) == NULL)
++            continue;
++        if (lseek64(fd, e->head + 512, SEEK_SET) != (long long)(e->head + 512) || !tmReadAll(fd, p->list[from], e->size) ||
++            strncmp(p->list[from], AP_HEAD, strlen(AP_HEAD))) {
++            free(p->list[from]);
++            p->list[from] = NULL; // not RIPPS2's: the merge answers only for what it holds
++            continue;
++        }
++        p->listLen[from] = e->size;
++    }
++    for (i = start; i < p->count; i++)
++        p->pictures[from] += p->m[i].drop != 2;
++    close(fd);
++    return 0;
++
++bad:
++    close(fd);
++    p->count = start;
++    return -1;
++}
++
++static tm_member_t *tmSortM;
++
++// by stem, the merged-in .tar's first (it wins), then in archive order (the first of a name, as tar.c finds it)
++static int tmDupCmp(const void *a, const void *b)
++{
++    int i = *(const int *)a, j = *(const int *)b;
++    const tm_member_t *x = &tmSortM[i], *y = &tmSortM[j];
++    if (x->hash != y->hash)
++        return x->hash < y->hash ? -1 : 1;
++    if (x->from != y->from)
++        return x->from > y->from ? -1 : 1;
++    return i - j;
++}
++
++// one list of the games both .tar files were built for: each key once (a game either knew whole is whole in the merge)
++static int tmListMerge(tm_plan_t *p)
++{
++    unsigned int *seen;
++    char *text;
++    int k, n = 0, len = 0, cap = AP_MAX_KEYS * AP_KEY / 2 + 64;
++
++    if (p->list[0] == NULL && p->list[1] == NULL)
++        return 1;
++    if ((seen = malloc(AP_MAX_KEYS * sizeof(unsigned int))) == NULL || (text = malloc(cap)) == NULL) {
++        free(seen);
++        return 0;
++    }
++    len = snprintf(text, cap, "%s\r\n", AP_HEAD);
++    for (k = 0; k < 2; k++) {
++        char *line, *end, *nl;
++        if (p->list[k] == NULL)
++            continue;
++        p->list[k][p->listLen[k]] = '\0';
++        for (line = p->list[k], end = line + p->listLen[k]; line < end; line = nl + 1) {
++            unsigned int h;
++            int i, w;
++            for (nl = line; nl < end && *nl != '\n' && *nl != '\r'; nl++)
++                ;
++            *nl = '\0';
++            if (!*line || !strcmp(line, AP_HEAD) || (w = (int)strlen(line)) >= AP_KEY)
++                continue;
++            h = apHash(line);
++            for (i = 0; i < n && seen[i] != h; i++)
++                ;
++            if (i < n || n >= AP_MAX_KEYS || len + w + 3 > cap)
++                continue; // known already, or past what the art worker reads (that game's folder is asked, as before)
++            seen[n++] = h;
++            len += snprintf(text + len, cap - len, "%s\r\n", line);
++        }
++    }
++    free(seen);
++    p->lst = text;
++    p->lstLen = len;
++    return 1;
++}
++
++// which members go in, how many came from where, and the merge's size. 0 out of memory
++static int tmPlan(tm_plan_t *p)
++{
++    int *order, i, j, run, n = 0;
++
++    if ((order = malloc((p->count + 1) * sizeof(int))) == NULL)
++        return 0;
++    for (i = 0; i < p->count; i++)
++        if (p->m[i].drop != 2)
++            order[n++] = i;
++    tmSortM = p->m;
++    qsort(order, n, sizeof(int), tmDupCmp);
++    for (run = 0; run < n; run = j) {
++        for (j = run + 1; j < n && p->m[order[j]].hash == p->m[order[run]].hash; j++)
++            ;
++        for (i = run + 1; i < j; i++) { // a stem met before in this run: that one wins
++            char a[64], b[64];
++            int k;
++            tmStem(p->m[order[i]].name, a, sizeof(a));
++            for (k = run; k < i; k++) {
++                if (p->m[order[k]].drop)
++                    continue;
++                tmStem(p->m[order[k]].name, b, sizeof(b));
++                if (!strcasecmp(a, b))
++                    break;
++            }
++            if (k < i) {
++                p->m[order[i]].drop = 1;
++                p->same += p->m[order[i]].from == 0 && p->m[order[k]].from == 1;
++            }
++        }
++    }
++    free(order);
++    if (!tmListMerge(p))
++        return 0;
++    p->out = p->in = 0;
++    p->inBytes = 0;
++    p->outBytes = 1024; // the end of the archive
++    for (i = 0; i < p->count; i++)
++        if (!p->m[i].drop) {
++            long long one = 512 + ((long long)p->m[i].size + 511) / 512 * 512;
++            p->out++;
++            p->outBytes += one;
++            if (p->m[i].from == 1) {
++                p->in++;
++                p->inBytes += one;
++            }
++        }
++    if (p->lst != NULL)
++        p->outBytes += 512 + (p->lstLen + 511) / 512 * 512;
++    return 1;
++}
++
++// the merge written to tmp: the kept .tar's members, the merged-in one's, the list of games, the end. 1 written whole,
++// 0 stopped, -1 not written (the drive), -2 an archive read short or not as it was read. Nothing is left on a failure
++static int tmWrite(tm_plan_t *p, const char *const tars[2], const char *tmp, int (*progress)(long long done, long long total, int n, int count))
++{
++    unsigned char *buf = malloc(TM_CHUNK), head[512];
++    unsigned long long pos = 0;
++    long long done = 0;
++    FILE *out = NULL;
++    int fd[2] = {-1, -1}, pass, i, k, n = 0, rc = -1;
++
++    free(p->index);
++    p->indexCount = 0;
++    if (buf == NULL || (p->index = calloc(p->out + 2, sizeof(TarEntryArt))) == NULL)
++        goto end;
++    for (k = 0; k < 2; k++)
++        if ((fd[k] = open(tars[k], O_RDONLY)) < 0) {
++            rc = -2;
++            goto end;
++        }
++    if ((out = fopen(tmp, "wb")) == NULL)
++        goto end;
++    setvbuf(out, NULL, _IOFBF, 256 * 1024); // whole 256 KB writes, as the pack's
++    for (pass = 0; pass < 2; pass++)
++        for (i = 0; i < p->count; i++) {
++            tm_member_t *e = &p->m[i];
++            unsigned int pad = (e->size + 511) / 512 * 512, left = 512 + pad;
++            int first = 1;
++            if (e->drop || e->from != pass)
++                continue;
++            if (progress != NULL && progress(done, p->outBytes, n + 1, p->out)) {
++                rc = 0;
++                goto end;
++            }
++            if (lseek64(fd[e->from], e->head, SEEK_SET) != (long long)e->head) {
++                rc = -2;
++                goto end;
++            }
++            while (left > 0) {
++                unsigned int want = left < TM_CHUNK ? left : TM_CHUNK, got = 0;
++                int r;
++                while (got < want && (r = read(fd[e->from], buf + got, want - got)) > 0)
++                    got += r;
++                if (got != want || (first && (!tmHeadOk(buf) || tmOctal(buf + 124, 12) != e->size))) {
++                    rc = -2; // changed since it was read (or its index beside it is not its own)
++                    goto end;
++                }
++                first = 0;
++                if (fwrite(buf, 1, want, out) != want)
++                    goto end;
++                left -= want;
++                done += want;
++            }
++            p->index[n].base.offset = pos + 512;
++            p->index[n].base.rawSize = e->size;
++            p->index[n].base.paddedSize = pad;
++            memcpy(p->index[n].filename, e->name, sizeof(p->index[n].filename));
++            pos += 512 + pad;
++            n++;
++        }
++    if (p->lst != NULL) {
++        k = (512 - p->lstLen % 512) % 512;
++        apHeader(head, AP_LIST, p->lstLen, (unsigned int)time(NULL));
++        if (fwrite(head, 1, 512, out) != 512 || fwrite(p->lst, 1, p->lstLen, out) != (size_t)p->lstLen || !apWriteZeros(out, k))
++            goto end;
++        p->index[n].base.offset = pos + 512;
++        p->index[n].base.rawSize = p->lstLen;
++        p->index[n].base.paddedSize = p->lstLen + k;
++        snprintf(p->index[n].filename, sizeof(p->index[n].filename), "%s", AP_LIST);
++        pos += 512 + p->lstLen + k;
++        n++;
++    }
++    if (!apWriteZeros(out, 1024))
++        goto end;
++    pos += 1024;
++    k = ferror(out);
++    if (fclose(out) != 0 || k) {
++        out = NULL;
++        goto end;
++    }
++    out = NULL;
++    {
++        struct stat st;
++        if ((long long)pos != p->outBytes || stat(tmp, &st) != 0 || (long long)st.st_size != p->outBytes)
++            goto end; // the drive kept less than it took
++    }
++    if (progress != NULL)
++        progress(p->outBytes, p->outBytes, p->out, p->out);
++    p->indexCount = n;
++    rc = 1;
++
++end:
++    if (out != NULL)
++        fclose(out);
++    for (k = 0; k < 2; k++)
++        if (fd[k] >= 0)
++            close(fd[k]);
++    free(buf);
++    if (rc != 1)
++        remove(tmp); // never a merge half written
++    return rc;
++}
++
++// the merge takes the kept .tar's name: the kept one to <name>.old, the merge to its name, then the old one goes. 1 done;
++// -1 not renamed (the kept .tar as it was, the merge removed); -2 caught between the two (both kept: old says where)
++static int tmSwap(const char *target, const char *tmp, char *old, int oldSize)
++{
++    snprintf(old, oldSize, "%s.old", target);
++    remove(old); // an earlier swap whose last step failed: the kept .tar has its name, so this is a spare copy
++    if (rename(target, old) != 0) {
++        remove(tmp);
++        return -1;
++    }
++    if (rename(tmp, target) != 0) {
++        if (rename(old, target) == 0) {
++            remove(tmp);
++            return -1;
++        }
++        return -2;
++    }
++    remove(old);
++    return 1;
++}
++
++// beside a merged art.tar, its index as tar.c reads it (art_cache.bin, checked against the size): no header scan at boot.
++// Another name's index would not be that folder's art.tar's, so only an art.tar gets one
++static void tmWriteIndex(const tm_plan_t *p, const char *target)
++{
++    const char *base = strrchr(target, '/');
++    char path[260];
++    TarCacheHeader ch;
++    int fd;
++
++    if (base == NULL || strcasecmp(base + 1, "art.tar"))
++        return;
++    apPackDir(target, path, sizeof(path));
++    snprintf(path + strlen(path), sizeof(path) - strlen(path), "art_cache.bin");
++    memset(&ch, 0, sizeof(ch));
++    memcpy(ch.magic, ARC_MAGIC, 4);
++    ch.version = ARC_VERSION;
++    ch.tarSize = p->outBytes;
++    ch.entryCount = p->indexCount;
++    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
++        return;
++    if (write(fd, &ch, sizeof(ch)) != (int)sizeof(ch) ||
++        write(fd, p->index, p->indexCount * sizeof(TarEntryArt)) != (int)(p->indexCount * sizeof(TarEntryArt))) {
++        close(fd);
++        remove(path); // tar.c reads the headers itself, once
++        return;
++    }
++    close(fd);
++}
++
++// ---------------------------------------------------------------- the merge on screen
++
++// "mmce0:/ART/art.tar" -> "mmce0:/"
++static void tmRootOf(const char *path, char *root, int size)
++{
++    const char *colon = strchr(path, ':');
++    snprintf(root, size, "%.*s/", colon != NULL ? (int)(colon - path + 1) : 0, path);
++}
++
++// an art.tar at the top of a drive's ART folder, where the sweep (and the ART Pack) reads one
++static int apIsPackPath(const char *path)
++{
++    const char *colon = strchr(path, ':'), *rest;
++    char root[24];
++    int i;
++    if (colon == NULL || colon - path > 8)
++        return 0;
++    rest = colon[1] == '/' ? colon + 2 : colon + 1;
++    tmRootOf(path, root, sizeof(root));
++    for (i = 0; apRoots[i] != NULL; i++)
++        if (!strcasecmp(apRoots[i], root))
++            return !strcasecmp(rest, "ART/art.tar");
++    return 0;
++}
++
++// the .tar files on the started drives a merge can take or go into: those in here (Memory Files' folder), in each started
++// drive's ART folder and at its top; except (the other side of the merge) left out. Their paths and sizes
++static int tmFind(const char *except, const char *here, char paths[][256], long long *sizes, int max)
++{
++    char dirs[2 * 11 + 1][256], path[256];
++    int nd = 0, n = 0, i, k;
++
++    if (here != NULL && here[0])
++        snprintf(dirs[nd++], sizeof(dirs[0]), "%s", here);
++    for (i = 0; apRoots[i] != NULL; i++)
++        if (ripps2FilesDriveUp(apRoots[i])) {
++            snprintf(dirs[nd++], sizeof(dirs[0]), "%sART/", apRoots[i]);
++            snprintf(dirs[nd++], sizeof(dirs[0]), "%s", apRoots[i]);
++        }
++    for (i = 0; i < nd && n < max; i++) {
++        struct dirent *e;
++        DIR *d;
++        for (k = 0; k < i && !apSamePath(dirs[k], dirs[i]); k++)
++            ;
++        if (k < i || (d = opendir(dirs[i])) == NULL)
++            continue; // looked in already (here is a drive's ART folder), or not there
++        while (n < max && (e = readdir(d)) != NULL) {
++            struct stat st;
++            int len = strlen(e->d_name);
++            if (e->d_name[0] == '.' || len < 5 || strcasecmp(e->d_name + len - 4, ".tar"))
++                continue;
++            snprintf(path, sizeof(path), "%s%s%s", dirs[i], dirs[i][strlen(dirs[i]) - 1] == '/' ? "" : "/", e->d_name);
++            if ((except != NULL && apSamePath(path, except)) || stat(path, &st) != 0 || S_ISDIR(st.st_mode))
++                continue;
++            for (k = 0; k < n && !apSamePath(paths[k], path); k++)
++                ;
++            if (k < n)
++                continue;
++            snprintf(paths[n], 256, "%s", path);
++            sizes[n++] = st.st_size;
++        }
++        closedir(d);
++    }
++    return n;
++}
++
++// one of them picked from the glass list, each row "<row's words> (size)"; -1 none
++static int tmPick(const char *rowFmt, char paths[][256], const long long *sizes, int n)
++{
++    char rows[TM_PICK][300], size[24];
++    const char *list[TM_PICK];
++    int i;
++    for (i = 0; i < n; i++) {
++        ripps2SizeText(sizes[i], size, sizeof(size));
++        snprintf(rows[i], sizeof(rows[i]), rowFmt, paths[i], size);
++        list[i] = rows[i];
++    }
++    return ripps2PickList(list, n);
++}
++
++static clock_t tmBegan;
++static const char *tmShown;
++
++// the RIPPS2 progress bar, as the pack's (apProgress); the back key asks to stop (1 = stop)
++static int tmProgress(long long done, long long total, int n, int count)
++{
++    static clock_t shown = 0;
++    char left[96], when[48];
++    double secs = (double)(clock() - tmBegan) / CLOCKS_PER_SEC;
++    float q = total > 0 ? (float)((double)done / (double)total) : 0.0f;
++    int force = n <= 1 || done >= total;
++
++    readPads();
++    if (getKeyOn(gSelectButton == KEY_CIRCLE ? KEY_CROSS : KEY_CIRCLE)) {
++        guiMsgBoxSound(SFX_ERROR);
++        if (guiMsgBox(_t("Stop? The kept .tar stays as it was; the unfinished copy is removed."), 1, NULL))
++            return 1;
++        force = 1;
++    }
++    if (!force && clock() - shown < CLOCKS_PER_SEC / 5)
++        return 0;
++    shown = clock();
++    when[0] = '\0';
++    if (secs > 5.0 && q > 0.02f) {
++        int mins = (int)((secs / q - secs) / 60.0 + 0.5);
++        if (mins < 1)
++            snprintf(when, sizeof(when), "%s", _t("LESS THAN A MINUTE LEFT"));
++        else
++            snprintf(when, sizeof(when), _t("ABOUT %d MIN"), mins);
++    }
++    snprintf(left, sizeof(left), _t("PICTURE %d OF %d"), n > count ? count : n, count);
++    if (when[0])
++        snprintf(left + strlen(left), sizeof(left) - strlen(left), "   %s", when);
++    ripps2DrawProgress(_t("MERGING THE ART"), tmShown, done, total, left, 1);
++    return 0;
++}
++
++// the merged-in .tar removed (and RIPPS2's files beside it when it was an art.tar: its index and the pack's notes, which
++// only an ART Pack in that folder reads, and that was this one). 1 gone
++static int tmDelete(const char *source)
++{
++    const char *base = strrchr(source, '/');
++    char dir[200], path[260];
++    int ok = 0;
++
++    tarInvalidate(TAR_KIND_ART); // never an index of what is no longer there
++    if (!ioWriteBegin())
++        return 0;
++    ok = remove(source) == 0;
++    if (ok && base != NULL && !strcasecmp(base + 1, "art.tar")) {
++        apPackDir(source, dir, sizeof(dir));
++        snprintf(path, sizeof(path), "%sart_cache.bin", dir);
++        remove(path);
++        snprintf(path, sizeof(path), "%s%s", dir, AP_NEW);
++        remove(path);
++    }
++    ioWriteEnd();
++    return ok;
++}
++
++// the merge, asked, run and reported, then the offer to delete the merged-in .tar. 1 when the ART Pack's settings changed
++static int tmRun(const char *target, const char *source)
++{
++    const char *tars[2] = {target, source};
++    char msg[1000], size[24], info[200], when[48], tmp[260], old[260], rootT[24], rootS[24];
++    ripps2_vol_t vol;
++    tm_plan_t p;
++    int r, secs, changed = 0, inUse = 0, wasTar = gEnableArtTar;
++    double kb;
++    clock_t start;
++
++    memset(&p, 0, sizeof(p));
++    snprintf(msg, sizeof(msg), _t("Reading the archives: %s"), source);
++    guiRenderTextScreen(msg);
++    for (r = 0; r < 2; r++)
++        if (strlen(tars[r]) + 5 >= sizeof(tmp) || tmScan(&p, tars[r], r) < 0 || (r == 1 && !tmPlan(&p))) { // (+5: ".tmp")
++            snprintf(msg, sizeof(msg), _t("%s could not be read as a .tar archive. Nothing was changed."), tars[r]);
++            guiMsgBoxSound(SFX_ERROR);
++            guiMsgBox(msg, 0, NULL);
++            goto out;
++        }
++    // the room: the merge is written beside the kept .tar before it takes its place (MMCE and the APA HDD cannot say: a
++    // full one stops the write, and the kept .tar is as it was)
++    tmRootOf(target, rootT, sizeof(rootT));
++    tmRootOf(source, rootS, sizeof(rootS));
++    if (ripps2VolInfo(rootT, &vol) && vol.freeKb > 0 && (long long)vol.freeKb * 1024 < p.outBytes + 1024 * 1024) {
++        ripps2SizeText(p.outBytes + 1024 * 1024, size, sizeof(size));
++        snprintf(msg, sizeof(msg), _t("The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again."),
++                 size, target);
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(msg, 0, NULL);
++        goto out;
++    }
++    // the panel every long job has: what goes where, how big, how long; SELECT held to go on
++    ripps2SizeText(p.inBytes, size, sizeof(size));
++    snprintf(info, sizeof(info), _t("Pictures in: %d (%s). Same name in both: %d (the merged-in one wins)."), p.in, size, p.same);
++    kb = (double)p.outBytes / 1024.0;
++    secs = (int)(kb / apWriteKbs(rootT) + (kb - p.inBytes / 1024.0) / (2.0 * apWriteKbs(rootT)) + p.inBytes / 1024.0 / (2.0 * apWriteKbs(rootS)) + 0.5);
++    if (secs < 60)
++        snprintf(when, sizeof(when), "%s", _t("Under a minute"));
++    else
++        snprintf(when, sizeof(when), _t("About %d min"), (secs + 30) / 60);
++    if (!ripps2AskHold(_t("MERGE .TAR"), target, info, when, _t("The kept .tar is only replaced once the merged copy is whole.")))
++        goto out;
++    snprintf(msg, sizeof(msg),
++             _t("KEPT and updated: %s (%d pictures)\nMERGED IN: %s (%d pictures)\nPictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?"),
++             target, p.pictures[0], source, p.pictures[1], p.same);
++    if (!guiMsgBox(msg, 1, NULL))
++        goto out;
++
++    // nothing reads the archives while the merge takes the kept one's place: the toggle off, the IO worker held
++    snprintf(tmp, sizeof(tmp), "%s.tmp", target);
++    gEnableArtTar = 0;
++    tarInvalidate(TAR_KIND_ART);
++    ioBlockOps(1);
++    start = tmBegan = clock();
++    tmShown = target;
++    if (!ioWriteBegin()) // never once a launch has begun
++        r = -1;
++    else {
++        r = tmWrite(&p, tars, tmp, tmProgress);
++        if (r == 1) {
++            r = tmSwap(target, tmp, old, sizeof(old));
++            if (r == 1)
++                tmWriteIndex(&p, target);
++            else
++                r = r == -1 ? -3 : -4;
++        }
++        ioWriteEnd();
++    }
++    ioBlockOps(0);
++
++    if (r == 1) {
++        // the merge is the pack in use when it is an art.tar the sweep reads and it took the place of the pack (or there was none)
++        if (apIsPackPath(target) && (!gRipps2ArtPack[0] || apSamePath(gRipps2ArtPack, target) || apSamePath(gRipps2ArtPack, source))) {
++            snprintf(gRipps2ArtPack, sizeof(gRipps2ArtPack), "%s", target);
++            gRipps2ArtPackCount = p.out;
++            gRipps2ArtPackKb = (int)(p.outBytes >> 10);
++            gEnableArtTar = 1;
++            changed = inUse = 1;
++        } else
++            gEnableArtTar = wasTar;
++        ripps2ArtPackApplySettings();
++        tarInvalidate(TAR_KIND_ART);
++        artIndexInvalidate();
++        cacheInvalidateFailMemo();
++        ripps2Diag("tar merge: %s into %s, %d in (%d in both), %d members, %d KB, %d s (said %d s)", source, target, p.in, p.same, p.out,
++                   (int)(p.outBytes >> 10), (int)((clock() - start) / CLOCKS_PER_SEC), secs);
++        snprintf(msg, sizeof(msg), _t("Merged: %s now holds %d pictures (%d MB), %d s."), target, p.out, (int)((p.outBytes + 1048575) >> 20),
++                 (int)((clock() - start) / CLOCKS_PER_SEC));
++        if (inUse)
++            snprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), " %s", _t("Art loads from it from now on."));
++        guiMsgBoxSound(SFX_SAVE);
++        guiMsgBox(msg, 0, NULL);
++        // the merged-in .tar is no longer needed: offered for deletion, the kept one never
++        snprintf(msg, sizeof(msg), _t("Delete the merged-in .tar?\nDELETE: %s\nKEEP: %s (the destination, now with every picture of both)"), source, target);
++        guiMsgBoxStartOption(_t("DELETE IT"));
++        guiMsgBoxBackLabel(_t("KEEP IT"));
++        if (guiMsgBox(msg, 0, NULL) == 2) {
++            int wasPack = apSamePath(source, gRipps2ArtPack);
++            if (tmDelete(source)) {
++                if (wasPack) {
++                    gRipps2ArtPack[0] = '\0';
++                    gRipps2ArtPackCount = gRipps2ArtPackKb = 0;
++                    changed = 1;
++                }
++                snprintf(msg, sizeof(msg), _t("%s is deleted. %s is kept."), source, target);
++                guiMsgBoxSound(SFX_SAVE);
++            } else {
++                snprintf(msg, sizeof(msg), _t("%s could not be deleted; it stays as it was."), source);
++                guiMsgBoxSound(SFX_ERROR);
++            }
++            ripps2ArtPackApplySettings();
++            tarInvalidate(TAR_KIND_ART);
++            artIndexInvalidate();
++            cacheInvalidateFailMemo();
++            guiMsgBox(msg, 0, NULL);
++        }
++        goto out;
++    }
++    gEnableArtTar = wasTar;
++    ripps2ArtPackApplySettings();
++    tarInvalidate(TAR_KIND_ART);
++    if (r == 0)
++        snprintf(msg, sizeof(msg), _t("Stopped. %s is as it was; the unfinished copy was removed."), target);
++    else if (r == -2)
++        snprintf(msg, sizeof(msg), _t("%s could not be read as a .tar archive. Nothing was changed."), source);
++    else if (r == -3)
++        snprintf(msg, sizeof(msg), _t("The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was."), target);
++    else if (r == -4)
++        snprintf(msg, sizeof(msg), _t("The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files."), old, tmp);
++    else
++        snprintf(msg, sizeof(msg), _t("The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed."), target);
++    guiMsgBoxSound(SFX_ERROR);
++    guiMsgBox(msg, 0, NULL);
++
++out:
++    tmFree(&p);
++    return changed;
++}
++
++int ripps2TarMergeInto(const char *target, const char *here)
++{
++    char paths[TM_PICK][256], msg[400];
++    long long sizes[TM_PICK];
++    int n = tmFind(target, here, paths, sizes, TM_PICK), pick;
++
++    if (n == 0) {
++        snprintf(msg, sizeof(msg), _t("There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again."), target);
++        guiMsgBoxSound(SFX_ERROR);
++        guiMsgBox(msg, 0, NULL);
++        return 0;
++    }
++    if ((pick = tmPick(_t("Merge in %s (%s)"), paths, sizes, n)) < 0)
++        return 0;
++    return tmRun(target, paths[pick]);
++}
++
++// after a pack is built: a small new pack straight into the master (another .tar on the started drives). 1 when the settings changed
++static int tmOfferAfterBuild(const char *pack)
++{
++    char paths[TM_PICK][256];
++    long long sizes[TM_PICK];
++    int n = tmFind(pack, NULL, paths, sizes, TM_PICK), pick;
++
++    if (n == 0 || !guiMsgBox(_t("Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it."), 1, NULL))
++        return 0;
++    if ((pick = tmPick(_t("Into %s (%s)"), paths, sizes, n)) < 0)
++        return 0;
++    return tmRun(paths[pick], pack);
++}
++
+ static int apSpeedCmp(const void *a, const void *b)
+ {
+     return apSrc[*(const int *)b].kbps - apSrc[*(const int *)a].kbps;
+@@ -806,10 +1641,10 @@ static int apSpeedCmp(const void *a, const void *b)
+ 
+ int ripps2ArtPackDialog(void)
+ {
+-    char items[AP_SOURCES + 1][200], msg[700], pack[160], rate[24], room[48], size[24], info[120], when[48];
+-    const char *list[AP_SOURCES + 1];
++    char items[AP_SOURCES + 2][200], msg[700], pack[160], rate[24], room[48], size[24], info[120], when[48];
++    const char *list[AP_SOURCES + 2];
+     int order[AP_SOURCES], n = 0, i, pick, target, pictures, kb, games, folders, result, secs, roomless = 0;
+-    int removable = gRipps2ArtPack[0] != '\0';
++    int removable = gRipps2ArtPack[0] != '\0', mergeRow = removable; // build 123: a .tar merged into the pack in use
+     int wasTar = gEnableArtTar; // Artwork > .tar art as it was: put back when a build does not finish
+     clock_t start;
+ 
+@@ -853,10 +1688,14 @@ int ripps2ArtPackDialog(void)
+                  apSrc[order[i]].root, rate, room);
+         list[i] = items[i];
+     }
+-    if (removable) {
+-        snprintf(items[n], sizeof(items[n]), _t("REMOVE the pack in %s (the ART folders stay as they are)"), gRipps2ArtPack);
++    if (mergeRow) {
++        snprintf(items[n], sizeof(items[n]), _t("MERGE a .tar into the pack in %s"), gRipps2ArtPack);
+         list[n] = items[n];
+     }
++    if (removable) {
++        snprintf(items[n + mergeRow], sizeof(items[0]), _t("REMOVE the pack in %s (the ART folders stay as they are)"), gRipps2ArtPack);
++        list[n + mergeRow] = items[n + mergeRow];
++    }
+ 
+     result = 0;
+     if (n == 0 && !removable) {
+@@ -869,10 +1708,15 @@ int ripps2ArtPackDialog(void)
+             guiMsgBox(_t("There is no ART folder with pictures on the started drives. Start the drives your art is on (SELECT on their page), then come back."), 0, NULL);
+         goto out;
+     }
+-    if ((pick = ripps2PickList(list, n + removable)) < 0)
++    if ((pick = ripps2PickList(list, n + mergeRow + removable)) < 0)
+         goto out;
+ 
+-    if (pick == n) { // remove the pack: RIPPS2's own three files, never the ART folders
++    if (mergeRow && pick == n) { // build 123: another .tar into the pack in use (the drives' folders are not packed again)
++        snprintf(pack, sizeof(pack), "%s", gRipps2ArtPack);
++        result = ripps2TarMergeInto(pack, NULL);
++        goto out;
++    }
++    if (pick == n + mergeRow) { // remove the pack: RIPPS2's own three files, never the ART folders
+         snprintf(msg, sizeof(msg), _t("Remove the ART Pack in %s? The ART folders stay as they are."), gRipps2ArtPack);
+         if (!guiMsgBox(msg, 1, NULL))
+             goto out;
+@@ -964,6 +1808,8 @@ int ripps2ArtPackDialog(void)
+         guiMsgBoxSound(SFX_ERROR);
+     }
+     guiMsgBox(msg, 0, NULL);
++    if (i > 0)
++        result |= tmOfferAfterBuild(pack); // build 123: a small new pack straight into the master
+ 
+ out:
+     free(apFiles);
+diff --git a/src/ripps2files.c b/src/ripps2files.c
+index fddfb82..7c1cff8 100644
+--- a/src/ripps2files.c
++++ b/src/ripps2files.c
+@@ -66,6 +66,7 @@
+ #include "include/ripps2tint.h" // RIPPSettings Color Theme: last, so every colour below goes through it
+ #include "include/ripps2tr.h" // build 104: _t, RIPPS2's words in the chosen language
+ #include "include/ripps2shot.h" // build 108: the RIPSHOT rolls in MEDIA
++#include "include/ripps2artpack.h" // build 123: MERGE A .TAR INTO THIS
+ 
+ #define FB_MAX      400 // entries in one folder
+ #define FB_NAME     128
+@@ -193,8 +194,8 @@ static unsigned char fbDeleteIsDir[FB_CLIP_MAX];
+ static int fbDeleteCount = 0;
+ 
+ // the actions menu (Triangle)
+-enum { FB_ACT_EDIT = 0, FB_ACT_COPY, FB_ACT_CUT, FB_ACT_PASTE, FB_ACT_PASTE_PSU, FB_ACT_UNPACK, FB_ACT_DELETE, FB_ACT_RENAME, FB_ACT_NEWDIR, FB_ACT_MARKALL, FB_ACT_CARDS, FB_ACT_RIPICON, FB_ACT_COUNT };
+-static const char *fbActName[FB_ACT_COUNT] = {N_("EDIT"), N_("COPY"), N_("CUT"), N_("PASTE"), N_("PASTE AS PSU"), N_("UNPACK PSU HERE"), N_("DELETE"), N_("RENAME"), N_("NEW FOLDER"), N_("MARK ALL"), N_("CARD MANAGER"), N_("RIP 3D ICON")};
++enum { FB_ACT_EDIT = 0, FB_ACT_COPY, FB_ACT_CUT, FB_ACT_PASTE, FB_ACT_PASTE_PSU, FB_ACT_UNPACK, FB_ACT_DELETE, FB_ACT_RENAME, FB_ACT_NEWDIR, FB_ACT_MARKALL, FB_ACT_CARDS, FB_ACT_RIPICON, FB_ACT_TARMERGE, FB_ACT_COUNT };
++static const char *fbActName[FB_ACT_COUNT] = {N_("EDIT"), N_("COPY"), N_("CUT"), N_("PASTE"), N_("PASTE AS PSU"), N_("UNPACK PSU HERE"), N_("DELETE"), N_("RENAME"), N_("NEW FOLDER"), N_("MARK ALL"), N_("CARD MANAGER"), N_("RIP 3D ICON"), N_("MERGE A .TAR INTO THIS")};
+ static int fbMenuOpen = 0, fbMenuSel = 0, fbMenuItems[FB_ACT_COUNT], fbMenuCount = 0;
+ 
+ static const char *fbDevices[] = {"mc0:/", "mc1:/", "mass0:/", "mass1:/", "mass2:/", "mass3:/", "mass4:/", "mass5:/", "mass6:/",
+@@ -1835,6 +1836,18 @@ int ripps2StartDrives(void)
+     return fbDrivesUp;
+ }
+ 
++// build 123: a drive Memory Files would list (as fbScanDevices decides), so a look for .tar files there costs no failed probe
++int ripps2FilesDriveUp(const char *root)
++{
++    if (!strncmp(root, "mass", 4) && root[4] >= '0' && root[4] <= '7')
++        return (fbDrivesUp || bdmSlotEverConnected(BDM_MODE + root[4] - '0')) && bdmSlotDeviceType(root[4] - '0') >= -1;
++    if (!strncmp(root, "mmce", 4))
++        return mmceGetObject(1) != NULL || fbMmceSlot[root[4] == '1'];
++    if (!strncmp(root, "pfs", 3))
++        return hddGetObject(1) != NULL || fbDrivesUp;
++    return 0;
++}
++
+ int ripps2DrivesStarted(void)
+ {
+     return fbDrivesUp;
+@@ -2015,6 +2028,8 @@ static void fbMenuBuild(void)
+         fbMenuItems[fbMenuCount++] = FB_ACT_CARDS; // build 86: the card image under the cursor
+     if (haveItem && !inVmc && fbList[fbCursor].kind == FB_KIND_FILE && ripps2MediaKind(fbList[fbCursor].name) == RIPPS2_MEDIA_ICON)
+         fbMenuItems[fbMenuCount++] = FB_ACT_RIPICON; // build 98: a save's 3D icon, for a PC
++    if (haveItem && !inVmc && !fbIsMc(fbPath) && fbList[fbCursor].kind == FB_KIND_FILE && fbHasSuffix(fbList[fbCursor].name, ".tar"))
++        fbMenuItems[fbMenuCount++] = FB_ACT_TARMERGE; // build 123: this .tar kept, another merged into it
+     fbMenuSel = 0;
+ }
+ 
+@@ -2143,6 +2158,14 @@ static void fbAction(int act)
+             ripps2CardManager(-1, from);
+             fbRun(FB_OP_SCAN, _t("READING"));
+             break;
++        case FB_ACT_TARMERGE: // build 123: the .tar under the cursor is the one kept
++            fbJoin(from, sizeof(from), fbPath, fbList[fbCursor].name);
++            snprintf(fbKeepName, sizeof(fbKeepName), "%s", fbList[fbCursor].name);
++            sfxPlay(SFX_CONFIRM);
++            if (ripps2TarMergeInto(from, fbPath))
++                saveConfig(CONFIG_OPL, 0); // the ART Pack in use moved (Settings is not open to save it)
++            fbRun(FB_OP_SCAN, _t("READING"));
++            break;
+         case FB_ACT_RIPICON: { // build 98: OBJ + MTL + PNG on mass0:, where a PC can take them
+             char out[160], msg[256];
+             const char *why;
+@@ -3210,7 +3233,13 @@ void ripps2RenderFiles(void)
+ 
+     // the actions menu
+     if (fbMenuOpen) {
+-        int w = 200, h = fbMenuCount * 24 + 20, x = 420, y = 120;
++        int w = 200, h = fbMenuCount * 24 + 20, x, y = 120;
++        for (i = 0; i < fbMenuCount; i++) { // build 123: as wide as its longest action (MERGE A .TAR INTO THIS, translated)
++            int iw = fntCalcDimensions(uiFont, _t(fbActName[fbMenuItems[i]])) + 32;
++            if (iw > w)
++                w = iw > 600 ? 600 : iw;
++        }
++        x = 620 - w;
+         rmDrawRect(x, y, w, h, FB_PRIM(0x03, 0x08, 0x22, 0x70));
+         rmDrawLine(x, y, x + w, y, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));
+         rmDrawLine(x, y + h, x + w, y + h, FB_PRIM(0x4A, 0x72, 0xDC, 0x80));

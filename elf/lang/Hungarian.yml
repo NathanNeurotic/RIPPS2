@@ -1306,6 +1306,51 @@ strings:
   : A(z) %s az oszlopok után indul, ezért az indítási hang késik. A START a boot.adp fájlt (%d KB) a RIPPS2 mellé másolja a memóriakártyára (%d KB szabad), ahol az oszlopok emelkedésekor szól.
   The boot sound could not be copied to %s. It still plays from %s.: 'Az indítási hangot nem sikerült a(z) %s helyre másolni. Továbbra is innen szól: %s.'
   Zoom: Nagyítás
+  '%s could not be deleted; it stays as it was.': A(z) %s nem törölhető; marad, ahogy volt.
+  '%s could not be read as a .tar archive. Nothing was changed.': A(z) %s nem olvasható .tar archívumként. Semmi sem változott.
+  '%s is deleted. %s is kept.': A(z) %s törölve. A(z) %s megmarad.
+  Art loads from it from now on.: A képek mostantól ebből töltődnek.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Törlöd a beolvasztott .tar fájlt?
+  
+    TÖRLÉS: %s
+  
+    MEGTARTÁS: %s (a cél, most már mindkettő minden képével)'
+  Into %s (%s): 'Ide: %s (%s)'
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'MEGMARAD és frissül: %s (%d kép)
+  
+    BEOLVAD: %s (%d kép)
+  
+    Mindkettőben szereplő képek: %d. A beolvasztott nyer. A megtartott .tar új fájlként íródik újra, és csak akkor cserélődik, ha teljes, így egy leállítás vagy egy megtelt meghajtó úgy hagyja, ahogy volt. Egyesíted most?'
+  MERGE .TAR: .TAR EGYESÍTÉSE
+  MERGE a .tar into the pack in %s: Egy .tar EGYESÍTÉSE a(z) %s csomagba
+  MERGING THE ART: A KÉPEK EGYESÍTÉSE
+  Merge in %s (%s): 'Beolvasztás: %s (%s)'
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Beolvasztod az új csomagot egy másik .tar fájlba? Ezután kiválasztod a megtartandó és frissítendő .tar fájlt; az új csomag képei abba kerülnek.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Egyesítve: a(z) %s most %d képet tartalmaz (%d MB), %d mp.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Bekerülő képek: %d (%s). Azonos név mindkettőben: %d (a beolvasztott nyer).'
+  'Reading the archives: %s': 'Az archívumok olvasása: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Leállítod? A megtartott .tar marad, ahogy volt; a befejezetlen másolat törlődik.
+  Stopped. %s is as it was; the unfinished copy was removed.: Leállítva. A(z) %s olyan, amilyen volt; a befejezetlen másolat törölve.
+  The kept .tar is only replaced once the merged copy is whole.: A megtartott .tar csak akkor cserélődik, ha az egyesített másolat teljes.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Az egyesítés nem írható a(z) %s meghajtójára (van hely?). Olyan, amilyen volt; semmi más nem változott.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Az egyesítéshez kb. %s szabad hely kell a(z) %s meghajtóján (az új archívum először a régi mellé íródik). Szabadíts fel helyet, majd próbáld újra.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Az egyesítés két átnevezés között állt meg: a megtartott .tar most %s, a beolvasztott %s. Nevezd vissza őket a Memóriafájlokban.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Az egyesített .tar elkészült, de nem kaphatta meg a(z) %s nevet (az MMCE az 1.4.0-s firmware-től nevez át). Az új fájl törölve; a megtartott .tar olyan, amilyen volt.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Nincs más .tar, amit a(z) %s fájlba lehetne olvasztani. Tedd ebbe a mappába, egy meghajtó ART mappájába vagy egy meghajtó gyökerébe, majd próbáld újra.
+  MERGE A .TAR INTO THIS: .TAR BEOLVASZTÁSA IDE
 labels:
   OK: OK
   BACKSPACE: Visszatörlés

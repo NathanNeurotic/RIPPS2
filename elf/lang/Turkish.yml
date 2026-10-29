@@ -1306,6 +1306,51 @@ strings:
   : '%s sütunlardan sonra başlıyor, bu yüzden açılış sesi geç çalıyor. START, boot.adp dosyasını (%d KB) hafıza kartında RIPPS2''nin yanına kopyalar (%d KB boş); orada sütunlar yükselirken çalar.'
   The boot sound could not be copied to %s. It still plays from %s.: Açılış sesi %s konumuna kopyalanamadı. Hâlâ %s konumundan çalıyor.
   Zoom: Yakınlaştır
+  '%s could not be deleted; it stays as it was.': '%s silinemedi; olduğu gibi kalıyor.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s bir .tar arşivi olarak okunamadı. Hiçbir şey değişmedi.'
+  '%s is deleted. %s is kept.': '%s silindi. %s tutuluyor.'
+  Art loads from it from now on.: Resimler bundan sonra buradan yüklenir.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Birleştirilen .tar silinsin mi?
+  
+    SİLİNİR: %s
+  
+    TUTULUR: %s (hedef, artık ikisinin de her resmiyle)'
+  Into %s (%s): Hedef %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'TUTULUR ve güncellenir: %s (%d resim)
+  
+    BİRLEŞTİRİLİR: %s (%d resim)
+  
+    İkisinde de olan resimler: %d. Birleştirilen kazanır. Tutulan .tar yeni bir dosya olarak yeniden yazılır ve yalnızca tamamlandığında yerine geçer; bu yüzden bir durdurma ya da dolu bir sürücü onu olduğu gibi bırakır. Şimdi birleştirilsin mi?'
+  MERGE .TAR: .TAR BİRLEŞTİR
+  MERGE a .tar into the pack in %s: Bir .tar'ı %s içindeki pakete BİRLEŞTİR
+  MERGING THE ART: RESİMLER BİRLEŞTİRİLİYOR
+  Merge in %s (%s): 'Birleştir: %s (%s)'
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Yeni paket başka bir .tar'a birleştirilsin mi? Ardından tutulacak ve güncellenecek .tar'ı seçersin; yeni paketin resimleri ona girer.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Birleştirildi: %s artık %d resim içeriyor (%d MB), %d sn.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Giren resimler: %d (%s). İkisinde de aynı ad: %d (birleştirilen kazanır).'
+  'Reading the archives: %s': 'Arşivler okunuyor: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Durdurulsun mu? Tutulan .tar olduğu gibi kalır; bitmemiş kopya kaldırılır.
+  Stopped. %s is as it was; the unfinished copy was removed.: Durduruldu. %s olduğu gibi; bitmemiş kopya kaldırıldı.
+  The kept .tar is only replaced once the merged copy is whole.: Tutulan .tar yalnızca birleştirilmiş kopya tamamlandığında değiştirilir.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Birleştirme %s sürücüsüne yazılamadı (yer var mı?). Olduğu gibi; başka hiçbir şey değişmedi.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : 'Birleştirme için yaklaşık %s boş alan gerekiyor, sürücü: %s (yeni arşiv önce eskisinin yanına yazılır). Biraz yer aç ve yeniden dene.'
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Birleştirme iki ad değiştirme arasında durdu: tutulan .tar %s, birleştirilen %s. Adlarını Hafıza dosyaları ile geri değiştir.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Birleştirilen .tar yazıldı ama %s adını alamadı (MMCE, 1.4.0 ürün yazılımından itibaren ad değiştirir). Yeni dosya kaldırıldı; tutulan .tar olduğu gibi.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : '%s içine birleştirilecek başka .tar yok. Onu bu klasöre, bir sürücünün ART klasörüne ya da bir sürücünün en üstüne koy ve yeniden dene.'
+  MERGE A .TAR INTO THIS: BURAYA BİR .TAR BİRLEŞTİR
 labels:
   ETH_100MFDX: 100Mbit Tam çift yönlü
   ETH_100MHDX: 100Mbit Yarı çift yönlü

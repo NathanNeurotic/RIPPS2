@@ -1306,6 +1306,51 @@ strings:
   : '%s پس از ستون‌ها راه می‌افتد، پس صدای راه‌اندازی دیر پخش می‌شود. START فایل boot.adp (%d KB) را کنار RIPPS2 روی کارت حافظه کپی می‌کند (%d KB آزاد)، جایی که با بالا آمدن ستون‌ها پخش می‌شود.'
   The boot sound could not be copied to %s. It still plays from %s.: صدای راه‌اندازی در %s کپی نشد. هنوز از %s پخش می‌شود.
   Zoom: بزرگ‌نمایی
+  '%s could not be deleted; it stays as it was.': '%s حذف نشد؛ همان‌طور که بود می‌ماند.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s به‌عنوان بایگانی .tar خوانده نشد. چیزی تغییر نکرد.'
+  '%s is deleted. %s is kept.': '%s حذف شد. %s نگه داشته می‌شود.'
+  Art loads from it from now on.: از این پس تصاویر از آن بارگذاری می‌شوند.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'فایل .tar ادغام‌شده حذف شود؟
+  
+    حذف: %s
+  
+    نگه‌داشتن: %s (مقصد، اکنون با همهٔ تصاویر هر دو)'
+  Into %s (%s): در %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'نگه داشته و به‌روز می‌شود: %s (%d تصویر)
+  
+    ادغام می‌شود: %s (%d تصویر)
+  
+    تصاویر موجود در هر دو: %d. ادغام‌شده برنده است. .tar نگه‌داشته به‌صورت فایلی تازه دوباره نوشته می‌شود و تنها وقتی کامل شد جایگزین می‌شود، پس توقف یا پر شدن درایو آن را همان‌طور که بود باقی می‌گذارد. اکنون ادغام شود؟'
+  MERGE .TAR: ادغام .TAR
+  MERGE a .tar into the pack in %s: ادغام یک .tar در بستهٔ %s
+  MERGING THE ART: در حال ادغام تصاویر
+  Merge in %s (%s): ادغام %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: بستهٔ تازه در .tar دیگری ادغام شود؟ سپس .tar ای را که نگه داشته و به‌روز می‌شود انتخاب می‌کنید؛ تصاویر بستهٔ تازه به آن می‌روند.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'ادغام شد: %s اکنون %d تصویر دارد (%d MB)، %d ث.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'تصاویر ورودی: %d (%s). نام یکسان در هر دو: %d (ادغام‌شده برنده است).'
+  'Reading the archives: %s': 'در حال خواندن بایگانی‌ها: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: توقف؟ .tar نگه‌داشته همان‌طور که بود می‌ماند؛ نسخهٔ ناتمام پاک می‌شود.
+  Stopped. %s is as it was; the unfinished copy was removed.: متوقف شد. %s همان‌طور که بود است؛ نسخهٔ ناتمام پاک شد.
+  The kept .tar is only replaced once the merged copy is whole.: .tar نگه‌داشته تنها وقتی نسخهٔ ادغام‌شده کامل شد جایگزین می‌شود.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: ادغام روی درایو %s نوشته نشد (جا هست؟). همان‌طور که بود است؛ چیز دیگری تغییر نکرد.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : ادغام حدود %s فضای آزاد روی درایو %s لازم دارد (بایگانی تازه ابتدا کنار قدیمی نوشته می‌شود). کمی جا باز کنید و دوباره امتحان کنید.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'ادغام میان دو تغییر نام متوقف شد: .tar نگه‌داشته %s است و ادغام‌شده %s. نام‌ها را با فایل‌های حافظه برگردانید.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : .tar ادغام‌شده نوشته شد اما نام %s را نگرفت (MMCE از فرم‌ور 1.4.0 به بعد تغییر نام می‌دهد). فایل تازه پاک شد؛ .tar نگه‌داشته همان‌طور که بود است.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : .tar دیگری برای ادغام در %s نیست. آن را در این پوشه، در پوشهٔ ART یک درایو یا در بالای یک درایو بگذارید و دوباره امتحان کنید.
+  MERGE A .TAR INTO THIS: ادغام یک .TAR در این
 labels:
   SAVE_CHANGES: ذخیره تغییرات
   BACK: بازگشت

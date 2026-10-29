@@ -1303,6 +1303,51 @@ strings:
   : '%s startet erst nach den Säulen, deshalb kommt der Startsound zu spät. START kopiert boot.adp (%d KB) neben RIPPS2 auf die Memory Card (%d KB frei), wo er spielt, während die Säulen aufsteigen.'
   The boot sound could not be copied to %s. It still plays from %s.: Der Startsound konnte nicht nach %s kopiert werden. Er spielt weiter von %s.
   Zoom: Zoomen
+  '%s could not be deleted; it stays as it was.': '%s konnte nicht gelöscht werden; es bleibt, wie es war.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s konnte nicht als .tar-Archiv gelesen werden. Nichts wurde geändert.'
+  '%s is deleted. %s is kept.': '%s ist gelöscht. %s bleibt erhalten.'
+  Art loads from it from now on.: Die Bilder laden ab jetzt daraus.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Das eingefügte .tar löschen?
+  
+    GELÖSCHT: %s
+  
+    BEHALTEN: %s (das Ziel, jetzt mit jedem Bild aus beiden)'
+  Into %s (%s): In %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'BEHALTEN und aktualisiert: %s (%d Bilder)
+  
+    EINGEFÜGT: %s (%d Bilder)
+  
+    Bilder in beiden: %d. Das eingefügte gewinnt. Das behaltene .tar wird als neue Datei neu geschrieben und erst ausgetauscht, wenn es vollständig ist, also lässt ein Stopp oder ein volles Laufwerk es, wie es war. Jetzt zusammenführen?'
+  MERGE .TAR: .TAR ZUSAMMENFÜHREN
+  MERGE a .tar into the pack in %s: Ein .tar in das Paket in %s ZUSAMMENFÜHREN
+  MERGING THE ART: BILDER WERDEN ZUSAMMENGEFÜHRT
+  Merge in %s (%s): '%s einfügen (%s)'
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Das neue Paket in ein anderes .tar einfügen? Danach wählst du das .tar, das behalten und aktualisiert wird; die Bilder des neuen Pakets kommen hinein.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Zusammengeführt: %s enthält jetzt %d Bilder (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Bilder hinein: %d (%s). Gleicher Name in beiden: %d (das eingefügte gewinnt).'
+  'Reading the archives: %s': 'Archive werden gelesen: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Stoppen? Das behaltene .tar bleibt, wie es war; die unfertige Kopie wird entfernt.
+  Stopped. %s is as it was; the unfinished copy was removed.: Gestoppt. %s ist, wie es war; die unfertige Kopie wurde entfernt.
+  The kept .tar is only replaced once the merged copy is whole.: Das behaltene .tar wird erst ersetzt, wenn die zusammengeführte Kopie vollständig ist.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Die Zusammenführung konnte nicht auf das Laufwerk von %s geschrieben werden (ist Platz da?). Es ist, wie es war; sonst wurde nichts geändert.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Die Zusammenführung braucht etwa %s frei auf dem Laufwerk von %s (das neue Archiv wird zuerst neben das alte geschrieben). Schaffe etwas Platz und versuche es erneut.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Die Zusammenführung hielt zwischen zwei Umbenennungen an: das behaltene .tar ist %s und das eingefügte %s. Benenne sie mit Speicherdateien zurück.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Das zusammengeführte .tar wurde geschrieben, konnte aber den Namen %s nicht annehmen (eine MMCE benennt ab Firmware 1.4.0 um). Die neue Datei wurde entfernt; das behaltene .tar ist, wie es war.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Es gibt kein anderes .tar zum Einfügen in %s. Lege es in diesen Ordner, in den ART-Ordner eines Laufwerks oder oben auf ein Laufwerk und versuche es erneut.
+  MERGE A .TAR INTO THIS: EIN .TAR HIER EINFÜGEN
 labels:
   CFG_NOTIFICATION: Konfiguration geladen von %s
   THM_NOTIFICATION: Design geladen von %s

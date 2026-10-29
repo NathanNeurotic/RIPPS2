@@ -1305,6 +1305,51 @@ strings:
   : '%s startar efter pelarna, så startljudet spelas för sent. START kopierar boot.adp (%d KB) bredvid RIPPS2 på minneskortet (%d KB ledigt), där det spelas när pelarna reser sig.'
   The boot sound could not be copied to %s. It still plays from %s.: Startljudet kunde inte kopieras till %s. Det spelas fortfarande från %s.
   Zoom: Zooma
+  '%s could not be deleted; it stays as it was.': '%s kunde inte raderas; den förblir som den var.'
+  '%s could not be read as a .tar archive. Nothing was changed.': '%s kunde inte läsas som ett .tar-arkiv. Inget ändrades.'
+  '%s is deleted. %s is kept.': '%s är raderad. %s behålls.'
+  Art loads from it from now on.: Bilderna laddas från den från och med nu.
+  ? 'Delete the merged-in .tar?
+  
+    DELETE: %s
+  
+    KEEP: %s (the destination, now with every picture of both)'
+  : 'Radera den sammanfogade .tar-filen?
+  
+    RADERAS: %s
+  
+    BEHÅLLS: %s (målet, nu med varje bild från båda)'
+  Into %s (%s): In i %s (%s)
+  ? 'KEPT and updated: %s (%d pictures)
+  
+    MERGED IN: %s (%d pictures)
+  
+    Pictures in both: %d. The merged-in one wins. The kept .tar is written again as a new file and swapped in only when it is whole, so a stop or a full drive leaves it as it was. Merge now?'
+  : 'BEHÅLLS och uppdateras: %s (%d bilder)
+  
+    FOGAS IN: %s (%d bilder)
+  
+    Bilder i båda: %d. Den infogade vinner. Den behållna .tar-filen skrivs om som en ny fil och byts in först när den är hel, så ett stopp eller en full enhet lämnar den som den var. Sammanfoga nu?'
+  MERGE .TAR: SAMMANFOGA .TAR
+  MERGE a .tar into the pack in %s: SAMMANFOGA en .tar i paketet i %s
+  MERGING THE ART: SAMMANFOGAR BILDERNA
+  Merge in %s (%s): Foga in %s (%s)
+  Merge the new pack into another .tar? You pick the .tar to keep and update next; the new pack's pictures go into it.: Foga in det nya paketet i en annan .tar? Sedan väljer du den .tar som behålls och uppdateras; det nya paketets bilder går in i den.
+  'Merged: %s now holds %d pictures (%d MB), %d s.': 'Sammanfogat: %s rymmer nu %d bilder (%d MB), %d s.'
+  'Pictures in: %d (%s). Same name in both: %d (the merged-in one wins).': 'Bilder in: %d (%s). Samma namn i båda: %d (den infogade vinner).'
+  'Reading the archives: %s': 'Läser arkiven: %s'
+  Stop? The kept .tar stays as it was; the unfinished copy is removed.: Stoppa? Den behållna .tar-filen förblir som den var; den ofärdiga kopian tas bort.
+  Stopped. %s is as it was; the unfinished copy was removed.: Stoppat. %s är som den var; den ofärdiga kopian togs bort.
+  The kept .tar is only replaced once the merged copy is whole.: Den behållna .tar-filen ersätts först när den sammanfogade kopian är hel.
+  The merge could not be written on the drive of %s (is there room?). It is as it was; nothing else changed.: Sammanfogningen kunde inte skrivas på enheten med %s (finns det plats?). Den är som den var; inget annat ändrades.
+  ? The merge needs about %s free on the drive of %s (the new archive is written beside the old one first). Free some room, then try again.
+  : Sammanfogningen behöver ungefär %s ledigt på enheten med %s (det nya arkivet skrivs först bredvid det gamla). Frigör lite plats och försök igen.
+  'The merge stopped between two renames: the kept .tar is %s and the merged one %s. Rename them back with Memory Files.': 'Sammanfogningen stannade mellan två namnbyten: den behållna .tar-filen är %s och den infogade %s. Byt tillbaka namnen med Minnesfiler.'
+  ? The merged .tar was written but could not take the name %s (an MMCE renames from firmware 1.4.0 on). The new file was removed; the kept .tar is as it was.
+  : Den sammanfogade .tar-filen skrevs men kunde inte få namnet %s (en MMCE byter namn från firmware 1.4.0). Den nya filen togs bort; den behållna .tar-filen är som den var.
+  ? There is no other .tar to merge into %s. Put it in this folder, in a drive's ART folder or at the top of a drive, then try again.
+  : Det finns ingen annan .tar att foga in i %s. Lägg den i den här mappen, i en enhets ART-mapp eller överst på en enhet och försök igen.
+  MERGE A .TAR INTO THIS: FOGA IN EN .TAR HÄR
 labels:
   OK: OK
   BDMMODE: Startläge för BDM
