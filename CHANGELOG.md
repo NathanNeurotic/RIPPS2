@@ -1,6 +1,6 @@
 # RIPPS2 changelog
 
-## Build 124 (beta), changes since build 123
+## Build 124 (beta, v1.2.4-beta), changes since build 123
 
 The user's notes of 10/28.
 
@@ -12,7 +12,7 @@ The user's notes of 10/28.
 - A test build's watchdog (`RIPPS2_HANG_WATCH`, never in a release) logs every thread's state every 2 s, to trace the
   freeze seen in the lab on a 38-game library with the menu music on.
 
-## Build 123 (beta), changes since build 122
+## Build 123 (beta, released in v1.2.4-beta), changes since build 122
 
 The user's notes of 10/28: pack the HDD's art and the MMCE's art apart (moving thousands of small files over USB has
 failed before), then merge one `.tar` into the other; later pack only the new games' art and merge that small `.tar`
@@ -39,7 +39,7 @@ into the master instead of packing every ART folder again.
   deletion.
 - 24 new strings in all 32 languages (`tools/lang123`). Memory Files' Triangle menu is as wide as its longest action.
 
-## Build 122 (beta), changes since build 121
+## Build 122 (beta, released in v1.2.4-beta), changes since build 121
 
 The user's notes of 10/28.
 
