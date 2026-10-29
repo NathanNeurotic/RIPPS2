@@ -18,7 +18,7 @@ The PS2 cannot play what phones and websites make (H.264 in an MP4): its process
 
 ## Run it
 
-- **Windows app:** `RIPPS2 Media Studio.exe` (build it with `build_exe.bat`), no install. Put `ffmpeg.exe` (and `ffprobe.exe`) beside it: ffmpeg reads more audio formats, writes Ogg music, and does all the video work (without it, music is written as WAV, which RIPPS2 also plays, and videos cannot be converted).
+- **Windows app: [download RIPPS2-Media-Studio.zip](https://github.com/akilluminati47/RIPPS2/releases/download/media-studio/RIPPS2-Media-Studio.zip)**, unzip it anywhere and double-click `RIPPS2 Media Studio.exe`. No install and no Python: ffmpeg and ffprobe are in the zip beside it (keep them there: they read more audio formats, write Ogg music and do all the video work). The zip is rebuilt by GitHub Actions whenever the studio changes ([its release page](https://github.com/akilluminati47/RIPPS2/releases/tag/media-studio)); `build_exe.bat` builds the .exe yourself.
 - **From source:** Python 3.10 or newer, then `pip install -r requirements.txt` and `python studio.py` (or double-click `run_studio.bat`). ffmpeg on the PATH or beside `studio.py`.
 - **Without the window:** `python studio.py --video <file>` writes one PS2 video into `output/MEDIA`.
 
