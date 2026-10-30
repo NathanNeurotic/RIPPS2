@@ -12,9 +12,18 @@ index d9e2096..0dc7960 100644
  assert "if (config == NULL)\n        return NULL;" in sb_slice
  
 diff --git a/include/config.h b/include/config.h
-index 70238f4..1c2632a 100644
+index 70238f4..615d2a6 100644
 --- a/include/config.h
 +++ b/include/config.h
+@@ -210,7 +210,7 @@ enum CONFIG_INDEX {
+ #define CONFIG_OPL_DEFAULT_BGM_PATH     "default_bgm_path"
+ #define CONFIG_OPL_XSENSITIVITY         "x_sensitivity"
+ #define CONFIG_OPL_YSENSITIVITY         "y_sensitivity"
+-#define CONFIG_OPL_COVERFLOW_COUNT      "coverflow_count"
++#define CONFIG_OPL_COVERFLOW_COUNT      "ripps2_flow_count" // build 125: a new key, so the 3 every old file saved reads as "by the picture"
+ #define CONFIG_OPL_COVERFLOW_SCALE      "coverflow_scale"
+ #define CONFIG_OPL_COVERFLOW_ANIM       "coverflow_anim"
+ #define CONFIG_OPL_COVERFLOW_DIM        "coverflow_dim"
 @@ -310,6 +310,13 @@ int configOplIsOfficialSeed(void);
  void configSetCarryOverDir(const char *dir);
  int configOplIsCarryOver(void);
@@ -79,6 +88,18 @@ index 68ca5b6..073e079 100644
 +int ripps2TarRemove(const char *tar, char (*names)[128], int n);
 +
  #endif
+diff --git a/include/themes.h b/include/themes.h
+index 01b966c..b1e0f3a 100644
+--- a/include/themes.h
++++ b/include/themes.h
+@@ -334,6 +334,7 @@ extern theme_t *gTheme;
+ #define RIPPS2_CASE_TITLE_FONT (gTheme->fonts[9])
+ 
+ extern int gCoverflowCount, gCoverflowCenterScale, gCoverflowAnimSpeed, gCoverflowDimCovers;
++int thmCoverflowCount(void); // RIPPS2 build 125: the count as shown (0 in gCoverflowCount: by the picture)
+ extern int gRipps2Vignette, gRipps2GridLayout; // RIPPS2 build 91: Flow and Grid (build 98: vignette 0 off, 1 weak, 2 full)
+ #define RIPPS2_GRID_LAYOUTS 4                  // presets after Theme
+ extern int gRipps2GridWide;                    // RIPPS2 build 98: Widescreen Grid Layout, 0 Theme, 1 Same, 2.. presets
 diff --git a/misc/theme_coverflow.cfg b/misc/theme_coverflow.cfg
 index a020021..82c0720 100644
 --- a/misc/theme_coverflow.cfg
@@ -336,6 +357,29 @@ index d71c0fc..82ebd99 100644
  int fntCalcDimensions(int id, const char *str)
  {
      int w;
+diff --git a/src/gui.c b/src/gui.c
+index a1a74bc..1d05696 100644
+--- a/src/gui.c
++++ b/src/gui.c
+@@ -3445,7 +3445,7 @@ void guiShowCoverflowConfig(void)
+     diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_SCALE, centerScales);
+     diaSetEnum(diaCoverflowConfig, COVERFLOW_CFG_ANIM, animSpeeds);
+ 
+-    diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_COUNT, (gCoverflowCount == 5) ? 1 : 0);
++    diaSetInt(diaCoverflowConfig, COVERFLOW_CFG_COUNT, (thmCoverflowCount() == 5) ? 1 : 0); // build 125: as shown
+ 
+     int scaleIdx = gCoverflowCenterScale / 15;
+     if (scaleIdx < 0)
+@@ -3487,7 +3487,8 @@ void guiShowCoverflowConfig(void)
+     }
+     if (result) {
+         if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_COUNT, &value))
+-            gCoverflowCount = (value == 1) ? 5 : 3;
++            if (((value == 1) ? 5 : 3) != thmCoverflowCount())
++                gCoverflowCount = (value == 1) ? 5 : 3; // build 125: kept by the picture until changed here
+         if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_SCALE, &value))
+             gCoverflowCenterScale = ((value >= 0 && value <= 3) ? value : 0) * 15;
+         if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_ANIM, &value))
 diff --git a/src/metadb.c b/src/metadb.c
 index 38c1414..5e5fe80 100644
 --- a/src/metadb.c
@@ -348,6 +392,19 @@ index 38c1414..5e5fe80 100644
      SignalSema(metaSemaId);
  }
  
+diff --git a/src/opl.c b/src/opl.c
+index 4b63eff..78f8226 100644
+--- a/src/opl.c
++++ b/src/opl.c
+@@ -4296,7 +4296,7 @@ static void _loadConfig()
+             configGetInt(configOPL, CONFIG_OPL_COVERFLOW_ANIM, &gCoverflowAnimSpeed);
+             configGetInt(configOPL, CONFIG_OPL_COVERFLOW_DIM, &gCoverflowDimCovers);
+             // clamp count to {3,5} on load -- defends a hand-edited conf.cfg
+-            gCoverflowCount = (gCoverflowCount == 5) ? 5 : 3;
++            gCoverflowCount = (gCoverflowCount == 5 || gCoverflowCount == 3) ? gCoverflowCount : 0; // build 125: 0 by the picture
+             // clamp the remaining coverflow values too -- a hand-edited conf.cfg
+             // otherwise feeds unbounded ints into signed render math
+             if (gCoverflowCenterScale < 0)
 diff --git a/src/ripps2art.c b/src/ripps2art.c
 index e81cf41..0ed3322 100644
 --- a/src/ripps2art.c
@@ -1975,10 +2032,44 @@ index 91b7135..c1aa4a6 100644
      if (!texture->Mem) {
          texFree(texture); // free the already-allocated paletted-PNG Clut before bailing (Gemini review);
 diff --git a/src/themes.c b/src/themes.c
-index b1a9f4e..cc50646 100644
+index b1a9f4e..8292d1c 100644
 --- a/src/themes.c
 +++ b/src/themes.c
-@@ -4185,6 +4185,14 @@ static int findMenuPrev(struct menu_list *menu)
+@@ -85,7 +85,7 @@ static const char **guiThemesNames = NULL;
+ // Coverflow render-mode state (externs in themes.h).
+ #define COVERFLOW_PAD 1 // extra covers built off each edge, purely to fill the slide (see drawCoverFlow)
+ #define COVERFLOW_MAX (5 + 2 * COVERFLOW_PAD)
+-int gCoverflowCount = 3;        // 3 or 5 only (clamped on load AND at draw)
++int gCoverflowCount = 0;        // 3 or 5, or 0: RIPPS2 build 125, by the picture (clamped on load AND at draw)
+ int gCoverflowCenterScale = 45; // Large by default; saved UI choices still override (0/15/30/45).
+ int gCoverflowAnimSpeed = 200;  // ms (UI 0/100/200/400; 0 = instant, no anim)
+ int gCoverflowDimCovers = 0;    // bool (RIPPS2 build 91: kept in the settings, drawn as the vignette below)
+@@ -2573,7 +2573,7 @@ static void drawCoverFlow(struct menu_list *menu, struct submenu_list *item, con
+     // Defensive clamp: never trust the global at the draw site (conf.cfg may be hand-edited
+     // to e.g. 7 -> covers[] OOB). coverCount is the VISIBLE count and drives layout only;
+     // coverTotal (= coverCount + 2*COVERFLOW_PAD) is the index bound for covers[].
+-    int coverCount = (gCoverflowCount == 5) ? 5 : 3;
++    int coverCount = thmCoverflowCount();
+     int centerIndex = coverCount / 2;
+ 
+     // Layout in virtual 640x480 space (div-guarded). SCALING_RATIO + the panel apply
+@@ -3047,6 +3047,15 @@ static void gridFlipUpdate(const void *selected, int backReady)
+     }
+ }
+ 
++// RIPPS2 build 125: RIPFLOW's covers as shown: the count chosen in its settings, or with none chosen, five on a 16:9
++// picture (720p, 1080i, or Widescreen on) and three on 4:3, as the Grid widens for the same pictures
++int thmCoverflowCount(void)
++{
++    if (gCoverflowCount == 3 || gCoverflowCount == 5)
++        return gCoverflowCount;
++    return rmWideScale(4) == 3 ? 5 : 3;
++}
++
+ // RIPPS2 build 98: the Grid's layout for the picture now on screen (a 16:9 one takes the wide layout); every reader of
+ // the grid's shape (its draw, the navigation) asks here first, so a widescreen switch takes effect at once
+ static void gridUseLayout(void)
+@@ -4185,6 +4194,14 @@ static int findMenuPrev(struct menu_list *menu)
      return prev == NULL ? 0 : prev->item->visible;
  }
  
@@ -1993,7 +2084,7 @@ index b1a9f4e..cc50646 100644
  static void drawMenuText(struct menu_list *menu, struct submenu_list *item, config_set_t *config, struct theme_element *elem)
  {
      GSTEXTURE *leftIconTex = NULL, *rightIconTex = NULL;
-@@ -4222,7 +4230,10 @@ static void drawMenuText(struct menu_list *menu, struct submenu_list *item, conf
+@@ -4222,7 +4239,10 @@ static void drawMenuText(struct menu_list *menu, struct submenu_list *item, conf
          u64 ic = GS_SETREG_RGBA(0x80, 0x80, 0x80, (int)(0x80 * srcA));
          guiDrawIconAndTextNoFade(confirm, _STR_RUN, elem->font, elem->posX - half - gTheme->hintsFlankGap - guiIconTextWidth(confirm, _STR_RUN, elem->font),
                                   elem->posY - 10, c, ic);
@@ -2005,7 +2096,7 @@ index b1a9f4e..cc50646 100644
              guiDrawIconAndTextNoFade(guiCancelIcon(), _STR_RIPPS2_SOURCE, elem->font, elem->posX + half + gTheme->hintsFlankGap, elem->posY - 10, c, ic);
          fntRenderString(elem->font, elem->posX, elem->posY, elem->aligned, 0, 0, text, c);
          return;
-@@ -4851,6 +4862,13 @@ static void drawInfoHintText(struct menu_list *menu, struct submenu_list *item,
+@@ -4851,6 +4871,13 @@ static void drawInfoHintText(struct menu_list *menu, struct submenu_list *item,
      float hintA = ripps2HintsAlpha(); // RIPPS2 build 70: RIPPSettings (Back still works with them hidden)
      if (hintA <= 0.0f)
          return;
@@ -2019,7 +2110,7 @@ index b1a9f4e..cc50646 100644
      u64 col = hintFade(elem->color, hintA), iconCol = hintFade(gDefaultCol, hintA);
  
      if (elem->aligned)
-@@ -6746,7 +6764,8 @@ static int thmLoad(const char *themePath)
+@@ -6746,7 +6773,8 @@ static int thmLoad(const char *themePath)
          // auto hide itself"): sidebar_left=list keeps Left / Right and L1 / R1 the list's; sidebar_hide=1 keeps the bar
          // out of sight until Circle brings it out
          newT->sbLeftList = configGetStr(themeConfig, "sidebar_left", &v) && v != NULL && !strcasecmp(v, "list");
