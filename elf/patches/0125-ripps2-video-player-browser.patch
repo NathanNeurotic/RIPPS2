@@ -936,6 +936,24 @@ index 6c49fb3..d0a5595 100644
  int ripps2TarMergeInto(const char *target, const char *here)
  {
      char paths[TM_PICK][256], msg[400];
+diff --git a/src/ripps2disc.c b/src/ripps2disc.c
+index b1f68c6..241b19d 100644
+--- a/src/ripps2disc.c
++++ b/src/ripps2disc.c
+@@ -587,9 +587,12 @@ static void rdHintPair(int iconA, const char *a, int iconB, const char *b, int y
+ #define RD_NOTCH_OUT 17.0f
+ #define RD_RING_W    38    // the room the ring takes in the hold hint, so HOLD starts clear of it
+ 
++// build 125: a widescreen picture stretches the 640 layout across 16:9, so every x offset takes rmWideScale's squeeze
++// (as the hint glyphs do) or the ring is an oval with leaning notches
+ static void rdNotch(float cx, float cy, float ang, u64 c)
+ {
+-    float ux = cosf(ang), uy = sinf(ang), nx = -uy, ny = ux, hw = 1.4f, fw = 2.4f;
++    float sq = rmWideScale(1000) / 1000.0f;
++    float ux = cosf(ang) * sq, uy = sinf(ang), nx = -sinf(ang) * sq, ny = cosf(ang), hw = 1.4f, fw = 2.4f;
+     float x0 = cx + ux * RD_NOTCH_IN, y0 = cy + uy * RD_NOTCH_IN, x1 = cx + ux * RD_NOTCH_OUT, y1 = cy + uy * RD_NOTCH_OUT;
+     u64 clear = c & ~(0xFFULL << 24);
+     rmDrawQuadGouraud(x0 + nx * hw, y0 + ny * hw, c, x1 + nx * hw, y1 + ny * hw, c, x0 - nx * hw, y0 - ny * hw, c, x1 - nx * hw, y1 - ny * hw, c);
 diff --git a/src/ripps2files.c b/src/ripps2files.c
 index 7c1cff8..3a2be42 100644
 --- a/src/ripps2files.c
