@@ -89,14 +89,15 @@ index 68ca5b6..073e079 100644
 +
  #endif
 diff --git a/include/themes.h b/include/themes.h
-index 01b966c..b1e0f3a 100644
+index 01b966c..1d0c23e 100644
 --- a/include/themes.h
 +++ b/include/themes.h
-@@ -334,6 +334,7 @@ extern theme_t *gTheme;
+@@ -334,6 +334,8 @@ extern theme_t *gTheme;
  #define RIPPS2_CASE_TITLE_FONT (gTheme->fonts[9])
  
  extern int gCoverflowCount, gCoverflowCenterScale, gCoverflowAnimSpeed, gCoverflowDimCovers;
-+int thmCoverflowCount(void); // RIPPS2 build 125: the count as shown (0 in gCoverflowCount: by the picture)
++int thmCoverflowCount(void);
++int thmSavedPending(void); // RIPPS2 build 125: the saved disk theme's drive is not up yet // RIPPS2 build 125: the count as shown (0 in gCoverflowCount: by the picture)
  extern int gRipps2Vignette, gRipps2GridLayout; // RIPPS2 build 91: Flow and Grid (build 98: vignette 0 off, 1 weak, 2 full)
  #define RIPPS2_GRID_LAYOUTS 4                  // presets after Theme
  extern int gRipps2GridWide;                    // RIPPS2 build 98: Widescreen Grid Layout, 0 Theme, 1 Same, 2.. presets
@@ -358,7 +359,7 @@ index d71c0fc..82ebd99 100644
  {
      int w;
 diff --git a/src/gui.c b/src/gui.c
-index a1a74bc..1d05696 100644
+index a1a74bc..ee55388 100644
 --- a/src/gui.c
 +++ b/src/gui.c
 @@ -3445,7 +3445,7 @@ void guiShowCoverflowConfig(void)
@@ -380,6 +381,37 @@ index a1a74bc..1d05696 100644
          if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_SCALE, &value))
              gCoverflowCenterScale = ((value >= 0 && value <= 3) ? value : 0) * 15;
          if (diaGetInt(diaCoverflowConfig, COVERFLOW_CFG_ANIM, &value))
+@@ -5837,6 +5838,8 @@ void guiIntroLoop(void)
+     gIntroSplashActive = 0;
+ }
+ 
++#define GUI_THEME_HOLD_S 6.0 // RIPPS2 build 125: the longest the boot waits for the saved theme's drive
++
+ void guiMainLoop(void)
+ {
+     guiResetNotifications();
+@@ -5848,9 +5851,21 @@ void guiMainLoop(void)
+     // RIPPS2: the music is started by bgmBootTick (below, and in the intro) once the sounds are loaded
+     sfxIntroStarted(); // build 102: a boot that skipped the intro still gets its boot sound
+ 
++    double holdUntil = ripps2Seconds() + GUI_THEME_HOLD_S;
+     while (!gTerminate) {
+         guiStartFrame();
+ 
++        // RIPPS2 build 125: the saved theme's drive is still coming up: the boot sky alone (the scene fades up over it
++        // once the theme is in), so RIPPS2's own look never shows for a moment before the theme replaces it
++        if (holdUntil > 0.0 && thmSavedPending() && ripps2Seconds() < holdUntil) {
++            ripps2DrawBootSky();
++            bgmBootTick();
++            guiHandleDeferredOpsBudget(GUI_OPS_FRAME_BUDGET_US);
++            guiEndFrame();
++            continue;
++        }
++        holdUntil = 0.0;
++
+         // Read the pad states to prepare for input processing in the screen handler
+         guiReadPads();
+         ripps2NoteInput(); // RIPPS2 build 70: the idle time RIPPSettings' fades follow
 diff --git a/src/metadb.c b/src/metadb.c
 index 38c1414..5e5fe80 100644
 --- a/src/metadb.c
@@ -2032,7 +2064,7 @@ index 91b7135..c1aa4a6 100644
      if (!texture->Mem) {
          texFree(texture); // free the already-allocated paletted-PNG Clut before bailing (Gemini review);
 diff --git a/src/themes.c b/src/themes.c
-index b1a9f4e..8292d1c 100644
+index b1a9f4e..fff6e8a 100644
 --- a/src/themes.c
 +++ b/src/themes.c
 @@ -85,7 +85,7 @@ static const char **guiThemesNames = NULL;
@@ -2120,3 +2152,20 @@ index b1a9f4e..8292d1c 100644
          // build 117 (the user, 10/27): flowtilt=1, a coverflow theme's Up / Down (and the left stick) tip the centre case
          // instead of changing the source, the sidebar on (its drawer has the sources)
          newT->flowTilt = configGetInt(themeConfig, "flowtilt", &intValue) && intValue == 1;
+@@ -7001,6 +7029,16 @@ int thmGetGuiValue(void)
+     return guiThemeID;
+ }
+ 
++// RIPPS2 build 125: the saved theme is on a drive that has not come up yet (a disk theme by name, not found so far);
++// the boot holds its sky for it rather than show RIPPS2's own look for a moment first
++int thmSavedPending(void)
++{
++    const char *temp = NULL;
++    if (!configGetStr(configGetByType(CONFIG_OPL), "theme", &temp) || temp == NULL || temp[0] == '\0' || temp[0] == '<')
++        return 0;
++    return thmFindGuiID(temp) == 0;
++}
++
+ int thmFindGuiID(const char *theme)
+ {
+     if (theme) {
