@@ -78,6 +78,10 @@
   .hero .shelf { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
     opacity: 0; transition: opacity .7s ease; }
   .hero .shelf[data-shelf="on"] { opacity: 1; }
+  /* the opening, as the ELF launches: the towers rise and settle first, then the page fades up over them */
+  body.settling :is(.options, .hero .shelf, .shelf-caption, .shelf-link, .hero-content, .elf, .ripps2-foot) {
+    opacity: 0 !important; pointer-events: none; }
+  body.settled :is(.options, .shelf-caption, .shelf-link, .hero-content, .elf, .ripps2-foot) { transition: opacity .9s ease; }
   .shelf-caption { position: absolute; left: 0; right: 0; bottom: 9vh; z-index: 2; text-align: center; pointer-events: none;
     font-family: "Master", var(--menu-font); text-transform: uppercase; letter-spacing: .14em;
     font-size: clamp(1rem, 2.4vw, 1.7rem); color: #f4f8ff; opacity: 0; transition: opacity .5s ease;
@@ -189,6 +193,11 @@
     palette: "cobalt", interactTarget: hero, maxPixelRatio: scale,
     startTime: Number(params.get("t")) || 0,
   });
+  // the page waits for the towers' rise (pillars.js: 5 s) unless it is skipped or motion is reduced
+  if (!(Number(params.get("t")) > 0) && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.body.classList.add("settling");
+    setTimeout(() => { document.body.classList.add("settled"); document.body.classList.remove("settling"); }, 4300);
+  }
   const spark = () => { pillars.blast(); setTimeout(() => pillars.blast(), 220); };
   let shelf;
   try {
