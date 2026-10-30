@@ -937,7 +937,7 @@ index 6c49fb3..d0a5595 100644
  {
      char paths[TM_PICK][256], msg[400];
 diff --git a/src/ripps2disc.c b/src/ripps2disc.c
-index b1f68c6..241b19d 100644
+index b1f68c6..3e65e64 100644
 --- a/src/ripps2disc.c
 +++ b/src/ripps2disc.c
 @@ -587,9 +587,12 @@ static void rdHintPair(int iconA, const char *a, int iconB, const char *b, int y
@@ -954,6 +954,15 @@ index b1f68c6..241b19d 100644
      float x0 = cx + ux * RD_NOTCH_IN, y0 = cy + uy * RD_NOTCH_IN, x1 = cx + ux * RD_NOTCH_OUT, y1 = cy + uy * RD_NOTCH_OUT;
      u64 clear = c & ~(0xFFULL << 24);
      rmDrawQuadGouraud(x0 + nx * hw, y0 + ny * hw, c, x1 + nx * hw, y1 + ny * hw, c, x0 - nx * hw, y0 - ny * hw, c, x1 - nx * hw, y1 - ny * hw, c);
+@@ -686,7 +689,7 @@ void ripps2DiscRipRender(void)
+     rdRing(hx + RD_RING_W / 2, y + 90, p > 1.0f ? 1.0f : p, ia);
+     GSTEXTURE *sel = thmGetTexture(SELECT_ICON);
+     if (sel != NULL)
+-        rmDrawPixmap(sel, hx + RD_RING_W / 2 - 10, y + 80, ALIGN_NONE, 20, 20, SCALING_RATIO, rdAlpha(RD_LIT, ia), 0);
++        rmDrawPixmap(sel, hx + RD_RING_W / 2 - rmWideScale(20) / 2, y + 80, ALIGN_NONE, 20, 20, SCALING_RATIO, rdAlpha(RD_LIT, ia), 0);
+     ripps2HintText(hx + RD_RING_W + 6, y + 90, hold, rdAlpha(RD_SOFT, ia));
+ }
+ 
 diff --git a/src/ripps2files.c b/src/ripps2files.c
 index 7c1cff8..3a2be42 100644
 --- a/src/ripps2files.c
@@ -1531,6 +1540,19 @@ index 7c1cff8..3a2be42 100644
          icons[n] = backIcon;
          texts[n++] = fbPath[0] ? _t("BACK") : _t("EXIT");
          if (fbPath[0]) {
+diff --git a/src/ripps2games.c b/src/ripps2games.c
+index a3fd3b5..ce9f1fe 100644
+--- a/src/ripps2games.c
++++ b/src/ripps2games.c
+@@ -1444,7 +1444,7 @@ int ripps2AskHold(const char *head, const char *name, const char *info, const ch
+         hx = 320 - (38 + 6 + ripps2HintWidth(hold)) / 2;
+         ripps2NotchRing(hx + 19, y + 90, p, ia);
+         if (sel != NULL)
+-            rmDrawPixmap(sel, hx + 9, y + 80, ALIGN_NONE, 20, 20, SCALING_RATIO, lgAlpha(LG_LIT, ia), 0);
++            rmDrawPixmap(sel, hx + 19 - rmWideScale(20) / 2, y + 80, ALIGN_NONE, 20, 20, SCALING_RATIO, lgAlpha(LG_LIT, ia), 0);
+         ripps2HintText(hx + 44, y + 90, hold, lgAlpha(LG_SOFT, ia));
+         fntRenderStringFit(RIPPS2_MSG_FONT, 320, y + 120, ALIGN_CENTER, w - 40, info, lgAlpha(LG_SOFT, ia), 1);
+         fntRenderStringFit(RIPPS2_MSG_FONT, 320, y + 140, ALIGN_CENTER, w - 40, when, lgAlpha(LG_SOFT, ia), 1);
 diff --git a/src/ripps2media.c b/src/ripps2media.c
 index 6b986ea..eb245d4 100644
 --- a/src/ripps2media.c
